@@ -27,7 +27,7 @@ public class EntityManagement {
 	public static class all_entities extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {
@@ -48,16 +48,34 @@ public class EntityManagement {
 					}
 				}
 			} else {
-				MCWorld w = Static.getServer().getWorld(args[0].val());
+				MCWorld w;
+				MCChunk c;
 				if (args.length == 3) {
-					int x = Static.getInt32(args[1], t);
-					int z = Static.getInt32(args[2], t);
-					for (MCEntity e : w.getChunkAt(x, z).getEntities()) {
+					w = Static.getServer().getWorld(args[0].val());
+					try {
+						int x = Static.getInt32(args[1], t);
+						int z = Static.getInt32(args[2], t);
+						c = w.getChunkAt(x, z);
+					} catch (ConfigRuntimeException cre) {
+						CArray l = CArray.GetAssociativeArray(t);
+						l.set("x", args[1], t);
+						l.set("z", args[2], t);
+						c = w.getChunkAt(ObjectGenerator.GetGenerator().location(l, w, t));
+					}
+					for (MCEntity e : c.getEntities()) {
 						ret.push(new CInt(e.getEntityId(), t));
 					}
 				} else {
-					for (MCEntity e : w.getEntities()) {
-						ret.push(new CInt(e.getEntityId(), t));
+					if (args[0] instanceof CArray) {
+						c = ObjectGenerator.GetGenerator().location(args[0], null, t).getChunk();
+						for (MCEntity e : c.getEntities()) {
+							ret.push(new CInt(e.getEntityId(), t));
+						}
+					} else {
+						w = Static.getServer().getWorld(args[0].val());
+						for (MCEntity e : w.getEntities()) {
+							ret.push(new CInt(e.getEntityId(), t));
+						}
 					}
 				}
 			}
@@ -73,10 +91,12 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "array {[world, [x, z]]} Returns an array of IDs for all entities in the given scope. With no args,"
-					+ " this will return all entities loaded on the entire server. If the first argument is given, only"
-					+ " entities in that world will be returned, and if all 3 arguments are given, only entities in the"
-					+ " chunk with those coords will be returned."; 
+			return "array {[world, [x, z]] | [locationArray]} Returns an array of IDs for all entities in the given"
+					+ " scope. With no args, this will return all entities loaded on the entire server. If the first"
+					+ " argument is given and is a location, only entities in the chunk containin that location will"
+					+ " be returned, or if it is a world only entities in that world will be returned. If all 3"
+					+ "arguments are given, only entities in the chunk with those coords will be returned. This can"
+					+ " take chunk coords (ints) or location coords (doubles)."; 
 		}
 
 		public CHVersion since() {
@@ -86,10 +106,12 @@ public class EntityManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Basic use", "msg(all_entities(pworld()))", 
+					new ExampleScript("Getting all entities in a world", "msg(all_entities(pworld()))", 
 							"Sends you an array of all entities in your world."),
-					new ExampleScript("Basic use", "msg(all_entities(pworld(), ploc()[0], ploc()[2]))", 
-							"Sends you an array of all entities in the same chunk as you.")
+					new ExampleScript("Getting entities in a chunk", "msg(all_entities(pworld(), 5, -3))", 
+							"Sends you an array of all entities in chunk (5,-3)."),
+					new ExampleScript("Getting entities in your chunk", "msg(all_entities(ploc()))",
+							"Sends you an array of all entities in the chunk you are in.")
 			};
 		}
 		

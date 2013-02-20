@@ -132,6 +132,53 @@ public class InventoryManagement {
             return ObjectGenerator.GetGenerator().item(is, t);
         }
     }
+	
+    @api(environments = {CommandHelperEnvironment.class})
+    public static class close_pinv extends AbstractFunction {
+
+        public Exceptions.ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p;
+			
+			if (args.length == 1) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			}
+			
+			p.closeInventory();
+            
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "close_pinv";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[player]} Closes the inventory of the current player, "
+					+ "or of the specified player.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
 
     @api(environments={CommandHelperEnvironment.class})
     public static class set_pinv extends AbstractFunction {

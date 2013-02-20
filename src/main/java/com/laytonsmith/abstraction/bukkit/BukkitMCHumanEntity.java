@@ -20,6 +20,10 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
         super(humanEntity);
         he = humanEntity;
     }
+	
+	public HumanEntity asHumanEntity() {
+		return he;
+	}
 
     public String getName() {
         return he.getName();
@@ -71,5 +75,13 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	public MCInventoryView openInventory(MCInventory inventory) {
 		return new BukkitMCInventoryView(he.openInventory((Inventory)inventory.getHandle()));
+	}
+
+	public MCInventoryView getOpenInventory() {
+		return new BukkitMCInventoryView(he.getOpenInventory());
+	}
+
+	public MCInventory getInventory() {
+		return new BukkitMCInventory(he.getInventory());
 	}
 }

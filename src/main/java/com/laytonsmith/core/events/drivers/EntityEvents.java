@@ -2,10 +2,14 @@
 
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.enums.MCSpawnReason;
+import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
@@ -18,8 +22,11 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
+import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.functions.Exceptions;
+
 import java.util.Map;
 
 
@@ -32,6 +39,79 @@ public class EntityEvents {
         return "Contains events related to an entity";
     }
 	
+    @api
+    public static class creature_spawn extends AbstractEvent {
+
+		public String getName() {
+			return "creature_spawn";
+		}
+
+		public String docs() {
+			return "{type | reason: One of " + StringUtils.Join(MCSpawnReason.values(), ", ", ", or ", " or ") + "}"
+				+ " Fired when a living entity spawns on the server."
+				+ " {type: the type of creature spawning | id: the entityID of the creature"
+				+ " | reason: the reason this creature is spawning | location: locationArray of the event}"
+				+ " {type: Spawn a different entity instead. This will fire a new event with a reason of 'CUSTOM'.}"
+				+ " {}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+				throws PrefilterNonMatchException {
+			if (event instanceof MCCreatureSpawnEvent) {
+				MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
+				Prefilters.match(prefilter, "type", e.getEntity().getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "reason", e.getSpawnReason().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event)
+				throws EventException {
+			if (event instanceof MCCreatureSpawnEvent) {
+				MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
+				Map<String, Construct> map = evaluate_helper(e);
+				
+				map.put("type", new CString(e.getEntity().getType().name(), Target.UNKNOWN));
+				map.put("id", new CInt(e.getEntity().getEntityId(), Target.UNKNOWN));
+				map.put("reason", new CString(e.getSpawnReason().name(), Target.UNKNOWN));
+				map.put("location", ObjectGenerator.GetGenerator().location(e.getLocation()));
+				
+				return map;
+			} else {
+				throw new EventException("Could not convert to MCCreatureSpawnEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.CREATURE_SPAWN;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
+			if (key.equals("type")) {
+				MCMobs type;
+				try {
+					type = MCMobs.valueOf(value.val());
+				} catch (IllegalArgumentException iae) {
+					throw new Exceptions.FormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
+				}
+				e.setType(type);
+			}
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+    	
+    }
+    
 	@api
 	public static class entity_damage extends AbstractEvent {
 
@@ -40,14 +120,16 @@ public class EntityEvents {
 		}
 
 		public String docs() {
-			return "{type: <macro> The type of entity being damaged | cause: <macro>} "
-				+ "Fires when any loaded entity takes damage. Using prefilters is advised when possible, as "
-				+ "the event fires in rapid succession on occasion, such as when sunrise kills the undead. "
-				+ "{type: The type of entity the got damaged | id: The entityID of the victim | " 
-				+ "cause: The cause of damage | amount}" // | sourcetype: type of entity causing damage | "
-				//+ "sourceid: the ID of the source entity} "
-				+ "{amount: the amount of damage recieved (in half hearts)} "
-				+ "{}";
+			return "{type: <macro> The type of entity being damaged | cause: <macro>}"
+				+ " Fires when any loaded entity takes damage."
+				+ " {type: The type of entity the got damaged | id: The entityID of the victim"
+				+ " | player: the player who got damaged (only present if type is PLAYER)" 
+				+ " | cause: The type of damage | amount | damager: If the source of damage is a player this will"
+				+ " contain their name, otherwise it will be the entityID of the damager (only available when"
+				+ " an entity causes damage) | shooter: The name of the player who shot, otherwise the entityID"
+				+ " (only available when damager is a projectile)}"
+				+ " {amount: the amount of damage recieved (in half hearts)}"
+				+ " {}";
 		}
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
@@ -131,17 +213,19 @@ public class EntityEvents {
 		}
 
 		public String docs() {
-			return "{} "
-				+ "Fires when a player right clicks an entity. Note, not all entities are clickable"
-				+ "{player: the player clicking | clicked: the entity type clicked | "
-				+ "id: the id of the entity | data: if a player is clicked, this will contain their name} "
-				+ "{} "
-				+ "{player|clicked|id|data}";
+			return "{clicked: the type of entity being clicked}"
+				+ " Fires when a player right clicks an entity. Note, not all entities are clickable."
+				+ " {player: the player clicking | clicked | id: the id of the entity"
+				+ " | data: if a player is clicked, this will contain their name}"
+				+ " {}"
+				+ " {player|clicked|id|data}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
 				throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerInteractEntityEvent){
+			if(event instanceof MCPlayerInteractEntityEvent){
+				MCPlayerInteractEntityEvent e = (MCPlayerInteractEntityEvent) event;
+				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
 				return true;
 			}
 			return false;
