@@ -9,6 +9,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -181,7 +182,7 @@ public class Enchantments {
 		}
 
 		public String docs() {
-			return "void {[player], slot, type, level} Adds an enchantment to an item in the player's inventory. Type can be a single string,"
+			return "Adds an enchantment to an item in the player's inventory. Type can be a single string,"
 					+ " or an array of enchantment names. If slot is null, the currently selected slot is used. If the enchantment cannot be applied"
 					+ " to the specified item, an EnchantmentException is thrown, and if the level specified is not valid, a RangeException is thrown."
 					+ " If type is an array, level must also be an array, with equal number of values in it, with each int corresponding to the appropriate"
@@ -190,13 +191,15 @@ public class Enchantments {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The player to operate on", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("The slot number", CInt.class, "slot"),
+						new Argument("The enchantment type, or an array of enchantment names", CString.class, CArray.class, "type"),
+						new Argument("The enchantment level", CInt.class, CString.class, "level")
 					);
 		}
 
@@ -223,7 +226,7 @@ public class Enchantments {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
 			}
-			MCItemStack is = m.getItemAt(args[1 - offset].isNull()?null:Static.getInt32(args[1 - offset], t));
+			MCItemStack is = m.getItemAt(args[1 - offset].isNull()?null:args[1 - offset].primitive(t).castToInt32(t));
 //            if (args[1 - offset].isNull()) {
 //                is = m.getItemInHand();
 //            } else {
@@ -249,7 +252,7 @@ public class Enchantments {
 					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
 				}
 				if (e.canEnchantItem(is)) {
-					int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
+					int level = new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t).primitive(t).castToInt32(t);
 					if (e.getMaxLevel() >= level && level > 0) {
 						is.addEnchantment(e, level);
 					} else {
@@ -275,19 +278,20 @@ public class Enchantments {
 		}
 
 		public String docs() {
-			return "void {[player], slot, type} Removes an enchantment from an item. type may be a valid enchantment, or an array of enchantment names. It"
+			return "Removes an enchantment from an item. type may be a valid enchantment, or an array of enchantment names. It"
 					+ " can also be null, and all enchantments will be removed. If an enchantment is specified, and the item is not enchanted with that,"
 					+ " it is simply ignored.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CInt.class, "slot"),
+						new Argument("", CString.class, CArray.class, "type")
 					);
 		}
 
@@ -316,7 +320,7 @@ public class Enchantments {
 				offset = 0;
 			}
 			Static.AssertPlayerNonNull(m, t);
-			MCItemStack is = m.getItemAt(args[1 - offset].isNull()?null:Static.getInt32(args[1 - offset], t));
+			MCItemStack is = m.getItemAt(args[1 - offset].isNull()?null:args[1 - offset].primitive(t).castToInt32(t));
 //            if (args[1 - offset].isNull()) {
 //                is = m.getItemInHand();
 //            } else {
@@ -354,18 +358,18 @@ public class Enchantments {
 		}
 
 		public String docs() {
-			return "array {[player], slot} Returns an array of arrays of the enchantments and their levels on the given"
+			return "Returns an array of arrays of the enchantments and their levels on the given"
 					+ " item. For example: array(array(DAMAGE_ALL, DAMAGE_UNDEAD), array(1, 2))";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("An array of all enchantments and their levels", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CInt.class, "slot")
 					);
 		}
 
@@ -394,7 +398,7 @@ public class Enchantments {
 			} else {
 				slot = args[0];
 			}
-			MCItemStack is = m.getItemAt(slot.isNull()?null:Static.getInt32(slot, t));
+			MCItemStack is = m.getItemAt(slot.isNull()?null:slot.primitive(t).castToInt32(t));
 //            if(slot.isNull()){
 //                is = m.getItemInHand();
 //            } else {
@@ -426,20 +430,20 @@ public class Enchantments {
 		}
 
 		public String docs() {
-			return "boolean {name, targetItem} Given an enchantment name, and target item id,"
+			return "Given an enchantment name, and target item id,"
 					+ " returns wether or not that item can be enchanted with that enchantment."
 					+ " Throws an EnchantmentException if the name is not a valid enchantment"
 					+ " type.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True if this item can normally be enchanted with the given enchantment", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the enchantment", CString.class, "name"),
+						new Argument("The id of the item to check", CInt.class, "targetItem")
 					);
 		}
 
@@ -483,18 +487,17 @@ public class Enchantments {
 		}
 
 		public String docs() {
-			return "int {name} Given an enchantment name, returns the max level it can be."
+			return "Given an enchantment name, returns the max level it can be."
 					+ " If name is not a valid enchantment, an EnchantException is thrown.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The maximum level of the target enchantment", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the enchantment to check", CString.class, "name")
 					);
 		}
 
@@ -535,18 +538,17 @@ public class Enchantments {
 		}
 
 		public String docs() {
-			return "array {item} Given an item id, returns the enchantments that can"
+			return "Given an item id, returns the enchantments that can"
 					+ " be validly added to this item. This may return an empty array.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The enchantments that can be added to this item normally", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The item id to check", CInt.class, "item")
 					);
 		}
 
@@ -611,13 +613,12 @@ public class Enchantments {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True, if this enchantment is a valid enchantment name.", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the enchantment to check", CString.class, "name")
 					);
 		}
 
@@ -687,14 +688,11 @@ public class Enchantments {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("A list of all enchantment names", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public CHVersion since() {

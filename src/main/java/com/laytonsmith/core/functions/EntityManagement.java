@@ -9,12 +9,15 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
+import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MLocation;
 
 /**
  *
@@ -55,8 +58,8 @@ public class EntityManagement {
 				if (args.length == 3) {
 					w = Static.getServer().getWorld(args[0].val());
 					try {
-						int x = Static.getInt32(args[1], t);
-						int z = Static.getInt32(args[2], t);
+						int x = args[1].primitive(t).castToInt32(t);
+						int z = args[2].primitive(t).castToInt32(t);
 						c = w.getChunkAt(x, z);
 					} catch (ConfigRuntimeException cre) {
 						CArray l = CArray.GetAssociativeArray(t);
@@ -93,12 +96,30 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "array {[world, [x, z]] | [locationArray]} Returns an array of IDs for all entities in the given"
+			return "Returns an array of IDs for all entities in the given"
 					+ " scope. With no args, this will return all entities loaded on the entire server. If the first"
 					+ " argument is given and is a location, only entities in the chunk containin that location will"
 					+ " be returned, or if it is a world only entities in that world will be returned. If all 3"
-					+ "arguments are given, only entities in the chunk with those coords will be returned. This can"
+					+ " arguments are given, only entities in the chunk with those coords will be returned. This can"
 					+ " take chunk coords (ints) or location coords (doubles)."; 
+		}
+		
+		public Argument returnType() {
+			return new Argument("The entity ids of the entities in the given scope", CArray.class).setGenerics(new Generic(CInt.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Signature(1, 
+							new Argument("", CString.class, "world").setOptionalDefaultNull()
+						), new Signature(2, 
+							new Argument("", CString.class, "world"),
+							new Argument("", CNumber.class, "x"),
+							new Argument("", CNumber.class, "z")
+						), new Signature(3, 
+							new Argument("A location array, from with the chunk will be determined", MLocation.class, "locationArray")
+						)
+					);
 		}
 
 		public CHVersion since() {
@@ -136,7 +157,7 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			return ObjectGenerator.GetGenerator().location(e.getLocation());
 		}
 
@@ -149,8 +170,18 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "locationArray {entityID} Returns the location array for this entity, if it exists."
+			return "Returns the location array for this entity, if it exists."
 					+ " This array will be compatible with any function that expects a location.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The location of this entity", MLocation.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The entity id to check", CInt.class, "entityID")
+					);
 		}
 
 		public CHVersion since() {
@@ -186,7 +217,7 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			MCLocation l;
 			if (args[1] instanceof CArray) {
 				l = ObjectGenerator.GetGenerator().location((CArray) args[1], e.getWorld(), t);
@@ -207,6 +238,17 @@ public class EntityManagement {
 		public String docs() {
 			return "boolean {entityID, locationArray} Teleports the entity to the given location and returns whether"
 					+ " the action was successful. Note this can set both location and direction.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("True if the action was successful", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID"),
+						new Argument("", MLocation.class, "locationArray")
+					);
 		}
 
 		public CHVersion since() {
@@ -248,7 +290,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			CArray va = ObjectGenerator.GetGenerator().velocity(e.getVelocity(), t);
 			return va;
 		}
@@ -262,8 +304,18 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "array {entityID} Returns an associative array indicating the x/y/z components of this entity's velocity."
+			return "Returns an associative array indicating the x/y/z components of this entity's velocity."
 					+ " As a convenience, the magnitude is also included.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CArray.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID")
+					);
 		}
 
 		public CHVersion since() {
@@ -299,7 +351,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			e.setVelocity(ObjectGenerator.GetGenerator().velocity(args[1], t));
 			return new CVoid(t);
 		}
@@ -313,9 +365,20 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, array} Sets the velocity of this entity according to the supplied xyz array. All 3"
+			return "Sets the velocity of this entity according to the supplied xyz array. All 3"
 					+ " values default to 0, so an empty array will simply stop the entity's motion. Both normal and"
 					+ " associative arrays are accepted.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID"),
+						new Argument("An array that represents the vector velocity, with the keys x, y, and z set", CArray.class, "vector")
+					);
 		}
 
 		public CHVersion since() {
@@ -351,7 +414,7 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity((int) Static.getInt(args[0], t), t);
+			MCEntity ent = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			if (ent == null) {
 				return new CVoid(t);
 			} else if (ent instanceof MCHumanEntity) {
@@ -371,19 +434,18 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID} Removes the specified entity from the world, without any drops or animations. "
+			return "Removes the specified entity from the world, without any drops or animations. "
 				+ "Note: you can't remove players. As a safety measure for working with NPC plugins, it will "
 				+ "not work on anything human, even if it is not a player.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "entityID")
 					);
 		}
 
@@ -410,9 +472,9 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity((int) Static.getInt(args[0], t), t);
+			MCEntity ent = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			if (ent == null) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			} else {
 				return new CString(ent.getType().name(), t);
 			}
@@ -427,17 +489,16 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "string {entityID} Returns the EntityType of the entity with the specified ID.";
+			return "Returns the EntityType of the entity with the specified ID.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The type of the entity", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "entityID")
 					);
 		}
 
@@ -464,7 +525,7 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
+			int id = args[0].primitive(t).castToInt32(t);
 			MCEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
 				return Construct.GetNullConstruct(t);
@@ -490,13 +551,12 @@ public class EntityManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The mob's age", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "entityID")
 					);
 		}
 
@@ -523,11 +583,11 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			int age = Static.getInt32(args[1], t);
+			int id = args[0].primitive(t).castToInt32(t);
+			int age = args[1].primitive(t).castToInt32(t);
 			boolean lock = false;
 			if (args.length == 3) {
-				lock = (boolean) Static.getBoolean(args[2]);
+				lock = args[2].primitive(t).castToBoolean();
 			}
 			MCEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
@@ -551,18 +611,19 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at that age"
+			return "sets the age of the mob to the specified int, and locks it at that age"
 					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does not age naturally.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "entityID"),
+						new Argument("The age to set", CInt.class, "age"),
+						new Argument("If true, locks this age in", CBoolean.class, "lock").setOptionalDefault(false)
 					);
 		}
 
@@ -584,7 +645,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {mobId, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30."
+			return "Not all potions work of course, but effect is 1-19. Seconds defaults to 30."
 					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
 					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects for a"
 					+ " complete list of potions that can be added. To remove an effect, set the strength (or duration) to 0."
@@ -594,13 +655,15 @@ public class EntityManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True if the effect was added or removed as desired", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "entityID"),
+						Argument.getRangedIntArgument("", "potionID", 1, 20),
+						new Argument("The strength of the effect", CInt.class, "strength"),
+						new Argument("The number of seconds to apply the effect", CInt.class, "seconds").setOptionalDefault(30)
 					);
 		}
 
@@ -622,21 +685,21 @@ public class EntityManagement {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			int id = (int) Static.getInt(args[0], t);
+			int id = args[0].primitive(t).castToInt32(t);
 			MCEntity ent = Static.getEntity(id, t);
 
 			if (ent == null) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			} else if (ent instanceof MCLivingEntity) {
 
 				MCLivingEntity mob = ((MCLivingEntity) ent);
 
-				int effect = Static.getInt32(args[1], t);
+				int effect = args[1].primitive(t).castToInt32(t);
 
-				int strength = Static.getInt32(args[2], t);
+				int strength = args[2].primitive(t).castToInt32(t);
 				int seconds = 30;
 				if (args.length == 4) {
-					seconds = Static.getInt32(args[3], t);
+					seconds = args[3].primitive(t).castToInt32(t);
 				}
 
 				if (seconds == 0 || strength == 0) {
@@ -677,7 +740,7 @@ public class EntityManagement {
 					id = Static.GetPlayer(args[0], t).getEntityId();
 				} catch (ConfigRuntimeException notPlayer) {
 					try {
-						id = Static.getInt32(args[0], t);
+						id = args[0].primitive(t).castToInt32(t);
 					} catch (ConfigRuntimeException notEntIDEither) {
 						throw new ConfigRuntimeException("Could not find an entity matching " + args[0] + "!",
 								ExceptionType.BadEntityException, t);
@@ -723,13 +786,13 @@ public class EntityManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The entity id of the projectile", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The player to shoot the projectile from", CInt.class, CString.class, "playerOrEntity").setOptionalDefaultNull(),
+						Argument.getEnumArgument("The projectile type", MCProjectileType.class, "projectile").setEnumDefault(MCProjectileType.FIREBALL)
 					);
 		}
 

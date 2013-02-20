@@ -7,10 +7,12 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -20,6 +22,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -73,20 +76,19 @@ public class Cmdline {
         }
 
         public String docs() {
-            return "void {text} Writes the text to the system's std out. Unlike console(), this does not use anything else to format the output, though in many"
+            return "Writes the text to the system's std out. Unlike console(), this does not use anything else to format the output, though in many"
                     + " cases they will behave the same. However, colors and other formatting characters will not \"bleed\" through, so"
                     + " sys_out(color(RED) . 'This is red') will not cause the next line to also be red, so if you need to print multiple lines out, you should"
                     + " manually add \\n to create your linebreaks, and only make one call to sys_out.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The text to print", CString.class, "text")
 					);
 		}
 
@@ -139,20 +141,19 @@ public class Cmdline {
         }
 
         public String docs() {
-            return "void {text} Writes the text to the system's std err. Unlike console(), this does not use anything else to format the output, though in many"
+            return "Writes the text to the system's std err. Unlike console(), this does not use anything else to format the output, though in many"
                     + " cases they will behave nearly the same. However, colors and other formatting characters will not \"bleed\" through, so"
                     + " sys_err(color(RED) . 'This is red') will not cause the next line to also be red, so if you need to print multiple lines out, you should"
                     + " manually add \\n to create your linebreaks, and only make one call to sys_err.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The text to print", CString.class, "text")
 					);
 		}
 
@@ -185,10 +186,8 @@ public class Cmdline {
         }
 
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            int exit_code = 0;
-            if (args.length == 1) {
-                exit_code = Static.getInt32(args[0], t);
-            }
+			ArgList list = getBuilder().parse(args, this, t);
+            int exit_code = list.getInt("exitCode", t);
             if (environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
 					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline")) {
                 System.exit(exit_code);
@@ -205,18 +204,17 @@ public class Cmdline {
         }
 
         public String docs() {
-            return "void {[int]} Exits the program. If this is being run from the command line, works by exiting the interpreter, with "
+            return "Exits the program. If this is being run from the command line, works by exiting the interpreter, with "
                     + " the specified exit code (defaulting to 0). If this is being run from in-game, works just like die().";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The exit code to use", CInt.class, "exitCode").setOptionalDefault(0)
 					);
 		}
 
@@ -256,9 +254,10 @@ public class Cmdline {
         }
 
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            if (args.length == 1) {
-                String propName = args[0].val();
-                String prop = System.getProperty(propName);
+			ArgList list = getBuilder().parse(args, this, t);
+			String propertyName = list.getStringWithNull("propertyName", t);
+            if (propertyName != null) {
+                String prop = System.getProperty(propertyName);
                 return new CString(prop, t);
             } else {
                 CArray ca = new CArray(t);
@@ -279,20 +278,19 @@ public class Cmdline {
         }
 
         public String docs() {
-            return "mixed {[propertyName]} If propertyName is set, that single property is returned, or null if that property doesn't exist. If propertyName is not set, an"
+            return "If propertyName is set, that single property is returned, or null if that property doesn't exist. If propertyName is not set, an"
                     + " associative array with all the system properties is returned. This mechanism hooks into Java's system property mechanism, and is just a wrapper for"
                     + " that. System properties are more reliable than environmental variables, and so are preferred in cases where they exist. For more information about system"
                     + " properties, see http://docs.oracle.com/javase/tutorial/essential/environment/sysprop.html";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("Either the single property, or an array of all properties, if none are specified", CArray.class, CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the property, or null for all properties", CString.class, "propertyName").setOptionalDefaultNull()
 					);
 		}
 
@@ -345,18 +343,17 @@ public class Cmdline {
         }
 
         public String docs() {
-            return "mixed {[variableName]} Returns the environment variable specified, if variableName is set. Otherwise, returns an associative array"
+            return "Returns the environment variable specified, if variableName is set. Otherwise, returns an associative array"
                     + " of all the environment variables.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("Either an array, if no value is specified, or the value of an individual environment variable", CArray.class, CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the environment variable, or null for all", CString.class, "variableName").setOptionalDefaultNull()
 					);
 		}
 
@@ -438,20 +435,20 @@ public class Cmdline {
         }
 
         public String docs() {
-            return "void {variableName, value} Sets the value of an environment variable. This only changes the environment value in this process, not system-wide."
+            return "Sets the value of an environment variable. This only changes the environment value in this process, not system-wide."
                     + " This uses some hackery to work, and may not be 100% reliable in all cases, and shouldn't be relied on heavily. It will"
                     + " always work with get_env, however, so you can rely on that mechanism. The value will always be interpreted as a string, so if you are expecting"
                     + " a particular data type on a call to get_env, you will need to manually cast the variable. Arrays will be toString'd as well, but will be accepted.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the environment variable to set", CString.class, "variableName"),
+						new Argument("The value to set it to", Mixed.class, "value")
 					);
 		}
 

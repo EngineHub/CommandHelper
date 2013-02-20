@@ -16,6 +16,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.PersistanceNetwork;
@@ -51,7 +52,7 @@ public final class Static {
     
     private static Map<String, String> hostCache = new HashMap<String, String>();
 
-	public static CArray getArray(Construct c, Target t){
+	public static CArray getArray(Mixed c, Target t){
 		if(c instanceof CArray){
 			return (CArray)c;
 		}

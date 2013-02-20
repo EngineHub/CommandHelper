@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -201,17 +202,16 @@ public class Debug {
         }
 
         public String docs() {
-            return "void {message} Manually logs a timestamped message to the debug log and the console, if debug-mode is set to true in the preferences";
+            return "Manually logs a timestamped message to the debug log and the console, if debug-mode is set to true in the preferences";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The message to log", CString.class, "message")
 					);
 		}
 
@@ -463,19 +463,16 @@ public class Debug {
 		}
 
 		public String docs() {
-			return "array {} Returns an array of all thread names that are currently running in the JVM."
+			return "Returns an array of all thread names that are currently running in the JVM."
 					+ " This is a debugging tool for your server, and less of a CommandHelper specific thing.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("An array of all thread names currently running", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public CHVersion since() {
@@ -518,10 +515,18 @@ public class Debug {
 		}
 
 		public String docs() {
-			return "void {} Creates a heap dump file, and places it in the working directory, as \"dump.bin\". This might"
+			return "Creates a heap dump file, and places it in the working directory, as \"dump.bin\". This might"
 					+ " throw a PluginInternalException if the heap dump tools aren't available in your JVM. Once dumped,"
 					+ " the heap dump can be analyzed using tools such as jhat. More information about jhat can be found"
 					+ " [http://docs.oracle.com/javase/6/docs/technotes/tools/share/jhat.html here].";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 
 		public CHVersion since() {

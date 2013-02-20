@@ -68,7 +68,9 @@ exception.
 
 You may also have more complicated enum class definitions, and you may implement
 interfaces as well. If a constructor is provided, it must be private, but otherwise
-is acceptable.
+is acceptable. The special constructor syntax is demonstrated in the example below
+as well. As you can see, each parameter is passed in separately for each enum, so
+getInfo() for each one would return different data.
 
 <pre>
 enum Compass {
@@ -81,7 +83,7 @@ enum Compass {
     members {
         private final string @info
     }
-    private Compass(@info){
+    private Compass(string @info){
         this()->@info = @info;
     }
     
@@ -96,8 +98,13 @@ definitely determine the enum to use, the class name can be left off. So, if the
 procedure _func() is defined as such: <code>proc(_func, Compass @direction, ...)</code>
 Then both <code>_func(Compass::NORTH)</code> and <code>_func(NORTH)</code> are
 acceptable. This is only possible when the declared type is a concrete enum type,
-and not the Enum or Object superclasses. Additionally, string types are cross
+and not the Enum or Object superclasses. Additionally, auto string types are cross
 castable to an enum, so <code>_func('NORTH')</code> is also valid.
+
+All enums inherit a few static methods from the enum superclass as well, the
+most important being valueOf() and values(). valueOf() converts a string to
+the corresponding enum, and values() returns an array of all enum values in the
+enum.
 
 == Mask Types ==
 

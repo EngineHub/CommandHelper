@@ -58,17 +58,16 @@ public class DataTransformations {
 		}
 
 		public String docs() {
-			return "string {array} Converts an array into a JSON encoded string. Both normal and associative arrays are supported.";
+			return "Converts an array into a JSON encoded string. Both normal and associative arrays are supported.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The JSON encoded string", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The array to encode", CArray.class, "array")
 					);
 		}
 
@@ -117,13 +116,12 @@ public class DataTransformations {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The array from the decoded JSON string", CArray.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The JSON encoded string", CString.class, "string")
 					);
 		}
 

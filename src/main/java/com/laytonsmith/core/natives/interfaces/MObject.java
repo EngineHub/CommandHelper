@@ -1,21 +1,25 @@
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.annotations.immutable;
 import com.laytonsmith.annotations.nofield;
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An MObject is a definition of an array with a certain configuration. While an MObject can be constructed
@@ -50,7 +54,8 @@ import java.util.logging.Logger;
  * MObject (and subclasses) and MMap.
  * @author lsmith
  */
-public class MObject {
+@typename("Object")
+public class MObject implements Mixed {
 	
 	public static <T extends MObject> T Construct(Class<T> type, CArray data, Target t){
 		T instance;
@@ -77,7 +82,7 @@ public class MObject {
 		return Construct(MObject.class, data, t);
 	}
 	
-	private Map<String, Construct> fields = new HashMap<String, Construct>();
+	private Map<String, Mixed> fields = new HashMap<String, Mixed>();
 	
 	/**
 	 * If a field can have an alias, this should return the proper
@@ -101,7 +106,7 @@ public class MObject {
 	 * @param value
 	 * @param t 
 	 */
-	public final void set(String field, Construct value, Target t){
+	public final void set(String field, Mixed value, Target t){
 		String alias = alias(field);
 		if(alias != null){
 			field = alias;
@@ -190,7 +195,7 @@ public class MObject {
 	 * @param field
 	 * @return 
 	 */
-	public Construct get(String field){
+	public Mixed get(String field){
 		//TODO: This won't work. It needs to scan the object first, THEN look for
 		//the parameter
 		if(alias(field) != null){
@@ -259,5 +264,75 @@ public class MObject {
 		} else {
 			return Construct.GetNullConstruct(Target.UNKNOWN);
 		}
+	}
+
+	/**
+	 * For MObjects, the underlying object is not useful to java code, so null
+	 * is returned, and subclasses are prevented from further subclassing.
+	 * @return 
+	 */
+	public final Object value() {
+		return null;
+	}
+
+	/**
+	 * By default, val is the listing of all the fields in the object, though this can be overridden by
+	 * subclasses.
+	 * @return 
+	 */
+	public String val() {
+		Map<String, Mixed> values = new HashMap<String, Mixed>();
+		for(String key : fields.keySet()){
+			values.put(key, fields.get(key));
+		}
+		for(Field f : this.getClass().getFields()){
+			values.put(f.getName(), get(f.getName()));
+		}
+		List<String> v = new ArrayList<String>();
+		for(String key : values.keySet()){
+			v.add(key + ": " + values.get(key).val());
+		}
+		return "{" + StringUtils.Join(v, ", ") + "}";
+	}
+
+	/**
+	 * MObjects cannot be null, otherwise they wouldn't exist.
+	 * @return 
+	 */
+	public boolean isNull() {
+		return false;
+	}
+
+	/**
+	 * This should be overriden by each subclass, or the subclass should
+	 * tag itself with @typename
+	 * @return 
+	 */
+	public String typeName() {
+		if(this.getClass().getAnnotation(typename.class) != null){
+			return this.getClass().getAnnotation(typename.class).value();
+		} else {
+			throw new Error(this.getClass() + " does not have the @typename annotation, nor does it override typeName()");
+		}
+	}
+
+	/**
+	 * Throws an Error, since MObjects are not primitives. Subclasses cannot
+	 * override this method either, since no object can ever be a primitive.
+	 * @param t
+	 * @return
+	 * @throws ConfigRuntimeException 
+	 */
+	public final CPrimitive primitive(Target t) throws ConfigRuntimeException {
+		throw new Error("Cannot convert a MObject to a primitive.");
+	}
+
+	/**
+	 * Returns true if this object is tagged with @immutable. This method cannot
+	 * be overridden by subclasses.
+	 * @return 
+	 */
+	public final boolean isImmutable() {
+		return this.getClass().getAnnotation(immutable.class) != null;
 	}
 }
