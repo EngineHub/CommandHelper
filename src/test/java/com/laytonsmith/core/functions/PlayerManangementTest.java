@@ -156,6 +156,7 @@ public class PlayerManangementTest {
     @Test
     public void testPlayerFromConsole() throws ConfigCompileException{
         MCConsoleCommandSender fakeConsole = mock(MCConsoleCommandSender.class);
+        when(fakeConsole.getName()).thenReturn("CONSOLE");
         assertEquals("~console", SRun("player()", fakeConsole));
     }
     

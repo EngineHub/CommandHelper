@@ -402,6 +402,7 @@ public class StaticTest {
     
     public static MCConsoleCommandSender GetFakeConsoleCommandSender(){
         MCConsoleCommandSender c = mock(MCConsoleCommandSender.class);
+        when(c.getName()).thenReturn("CONSOLE");
         MCServer s = GetFakeServer();
         when(c.getServer()).thenReturn(s);
         return c;
