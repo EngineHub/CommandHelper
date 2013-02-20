@@ -421,7 +421,6 @@ public class InventoryManagement {
 
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Static.AssertPlayerNonNull(p, t);
             MCItemStack is;
 			Construct m = null;
 			
@@ -440,6 +439,7 @@ public class InventoryManagement {
 				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
 				m = args[3];
 			}
+			Static.AssertPlayerNonNull(p, t);
 			
 			MCItemMeta meta;
 			if (m != null) {
@@ -771,7 +771,6 @@ public class InventoryManagement {
 			} else {
 				p2 = Static.GetPlayer(args[0], t);
 			}
-
 			Static.AssertPlayerNonNull(p1, t);
 			p1.openInventory(p2.getInventory());
 			return new CVoid(t);
