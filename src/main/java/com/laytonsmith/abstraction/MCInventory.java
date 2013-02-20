@@ -1,13 +1,14 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCInventoryType;
-import java.util.List;
+import java.util.HashMap;
 
 /**
  *
  * @author Layton
  */
 public interface MCInventory extends AbstractionObject {
+	public HashMap addItem(MCItemStack stack);
 	public MCInventoryType getType();
 	public int getSize();
 	public MCItemStack getItem(int index);

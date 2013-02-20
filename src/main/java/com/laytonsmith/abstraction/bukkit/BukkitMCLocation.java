@@ -45,6 +45,10 @@ public class BukkitMCLocation implements MCLocation {
         return l.getZ();
     }
 
+	public double distance(MCLocation o) {
+		return l.distance(((BukkitMCLocation)o)._Location());
+	}
+
     public MCWorld getWorld() {
         if (l.getWorld() == null) {
             return null;
@@ -78,7 +82,7 @@ public class BukkitMCLocation implements MCLocation {
         }
         return new BukkitMCBlock(l.getBlock());
     }
-    
+
     public Location _Location() {
         return l;
     }
