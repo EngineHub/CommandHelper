@@ -24,7 +24,9 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MBlockInfo;
 import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.interfaces.MObject;
 import com.sk89q.util.StringUtil;
 
 /**
@@ -1021,13 +1023,13 @@ public class Environment {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
 			MCBlock b = l.getBlock();
-			CArray array = new CArray(t);
-			array.set("solid", new CBoolean(b.isSolid(), t), t);
-			array.set("flammable", new CBoolean(b.isFlammable(), t), t);
-			array.set("transparent", new CBoolean(b.isTransparent(), t), t);
-			array.set("occluding", new CBoolean(b.isOccluding(), t), t);
-			array.set("burnable", new CBoolean(b.isBurnable(), t), t);
-			return array;
+			MBlockInfo bi = new MBlockInfo();
+			bi.solid = b.isSolid();
+			bi.flammable = b.isFlammable();
+			bi.transparent = b.isTransparent();
+			bi.occluding = b.isOccluding();
+			bi.burnable = b.isBurnable();
+			return bi.deconstruct(t);
 			//return new CBoolean(l.getBlock().isSolid(), t);
 		}
 
@@ -1040,17 +1042,11 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "Returns an associative array with various information about a block ---- <ul>"
-					+ " <li>solid: If a block is solid (i.e. dirt or stone, as opposed to a torch or water)</li>"
-					+ " <li>flammable: Indicates if a block can catch fire</li>"
-					+ " <li>transparent: Indicates if light can pass through</li>"
-					+ " <li>occluding: indicates If the block fully blocks vision</li>"
-					+ " <li>burnable: Indicates if the block can burn away</li>"
-					+ "</ul>";
+			return "Returns an object with various information about a block";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", CArray.class); //TODO: Make this an object
+			return new Argument("", MBlockInfo.class);
 		}
 
 		public ArgumentBuilder arguments() {

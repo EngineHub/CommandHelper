@@ -1,6 +1,7 @@
 package com.laytonsmith.core.natives;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.documentation;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
@@ -14,11 +15,17 @@ import com.laytonsmith.core.natives.interfaces.MObject;
 @typename("Location")
 public class MLocation extends MObject implements Documentation {
 	
+	@documentation(docs="The x coordinate in this location")
 	public Double x;
+	@documentation(docs="The y coordinate in this location")
 	public Double y;
+	@documentation(docs="The z coordinate in this location")
 	public Double z;
+	@documentation(docs="The world that this location is in")
 	public String world;
+	@documentation(docs="The yaw of this location (left and right), from 0 to 360")
 	public Double yaw;
+	@documentation(docs="The pitch of this location (up and down), from -90 to 90")
 	public Double pitch;
 
 	@Override
@@ -41,7 +48,7 @@ public class MLocation extends MObject implements Documentation {
 	}
 
 	public String getName() {
-		return "Location";
+		return this.getClass().getAnnotation(typename.class).value();
 	}
 
 	public String docs() {

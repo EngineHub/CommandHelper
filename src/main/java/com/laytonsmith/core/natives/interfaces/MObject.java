@@ -57,14 +57,27 @@ import java.util.Map;
 @typename("Object")
 public class MObject implements Mixed {
 	
+	/**
+	 * Creates a new MObject subclass, given the CArray. If the array lacks
+	 * appropriate parameters, they remain the default values assigned in the object.
+	 * Any undefined properties will remain set, and are accessible through the
+	 * {@link #get(java.lang.String)} method, but are likely to be ignored by
+	 * the code that uses them.
+	 * 
+	 * @param <T> Some subclass of MObject, which is the type of object returned.
+	 * @param type The desired return type
+	 * @param data The CArray that contains the data
+	 * @param t The target
+	 * @return 
+	 */
 	public static <T extends MObject> T Construct(Class<T> type, CArray data, Target t){
 		T instance;
 		try {
 			instance = type.newInstance();
 		} catch (InstantiationException ex) {
-			throw new RuntimeException(type.getName() + " does not have a default constructor.");
+			throw new Error(type.getName() + " does not have a default constructor.");
 		} catch (IllegalAccessException ex) {
-			throw new RuntimeException(type.getName() + "'s default constructor is not public.");
+			throw new Error(type.getName() + "'s default constructor is not public.");
 		}
 		for(String key : data.keySet()){
 			instance.set(key, data.get(key), t);
@@ -80,6 +93,33 @@ public class MObject implements Mixed {
 	 */
 	public static MObject Construct(CArray data, Target t){
 		return Construct(MObject.class, data, t);
+	}
+	
+	/**
+	 * Returns a generic CArray from this MObject. This is the opposite
+	 * process from construction. If sub MObjects are present, they are also
+	 * deconstructed as part of this process.
+	 * @param t
+	 * @return 
+	 */
+	public CArray deconstruct(Target t){
+		Map<String, Mixed> values = new HashMap<String, Mixed>();
+		for(String key : fields.keySet()){
+			values.put(key, fields.get(key));
+		}
+		for(Field f : this.getClass().getFields()){
+			values.put(f.getName(), get(f.getName()));
+		}
+		CArray ca = CArray.GetAssociativeArray(t);
+		for(String key : values.keySet()){
+			Mixed value = values.get(key);
+			if(value instanceof MObject){
+				ca.set(key, ((MObject)value).deconstruct(t), t);
+			} else {
+				ca.set(key, (Construct)value, t);
+			}
+		}
+		return ca;
 	}
 	
 	private Map<String, Mixed> fields = new HashMap<String, Mixed>();
