@@ -287,16 +287,25 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		} while(c != null);
 		return false;
 	}
-    
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(CharSequence c){return GetConstruct((Object)c);}
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(Integer c){return GetConstruct((Object)c);}
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(Long c){return GetConstruct((Object)c);}
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(Byte c){return GetConstruct((Object)c);}
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(BigInteger c){return GetConstruct((Object)c);}
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(AtomicInteger c){return GetConstruct((Object)c);}
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(Short c){return GetConstruct((Object)c);}
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(Boolean c){return GetConstruct((Object)c);}
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(Map c) throws ClassCastException {return GetConstruct((Object)c);}
+    /** It is generally best to use this factory method, instead of creating a new Construct() directly. */
 	public static Construct GetConstruct(Collection c){return GetConstruct((Object)c);}
     /**
      * Converts a POJO to a Construct, if the type is convertable. This accepts many types of

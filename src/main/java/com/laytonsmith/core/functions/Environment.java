@@ -17,11 +17,14 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
+import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MLocation;
 import com.sk89q.util.StringUtil;
 
 /**
@@ -46,7 +49,7 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "string {x, y, z, [world] | xyzArray, [world]} Gets the id of the block at x, y, z. This function expects "
+			return "Gets the id of the block at x, y, z. This function expects "
 					+ "either 1 or 3 arguments. If 1 argument is passed, it should be an array with the x, y, z"
 					+ " coordinates. The format of the return will be x:y where x is the id of the block, and"
 					+ " y is the meta data for the block. All blocks will return in this format, but blocks"
@@ -55,13 +58,20 @@ public class Environment {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The id of the block at the given location", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1, 
+							new Argument("The x coordinate", CNumber.class, "x"),
+							new Argument("The y coordinate", CNumber.class, "y"),
+							new Argument("The z coordinate", CNumber.class, "z"),
+							new Argument("The world", CString.class, "world").setOptionalDefaultNull()
+						),
+						new Signature(2, 
+							new Argument("The location of the block", MLocation.class, "locationArray")
+						)
 					);
 		}
 
@@ -101,9 +111,9 @@ public class Environment {
 					world = args[1].val();
 				}
 			} else if (args.length == 3 || args.length == 4) {
-				x = Static.getDouble(args[0], t);
-				y = Static.getDouble(args[1], t);
-				z = Static.getDouble(args[2], t);
+				x = args[0].primitive(t).castToDouble(t);	
+				y = args[1].primitive(t).castToDouble(t);
+				z = args[2].primitive(t).castToDouble(t);
 				if (args.length == 4) {
 					world = args[3].val();
 				}
@@ -138,7 +148,7 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "void {x, y, z, id, [world] | locationArray, id} Sets the id of the block at the x y z coordinates specified. If the"
+			return "Sets the id of the block at the x y z coordinates specified. If the"
 					+ " first argument passed is an array, it should be x, y, z, world coordinates. id must"
 					+ " be a blocktype identifier similar to the type returned from get_block_at, except if the meta"
 					+ " value is not specified, 0 is used. If world isn't specified, the current player's world"
@@ -146,13 +156,21 @@ public class Environment {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1,
+							new Argument("", CNumber.class, "x"),
+							new Argument("", CNumber.class, "y"),
+							new Argument("", CNumber.class, "z"),
+							new Argument("", CString.class, CInt.class, "id"),
+							new Argument("", CString.class, "world").setOptionalDefaultNull()
+						), new Signature(2, 
+							new Argument("", MLocation.class, "locationArray"),
+							new Argument("", CString.class, CInt.class, "id")
+						)
 					);
 		}
 
@@ -191,9 +209,9 @@ public class Environment {
 				id = args[1].val();
 
 			} else {
-				x = Static.getNumber(args[0], t);
-				y = Static.getNumber(args[1], t);
-				z = Static.getNumber(args[2], t);
+				x = args[0].primitive(t).castToDouble(t);
+				y = args[1].primitive(t).castToDouble(t);
+				z = args[2].primitive(t).castToDouble(t);
 				id = args[3].val();
 				if (args.length == 5) {
 					world = args[4].val();
@@ -261,20 +279,27 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "void {xyzLocation, lineArray | xyzLocation, line1, [line2, [line3, [line4]]]}"
-					+ " Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
+			return "Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
 					+ " a RangeException is thrown. If the text on a line overflows 15 characters, it is simply"
 					+ " truncated.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1, 
+							new Argument("", MLocation.class, "locationArray"),
+							new Argument("A length 4 array that contains the text to put on the sign", CArray.class, "lineArray").setGenerics(new Generic(CString.class))
+						), new Signature(2, 
+							new Argument("", MLocation.class, "locationArray"),
+							new Argument("The first line of text", CString.class, "line1"),
+							new Argument("The second line of text", CString.class, "line2").setOptionalDefault(""),
+							new Argument("The third line of text", CString.class, "line3").setOptionalDefault(""),
+							new Argument("The fourth line of text", CString.class, "line4").setOptionalDefault("")
+						)
 					);
 		}
 
@@ -364,13 +389,12 @@ public class Environment {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("An array of length 4, with the text of the sign", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location")
 					);
 		}
 
@@ -426,13 +450,12 @@ public class Environment {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True, if the block at the location is a sign", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location")
 					);
 		}
 
@@ -475,18 +498,17 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event. Only works with"
+			return "Mostly simulates a block break at a location. Does not trigger an event. Only works with"
 					+ " craftbukkit.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location")
 					);
 		}
 
@@ -529,19 +551,26 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
+			return "Sets the biome of the specified block column."
 					+ " The location array's y value is ignored. ----"
 					+ " Biome may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1, 
+							new Argument("", CNumber.class, "x"),
+							new Argument("", CNumber.class, "z"),
+							new Argument("", CString.class, "world").setOptionalDefaultNull(),
+							Argument.getEnumArgument("The biome type to set for the column specified", MCBiomeType.class, "biome")
+						), new Signature(2, 
+							new Argument("", MLocation.class, "location"),
+							Argument.getEnumArgument("The biome type to set for the column specified", MCBiomeType.class, "biome")
+						)
 					);
 		}
 
@@ -571,8 +600,8 @@ public class Environment {
 				z = l.getBlockZ();
 				w = l.getWorld();
 			} else {
-				x = Static.getInt32(args[0], t);
-				z = Static.getInt32(args[1], t);
+				x = args[0].primitive(t).castToInt32(t);
+				z = args[1].primitive(t).castToInt32(t);
 				if (args.length != 3) {
 					w = Static.getServer().getWorld(args[2].val());
 				}
@@ -607,19 +636,24 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location array's"
+			return "Returns the biome type of this block column. The location array's"
 					+ " y value is ignored. ---- The value returned"
 					+ " may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The biome currently set for this column", MCBiomeType.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1, 
+							new Argument("", CNumber.class, "x"),
+							new Argument("", CNumber.class, "z"),
+							new Argument("", CString.class, "world").setOptionalDefaultNull()
+						), new Signature(2, 
+							new Argument("", MLocation.class, "location")
+						)
 					);
 		}
 
@@ -649,8 +683,8 @@ public class Environment {
 				z = l.getBlockZ();
 				w = l.getWorld();
 			} else {
-				x = Static.getInt32(args[0], t);
-				z = Static.getInt32(args[1], t);
+				x = args[0].primitive(t).castToInt32(t);
+				z = args[1].primitive(t).castToInt32(t);
 				if (args.length != 2) {
 					w = Static.getServer().getWorld(args[2].val());
 				}
@@ -679,19 +713,23 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "array {x, z, [world] | xyzArray, [world]} Gets the xyz of the highest block at a x and a z."
-					+ "It works the same as get_block_at, except that it doesn't matter now what the Y is."
-					+ "You can set it to -1000 or to 92374 it will just be ignored.";
+			return "Gets the location of the highest block at a x and a z."
+					+ "The y value of the location is ignored, and may be set to anything.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1, 
+							new Argument("", CNumber.class, "x"),
+							new Argument("", CNumber.class, "z"),
+							new Argument("", CString.class, "world").setOptionalDefaultNull()
+						), new Signature(2, 
+							new Argument("", MLocation.class, "location")
+						)
 					);
 		}
 
@@ -723,12 +761,9 @@ public class Environment {
 				x = loc.getX();
 				z = loc.getZ();
 				world = loc.getWorld().getName();
-				if (args.length == 2) {
-					world = args[1].val();
-				}
 			} else if (args.length == 2 || args.length == 3) {
-				x = Static.getDouble(args[0], t);
-				z = Static.getDouble(args[1], t);
+				x = args[0].primitive(t).castToDouble(t);
+				z = args[1].primitive(t).castToDouble(t);
 				if (args.length == 3) {
 					world = args[2].val();
 				}
@@ -768,7 +803,7 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "void {Locationarray, [size], [safe]} Creates an explosion with the given size at the given location."
+			return "Creates an explosion with the given size at the given location."
 					+ "Size defaults to size of a creeper (3), and null uses the default. If safe is true, (defaults to false)"
 					+ " the explosion"
 					+ " won't hurt the surrounding blocks. If size is 0, and safe is true, you will still see the animation"
@@ -776,13 +811,14 @@ public class Environment {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location"),
+						Argument.getRangedIntArgument("The size of the explosion", "size", 0, Integer.MAX_VALUE).setOptionalDefault(3),
+						new Argument("Whether or not the explosion will hurt surrounding blocks", CBoolean.class, "safe").setOptionalDefault(false)
 					);
 		}
 
@@ -808,11 +844,11 @@ public class Environment {
 			boolean safe = false;
 
 			if (args.length >= 3) {
-				safe = Static.getBoolean(args[2]);
+				safe = args[2].primitive(t).castToBoolean();
 			}
 			if (args.length >= 2) {
 				if (!(args[1].isNull())) {
-					size = Static.getInt(args[1], t);
+					size = args[1].primitive(t).castToInt32(t);
 				}
 			}
 
@@ -904,7 +940,7 @@ public class Environment {
 			}
 			MCTone tone = null;
 			if (args[noteOffset] instanceof CArray) {
-				int octave = Static.getInt32(((CArray) args[noteOffset]).get("octave"), t);
+				int octave = ((CArray) args[noteOffset]).get("octave").primitive(t).castToInt32(t);
 				if (octave < 0 || octave > 2) {
 					throw new Exceptions.RangeException("The octave must be 0, 1, or 2, but was " + octave, t);
 				}
@@ -940,7 +976,7 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "void {[player], instrument, note, [location]} Plays a note for the given player, at the given location."
+			return "Plays a note for the given player, at the given location."
 					+ " Player defaults to the current player, and location defaults to the player's location. Instrument may be one of:"
 					+ " " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + ", and note is an associative array with 2 values,"
 					+ " array(octave: 0, tone: 'F#') where octave is either 0, 1, or 2, and tone is one of the notes "
@@ -949,13 +985,15 @@ public class Environment {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						Argument.getEnumArgument("The instrument to play", MCInstrument.class, "instrument"),
+						new Argument("The note, formatted as described", CArray.class, "note"),
+						new Argument("The location to play the note at", MLocation.class, "location").setOptionalDefaultNull()
 					);
 		}
 
@@ -1002,7 +1040,7 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "array {locationArray} Returns an associative array with various information about a block ---- <ul>"
+			return "Returns an associative array with various information about a block ---- <ul>"
 					+ " <li>solid: If a block is solid (i.e. dirt or stone, as opposed to a torch or water)</li>"
 					+ " <li>flammable: Indicates if a block can catch fire</li>"
 					+ " <li>transparent: Indicates if light can pass through</li>"
@@ -1012,13 +1050,12 @@ public class Environment {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class); //TODO: Make this an object
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location")
 					);
 		}
 

@@ -43,6 +43,12 @@ immutable int @a = 4;
 @{Annotation(numbers: array(1, 2, 3, @a)}
 </pre>
 
+The key principal to take away here, is that annotations require immutable data, and
+are ways to add meta information to your code. They do not "execute" ever, that is,
+they are to be fully resolved at compile time, because in many cases, the compiler
+itself uses the annotations itself to do certain things.
+
+== Defining custom annotations ==
 To define your own annotation, define the public values in an <code>annotations</code>
 block in a class-like structure, and
 include default values if you like. Methods may also be defined in the annotation,
@@ -76,3 +82,13 @@ foreach(reflect_annotations(@var), @annotation){
 	msg(typeof(@annotation)) # In this case, "Annotation"
 }
 </pre>
+
+== Meta annotations ==
+Annotation declarations (not the annotation usages) can be themselves annotated
+with various annotations. All annotations are available at runtime, so unlike Java,
+there is no Retention annotation. There is however the ability to restrict ''where''
+an annotation is placed, based on the type of code structure being annotated. The
+Target annotation, which takes a ElementType enum, can be used to restrict what elements
+this annotation is added to.
+
+%%EnumDocs|ElementType%%

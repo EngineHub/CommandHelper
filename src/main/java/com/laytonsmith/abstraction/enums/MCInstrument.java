@@ -1,14 +1,45 @@
 
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.typename;
+import com.laytonsmith.core.constructs.CPrimitive;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.MEnum;
+
 /**
  *
  * @author Layton
  */
-public enum MCInstrument {
+@typename("Instrument")
+public enum MCInstrument implements MEnum {
 	PIANO,
     BASS_DRUM,
     SNARE_DRUM,
     STICKS,
-    BASS_GUITAR
+    BASS_GUITAR;
+
+	public Object value() {
+		return this;
+	}
+
+	public String val() {
+		return name();
+	}
+
+	public boolean isNull() {
+		return false;
+	}
+
+	public String typeName() {
+		return this.getClass().getAnnotation(typename.class).value();
+	}
+
+	public CPrimitive primitive(Target t) throws ConfigRuntimeException {
+		throw new Error();
+	}
+
+	public boolean isImmutable() {
+		return true;
+	}
 }
