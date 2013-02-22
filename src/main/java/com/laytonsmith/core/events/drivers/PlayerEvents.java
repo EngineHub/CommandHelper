@@ -24,6 +24,7 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.StringHandling;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -99,16 +100,16 @@ public class PlayerEvents {
             return Driver.PLAYER_KICK;
         }
 
-        public boolean modifyEvent(String key, Construct value,
+        public boolean modifyEvent(String key, Mixed value,
                 BindableEvent event, Target t) {
             if(event instanceof MCPlayerKickEvent){
                 MCPlayerKickEvent e = (MCPlayerKickEvent) event;
                 if(key.equalsIgnoreCase("message")){
-                    e.setMessage(value.nval());
+                    e.setMessage(value.isNull()?null:value.val());
                     return true;
                 }
                 if(key.equalsIgnoreCase("reason")){
-                    e.setReason(value.nval());
+                    e.setReason(value.isNull()?null:value.val());
                     return true;
                 }
             }
@@ -209,12 +210,12 @@ public class PlayerEvents {
 			return Driver.PLAYER_TELEPORT;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (event instanceof MCPlayerTeleportEvent) {
 				MCPlayerTeleportEvent e = (MCPlayerTeleportEvent)event;
 
 				if (key.equalsIgnoreCase("to")) {
-					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
+					MCLocation loc = ObjectGenerator.GetGenerator().location((Construct)value, null, t);
 					e.setTo(loc);
 
 					return true;
@@ -289,7 +290,7 @@ public class PlayerEvents {
 			return Driver.PLAYER_PRELOGIN;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
+		public boolean modifyEvent(String key, Mixed value,
 				BindableEvent e, Target t) {
 			if(e instanceof MCPlayerPreLoginEvent){
                 MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent)e;
@@ -372,7 +373,7 @@ public class PlayerEvents {
 			return Driver.PLAYER_LOGIN;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
+		public boolean modifyEvent(String key, Mixed value,
 				BindableEvent e, Target t) {
 			if(e instanceof MCPlayerLoginEvent){
                 MCPlayerLoginEvent event = (MCPlayerLoginEvent)e;
@@ -468,7 +469,7 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if(event instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent pje = (MCPlayerJoinEvent)event;
                 if(key.equals("join_message") || key.equals("message")){
@@ -588,7 +589,7 @@ public class PlayerEvents {
             return e;
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if(event instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)event;
 
@@ -663,12 +664,12 @@ public class PlayerEvents {
             return e;
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerRespawnEvent) {
                 MCPlayerRespawnEvent e = (MCPlayerRespawnEvent) event;
                 if (key.equals("location")) {
                     //Change this parameter in e to value
-                    e.setRespawnLocation(ObjectGenerator.GetGenerator().location(value, e.getPlayer().getWorld(), Target.UNKNOWN));
+                    e.setRespawnLocation(ObjectGenerator.GetGenerator().location((Construct)value, e.getPlayer().getWorld(), t));
                     return true;
                 }
             }
@@ -776,7 +777,7 @@ public class PlayerEvents {
         }
 
         //Given the paramters, change the underlying event
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
                 if (key.equals("xp")) {
@@ -789,7 +790,7 @@ public class PlayerEvents {
                         value = new CArray(t);
                     }
                     if(!(value instanceof CArray)){
-                        throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
+                        throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, t);
                     }
                     e.clearDrops();
                     CArray drops = (CArray) value;
@@ -799,7 +800,7 @@ public class PlayerEvents {
                     return true;
                 }
                 if(event instanceof MCPlayerDeathEvent && key.equals("death_message")){
-                    ((MCPlayerDeathEvent)event).setDeathMessage(value.nval());
+                    ((MCPlayerDeathEvent)event).setDeathMessage(value.isNull()?null:value.val());
                     return true;
                 }
             }
@@ -866,11 +867,11 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerQuitEvent) {
                 MCPlayerQuitEvent e = (MCPlayerQuitEvent)event;
                 if("message".equals(key)){
-                    e.setMessage(value.nval());
+                    e.setMessage(value.isNull()?null:value.val());
                 }
                 return true;
             }
@@ -967,11 +968,11 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerChatEvent) {
                 MCPlayerChatEvent e = (MCPlayerChatEvent)event;
                 if("message".equals(key)){
-                    e.setMessage(value.nval());
+                    e.setMessage(value.isNull()?null:value.val());
                 }
                 if("recipients".equals(key)){
                     if(value instanceof CArray){
@@ -986,11 +987,11 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
+                        throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, t);
                     }
                 }
 				if("format".equals(key)){
-					e.setFormat(value.nval());
+					e.setFormat(value.isNull()?null:value.val());
 				}
                 return true;
             }
@@ -1074,7 +1075,7 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerCommandEvent) {
                 MCPlayerCommandEvent e = (MCPlayerCommandEvent) event;
 
@@ -1151,7 +1152,7 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if (event instanceof MCWorldChangedEvent) {
                 MCWorldChangedEvent e = (MCWorldChangedEvent) event;
 
@@ -1406,7 +1407,7 @@ public class PlayerEvents {
 			return Driver.PLAYER_MOVE;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			//Nothing can be modified, so always return false
 			return false;
 		}

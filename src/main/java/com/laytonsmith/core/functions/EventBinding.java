@@ -2,8 +2,10 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -16,6 +18,7 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,20 +44,22 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "string {event_name, options, prefilter, event_obj, [custom_params], &lt;code&gt;} Binds some functionality to an event, so that"
+			return "Binds some functionality to an event, so that"
 					+ " when said event occurs, the event handler will fire. Returns the id of this event, so it can be unregistered"
 					+ " later, if need be.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The identifier automatically assigned to this bind (or the id you assigned)", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.MANUAL;
+		}
+
+		@Override
+		public String argumentsManual() {
+			return "string event_name, array options, array prefilter, ivar event_obj, [ivar... custom_params], code codeBlock";
 		}
 
 		public ExceptionType[] thrown() {
@@ -160,14 +165,11 @@ public class EventBinding {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("An array of the events currently bound", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -208,13 +210,12 @@ public class EventBinding {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The event ID to unbind, or the currently running event if none specified", CString.class, "eventID").setOptionalDefaultNull()
 					);
 		}
 
@@ -263,19 +264,18 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "void {[state]} Cancels the event (if applicable). If the event is not cancellable, or is already cancelled, nothing happens."
+			return "Cancels the event (if applicable). If the event is not cancellable, or is already cancelled, nothing happens."
 					+ " If called from outside an event handler, a BindException is thrown. By default, state is true, but you can"
 					+ " uncancel an event (if possible) by calling cancel(false).";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("If true, cancels the event, if false, uncancels it, if possible.", CBoolean.class, "state").setOptionalDefault(true)
 					);
 		}
 
@@ -296,17 +296,15 @@ public class EventBinding {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			boolean cancelled = true;
-			if (args.length == 1) {
-				cancelled = Static.getBoolean(args[0]);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			boolean state = list.getBoolean("state", t);
 
 			BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
 			if (original == null) {
 				throw new ConfigRuntimeException("cancel cannot be called outside an event handler", ExceptionType.BindException, t);
 			}
 			if (original.getUnderlyingEvent() != null && original.isCancellable()) {
-				original.setCancelled(cancelled);
+				original.setCancelled(state);
 			}
 			return new CVoid(t);
 		}
@@ -324,19 +322,16 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "boolean {} Returns whether or not the underlying event is cancelled or not. If the event is not cancellable in the first place,"
+			return "Returns whether or not the underlying event is cancelled or not. If the event is not cancellable in the first place,"
 					+ " false is returned. If called from outside an event, a BindException is thrown";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True, if the the event is cancelled", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -380,7 +375,7 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "void {eventName, eventObject, [serverWide]} Manually triggers bound events. The event object passed to this function is "
+			return "Manually triggers bound events. The event object passed to this function is "
 					+ " sent directly as-is to the bound events. Check the documentation for each event to see what is required."
 					+ " No checks will be done on the data here, but it is not recommended to fail to send all parameters required."
 					+ " If serverWide is true, the event is triggered directly in the server, unless it is a CommandHelper specific"
@@ -389,13 +384,14 @@ public class EventBinding {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The event name to trigger", CString.class, "eventName"),
+						new Argument("The event object", CArray.class, "eventObject"),
+						new Argument("If true, it will be triggered serverwide", CBoolean.class, "serverWide").setOptionalDefault(false)
 					);
 		}
 
@@ -416,19 +412,11 @@ public class EventBinding {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CArray obj = null;
-			if (args[1].isNull()) {
-				obj = new CArray(t);
-			} else if (args[1] instanceof CArray) {
-				obj = (CArray) args[1];
-			} else {
-				throw new ConfigRuntimeException("The eventObject must be null, or an array", ExceptionType.CastException, t);
-			}
-			boolean serverWide = false;
-			if (args.length == 3) {
-				serverWide = Static.getBoolean(args[2]);
-			}
-			EventUtils.ManualTrigger(args[0].val(), obj, serverWide);
+			ArgList list = getBuilder().parse(args, this, t);
+			String eventName = list.getString("eventName", t);
+			CArray eventObject = list.getEmptyArrayIfNull("eventObject");
+			boolean serverWide = list.getBoolean("serverWide", t);
+			EventUtils.ManualTrigger(eventName, eventObject, serverWide, t);
 			return new CVoid(t);
 		}
 	}
@@ -445,7 +433,7 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "boolean {parameter, value, [throwOnFailure]} Modifies the underlying event object, if applicable."
+			return "Modifies the underlying event object, if applicable."
 					+ " The documentation for each event will explain what parameters can be modified,"
 					+ " and what their expected values are. ---- If an invalid parameter name is passed in,"
 					+ " nothing will happen. If this function is called from outside an event"
@@ -459,13 +447,14 @@ public class EventBinding {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True, if the value was modified as intended. If throwOnFailure is true, this will never return false", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the parameter to modify", CString.class, "parameter"),
+						new Argument("The value to set it to", Mixed.class, "value"),
+						new Argument("If true, an exception will be thrown, instead of returning false, if the parameter is not able to be set", CBoolean.class, "throwOnFailure").setOptionalDefault(false)
 					);
 		}
 
@@ -486,12 +475,10 @@ public class EventBinding {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String parameter = args[0].val();
-			Construct value = args[1];
-			boolean throwOnFailure = false;
-			if (args.length == 3) {
-				throwOnFailure = Static.getBoolean(args[3]);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			String parameter = list.getString("parameter", t);
+			Mixed value = list.get("value");
+			boolean throwOnFailure = list.getBoolean("throwOnFailure", t);
 			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
 				throw new ConfigRuntimeException(this.getName() + " must be called from within an event handler", ExceptionType.BindException, t);
 			}
@@ -503,7 +490,7 @@ public class EventBinding {
 			boolean success = false;
 			if (!active.isLocked(parameter)) {
 				try {
-					success = e.modifyEvent(parameter, value, environment.getEnv(CommandHelperEnvironment.class).GetEvent().getUnderlyingEvent());
+					success = e.modifyEvent(parameter, value, environment.getEnv(CommandHelperEnvironment.class).GetEvent().getUnderlyingEvent(), t);
 				} catch (ConfigRuntimeException ex) {
 					ex.setFile(t.file());
 					ex.setLineNum(t.line());
@@ -532,18 +519,17 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "void {<none> | parameterArray | parameter, [parameter...]} Locks the specified event parameter(s), or all of them,"
+			return "Locks the specified event parameter(s), or all of them,"
 					+ " if specified with no arguments. Locked parameters become read only for lower priority event handlers.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The params to lock", CArray.class, "params").setVarargs().setGenerics(new Generic(CString.class))
 					);
 		}
 
@@ -604,20 +590,19 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "boolean {parameter} Returns whether or not a call to modify_event() would fail, based on"
+			return "Returns whether or not a call to modify_event() would fail, based on"
 					+ " the parameter being locked by a higher priority handler. If this returns false, it"
 					+ " is still not a guarantee that the event would be successfully modified, just that"
 					+ " it isn't locked.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True, if the parameter is locked", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The parameter to check", CString.class, "parameter")
 					);
 		}
 
@@ -658,20 +643,17 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "void {} Consumes an event, so that lower priority handlers don't even"
+			return "Consumes an event, so that lower priority handlers don't even"
 					+ " recieve the event. Monitor level handlers will still recieve it, however,"
 					+ " and they can check to see if the event was consumed.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -711,21 +693,18 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "boolean {} Returns whether or not this event has been consumed. Usually only useful"
+			return "Returns whether or not this event has been consumed. Usually only useful"
 					+ " for Monitor level handlers, it could also be used for highly robust code,"
 					+ " as an equal priority handler could have consumed the event, but this handler"
 					+ " would still recieve it.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True, if this event is consumed", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -770,19 +749,16 @@ public class EventBinding {
 		}
 
 		public String docs() {
-			return "array {} Returns meta information about the activity in regards to this event. This"
+			return "Returns meta information about the activity in regards to this event. This"
 					+ " is meant as a debug tool.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("Meta information about the event, in no particular format", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {

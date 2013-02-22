@@ -20,6 +20,7 @@ import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -98,17 +99,17 @@ public class InventoryEvents {
 			return Driver.INVENTORY_CLICK;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
+		public boolean modifyEvent(String key, Mixed value,
 				BindableEvent event, Target t) {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 				
 				if (key.equalsIgnoreCase("slotitem")) {
-					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setCurrentItem(ObjectGenerator.GetGenerator().item((Construct)value, Target.UNKNOWN));
 					return true;
 				}
 				if (key.equalsIgnoreCase("cursoritem")) {
-					e.setCursor(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setCursor(ObjectGenerator.GetGenerator().item((Construct)value, Target.UNKNOWN));
 					return true;
 				}
 			}
@@ -177,7 +178,7 @@ public class InventoryEvents {
 			return Driver.INVENTORY_OPEN;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
+		public boolean modifyEvent(String key, Mixed value,
 				BindableEvent event, Target t) {
 			return false;
 		}
@@ -244,7 +245,7 @@ public class InventoryEvents {
 			return Driver.INVENTORY_CLOSE;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
+		public boolean modifyEvent(String key, Mixed value,
 				BindableEvent event, Target t) {
 			return false;
 		}

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
@@ -13,6 +14,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.MEnum;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +65,8 @@ public class Exceptions {
 		
 	}
 
-	public enum ExceptionType implements Documentation {
+	@typename("ExceptionType")
+	public enum ExceptionType implements Documentation, MEnum {
 
 		/**
 		 * This exception is thrown if a value cannot be cast into an
@@ -218,6 +221,30 @@ public class Exceptions {
 
 		public CHVersion since() {
 			return since;
+		}
+
+		public Object value() {
+			return this;
+		}
+
+		public String val() {
+			return name();
+		}
+
+		public boolean isNull() {
+			return false;
+		}
+
+		public String typeName() {
+			return this.getClass().getAnnotation(typename.class).value();
+		}
+
+		public CPrimitive primitive(Target t) throws ConfigRuntimeException {
+			throw new Error();
+		}
+
+		public boolean isImmutable() {
+			return true;
 		}
 	}
 

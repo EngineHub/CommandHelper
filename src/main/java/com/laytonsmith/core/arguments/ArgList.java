@@ -31,7 +31,14 @@ public class ArgList {
 	}
 	
 	/**
-	 * Returns the underlying value, as a construct
+	 * Returns the underlying value, as a construct. The value will
+	 * have already been checked for the following conditions by the compiler
+	 * or runtime:
+	 * <ul>
+	 * <li>The object is of the correct type. If the type was declared as auto, it
+	 * will be checked at runtime, but regardless will be of the correct type
+	 * at this point.</li>
+	 * </ul>
 	 * @param <T>
 	 * @param varName
 	 * @return 
@@ -313,5 +320,21 @@ public class ArgList {
 	 */
 	public int getSignatureId(){
 		return signature.getSignatureId();
+	}
+
+	/**
+	 * If the underlying argument is an array, and is null, an empty array
+	 * is returned instead, so the code operating on the array doesn't need
+	 * to do null checks.
+	 * @param eventObject
+	 * @return 
+	 */
+	public CArray getEmptyArrayIfNull(String varName) {
+		CArray array = get(varName);
+		if(array == null){
+			return new CArray(Target.UNKNOWN);
+		} else {
+			return array;
+		}
 	}
 }

@@ -11,6 +11,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Map;
 
 /**
@@ -130,7 +131,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * takes a key, a construct, and the underlying event. It returns true if the underlying
      * event was successfully updated.
      */
-    public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t);
+    public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t);
 
     /**
      * Returns if this event is cancelled. If the event is not cancellable, false should

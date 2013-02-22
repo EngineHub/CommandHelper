@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -146,7 +147,7 @@ public class BlockEvents {
             return map;
         }
 
-        public boolean modifyEvent(String key, Construct value,
+        public boolean modifyEvent(String key, Mixed value,
                 BindableEvent e, Target t) {
 
             MCBlockBreakEvent event = (MCBlockBreakEvent) e;
@@ -309,7 +310,7 @@ public class BlockEvents {
             return map;
         }
 
-        public boolean modifyEvent(String key, Construct value,
+        public boolean modifyEvent(String key, Mixed value,
                 BindableEvent e, Target t) {
             MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 
@@ -410,7 +411,7 @@ public class BlockEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if (event instanceof MCSignChangeEvent) {
                 MCSignChangeEvent sce = (MCSignChangeEvent) event;
 

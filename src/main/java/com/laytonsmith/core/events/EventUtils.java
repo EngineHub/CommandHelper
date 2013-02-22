@@ -223,7 +223,7 @@ public final class EventUtils {
         }
     }
 
-    public static Construct DumpEvents() {
+    public static CArray DumpEvents() {
         CArray ca = new CArray(Target.UNKNOWN);
         for (Driver type : event_handles.keySet()) {
             SortedSet<BoundEvent> set = event_handles.get(type);

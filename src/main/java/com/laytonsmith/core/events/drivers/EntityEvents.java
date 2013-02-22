@@ -26,6 +26,7 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.Map;
 
@@ -91,7 +92,7 @@ public class EntityEvents {
 			return Driver.CREATURE_SPAWN;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
+		public boolean modifyEvent(String key, Mixed value,
 				BindableEvent event, Target t) {
 			MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
 			if (key.equals("type")) {
@@ -187,7 +188,7 @@ public class EntityEvents {
 			return Driver.ENTITY_DAMAGE;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
+		public boolean modifyEvent(String key, Mixed value,
 				BindableEvent event, Target t) {
 			MCEntityDamageEvent e = (MCEntityDamageEvent) event;
 			if (key.equals("amount")) {
@@ -261,7 +262,7 @@ public class EntityEvents {
 			return Driver.PLAYER_INTERACT_ENTITY;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
+		public boolean modifyEvent(String key, Mixed value,
 				BindableEvent event, Target t) {
 			return false;
 		}
@@ -326,12 +327,12 @@ public class EntityEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerDropItemEvent) {
                 MCPlayerDropItemEvent e = (MCPlayerDropItemEvent)event;
                 
                 if (key.equalsIgnoreCase("item")) {
-                    MCItemStack stack = ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN);
+                    MCItemStack stack = ObjectGenerator.GetGenerator().item((Construct)value, Target.UNKNOWN);
                     
                     e.setItem(stack);
                     
@@ -396,12 +397,12 @@ public class EntityEvents {
 			return Driver.ITEM_PICKUP;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (event instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent e = (MCPlayerPickupItemEvent)event;
 				
 				if (key.equalsIgnoreCase("item")) {
-					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN);
+					MCItemStack stack = ObjectGenerator.GetGenerator().item((Construct)value, Target.UNKNOWN);
 					
 					e.setItem(stack);
 					
@@ -489,7 +490,7 @@ public class EntityEvents {
 			return Driver.ENTITY_DAMAGE_PLAYER;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent e, Target t) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Target t) {
 			MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent)e;
             
     		if (key.equals("amount")) {
@@ -576,7 +577,7 @@ public class EntityEvents {
             }
         }
         
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
         	if(event instanceof MCEntityTargetEvent){
         		MCEntityTargetEvent ete = (MCEntityTargetEvent)event;
             

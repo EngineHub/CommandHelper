@@ -10,6 +10,7 @@ import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.BasicLogic;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MEnum;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.*;
 
@@ -595,7 +596,8 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 		};
 	}
     
-    public enum SortType{
+	@typename("SortType")
+    public enum SortType implements MEnum {
         /**
          * Sorts the elements without converting types first. If a non-numeric
          * string is compared to a numeric string, it is compared as a string,
@@ -613,8 +615,32 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
         /**
          * All values are considered strings, but the comparison is case-insensitive.
          */
-        STRING_IC
-    }
+        STRING_IC;
+		
+		public Object value() {
+			return this;
+		}
+
+		public String val() {
+			return name();
+		}
+
+		public boolean isNull() {
+			return false;
+		}
+
+		public String typeName() {
+			return this.getClass().getAnnotation(typename.class).value();
+		}
+
+		public CPrimitive primitive(Target t) throws ConfigRuntimeException {
+			throw new Error();
+		}
+
+		public boolean isImmutable() {
+			return true;
+		}
+	}
     public void sort(final SortType sort, final Target t){
         List<Construct> list = array;
         if(this.associative_mode){
