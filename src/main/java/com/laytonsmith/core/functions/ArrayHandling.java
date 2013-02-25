@@ -451,9 +451,10 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
-			Construct value = args[1];
-			int index = Static.getInt32(args[2], t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CArray array = list.get("array");
+			Construct value = list.get("item");
+			int index = list.getInt("index", t);
 			array.push(value, index);
 			return new CVoid(t);
 		}
@@ -467,10 +468,22 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "void {array, item, index} Inserts an item at the specified index, and shifts all other items in the array to the right one."
+			return "Inserts an item at the specified index, and shifts all other items in the array to the right one."
 					+ " If index is greater than the size of the array, an IndexOverflowException is thrown, though the index may be equal"
 					+ " to the size, in which case this works just like array_push. The array must be normal though, associative arrays"
 					+ " are not supported.";
+		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The array to insert into", CArray.class, "array").setGenerics(Generic.ANY),
+						new Argument("The item to insert", Mixed.class, "item"),
+						new Argument("The index to insert at, less than or equal to the array's size", CInt.class, "index")
+					);
 		}
 
 		public CHVersion since() {
