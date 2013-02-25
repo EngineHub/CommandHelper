@@ -919,7 +919,7 @@ public class EntityManagement {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
