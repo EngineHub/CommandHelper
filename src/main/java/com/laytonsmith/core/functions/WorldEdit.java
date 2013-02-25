@@ -27,6 +27,7 @@ import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
+import com.sk89q.worldguard.protection.databases.RegionDBUtil;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
@@ -1108,7 +1109,7 @@ public class WorldEdit {
 
             World world = null;
             MCPlayer m = null;
-            List<MCOfflinePlayer> owners = new ArrayList<MCOfflinePlayer>();
+            String[] owners = null;
             String region = args[0].val();
 
             if (args.length == 1) {
@@ -1119,7 +1120,8 @@ public class WorldEdit {
 
                 if (m != null) {
                     world = Bukkit.getServer().getWorld(m.getWorld().getName());
-                    owners.add(Static.getServer().getOfflinePlayer(m.getName()));
+					owners = new String[1];
+					owners[0] = m.getName();
                 }
 
             } else if (args.length == 2) {
@@ -1131,7 +1133,8 @@ public class WorldEdit {
                 }
 
                 if (m != null) {
-                    owners.add(Static.getServer().getOfflinePlayer(m.getName()));
+					owners = new String[1];
+					owners[0] = m.getName();
                 }
 
             } else {
@@ -1141,12 +1144,14 @@ public class WorldEdit {
                 if (args[2] instanceof CArray) {
 
                     CArray arg = (CArray) args[2];
+					owners = new String[(int)arg.size()];
 
                     for (int i = 0; i < arg.size(); i++) {
-                        owners.add(Static.getServer().getOfflinePlayer(arg.get(i, t).val()));
+						owners[i] = arg.get(i, t).val();
                     }
                 } else {
-                    owners.add(Static.getServer().getOfflinePlayer(args[2].val()));
+					owners = new String[1];
+					owners[0] = args[2].val();
                 }
 
             }
@@ -1163,13 +1168,7 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
-            DefaultDomain newOwners = regionExists.getOwners();
-
-            for (MCOfflinePlayer owner : owners) {
-                newOwners.addPlayer(owner.getName());
-            }
-
-            regionExists.setOwners(newOwners);
+			RegionDBUtil.addToDomain(regionExists.getOwners(), owners, 0);
 
 			try {
 				mgr.save();
@@ -1210,7 +1209,7 @@ public class WorldEdit {
 
             World world = null;
             MCPlayer m = null;
-            List<MCOfflinePlayer> owners = new ArrayList<MCOfflinePlayer>();
+			String[] owners = null;
             String region = args[0].val();
 
             if (args.length == 1) {
@@ -1221,7 +1220,8 @@ public class WorldEdit {
 
                 if (m != null) {
                     world = Bukkit.getServer().getWorld(m.getWorld().getName());
-                    owners.add(Static.getServer().getOfflinePlayer(m.getName()));
+					owners = new String[1];
+					owners[0] = m.getName();
                 }
 
             } else if (args.length == 2) {
@@ -1233,7 +1233,8 @@ public class WorldEdit {
                 }
 
                 if (m != null) {
-                    owners.add(Static.getServer().getOfflinePlayer(m.getName()));
+					owners = new String[1];
+					owners[0] = m.getName();
                 }
 
             } else {
@@ -1243,12 +1244,14 @@ public class WorldEdit {
                 if (args[2] instanceof CArray) {
 
                     CArray arg = (CArray) args[2];
+					owners = new String[(int)arg.size()];
 
                     for (int i = 0; i < arg.size(); i++) {
-                        owners.add(Static.getServer().getOfflinePlayer(arg.get(i, t).val()));
+						owners[i] = arg.get(i, t).val();
                     }
                 } else {
-                    owners.add(Static.getServer().getOfflinePlayer(args[2].val()));
+					owners = new String[1];
+					owners[0] = args[2].val();
                 }
 
             }
@@ -1265,13 +1268,7 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
-            DefaultDomain newOwners = regionExists.getOwners();
-
-            for (MCOfflinePlayer owner : owners) {
-                newOwners.removePlayer(owner.getName());
-            }
-
-            regionExists.setOwners(newOwners);
+			RegionDBUtil.removeFromDomain(regionExists.getOwners(), owners, 0);
 
 			try {
 				mgr.save();
@@ -1312,7 +1309,7 @@ public class WorldEdit {
 
             World world = null;
             MCPlayer m = null;
-            List<MCOfflinePlayer> members = new ArrayList<MCOfflinePlayer>();
+			String[] members = null;
             String region = args[0].val();
 
             if (args.length == 1) {
@@ -1323,7 +1320,8 @@ public class WorldEdit {
 
                 if (m != null) {
                     world = Bukkit.getServer().getWorld(m.getWorld().getName());
-                    members.add(Static.getServer().getOfflinePlayer(m.getName()));
+					members = new String[1];
+					members[0] = m.getName();
                 }
 
             } else if (args.length == 2) {
@@ -1335,7 +1333,8 @@ public class WorldEdit {
                 }
 
                 if (m != null) {
-                    members.add(Static.getServer().getOfflinePlayer(m.getName()));
+					members = new String[1];
+					members[0] = m.getName();
                 }
 
             } else {
@@ -1347,10 +1346,12 @@ public class WorldEdit {
                     CArray arg = (CArray) args[2];
 
                     for (int i = 0; i < arg.size(); i++) {
-                        members.add(Static.getServer().getOfflinePlayer(arg.get(i, t).val()));
+						members = new String[(int)arg.size()];
+						members[i] = arg.get(i, t).val();
                     }
                 } else {
-                    members.add(Static.getServer().getOfflinePlayer(args[2].val()));
+					members = new String[1];
+					members[0] = args[2].val();
                 }
 
             }
@@ -1367,13 +1368,7 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
-            DefaultDomain newMembers = regionExists.getMembers();
-
-            for (MCOfflinePlayer member : members) {
-                newMembers.addPlayer(member.getName());
-            }
-
-            regionExists.setMembers(newMembers);
+			RegionDBUtil.addToDomain(regionExists.getMembers(), members, 0);
 
 			try {
 				mgr.save();
@@ -1414,7 +1409,7 @@ public class WorldEdit {
 
             World world = null;
             MCPlayer m = null;
-            List<MCOfflinePlayer> members = new ArrayList<MCOfflinePlayer>();
+			String[] members = null;
             String region = args[0].val();
 
             if (args.length == 1) {
@@ -1425,7 +1420,8 @@ public class WorldEdit {
 
                 if (m != null) {
                     world = Bukkit.getServer().getWorld(m.getWorld().getName());
-                    members.add(Static.getServer().getOfflinePlayer(m.getName()));
+					members = new String[1];
+					members[0] = m.getName();
                 }
 
             } else if (args.length == 2) {
@@ -1437,7 +1433,8 @@ public class WorldEdit {
                 }
 
                 if (m != null) {
-                    members.add(Static.getServer().getOfflinePlayer(m.getName()));
+					members = new String[1];
+					members[0] = m.getName();
                 }
 
             } else {
@@ -1447,12 +1444,14 @@ public class WorldEdit {
                 if (args[2] instanceof CArray) {
 
                     CArray arg = (CArray) args[2];
+					members = new String[(int)arg.size()];
 
                     for (int i = 0; i < arg.size(); i++) {
-                        members.add(Static.getServer().getOfflinePlayer(arg.get(i, t).val()));
+						members[i] = arg.get(i, t).val();
                     }
                 } else {
-                    members.add(Static.getServer().getOfflinePlayer(args[2].val()));
+					members = new String[1];
+					members[0] = args[2].val();
                 }
 
             }
@@ -1469,13 +1468,7 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
-            DefaultDomain newMembers = regionExists.getMembers();
-
-            for (MCOfflinePlayer member : members) {
-                newMembers.removePlayer(member.getName());
-            }
-
-            regionExists.setMembers(newMembers);
+			RegionDBUtil.removeFromDomain(regionExists.getMembers(), members, 0);
 
 			try {
 				mgr.save();
