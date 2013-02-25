@@ -4,6 +4,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.HeapDumper;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
@@ -461,6 +462,7 @@ public class Debug {
 	}
 	
 	@api
+	@noboilerplate
 	public static class heap_dump extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
