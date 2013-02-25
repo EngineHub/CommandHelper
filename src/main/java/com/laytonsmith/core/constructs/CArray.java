@@ -183,15 +183,36 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 		}
 	}
 
+	/**
+	 * Pushes a new Construct onto the end of the array.
+	 * @param c 
+	 */
+	public void push(Construct c){
+		push(c, null);
+	}
     /**
-     * Pushes a new Construct onto the array
-     * @param c 
+     * Pushes a new Construct onto the end of the array. If the index is specified, this works like
+	 * a "insert" operation, in that all values are shifted to the right, starting with the value
+	 * at that index. If the array is associative though, you MUST send null, otherwise an
+	 * {@link IllegalArgumentException} is thrown. Ideally, you should use {@link #set} anyways
+	 * for an associative array.
+     * @param c The Construct to add to the array
+	 * @throws IllegalArgumentException If index is not null, and this is an associative array.
+	 * @throws IndexOutOfBoundsException If the index is not null, and the index specified is out of
+	 * range.
      */
-    public void push(Construct c) {
+    public void push(Construct c, Integer index) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (!associative_mode) {
-            array.add(c);
+			if(index != null){
+				array.add(index, c);
+			} else {
+				array.add(c);
+			}
             next_index++;
         } else {
+			if(index != null){
+				throw new IllegalArgumentException("Cannot insert into an associative array");
+			}
             int max = 0;            
             for (String key : associative_array.keySet()) {
                 try{

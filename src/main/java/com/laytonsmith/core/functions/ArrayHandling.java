@@ -434,6 +434,62 @@ public class ArrayHandling {
 						new ExampleScript("Demonstrates pushing multiple values", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0, 1, 2)\nmsg(@array)"),};
 		}
 	}
+	
+	@api
+	public static class array_insert extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IndexOverflowException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray array = Static.getArray(args[0], t);
+			Construct value = args[1];
+			int index = Static.getInt32(args[2], t);
+			array.push(value, index);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "array_insert";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{3};
+		}
+
+		public String docs() {
+			return "void {array, item, index} Inserts an item at the specified index, and shifts all other items in the array to the right one."
+					+ " If index is greater than the size of the array, an IndexOverflowException is thrown, though the index may be equal"
+					+ " to the size, in which case this works just like array_push. The array must be normal though, associative arrays"
+					+ " are not supported.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "@array = array(1, 3, 4)\n"
+					+ "array_insert(@array, 2, 1)\n"
+					+ "msg(@array)"),
+				new ExampleScript("Usage as if it were array_push", "@array = array(1, 2, 3)\n"
+					+ "array_insert(@array, 4, array_size(@array))\n"
+					+ "msg(@array)")
+			};
+		}		
+		
+	}
 
 	@api
 	public static class array_contains extends AbstractFunction {
