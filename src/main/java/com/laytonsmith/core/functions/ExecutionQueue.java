@@ -9,6 +9,8 @@ import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -82,17 +84,17 @@ public class ExecutionQueue {
 		}
 
 		public String docs() {
-			return "void {closure, [queue]} Queues a task up at the end of the specified queue.";
+			return "Queues a task up at the end of the specified queue.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The task to push on to the queue", CClosure.class, "closure"),
+						new Argument("The queue name", CString.class, "queue").setOptionalDefaultNull()
 					);
 		}
 
@@ -152,17 +154,17 @@ public class ExecutionQueue {
 		}
 
 		public String docs() {
-			return "void {closure, [queue]} Queues a task at the front of the queue.";
+			return "Queues a task at the front of the queue.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The task to push on to the queue", CClosure.class, "closure"),
+						new Argument("The queue name", CString.class, "queue").setOptionalDefaultNull()
 					);
 		}
 
@@ -205,17 +207,16 @@ public class ExecutionQueue {
 		}
 
 		public String docs() {
-			return "void {[queue]} Removes the last task at the end of the queue from the queue.";
+			return "Removes the last task at the end of the queue from the queue.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The queue name", CString.class, "queue").setOptionalDefaultNull()
 					);
 		}
 
@@ -258,18 +259,17 @@ public class ExecutionQueue {
 		}
 
 		public String docs() {
-			return "void {[queue]} Removes a task from the front of the queue. That is, the next task"
+			return "Removes a task from the front of the queue. That is, the next task"
 				+ " that would have been run is removed.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The queue name", CString.class, "queue").setOptionalDefaultNull()
 					);
 		}
 
@@ -312,18 +312,17 @@ public class ExecutionQueue {
 		}
 
 		public String docs() {
-			return "void {[queue]} Clears out all tasks that are on the queue. If no tasks were"
+			return "Clears out all tasks that are on the queue. If no tasks were"
 				+ " on the queue, nothing happens.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The queue name", CString.class, "queue").setOptionalDefaultNull()
 					);
 		}
 
@@ -365,17 +364,16 @@ public class ExecutionQueue {
 		}
 
 		public String docs() {
-			return "boolean {[queue]} Returns true if the specified queue still has tasks running on it.";
+			return "Returns true if the specified queue still has tasks running on it.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True, if the given queue is running", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The queue name", CString.class, "queue").setOptionalDefaultNull()
 					);
 		}
 
@@ -405,7 +403,7 @@ public class ExecutionQueue {
 			if(args.length == 2){
 				queue = args[1].nval();
 			}
-			final long delay = Static.getInt(args[0], t);
+			final long delay = args[0].primitive(t).castToInt(t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(queue, new Runnable() {
 
 				public void run() {
@@ -428,18 +426,18 @@ public class ExecutionQueue {
 		}
 
 		public String docs() {
-			return "void {x, [queue]} Queues up a non-disruptive sleep at the end of the queue. This task"
-				+ " will stall the execution thread for x milliseconds.";
+			return "Queues up a non-disruptive sleep at the end of the queue. This task"
+				+ " will stall the execution thread for time milliseconds.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The delay, in ms, to queue up", CInt.class, "time"),
+						new Argument("The queue name", CString.class, "queue").setOptionalDefaultNull()
 					);
 		}
 
@@ -469,7 +467,7 @@ public class ExecutionQueue {
 			if(args.length == 2){
 				queue = args[1].nval();
 			}
-			final long delay = Static.getInt(args[0], t);
+			final long delay = args[0].primitive(t).castToInt(t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(queue, new Runnable() {
 
 				public void run() {
@@ -496,13 +494,13 @@ public class ExecutionQueue {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The delay, in ms, to queue up at the front of the queue", CInt.class, "time"),
+						new Argument("The queue name", CString.class, "queue").setOptionalDefaultNull()
 					);
 		}
 
