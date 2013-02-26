@@ -399,56 +399,61 @@ public class BukkitPlayerEvents {
 
     @abstraction(type=Implementation.Type.BUKKIT)
     public static class BukkitMCPlayerDeathEvent implements MCPlayerDeathEvent {
-        EntityDeathEvent ede;
-        public BukkitMCPlayerDeathEvent(EntityDeathEvent event) {
-            ede = event;
+        PlayerDeathEvent pde;
+		
+        public BukkitMCPlayerDeathEvent(PlayerDeathEvent event) {
+            pde = event;
         }
 
         public Object _GetObject() {
-            return ede;
+            return pde;
         }
 
         public static BukkitMCPlayerDeathEvent _instantiate(MCPlayer entity, List<MCItemStack> listOfDrops,
                 int droppedExp, String deathMessage){
             List<ItemStack> drops = new ArrayList<ItemStack>();
+			
             return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer)entity)._Player(), drops, droppedExp, deathMessage));
         }
 
         public List<MCItemStack> getDrops() {
-            List<ItemStack> islist = ede.getDrops();
+            List<ItemStack> islist = pde.getDrops();
             List<MCItemStack> drops = new ArrayList<MCItemStack>();
+			
             for(ItemStack is : islist){
                 drops.add(new BukkitMCItemStack(is));
             }
+			
             return drops;
         }
+		
         public void clearDrops() {
-            ede.getDrops().clear();
+            pde.getDrops().clear();
         }
+		
         public void addDrop(MCItemStack is){
-            ede.getDrops().add(((BukkitMCItemStack)is).__ItemStack());
+            pde.getDrops().add(((BukkitMCItemStack)is).__ItemStack());
         }
 
         public MCEntity getEntity() {
-            return new BukkitMCPlayer((Player)ede.getEntity());
+            return new BukkitMCPlayer(pde.getEntity());
         }
 
         public int getDroppedExp() {
-            return ede.getDroppedExp();
+            return pde.getDroppedExp();
         }
 
         public String getDeathMessage() {
-            return ((PlayerDeathEvent)ede).getDeathMessage();
+            return pde.getDeathMessage();
         }
 
         public void setDroppedExp(int i) {
-            ede.setDroppedExp(i);
+            pde.setDroppedExp(i);
         }
 
         public void setDeathMessage(String nval) {
-            ((PlayerDeathEvent)ede).setDeathMessage(nval);
+            pde.setDeathMessage(nval);
         }
-
     }
 
     @abstraction(type=Implementation.Type.BUKKIT)
