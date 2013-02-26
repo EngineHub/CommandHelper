@@ -14,6 +14,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.Threader;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
@@ -76,20 +78,20 @@ public class FileHandling {
 		}
 
 		public String docs() {
-			return "string {file} Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
+			return "Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
 				+ " the file that is being run, not CommandHelper. If the file is not found, or otherwise can't be read in, an IOException is thrown."
 				+ " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
 				+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The path to the file to read in, relative to the file this is being run from."
+					+ " It is assumed that the contents of the file are text based.", CString.class, "filePath")
 					);
 		}
 
@@ -195,7 +197,7 @@ public class FileHandling {
 		}
 
 		public String docs() {
-			return "void {file, callback} Asyncronously reads in a file. ---- "
+			return "Asyncronously reads in a file. ---- "
 				+ " This may be a remote file accessed with an SCP style path. (See the [[CommandHelper/SCP|wiki article]]"
 				+ " about SCP credentials for more information.) If the file is not found, or otherwise can't be read in, an IOException is thrown."
 				+ " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
@@ -210,13 +212,14 @@ public class FileHandling {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The path to the file to read in, relative to the file this is being run from."
+					+ " It is assumed that the contents of the file are text based.", CString.class, "fileOrSCPPath"),
+						new Argument("The callback, which will receieve the text read in (or the exception).", CClosure.class, "callback").setGenerics(new Generic(CString.class), new Generic(CArray.class))
 					);
 		}
 
@@ -259,17 +262,16 @@ public class FileHandling {
 		}
 
 		public String docs() {
-			return "int {path} Returns the size of a file on the file system.";
+			return "Returns the size of a file on the file system.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The size of a file on the file system. Returns 0 if the file is empty, or otherwise doesn't exist.", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The path to the file, relative to the file this code is being run from", CString.class, "filePath")
 					);
 		}
 

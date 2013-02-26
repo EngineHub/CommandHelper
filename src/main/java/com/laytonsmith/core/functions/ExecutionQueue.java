@@ -490,7 +490,7 @@ public class ExecutionQueue {
 		}
 
 		public String docs() {
-			return "void {x, [queue]} Works like queue_delay, but puts the delay at the front of the queue.";
+			return "Works like queue_delay, but puts the delay at the front of the queue.";
 		}
 		
 		public Argument returnType() {

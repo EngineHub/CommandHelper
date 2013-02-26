@@ -6,7 +6,9 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -60,8 +62,8 @@ public class Marquee {
 				marqueeName = null;
 			}
 			text = args[1 + offset].val();
-			stringWidth = Static.getInt32(args[2 + offset], t);
-			delayTime = Static.getInt32(args[3 + offset], t);
+			stringWidth = args[2 + offset].primitive(t).castToInt32(t);
+			delayTime = args[3 + offset].primitive(t).castToInt32(t);
 			if(args[4 + offset] instanceof CClosure){
 				callback = ((CClosure)args[4 + offset]);
 			} else {
@@ -110,7 +112,7 @@ public class Marquee {
 		}
 
 		public String docs() {
-			return "void {[marqueeName], text, stringWidth, delayTime, callback} Sets up a marquee, which will automatically"
+			return "Sets up a marquee, which will automatically"
 					+ " split up a given string for you, and call the callback. The split string will automatically wrap, handle"
 					+ " buffering spaces, and scroll through the text. ---- marqueeName is optional, but required if you wish"
 					+ " to stop the marquee at any point. text is the text that the marquee should scroll, stringWidth is the"
@@ -121,13 +123,16 @@ public class Marquee {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "marqueeName").setOptionalDefaultNull(),
+						new Argument("", CString.class, "text"),
+						new Argument("", CInt.class, "stringWidth"),
+						new Argument("", CInt.class, "delayTime"),
+						new Argument("", CClosure.class, "callback").setGenerics(new Generic(CString.class))
 					);
 		}
 
@@ -168,17 +173,16 @@ public class Marquee {
 		}
 
 		public String docs() {
-			return "void {marqueeName} Stops a named marquee.";
+			return "Stops a named marquee.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "marqueeName")
 					);
 		}
 

@@ -12,6 +12,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
@@ -20,6 +21,8 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MColor;
+import com.laytonsmith.core.natives.MItemMeta;
 
 /**
  *
@@ -38,11 +41,12 @@ public class ItemMeta {
 			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"
 			+ "</ul>";
 	
+	//TODO: All these functions need to switch over from ObjectGenerator to the MObject syntax.
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_itemmeta extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
 		public boolean isRestricted() {
@@ -54,23 +58,21 @@ public class ItemMeta {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			MCItemStack is;
-			Construct slot;
-			if(args.length == 2){
-				p = Static.GetPlayer(args[0], t);
-				slot = args[1];
-			} else {
-				slot = args[0];
+			if(list.getStringWithNull("player", t) != null){
+				p = Static.GetPlayer(list.getString("player", t), t);
 			}
+			Integer slot = list.getIntegerWithNull("inventorySlot", t);
 			Static.AssertPlayerNonNull(p, t);
-			if (slot instanceof CNull) {
+			MCItemStack is;
+			if (slot == null) {
 				is = p.getItemInHand();
 			} else {
-				is = p.getItemAt(Static.getInt32(slot, t));
+				is = p.getItemAt(slot);
 			}
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new Exceptions.RangeException("There is no item at slot " + slot, t);
 			}
 			return ObjectGenerator.GetGenerator().itemMeta(is, t);
 		}
@@ -84,19 +86,19 @@ public class ItemMeta {
 		}
 
 		public String docs() {
-			return "mixed {[player,] inventorySlot} Returns an associative array of known ItemMeta for the slot given,"
+			return "Returns an associative array of known ItemMeta for the slot given,"
 					+ " or null if there isn't any. All items can have a display(name) and/or lore, and more info will"
 					+ " be available for the items that have it. ---- Returned keys: " + applicableItemMeta;
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The known item meta for the item", CArray.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						Argument.getRangedIntArgument("", "inventorySlot", 0, 104)
 					);
 		}
 
@@ -152,10 +154,10 @@ public class ItemMeta {
 				meta = args[1];
 			}
 			Static.AssertPlayerNonNull(p, t);
-			if (slot instanceof CNull) {
+			if (slot.isNull()) {
 				is = p.getItemInHand();
 			} else {
-				is = p.getItemAt(Static.getInt32(slot, t));
+				is = p.getItemAt(slot.primitive(t).castToInt32(t));
 			}
 			if (is == null) {
 				throw new Exceptions.CastException("There is no item at slot " + slot, t);
@@ -173,20 +175,21 @@ public class ItemMeta {
 		}
 
 		public String docs() {
-			return "void {[player,] inventorySlot, ItemMetaArray} Applies the data from the given array to the item at the"
+			return "Applies the data from the given array to the item at the"
 					+ " specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if none of"
 					+ " the given fields are applicable, the item will become default, as this function overwrites any"
 					+ " existing data. ---- Available fields: " + applicableItemMeta;
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						Argument.getRangedIntArgument("", "inventorySlot", 0, 104),
+						new Argument("", MItemMeta.class, "itemMeta")
 					);
 		}
 
@@ -238,9 +241,9 @@ public class ItemMeta {
 			int slot;
 			if(args.length == 2){
 				p = Static.GetPlayer(args[0], t);
-				slot = Static.getInt32(args[1], t);
+				slot = args[1].primitive(t).castToInt32(t);
 			} else {
-				slot = Static.getInt32(args[0], t);
+				slot = args[0].primitive(t).castToInt32(t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
@@ -264,19 +267,19 @@ public class ItemMeta {
 		}
 
 		public String docs() {
-			return "colorArray {[player], inventorySlot} Returns a color array for the color of the leather armor at"
+			return "Returns a color array for the color of the leather armor at"
 					+ " the given slot. A CastException is thrown if this is not leather armor at that slot. The color"
 					+ " array returned will look like: array(r: 0, g: 0, b: 0)";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MColor.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						Argument.getRangedIntArgument("", "inventorySlot", 0, 104)
 					);
 		}
 
@@ -307,14 +310,14 @@ public class ItemMeta {
 			CArray color;
 			if(args.length == 3){
 				p = Static.GetPlayer(args[0], t);
-				slot = Static.getInt32(args[1], t);
+				slot = args[1].primitive(t).castToInt32(t);
 				if (args[2] instanceof CArray) {
 					color = (CArray)args[2];
 				} else {
 					throw new Exceptions.FormatException("Expected an array but recieved " + args[2] + " instead.", t);
 				}
 			} else {
-				slot = Static.getInt32(args[0], t);
+				slot = args[0].primitive(t).castToInt32(t);
 				if (args[1] instanceof CArray) {
 					color = (CArray)args[1];
 				} else {
@@ -345,20 +348,21 @@ public class ItemMeta {
 		}
 
 		public String docs() {
-			return "void {[player], slot, colorArray} Sets the color of the leather armor at the given slot. colorArray"
+			return "Sets the color of the leather armor at the given slot. colorArray"
 					+ " should be an array that matches one of the formats: array(r: 0, g: 0, b: 0)"
 					+ " array(red: 0, green: 0, blue: 0)"
 					+ " array(0, 0, 0)";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						Argument.getRangedIntArgument("", "inventorySlot", 0, 104),
+						new Argument("", MColor.class, "color")
 					);
 		}
 
@@ -388,9 +392,9 @@ public class ItemMeta {
 			int slot;
 			if(args.length == 2){
 				p = Static.GetPlayer(args[0], t);
-				slot = Static.getInt32(args[1], t);
+				slot = args[1].primitive(t).castToInt32(t);
 			} else {
-				slot = Static.getInt32(args[0], t);
+				slot = args[0].primitive(t).castToInt32(t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemMeta im = p.getItemAt(slot).getItemMeta();
@@ -406,18 +410,18 @@ public class ItemMeta {
 		}
 
 		public String docs() {
-			return "boolean {[player], itemSlot} Returns true if the item at the given slot is a piece of leather"
+			return "Returns true if the item at the given slot is a piece of leather"
 					+ " armor, that is, if dying it is allowed.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("True if the item at the given slot is leather armor", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						Argument.getRangedIntArgument("", "inventorySlot", 0, 104)
 					);
 		}
 
