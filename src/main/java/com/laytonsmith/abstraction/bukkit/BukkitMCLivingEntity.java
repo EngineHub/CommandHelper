@@ -1,27 +1,27 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -53,6 +53,14 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 
 	public int getMaxHealth() {
 		return le.getMaxHealth();
+	}
+	
+	public void setMaxHealth(int health) {
+		le.setMaxHealth(health);
+	}
+	
+	public void resetMaxHealth() {
+		le.resetMaxHealth();
 	}
 
 	public void damage(int i) {
@@ -173,14 +181,16 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		return blocks;
 	}
 
-	public void addEffect(int potionID, int strength, int seconds, Target t) {
+	public void addEffect(int potionID, int strength, int seconds, boolean ambient, Target t) {
 		//To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
 		//otherwise the client crashes, and requires deletion of
 		//player data to fix.
 		if (potionID < 1 || potionID > 20) {
-			throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-20", Exceptions.ExceptionType.RangeException, t);
+			throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-20", 
+					ExceptionType.RangeException, t);
 		}
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000), strength);
+		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000), 
+				strength, ambient);
 		try{
 			if(le != null){
 				le.addPotionEffect(pe, true);
@@ -273,13 +283,32 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		return le;
 	}
 
-	public Map<MCEquipmentSlot, MCItemStack> getEquipment() {
-		BukkitMCEntityEquipment ee = new BukkitMCEntityEquipment(le.getEquipment());
-		return ee.getAllEquipment();
+	public MCEntityEquipment getEquipment() {
+		return new BukkitMCEntityEquipment(le.getEquipment());
+	}
+	
+	public boolean getCanPickupItems() {
+		return le.getCanPickupItems();
+	}
+	
+	public void setCanPickupItems(boolean pickup) {
+		le.setCanPickupItems(pickup);
 	}
 
-	public void setEquipment(Map<MCEquipmentSlot, MCItemStack> emap) {
-		BukkitMCEntityEquipment ee = new BukkitMCEntityEquipment(le.getEquipment());
-		ee.setAllEquipment(emap);
+	public MCLivingEntity getTarget(Target t) {
+		if (!(le instanceof Creature)) {
+			throw new ConfigRuntimeException("This type of mob does not have a target API", 
+					ExceptionType.BadEntityException, t);
+		}
+		LivingEntity target = ((Creature) le).getTarget();
+		return target == null ? null : new BukkitMCLivingEntity(target);
+	}
+
+	public void setTarget(MCLivingEntity target, Target t) {
+		if (!(le instanceof Creature)) {
+			throw new ConfigRuntimeException("This type of mob does not have a target API", 
+					ExceptionType.BadEntityException, t);
+		}
+		((Creature) le).setTarget(target == null ? null : ((BukkitMCLivingEntity) target).asLivingEntity());
 	}
 }
