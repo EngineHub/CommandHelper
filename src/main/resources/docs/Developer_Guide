@@ -73,6 +73,37 @@ and tag it with @api. It is important to read and be very familiar with the meth
 in %%GET_SIMPLE_CLASS|.*|Function%%, so you know which methods that are optional should
 be overridden.
 
+=== Documentation and argument builder ===
+Each function has embedded java doc and type information. This is extremely important
+to keep accurate, both for the sake of the user, and for a technical need. The docs()
+method should return the plain text user readable documentation, which summarizes the 
+behavior of the function. This information isn't used programmatically in any way by
+the compiler, but it is used of course by the users, and should accurately reflect
+the behavior of the function. Previously, the docs() method needed to return a string
+in the format <code>returnType {argumentList} documentation</code>, however, this is
+no longer necessary, since the return type and argument list are used programmatically
+elsewhere, and therefore specified in different methods.
+
+The returnType() method should return an %%GET_SIMPLE_CLASS|.*arguments|Argument%%, using
+the "nameless" constructor of the Argument class. This simply provides the documentation
+and return type of the function, no "name" is needed. There is a pre-constructed Argument.VOID
+object that should be used in the case where the function returns void. Additionally, there
+are a few low level functions that cause execution to terminate in a non standard way, for instance,
+the die() method, or return(). These must use the Argument.NONE member, and should also likely
+provide the %%GET_SIMPLE_CLASS|.*Optimizable|OptimizationOption%%.TERMINAL optimization.
+
+The arguments() method returns the function's signature. For some functions, this will be quite
+complex, for others, it should be straightforward. By design, no arguments are passed to this
+method, because all arguments (and their defaults) should be constant, and should never vary
+based on runtime parameters. (This complicates the design, but more importantly prevents 
+certain optimizations from occurring.) Functions may have multiple signatures, that is,
+completely conflicting signature types, though this behavior is only provided for backwards
+compatibility, and should not be used for new functions. Disjoint types are recommended instead,
+or general simplification of the function instead. See the methods in the 
+%%GET_SIMPLE_CLASS|.*arguments|Argument%% class for more information on the various
+options available when creating arguments, and %%GET_SIMPLE_CLASS|.*|ArgumentBuilder%%
+for information about the ArgumentBuilder as a whole.
+
 == Adding an event ==
 Adding an event is only slightly more complicated than adding a function, though
 the addition of platform specific abstraction layers may complicate the process

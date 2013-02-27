@@ -7,11 +7,16 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MItemMeta;
+import com.laytonsmith.core.natives.MItemStack;
+import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 
 /**
@@ -35,7 +40,7 @@ public class InventoryManagement {
         }
 
         public String docs() {
-            return "mixed {[player, [index]]} Gets the inventory information for the specified player, or the current player if none specified. If the index is specified, only the slot "
+            return "Gets the inventory information for the specified player, or the current player if none specified. If the index is specified, only the slot "
                     + " given will be returned."
                     + " The index of the array in the array is 0 - 35, 100 - 103, which corresponds to the slot in the players inventory. To access armor"
                     + " slots, you may also specify the index. (100 - 103). The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
@@ -49,13 +54,13 @@ public class InventoryManagement {
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("If index is null, an array is returned, otherwise a single item will be returned.", Mixed.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("If null, the entire inventory is returned", CInt.class, "index").setOptionalDefaultNull()
 					);
 		}
 
@@ -91,7 +96,7 @@ public class InventoryManagement {
                 if (args[1].isNull()) {
                     index = null;
                 } else {
-                    index = Static.getInt32(args[1], t);
+                    index = args[1].primitive(t).castToInt32(t);
                 }
                 all = false;
                 m = Static.GetPlayer(args[0], t);
@@ -184,9 +189,19 @@ public class InventoryManagement {
         }
 
         public String docs() {
-            return "void {[player]} Closes the inventory of the current player, "
+            return "Closes the inventory of the current player, "
 					+ "or of the specified player.";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "player").setOptionalDefaultNull()
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
@@ -205,7 +220,7 @@ public class InventoryManagement {
         }
 
         public String docs() {
-            return "void {[player], pinvArray} Sets a player's inventory to the specified inventory object."
+            return "Sets a player's inventory to the specified inventory object."
                     + " An inventory object is one that matches what is returned by pinv(), so set_pinv(pinv()),"
                     + " while pointless, would be a correct call. ---- The array must be associative, "
                     + " however, it may skip items, in which case, only the specified values will be changed. If"
@@ -222,13 +237,13 @@ public class InventoryManagement {
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player"),
+						new Argument("An array of ItemStacks, where the index of the array maps to the slot to put the item", CArray.class, "pinvArray").setGenerics(new Generic(MItemStack.class))
 					);
 		}
 
@@ -319,7 +334,7 @@ public class InventoryManagement {
         }
 
         public String docs() {
-            return "int {[player], itemId} Returns the quantity of the specified item"
+            return "Returns the quantity of the specified item"
                     + " that the player is carrying (including armor slots)."
                     + " This counts across all slots in"
                     + " inventory. Recall that 0 is false, and anything else is true,"
@@ -329,13 +344,13 @@ public class InventoryManagement {
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CString.class, CInt.class, "itemID")
 					);
 		}
 
@@ -405,18 +420,18 @@ public class InventoryManagement {
         }
 
         public String docs() {
-            return "array {[player], itemID} Given an item id, returns the slot numbers"
+            return "Given an item id, returns the slot numbers"
                     + " that the matching item has at least one item in.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CInt.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CString.class, CInt.class, "itemID")
 					);
 		}
 
@@ -487,7 +502,7 @@ public class InventoryManagement {
         }
 
         public String docs() {
-            return "int {[player], itemID, qty, [meta]} Gives a player the specified item * qty. The meta argument uses the"
+            return "Gives a player the specified item * qty. The meta argument uses the"
                     + " same format as set_itemmeta. Unlike set_pinv(), this does not specify a slot. The qty is distributed"
                     + " in the player's inventory, first filling up slots that have the same item"
                     + " type, up to the max stack size, then fills up empty slots, until either"
@@ -500,13 +515,15 @@ public class InventoryManagement {
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The quantity actually given to the player", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CString.class, CInt.class, "itemID"),
+						new Argument("", CInt.class, "qty"),
+						new Argument("", MItemMeta.class, "meta").setOptionalDefaultNull()
 					);
 		}
 
@@ -528,18 +545,18 @@ public class InventoryManagement {
 			Construct m = null;
 			
             if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), args[1].primitive(t).castToInt32(t), t);
             } else if(args.length == 3) {
 				if(args[0] instanceof CString) {
 					p = Static.GetPlayer(args[0], t);
-					is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+					is = Static.ParseItemNotation(this.getName(), args[1].val(), args[2].primitive(t).castToInt32(t), t);
 				} else {
-					is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
+					is = Static.ParseItemNotation(this.getName(), args[0].val(), args[1].primitive(t).castToInt32(t), t);
 					m = args[2];
 				}
 			} else {
 				p = Static.GetPlayer(args[0], t);
-				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), args[2].primitive(t).castToInt32(t), t);
 				m = args[3];
 			}
 			Static.AssertPlayerNonNull(p, t);
@@ -548,7 +565,7 @@ public class InventoryManagement {
 			if (m != null) {
 				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(Construct.GetNullConstruct(t), is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
 			HashMap<Integer, MCItemStack> h = p.getInventory().addItem(is);
@@ -578,19 +595,20 @@ public class InventoryManagement {
         }
 
         public String docs() {
-            return "int {[player], itemID, qty} Works in reverse of pgive_item(), but"
+            return "Works in reverse of pgive_item(), but"
                     + " returns the number of items actually taken, which will be"
                     + " from 0 to qty.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CString.class, CInt.class, "itemID"),
+						new Argument("", CInt.class, "qty")
 					);
 		}
 
@@ -610,10 +628,10 @@ public class InventoryManagement {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
             if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), args[1].primitive(t).castToInt32(t), t);
             } else {
                 p = Static.GetPlayer(args[0], t);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), args[2].primitive(t).castToInt32(t), t);
             }
             int total = is.getAmount();
             int remaining = is.getAmount();
@@ -672,7 +690,7 @@ public class InventoryManagement {
 			}
 			
 			MCInventory inv = GetInventory(args[0], w, t);			
-			int slot = Static.getInt32(args[1], t);
+			int slot = args[1].primitive(t).castToInt32(t);
 			try{
 				MCItemStack is = inv.getItem(slot);
 				return ObjectGenerator.GetGenerator().item(is, t);
@@ -690,7 +708,7 @@ public class InventoryManagement {
 		}
 
 		public String docs() {
-			return "array {entityID, slotNumber | locationArray, slotNumber} If a number is provided, it is assumed to be an entity, and if the entity supports"
+			return "If a number is provided, it is assumed to be an entity, and if the entity supports"
 					+ " inventories, it will be valid. Otherwise, if a location array is provided, it is assumed to be a block (chest, brewer, etc)"
 					+ " and interpreted thusly. Depending on the inventory type, the max index will vary. If the index is too large, a RangeException is thrown,"
 					+ " otherwise, the item at that location is returned as an item array, or null, if no item is there. You can determine the inventory type"
@@ -698,13 +716,13 @@ public class InventoryManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MItemStack.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, MLocation.class, "entityIDOrLocation"),
+						new Argument("", CInt.class, "slotNumber")
 					);
 		}
 
@@ -737,7 +755,7 @@ public class InventoryManagement {
 			}
 			
 			MCInventory inv = GetInventory(args[0], w, t);			
-			int slot = Static.getInt32(args[1], t);
+			int slot = args[1].primitive(t).castToInt32(t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
 			try{
 				inv.setItem(slot, is);
@@ -756,18 +774,19 @@ public class InventoryManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, index, itemArray | locationArray, index, itemArray} Sets the specified item in the specified slot given either an entityID or a location array of a container"
+			return "Sets the specified item in the specified slot given either an entityID or a location array of a container"
 					+ " object. See get_inventory_type for more information. The itemArray is an array in the same format as pinv/set_pinv takes.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, MLocation.class, "entityIDOrLocation"),
+						new Argument("", CInt.class, "index"),
+						new Argument("", MItemStack.class, "item")
 					);
 		}
 
@@ -812,20 +831,19 @@ public class InventoryManagement {
 		}
 
 		public String docs() {
-			return "string {entityID | locationArray} Returns the inventory type at the location specified, or of the entity specified. If the"
+			return "Returns the inventory type at the location specified, or of the entity specified. If the"
 					+ " entity or location specified is not capable of having an inventory, a FormatException is thrown."
 					+ " ---- Note that not all valid inventory types are actually returnable at this time, due to lack of support in the server, but"
 					+ " the valid return types are: " + StringUtils.Join(MCInventoryType.values(), ", ");
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MCInventoryType.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, MLocation.class, "entityIDOrLocation")
 					);
 		}
 
@@ -868,18 +886,17 @@ public class InventoryManagement {
 		}
 
 		public String docs() {
-			return "int {entityID | locationArray} Returns the max size of the inventory specified. If the block or entity can't have an inventory,"
+			return "Returns the max size of the inventory specified. If the block or entity can't have an inventory,"
 					+ " a FormatException is thrown.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, MLocation.class, "entityIDOrLocation")
 					);
 		}
 
@@ -895,7 +912,7 @@ public class InventoryManagement {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
 			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
 		} else {
-			int entityID = Static.getInt32(specifier, t);
+			int entityID = specifier.primitive(t).castToInt32(t);
 			inv = StaticLayer.GetConvertor().GetEntityInventory(entityID);
 		}
 		if(inv == null){
@@ -943,17 +960,17 @@ public class InventoryManagement {
 		}
 
 		public String docs() {
-			return "void {[playerToShow,] playerInventory} Opens a player's inventory, shown to the player specified's screen.";
+			return "Opens a player's inventory, shown to the player specified's screen.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "playerToShow").setOptionalDefaultNull(),
+						new Argument("", CString.class, "playerInventory")
 					);
 		}
 

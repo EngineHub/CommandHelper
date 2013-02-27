@@ -58,9 +58,14 @@ public interface Function extends FunctionBase, Documentation {
 	 * If the ArgumentBuilder returns {@link ArgumentBuilder#MANUAL}, then 
 	 * this function is called to get the signature of the method for documentation
 	 * purposes. No typechecking is performed on the function parameters, and the builder
-	 * will be unavailable.
+	 * will be unavailable. This is meant for existing functions to use, and should not
+	 * be used by new functions. In the future, if the function's signature is too complex
+	 * to use the actual type checking framework, you should consider reworking the 
+	 * function so that it works with a more standard signature. Eventually, this
+	 * method will be removed.
 	 * @return 
 	 */
+	@Deprecated
 	String argumentsManual();
 
     /**

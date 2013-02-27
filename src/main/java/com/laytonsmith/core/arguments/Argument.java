@@ -69,7 +69,8 @@ public class Argument implements Documentation {
 	};
 	
 	/**
-	 * This is the default value for many things' return type.
+	 * This is the default value for a few core language features, but should
+	 * not be used by general purpose functions.
 	 */
 	public static final Argument AUTO = new Argument("", new Class[]{}){
 
