@@ -27,11 +27,15 @@ public class BukkitBlockListener implements Listener{
 	
 	@EventHandler(priority=EventPriority.LOWEST)
     public void onBlockPlace(BlockPlaceEvent e){
-        EventUtils.TriggerListener(Driver.BLOCK_PLACE, "block_place", new BukkitBlockEvents.BukkitMCBlockPlaceEvent(e));
+		BukkitBlockEvents.BukkitMCBlockPlaceEvent bpe = new BukkitBlockEvents.BukkitMCBlockPlaceEvent(e);
+		EventUtils.TriggerExternal(bpe);
+        EventUtils.TriggerListener(Driver.BLOCK_PLACE, "block_place", bpe);
     }
 	
 	@EventHandler(priority=EventPriority.LOWEST)
     public void onBlockBreak(BlockBreakEvent e){
-        EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", new BukkitBlockEvents.BukkitMCBlockBreakEvent(e));
+		BukkitBlockEvents.BukkitMCBlockBreakEvent bbe = new BukkitBlockEvents.BukkitMCBlockBreakEvent(e);
+		EventUtils.TriggerExternal(bbe);
+        EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", bbe);
     }
 }
