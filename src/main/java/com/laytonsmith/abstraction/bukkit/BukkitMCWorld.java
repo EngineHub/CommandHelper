@@ -167,15 +167,15 @@ public class BukkitMCWorld implements MCWorld {
         w.setBiome(x, z, Biome.valueOf(type.name()));
     }
 
-    public MCBlock getHighestBlockAt(int x, int z) {
+	public MCBlock getHighestBlockAt(int x, int z) {
 		//Workaround for getHighestBlockAt, since it doesn't like transparent
 		//blocks.
 		Block b = w.getBlockAt(x, w.getMaxHeight() - 1, z);
-		while(b.getType() == Material.AIR){
+		while(b.getType() == Material.AIR && b.getY() > 0){
 			b = b.getRelative(BlockFace.DOWN);
 		}
-        return new BukkitMCBlock(b);
-     }
+		return new BukkitMCBlock(b);
+	}
 
     public void explosion(double x, double y, double z, float size, boolean safe) {
         w.createExplosion(x, y, z, size, !safe, !safe);

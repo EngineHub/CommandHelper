@@ -635,11 +635,16 @@ public final class Static {
 	 * @param id
 	 * @return 
 	 */
-	public static MCEntity getLivingEntity(int id, Target t) {
+	public static MCLivingEntity getLivingEntity(int id, Target t) {
         for (MCWorld w : Static.getServer().getWorlds()) {
             for (MCLivingEntity e : w.getLivingEntities()) {
-                if (e.getEntityId() == id) {                    
-                    return StaticLayer.GetCorrectEntity(e);
+                if (e.getEntityId() == id) {
+                	try {
+                		return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
+                	} catch (ClassCastException cce) {
+                		throw new ConfigRuntimeException("The entity found was misinterpreted by the converter, this is"
+                				+ " a developer mistake, please file a ticket.", ExceptionType.BadEntityException, t);
+                	}
                 }
             }
         }

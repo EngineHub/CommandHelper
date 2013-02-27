@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -16,6 +17,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -25,13 +27,8 @@ public class EntityManagement {
 	public static String docs(){
         return "This class of functions allow entities to be managed.";
     }
-
-	@api
-	public static class all_entities extends AbstractFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException, ExceptionType.CastException};
-		}
+	
+	public static abstract class EntityFunction extends AbstractFunction {
 
 		public boolean isRestricted() {
 			return true;
@@ -39,6 +36,19 @@ public class EntityManagement {
 
 		public Boolean runAsync() {
 			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class all_entities extends EntityFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException, 
+					ExceptionType.CastException};
 		}
 
 		public Construct exec(Target t, Environment environment,
@@ -97,13 +107,9 @@ public class EntityManagement {
 			return "array {[world, [x, z]] | [locationArray]} Returns an array of IDs for all entities in the given"
 					+ " scope. With no args, this will return all entities loaded on the entire server. If the first"
 					+ " argument is given and is a location, only entities in the chunk containin that location will"
-					+ " be returned, or if it is a world only entities in that world will be returned. If all 3"
-					+ "arguments are given, only entities in the chunk with those coords will be returned. This can"
+					+ " be returned, or if it is a world only entities in that world will be returned. If all three"
+					+ " arguments are given, only entities in the chunk with those coords will be returned. This can"
 					+ " take chunk coords (ints) or location coords (doubles).";
-		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
 		}
 
 		@Override
@@ -121,18 +127,10 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_loc extends AbstractFunction {
+	public static class entity_loc extends EntityFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
 		}
 
 		public Construct exec(Target t, Environment environment,
@@ -154,10 +152,6 @@ public class EntityManagement {
 					+ " This array will be compatible with any function that expects a location.";
 		}
 
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -170,19 +164,11 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class set_entity_loc extends AbstractFunction {
+	public static class set_entity_loc extends EntityFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException,
 					ExceptionType.CastException, ExceptionType.InvalidWorldException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
 		}
 
 		public Construct exec(Target t, Environment environment,
@@ -210,10 +196,6 @@ public class EntityManagement {
 					+ " the action was successful. Note this can set both location and direction.";
 		}
 
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -232,18 +214,10 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_velocity extends AbstractFunction {
+	public static class entity_velocity extends EntityFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
 		}
 
 		public Construct exec(Target t, Environment environment,
@@ -267,10 +241,6 @@ public class EntityManagement {
 					+ " As a convenience, the magnitude is also included.";
 		}
 
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -282,19 +252,11 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class set_entity_velocity extends AbstractFunction {
+	public static class set_entity_velocity extends EntityFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
 					ExceptionType.BadEntityException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
 		}
 
 		public Construct exec(Target t, Environment environment,
@@ -319,10 +281,6 @@ public class EntityManagement {
 					+ " associative arrays are accepted.";
 		}
 
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -336,18 +294,10 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_remove extends AbstractFunction {
+	public static class entity_remove extends EntityFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
 		}
 
 		public Construct exec(Target t, Environment environment,
@@ -356,7 +306,8 @@ public class EntityManagement {
 			if (ent == null) {
 				return new CVoid(t);
 			} else if (ent instanceof MCHumanEntity) {
-				throw new ConfigRuntimeException("Cannot remove human entity (" + ent.getEntityId() + ")!", ExceptionType.BadEntityException, t);
+				throw new ConfigRuntimeException("Cannot remove human entity (" + ent.getEntityId() + ")!", 
+						ExceptionType.BadEntityException, t);
 			} else {
 				ent.remove();
 				return new CVoid(t);
@@ -377,25 +328,13 @@ public class EntityManagement {
 				+ "not work on anything human, even if it is not a player.";
 		}
 
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
 	}
 
 	@api
-	public static class entity_type extends AbstractFunction {
+	public static class entity_type extends EntityFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
-		}
-
-		public boolean isRestricted() {
-			return false;
-		}
-
-		public Boolean runAsync() {
-			return false;
 		}
 
 		public Construct exec(Target t, Environment environment,
@@ -419,32 +358,20 @@ public class EntityManagement {
 		public String docs() {
 			return "string {entityID} Returns the EntityType of the entity with the specified ID.";
 		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
 	}
 
 	@api
-	public static class get_mob_age extends AbstractFunction {
+	public static class get_mob_age extends EntityFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
+			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException, 
+					ExceptionType.BadEntityException};
 		}
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
-			MCEntity ent = Static.getLivingEntity(id, t);
+			MCLivingEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
 				return new CNull(t);
 			} else if (ent instanceof MCAgeable) {
@@ -467,26 +394,14 @@ public class EntityManagement {
 			return "int {entityID} Returns the mob's age as an integer. Zero represents the point of adulthood. Throws an"
 					+ " UnageableMobException if the mob is not a type that ages";
 		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
 	}
 
 	@api
-	public static class set_mob_age extends AbstractFunction {
+	public static class set_mob_age extends EntityFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
+			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException, 
+					ExceptionType.BadEntityException};
 		}
 
 		public Construct exec(Target t, Environment environment,
@@ -497,7 +412,7 @@ public class EntityManagement {
 			if (args.length == 3) {
 				lock = (boolean) Static.getBoolean(args[2]);
 			}
-			MCEntity ent = Static.getLivingEntity(id, t);
+			MCLivingEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
 				return new CNull(t);
 			} else if (ent instanceof MCAgeable) {
@@ -520,51 +435,36 @@ public class EntityManagement {
 
 		public String docs() {
 			return "void {entityID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at that age"
-					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does not age naturally.";
+					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does"
+					+ " not age naturally.";
 		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class set_mob_effect extends AbstractFunction {
+	public static class set_mob_effect extends EntityFunction {
 
 		public String getName() {
 			return "set_mob_effect";
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{3, 4};
+			return new Integer[]{3, 4, 5};
 		}
 
 		public String docs() {
-			return "boolean {mobId, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30."
+			return "boolean {entityId, potionID, strength, [seconds], [ambient]} Effect is 1-19. Seconds defaults to 30."
 					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
-					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects for a"
-					+ " complete list of potions that can be added. To remove an effect, set the strength (or duration) to 0."
-					+ " It returns true if the effect was added or removed as desired. It returns false if the effect was"
-					+ " not added or removed as desired (however, this currently only will happen if an effect is attempted"
-					+ " to be removed, yet isn't already on the mob).";
+					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects"
+					+ " for a complete list of potions that can be added. To remove an effect, set the seconds to 0."
+					+ " Strength is the number of levels to add to the base power (effect level 1). Ambient takes a boolean"
+					+ " of whether the particles should be less noticeable. The function returns true if the effect was"
+					+ " added or removed as desired, and false if it wasn't (however, this currently only will happen if"
+					+ " an effect is attempted to be removed, yet isn't already on the mob).";
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.BadEntityException,
-                        ExceptionType.RangeException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		public Boolean runAsync() {
-			return false;
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, 
+					ExceptionType.BadEntityException, ExceptionType.RangeException};
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
@@ -581,14 +481,18 @@ public class EntityManagement {
 
 				int strength = Static.getInt32(args[2], t);
 				int seconds = 30;
-				if (args.length == 4) {
+				boolean ambient = false;
+				if (args.length >= 4) {
 					seconds = Static.getInt32(args[3], t);
 				}
+				if (args.length == 5) {
+					ambient = Static.getBoolean(args[4]);
+				}
 
-				if (seconds == 0 || strength == 0) {
+				if (seconds == 0) {
 					return new CBoolean(mob.removeEffect(effect), t);
 				} else {
-					mob.addEffect(effect, strength, seconds, t);
+					mob.addEffect(effect, strength, seconds, ambient, t);
 					return new CBoolean(true, t);
 				}
 			} else {
@@ -598,24 +502,17 @@ public class EntityManagement {
 	}
 
 	@api(environments={CommandHelperEnvironment.class})
-	public static class shoot_projectile extends AbstractFunction {
+	public static class shoot_projectile extends EntityFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException, 
+					ExceptionType.PlayerOfflineException};
 		}
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCCommandSender cmdsr = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCEntity ent = null;
+			MCLivingEntity ent = null;
 			int id;
 			MCProjectileType toShoot = MCProjectileType.FIREBALL;
 			if (args.length >= 1) {
@@ -645,12 +542,7 @@ public class EntityManagement {
 				}
 			}
 			ent = Static.getLivingEntity(id, t);
-			if (ent instanceof MCLivingEntity) {
-				MCProjectile shot = ((MCLivingEntity) ent).launchProjectile(toShoot);
-				return new CInt(shot.getEntityId(), t);
-			} else {
-				throw new ConfigRuntimeException("Entity (" + id + ") is not living", ExceptionType.BadEntityException, t);
-			}
+			return new CInt(ent.launchProjectile(toShoot).getEntityId(), t);
 		}
 
 		public String getName() {
@@ -662,20 +554,15 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "int {[player[, projectile]] | [entityID[, projectile]]} shoots a projectile from the entity or player "
-					+ "specified, or the current player if no arguments are passed. If no projectile is specified, "
-					+ "it defaults to a fireball. Returns the EntityID of the projectile. Valid projectiles: "
+			return "int {[player[, projectile]] | [entityID[, projectile]]} shoots a projectile from the entity or player"
+					+ " specified, or the current player if no arguments are passed. If no projectile is specified,"
+					+ " it defaults to a fireball. Returns the EntityID of the projectile. Valid projectiles: "
 					+ StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
 		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class entities_in_radius extends AbstractFunction {
+	public static class entities_in_radius extends EntityFunction {
 
 		public String getName() {
 			return "entities_in_radius";
@@ -707,7 +594,7 @@ public class EntityManagement {
 						types.add(ta.get(i, t).val());
 					}
 				} else {
-					types.add(args[2].toString());
+					types.add(args[2].val());
 				}
 
 				types = prepareTypes(t, types);
@@ -735,7 +622,7 @@ public class EntityManagement {
 							).getChunk().getEntities()) {
 
 						if (e.getLocation().distance(loc) <= dist && e.getLocation().getBlock() != loc.getBlock()) {
-							if (types.isEmpty() || types.contains(e.getType().toString())) {
+							if (types.isEmpty() || types.contains(e.getType().name())) {
 								entities.push(new CInt(e.getEntityId(), t));
 							}
 						}
@@ -750,46 +637,181 @@ public class EntityManagement {
 
 			List<String> newTypes = new ArrayList<String>();
 			MCEntityType entityType = null;
-			String uc;
 
-			for (int i = 0; i < types.size(); i++) {
-
-				uc = types.get(i).toString().toUpperCase();
+			for (String type : types) {
 
 				try {
-					entityType = MCEntityType.valueOf(uc);
+					entityType = MCEntityType.valueOf(type.toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException(String.format("Wrong entity type: %s", uc), ExceptionType.BadEntityException, t);
+					throw new ConfigRuntimeException(String.format("Wrong entity type: %s", type), 
+							ExceptionType.BadEntityException, t);
 				}
 
-				newTypes.add(uc);
+				newTypes.add(entityType.name());
 			}
 
 			return newTypes;
 		}
 
 		public String docs() {
-			return "array {location array, distance, [type] | location array, distance, [arrayTypes]} Returns an array of all entities"
-					+ " within the given radius. Set type argument to filter entities to a specific type. You can pass an array of types."
-					+ " Valid types (case doesn't matter): "
+			return "array {location array, distance, [type] | location array, distance, [arrayTypes]} Returns an array of"
+					+ " all entities within the given radius. Set type argument to filter entities to a specific type. You"
+					+ " can pass an array of types. Valid types (case doesn't matter): "
 					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ", " or ");
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.FormatException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		public Boolean runAsync() {
-			return false;
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
+					ExceptionType.FormatException};
 		}
 	}
 
+	//@api
+	public static class get_mob_target extends EntityFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			if (le.getTarget(t) == null) {
+				return new CNull(t);
+			} else {
+				return new CInt(le.getTarget(t).getEntityId(), t);
+			}
+		}
+
+		public String getName() {
+			return "get_mob_target";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
+					+ " If there is no target, null is returned instead.";
+		}
+	}
+	
+	//@api
+	public static class set_mob_target extends EntityFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity target = null;
+			if (!(args[1] instanceof CNull)) {
+				target = Static.getLivingEntity(Static.getInt32(args[1], t), t);
+			}
+			le.setTarget(target, t);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_mob_target";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "void {entityID, entityID} The first ID is the entity who is targetting, the second is the target."
+					+ " It can also be set to null to clear the current target.";
+		}
+	}
+	
+	@api
+	public static class get_mob_equipment extends EntityFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			Map<MCEquipmentSlot, MCItemStack> eq = le.getEquipment().getAllEquipment();
+			CArray ret = CArray.GetAssociativeArray(t);
+			for (MCEquipmentSlot key : eq.keySet()) {
+				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eq.get(key), t), t);
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "get_mob_equipment";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "equipmentArray {entityID} Returns an associative array showing the equipment this entity is wearing.";
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Getting a mob's equipment", "get_mob_equipment(276)", "{boots: null,"
+							+ " chestplate: null, helmet: {data: 0, enchants: {} meta: null, type: 91}, leggings: null," 
+							+ " weapon: {data: 5, enchants: {} meta: {display: Excalibur, lore: null}, type: 276}}")
+			};
+		}
+	}
+	
+	@api
+	public static class set_mob_equipment extends EntityFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
+					ExceptionType.FormatException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntityEquipment ee = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
+			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
+			if (args[1] instanceof CNull) {
+				ee.clearEquipment();
+				return new CVoid(t);
+			} else if (args[1] instanceof CArray) {
+				CArray ea = (CArray) args[1];
+				for (String key : ea.keySet()) {
+					try {
+						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
+					} catch (IllegalArgumentException iae) {
+						throw new Exceptions.FormatException("Not an equipment slot: " + key, t);
+					}
+				}
+			} else {
+				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
+			}
+			ee.setAllEquipment(eq);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_mob_equipment";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "void {entityID, array} Takes an associative array with keys representing equipment slots and values"
+					+ " of itemArrays, the same used by set_pinv. The equipment slots are: " 
+					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
+		}
+	}
 }
