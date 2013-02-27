@@ -149,7 +149,7 @@ public class ObjectGenerator {
      * @return
      */
     public Construct item(MCItemStack is, Target t) {
-        if (is == null || is.getAmount() == 0) {
+        if (is == null || is.getAmount() == 0 || is.getTypeId() == 0) {
             return new CNull(t);
         }
         int type = is.getTypeId();
