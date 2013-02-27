@@ -11,6 +11,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -495,7 +496,7 @@ public class InventoryManagement {
 				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
-			HashMap<Integer, MCItemStack> h = p.getInventory().addItem(is);
+			Map<Integer, MCItemStack> h = p.getInventory().addItem(is);
 			
 			if (h.isEmpty()) {
 				return new CInt(0, t);

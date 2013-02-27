@@ -70,9 +70,9 @@ public class BukkitMCInventory implements MCInventory {
 		return i.hashCode();
 	}
 	
-	public HashMap<Integer, MCItemStack> addItem(MCItemStack stack) {
-		HashMap<Integer, ItemStack> h = i.addItem(stack==null?null:((BukkitMCItemStack)stack).is);
-		HashMap<Integer, MCItemStack> m = new HashMap<Integer, MCItemStack>();
+	public Map<Integer, MCItemStack> addItem(MCItemStack stack) {
+		Map<Integer, ItemStack> h = i.addItem(stack==null?null:((BukkitMCItemStack)stack).is);
+		Map<Integer, MCItemStack> m = new HashMap<Integer, MCItemStack>();
 		
 		for (Map.Entry<Integer, ItemStack> entry : h.entrySet()) {
 			Integer key = entry.getKey();
