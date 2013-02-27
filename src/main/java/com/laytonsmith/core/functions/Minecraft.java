@@ -390,7 +390,7 @@ public class Minecraft {
 				entityID = args[0];
 			}
 			int id = Static.getInt32(entityID, t);
-			MCEntity e = Static.getLivingEntity(id, t);
+			MCLivingEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
 				return new CVoid(t);
 			} else if (e instanceof MCTameable) {
@@ -441,7 +441,7 @@ public class Minecraft {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
-			MCEntity e = Static.getLivingEntity(id, t);
+			MCLivingEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
 				return new CNull(t);
 			} else if (e instanceof MCTameable) {
@@ -601,14 +601,12 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			if (e instanceof MCLivingEntity) {
-				int health = (int) ((double) Static.getInt(args[1], t) / 100.0 * (double) ((MCLivingEntity) e).getMaxHealth());
-				if (health != 0) {
-					((MCLivingEntity) e).setHealth(health);
-				} else {
-					((MCLivingEntity) e).damage(9001); //His power level is over 9000!
-				}
+			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			int health = (int) ((double) Static.getInt(args[1], t) / 100.0 * (double) e.getMaxHealth());
+			if (health != 0) {
+				e.setHealth(health);
+			} else {
+				e.damage(e.getMaxHealth() + 1); //Since mobs can now have custom max health
 			}
 			return new CVoid(t);
 		}
@@ -647,13 +645,9 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			if (e instanceof MCLivingEntity) {
-				int h = (int) (((double) ((MCLivingEntity) e).getHealth() / (double) ((MCLivingEntity) e).getMaxHealth()) * 100);
-				return new CInt(h, t);
-			} else {
-				throw new ConfigRuntimeException("Not a valid entity id", ExceptionType.FormatException, t);
-			}
+			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			int h = (int) (((double) e.getHealth() / (double) e.getMaxHealth()) * 100);
+			return new CInt(h, t);
 		}
 	}
 
