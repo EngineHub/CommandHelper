@@ -22,5 +22,20 @@ public class BukkitMCInventoryHolder implements MCInventoryHolder {
 	public Object getHandle() {
 		return holder;
 	}
-	
+
+	@Override
+	public String toString() {
+		return holder.toString();
+	}
+
+	@Override
+	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+	public boolean equals(Object obj) {
+		return holder.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return holder.hashCode();
+	}
 }
