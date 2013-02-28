@@ -2,12 +2,10 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.core.constructs.Target;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -15,17 +13,20 @@ import java.util.Map;
  */
 public interface MCLivingEntity extends MCEntity {
 
-	public void addEffect(int potionID, int strength, int seconds, Target t);
+	public void addEffect(int potionID, int strength, int seconds, boolean ambient, Target t);
 	public boolean removeEffect(int potionID);
 	public List<MCEffect> getEffects();
     public void damage(int amount);
     public void damage(int amount, MCEntity source);
+	public boolean getCanPickupItems();
+	public MCEntityEquipment getEquipment();
     public double getEyeHeight();
     public double getEyeHeight(boolean ignoreSneaking);
     public MCLocation getEyeLocation();
     public int getHealth();
     public MCPlayer getKiller();
     public int getLastDamage();
+	public MCLivingEntity getTarget(Target t);
 	public MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance, boolean castToByte);
 	public MCBlock getTargetBlock(HashSet<Byte> transparent, int maxDistance);
     public List<MCBlock> getLastTwoTargetBlocks(HashSet<Byte> transparent, int maxDistance);
@@ -36,14 +37,16 @@ public interface MCLivingEntity extends MCEntity {
     public int getNoDamageTicks();
     public int getRemainingAir();
     public MCProjectile launchProjectile(MCProjectileType projectile);
+	public void resetMaxHealth();
+	public void setCanPickupItems(boolean pickup);
     public void setHealth(int health);
     public void setLastDamage(int damage);
+	public void setMaxHealth(int health);
     public void setMaximumAir(int ticks);
     public void setMaximumNoDamageTicks(int ticks);
     public void setNoDamageTicks(int ticks);
     public void setRemainingAir(int ticks);
-    public Map<MCEquipmentSlot, MCItemStack> getEquipment();
-    public void setEquipment(Map<MCEquipmentSlot, MCItemStack> emap);
+	public void setTarget(MCLivingEntity target, Target t);
 
 	public static class MCEffect{
 

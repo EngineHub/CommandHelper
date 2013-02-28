@@ -1894,11 +1894,11 @@ public class PlayerManagement {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{3, 4};
+			return new Integer[]{3, 4, 5};
 		}
 
 		public String docs() {
-			return "boolean {player, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30."
+			return "boolean {player, potionID, strength, [seconds], [ambient]} Effect is 1-19. Seconds defaults to 30."
 					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
 					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects for a"
 					+ " complete list of potions that can be added. To remove an effect, set the duration to 0 seconds."
@@ -1943,14 +1943,18 @@ public class PlayerManagement {
 
 			int strength = Static.getInt32(args[2], t);
 			int seconds = 30;
-			if (args.length == 4) {
+			boolean ambient = false;
+			if (args.length >= 4) {
 				seconds = Static.getInt32(args[3], t);
+			}
+			if (args.length == 5) {
+				ambient = Static.getBoolean(args[4]);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if (seconds == 0) {
 				return new CBoolean(m.removeEffect(effect), t);
 			} else {
-				m.addEffect(effect, strength, seconds, t);
+				m.addEffect(effect, strength, seconds, ambient, t);
 				return new CBoolean(true, t);
 			}
 		}

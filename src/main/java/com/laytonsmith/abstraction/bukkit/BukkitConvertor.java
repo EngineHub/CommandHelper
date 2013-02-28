@@ -204,10 +204,6 @@ public class BukkitConvertor extends AbstractConvertor {
     		return new BukkitMCHanging(be);
     	}
     	
-    	if(be instanceof Vehicle){
-    		return new BukkitMCVehicle(be);
-    	}
-    	
     	if(be instanceof Wolf){
             return new BukkitMCWolf(be);
         }
@@ -218,6 +214,10 @@ public class BukkitConvertor extends AbstractConvertor {
     	
     	if(be instanceof Ageable){
     		return new BukkitMCAgeable(be);
+    	}
+    	
+    	if(be instanceof Vehicle){
+    		return new BukkitMCVehicle(be);
     	}
         
         if(be instanceof Player){

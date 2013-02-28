@@ -31,22 +31,22 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	public Map<MCEquipmentSlot, MCItemStack> getAllEquipment() {
 		Map<MCEquipmentSlot, MCItemStack> slots = new EnumMap<MCEquipmentSlot, MCItemStack>(MCEquipmentSlot.class);
-		for (MCEquipmentSlot key : slots.keySet()) {
+		for (MCEquipmentSlot key : MCEquipmentSlot.values()) {
 			switch (key) {
 			case WEAPON:
-				slots.put(key, (BukkitMCItemStack) getWeapon());
+				slots.put(key, getWeapon());
 				break;
 			case HELMET:
-				slots.put(key, (BukkitMCItemStack) getHelmet());
+				slots.put(key, getHelmet());
 				break;
 			case CHESTPLATE:
-				slots.put(key, (BukkitMCItemStack) getChestplate());
+				slots.put(key, getChestplate());
 				break;
 			case LEGGINGS:
-				slots.put(key, (BukkitMCItemStack) getLeggings());
+				slots.put(key, getLeggings());
 				break;
 			case BOOTS:
-				slots.put(key, (BukkitMCItemStack) getBoots());
+				slots.put(key, getBoots());
 				break;
 			}
 		}

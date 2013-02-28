@@ -18,6 +18,7 @@ import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -568,7 +569,7 @@ public class InventoryManagement {
 				meta = ObjectGenerator.GetGenerator().itemMeta(Construct.GetNullConstruct(t), is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
-			HashMap<Integer, MCItemStack> h = p.getInventory().addItem(is);
+			Map<Integer, MCItemStack> h = p.getInventory().addItem(is);
 			
 			if (h.isEmpty()) {
 				return new CInt(0, t);

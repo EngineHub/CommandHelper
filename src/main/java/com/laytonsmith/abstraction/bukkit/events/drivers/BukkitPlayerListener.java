@@ -26,32 +26,44 @@ public class BukkitPlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerKick(PlayerKickEvent e) {
-        EventUtils.TriggerListener(Driver.PLAYER_KICK, "player_kick", new BukkitPlayerEvents.BukkitMCPlayerKickEvent(e));
+		BukkitPlayerEvents.BukkitMCPlayerKickEvent pke = new BukkitPlayerEvents.BukkitMCPlayerKickEvent(e);
+        EventUtils.TriggerExternal(pke);
+		EventUtils.TriggerListener(Driver.PLAYER_KICK, "player_kick", pke);
     }
     
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerLogin(PlayerLoginEvent e) {
-		EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", new BukkitPlayerEvents.BukkitMCPlayerLoginEvent(e));
+		BukkitPlayerEvents.BukkitMCPlayerLoginEvent ple = new BukkitPlayerEvents.BukkitMCPlayerLoginEvent(e);
+		EventUtils.TriggerExternal(ple);
+		EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", ple);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerPreLogin(PlayerPreLoginEvent e) {
-		EventUtils.TriggerListener(Driver.PLAYER_PRELOGIN, "player_prelogin", new BukkitPlayerEvents.BukkitMCPlayerPreLoginEvent(e));
+		BukkitPlayerEvents.BukkitMCPlayerPreLoginEvent pple = new BukkitPlayerEvents.BukkitMCPlayerPreLoginEvent(e);
+		EventUtils.TriggerExternal(pple);
+		EventUtils.TriggerListener(Driver.PLAYER_PRELOGIN, "player_prelogin", pple);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerJoin(PlayerJoinEvent e) {
-		EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", new BukkitPlayerEvents.BukkitMCPlayerJoinEvent(e));
+		BukkitPlayerEvents.BukkitMCPlayerJoinEvent pje = new BukkitPlayerEvents.BukkitMCPlayerJoinEvent(e);
+		EventUtils.TriggerExternal(pje);
+		EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", pje);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerInteract(PlayerInteractEvent e) {
-		EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "player_interact", new BukkitPlayerEvents.BukkitMCPlayerInteractEvent(e));
+		BukkitPlayerEvents.BukkitMCPlayerInteractEvent pie = new BukkitPlayerEvents.BukkitMCPlayerInteractEvent(e);
+		EventUtils.TriggerExternal(pie);
+		EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "player_interact", pie);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		EventUtils.TriggerListener(Driver.PLAYER_SPAWN, "player_spawn", new BukkitPlayerEvents.BukkitMCPlayerRespawnEvent(event));
+		BukkitPlayerEvents.BukkitMCPlayerRespawnEvent pre = new BukkitPlayerEvents.BukkitMCPlayerRespawnEvent(event);
+		EventUtils.TriggerExternal(pre);
+		EventUtils.TriggerListener(Driver.PLAYER_SPAWN, "player_spawn", pre);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled=true)
@@ -146,12 +158,16 @@ public class BukkitPlayerListener implements Listener {
 	}
 
 	private void fireChat(AsyncPlayerChatEvent event) {
-		EventUtils.TriggerListener(Driver.PLAYER_CHAT, "player_chat", new BukkitPlayerEvents.BukkitMCPlayerChatEvent(event));
+		BukkitPlayerEvents.BukkitMCPlayerChatEvent pce = new BukkitPlayerEvents.BukkitMCPlayerChatEvent(event);
+		EventUtils.TriggerExternal(pce);
+		EventUtils.TriggerListener(Driver.PLAYER_CHAT, "player_chat", pce);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		EventUtils.TriggerListener(Driver.PLAYER_QUIT, "player_quit", new BukkitPlayerEvents.BukkitMCPlayerQuitEvent(event));
+		BukkitPlayerEvents.BukkitMCPlayerQuitEvent pqe = new BukkitPlayerEvents.BukkitMCPlayerQuitEvent(event);
+		EventUtils.TriggerExternal(pqe);
+		EventUtils.TriggerListener(Driver.PLAYER_QUIT, "player_quit", pqe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -159,7 +175,9 @@ public class BukkitPlayerListener implements Listener {
 		BukkitMCPlayer currentPlayer = (BukkitMCPlayer) Static.GetPlayer(event.getPlayer().getName(), Target.UNKNOWN);
 		//Apparently this happens sometimes, so prevent it
 		if (!event.getFrom().equals(currentPlayer._Player().getWorld())) {
-			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", new BukkitPlayerEvents.BukkitMCWorldChangedEvent(event));
+			BukkitPlayerEvents.BukkitMCWorldChangedEvent wce = new BukkitPlayerEvents.BukkitMCWorldChangedEvent(event);
+			EventUtils.TriggerExternal(wce);
+			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce);
 		}
 	}
 
@@ -169,10 +187,14 @@ public class BukkitPlayerListener implements Listener {
 			return;
 		}
 		
-		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", new BukkitPlayerEvents.BukkitMCPlayerTeleportEvent(event));
+		BukkitPlayerEvents.BukkitMCPlayerTeleportEvent pte = new BukkitPlayerEvents.BukkitMCPlayerTeleportEvent(event);
+		EventUtils.TriggerExternal(pte);
+		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", pte);
 	
 		if (!event.getFrom().getWorld().equals(event.getTo().getWorld()) && !event.isCancelled()) {
-			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", new BukkitPlayerEvents.BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent(event.getPlayer(), event.getFrom().getWorld())));
+			BukkitPlayerEvents.BukkitMCWorldChangedEvent wce = new BukkitPlayerEvents.BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent(event.getPlayer(), event.getFrom().getWorld()));
+			EventUtils.TriggerExternal(wce);
+			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce);
 		}
 	}
 }
