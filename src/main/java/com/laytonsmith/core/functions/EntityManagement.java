@@ -930,11 +930,11 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "Returns an associative array showing the equipment this entity is wearing.";
+			return "Returns an Equipment object showing the equipment this entity is wearing.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("An array with the following keys: " + StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ").toLowerCase(), CArray.class).setGenerics(new Generic(MItemStack.class));
+			return new Argument("The equipment that the entity is currently wearing", MEquipment.class);
 		}
 
 		public ArgumentBuilder arguments() {
