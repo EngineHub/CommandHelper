@@ -47,10 +47,6 @@ public class MLocation extends MObject implements Documentation {
 		}
 	}
 
-	public String getName() {
-		return this.getClass().getAnnotation(typename.class).value();
-	}
-
 	public String docs() {
 		return "A location array represents a location in the map.";
 	}

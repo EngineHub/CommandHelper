@@ -19,6 +19,8 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MEquipment;
+import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
 import java.util.ArrayList;
 import java.util.List;
@@ -826,9 +828,9 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			if (le.getTarget(t) == null) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			} else {
 				return new CInt(le.getTarget(t).getEntityId(), t);
 			}
@@ -843,8 +845,18 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
+			return "Gets the mob's target if it has one, and returns the target's entityID."
 					+ " If there is no target, null is returned instead.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The entity id of the entity's target, or null if none", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID")
+					);
 		}
 	}
 	
@@ -857,10 +869,10 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			MCLivingEntity target = null;
-			if (!(args[1] instanceof CNull)) {
-				target = Static.getLivingEntity(Static.getInt32(args[1], t), t);
+			if (!args[1].isNull()) {
+				target = Static.getLivingEntity(args[1].primitive(t).castToInt32(t), t);
 			}
 			le.setTarget(target, t);
 			return new CVoid(t);
@@ -875,8 +887,19 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, entityID} The first ID is the entity who is targetting, the second is the target."
+			return "Sets the mob's target. The first ID is the entity who is targetting, the second is the target."
 					+ " It can also be set to null to clear the current target.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The entity to change the target of", CInt.class, "entityID1"),
+						new Argument("The entity to change the target to", CInt.class, "entityID2")
+					);
 		}
 	}
 	
@@ -889,7 +912,7 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			Map<MCEquipmentSlot, MCItemStack> eq = le.getEquipment().getAllEquipment();
 			CArray ret = CArray.GetAssociativeArray(t);
 			for (MCEquipmentSlot key : eq.keySet()) {
@@ -907,7 +930,17 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "equipmentArray {entityID} Returns an associative array showing the equipment this entity is wearing.";
+			return "Returns an associative array showing the equipment this entity is wearing.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("An array with the following keys: " + StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ").toLowerCase(), CArray.class).setGenerics(new Generic(MItemStack.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID")
+					);
 		}
 		
 		@Override
@@ -930,9 +963,9 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntityEquipment ee = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
+			MCEntityEquipment ee = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t).getEquipment();
 			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
-			if (args[1] instanceof CNull) {
+			if (args[1].isNull()) {
 				ee.clearEquipment();
 				return new CVoid(t);
 			} else if (args[1] instanceof CArray) {
@@ -960,9 +993,19 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, array} Takes an associative array with keys representing equipment slots and values"
-					+ " of itemArrays, the same used by set_pinv. The equipment slots are: " 
-					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
+			return "Takes an Equipment object, with keys representing equipment slots and values"
+					+ " of ItemStacks, and sets the entity's equipment to those items.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID"),
+						new Argument("", MEquipment.class, "equipment")
+					);
 		}
 	}
 }

@@ -4,6 +4,8 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.immutable;
 import com.laytonsmith.annotations.nofield;
 import com.laytonsmith.annotations.typename;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -55,7 +57,7 @@ import java.util.Map;
  * @author lsmith
  */
 @typename("Object")
-public class MObject implements Mixed {
+public class MObject implements Mixed, Documentation {
 	
 	/**
 	 * Creates a new MObject subclass, given the CArray. If the array lacks
@@ -374,5 +376,38 @@ public class MObject implements Mixed {
 	 */
 	public final boolean isImmutable() {
 		return this.getClass().getAnnotation(immutable.class) != null;
+	}
+
+	/**
+	 * This MUST be the typename, so the method is marked as final, and
+	 * simply returns typeName();
+	 * @return 
+	 */
+	public final String getName() {
+		return typeName();
+	}
+
+	/**
+	 * Each subclass should separately implement this, despite the fact that
+	 * it can't be enforced, a unit test will check for the presence of this
+	 * method in all subclasses, to ensure all subclasses override this.
+	 * @return 
+	 */
+	public String docs() {
+		return "An Object is the building block of all custom classes, as well as many built"
+				+ " in classes. All custom objects extend Object, even if they do not explicitely"
+				+ " declare that they do. Not all data types are Objects however, but only system"
+				+ " level classes will not extend Object. ALL data types extend Mixed, however, so"
+				+ " that is the top level data type, not Object.";
+	}
+
+	/**
+	 * Each subclass should separately implement this, despite the fact that
+	 * it can't be enforced, a unit test will check for the presence of this
+	 * method in all subclasses, to ensure all subclasses override this.
+	 * @return 
+	 */
+	public CHVersion since() {
+		return CHVersion.V3_3_1;
 	}
 }

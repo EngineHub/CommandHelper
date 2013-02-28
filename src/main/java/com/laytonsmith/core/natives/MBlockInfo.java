@@ -23,14 +23,12 @@ public class MBlockInfo extends MObject implements Documentation {
 	@documentation(docs="Indicates if the block can burn away")
 	public boolean burnable;
 
-	public String getName() {
-		return this.getClass().getAnnotation(typename.class).value();
-	}
-
+	@Override
 	public String docs() {
 		return "Contains read-only information about a block";
 	}
 
+	@Override
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
 	}

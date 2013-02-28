@@ -258,6 +258,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return 
 	 */
 	public static Construct GetNullConstruct(final Target t){
+		//TODO: Change this return type to Mixed once the exec function
+		//has been updated
 		return new Construct(null, t) {
 
 			@Override
