@@ -22,6 +22,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MEquipment;
 import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.annotations.Ranged;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -581,7 +582,7 @@ public class EntityManagement {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CInt.class, "entityID"),
-						Argument.getRangedIntArgument("", "potionID", 1, 20),
+						new Argument("", CInt.class, "potionID").addAnnotation(new Ranged(1, 20)),
 						new Argument("The strength of the effect", CInt.class, "strength"),
 						new Argument("The number of seconds to apply the effect", CInt.class, "seconds").setOptionalDefault(30)
 					);
@@ -692,7 +693,7 @@ public class EntityManagement {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("The player to shoot the projectile from", CInt.class, CString.class, "playerOrEntity").setOptionalDefaultNull(),
-						Argument.getEnumArgument("The projectile type", MCProjectileType.class, "projectile").setEnumDefault(MCProjectileType.FIREBALL)
+						new Argument("The projectile type", MCProjectileType.class, "projectile").setOptionalDefault(MCProjectileType.FIREBALL)
 					);
 		}
 

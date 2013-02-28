@@ -9,6 +9,8 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -17,10 +19,16 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.annotations.FormatString;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistance.DataSourceException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -100,20 +108,20 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "void {player, command} Runs a command as a particular user. The special user '~console' can be used to run it as a console"
+			return "Runs a command as a particular user. The special user '~console' can be used to run it as a console"
 					+ " user. Using '~op' is deprecated, and will be removed after the next release, use sudo() instead."
 					+ " Commands cannot be run as an offline player. If the first argument is an array of usernames, the command"
 					+ " will be run in the context of each user in the array.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The player (or players if an array) to run the command as", CString.class, CArray.class, "users"),
+						new Argument("The command to run. It should start with a '/'", CString.class, "command").addAnnotation(new FormatString("/.*"))
 					);
 		}
 
@@ -184,20 +192,36 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "void {command} Runs a single command for this user, as op. Works like runas(~op, '/command') used to work,"
-					+ " before it was deprecated.";
+			return "Runs a single command for this user, as if they were op. ---- Often times this function is used to allow a user"
+					+ " to run an otherwise restricted command, but that only works if the plugin running the command allows operators"
+					+ " all privileges on the server, or your permissions plugin grants all permissions to operators, though all possible attempts"
+					+ " have been made to make this work regardless. If the command"
+					+ " still doesn't work, check to see if the player can run the command if you give them op, and if not, the problem"
+					+ " is not with your usage of this function, but rather your server configuration, or the other plugin. Essentially,"
+					+ " \"sudo('/command')\" works the same as if you chained together a '/op player' '/command' '/deop player', however"
+					+ " the operator status is maintained in memory only, and after the command is run, (or even if an error occurs) they"
+					+ " will ALWAYS be deopped after the command is run. There is special handling however, if the command is either"
+					+ " \"sudo('/op player')\" or \"sudo('/deop player')\", that is, you're using this function to permanently op or deop"
+					+ " a player, then the status will remain permanent, though it is better to use the psetop function directly.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The command to run. It should start with a '/'", CString.class, "command").addAnnotation(new FormatString("/.*"))
 					);
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Runs the command \"command\" as op", "sudo('/command')", ""),
+				new ExampleScript("Permanently ops the player", "sudo('/op '.player())", "")
+			};
+		}				
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -275,18 +299,17 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
+			return "Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
 					+ "chat; with a forward slash in front.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The command to run. It must start with a '/'", CString.class, "command").addAnnotation(new FormatString("/.*"))
 					);
 		}
 
@@ -309,7 +332,7 @@ public class Meta {
 
 	@api
 	@noprofile
-	public static class g extends AbstractFunction {
+	public static class g extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "g";
@@ -327,17 +350,17 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
+			return "Groups any number of functions together, and returns void. This method is deprecated, and should not be used anymore."
+					+ " It will be removed in a future release, as it is not needed anymore.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", Mixed.class, "code").setVarargs()
 					);
 		}
 
@@ -356,6 +379,20 @@ public class Meta {
 		public Boolean runAsync() {
 			return null;
 		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().CompilerWarning(CompilerWarning.Deprecated, "g() is deprecated,"
+					+ " and will be removed in a future release. You do not need this function anymore."
+					+ " If your code were g(run('/cmd') run('/cmd')) you can simply remove the g(), and"
+					+ " it will function the same.", t, null);
+			return null;
+		}
+		
 	}
 
 	@api
@@ -370,18 +407,21 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
-					+ "removal.";
+			return "Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
+					+ "removal. The function returns a string, which is by design, so it encourages better design patterns than executing dynamic code."
+					+ " This does allow for embedding an interpreter however, and can be used in a very few cases to allow for things like a built in"
+					+ " debug console, or other meta programming tasks. The environment is passed along to the evaluated script, and the working file"
+					+ " of the script is set to this file, even if the script is read() from elsewhere. Ideally, however, you should simply use"
+					+ " procedures and includes to accomplish your tasks.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The script to execute.", CString.class, "script")
 					);
 		}
 
@@ -487,17 +527,16 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "boolean {cmd} Returns true if using call_alias with this cmd would trigger an alias.";
+			return "Returns true if using call_alias with this cmd would trigger an alias.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "command")
 					);
 		}
 
@@ -518,7 +557,7 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "boolean {cmd} Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
+			return "Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
 					+ " a script that runs \"/jail = /jail\" for instance, would simply be calling whatever plugin that actually"
 					+ " provides the jail functionality's /jail command. However, using this function makes the command loop back"
 					+ " to CommandHelper only. ---- Returns true if the command was run, or false otherwise. Note however that if an alias"
@@ -529,13 +568,12 @@ public class Meta {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The alias to call", CString.class, "alias").addAnnotation(new FormatString("/.*"))
 					);
 		}
 
@@ -583,20 +621,21 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "void {player, [label], script} Runs the specified script in the context of a given player."
+			return "Runs the specified script in the context of a given player."
 					+ " A script that runs player() for instance, would return the specified player's name,"
 					+ " not the player running the command. Setting the label allows you to dynamically set the label"
 					+ " this script is run under as well (in regards to permission checking)";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player"),
+						new Argument("", CString.class, "label").setOptionalDefaultNull(),
+						new Argument("", CString.class, "script")
 					);
 		}
 
@@ -664,20 +703,17 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "mixed {} Gets the command (as a string) that ended up triggering this script, exactly"
+			return "Gets the command (as a string) that ended up triggering this script, exactly"
 					+ " how it was entered by the player. This could be null, if for instance"
 					+ " it is called from within an event.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", Mixed.class);
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -785,20 +821,21 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "string {player, command} Works like runas, except any messages sent to the command sender during command execution are attempted to be"
+			return "This function is still experimental, but may work in some cases. Works like runas,"
+					+ " except any messages sent to the command sender during command execution are attempted to be"
 					+ " intercepted, and are then returned as a string, instead of being sent to the command sender. Note that this is VERY easy"
 					+ " for plugins to get around in such a way that this function will not work, this is NOT a bug in CommandHelper, nor is it necessarily"
 					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player"),
+						new Argument("", CString.class, "command")
 					);
 		}
 
@@ -828,7 +865,7 @@ public class Meta {
 				MCLocation l = (cs.getBlock().getLocation());
 				return ObjectGenerator.GetGenerator().location(l);
 			}
-			return new CNull(t);
+			return Construct.GetNullConstruct(t);
 		}
 
 		public String getName() {
@@ -840,19 +877,16 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "locationArray {} If this command was being run from a command block, this will return the location of"
+			return "If this command was being run from a command block, this will return the location of"
 					+ " the block. If a player or console ran this command, (or any other command sender) this will return null.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public CHVersion since() {
@@ -881,9 +915,9 @@ public class Meta {
 			boolean state = false;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0].val(), t);
-				state = Static.getBoolean(args[1]);
+				state = args[1].primitive(t).castToBoolean();
 			} else if(args.length == 1) {
-				state = Static.getBoolean(args[0]);
+				state = args[0].primitive(t).castToBoolean();
 			}
 			
 			p.setOp(state);
@@ -899,7 +933,18 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "string {[player], status} Sets whether or not a player has operator status. If no player is specified the player running the script is given.";
+			return "Sets whether or not a player has operator status. If no player is specified the player running the script is given.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("", CString.class, "player").setOptionalDefaultNull(),
+					new Argument("", CBoolean.class, "status")
+				);
 		}
 
 		public CHVersion since() {

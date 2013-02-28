@@ -12,38 +12,76 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.NonScriptError;
 import com.laytonsmith.core.natives.MEnum;
+import com.laytonsmith.core.natives.annotations.MAnnotation;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author lsmith
  */
 public class Argument implements Documentation {
+	/**
+	 * The documentation for this argument.
+	 */
 	private final String docs;
-	private final List<Class<? extends Mixed>> clazz = new ArrayList<Class<? extends Mixed>>();
+	
+	/**
+	 * The types of this argument. If there are more than one classes in this list,
+	 * it is a disjoint type.
+	 */
+	private final List<Class<? extends Mixed>> types = new ArrayList<Class<? extends Mixed>>();
+	
+	/**
+	 * The name of this argument, though this is null in the case of a return type
+	 */
 	private final String name;
+	
+	/**
+	 * True if this argument is optional
+	 */
 	private boolean optional;
+	
+	/**
+	 * True if this argument is varargs
+	 */
 	private boolean varargs;
+	
+	/**
+	 * By default, this is null, but if specified, it means the argument was added
+	 * later than the containing function.
+	 */
 	private CHVersion since;
+	
+	/**
+	 * If the argument has a default value, it is stored here.
+	 */
 	private Mixed def;
-	private List<Generic> generics = new ArrayList<Generic>();
 	
-	//Enum support
-	private Class enumClass;
-	private Enum defaultEnum;
+	/**
+	 * The generics attached to this argument. It is a map, because each generic is attached to 
+	 * the individual disjoint type.
+	 */
+	private Map<Class<? extends Mixed>, List<Generic>> generics = new HashMap<Class<? extends Mixed>, List<Generic>>();
 	
-	//Range support
-	private double minInclusive;
-	private double maxExclusive;
-	private boolean isRanged = false;
+	/**
+	 * The annotations associated with this field.
+	 */
+	private List<MAnnotation> annotations = new ArrayList<MAnnotation>();
 	
 	/**
 	 * Void return types don't need any documentation, so can
-	 * all use the same Argument object.
+	 * all use the same Argument object. Note that VOID isn't a
+	 * real type, despite the fact that CVoid is. This is because a function
+	 * should never return void as part of a disjoint type, since scripts
+	 * cannot set that as a valid type. Therefore, if a script returns
+	 * ANYTHING other than void, it must NOT return void, and vice versa.
 	 */
 	public static final Argument VOID = new Argument("", CVoid.class){
 
@@ -157,59 +195,8 @@ public class Argument implements Documentation {
 	 */
 	public Argument(String docs, Class<? extends Mixed>[] disjointTypes, String name){
 		this.docs = docs;
-		this.clazz.addAll(Arrays.asList(disjointTypes));
+		this.types.addAll(Arrays.asList(disjointTypes));
 		this.name = name;
-	}
-	
-	/**
-	 * Creates a new Argument, which is capable of validating enum types.
-	 * @param docs
-	 * @param clazz
-	 * @param name
-	 * @return 
-	 */
-	public static Argument getEnumArgument(String docs, Class<? extends MEnum> clazz, String name){
-		Argument a = new Argument(docs, new Class[]{}, name);
-		a.enumClass = clazz;
-		return a;
-	}
-	
-	/**
-	 * Returns a ranged support int based Argument. This will validate the range on the value
-	 * for you, so you may safely assume in the function handling that the range is appropriate.
-	 * The min is inclusive, and the max is exclusive, so 0, 2 would include 2 numbers: {0, 1}
-	 * A CInt is always returned from this Argument.
-	 * @param docs
-	 * @param name
-	 * @param minInclusive
-	 * @param maxExclusive
-	 * @return 
-	 */
-	public static Argument getRangedIntArgument(String docs, String name, int minInclusive, int maxExclusive){
-		Argument a = new Argument(docs, CInt.class, name);
-		a.minInclusive = minInclusive;
-		a.maxExclusive = maxExclusive;
-		a.isRanged = true;
-		return a;
-	}
-	
-	/**
-	 * Returns a ranged support double based Argument. This will validate the range on the value
-	 * for you, so you may safely assume in the function handling that the range is appropriate.
-	 * The min is inclusive, and the max is exclusive, so 0, 2 would include 2 numbers: {0, 1}.
-	 * A CDouble is always returned from this Argument.
-	 * @param docs
-	 * @param name
-	 * @param minInclusive
-	 * @param maxExclusive
-	 * @return 
-	 */
-	public static Argument getRangedDoubleArgument(String docs, String name, double minInclusive, double maxExclusive){
-		Argument a = new Argument(docs, CDouble.class, name);
-		a.minInclusive = minInclusive;
-		a.maxExclusive = maxExclusive;
-		a.isRanged = true;
-		return a;
 	}
 	
 	/**
@@ -248,13 +235,35 @@ public class Argument implements Documentation {
 	}
 	
 	/**
-	 * Adds generic parameters to this argument type. Multiple generic types
-	 * can be added if this is an argument attached to a declaration.
+	 * Sets the generic parameters to this argument type. Multiple generic types
+	 * can be added if this is an argument attached to a declaration. Using this version
+	 * of the method assumes that there is only one argument type. If this is a disjoint
+	 * argument, then this method may not be used, and you must specify which type this
+	 * is being added for with the {@link #setGenerics(java.lang.Class, com.laytonsmith.core.arguments.Generic[])}
+	 * version.
 	 * @param generics
 	 * @return 
 	 */
 	public Argument setGenerics(Generic...generics){
-		this.generics.addAll(Arrays.asList(generics));
+		if(types.size() > 1){
+			throw new NonScriptError("For disjoint types, you must use the setGenerics(Class, Generic...) method instead of this one.");
+		}
+		Class<? extends Mixed> type = types.get(0);
+		this.generics.put(type, Arrays.asList(generics));
+		return this;
+	}
+	
+	/**
+	 * Sets the generic parameters to this argument type, for the disjoint type
+	 * specified. If this is not a disjoint type, it is faster to use the
+	 * {@link #setGenerics(com.laytonsmith.core.arguments.Generic[])} version of this
+	 * method.
+	 * @param forClass
+	 * @param generics
+	 * @return 
+	 */
+	public Argument setGenerics(Class<? extends Mixed> forClass, Generic...generics){
+		
 		return this;
 	}
 	
@@ -266,18 +275,6 @@ public class Argument implements Documentation {
 	 */
 	public Argument setDefault(Mixed def){
 		this.def = def;
-		return this;
-	}
-	
-	/**
-	 * Sets the default enum value for this argument. This also
-	 * automatically sets it to optional.
-	 * @param defaultEnum
-	 * @return 
-	 */
-	public Argument setEnumDefault(Enum<? extends MEnum> defaultEnum){
-		this.defaultEnum = defaultEnum;
-		this.setOptional();
 		return this;
 	}
 	
@@ -334,6 +331,17 @@ public class Argument implements Documentation {
 		return this.setOptionalDefault(Construct.GetNullConstruct(Target.UNKNOWN));
 	}
 	
+	/**
+	 * Adds an argument annotation to this argument. TODO: This is only allowed if the
+	 * annotation is allowed to be added to a field.
+	 * @param annotation
+	 * @return 
+	 */
+	public Argument addAnnotation(MAnnotation annotation){
+		annotations.add(annotation);
+		return this;
+	}
+	
 	public <T extends Mixed> T getDefault(){
 		try{
 			return (T)def;
@@ -351,7 +359,7 @@ public class Argument implements Documentation {
 	 * @return 
 	 */
 	public Argument setVarargs(boolean varargs){
-		if(clazz.size() != 1 || clazz.get(0) != CArray.class){
+		if(types.size() != 1 || types.get(0) != CArray.class){
 			throw new Error("Vararg status can only be set on an Argument that is a non-disjoint CArray type.");
 		}
 		this.varargs = varargs;
@@ -375,7 +383,7 @@ public class Argument implements Documentation {
 			return false;
 		}
 		final Argument other = (Argument) obj;
-		if (this.clazz != other.clazz && (this.clazz == null || !this.clazz.equals(other.clazz))) {
+		if (this.types != other.types && (this.types == null || !this.types.equals(other.types))) {
 			return false;
 		}
 		if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
@@ -393,7 +401,7 @@ public class Argument implements Documentation {
 	@Override
 	public int hashCode() {
 		int hash = 7;
-		hash = 67 * hash + (this.clazz != null ? this.clazz.hashCode() : 0);
+		hash = 67 * hash + (this.types != null ? this.types.hashCode() : 0);
 		hash = 67 * hash + (this.name != null ? this.name.hashCode() : 0);
 		hash = 67 * hash + (this.optional ? 1 : 0);
 		hash = 67 * hash + (this.varargs ? 1 : 0);
@@ -405,13 +413,13 @@ public class Argument implements Documentation {
 	 * @return 
 	 */
 	public List<Class<? extends Mixed>> getType() {
-		return new ArrayList<Class<? extends Mixed>>(clazz);
+		return new ArrayList<Class<? extends Mixed>>(types);
 	}
 
 	@Override
 	public String toString() {
-		List<String> types = new ArrayList<String>();
-		for(Class<? extends Mixed> c : clazz){
+		List<String> stypes = new ArrayList<String>();
+		for(Class<? extends Mixed> c : types){
 			String type = c.getSimpleName();
 			if(c.getAnnotation(typename.class) != null){
 				typename t = c.getAnnotation(typename.class);
@@ -422,15 +430,13 @@ public class Argument implements Documentation {
 				//Otherwise, it's dynamic, and we can't get that anyways right now, because
 				//we don't have an instance.
 			}
-			types.add(type);
+			String generic = "";
+			if(generics.containsKey(c)){
+				generic = "<" + StringUtils.Join(generics.get(c), ", ") + ">";
+			}
+			stypes.add(type + generic);
 		}
-		String generic = "";
-		if(!generics.isEmpty()){
-			List<String> g = new ArrayList<String>();
-			
-			generic = "<" + StringUtils.Join(g, ", ") + ">";
-		}
-		return (optional?"[":"") + StringUtils.Join(types, "|") + generic + (varargs?"...":"") + " " + name + (optional?"]":"");
+		return (StringUtils.Join(annotations, " ") + " " + (optional?"[":"") + StringUtils.Join(stypes, "|") + (varargs?"...":"") + " " + name + (optional?"]":"")).trim();
 	}	
 
 	public String getName() {
@@ -456,46 +462,31 @@ public class Argument implements Documentation {
 	public CHVersion since() {
 		return since;
 	}
-
-	/**
-	 * Returns the enum class associated with this argument, if it
-	 * was created with the enum methods.
-	 * @return 
-	 */
-	/*package*/ Class<? extends Enum<?>> getEnumClass() {
-		return enumClass;
-	}
 	
 	/**
-	 * Returns true if this is an argument with range support.
-	 * @return 
-	 */
-	/*package*/ boolean isRanged(){
-		return isRanged;
-	}
-	
-	/**
-	 * Returns the inclusive min value for arguments with range support
-	 * @return 
-	 */
-	/*package*/ double getMin(){
-		return minInclusive;
-	}
-	
-	/**
-	 * Returns the inclusive max value for arguments with range support.
-	 * @return 
-	 */
-	/*package*/ double getMax(){
-		return maxExclusive;
-	}
-	
-	/**
-	 * Returns the generics associated with this argument. An empty
-	 * list is returned if no generics were registered.
+	 * Returns the generics associated with this argument. If this is a disjoint
+	 * type, you must use {@link #getGenerics(java.lang.Class)} instead.
 	 * @return 
 	 */
 	public List<Generic> getGenerics(){
-		return new ArrayList<Generic>(generics);
+		if(types.size() == 1){
+			return generics.get(types.get(0));
+		} else {
+			throw new NonScriptError("This method can only be used for non-disjoint types.");
+		}
+	}
+	
+	/**
+	 * Returns the generics associated with the type of the specified disjoint
+	 * type in this argument. If only one type is provided, then the {@link #getGenerics()}
+	 * method may be used instead.
+	 * @return 
+	 */
+	public List<Generic> getGenerics(Class<? extends Mixed> forClass){
+		if(generics.containsKey(forClass)){
+			return generics.get(forClass);
+		} else {
+			throw new NonScriptError("This argument does not have " + forClass + " as a valid type.");
+		}
 	}
 }

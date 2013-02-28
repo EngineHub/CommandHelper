@@ -18,6 +18,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.annotations.Ranged;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -364,7 +365,7 @@ public class Crypto {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 					new Argument("The string to hash", CString.class, "val"),
-					Argument.getRangedIntArgument("The workload factor", "workloadFactor", 1, Integer.MAX_VALUE).setOptionalDefault(5)
+					new Argument("The workload factor", CInt.class, "workloadFactor").addAnnotation(new Ranged(1, Integer.MAX_VALUE)).setOptionalDefault(5)
 				);
 		}
 

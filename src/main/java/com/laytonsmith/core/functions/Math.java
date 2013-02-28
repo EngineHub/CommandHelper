@@ -20,6 +20,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Math;
+import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
@@ -1273,7 +1274,7 @@ public class Math {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-					Argument.getRangedDoubleArgument("The number to find the square root of", "number", 0, Double.MAX_VALUE)
+					new Argument("The number to find the square root of", CDouble.class, "number").addAnnotation(new Ranged(0, Double.MAX_VALUE))
 					);
 		}
 
@@ -2003,7 +2004,7 @@ public class Math {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 					new Argument("The number to round", CNumber.class, "number"),
-					Argument.getRangedIntArgument("The precision", "precision", 0, Integer.MAX_VALUE).setOptionalDefault(0)
+					new Argument("The precision", CInt.class, "precision").addAnnotation(new Ranged(0, Integer.MAX_VALUE)).setOptionalDefault(0)
 					);
 		}
 
@@ -2251,7 +2252,7 @@ public class Math {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-					Argument.getRangedDoubleArgument("", "val", 0.00000000000001, Double.MAX_VALUE),
+					new Argument("", CDouble.class, "val").addAnnotation(new Ranged(0.00000000000001, Double.MAX_VALUE)),
 					new Argument("", CDouble.class, "base").setOptionalDefault(java.lang.Math.E)
 					);
 		}

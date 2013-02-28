@@ -19,6 +19,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
@@ -1305,7 +1306,7 @@ public class ArrayHandling {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 					new Argument("The array to sort", CArray.class, "array"),
-					Argument.getEnumArgument("The sort type", CArray.SortType.class, "sortType").setEnumDefault(CArray.SortType.REGULAR));
+					new Argument("The sort type", CArray.SortType.class, "sortType").setOptionalDefault(CArray.SortType.REGULAR));
 		}
 
 		public CHVersion since() {
@@ -1388,7 +1389,7 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			final CArray array = list.get("array");
-			final CArray.SortType sortType = list.getEnum("sortType", t);
+			final CArray.SortType sortType = list.getEnum("sortType", CArray.SortType.class);
 			final CClosure callback = list.get("closure");
 			queue.invokeLater(new Runnable() {
 				public void run() {
@@ -1421,7 +1422,7 @@ public class ArrayHandling {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 					new Argument("The array to be sorted", CArray.class, "array").setGenerics(Generic.ANY),
-					Argument.getEnumArgument("The sort type", CArray.SortType.class, "sortType").setEnumDefault(CArray.SortType.REGULAR),
+					new Argument("The sort type", CArray.SortType.class, "sortType").setOptionalDefault(CArray.SortType.REGULAR),
 					new Argument("The closure that recieves the sorted array once finished", CClosure.class, "closure").setGenerics(new Generic("?", CArray.class)));
 		}
 
@@ -1726,7 +1727,7 @@ public class ArrayHandling {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 					new Argument("The array to select from", ArrayAccess.class, "array").setGenerics(Generic.ANY),
-					Argument.getRangedIntArgument("The number of items to select from the array", "number", 1, Integer.MAX_VALUE).setOptionalDefault(1),
+					new Argument("The number of items to select from the array", CInt.class, "number").setOptionalDefault(1).addAnnotation(new Ranged(1, Integer.MAX_VALUE)),
 					new Argument("If true, it will select from the keys instead of the values", CBoolean.class, "getKeys").setOptionalDefault(true));
 		}
 

@@ -9,8 +9,10 @@ import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.NonScriptError;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.CastException;
+import com.laytonsmith.core.natives.MEnum;
 import com.laytonsmith.core.natives.interfaces.MObject;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
@@ -66,32 +68,33 @@ public class ArgList {
 		}
 	}
 	
-	/**
-	 * Returns the underlying value, as a construct. The value will have been
-	 * type checked and verified that if numeric, is within the specified range.
-	 * @param <T>
-	 * @param varName
-	 * @param t
-	 * @return 
-	 */
-	public <T extends CNumber> T getRanged(String varName, Target t){
-		Mixed m = get(varName);
-		Argument a = signature.getArgument(varName);
-		if(!a.isRanged()){
-			throw new Error("Using getRanged on a non-ranged value");
-		}
-		if(m instanceof CNumber){
-			double actual = m.primitive(t).castToDouble(t);
-			if(actual >= a.getMin() && actual < a.getMax()){
-				return (T)m;
-			} else {
-				throw new Exceptions.RangeException("Expecting a value between (" + a.getMin() + ", " + a.getMax() + "], but " 
-						+ actual + " was found.", t);
-			}
-		} else {
-			throw new CastException("Expecting a numeric value, but " + m.typeName() + " was found instead.", t);
-		}
-	}
+//	/**
+//	 * Returns the underlying value, as a construct. The value will have been
+//	 * type checked and verified that if numeric, is within the specified range.
+//	 * //TODO: Move this code into the compiler.
+//	 * @param <T>
+//	 * @param varName
+//	 * @param t
+//	 * @return 
+//	 */
+//	public <T extends CNumber> T getRanged(String varName, Target t){
+//		Mixed m = get(varName);
+//		Argument a = signature.getArgument(varName);
+//		if(!a.isRanged()){
+//			throw new Error("Using getRanged on a non-ranged value");
+//		}
+//		if(m instanceof CNumber){
+//			double actual = m.primitive(t).castToDouble(t);
+//			if(actual >= a.getMin() && actual < a.getMax()){
+//				return (T)m;
+//			} else {
+//				throw new Exceptions.RangeException("Expecting a value between (" + a.getMin() + ", " + a.getMax() + "], but " 
+//						+ actual + " was found.", t);
+//			}
+//		} else {
+//			throw new CastException("Expecting a numeric value, but " + m.typeName() + " was found instead.", t);
+//		}
+//	}
 	
 	private Construct getConstruct(String varName){
 		Mixed m = get(varName);
@@ -268,7 +271,7 @@ public class ArgList {
 	 * @param t
 	 * @return 
 	 */
-	public <T extends Enum<?>> T getEnum(String name, Target t){
+	public <T extends Enum<?>> T getEnum(String name, Class<? extends Enum> type){
 		String s = getConstruct(name).val();
 		Argument a = null;
 		for(Argument aa : signature.getArguments()){
@@ -280,27 +283,23 @@ public class ArgList {
 		if(a == null){
 			throw new Error("Should not have gotten here, please alert a developer with this stack trace.");
 		}
-		Class clazz = a.getEnumClass();
 		try{
-			return (T)Enum.valueOf(clazz, s.toUpperCase());
+			return (T)Enum.valueOf(type, s);
 		} catch(IllegalArgumentException e){
 			try{
-				return (T)Enum.valueOf(clazz, s); //Ok, try actual case.
+				return (T)Enum.valueOf(type, s.toUpperCase()); //Ok, try uppercase.
+				//TODO: Make this a warning once enums are more established.
 			} catch(IllegalArgumentException ex){
-				if(Prefs.DebugMode()){
-					//We have to use reflection to get these, since the "values"
-					//method is static. 
-					Object v = ReflectionUtils.invokeMethod(clazz, null, "values");
-					List<String> list = new ArrayList<String>();
-					for(Enum ee : ReflectionUtils.values(clazz)){
-						list.add(ee.name());
-					}
-					throw new CastException("Unexpected value \"" + name + "\" passed as \"" 
-							+ a.getName() + "\", but should be one of " + StringUtils.Join(list, ", ", " or ", " or "), t);
-				} else {
-					throw new CastException("Unexpected value \"" + name + "\" passed as \"" + a.getName() + "\". Enable debug mode for all possible values,"
-							+ " or check the documentation.", t);
-				}
+				//We have to use reflection to get these, since the "values"
+				//method is static. 
+				//TODO: The generic runtime can use this code to provide an error message
+//				Object v = ReflectionUtils.invokeMethod(clazz, null, "values");
+//				List<String> list = new ArrayList<String>();
+//				for(Enum ee : ReflectionUtils.values(clazz)){
+//					list.add(ee.name());
+//				}
+				throw new NonScriptError("Unexpected value \"" + name + "\" passed as \"" 
+						+ a.getName() + "\". This exception should have been caught previously by the generic runtime.");
 			}
 		}
 	}

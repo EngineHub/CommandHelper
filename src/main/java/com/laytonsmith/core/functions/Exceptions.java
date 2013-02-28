@@ -417,7 +417,7 @@ public class Exceptions {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-					Argument.getEnumArgument("The type of the exception to throw", ExceptionType.class, "exceptionType"),
+					new Argument("The type of the exception to throw", ExceptionType.class, "exceptionType"),
 					new Argument("The message to include as a part of the exception", CString.class, "msg")
 					);
 		}
@@ -448,7 +448,7 @@ public class Exceptions {
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
-			ExceptionType exceptionType = list.getEnum("exceptionType", t);
+			ExceptionType exceptionType = list.getEnum("exceptionType", ExceptionType.class);
 			String msg = list.getString("msg", t);
 			throw new ConfigRuntimeException(msg, exceptionType, t);
 		}

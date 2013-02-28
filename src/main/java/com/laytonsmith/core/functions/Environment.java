@@ -26,6 +26,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MBlockInfo;
 import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.MObject;
 import com.sk89q.util.StringUtil;
 
@@ -568,10 +569,10 @@ public class Environment {
 							new Argument("", CNumber.class, "x"),
 							new Argument("", CNumber.class, "z"),
 							new Argument("", CString.class, "world").setOptionalDefaultNull(),
-							Argument.getEnumArgument("The biome type to set for the column specified", MCBiomeType.class, "biome")
+							new Argument("The biome type to set for the column specified", MCBiomeType.class, "biome")
 						), new Signature(2, 
 							new Argument("", MLocation.class, "location"),
-							Argument.getEnumArgument("The biome type to set for the column specified", MCBiomeType.class, "biome")
+							new Argument("The biome type to set for the column specified", MCBiomeType.class, "biome")
 						)
 					);
 		}
@@ -819,7 +820,7 @@ public class Environment {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", MLocation.class, "location"),
-						Argument.getRangedIntArgument("The size of the explosion", "size", 0, Integer.MAX_VALUE).setOptionalDefault(3),
+						new Argument("The size of the explosion", CInt.class, "size").addAnnotation(new Ranged(0, Integer.MAX_VALUE)).setOptionalDefault(3),
 						new Argument("Whether or not the explosion will hurt surrounding blocks", CBoolean.class, "safe").setOptionalDefault(false)
 					);
 		}
@@ -993,7 +994,7 @@ public class Environment {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "player").setOptionalDefaultNull(),
-						Argument.getEnumArgument("The instrument to play", MCInstrument.class, "instrument"),
+						new Argument("The instrument to play", MCInstrument.class, "instrument"),
 						new Argument("The note, formatted as described", CArray.class, "note"),
 						new Argument("The location to play the note at", MLocation.class, "location").setOptionalDefaultNull()
 					);

@@ -23,6 +23,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MColor;
 import com.laytonsmith.core.natives.MItemMeta;
+import com.laytonsmith.core.natives.annotations.Ranged;
 
 /**
  *
@@ -98,7 +99,7 @@ public class ItemMeta {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "player").setOptionalDefaultNull(),
-						Argument.getRangedIntArgument("", "inventorySlot", 0, 104)
+						new Argument("", CInt.class, "inventorySlot").addAnnotation(new Ranged(0, 104))
 					);
 		}
 
@@ -188,7 +189,7 @@ public class ItemMeta {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "player").setOptionalDefaultNull(),
-						Argument.getRangedIntArgument("", "inventorySlot", 0, 104),
+						new Argument("", CInt.class, "inventorySlot").addAnnotation(new Ranged(0, 104)),
 						new Argument("", MItemMeta.class, "itemMeta")
 					);
 		}
@@ -279,7 +280,7 @@ public class ItemMeta {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "player").setOptionalDefaultNull(),
-						Argument.getRangedIntArgument("", "inventorySlot", 0, 104)
+						new Argument("", CInt.class, "inventorySlot").addAnnotation(new Ranged(0, 104))
 					);
 		}
 
@@ -361,7 +362,7 @@ public class ItemMeta {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "player").setOptionalDefaultNull(),
-						Argument.getRangedIntArgument("", "inventorySlot", 0, 104),
+						new Argument("", CInt.class, "inventorySlot").addAnnotation(new Ranged(0, 104)),
 						new Argument("", MColor.class, "color")
 					);
 		}
@@ -421,7 +422,7 @@ public class ItemMeta {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "player").setOptionalDefaultNull(),
-						Argument.getRangedIntArgument("", "inventorySlot", 0, 104)
+						new Argument("", CInt.class, "inventorySlot").addAnnotation(new Ranged(0, 104))
 					);
 		}
 
