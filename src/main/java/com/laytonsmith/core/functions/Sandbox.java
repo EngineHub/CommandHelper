@@ -11,6 +11,9 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MItemStack;
+import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.annotations.Ranged;
 import org.bukkit.event.Cancellable;
 
 /**
@@ -121,20 +124,21 @@ public class Sandbox {
         }
 
         public String docs() {
-            return "void {[player/LocationArray], item, [qty]} Drops the specified item at the specified quantity at the specified player's feet (or "
+            return "Drops the specified item at the specified quantity at the specified player's feet (or "
                     + " at an arbitrary Location, if an array is given),"
                     + " like the vanilla /give command. player defaults to the current player, and qty defaults to 1. item follows the"
                     + " same type[:data] format used elsewhere.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, MLocation.class, "playerOrLocation").setOptionalDefaultNull(),
+						new Argument("", MItemStack.class, CInt.class, CString.class, "item"),
+						new Argument("", CInt.class, "qty").setOptionalDefault(1).addAnnotation(new Ranged(0, Integer.MAX_VALUE))
 					);
 		}
 
@@ -226,7 +230,7 @@ public class Sandbox {
         }
 
         public String docs() {
-            return "void {} \"Super Cancels\" an event. This only will work if play-dirty is set to true. If an event is"
+            return "\"Super Cancels\" an event. This only will work if play-dirty is set to true. If an event is"
                     + " super cancelled, not only is the cancelled flag set to true, the event stops propagating down, so"
                     + " no other plugins (as in other server plugins, not just CH scripts) will receive the event at all "
                     + " (other than monitor level plugins). This is useful for overridding"
@@ -235,14 +239,11 @@ public class Sandbox {
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
         public ExceptionType[] thrown() {
@@ -287,20 +288,22 @@ public class Sandbox {
         }
 
         public String docs() {
-            return "void {[player], slot, type, level} Works the same as enchant_inv, except anything goes. "
+            return "Works the same as enchant_inv, except anything goes. "
                     + " You can enchant a fish with a level 5000 enchantment if you wish. Side effects"
                     + " may include nausia, dry mouth, insomnia, or server crashes. (Seriously, this might"
                     + " crash your server, be careful with it.)";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CInt.class, "slot").addAnnotation(new Ranged(0, 104)),
+						new Argument("", CString.class, "type"),
+						new Argument("", CInt.class, "level")
 					);
 		}
 
@@ -371,7 +374,7 @@ public class Sandbox {
         }
 
         public String docs() {
-            return "void {[player], isVanished, otherPlayer} Sets the visibility"
+            return "Sets the visibility"
                     + " of the current player (or the one specified) to visible or invisible"
                     + " (based on the value of isVanished) from the view of the otherPlayer."
                     + " This is the raw access function, you probably shouldn't use this, as"
@@ -379,13 +382,14 @@ public class Sandbox {
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CBoolean.class, "isVanished"),
+						new Argument("", CString.class, "otherPlayer")
 					);
 		}
 
@@ -436,19 +440,19 @@ public class Sandbox {
         }
 
         public String docs() {
-            return "boolean {[player], other} Returns a boolean stating if the other player can"
+            return "Returns a boolean stating if the other player can"
                     + " see this player or not. This is the raw access function, you probably shouldn't use this, as"
                     + " the CommandHelper vanish api functions will probably be easier to use.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CString.class, "otherPlayer")
 					);
 		}
 
@@ -538,17 +542,17 @@ public class Sandbox {
 		}
 
 		public String docs() {
-			return "void {horse, rider} Sets the rider of an entity. horse and rider are entity ids.";
+			return "Sets the rider of an entity. horse and rider are entity ids.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "horse"),
+						new Argument("", CInt.class, "rider")
 					);
 		}
 

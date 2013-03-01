@@ -8,12 +8,14 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MLocation;
 
 /**
  *
@@ -55,9 +57,9 @@ public class Weather {
 				z = (int) java.lang.Math.floor(l.getZ());
 				w = l.getWorld();
 			} else {
-				x = (int) java.lang.Math.floor(Static.getNumber(args[0], t));
-				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
-				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
+				x = (int) java.lang.Math.floor(args[0].primitive(t).castToDouble(t));
+				y = (int) java.lang.Math.floor(args[1].primitive(t).castToDouble(t));
+				z = (int) java.lang.Math.floor(args[2].primitive(t).castToDouble(t));
 				safeIndex = 3;
 			}
 			if (args.length >= safeIndex + 1) {
@@ -77,18 +79,25 @@ public class Weather {
 		}
 
 		public String docs() {
-			return "void {strikeLocArray, [safe] | x, y, z, [safe]} Makes lightning strike at the x y z coordinates specified in the array(x, y, z). Safe"
+			return "Makes lightning strike at the x y z coordinates specified in the array(x, y, z). Safe"
 					+ " defaults to false, but if true, lightning striking a player will not hurt them.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1,
+							new Argument("", MLocation.class, "location"),
+							new Argument("", CBoolean.class, "safe").setOptionalDefault(false)
+						), new Signature(2,
+							new Argument("", CDouble.class, "x"),
+							new Argument("", CDouble.class, "y"),
+							new Argument("", CDouble.class, "z"),
+							new Argument("", CBoolean.class, "safe").setOptionalDefault(false)
+						)
 					);
 		}
 
@@ -130,25 +139,26 @@ public class Weather {
 			} else {
 				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
-			if (args.length == 3) {
+			if (args.length == 3 && !args[2].isNull()) {
 				w.setWeatherDuration(args[2].primitive(t).castToInt32(t));
 			}
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {isStorming, [world], [int]} Creates a (rain) storm if isStorming is true, stops a storm if"
+			return "Creates a (rain) storm if isStorming is true, stops a storm if"
 					+ " isStorming is false. The third argument allows setting how long this weather setting will last.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CBoolean.class, "isStorming"),
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("", CInt.class, "length").setOptionalDefaultNull()
 					);
 		}
 
@@ -199,7 +209,7 @@ public class Weather {
 			} else {
 				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
 			}
-			if (args.length == 3) {
+			if (args.length == 3 && !args[2].isNull()) {
 				w.setThunderDuration(args[2].primitive(t).castToInt32(t));
 			}
 			return new CVoid(t);
@@ -214,8 +224,20 @@ public class Weather {
 		}
 
 		public String docs() {
-			return "void {boolean, [world], [int]} Sets whether or not the weather can have thunder. The third argument"
+			return "Sets whether or not the weather can have thunder. The third argument"
 					+ " can specify how long the thunder should last.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CBoolean.class, "isThundering"),
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("", CInt.class, "length").setOptionalDefaultNull()
+					);
 		}
 
 		public CHVersion since() {
@@ -265,7 +287,17 @@ public class Weather {
 		}
 
 		public String docs() {
-			return "boolean {[world]} Returns whether the world (defaults to player's world) has a storm.";
+			return "Returns whether the world (defaults to player's world) has a storm.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "world").setOptionalDefaultNull()
+					);
 		}
 
 		public CHVersion since() {
@@ -315,7 +347,17 @@ public class Weather {
 		}
 
 		public String docs() {
-			return "boolean {[world]} Returns whether the world (defaults to player's world) has thunder.";
+			return "Returns whether the world (defaults to player's world) has thunder.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "world").setOptionalDefaultNull()
+					);
 		}
 
 		public CHVersion since() {

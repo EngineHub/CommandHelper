@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -32,6 +33,9 @@ public class Regex {
                 + " for a pattern, instead send array('pattern', 'flags') where flags is any of i, m, or s."
                 + " Alternatively, using the embedded flag system that Java provides is also valid.";
     }
+	
+	private static final Argument PATTERN_ARGUMENT = new Argument("The regex to match with", CString.class, "pattern");
+	private static final Argument SUBJECT_ARGUMENT = new Argument("The string to match against", CString.class, "subject");
     
     @api public static class reg_match extends AbstractFunction implements Optimizable {
 
@@ -44,20 +48,20 @@ public class Regex {
         }
 
         public String docs() {
-            return "array {pattern, subject} Searches for the given pattern, and returns an array with the results. Captures are supported."
+            return "Searches for the given pattern, and returns an array with the results. Captures are supported."
                     + " If the pattern is not found anywhere in the subject, an empty array is returned. The indexes of the array"
                     + " follow typical regex fashion; the 0th element is the whole match, and 1-n are the captures specified in"
                     + " the regex.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PATTERN_ARGUMENT,
+						SUBJECT_ARGUMENT
 					);
 		}
 
@@ -127,18 +131,19 @@ public class Regex {
         }
 
         public String docs() {
-            return "array {pattern, subject} Searches subject for all matches to the regular expression given in pattern, unlike reg_match,"
-                    + " which just returns the first match.";
+            return "Searches subject for all matches to the regular expression given in pattern, unlike reg_match,"
+                    + " which just returns the first match. The result will be an array of arrays, where each inner"
+					+ " array is an array equivalent to the one array returned by reg_match.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CArray.class).addSubtype(new Generic(CString.class)));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PATTERN_ARGUMENT,
+						SUBJECT_ARGUMENT
 					);
 		}
 
@@ -206,18 +211,20 @@ public class Regex {
         }
 
         public String docs() {
-            return "string {pattern, replacement, subject} Replaces any occurances of pattern with the replacement in subject."
-                    + " Back references are allowed.";
+            return "Replaces any occurances of pattern with the replacement in subject. Back references are allowed.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PATTERN_ARGUMENT,
+						new Argument("The replacement string to insert at all matched locations, including back references. Note that in"
+					+ " this string, $ signs are special characters, (they refer to back references) so must be escaped (with '\\\\$')"
+					+ " to mean literal dollar signs.", CString.class, "replacement"),
+						SUBJECT_ARGUMENT
 					);
 		}
 
@@ -300,18 +307,18 @@ public class Regex {
         }
 
         public String docs() {
-            return "array {pattern, subject} Splits a string on the given regex, and returns an array of the parts. If"
+            return "Splits a string on the given regex, and returns an array of the parts. If"
                     + " nothing matched, an array with one element, namely the original subject, is returned.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PATTERN_ARGUMENT,
+						SUBJECT_ARGUMENT
 					);
 		}
 
@@ -382,17 +389,17 @@ public class Regex {
         }
 
         public String docs() {
-            return "int {pattern, subject} Counts the number of occurances in the subject.";
+            return "Counts the number of occurances in the subject.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PATTERN_ARGUMENT,
+						SUBJECT_ARGUMENT
 					);
 		}
 
@@ -471,19 +478,18 @@ public class Regex {
         }
 
         public String docs() {
-            return "string {arg} Escapes arg so that it may be used directly in a regular expression, without fear that"
+            return "Escapes the value so that it may be used directly in a regular expression, without fear that"
                     + " it will have special meaning; that is, it escapes all special characters. Use this if you need"
                     + " to use user input or similar as a literal search index.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The value to escape", CString.class, "value")
 					);
 		}
 

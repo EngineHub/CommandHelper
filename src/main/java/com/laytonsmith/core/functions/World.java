@@ -16,12 +16,17 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
+import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MItemStack;
+import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.MVector3D;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -54,17 +59,16 @@ public class World {
 		}
 
 		public String docs() {
-			return "array {[world]} Returns a location array for the specified world, or the current player's world, if not specified.";
+			return "Returns a location array for the specified world, or the current player's world, if not specified.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "world").setOptionalDefaultNull()
 					);
 		}
 
@@ -152,19 +156,25 @@ public class World {
 		}
 
 		public String docs() {
-			return "void {locationArray | [world], x, y, z} Sets the spawn of the world. Note that in some cases, a plugin"
+			return "Sets the spawn of the world. Note that in some cases, a plugin"
 					+ " may set the spawn differently, and this method will do nothing. In that case, you should use"
 					+ " the plugin's commands to set the spawn.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1, 
+							new Argument("", MLocation.class, "location")
+						), new Signature(2, 
+							new Argument("", CString.class, "world").setOptionalDefaultNull(),
+							new Argument("", CDouble.class, "x"),
+							new Argument("", CDouble.class, "y"),
+							new Argument("", CDouble.class, "z")							
+						)
 					);
 		}
 
@@ -185,18 +195,23 @@ public class World {
 		}
 
 		public String docs() {
-			return "void {[world], x, z | [world], locationArray} Resends the chunk data to all clients, using the specified world, or the current"
+			return "Resends the chunk data to all clients, using the specified world, or the current"
 					+ " players world if not provided.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1,
+							new Argument("", CString.class, "world").setOptionalDefaultNull(),
+							new Argument("", CInt.class, "x"),
+							new Argument("", CInt.class, "z")
+						), new Signature(2, 
+							new Argument("", MLocation.class, "location")
+						)
 					);
 		}
 
@@ -265,18 +280,23 @@ public class World {
 		}
 
 		public String docs() {
-			return "void {x, z, [world]| locationArray, [world]} Regenerate the chunk, using the specified world, or the current"
+			return "void {x, z, [world]| locationArray} Regenerate the chunk, using the specified world, or the current"
 					+ " players world if not provided. Beware that this is destructive! Any data in this chunk will be lost!";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1, 
+							new Argument("", CInt.class, "x"),
+							new Argument("", CInt.class, "z"),
+							new Argument("", CString.class, "world").setOptionalDefaultNull()
+						), new Signature(2,
+							new Argument("", MLocation.class, "location")
+						)
 					);
 		}
 
@@ -328,9 +348,9 @@ public class World {
 				}
 			} else {
 				//world, x and z provided
-				x = args[0].primitive(t).castToInt32(t);
-				z = args[1].primitive(t).castToInt32(t);
-				world = Static.getServer().getWorld(args[2].val());
+				world = Static.getServer().getWorld(args[0].val());
+				x = args[1].primitive(t).castToInt32(t);
+				z = args[2].primitive(t).castToInt32(t);
 			}
 			
 			return new CBoolean(world.regenerateChunk(x, z), t);
@@ -382,13 +402,13 @@ public class World {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("", CInt.class, CString.class, "time")
 					);
 		}
 
@@ -475,18 +495,17 @@ public class World {
 		}
 
 		public String docs() {
-			return "int {[world]} Returns the time of the specified world, as an integer from"
+			return "Returns the time of the specified world, as an integer from"
 					+ " 0 to 24000-1";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "world").setOptionalDefaultNull()
 					);
 		}
 
@@ -580,13 +599,15 @@ public class World {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "name"),
+						new Argument("", MCWorldType.class, "type").setOptional(),
+						new Argument("", MCWorldEnvironment.class, "environment").setOptional(),
+						new Argument("", CInt.class, "").setOptional()
 					);
 		}
 
@@ -628,18 +649,15 @@ public class World {
 		}
 
 		public String docs() {
-			return "array {} Returns a list of all currently loaded worlds.";
+			return "Returns a list of all currently loaded worlds.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public CHVersion since() {
@@ -672,7 +690,7 @@ public class World {
 				w = l.getWorld();
 			}
 			
-			if (args.length == 1) {
+			if (args.length == 1 && !args[0].isNull()) {
 				if (args[0] instanceof CArray) {
 					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				} else {
@@ -686,26 +704,27 @@ public class World {
 				}
 			}
 			
-			return new CArray(t,
-				new CInt(l.getChunk().getX(), t),
-				new CInt(l.getChunk().getZ(), t),
-				new CString(l.getChunk().getWorld().getName(), t));
+			MLocation loc = new MLocation();
+			loc.world = l.getWorld().getName();
+			loc.x = (double)l.getChunk().getX();
+			loc.y = 0d;
+			loc.z = (double)l.getChunk().getZ();
+			return loc.deconstruct(t);
 		}
 
 		public String docs() {
-			return "array {[location array]} Returns an array of x, z, world "
+			return "Returns an array of x, z, world "
 					+ "coords of the chunk of either the location specified or the location of "
 					+ "the player running the command.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location").setOptionalDefaultNull()
 					);
 		}
 
@@ -784,20 +803,20 @@ public class World {
 		}
 
 		public String docs() {
-			return "integer {location array, id[:type], [vector array ie. array(x, y, z)]} Spawns a"
-				+ " falling block of the specified id and type at the specified location, applying"
+			return "Spawns a falling block of the specified id and type at the specified location, applying"
 				+ " vector array as a velocity if given. Values for the vector array are doubles, and 1.0"
-				+ " seems to imply about 3 times walking speed. Gravity applies for y.";
+				+ " is approximately 3 times walking speed. Gravity applies for y.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location"),
+						new Argument("", MItemStack.class, CInt.class, CString.class, "item"),
+						new Argument("", MVector3D.class, "vector")
 					);
 		}
 

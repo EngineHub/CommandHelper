@@ -2,7 +2,6 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
@@ -13,12 +12,15 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.MRegionInfo;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
@@ -26,7 +28,6 @@ import com.sk89q.worldedit.bukkit.BukkitUtil;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.RegionSelector;
-import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 import com.sk89q.worldguard.protection.databases.RegionDBUtil;
@@ -72,18 +73,18 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "mixed {[player], locationArray | [player]} Sets the player's point 1, or returns it if the array to set isn't specified. If"
-                    + " the location is returned, it is returned as a 4 index array:(x, y, z, world)";
+            return "Sets the player's point 1 (and returns null),"
+					+ " or returns the current point if the array to set isn't specified.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", MLocation.class, "location").setOptionalDefaultNull()
 					);
 		}
 
@@ -96,11 +97,11 @@ public class WorldEdit {
             if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
                 m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
             }
-            if (args.length == 2) {
+            if (args.length == 2 && !args[1].isNull()) {
                 m = Static.GetPlayer(args[0].val(), t);
                 l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), t);
                 setter = true;
-            } else if (args.length == 1) {
+            } else if (args.length == 1 && !args[0].isNull()) {
                 if (args[0] instanceof CArray) {
                     l = ObjectGenerator.GetGenerator().location(args[0], ( m == null ? null : m.getWorld() ), t);
                     setter = true;
@@ -119,7 +120,7 @@ public class WorldEdit {
             }
             if (setter) {
                 sel.selectPrimary(BukkitUtil.toVector(( (BukkitMCLocation) l )._Location()));
-                return new CVoid(t);
+                return Construct.GetNullConstruct(t);
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos1();
                 if (pt == null) {
@@ -146,17 +147,18 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "mixed {[player], array | [player]} Sets the player's point 2, or returns it if the array to set isn't specified";
+            return "Sets the player's point 2 (and returns null),"
+					+ " or returns the current point if the array to set isn't specified.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", MLocation.class, "location").setOptionalDefaultNull()
 					);
 		}
 
@@ -173,11 +175,11 @@ public class WorldEdit {
             if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
                 m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
             }
-            if (args.length == 2) {
+            if (args.length == 2 && !args[1].isNull()) {
                 m = Static.GetPlayer(args[0].val(), t);
                 l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), t);
                 setter = true;
-            } else if (args.length == 1) {
+            } else if (args.length == 1 && !args[0].isNull()) {
                 if (args[0] instanceof CArray) {
                     l = ObjectGenerator.GetGenerator().location(args[0], ( m == null ? null : m.getWorld() ), t);
                     setter = true;
@@ -248,26 +250,18 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "array {region, world} Given a region name, returns an array of information about that region."
-                    + " ---- The following information is returned:<ul>"
-                    + " <li>0 - An array of points that define this region</li>"
-                    + " <li>1 - An array of owners of this region</li>"
-                    + " <li>2 - An array of members of this region</li>"
-                    + " <li>3 - An array of arrays of this region's flags, where each array is: array(flag_name, value)</li>"
-                    + " <li>4 - This region's priority</li>"
-                    + " <li>5 - The volume of this region (in meters cubed)</li>"
-                    + "</ul>"
-                    + "If the region cannot be found, a PluginInternalException is thrown.";
+            return "Given a region name, returns an RegionInfo object with information about that region."
+					+ " If the region cannot be found, a PluginInternalException is thrown.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MRegionInfo.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "region"),
+						new Argument("", CString.class, "world")
 					);
 		}
 
@@ -316,39 +310,24 @@ public class WorldEdit {
                 }
 
 
-                CArray ret = new CArray(t);
-
-                CArray pointSet = new CArray(t);
+                MRegionInfo ri = new MRegionInfo();
+                ri.regionBounds = new ArrayList<MLocation>();
                 for (Location l : points) {
-                    CArray point = new CArray(t);
-                    point.push(new CInt(l.getBlockX(), t));
-                    point.push(new CInt(l.getBlockY(), t));
-                    point.push(new CInt(l.getBlockZ(), t));
-                    point.push(new CString(l.getWorld().getName(), t));
-                    pointSet.push(point);
+					MLocation ml = new MLocation(new BukkitMCLocation(l));
+                    ri.regionBounds.add(ml);
                 }
-                CArray ownerSet = new CArray(t);
                 for (String owner : owners) {
-                    ownerSet.push(new CString(owner, t));
+                    ri.owners.add(owner);
                 }
-                CArray memberSet = new CArray(t);
                 for (String member : members) {
-                    memberSet.push(new CString(member, t));
+                    ri.members.add(member);
                 }
-                CArray flagSet = new CArray(t);
                 for (Map.Entry<String, String> flag : flags.entrySet()) {
-                    CArray fl = new CArray(t,
-                            new CString(flag.getKey(), t),
-                            new CString(flag.getValue(), t));
-                    flagSet.push(fl);
+					ri.flags.put(flag.getKey(), flag.getValue());
                 }
-                ret.push(pointSet);
-                ret.push(ownerSet);
-                ret.push(memberSet);
-                ret.push(flagSet);
-                ret.push(new CInt(priority, t));
-                ret.push(new CDouble(volume, t));
-                return ret;
+				ri.priority = priority;
+				ri.volume = volume;
+				return ri.deconstruct(t);
 
             } catch (NoClassDefFoundError e) {
                 throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, t, e);
@@ -368,17 +347,19 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "boolean {world, region1, array(region2, [regionN...])} Returns true or false whether or not the specified regions overlap.";
+            return "Returns true or false whether or not any of the specified regions overlap.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "world"),
+						new Argument("", CString.class, "region1"),
+						new Argument("", CString.class, "region2"),
+						new Argument("", CString.class, "regionN").setVarargs()
 					);
 		}
 
@@ -439,9 +420,20 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "boolean {world, region1, [array(region2, [regionN...])]} Returns an array of regions names which intersect with defined region."
-					+ " You can pass an array of regions to verify or omit this parameter and all regions in selected world will be checked.";
+            return "Returns an array of regions names which intersect with defined region."
+					+ " You can use sk_all_regions and all regions in selected world will be checked.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "world"),
+						new Argument("", CString.class, "regionN").setVarargs()
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
@@ -521,17 +513,16 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "array {[world]} Returns all the regions in all worlds, or just the one world, if specified.";
+            return "Returns all the regions in all worlds, or just the one world, if specified.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "world")
 					);
 		}
 
@@ -575,18 +566,17 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "mixed {[player]} Returns the list regions that player is in. If no player specified, then the current player is used."
+            return "Returns the list regions that player is in. If no player specified, then the current player is used."
                     + " If region is found, an array of region names are returned, else an empty is returned";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull()
 					);
 		}
 
@@ -659,18 +649,17 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "mixed {Locationarray} Returns a list of regions at the specified location. "
+            return "Returns a list of regions at the specified location. "
                     + "If regions are found, an array of region names are returned, otherwise, an empty array is returned.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location")
 					);
 		}
 
@@ -746,17 +735,17 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "int {region, world} Returns the volume of the given region in the given world.";
+            return "Returns the volume of the given region in the given world.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "region"),
+						new Argument("", CString.class, "world")
 					);
 		}
 
@@ -794,17 +783,18 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])} Create region of the given name in the given world.";
+            return "Create region of the given name in the given world.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("", CString.class, "name"),
+						new Argument("", MLocation.class, "points").setVarargs()
 					);
 		}
 
@@ -929,8 +919,21 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])} Updates the location of a given region to the new location. Other properties of the region, like owners, members, priority, etc are unaffected.";
+            return "Updates the location of a given region to the new location."
+					+ " Other properties of the region, like owners, members, priority, etc are unaffected.";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("", CString.class, "name"),
+						new Argument("", MLocation.class, "points").setVarargs()
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
@@ -1062,17 +1065,17 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {[world], name} Remove existed region.";
+            return "Removes an existing region in the given world.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("", CString.class, "name")
 					);
 		}
 
@@ -1145,17 +1148,17 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {[world], name} Check if a given region exists.";
+            return "Returns true if the given region exists.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("", CString.class, "name")
 					);
 		}
 
@@ -1220,17 +1223,18 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {region, [world], [owner1] | region, [world], [array(owner1, ownerN, ...)]} Add owner(s) to given region.";
+            return "Add owner(s) to given region.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "region"),
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("Either a single player name, or an array of player names", CString.class, CArray.class, "ownerOrOwnerArray").setGenerics(CArray.class, new Generic(CString.class))
 					);
 		}
 
@@ -1331,17 +1335,18 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {region, [world], [owner1] | region, [world], [array(owner1, ownerN, ...)]} Remove owner(s) from given region.";
+            return "Remove owner(s) from given region.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "region"),
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("Either a single player name, or an array of player names", CString.class, CArray.class, "ownerOrOwnerArray").setGenerics(CArray.class, new Generic(CString.class))
 					);
 		}
 
@@ -1442,17 +1447,18 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {region, [world], [member1] | region, [world], [array(member1, memberN, ...)]} Add member(s) to given region.";
+            return "Add member(s) to given region.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "region"),
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("Either a single player name, or an array of player names", CString.class, CArray.class, "memberOrMemberArray").setGenerics(CArray.class, new Generic(CString.class))
 					);
 		}
 
@@ -1553,17 +1559,18 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {region, [world], [member1] | region, [world], [array(member1, memberN, ...)]} Remove member(s) from given region.";
+            return "Remove member(s) from given region.";
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "region"),
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("Either a single player name, or an array of player names", CString.class, CArray.class, "memberOrMemberArray").setGenerics(CArray.class, new Generic(CString.class))
 					);
 		}
 
@@ -1664,12 +1671,26 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {world, region, flagName, flagValue, [group]} Add/change/remove flag for selected region. FlagName should be any"
+            return "Add/change/remove flag for selected region. FlagName should be any"
 					+ " supported flag from [http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags this list]. For the flagValue, use types which"
 					+ " are supported by WorldGuard. Add group argument if you want to add WorldGuard group flag (read more about group"
 					+ " flag types [http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags#Group here]). Set flagValue as null (and don't set"
 					+ " group) to delete the flag from the region.";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "world"),
+						new Argument("", CString.class, "region"),
+						new Argument("", CString.class, "flagName"),
+						new Argument("", CPrimitive.class, "flagValue"),
+						new Argument("", CString.class, "group").setOptionalDefaultNull()
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
@@ -1689,7 +1710,7 @@ public class WorldEdit {
 			String flagValue = null;
 			RegionGroup groupValue = null;
 
-			if (args.length >= 4 && !(args[3] instanceof CNull) && args[3].val() != "") {
+			if (args.length >= 4 && !(args[3].isNull()) && !"".equals(args[3].val())) {
 				flagValue = args[3].val();
 			}
 
@@ -1793,8 +1814,20 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {[world], region, priority} Sets priority for a given region.";
+            return "Sets priority for a given region.";
         }
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "world").setOptionalDefaultNull(),
+						new Argument("", CString.class, "region"),
+						new Argument("", CInt.class, "priority")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
@@ -1875,8 +1908,20 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {world, region, [parentRegion]} Sets parent region for a given region.";
+            return "Sets parent region for a given region. Setting the parent region to null clears the parent region entirely.";
         }
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "world"),
+						new Argument("", CString.class, "region"),
+						new Argument("", CString.class, "parentRegion").setOptionalDefaultNull()
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};

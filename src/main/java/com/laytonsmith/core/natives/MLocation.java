@@ -1,5 +1,6 @@
 package com.laytonsmith.core.natives;
 
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.documentation;
 import com.laytonsmith.annotations.typename;
@@ -15,6 +16,19 @@ import com.laytonsmith.core.natives.interfaces.MObject;
 @typename("Location")
 public class MLocation extends MObject implements Documentation {
 	
+	public MLocation(){
+		
+	}
+	
+	public MLocation(MCLocation loc){
+		this.x = loc.getX();
+		this.y = loc.getY();
+		this.z = loc.getZ();
+		this.world = loc.getWorld().getName();
+		this.yaw = loc.getYaw();
+		this.pitch = loc.getPitch();
+	}
+	
 	@documentation(docs="The x coordinate in this location")
 	public Double x;
 	@documentation(docs="The y coordinate in this location")
@@ -24,9 +38,9 @@ public class MLocation extends MObject implements Documentation {
 	@documentation(docs="The world that this location is in")
 	public String world;
 	@documentation(docs="The yaw of this location (left and right), from 0 to 360")
-	public Double yaw;
+	public Float yaw;
 	@documentation(docs="The pitch of this location (up and down), from -90 to 90")
-	public Double pitch;
+	public Float pitch;
 
 	@Override
 	protected String alias(String field) {
