@@ -9,6 +9,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -40,7 +41,7 @@ public class Permissions {
 		}
 
 		public String docs() {
-			return "boolean {[player], permissionName} Using the built in permissions system, checks to see if the player has a particular permission."
+			return "Using the built in permissions system, checks to see if the player has a particular permission."
 					+ " This is simply passed through to the permissions system. This function does not throw a PlayerOfflineException, because"
 					+ " it works with offline players, but that means that names must be an exact match. If you notice, this function isn't"
 					+ " restricted. However, it IS restricted if the player attempts to check another player's permissions. If run from"
@@ -48,13 +49,13 @@ public class Permissions {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CString.class, "permissionName")
 					);
 		}
 

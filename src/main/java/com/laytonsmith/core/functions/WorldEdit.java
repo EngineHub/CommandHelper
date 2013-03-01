@@ -869,9 +869,9 @@ public class WorldEdit {
             for (int i = 0; i < arg.size(); i++) {
                 CArray point = (CArray)arg.get(i, t);
 
-                x = Static.getInt32(point.get(0), t);
-                y = Static.getInt32(point.get(1), t);
-                z = Static.getInt32(point.get(2), t);
+                x = point.get(0).primitive(t).castToInt32(t);
+                y = point.get(1).primitive(t).castToInt32(t);
+                z = point.get(2).primitive(t).castToInt32(t);
 
                 if (arg.size() == 2) {
                     points.add(new BlockVector(x, y, z));
@@ -993,9 +993,9 @@ public class WorldEdit {
             for (int i = 0; i < arg.size(); i++) {
                 CArray point = (CArray)arg.get(i, t);
 
-                x = Static.getInt32(point.get(0), t);
-                y = Static.getInt32(point.get(1), t);
-                z = Static.getInt32(point.get(2), t);
+                x = point.get(0).primitive(t).castToInt32(t);
+                y = point.get(1).primitive(t).castToInt32(t);
+                z = point.get(2).primitive(t).castToInt32(t);
 
                 if (arg.size() == 2) {
                     points.add(new BlockVector(x, y, z));
@@ -1821,13 +1821,13 @@ public class WorldEdit {
                     world = Bukkit.getServer().getWorld(m.getWorld().getName());
                 }
 
-				priority = Static.getInt32(args[1], t);
+				priority = args[1].primitive(t).castToInt32(t);
 
             } else {
                 region = args[1].val();
                 world = Bukkit.getServer().getWorld(args[0].val());
 
-				priority = Static.getInt32(args[2], t);
+				priority = args[2].primitive(t).castToInt32(t);
             }
 
             if (world == null) {

@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ArgumentSuite;
 import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Util;
 import com.laytonsmith.abstraction.Implementation;
@@ -54,6 +55,7 @@ public class Main {
 	private static final ArgumentParser apiMode;
 	private static final ArgumentParser examplesMode;
 	private static final ArgumentParser optimizerTestMode;
+	private static final ArgumentParser dataValuesList;
 
 	static {
 		ArgumentSuite suite = new ArgumentSuite()
@@ -120,6 +122,9 @@ public class Main {
 				+ " tool, but could be used as an obfuscation tool as well.")
 				.addArgument("File path", "file", true);
 		suite.addMode("optimizer-test", optimizerTestMode);
+		dataValuesList = ArgumentParser.GetParser()
+				.addDescription("Prints out the entire list of data values that this version contains");
+		suite.addMode("data-values", dataValuesList);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -284,6 +289,9 @@ public class Main {
 					//Display the help for this mode
 					System.out.println(ARGUMENT_SUITE.getModeFromName(modeForHelp).getBuiltDescription());
 				}
+			} else if(mode == dataValuesList){
+				System.out.println(StreamUtils.GetString(Main.class.getResourceAsStream("/data_values.txt")));
+				System.exit(0);
 			} else {
 				throw new Error("Should not have gotten here");
 			}

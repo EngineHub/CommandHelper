@@ -127,14 +127,14 @@ public class World {
 				y = l.getBlockY();
 				z = l.getBlockZ();
 			} else if (args.length == 3) {
-				x = Static.getInt32(args[0], t);
-				y = Static.getInt32(args[1], t);
-				z = Static.getInt32(args[2], t);
+				x = args[0].primitive(t).castToInt32(t);
+				y = args[1].primitive(t).castToInt32(t);
+				z = args[2].primitive(t).castToInt32(t);
 			} else if (args.length == 4) {
 				w = Static.getServer().getWorld(args[0].val());
-				x = Static.getInt32(args[1], t);
-				y = Static.getInt32(args[2], t);
-				z = Static.getInt32(args[3], t);
+				x = args[1].primitive(t).castToInt32(t);
+				y = args[2].primitive(t).castToInt32(t);
+				z = args[3].primitive(t).castToInt32(t);
 			}
 			if (w == null) {
 				throw new ConfigRuntimeException("Invalid world given.", ExceptionType.InvalidWorldException, t);
@@ -239,14 +239,14 @@ public class World {
 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
 					}
 					world = m.getWorld();
-					x = Static.getInt32(args[0], t);
-					z = Static.getInt32(args[1], t);
+					x = args[0].primitive(t).castToInt32(t);
+					z = args[1].primitive(t).castToInt32(t);
 				}
 			} else {
 				//world, x and z provided
 				world = Static.getServer().getWorld(args[0].val());
-				x = Static.getInt32(args[1], t);
-				z = Static.getInt32(args[2], t);
+				x = args[1].primitive(t).castToInt32(t);
+				z = args[2].primitive(t).castToInt32(t);
 			}
 			world.refreshChunk(x, z);
 			return new CVoid(t);
@@ -323,13 +323,13 @@ public class World {
 					}
 					
 					world = m.getWorld();
-					x = Static.getInt32(args[0], t);
-					z = Static.getInt32(args[1], t);
+					x = args[0].primitive(t).castToInt32(t);
+					z = args[1].primitive(t).castToInt32(t);
 				}
 			} else {
 				//world, x and z provided
-				x = Static.getInt32(args[0], t);
-				z = Static.getInt32(args[1], t);
+				x = args[0].primitive(t).castToInt32(t);
+				z = args[1].primitive(t).castToInt32(t);
 				world = Static.getServer().getWorld(args[2].val());
 			}
 			
@@ -541,7 +541,7 @@ public class World {
 			if(args.length == 4){
 				MCWorldType type;
 				MCWorldEnvironment environment;
-				long seed = Static.getInt(args[3], t);
+				long seed = args[3].primitive(t).castToInt32(t);
 				try{
 					type = MCWorldType.valueOf(args[1].val().toUpperCase());
 				} catch(IllegalArgumentException e){

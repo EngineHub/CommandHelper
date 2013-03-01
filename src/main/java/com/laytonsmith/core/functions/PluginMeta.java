@@ -9,6 +9,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -50,7 +51,7 @@ public class PluginMeta {
 				p = Static.GetPlayer(args[0], t);
 			}
 			String channel = args[0 + offset].val();
-			CByteArray ba = Static.getByteArray(args[1 + offset], t);
+			CByteArray ba = (CByteArray)args[1 + offset];
 			Static.AssertPlayerNonNull(p, t);
 			meta.fakeIncomingMessage(p, channel, ba.asByteArrayCopy());
 			return new CVoid(t);
@@ -71,13 +72,14 @@ public class PluginMeta {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CString.class, "channel"),
+						new Argument("", CByteArray.class, "message")
 					);
 		}
 
@@ -111,7 +113,7 @@ public class PluginMeta {
 				p = Static.GetPlayer(args[0], t);
 			}
 			String channel = args[0 + offset].val();
-			CByteArray ba = Static.getByteArray(args[1 + offset], t);
+			CByteArray ba = (CByteArray)args[1 + offset];
 			Static.AssertPlayerNonNull(p, t);
 			p.sendPluginMessage(channel, ba.asByteArrayCopy());
 			return new CVoid(t);
@@ -126,19 +128,20 @@ public class PluginMeta {
 		}
 
 		public String docs() {
-			return "void {[player,] channel, message} Sends a plugin message to the player. Channel should be a string (the"
+			return "Sends a plugin message to the player. Channel should be a string (the"
 					+ " channel name) and message should be a byte_array primitive. Depending on the plugin, these parameters"
 					+ " will vary. If message is null an empty byte_array is sent.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CString.class, "channel"),
+						new Argument("", CByteArray.class, "message")
 					);
 		}
 

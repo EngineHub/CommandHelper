@@ -15,15 +15,22 @@ import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.documentation;
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MItemStack;
+import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.annotations.Ranged;
+import com.laytonsmith.core.natives.interfaces.MObject;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -80,7 +87,7 @@ public class Minecraft {
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CInt) {
-				return new CInt(Static.getInt(args[0], t), t);
+				return new CInt(args[0].primitive(t).castToInt32(t), t);
 			} else {
 				String c = args[0].val();
 				int number = StaticLayer.LookupItemId(c);
@@ -110,18 +117,19 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
-					+ " simply returns that number. If the data value cannot be found, null is returned.";
+			return "Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
+					+ " simply returns that number. If the data value cannot be found, null is returned. Item names are drawn from"
+					+ " an internally maintained list, which can be output by running the jar from command line with the 'data-values'"
+					+ " option.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the item to look up", CString.class, "itemName")
 					);
 		}
 
@@ -154,20 +162,19 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "string {int | itemArray} Performs the reverse functionality as data_values. Given 1, returns 'Stone'. Note that the enum value"
+			return "Performs the reverse functionality as data_values. Given 1, returns 'Stone'. Note that the enum value"
 					+ " given in bukkit's Material class is what is returned as a fallback, if the id doesn't match a value in the internally maintained list."
 					+ " If a completely invalid argument is passed"
 					+ " in, null is returned.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("Either an ItemStack, or just the integer type, or the old string notation", CString.class, CInt.class, MItemStack.class, "item")
 					);
 		}
 
@@ -206,7 +213,7 @@ public class Minecraft {
 				i2 = (int) is.getData().getData();
 			}
 			if (i == -1) {
-				i = Static.getInt32(args[0], t);
+				i = args[0].primitive(t).castToInt32(t);
 			}
 			if (i2 == -1) {
 				i2 = 0;
@@ -237,7 +244,7 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "integer {itemType | itemArray} Given an item type, returns"
+			return "Given an item type, returns"
 					+ " the maximum allowed stack size. This method will accept either"
 					+ " a single data value (i.e. 278) or an item array like is returned"
 					+ " from pinv(). Additionally, if a single value, it can also be in"
@@ -246,13 +253,12 @@ public class Minecraft {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("Either an ItemStack, or just the integer type, or the old string notation", CString.class, CInt.class, MItemStack.class, "item")
 					);
 		}
 
@@ -323,13 +329,14 @@ public class Minecraft {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CInt.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The mob type to spawn", CString.class, MCMobs.class, "mobType"),
+						new Argument("The number of mobs to spawn", CInt.class, "qty").setOptionalDefault(1),
+						new Argument("The location to spawn the mobs at", MLocation.class, "location").setOptionalDefaultNull()
 					);
 		}
 
@@ -358,7 +365,7 @@ public class Minecraft {
 			}
 			int qty = 1;
 			if (args.length > 1) {
-				qty = Static.getInt32(args[1], t);
+				qty = args[1].primitive(t).castToInt32(t);
 			}
 			if (qty > 50) {
 				throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
@@ -401,19 +408,19 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {[player], entityID} Tames the entity specified to the player. Wolves and ocelots are supported. Offline players"
+			return "Tames the entity specified to the player. Wolves and ocelots are supported. Offline players"
 					+ " are supported, but this means that partial matches are NOT supported. You must type the players name exactly. Setting"
 					+ " the player to null will untame the mob. If the entity doesn't exist, nothing happens.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "player").setOptionalDefaultNull(),
+						new Argument("", CInt.class, "entityID")
 					);
 		}
 
@@ -446,7 +453,7 @@ public class Minecraft {
 			} else {
 				entityID = args[0];
 			}
-			int id = Static.getInt32(entityID, t);
+			int id = entityID.primitive(t).castToInt32(t);
 			MCLivingEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
 				return new CVoid(t);
@@ -476,18 +483,17 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "string {entityID} Returns the owner's name, or null if the mob is unowned. An UntameableMobException is thrown if"
+			return "Returns the owner's name, or null if the mob is unowned. An UntameableMobException is thrown if"
 					+ " mob isn't tameable to begin with.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "entityID")
 					);
 		}
 
@@ -508,7 +514,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
+			int id = args[0].primitive(t).castToInt32(t);
 			MCLivingEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
 				return Construct.GetNullConstruct(t);
@@ -537,17 +543,16 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "boolean {entityID} Returns true or false if the specified entity is tameable";
+			return "Returns true or false if the specified entity is tameable";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "entityID")
 					);
 		}
 
@@ -568,7 +573,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
+			int id = args[0].primitive(t).castToInt32(t);
 			MCEntity e = Static.getEntity(id, t);
 			boolean ret;
 			if (e == null) {
@@ -594,7 +599,7 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
+			return "Plays the specified effect (sound effect) at the given location, for all players within"
 					+ " the radius (or 64 by default). The effect can be one of the following: "
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
 					+ ". Additional data can be supplied with the syntax EFFECT:DATA. The RECORD_PLAY effect takes the item"
@@ -602,13 +607,14 @@ public class Minecraft {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location"),
+						new Argument("", MCEffect.class, "effect"),
+						new Argument("", CInt.class, "radius").setOptionalDefault(64)
 					);
 		}
 
@@ -651,7 +657,7 @@ public class Minecraft {
 				throw new ConfigRuntimeException("This effect requires a valid BlockID", ExceptionType.FormatException, t);
 			}
 			if (args.length == 3) {
-				radius = Static.getInt32(args[2], t);
+				radius = args[2].primitive(t).castToInt32(t);
 			}
 			l.getWorld().playEffect(l, e, data, radius);
 			return new CVoid(t);
@@ -670,18 +676,18 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {entityID, healthPercent} Sets the specified entity's health (0 kills it), or ignores this call if the entityID doesn't exist or isn't"
+			return "Sets the specified entity's health (0 kills it), or ignores this call if the entityID doesn't exist or isn't"
 					+ "a LivingEntity.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "entityID"),
+						new Argument("", CInt.class, "percentage").addAnnotation(new Ranged(0, 101))
 					);
 		}
 
@@ -702,8 +708,8 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			int health = (int) ((double) Static.getInt(args[1], t) / 100.0 * (double) e.getMaxHealth());
+			MCLivingEntity e = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
+			int health = (int) ((double) args[1].primitive(t).castToInt32(t) / 100.0 * (double) e.getMaxHealth());
 			if (health != 0) {
 				e.setHealth(health);
 			} else {
@@ -730,13 +736,12 @@ public class Minecraft {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CInt.class, "entityID")
 					);
 		}
 
@@ -757,10 +762,66 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity e = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			int h = (int) (((double) e.getHealth() / (double) e.getMaxHealth()) * 100);
 			return new CInt(h, t);
 		}
+	}
+	
+	@typename("ServerInfo")
+	public static class MServerInfo extends MObject {
+		@documentation(docs="The name of the server in server.properties")
+		public String serverName;		
+		@documentation(docs="The Minecraft API version that is used in this build.")
+		public String apiVersion;		
+		@documentation(docs="The implementation API version that is used in this build.")
+		public String implementationVersion;		
+		@documentation(docs="If true, Minecraft's inbuilt anti fly check is enabled.")
+		public boolean allowFlight;		
+		@documentation(docs="If true, the Nether is enabled.")
+		public boolean allowNether;		
+		@documentation(docs="If true, the End is enabled.")
+		public boolean allowEnd;		
+		@documentation(docs="The path to the world container.")
+		public String worldContainer;		
+		@documentation(docs="The max player count that this server allows.")
+		public int maxPlayerLimit;		
+		@documentation(docs="A list of operators on the server.")
+		public List<String> operators;		
+		@documentation(docs="A list of plugins loaded by the server.")
+		public List<String> plugins;
+		@documentation(docs="If true, users are authenticated with Mojang before login.")
+		public boolean onlineMode;
+
+		@Override
+		protected String alias(String field) {
+			if("0".equals(field)){
+				return "serverName";
+			} else if("1".equals(field)){
+				return "apiVersion";
+			} else if("2".equals(field)){
+				return "implementationVersion";
+			} else if("3".equals(field)){
+				return "allowFlight";
+			} else if("4".equals(field)){
+				return "allowNether";
+			} else if("5".equals(field)){
+				return "allowEnd";
+			} else if("6".equals(field)){
+				return "worldContainer";
+			} else if("7".equals(field)){
+				return "maxPlayerLimit";
+			} else if("8".equals(field)){
+				return "operators";
+			} else if("9".equals(field)){
+				return "plugins";
+			} else if("10".equals(field)){
+				return "onlineMode";
+			} else {
+				return null;
+			}
+		}
+		
 	}
 
 	@api(environments={CommandHelperEnvironment.class})
@@ -775,29 +836,15 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "mixed {[value]} Returns various information about server."
-					+ "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
-					+ " will be returned. ---- Otherwise if value is not specified (or is -1), it returns an array of"
-					+ " information with the following pieces of information in the specified index: "
-					+ "<ul><li>0 - Server name; the name of the server in server.properties. "
-					+ "</li><li>1 - API version; The bukkit api version that is implemented in this build.</li><li>2 - Bukkit version; The version of craftbukkit your using.  "
-					+ "</li><li>3 - Allow flight; If true, minecrafts inbuild anti fly check is enabled.</li><li>4 - Allow nether; is true, nether is enabled"
-					+ "</li><li>5 - Allow end; if true, end is enabled"
-					+ "</li><li>6 - World container; The path to the world container.</li><li>7 - "
-					+ "Max player limit; returns the player limit.</li><li>8 - Operators; An array of operators on the server.</li>"
-					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li>"
-					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li></ul>";
+			return "Returns various information about server.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MServerInfo.class);
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -819,98 +866,26 @@ public class Minecraft {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
 
+			MServerInfo info = new MServerInfo();
+			info.serverName = server.getServerName();
+			info.apiVersion = server.getVersion();
+			info.implementationVersion = server.getModVersion();
+			info.allowFlight = server.getAllowFlight();
+			info.allowNether = server.getAllowNether();
+			info.allowEnd = server.getAllowEnd();
+			info.worldContainer = server.getWorldContainer();
+			info.maxPlayerLimit = server.getMaxPlayers();
+			info.operators = new ArrayList<String>();
+			for(MCOfflinePlayer o : server.getOperators()){
+				info.operators.add(o.getName());
+			}
+			info.plugins = new ArrayList<String>();
+			for(MCPlugin p: server.getPluginManager().getPlugins()){
+				info.plugins.add(p.getName());
+			}
+			info.onlineMode = server.getOnlineMode();
 
-			int index = -1;
-			if (args.length == 0) {
-				index = -1;
-			} else if (args.length == 1) {
-				index = Static.getInt32(args[0], t);
-			}
-
-			if (index < -1 || index > 10) {
-				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 10 (inclusive)",
-						ExceptionType.RangeException, t);
-			}
-
-			assert index >= -1 && index <= 10; // Is this needed? Above statement should cause this to never be true. - entityreborn
-			ArrayList<Construct> retVals = new ArrayList<Construct>();
-
-			if (index == 0 || index == -1) {
-				//Server name
-				retVals.add(new CString(server.getServerName(), t));
-			}
-
-			if (index == 1 || index == -1) {
-				//Server Version
-				retVals.add(new CString(server.getVersion(), t));
-			}
-			if (index == 2 || index == -1) {
-				//Bukkit Version
-				retVals.add(new CString(server.getModVersion(), t));
-			}
-			if (index == 3 || index == -1) {
-				//Allow flight
-				retVals.add(new CBoolean(server.getAllowFlight(), t));
-			}
-			if (index == 4 || index == -1) {
-				//Allow nether
-				retVals.add(new CBoolean(server.getAllowNether(), t));
-			}
-			if (index == 5 || index == -1) {
-				//Allow end
-				retVals.add(new CBoolean(server.getAllowEnd(), t));
-			}
-			if (index == 6 || index == -1) {
-				//World container
-				retVals.add(new CString(server.getWorldContainer(), t));
-			}
-			if (index == 7 || index == -1) {
-				//Max player limit
-				retVals.add(new CInt(server.getMaxPlayers(), t));
-			}
-			if (index == 8 || index == -1) {
-				//Array of op's
-				CArray co = new CArray(t);
-				List<MCOfflinePlayer> so = server.getOperators();
-				for (MCOfflinePlayer o : so) {
-					if (o == null) {
-						continue;
-					}
-					CString os = new CString(o.getName(), t);
-					co.push(os);
-				}
-				retVals.add(co);
-			}
-			if (index == 9 || index == -1) {
-				//Array of plugins
-				CArray co = new CArray(t);
-				List<MCPlugin> plugs = server.getPluginManager().getPlugins();
-				
-				for (MCPlugin p : plugs) {
-					if (p == null) {
-						continue;
-					}
-					
-					CString name = new CString(p.getName(), t);
-					co.push(name);
-				}
-				
-				retVals.add(co);
-			}
-			if (index == 10 || index == -1) {
-				//Online Mode
-				retVals.add(new CBoolean(server.getOnlineMode(), t));
-			}
-
-			if (retVals.size() == 1) {
-				return retVals.get(0);
-			} else {
-				CArray ca = new CArray(t);
-				for (Construct c : retVals) {
-					ca.push(c);
-				}
-				return ca;
-			}
+			return info.deconstruct(t);
 		}
 	}
 
@@ -926,18 +901,15 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "Array {} An array of players banned on the server.";
+			return "An array of players banned on the server.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -984,18 +956,15 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "Array {} An array of players whitelisted on the server.";
+			return "An array of players whitelisted on the server.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -1070,18 +1039,17 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "string {locationArray} Gets the spawner type of the specified mob spawner. ----"
+			return "Gets the spawner type of the specified mob spawner."
 					+ " Valid types will be one of the mob types.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MCEntityType.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location")
 					);
 		}
 
@@ -1131,18 +1099,18 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
-					+ " or if the type is invalid, a FormatException is thrown.";
+			return "Sets the mob spawner type at the location specified."
+					+ " If the location is not a mob spawner, a FormatException is thrown.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location"),
+						new Argument("The spawner type to create", MCEntityType.class, "type")
 					);
 		}
 
@@ -1187,13 +1155,13 @@ public class Minecraft {
 			MCFireworkType type = MCFireworkType.BALL;
 			
 			if(options.containsKey("strength")){
-				strength = Static.getInt32(options.get("strength"), t);
+				strength = options.get("strength").primitive(t).castToInt32(t);
 			}
 			if(options.containsKey("flicker")){
-				flicker = Static.getBoolean(options.get("flicker"));
+				flicker = options.get("flicker").primitive(t).castToBoolean();
 			}
 			if(options.containsKey("trail")){
-				trail = Static.getBoolean(options.get("trail"));
+				trail = options.get("trail").primitive(t).castToBoolean();
 			}
 			if(options.containsKey("colors")){
 				colors = parseColors(options.get("colors"), t);
@@ -1255,9 +1223,9 @@ public class Minecraft {
 		
 		private MCColor parseColor(CArray ca, Target t){
 			return StaticLayer.GetConvertor().GetColor(
-							Static.getInt32(ca.get(0), t), 
-							Static.getInt32(ca.get(1), t), 
-							Static.getInt32(ca.get(2), t)
+							ca.get(0).primitive(t).castToInt32(t), 
+							ca.get(1).primitive(t).castToInt32(t), 
+							ca.get(2).primitive(t).castToInt32(t)
 						);
 		}
 		
@@ -1312,13 +1280,13 @@ public class Minecraft {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, ""),
+						new Argument("", CArray.class, "")
 					);
 		}
 

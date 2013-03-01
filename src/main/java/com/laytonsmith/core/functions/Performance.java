@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -49,7 +50,7 @@ public class Performance {
         }
 
         public String docs() {
-            return "void {boolean} Enables performance logging. The allow-profiling option must be set to true in your preferences file,"
+            return "Enables performance logging. The allow-profiling option must be set to true in your preferences file,"
                     + " and play-dirty mode must be active. If allow-profiling is set to false, a SecurityException is thrown."
                     + " The debug filters are used by the performance logger, if you choose to filter through the events."
                     + " See the documenation"
@@ -57,13 +58,12 @@ public class Performance {
         }
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CBoolean.class, "enabled")
 					);
 		}
 
@@ -86,7 +86,7 @@ public class Performance {
             if(!Prefs.AllowProfiling()){
                 throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, t);
             }
-            PERFORMANCE_LOGGING = Static.getBoolean(args[0]);
+            PERFORMANCE_LOGGING = args[0].primitive(t).castToBoolean();
             return new CVoid(t);
         }
         

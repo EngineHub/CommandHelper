@@ -61,7 +61,7 @@ public class Weather {
 				safeIndex = 3;
 			}
 			if (args.length >= safeIndex + 1) {
-				safe = Static.getBoolean(args[safeIndex]);
+				safe = args[safeIndex].primitive(t).castToBoolean();
 			}
 			if (w != null) {
 				if (!safe) {
@@ -117,7 +117,7 @@ public class Weather {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			boolean b = Static.getBoolean(args[0]);
+			boolean b = args[0].primitive(t).castToBoolean();
 			MCWorld w = null;
 			if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
 				w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
@@ -131,7 +131,7 @@ public class Weather {
 				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
 			if (args.length == 3) {
-				w.setWeatherDuration(Static.getInt32(args[2], t));
+				w.setWeatherDuration(args[2].primitive(t).castToInt32(t));
 			}
 			return new CVoid(t);
 		}
@@ -195,12 +195,12 @@ public class Weather {
 				w = Static.getServer().getWorld(args[1].val());
 			}
 			if (w != null) {
-				w.setThundering(Static.getBoolean(args[0]));
+				w.setThundering(args[0].primitive(t).castToBoolean());
 			} else {
 				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
 			}
 			if (args.length == 3) {
-				w.setThunderDuration(Static.getInt32(args[2], t));
+				w.setThunderDuration(args[2].primitive(t).castToInt32(t));
 			}
 			return new CVoid(t);
 		}

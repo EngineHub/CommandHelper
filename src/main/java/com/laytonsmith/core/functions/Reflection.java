@@ -6,6 +6,7 @@ import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -13,6 +14,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistance.DataSourceFactory;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -51,7 +53,7 @@ public class Reflection {
 		}
 
 		public String docs() {
-			return "mixed {param, [args, ...]} Returns information about the runtime in a usable"
+			return "Returns information about the runtime in a usable"
 					+ " format. Depending on the information returned, it may be useable directly,"
 					+ " or it may be more of a referential format. ---- The following items can be retrieved:"
 					+ "<table><tr><th>param</th><th>args</th><th>returns/description</th></tr>"
@@ -68,13 +70,13 @@ public class Reflection {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", Mixed.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "param"),
+						new Argument("", CString.class, "args").setVarargs()
 					);
 		}
 
@@ -263,7 +265,7 @@ public class Reflection {
 		}
 
 		public String docs() {
-			return "string { | element, docField} Returns the documentation for an element. There are 4 things that an element might have,"
+			return "Returns the documentation for an element. There are 4 things that an element might have,"
 					+ " and one of these should be passed as the docField argument: type, return, args, description. A valid element is either"
 					+ " the name of an ivariable, or a function/proc. For instance, reflect_docs('reflect_docs', 'description') would return"
 					+ " what you are reading right now. User defined variables and procs may not have any documentation, in which case null"
@@ -272,13 +274,15 @@ public class Reflection {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1,
+							new Argument("", CString.class, "element"),
+							new Argument("", CString.class, "docField")
+						), new Signature(2)
 					);
 		}
 
