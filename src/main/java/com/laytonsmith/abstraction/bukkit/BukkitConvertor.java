@@ -172,6 +172,9 @@ public class BukkitConvertor extends AbstractConvertor {
     	}
     	//TODO: Change this to a reflection mechanism, this is getting tiresome to do.
 		//truth.
+		if (be instanceof Firework) {
+			return new BukkitMCFirework((Firework) be);
+		}
 		if(be instanceof FallingBlock){
 			return new BukkitMCFallingBlock((FallingBlock) be);
 		}
@@ -254,11 +257,17 @@ public class BukkitConvertor extends AbstractConvertor {
 		if (im instanceof EnchantmentStorageMeta) {
 			return new BukkitMCEnchantmentStorageMeta((EnchantmentStorageMeta) im);
 		}
+		if (im instanceof FireworkEffectMeta) {
+			
+		}
+		if (im instanceof FireworkMeta) {
+			return new BukkitMCFireworkMeta((FireworkMeta) im);
+		}
 		if (im instanceof LeatherArmorMeta) {
 			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
 		}
 		if (im instanceof PotionMeta) {
-			
+			return new BukkitMCPotionMeta((PotionMeta) im);
 		}
 		if (im instanceof SkullMeta) {
 			return new BukkitMCSkullMeta((SkullMeta) im);
@@ -375,8 +384,8 @@ public class BukkitConvertor extends AbstractConvertor {
 		return BukkitMCColor.GetMCColor(Color.fromRGB(red, green, blue));
 	}
 
-	public MCFirework GetFirework() {
-		return new BukkitMCFirework();
+	public MCFireworkBuilder GetFireworkBuilder() {
+		return new BukkitMCFireworkBuilder();
 	}
 
 	public MCPluginMeta GetPluginMeta() {

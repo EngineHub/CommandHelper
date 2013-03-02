@@ -305,10 +305,11 @@ public class ObjectGenerator {
     
 	public Construct itemMeta(MCItemStack is, Target t) {
 		Construct ret, display, lore, color, title, author, pages, owner, stored;
+		CArray enchants, effects;
 		if (!is.hasItemMeta()) {
 			ret = new CNull(t);
 		} else {
-			ret = CArray.GetAssociativeArray(t);
+			CArray ma = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
 			if (meta.hasDisplayName()) {
 				display = new CString(meta.getDisplayName(), t);
@@ -323,11 +324,13 @@ public class ObjectGenerator {
 			} else {
 				lore = new CNull(t);
 			}
-			((CArray) ret).set("display", display, t);
-			((CArray) ret).set("lore", lore, t);
+			enchants = enchants(meta.getEnchants(), t);
+			ma.set("display", display, t);
+			ma.set("lore", lore, t);
+			ma.set("enchants", enchants, t);
 			if (meta instanceof MCLeatherArmorMeta) {
 				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
-				((CArray) ret).set("color", color, t);
+				ma.set("color", color, t);
 			}
 			if (meta instanceof MCBookMeta) {
 				if (((MCBookMeta) meta).hasTitle()) {
@@ -348,9 +351,9 @@ public class ObjectGenerator {
 				} else {
 					pages = new CNull(t);
 				}
-				((CArray) ret).set("title", title, t);
-				((CArray) ret).set("author", author, t);
-				((CArray) ret).set("pages", pages, t);
+				ma.set("title", title, t);
+				ma.set("author", author, t);
+				ma.set("pages", pages, t);
 			}
 			if (meta instanceof MCSkullMeta) {
 				if (((MCSkullMeta) meta).hasOwner()) {
@@ -358,22 +361,24 @@ public class ObjectGenerator {
 				} else {
 					owner = new CNull(t);
 				}
-				((CArray) ret).set("owner", owner, t);
+				ma.set("owner", owner, t);
 			}
 			if (meta instanceof MCEnchantmentStorageMeta) {
 				if (((MCEnchantmentStorageMeta) meta).hasStoredEnchants()) {
-					stored = new CArray(t);
-					for (Map.Entry<MCEnchantment, Integer> entry : ((MCEnchantmentStorageMeta) meta).getStoredEnchants().entrySet()) {
-						CArray eObj = CArray.GetAssociativeArray(t);
-						eObj.set("etype", new CString(entry.getKey().getName(), t), t);
-						eObj.set("elevel", new CInt(entry.getValue(), t), t);
-						((CArray) stored).push(eObj);
-					}
+					stored = enchants(((MCEnchantmentStorageMeta) meta).getStoredEnchants(), t);
 				} else {
 					stored = new CNull(t);
 				}
-				((CArray) ret).set("stored", stored, t);
+				ma.set("stored", stored, t);
 			}
+			if (meta instanceof MCPotionMeta) {
+				effects = potions(((MCPotionMeta) meta).getCustomEffects(), t);
+				ma.set("potions", effects, t);
+				if (effects.size() > 0) {
+					ma.set("main", ((CArray) effects.get(0)).get("id"), t);
+				}
+			}
+			ret = ma;
 		}
 		return ret;
 	}
@@ -406,6 +411,16 @@ public class ObjectGenerator {
 						meta.setLore(ll);
 					} else {
 						throw new Exceptions.FormatException("Lore was expected to be an array.", t);
+					}
+				}
+				if (ma.containsKey("enchants")) {
+					Construct enchants = ma.get("enchants");
+					if (enchants instanceof CArray) {
+						for (Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) enchants, t).entrySet()) {
+							meta.addEnchant(ench.getKey(), ench.getValue(), true);
+						}
+					} else {
+						throw new Exceptions.FormatException("Enchants field was expected to be an array of Enchantment arrays", t);
 					}
 				}
 				if (meta instanceof MCLeatherArmorMeta) {
@@ -463,19 +478,28 @@ public class ObjectGenerator {
 						if (stored instanceof CNull) {
 							//Still doing nothing
 						} else if (stored instanceof CArray) {
-							for (String index : ((CArray) stored).keySet()) {
-								try {
-									CArray earray = (CArray) ((CArray) stored).get(index);
-									MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(earray.get("etype").val());
-									int elevel = Static.getInt32(earray.get("elevel"), t);
-									((MCEnchantmentStorageMeta) meta).addStoredEnchant(etype, elevel, true);
-								} catch (Exception bade) {
-									throw new Exceptions.FormatException("Could not get enchantment data from index " + index, t);
-								}
+							for (Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) stored, t).entrySet()) {
+								((MCEnchantmentStorageMeta) meta).addStoredEnchant(ench.getKey(), ench.getValue(), true);
 							}
 						} else {
 							throw new Exceptions.FormatException("Stored field was expected to be an array of Enchantment arrays", t);
 						}
+					}
+				}
+				if (meta instanceof MCPotionMeta) {
+					if (ma.containsKey("potions")) {
+						Construct effects = ma.get("potions", t);
+						if (effects instanceof CArray) {
+							for (MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
+								((MCPotionMeta) meta).addCustomEffect(e.getPotionID(), e.getStrength(),
+										e.getSecondsRemaining(), e.isAmbient(), true, t);
+							}
+						} else {
+							throw new Exceptions.FormatException("Effects was expected to be an array of potion arrays.", t);
+						}
+					}
+					if (ma.containsKey("main")) {
+						((MCPotionMeta) meta).setMainEffect(Static.getInt32(ma.get("main", t), t));
 					}
 				}
 			} catch(Exception ex) {
@@ -600,5 +624,77 @@ public class ObjectGenerator {
 		} else {
 			throw new Exceptions.FormatException("Expected an array but recieved " + c, t);
 		}
+	}
+	
+	public CArray enchants(Map<MCEnchantment, Integer> map, Target t) {
+		CArray ret = new CArray(t);
+		for (Map.Entry<MCEnchantment, Integer> entry : map.entrySet()) {
+			CArray eObj = CArray.GetAssociativeArray(t);
+			eObj.set("etype", new CString(entry.getKey().getName(), t), t);
+			eObj.set("elevel", new CInt(entry.getValue(), t), t);
+			ret.push(eObj);
+		}
+		return ret;
+	}
+	
+	public Map<MCEnchantment,Integer> enchants(CArray enchantArray, Target t) {
+		Map<MCEnchantment,Integer> ret = new HashMap<MCEnchantment,Integer>();
+		for (String key : enchantArray.keySet()) {
+			try {
+				CArray ea = (CArray) enchantArray.get(key, t);
+				MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(ea.get("etype", t).val());
+				int elevel = Static.getInt32(ea.get("elevel", t), t);
+				if (etype == null) {
+					throw new ConfigRuntimeException("Unknown enchantment type at " + key, 
+							ExceptionType.EnchantmentException, t);
+				}
+				ret.put(etype, elevel);
+			} catch (ClassCastException cce) {
+				throw new ConfigRuntimeException("Expected an array at index " + key, ExceptionType.FormatException, t);
+			}
+		}
+		return ret;
+	}
+	
+	public CArray potions(List<MCLivingEntity.MCEffect> effectList, Target t) {
+		CArray ea = new CArray(t);
+		for (MCLivingEntity.MCEffect eff : effectList) {
+			CArray effect = CArray.GetAssociativeArray(t);
+			effect.set("id", new CInt(eff.getPotionID(), t), t);
+			effect.set("strength", new CInt(eff.getStrength(), t), t);
+			effect.set("seconds", new CInt(eff.getSecondsRemaining(), t), t);
+			effect.set("ambient", new CBoolean(eff.isAmbient(), t), t);
+			ea.push(effect);
+		}
+		return ea;
+	}
+	
+	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t) {
+		List<MCLivingEntity.MCEffect> ret = new ArrayList<MCLivingEntity.MCEffect>();
+		for (String key : ea.keySet()) {
+			if (ea.get(key, t) instanceof CArray) {
+				CArray effect = (CArray) ea.get(key, t);
+				int potionID = 0, strength = 0, seconds = 30;
+				boolean ambient = false;
+				if (effect.containsKey("id")) {
+					potionID = Static.getInt32(effect.get("id", t), t);
+				} else {
+					throw new Exceptions.FormatException("No potion ID was given at index " + key, t);
+				}
+				if (effect.containsKey("strength")) {
+					strength = Static.getInt32(effect.get("strength", t), t);
+				}
+				if (effect.containsKey("seconds")) {
+					seconds = Static.getInt32(effect.get("seconds", t), t);
+				}
+				if (effect.containsKey("ambient")) {
+					ambient = Static.getBoolean(effect.get("ambient", t));
+				}
+				ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient));
+			} else {
+				throw new Exceptions.FormatException("Expected a potion array at index" + key, t);
+			}
+		}
+		return ret;
 	}
 }

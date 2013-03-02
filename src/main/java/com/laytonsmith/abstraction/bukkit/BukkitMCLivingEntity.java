@@ -239,7 +239,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 	public List<MCEffect> getEffects(){
 		List<MCEffect> effects = new ArrayList<MCEffect>();
 		for(PotionEffect pe : le.getActivePotionEffects()){
-			MCEffect e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), (int)(Static.ticksToMs(pe.getDuration()) / 1000));
+			MCEffect e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), 
+					(int)(Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient());
 			effects.add(e);
 		}
 		return effects;
