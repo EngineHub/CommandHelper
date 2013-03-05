@@ -6,8 +6,9 @@ import com.laytonsmith.core.CHVersion;
  *
  * @author lsmith
  */
-public class Override extends MAnnotation {
+public class MOverride extends MAnnotation {
 
+	@Override
 	public String getName() {
 		return "Override";
 	}

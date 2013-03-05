@@ -25,11 +25,22 @@ public class Ranged extends MAnnotation {
 		this.max = max;
 	}
 	
+	public Ranged(double min, boolean minInclusive, double max, boolean maxInclusive){
+		this(min, max);
+		this.minInclusive = minInclusive;
+		this.maxInclusive = maxInclusive;
+	}
+	
 	public String docs() {
 		return "Used on an argument to indicate that it is a ranged argument. The type of the argument must be a number.";
 	}
 
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
+	}
+
+	@java.lang.Override
+	public String toString() {
+		return (minInclusive?"[":"(") + min + ", " + max + (maxInclusive?"]":")");
 	}
 }

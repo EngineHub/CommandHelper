@@ -4,10 +4,15 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.documentation;
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
+import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.compiler.Optimizable.OptimizationOption;
 import com.laytonsmith.core.constructs.*;
@@ -18,6 +23,11 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MItemStack;
+import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.annotations.Ranged;
+import com.laytonsmith.core.natives.interfaces.MObject;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -30,6 +40,9 @@ import java.util.regex.Pattern;
  * @author Layton
  */
 public class PlayerManagement {
+	
+	private static final Argument PLAYER_ARG = new Argument("The name of the player to run the function with. If not provided,"
+			+ " the player running the current execution context is used.", CString.class, "player").setOptionalDefaultNull();
 
 	public static String docs() {
 		return "This class of functions allow players to be managed";
@@ -57,7 +70,7 @@ public class PlayerManagement {
 			// for player entities in CraftBukkit, this is the player's name, and
 			// for the console it's "CONSOLE".
 			if (p == null) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			} else {
 				String name = p.getName();
 				return new CString(("CONSOLE".equals(name)) ? "~console" : name, t);
@@ -65,20 +78,19 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "string {[playerName]} Returns the full name of the partial Player name specified or the Player running the command otherwise. If the command is being run from"
+			return "Returns the full name of the partial Player name specified or the Player running the command otherwise. If the command is being run from"
 					+ " the console, then the string '~console' is returned. If the command is coming from elsewhere, returns a string chosen by the sender of this command (or null)."
 					+ " Note that most functions won't support the user '~console' (they'll throw a PlayerOfflineException), but you can use this to determine"
 					+ " where a command is being run from.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", CString.class, "partialPlayer").setOptionalDefaultNull()
 					);
 		}
 
@@ -120,18 +132,15 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "array {} Returns an array of all the player names of all the online players on the server";
+			return "Returns an array of all the player names of all the online players on the server";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -195,7 +204,7 @@ public class PlayerManagement {
 			double dist;
 
 			if (args.length == 1) {
-				dist = Static.getDouble(args[0], t);
+				dist = args[0].primitive(t).castToDouble(t);
 				Static.AssertPlayerNonNull(p, t);
 				loc = p.getLocation();
 			} else {
@@ -205,7 +214,7 @@ public class PlayerManagement {
 				}
 
 				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
-				dist = Static.getDouble(args[1], t);
+				dist = args[1].primitive(t).castToDouble(t);
 			}
 
 			CArray sa = new CArray(t);
@@ -220,17 +229,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "array {[location array], distance} Returns an array of all the player names of all the online players within the given radius";
+			return "Returns an array of all the player names of all the online players within the given radius";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("", MLocation.class, "location").setOptionalDefaultNull(),
+						new Argument("", CInt.class, "distance")
 					);
 		}
 
@@ -272,28 +281,23 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			MCLocation l = m.getLocation();
-			MCWorld w = m.getWorld();
-			return new CArray(t,
-					new CDouble(l.getX(), t),
-					new CDouble(l.getY() - 1, t),
-					new CDouble(l.getZ(), t),
-					new CString(w.getName(), t));
+			MLocation loc = new MLocation(m.getLocation());
+			return loc.deconstruct(t);
 		}
 
 		public String docs() {
-			return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise. Note that the y coordinate is"
-					+ " in relation to the block the player is standing on. The array returned will also include the player's world in index 3 of the array.";
+			return "Returns the location of the player specified, or the player running the command otherwise. Note that the y coordinate is"
+					+ " in relation to the block the player is standing on. Note that the location also includes the yaw and pitch, which"
+					+ " is used to determine the direction the player is facing.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -326,20 +330,27 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the player to the specified coordinates. If the coordinates"
+			return "Sets the location of the player to the specified coordinates. If the coordinates"
 					+ " are not valid, or the player was otherwise prevented from moving, false is returned, otherwise true. If player is omitted, "
 					+ " the current player is used. Note that 1 is automatically added to the y component, which means that sending a player to"
 					+ " x, y, z coordinates shown with F3 will work as expected, instead of getting them stuck inside the floor. ";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1,
+							PLAYER_ARG,
+							new Argument("", MLocation.class, "location")
+						), new Signature(2,
+							PLAYER_ARG,
+							new Argument("", CNumber.class, "x"),
+							new Argument("", CNumber.class, "y"),
+							new Argument("", CNumber.class, "z")
+						)
 					);
 		}
 
@@ -432,7 +443,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "array {[player], [array]} Returns an array with the (x, y, z, world) coordinates of the block the player has highlighted"
+			return "Returns the location of the block the player has highlighted"
 					+ " in their crosshairs. If player is omitted, the current player is used. If the block is too far, a"
 					+ " RangeException is thrown. An array of ids to be considered transparent can be supplied, otherwise"
 					+ " only air will be considered transparent. Providing an empty array will cause air to be considered"
@@ -440,13 +451,13 @@ public class PlayerManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CArray.class, "transparent").setGenerics(new Generic(new Class[]{MItemStack.class, CInt.class, CString.class}))
 					);
 		}
 
@@ -471,18 +482,18 @@ public class PlayerManagement {
 					CArray ta = (CArray) args[0];
 					trans = new HashSet<Short>();
 					for (int i=0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i), t));
+						trans.add(ta.get(i).primitive(t).castToInt16(t));
 					}
 				} else {
 					p = Static.GetPlayer(args[0], t);
 				}
 			} else if (args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				if(args[1] instanceof CArray) {
+				if(args[1] instanceof CArray && !args[1].isNull()) {
 					CArray ta = (CArray) args[1];
 					trans = new HashSet<Short>();
 					for (int i=0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i), t));
+						trans.add(ta.get(i).primitive(t).castToInt16(t));
 					}
 				} else {
 					throw new Exceptions.FormatException("An array was expected for argument 2 but received " + args[1], t);
@@ -549,13 +560,12 @@ public class PlayerManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -614,13 +624,12 @@ public class PlayerManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -641,6 +650,92 @@ public class PlayerManagement {
 		}
 	}
 
+	@typename("PlayerInfo")
+	public static class MPlayerInfo extends MObject{
+		@documentation(docs="This is the player's exact name")
+		public String name;
+		@documentation(docs="The current location of the player")
+		public MLocation location;
+		@documentation(docs="The location of the player's cursor, or null if it is out of sight")
+		public MLocation cursor;
+		@documentation(docs="The IP address of the player")
+		public String ip;
+		@documentation(docs="The display name of the player")
+		public String displayName;
+		@documentation(docs="The player's current health")
+		public int health;
+		@documentation(docs="The item that the player is currently holding")
+		public MItemStack itemInHand;
+		@documentation(docs="The world that the player is in")
+		public String world;
+		@documentation(docs="True if the player is op")
+		public boolean op;
+		@documentation(docs="A list of the groups the player is in")
+		public List<String> groups;
+		@documentation(docs="The hostname of the player, or the ip if the reverse lookup didn't return anything, or hasn't yet finished")
+		public String hostname;
+		@documentation(docs="True if the player is sneaking")
+		public boolean sneaking;
+		@documentation(docs="The host the player connected to to join this server")
+		public String host;
+		@documentation(docs="The entity ID of this player")
+		public int entityID;
+		@documentation(docs="True if this player is currently in a vehicle")
+		public boolean riding;
+		@documentation(docs="The slot number that the player currently has highlighted in their hotbar")
+		public int currentSlot;
+		@documentation(docs="True if the player is sleeping")
+		public boolean sleeping;
+		@documentation(docs="True if the player is blocking")
+		public boolean blocking;
+		@documentation(docs="True if the player is flying")
+		public boolean flying;
+
+		@Override
+		protected String alias(String field) {
+			if("0".equals(field)){
+				return "name";
+			} else if("1".equals(field)){
+				return "location";
+			} else if("2".equals(field)){
+				return "cursor";
+			} else if("3".equals(field)){
+				return "ip";
+			} else if("4".equals(field)){
+				return "displayName";
+			} else if("5".equals(field)){
+				return "health";
+			} else if("6".equals(field)){
+				return "itemInHand";
+			} else if("7".equals(field)){
+				return "world";
+			} else if("8".equals(field)){
+				return "op";
+			} else if("9".equals(field)){
+				return "groups";
+			} else if("10".equals(field)){
+				return "hostname";
+			} else if("11".equals(field)){
+				return "sneaking";
+			} else if("12".equals(field)){
+				return "host";
+			} else if("13".equals(field)){
+				return "entityID";
+			} else if("14".equals(field)){
+				return "riding";
+			} else if("15".equals(field)){
+				return "currentSlot";
+			} else if("16".equals(field)){
+				return "sleeping";
+			} else if("17".equals(field)){
+				return "blocking";
+			} else if("18".equals(field)){
+				return "flying";
+			} else {
+				return null;
+			}
+		}		
+	}
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class pinfo extends AbstractFunction {
 
@@ -653,32 +748,19 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "mixed {[pName], [value]} Returns various information about the player specified, or the current player if no argument was given. ---- "
-					+ "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
-					+ " will be returned. Otherwise if value is not specified (or is -1), it returns an array of"
-					+ " information with the following pieces of information in the specified index: "
-					+ "<ul><li>0 - player's name; This will return the player's exact name, "
-					+ " even if called with a partial match.</li><li>1 - player's location; an array of the player's xyz coordinates</li><li>2 - player's cursor; an array of the "
-					+ "location of the player's cursor, or null if the block is out of sight.</li><li>3 - player's IP; Returns the IP address of this player.</li><li>4 - Display name; The name that is used when the"
-					+ " player's name is displayed on screen typically. </li><li>5 - player's health; Gets the current health of the player, which will be an int"
-					+ " from 0-20.</li><li>6 - Item in hand; The value returned by this will be similar to the value returned by get_block_at()</li><li>7 - "
-					+ "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - player groups;"
-					+ " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
-					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
-					+ " <li>13 - Player's current entity id</li><li>14 - Is player in a vehicle? Returns true or false.</li>"
-					+ " <li>15 - The slot number of the player's current hand.</li>"
-					+ " <li>16 - Is sleeping?</li><li>17 - Is blocking?</li><li>18 - Is flying?</li>"
-					+ " </ul>";
+			return "Returns various information about the player specified, or the current player if no argument was given."
+					+ " If value is set, it should be an integer of one of the following indexes, and only that information for that index"
+					+ " will be returned. Otherwise if value is not specified (or is -1), it returns a PlayerInfo object.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", Mixed.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "index").setOptionalDefault(-1).addAnnotation(new Ranged(-1, 19))
 					);
 		}
 
@@ -717,6 +799,7 @@ public class PlayerManagement {
 
 			Static.AssertPlayerNonNull(p, t);
 			int maxIndex = 18;
+			//TODO: This needs converting to the PlayerInfo object
 			if (index < -1 || index > maxIndex) {
 				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
@@ -854,17 +937,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "string {[playerName]} Gets the world of the player specified, or the current player, if playerName isn't specified.";
+			return "Gets the world of the player specified, or the current player, if playerName isn't specified.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -911,18 +993,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[playerName], [message]} Kicks the specified player, with an optional message. If no message is specified, "
+			return "Kicks the specified player, with an optional message. If no message is specified, "
 					+ "\"You have been kicked\" is used. If no player is specified, the current player is used, with the default message.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CString.class, "message").setOptionalDefault("You have been kicked")
 					);
 		}
 
@@ -976,19 +1058,20 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {playerName, newDisplayName | newDisplayName} Sets a player's display name. If the second usage is used,"
-					+ " it sets the display name of the player running the command. See reset_display_name also. playerName, as well"
-					+ " as all CommandHelper commands expect the player's real name, not their display name.";
+			return "Sets a player's display name."
+					+ " See reset_display_name also. playerName, as well."
+					+ " It is important to note that all functions expect the"
+					+ " player's real name, not their display name.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CString.class, "displayName")
 					);
 		}
 
@@ -1039,18 +1122,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[playerName]} Resets a player's display name to their real name. If playerName isn't specified, defaults to the"
+			return "Resets a player's display name to their real name. If playerName isn't specified, defaults to the"
 					+ " player running the command.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -1085,6 +1167,67 @@ public class PlayerManagement {
 			return new CVoid(t);
 		}
 	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pfacing extends AbstractFunction{
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PLAYER_ARG,
+						new Argument("", CNumber.class, "yaw").addAnnotation(new Ranged(-90, 90)),
+						new Argument("", CNumber.class, "pitch").addAnnotation(new Ranged(0, 360))
+					);
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(list.getStringWithNull("player", t) != null){
+				p = Static.GetPlayer(list.getString("player", t), t);
+			}
+			Static.AssertPlayerNonNull(p, t);
+			float yaw = list.getFloat("yaw", t);
+			float pitch = list.getFloat("pitch", t);
+			MCLocation l = p.getLocation();
+			l.setYaw(yaw);
+			l.setPitch(pitch);
+			p.teleport(l);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_pfacing";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "Sets the direction the player is facing. See pfacing for what the range of the numbers means.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pfacing extends AbstractFunction {
@@ -1098,13 +1241,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "mixed {F | yaw, pitch | player, F | player, yaw, pitch | player | &lt;none&gt;} Sets the direction the player is facing. ---- When using the first variation, expects an integer 0-3, which will"
-					+ " set the direction the player faces using their existing pitch (up and down) but sets their yaw (left and right) to one of the"
-					+ " cardinal directions, as follows: 0 - West, 1 - South, 2 - East, 3 - North, which corresponds to the directions given by F when"
-					+ " viewed with F3. In the second variation, specific yaw and pitches can be provided. If the player is not specified, the current player"
-					+ " is used. If just the player is specified, that player's yaw and pitch are returned as an array, or if no arguments are given, the"
-					+ " player running the command's yaw and pitch are returned as an array. The function returns void when setting the values. (Note that while this"
-					+ " function looks like it has ambiguous arguments, players cannot be named numbers.) A note on numbers: The values returned by the getter will always be"
+			return "Gets the direction the player is facing. ---- A note on the meaning of the values: The values returned will always be"
 					+ " as such: pitch will always be a number between 90 and -90, with -90 being the player looking up, and 90 being the player looking down. Yaw will"
 					+ " always be a number between 0 and 359.9~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
 					+ " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";
@@ -3317,9 +3454,9 @@ public class PlayerManagement {
 						offset = 1;
 						p = Static.GetPlayer(args[0], t);
 					}
-					x = Static.getDouble(args[offset], t);
-					y = Static.getDouble(args[offset + 1], t);
-					z = Static.getDouble(args[offset + 2], t);
+					x = args[offset].primitive(t).castToDouble(t);
+					y = args[offset + 1].primitive(t).castToDouble(t);
+					z = args[offset + 2].primitive(t).castToDouble(t);
 					break;
 				}
 				default:
@@ -3607,7 +3744,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 				saturationIndex = 1;
 			}
-			saturation = (float) Static.getDouble(args[saturationIndex], t);
+			saturation = (float) args[saturationIndex].primitive(t).castToDouble(t);
 			p.setSaturation(saturation);
 			return new CVoid(t);
 		}
