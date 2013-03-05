@@ -1,0 +1,163 @@
+
+"Debugging is twice as hard as writing the code in the first place. Therefore, if
+you write the code as cleverly as possible, you are, by definition, not smart
+enough to debug it." --Brian Kernighan
+
+Debugging your code is an important, but challenging part of writing working code.
+Currently, MethodScript does not have an interactive debugger (though this is planned
+in the future) however, this does not stop you from debugging scripts anyways.
+When debugging, there are several key concepts
+
+  * Understand code flow
+  * Understand variable's values
+  * Know the assumptions you are making, and test assumptions that matter
+
+== Understand code flow ==
+
+The most important thing for you to know is how the code is supposed to work. Granted, there
+may be a problem with how it is actually working, but if you don't know what the code
+is supposed to do, you can't know what is wrong with it. This includes usages of the
+builtin API, as well as your own code. Stack traces are important to understand as well.
+Lets examine the components of a stack trace, given the following source code (line numbers
+have been added):
+
+<pre>
+1  #!/usr/local/bin/mscript
+2
+3  proc(_proc1, @a,
+4          return(_proc2(@a))
+5  )
+6  
+7  proc(_proc2, @b,
+8          return(1 / @b)
+9  )
+10 
+11 msg(_proc1(0))
+</pre>
+
+When we run this script, we get the following error:
+
+<pre>
+RangeException: Division by 0!
+        proc _proc2:Interpreter:8
+        proc _proc1:Interpreter:4
+        <<main code>>:Interpreter:11
+</pre>
+
+This is our ''stack trace''. The problem is that we are dividing by zero. The first
+line of the stack trace tells us what the error type was, and gives us the exception
+message as well. As you can see, the root of our problem is on line 8, if @b is 0. @b
+ends up being 0, so we end up dividing by zero, thus the exception. The root cause is always 
+the first element in the stack trace. Each stack trace element follows the format
+<code description>:<file path>:<line number>. In this case, the example was run from
+the command line, so the "main" file is run from the Interpreter, but normally this
+will contain a file path. The important information is the code description and the line
+number. The code description tells us that this is code defined in the procedure "_proc2",
+and the error is on line 8.
+
+<pre>
+8          return(1 / @b)
+</pre>
+
+If @b is zero, then this would certainly cause the error. However, there is more to the
+stack trace, which is useful, because this line may not be where we actually want to fix
+the error. The next element in the stack trace tells us that _proc2 was called from _proc1,
+on line 4.
+
+<pre>
+4          return(_proc2(@a))
+</pre>
+
+Ok, so this still doesn't help us much, because we don't know where @a came from,
+so lets dig down again into the stack trace. The last element is <<main code>>, which
+means that this is the "top level" of the execution unit. In this case, it means that
+the code is "loose" code, that is, it is not contained inside a procedure. 
+
+<pre>
+11 msg(_proc1(0))
+</pre>
+
+Aha! Now we see where the 0 is coming from, it is hard coded in at this point. Sometimes
+your code is more complicated though, and it's not so obvious where a value is coming from,
+which leads us to our next section:
+
+== Understand variable's values ==
+
+Sometimes it's not obvious where a variable's values come from. In this case, you can use
+runtime checks to gather the value of variables. The simplest way to do this is to use
+{{function|msg}} or {{function|console}} to output the value of the variable at that moment
+in time. Say you have a value that is brought in from storage:
+
+<pre>
+@value = get_value('my.value')
+</pre>
+
+We don't know offhand what @value is, so it may be useful to output the value before we use
+it, especially if it's involved in part of the stack trace chain.
+
+<pre>
+msg(@value)
+</pre>
+
+You can also use {{function|trace}} for a more detailed output, which includes the
+variable name. So, assuming @value contained 'string', then <code>trace(@value)</code>
+would output: <code>@value: string</code>.
+
+== Know the assumptions you are making, and test assumptions that matter ==
+
+As you look at the problem code, it is likely that you won't test all your assumptions. Sometimes,
+it's obvious what a particular value is, for instance, given this code:
+
+<pre>
+@value1 = $value
+@value2 = 1
+if(@value1 == 'test1'){
+	@value2 = 0
+}
+trace(@value1)
+_problem_code(@value2)
+</pre>
+
+If when we trace(@value1), we see that it is "test1", then we can safely assume that
+@value2 is 0. However, if we did not have that trace() present, (allowing us to know
+the value of @value1 for sure) we must be aware that we have two assumptions here. If the
+assumptions matter, that is, they are involved in the code that is having problems, we
+would be wise to test those assumptions, in order to rule out the problem.
+
+== Syntax errors ==
+
+These debugging techniques do not help with syntax errors. There is a difference between
+compiler errors and runtime errors. Syntax errors do not require testing values or anything,
+because they are a problem with your syntax, not your logic. For instance, in the following
+code, we are missing a parenthesis.
+
+<pre>
+if(@a == 2{
+	msg('a is 2')
+}
+</pre>
+
+These types of errors are usually more straightforward to fix, since the compiler can usually
+point us right at the code in question. Regardless, the code isn't actually running
+at this point, so our runtime debugging techniques aren't applicable here.
+
+== Bugs in MethodScript itself ==
+
+MethodScript is itself written in code, and is prone to bugs as well. These debugging
+techniques are not meant to be useful when you get a java stack trace, and in fact,
+the java stack trace often doesn't help you identify the problem at all. In these
+cases, you may be able to find a workaround which prevents the error, but in ALL
+cases if you get a Java stack trace, this is a bug which should be reported. An example
+Java stack trace looks like this:
+
+<pre>
+java.io.FileNotFoundException: test.txt
+        at java.io.FileInputStream.<init>(FileInputStream.java)
+        at java.io.FileInputStream.<init>(FileInputStream.java)
+        at com.example.Example.readFile(Example.java:19)
+        at com.example.Example.main(Example.java:7)
+</pre>
+
+If you can determine what was done to cause this error, please include that information
+in the bug report, but often times, this error can be fixed without any information
+other than the stack trace.
