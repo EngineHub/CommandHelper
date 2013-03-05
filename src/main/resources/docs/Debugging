@@ -49,7 +49,7 @@ line of the stack trace tells us what the error type was, and gives us the excep
 message as well. As you can see, the root of our problem is on line 8, if @b is 0. @b
 ends up being 0, so we end up dividing by zero, thus the exception. The root cause is always 
 the first element in the stack trace. Each stack trace element follows the format
-<code description>:<file path>:<line number>. In this case, the example was run from
+&lt;code description&gt;:&lt;file path&gt;:&lt;line number&gt;. In this case, the example was run from
 the command line, so the "main" file is run from the Interpreter, but normally this
 will contain a file path. The important information is the code description and the line
 number. The code description tells us that this is code defined in the procedure "_proc2",
@@ -69,7 +69,7 @@ on line 4.
 </pre>
 
 Ok, so this still doesn't help us much, because we don't know where @a came from,
-so lets dig down again into the stack trace. The last element is <<main code>>, which
+so lets dig down again into the stack trace. The last element is &lt;&lt;main code&gt;&gt;, which
 means that this is the "top level" of the execution unit. In this case, it means that
 the code is "loose" code, that is, it is not contained inside a procedure. 
 
