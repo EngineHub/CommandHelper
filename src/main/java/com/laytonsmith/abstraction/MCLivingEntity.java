@@ -53,10 +53,12 @@ public interface MCLivingEntity extends MCEntity {
 		private int potionID;
 		private int strength;
 		private int secondsRemaining;
-		public MCEffect(int potionID, int strength, int secondsRemaining){
+		private boolean ambient;
+		public MCEffect(int potionID, int strength, int secondsRemaining, boolean ambient){
 			this.potionID = potionID;
 			this.strength = strength;
 			this.secondsRemaining = secondsRemaining;
+			this.ambient = ambient;
 		}
 
 		public int getPotionID() {
@@ -69,6 +71,10 @@ public interface MCLivingEntity extends MCEntity {
 
 		public int getSecondsRemaining() {
 			return secondsRemaining;
+		}
+		
+		public boolean isAmbient() {
+			return ambient;
 		}
 
 	}

@@ -5,7 +5,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCColor;
-import com.laytonsmith.abstraction.MCFirework;
+import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFireworkType;
@@ -19,45 +19,45 @@ import org.bukkit.inventory.meta.FireworkMeta;
  *
  * @author Layton
  */
-public class BukkitMCFirework implements MCFirework {
+public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 	private FireworkEffect.Builder builder;
 	private int strength;
-	public BukkitMCFirework(){
+	public BukkitMCFireworkBuilder(){
 		builder = FireworkEffect.builder();
 		strength = 0;
 	}
 	
-	public MCFirework setFlicker(boolean flicker) {
+	public MCFireworkBuilder setFlicker(boolean flicker) {
 		builder.flicker(flicker);
 		return this;
 	}
 
-	public MCFirework setTrail(boolean trail) {
+	public MCFireworkBuilder setTrail(boolean trail) {
 		builder.trail(trail);
 		return this;
 	}
 
-	public MCFirework addColor(MCColor color) {
+	public MCFireworkBuilder addColor(MCColor color) {
 		builder.withColor(BukkitMCColor.GetColor(color));
 		return this;
 	}
 
-	public MCFirework addFadeColor(MCColor color) {
+	public MCFireworkBuilder addFadeColor(MCColor color) {
 		builder.withFade(BukkitMCColor.GetColor(color));
 		return this;
 	}
 	
-	public MCFirework setType(MCFireworkType type){
+	public MCFireworkBuilder setType(MCFireworkType type){
 		builder.with(BukkitMCFireworkType.getConvertor().getConcreteEnum(type));
 		return this;
 	}
 
-	public MCFirework setStrength(int i) {
+	public MCFireworkBuilder setStrength(int i) {
 		strength = i;
 		return this;
 	}
 	
-	public void launch(MCLocation l) {
+	public int launch(MCLocation l) {
 		FireworkEffect fe = builder.build();
 		Location ll = ((BukkitMCLocation)l).asLocation();
 		Firework fw = (Firework)ll.getWorld().spawnEntity(ll, EntityType.FIREWORK);
@@ -65,6 +65,7 @@ public class BukkitMCFirework implements MCFirework {
 		fwmeta.addEffect(fe);
 		fwmeta.setPower(strength);
 		fw.setFireworkMeta(fwmeta);
+		return fw.getEntityId();
 	}
 
 	
