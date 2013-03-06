@@ -5,6 +5,7 @@
 package com.laytonsmith.abstraction;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -52,4 +53,36 @@ public interface MCItemMeta extends AbstractionObject {
      * @param lore the lore that will be set
      */
     void setLore(List<String> lore);
+    
+    /**
+     * Checks if this item has any enchantments
+     * 
+     * @return true if there are enchantments
+     */
+    boolean hasEnchants();
+    
+    /**
+     * Gets the enchantments on this items
+     * 
+     * @return a map of MCEnchantment keys and enchantLevel values
+     */
+    Map<MCEnchantment, Integer> getEnchants();
+    
+    /**
+     * Adds a given enchantment to this meta
+     * 
+     * @param ench The type of enchantment to add
+     * @param level The level of enchantment
+     * @param ignoreLevelRestriction Should adding an outrageous level be allowed?
+     * @return whether the enchantment was added successfully
+     */
+    boolean addEnchant(MCEnchantment ench, int level, boolean ignoreLevelRestriction);
+    
+    /**
+     * Removes a given enchantment from this meta
+     * 
+     * @param ench The type of enchantment to remove
+     * @return whether the enchantment was removed successfully
+     */
+    boolean removeEnchant(MCEnchantment ench);
 }
