@@ -108,10 +108,10 @@ public class Sandbox {
 //        }
 //    }
     @api(environments={CommandHelperEnvironment.class})
-    public static class item_drop extends AbstractFunction {
+    public static class drop_item extends AbstractFunction {
 
         public String getName() {
-            return "item_drop";
+            return "drop_item";
         }
 
         public Integer[] numArgs() {
