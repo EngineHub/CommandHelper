@@ -155,7 +155,7 @@ public interface Convertor {
 	 * Returns an MCFirework which can be built.
 	 * @return 
 	 */
-	public MCFirework GetFirework();
+	public MCFireworkBuilder GetFireworkBuilder();
 	
 	public MCPluginMeta GetPluginMeta();
 	

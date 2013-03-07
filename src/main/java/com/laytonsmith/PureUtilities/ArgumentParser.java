@@ -862,8 +862,14 @@ public class ArgumentParser {
             b.append("\n");
         }
 		
-		if(flags.length() == 0){
-			b.append("\tNo options.\n");
+		if(shortCodes.isEmpty() && longCodes.isEmpty() && def == null && flags.length() == 0){
+			b.append("\tNo flags or options.\n");
+		} else {
+			if(shortCodes.isEmpty() && longCodes.isEmpty() && def == null){
+				b.append("\tNo options.\n");
+			} else if(flags.length() == 0){
+				b.append("\tNo flags.\n");
+			}
 		}
 
         for (Character c : shortCodes) {

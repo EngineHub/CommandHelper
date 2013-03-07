@@ -5,8 +5,15 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
@@ -46,6 +53,26 @@ public class BukkitMCItemMeta implements MCItemMeta {
 
 	public void setLore(List<String> lore) {
 		im.setLore(lore);
+	}
+	
+	public boolean hasEnchants() {
+		return im.hasEnchants();
+	}
+
+	public Map<MCEnchantment, Integer> getEnchants() {
+		Map<MCEnchantment, Integer> map = new HashMap<MCEnchantment, Integer>();
+		for(Entry<Enchantment, Integer> entry : im.getEnchants().entrySet()) {
+			map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
+		}
+		return map;
+	}
+	
+	public boolean addEnchant(MCEnchantment ench, int level, boolean ignoreLevelRestriction) {
+		return im.addEnchant(((BukkitMCEnchantment) ench).__Enchantment(), level, ignoreLevelRestriction);
+	}
+	
+	public boolean removeEnchant(MCEnchantment ench) {
+		return im.removeEnchant(((BukkitMCEnchantment) ench).__Enchantment());
 	}
 
 	public Object getHandle() {
