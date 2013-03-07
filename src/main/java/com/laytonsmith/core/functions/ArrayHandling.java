@@ -409,7 +409,11 @@ public class ArrayHandling {
 			CArray array = Static.getArray(args[0], t);
 			Construct value = args[1];
 			int index = Static.getInt32(args[2], t);
-			array.push(value, index);
+			try{
+				array.push(value, index);
+			} catch(IllegalArgumentException e){
+				throw new Exceptions.CastException(e.getMessage(), t);
+			}
 			return new CVoid(t);
 		}
 
