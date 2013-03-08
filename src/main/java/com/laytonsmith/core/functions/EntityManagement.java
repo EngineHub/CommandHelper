@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
@@ -29,7 +30,6 @@ public class EntityManagement {
     }
 	
 	public static abstract class EntityFunction extends AbstractFunction {
-
 		public boolean isRestricted() {
 			return true;
 		}
@@ -40,6 +40,27 @@ public class EntityManagement {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+	
+	public static abstract class EntityGetterFunction extends EntityFunction {
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+		}
+		
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+	}
+	
+	public static abstract class EntitySetterFunction extends EntityFunction {
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
+					ExceptionType.BadEntityException};
+		}
+		
+		public Integer[] numArgs() {
+			return new Integer[]{2};
 		}
 	}
 
@@ -127,11 +148,7 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_loc extends EntityFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
-		}
+	public static class entity_loc extends EntityGetterFunction {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -141,10 +158,6 @@ public class EntityManagement {
 
 		public String getName() {
 			return "entity_loc";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{1};
 		}
 
 		public String docs() {
@@ -164,8 +177,9 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class set_entity_loc extends EntityFunction {
+	public static class set_entity_loc extends EntitySetterFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException,
 					ExceptionType.CastException, ExceptionType.InvalidWorldException};
@@ -185,10 +199,6 @@ public class EntityManagement {
 
 		public String getName() {
 			return "set_entity_loc";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{2};
 		}
 
 		public String docs() {
@@ -214,11 +224,7 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_velocity extends EntityFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
-		}
+	public static class entity_velocity extends EntityGetterFunction {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -230,10 +236,6 @@ public class EntityManagement {
 
 		public String getName() {
 			return "entity_velocity";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{1};
 		}
 
 		public String docs() {
@@ -252,12 +254,7 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class set_entity_velocity extends EntityFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
-					ExceptionType.BadEntityException};
-		}
+	public static class set_entity_velocity extends EntitySetterFunction {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -269,10 +266,6 @@ public class EntityManagement {
 
 		public String getName() {
 			return "set_entity_velocity";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{2};
 		}
 
 		public String docs() {
@@ -294,11 +287,7 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_remove extends EntityFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
-		}
+	public static class entity_remove extends EntityGetterFunction {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -318,10 +307,6 @@ public class EntityManagement {
 			return "entity_remove";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
 		public String docs() {
 			return "void {entityID} Removes the specified entity from the world, without any drops or animations. "
 				+ "Note: you can't remove players. As a safety measure for working with NPC plugins, it will "
@@ -331,38 +316,39 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_type extends EntityFunction {
+	public static class entity_type extends EntityGetterFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException};
 		}
-
+		
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity((int) Static.getInt(args[0], t), t);
-			if (ent == null) {
+			MCEntity ent;
+			int id = Static.getInt32(args[0], t);
+			try {
+				ent = Static.getEntity(id, t);
+			} catch (ConfigRuntimeException cre) {
 				return new CNull(t);
-			} else {
-				return new CString(ent.getType().name(), t);
 			}
+			return new CString(ent.getType().name(), t);
 		}
 
 		public String getName() {
 			return "entity_type";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
 		public String docs() {
-			return "string {entityID} Returns the EntityType of the entity with the specified ID.";
+			return "mixed {entityID} Returns the EntityType of the entity with the specified ID."
+					+ " Returns null if the entity does not exist.";
 		}
 	}
 
 	@api
-	public static class get_mob_age extends EntityFunction {
+	public static class get_mob_age extends EntityGetterFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException, 
 					ExceptionType.BadEntityException};
@@ -384,10 +370,6 @@ public class EntityManagement {
 
 		public String getName() {
 			return "get_mob_age";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{1};
 		}
 
 		public String docs() {
@@ -440,7 +422,33 @@ public class EntityManagement {
 		}
 	}
 
-	@api(environments = {CommandHelperEnvironment.class})
+	@api
+	public static class get_mob_effects extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity mob = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t);
+		}
+
+		public String getName() {
+			return "get_mob_effects";
+		}
+
+		public String docs() {
+			return "array {entityID} Returns an array of potion arrays showing"
+					+ " the effects on this mob.";
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{new ExampleScript("Basic use", "msg(get_mob_effects(259))", 
+					"{{ambient: false, id: 1, seconds: 30, strength: 1}}")};
+		}
+		
+	}
+	
+	@api
 	public static class set_mob_effect extends EntityFunction {
 
 		public String getName() {
@@ -467,36 +475,27 @@ public class EntityManagement {
 					ExceptionType.BadEntityException, ExceptionType.RangeException};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			int id = (int) Static.getInt(args[0], t);
-			MCEntity ent = Static.getEntity(id, t);
+		public Construct exec(Target t, Environment env, Construct... args) 
+				throws ConfigRuntimeException {
+			MCLivingEntity mob = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 
-			if (ent == null) {
-				return new CNull(t);
-			} else if (ent instanceof MCLivingEntity) {
+			int effect = Static.getInt32(args[1], t);
 
-				MCLivingEntity mob = ((MCLivingEntity) ent);
+			int strength = Static.getInt32(args[2], t);
+			int seconds = 30;
+			boolean ambient = false;
+			if (args.length >= 4) {
+				seconds = Static.getInt32(args[3], t);
+			}
+			if (args.length == 5) {
+				ambient = Static.getBoolean(args[4]);
+			}
 
-				int effect = Static.getInt32(args[1], t);
-
-				int strength = Static.getInt32(args[2], t);
-				int seconds = 30;
-				boolean ambient = false;
-				if (args.length >= 4) {
-					seconds = Static.getInt32(args[3], t);
-				}
-				if (args.length == 5) {
-					ambient = Static.getBoolean(args[4]);
-				}
-
-				if (seconds == 0) {
-					return new CBoolean(mob.removeEffect(effect), t);
-				} else {
-					mob.addEffect(effect, strength, seconds, ambient, t);
-					return new CBoolean(true, t);
-				}
+			if (seconds == 0) {
+				return new CBoolean(mob.removeEffect(effect), t);
 			} else {
-				throw new ConfigRuntimeException("Entity (" + id + ") is not living", ExceptionType.BadEntityException, t);
+				mob.addEffect(effect, strength, seconds, ambient, t);
+				return new CBoolean(true, t);
 			}
 		}
 	}
@@ -667,11 +666,7 @@ public class EntityManagement {
 	}
 
 	//@api
-	public static class get_mob_target extends EntityFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
+	public static class get_mob_target extends EntityGetterFunction {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -687,10 +682,6 @@ public class EntityManagement {
 			return "get_mob_target";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
 		public String docs() {
 			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
 					+ " If there is no target, null is returned instead.";
@@ -698,8 +689,9 @@ public class EntityManagement {
 	}
 	
 	//@api
-	public static class set_mob_target extends EntityFunction {
+	public static class set_mob_target extends EntitySetterFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
 		}
@@ -719,10 +711,6 @@ public class EntityManagement {
 			return "set_mob_target";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
 		public String docs() {
 			return "void {entityID, entityID} The first ID is the entity who is targetting, the second is the target."
 					+ " It can also be set to null to clear the current target.";
@@ -730,11 +718,7 @@ public class EntityManagement {
 	}
 	
 	@api
-	public static class get_mob_equipment extends EntityFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
+	public static class get_mob_equipment extends EntityGetterFunction {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -749,10 +733,6 @@ public class EntityManagement {
 
 		public String getName() {
 			return "get_mob_equipment";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{1};
 		}
 
 		public String docs() {
@@ -770,12 +750,7 @@ public class EntityManagement {
 	}
 	
 	@api
-	public static class set_mob_equipment extends EntityFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
-					ExceptionType.FormatException};
-		}
+	public static class set_mob_equipment extends EntitySetterFunction {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -804,14 +779,134 @@ public class EntityManagement {
 			return "set_mob_equipment";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
 		public String docs() {
 			return "void {entityID, array} Takes an associative array with keys representing equipment slots and values"
 					+ " of itemArrays, the same used by set_pinv. The equipment slots are: " 
 					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
 		}
+	}
+	
+	@api
+	public static class get_max_health extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			return new CInt(le.getMaxHealth(), t);
+		}
+
+		public String getName() {
+			return "get_max_health";
+		}
+
+		public String docs() {
+			return "int {entityID} Returns the maximum health of this living entity.";
+		}
+		
+	}
+	
+	@api
+	public static class set_max_health extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			le.setMaxHealth(Static.getInt32(args[1], t));
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_max_health";
+		}
+
+		public String docs() {
+			return "void {entityID, int} Sets the max health of this living entity."
+					+ " this is persistent for players, and will not reset even"
+					+ " after server restarts.";
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{new ExampleScript("Basic use", 
+					"set_max_health(256, 10)", "The entity will now only have 5 hearts max.")};
+		}
+	}
+	
+	@api
+	public static class entity_onfire extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			return new CInt(Static.ticksToMs(ent.getFireTicks())/1000, t);
+		}
+
+		public String getName() {
+			return "entity_onfire";
+		}
+
+		public String docs() {
+			return "int {entityID} Returns the number of seconds until this entity"
+					+ " stops being on fire, 0 if it already isn't.";
+		}
+		
+	}
+	
+	@api
+	public static class set_entity_onfire extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			int setTicks = (int) Static.msToTicks(Static.getInt(args[1], t)*1000);
+			if (setTicks < 0) {
+				throw new Exceptions.FormatException("Seconds cannot be less than 0", t);
+			}
+			ent.setFireTicks(setTicks);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_entity_onfire";
+		}
+
+		public String docs() {
+			return "void {entityID, seconds} Sets the entity on fire for the"
+					+ " given number of seconds. Throws a FormatException"
+					+ " if seconds is less than 0.";
+		}
+		
+	}
+	
+	@api
+	public static class play_entity_effect extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntityEffect mee;
+			try {
+				mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
+			} catch (IllegalArgumentException iae) {
+				throw new Exceptions.FormatException("Unknown effect at arg 2.", t);
+			}
+			ent.playEffect(mee);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "play_entity_effect";
+		}
+
+		public String docs() {
+			return "void {entityID, effect} Plays the given visual effect on the"
+					+ " entity. Non-applicable effects simply won't happen. Note:"
+					+ " the death effect makes the mob invisible to players and"
+					+ " immune to melee attacks. When used on players, they are"
+					+ " shown the respawn menu, but because they are not actually"
+					+ " dead, they can only log out. Possible effects are: "
+					+ StringUtils.Join(MCEntityEffect.values(), ", ", ", or ", " or ");
+		}
+		
 	}
 }
