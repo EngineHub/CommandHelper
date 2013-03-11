@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -135,7 +136,7 @@ public class PlayerEvents {
 				+ "moved from 1.3, that parameter would match."
 				+ "| to: <custom> The location the player is now in. This should be a location array as well. "
 				+ "{player | from: The location the player is coming from | to: The location the player is now in | "
-				+ "type: the type of teleport occuring}"
+				+ "type: the type of teleport occuring, one of: " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 				+ "{to}"
 				+ "{}";
 		}
