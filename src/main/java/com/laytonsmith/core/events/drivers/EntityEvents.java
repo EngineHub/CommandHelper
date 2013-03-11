@@ -5,6 +5,7 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -12,6 +13,7 @@ import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
+import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
@@ -23,10 +25,12 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -38,9 +42,106 @@ public class EntityEvents {
     public static String docs(){
         return "Contains events related to an entity";
     }
+
+	@api
+	public static class entity_death extends AbstractEvent {
+
+		public String getName() {
+			return "entity_death";
+		}
+
+		public String docs() {
+			return "{type: <macro> The type of entity dying.}"
+					+ " Fires when any living entity dies."
+					+ " {type | id: The entityID | drops: an array of item arrays of each stack"
+					+ " | xp | cause: the last entity_damage object for this entity"
+					+ " | location: where the entity was when it died}" 
+					+ " {drops: an array of item arrays of what will be dropped,"
+					+ " replaces the normal drops, can be null | xp: the amount of xp to drop}" 
+					+ " {id|drops|xp}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if (e instanceof MCEntityDeathEvent) {
+				MCEntityDeathEvent event = (MCEntityDeathEvent) e;
+				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event)
+				throws EventException {
+			if (event instanceof MCEntityDeathEvent) {
+				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
+				Target t = Target.UNKNOWN;
+				MCLivingEntity dead = e.getEntity();
+				Map<String, Construct> map = evaluate_helper(event);
+				CArray drops = new CArray(t);
+				for(MCItemStack is : e.getDrops()){
+					drops.push(ObjectGenerator.GetGenerator().item(is, t));
+				}
+				map.put("type", new CString(dead.getType().name(), t));
+				map.put("id", new CInt(dead.getEntityId(), t));
+				map.put("drops", drops);
+				map.put("xp", new CInt(e.getDroppedExp(), t));
+				CArray cod = CArray.GetAssociativeArray(t);
+				Map<String, Construct> ldc = 
+						parseEntityDamageEvent(dead.getLastDamageCause(), 
+								new HashMap<String, Construct>());
+				for (String key : ldc.keySet()) {
+					cod.set(key, ldc.get(key), t);
+				}
+				map.put("cause", cod);
+				map.put("location", ObjectGenerator.GetGenerator().location(dead.getLocation()));
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to EntityDeathEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.ENTITY_DEATH;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCEntityDeathEvent) {
+				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
+				if (key.equals("xp")) {
+					e.setDroppedExp(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+				if(key.equals("drops")){
+					if(value instanceof CNull){
+						value = new CArray(Target.UNKNOWN);
+					}
+					if(!(value instanceof CArray)){
+						throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
+					}
+					e.clearDrops();
+					CArray drops = (CArray) value;
+					for(String dropID : drops.keySet()){
+						e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID), Target.UNKNOWN));
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 	
-    @api
-    public static class creature_spawn extends AbstractEvent {
+	@api
+	public static class creature_spawn extends AbstractEvent {
 
 		public String getName() {
 			return "creature_spawn";
@@ -109,9 +210,9 @@ public class EntityEvents {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-    	
-    }
-    
+		
+	}
+	
 	@api
 	public static class entity_damage extends AbstractEvent {
 
@@ -154,28 +255,7 @@ public class EntityEvents {
 				MCEntityDamageEvent event = (MCEntityDamageEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
 				
-				MCEntity victim = event.getEntity();
-				map.put("type", new CString(victim.getType().name(), Target.UNKNOWN));
-				map.put("id", new CInt(victim.getEntityId(), Target.UNKNOWN));
-				map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
-				map.put("amount", new CInt(event.getDamage(), Target.UNKNOWN));
-				
-				if (event instanceof MCEntityDamageByEntityEvent) {
-					MCEntity damager = ((MCEntityDamageByEntityEvent) event).getDamager();
-					if (damager instanceof MCPlayer) {
-						map.put("damager", new CString(((MCPlayer) damager).getName(), Target.UNKNOWN));
-					} else {
-						map.put("damager", new CInt(damager.getEntityId(), Target.UNKNOWN));
-					}
-					if (damager instanceof MCProjectile) {
-						MCEntity shooter = ((MCProjectile) damager).getShooter();
-						if (shooter instanceof MCPlayer) {
-							map.put("shooter", new CString(((MCPlayer) shooter).getName(), Target.UNKNOWN));
-						} else if (shooter instanceof MCEntity) {
-							map.put("shooter", new CInt(shooter.getEntityId(), Target.UNKNOWN));
-						}
-					}
-				}
+				map = parseEntityDamageEvent(event, map);
 				
 				return map;
 			} else {
@@ -605,4 +685,33 @@ public class EntityEvents {
         }
         
     }
+    
+	public static Map<String, Construct> parseEntityDamageEvent(MCEntityDamageEvent event,
+			Map<String, Construct> map) {
+		if (event != null) {
+			MCEntity victim = event.getEntity();
+			map.put("type", new CString(victim.getType().name(), Target.UNKNOWN));
+			map.put("id", new CInt(victim.getEntityId(), Target.UNKNOWN));
+			map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
+			map.put("amount", new CInt(event.getDamage(), Target.UNKNOWN));
+
+			if (event instanceof MCEntityDamageByEntityEvent) {
+				MCEntity damager = ((MCEntityDamageByEntityEvent) event).getDamager();
+				if (damager instanceof MCPlayer) {
+					map.put("damager", new CString(((MCPlayer) damager).getName(), Target.UNKNOWN));
+				} else {
+					map.put("damager", new CInt(damager.getEntityId(), Target.UNKNOWN));
+				}
+				if (damager instanceof MCProjectile) {
+					MCEntity shooter = ((MCProjectile) damager).getShooter();
+					if (shooter instanceof MCPlayer) {
+						map.put("shooter", new CString(((MCPlayer) shooter).getName(), Target.UNKNOWN));
+					} else if (shooter instanceof MCEntity) {
+						map.put("shooter", new CInt(shooter.getEntityId(), Target.UNKNOWN));
+					}
+				}
+			}
+		}
+		return map;
+	}
 }

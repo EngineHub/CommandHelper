@@ -6,7 +6,9 @@ import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -381,6 +383,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note) {
 		p.playNote((Location)loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note)note.getHandle());
+	}
+	
+	public void playSound(MCLocation l, MCSound sound, int volume, int pitch) {
+		p.playSound(((BukkitMCLocation) l).asLocation(), 
+				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}
 
 	public int getHunger() {

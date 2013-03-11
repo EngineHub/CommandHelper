@@ -1,6 +1,9 @@
 
 package com.laytonsmith.abstraction.bukkit.events;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
@@ -24,16 +27,63 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCEntityDeathEvent implements MCEntityDeathEvent {
+
+		EntityDeathEvent e;
+		public BukkitMCEntityDeathEvent(EntityDeathEvent e) {
+			this.e = e;
+		}
+
+		public Object _GetObject() {
+			return e;
+		}
+
+		public int getDroppedExp() {
+			return e.getDroppedExp();
+		}
+
+		public List<MCItemStack> getDrops() {
+            List<ItemStack> islist = e.getDrops();
+            List<MCItemStack> drops = new ArrayList<MCItemStack>();
+			
+            for(ItemStack is : islist){
+                drops.add(new BukkitMCItemStack(is));
+            }
+			
+            return drops;
+        }
+		
+        public void clearDrops() {
+            e.getDrops().clear();
+        }
+		
+        public void addDrop(MCItemStack is){
+            e.getDrops().add(((BukkitMCItemStack)is).__ItemStack());
+        }
+
+		public MCLivingEntity getEntity() {
+			return new BukkitMCLivingEntity(e.getEntity());
+		}
+
+		public void setDroppedExp(int exp) {
+			e.setDroppedExp(exp);
+		}
+		
+	}
 	
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCCreatureSpawnEvent implements MCCreatureSpawnEvent {

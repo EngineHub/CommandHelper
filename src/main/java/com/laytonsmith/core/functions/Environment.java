@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
@@ -839,6 +840,91 @@ public class Environment {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+	
+	@api
+	public static class play_sound extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException,
+					ExceptionType.CastException, ExceptionType.FormatException,
+					ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t,
+				com.laytonsmith.core.environments.Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCSound sound = MCSound.BREATH;
+			int volume = 1; int pitch = 1;
+			if (!(args[1] instanceof CArray)) {
+				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
+			}
+			CArray sa = (CArray) args[1];
+			if (sa.containsKey("sound")) {
+				try {
+					sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
+				} catch (IllegalArgumentException iae) {
+
+				}
+			} else {
+				throw new Exceptions.FormatException("Sound field was missing.", t);
+			}
+			if (sa.containsKey("volume")) {
+				volume = Static.getInt32(sa.get("volume", t), t);
+			}
+			if (sa.containsKey("pitch")) {
+				pitch = Static.getInt32(sa.get("pitch", t), t);
+			}
+			if (args.length == 3) {
+				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
+				if (args[2] instanceof CArray) {
+					for (String key : ((CArray) args[2]).keySet()) {
+						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
+					}
+				} else {
+					players.add(Static.GetPlayer(args[2], t));
+				}
+				for (MCPlayer p : players) {
+					p.playSound(l, sound, volume, pitch);
+				}
+			} else {
+				l.getWorld().playSound(l, sound, volume, pitch);
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "play_sound";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "void {locationArray, soundArray[, players]} Plays a sound at the"
+					+ " given location. SoundArray is in an associative array with"
+					+ " keys 'sound', 'volume', 'pitch', where volume and pitch"
+					+ " are optional and default to 1. Players can be a single"
+					+ " player or an array of players to play the sound to, if"
+					+ " not given, all players can potentially hear it. ----"
+					+ " Possible sounds: " 
+					+ StringUtils.Join(MCSound.values(), ", ", ", or ", " or ");
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
