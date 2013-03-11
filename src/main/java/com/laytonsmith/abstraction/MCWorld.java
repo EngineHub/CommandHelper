@@ -6,7 +6,9 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCEffect;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;
 import java.util.List;
@@ -28,7 +30,11 @@ public interface MCWorld extends AbstractionObject{
 
     public MCEntity spawn(MCLocation l, Class mobType);
 
+	public MCEntity spawn(MCLocation l, MCEntityType entType);
+
     public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data);
+
+	public void playSound(MCLocation l, MCSound sound, int volume, int pitch);
 
     public MCItem dropItemNaturally(MCLocation l, MCItemStack is);
 

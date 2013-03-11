@@ -11,11 +11,13 @@ import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEffect;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCPigType;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
+import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
@@ -23,6 +25,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSkeletonType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -119,9 +122,19 @@ public class BukkitMCWorld implements MCWorld {
         return BukkitConvertor.BukkitGetCorrectEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
     }
 
+	public MCEntity spawn(MCLocation l, MCEntityType entType) {
+		return BukkitConvertor.BukkitGetCorrectEntity(w.spawnEntity(
+				((BukkitMCLocation) l).asLocation(), EntityType.valueOf(entType.name())));
+	}
+
     public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data) {
         w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), e, data);
     }
+
+	public void playSound(MCLocation l, MCSound sound, int volume, int pitch) {
+		w.playSound(((BukkitMCLocation) l).asLocation(), 
+				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
+	}
 
     public MCItem dropItemNaturally(MCLocation l, MCItemStack is) {
         return new BukkitMCItem(w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));

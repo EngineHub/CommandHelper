@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.events.*;
@@ -23,7 +24,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerPreLoginEvent.Result;
@@ -398,10 +398,12 @@ public class BukkitPlayerEvents {
     }
 
     @abstraction(type=Implementation.Type.BUKKIT)
-    public static class BukkitMCPlayerDeathEvent implements MCPlayerDeathEvent {
+    public static class BukkitMCPlayerDeathEvent extends BukkitMCEntityDeathEvent
+    		implements MCPlayerDeathEvent {
         PlayerDeathEvent pde;
 		
         public BukkitMCPlayerDeathEvent(PlayerDeathEvent event) {
+        	super(event);
             pde = event;
         }
 
@@ -415,45 +417,51 @@ public class BukkitPlayerEvents {
 			
             return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer)entity)._Player(), drops, droppedExp, deathMessage));
         }
-
-        public List<MCItemStack> getDrops() {
-            List<ItemStack> islist = pde.getDrops();
-            List<MCItemStack> drops = new ArrayList<MCItemStack>();
-			
-            for(ItemStack is : islist){
-                drops.add(new BukkitMCItemStack(is));
-            }
-			
-            return drops;
-        }
-		
-        public void clearDrops() {
-            pde.getDrops().clear();
-        }
-		
-        public void addDrop(MCItemStack is){
-            pde.getDrops().add(((BukkitMCItemStack)is).__ItemStack());
-        }
-
-        public MCEntity getEntity() {
+        
+        @Override
+        public MCPlayer getEntity() {
             return new BukkitMCPlayer(pde.getEntity());
-        }
-
-        public int getDroppedExp() {
-            return pde.getDroppedExp();
         }
 
         public String getDeathMessage() {
             return pde.getDeathMessage();
         }
 
-        public void setDroppedExp(int i) {
-            pde.setDroppedExp(i);
-        }
-
         public void setDeathMessage(String nval) {
             pde.setDeathMessage(nval);
         }
+
+		public boolean getKeepLevel() {
+			return pde.getKeepLevel();
+		}
+
+		public void setKeepLevel(boolean keepLevel) {
+			pde.setKeepLevel(keepLevel);
+		}
+
+		public int getNewExp() {
+			return pde.getNewExp();
+		}
+
+		public void setNewExp(int exp) {
+			pde.setNewExp(exp);
+		}
+
+		public int getNewLevel() {
+			return pde.getNewLevel();
+		}
+
+		public void setNewLevel(int level) {
+			pde.setNewLevel(level);
+		}
+
+		public int getNewTotalExp() {
+			return pde.getNewTotalExp();
+		}
+
+		public void setNewTotalExp(int totalExp) {
+			pde.setNewTotalExp(totalExp);
+		}
     }
 
     @abstraction(type=Implementation.Type.BUKKIT)
