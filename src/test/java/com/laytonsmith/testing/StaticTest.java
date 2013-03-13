@@ -687,7 +687,7 @@ public class StaticTest {
 			};
 		}
 
-		public MCFirework GetFirework() {
+		public MCFireworkBuilder GetFireworkBuilder() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

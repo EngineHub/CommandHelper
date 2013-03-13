@@ -113,10 +113,10 @@ public class Sandbox {
 //        }
 //    }
     @api(environments={CommandHelperEnvironment.class})
-    public static class item_drop extends AbstractFunction {
+    public static class drop_item extends AbstractFunction {
 
         public String getName() {
-            return "item_drop";
+            return "drop_item";
         }
 
         public Integer[] numArgs() {
@@ -127,7 +127,7 @@ public class Sandbox {
             return "Drops the specified item at the specified quantity at the specified player's feet (or "
                     + " at an arbitrary Location, if an array is given),"
                     + " like the vanilla /give command. player defaults to the current player, and qty defaults to 1. item follows the"
-                    + " same type[:data] format used elsewhere.";
+                    + " same type[:data] format used elsewhere. Returns the entity id of the item stack dropped.";
         }
 		
 		public Argument returnType() {
@@ -165,42 +165,55 @@ public class Sandbox {
 			MCItem item = null;
             boolean natural = false;
             if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-                l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getLocation();
+                l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
             }
-            if (args.length == 1) {
-                //It is just the item
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, t);
-                natural = true;
-            } else if (args.length == 2) {
-                //If args[0] starts with a number, it's the (item, qty) version, otherwise it's
-                //(player, item)
-                if (args[0].val().matches("\\d.*")) {
-                    qty = args[1].primitive(t).castToInt32(t);
-                    is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, t);
-                    natural = true;
-                } else {
-                    if (args[0] instanceof CArray) {
-                        l = ObjectGenerator.GetGenerator().location(args[0], ( l != null ? l.getWorld() : null ), t);
-                        natural = false;
-                    } else {
-                        l = Static.GetPlayer(args[0].val(), t).getLocation();
-                        natural = true;
-                    }
-                    is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, t);
-
-                }
-            } else if (args.length == 3) {
-                //We are specifying all 3
-                if (args[0] instanceof CArray) {
-                    l = ObjectGenerator.GetGenerator().location(args[0], ( l != null ? l.getWorld() : null ), t);
-                    natural = false;
-                } else {
-                    l = Static.GetPlayer(args[0].val(), t).getLocation();
-                    natural = true;
-                }
-                qty = args[2].primitive(t).castToInt32(t);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, t);
-            }
+			if(args.length == 1){
+				is = ObjectGenerator.GetGenerator().item(args[0], t);
+				natural = true;
+			} else if(args.length == 2){
+				if(args[0] instanceof CString){
+					l = Static.GetPlayer(args[0], t).getEyeLocation();
+					natural = false;
+				} else {
+					l = ObjectGenerator.GetGenerator().location(args[0], l==null?null:l.getWorld(), t);
+					natural = true;
+				}
+				is = ObjectGenerator.GetGenerator().item(args[1], t);
+			}
+//            if (args.length == 1) {
+//                //It is just the item
+//                is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, t);
+//                natural = true;
+//            } else if (args.length == 2) {
+//                //If args[0] starts with a number, it's the (item, qty) version, otherwise it's
+//                //(player, item)
+//                if (args[0].val().matches("\\d.*")) {
+//                    qty = Static.getInt32(args[1], t);
+//                    is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, t);
+//                    natural = true;
+//                } else {
+//                    if (args[0] instanceof CArray) {
+//                        l = ObjectGenerator.GetGenerator().location(args[0], ( l != null ? l.getWorld() : null ), t);
+//                        natural = false;
+//                    } else {
+//                        l = Static.GetPlayer(args[0].val(), t).getLocation();
+//                        natural = true;
+//                    }
+//                    is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, t);
+//
+//                }
+//            } else if (args.length == 3) {
+//                //We are specifying all 3
+//                if (args[0] instanceof CArray) {
+//                    l = ObjectGenerator.GetGenerator().location(args[0], ( l != null ? l.getWorld() : null ), t);
+//                    natural = false;
+//                } else {
+//                    l = Static.GetPlayer(args[0].val(), t).getLocation();
+//                    natural = true;
+//                }
+//                qty = Static.getInt32(args[2], t);
+//                is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, t);
+//            }
             if (l.getWorld() != null) {
                 if (natural) {
                     item = l.getWorld().dropItemNaturally(l, is);
@@ -214,7 +227,7 @@ public class Sandbox {
 			if(item != null){
 				return new CInt(item.getEntityId(), t);
 			}
-            return new CVoid(t);
+            return new CNull(t);
         }
     }    
 

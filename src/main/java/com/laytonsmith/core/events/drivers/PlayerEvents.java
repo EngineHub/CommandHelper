@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -19,6 +20,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -136,7 +138,7 @@ public class PlayerEvents {
 				+ "moved from 1.3, that parameter would match."
 				+ "| to: <custom> The location the player is now in. This should be a location array as well. "
 				+ "{player | from: The location the player is coming from | to: The location the player is now in | "
-				+ "type: the type of teleport occuring}"
+				+ "type: the type of teleport occuring, one of: " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 				+ "{to}"
 				+ "{}";
 		}
@@ -698,28 +700,33 @@ public class PlayerEvents {
 
 
     @api
-    public static class player_death extends AbstractEvent {
+	public static class player_death extends entity_death {
 
+		@Override
         public String getName() {
             return "player_death";
         }
 
+		@Override
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when a player dies."
                     + "{player: The player that died | drops: An array of the dropped items"
                     + "| xp: The xp that will be dropped | cause: The cause of death | death_message: The"
-                    + " death message}"
+					+ " death message | keep_level | new_level: the player's level when they respawn}"
                     + "{xp|drops: An array of item objects, or null. The items to be dropped"
-                    + " are replaced with the given items, not added to|death_message the death message,"
-                    + " or null to remove it entirely}"
+					+ " are replaced with the given items, not added to|death_message: the death message,"
+					+ " or null to remove it entirely|keep_level: if true, the player will not lose"
+					+ " their xp and levels|new_level}"
                     + "{player | drops | death_message}";
         }
 
+		@Override
         public Driver driver() {
             return Driver.PLAYER_DEATH;
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -735,32 +742,27 @@ public class PlayerEvents {
 
         //We have an actual event now, change it into a Map
         //that will end up being the @event object
+		@Override
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
-                CArray ca = new CArray(Target.UNKNOWN);
-                for(MCItemStack is : event.getDrops()){
-                    ca.push(ObjectGenerator.GetGenerator().item(is, Target.UNKNOWN));
-                }
-                MCPlayer p = (MCPlayer)event.getEntity();
-                map.put("drops", ca);
-                map.put("xp", new CInt(event.getDroppedExp(), Target.UNKNOWN));
-                if(event instanceof MCPlayerDeathEvent){
-                    map.put("death_message", new CString(((MCPlayerDeathEvent)event).getDeathMessage(), Target.UNKNOWN));
-                }
+				Map<String, Construct> map = super.evaluate(e);
+				map.putAll(evaluate_helper(e));
+                map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
                 try{
                     map.put("cause", new CString(event.getEntity().getLastDamageCause().getCause().name(), Target.UNKNOWN));
                 } catch(NullPointerException ex){
                     map.put("cause", new CString(MCDamageCause.CUSTOM.name(), Target.UNKNOWN));
                 }
-                map.put("location", ObjectGenerator.GetGenerator().location(p.getLocation()));
+				map.put("keep_level", new CBoolean(event.getKeepLevel(), Target.UNKNOWN));
+				map.put("new_level", new CInt(event.getNewLevel(), Target.UNKNOWN));
                 return map;
             } else {
                 throw new EventException("Cannot convert e to EntityDeathEvent");
             }
         }
 
+		@Override
         public BindableEvent convert(CArray manual) {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
@@ -777,12 +779,19 @@ public class PlayerEvents {
         }
 
         //Given the paramters, change the underlying event
-        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
-            if (event instanceof MCPlayerDeathEvent) {
+		@Override
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+			if (super.modifyEvent(key, value, event, t)) {
+				return true;
+			} else if (event instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
                 if (key.equals("xp")) {
                     //Change this parameter in e to value
                     e.setDroppedExp(value.primitive(t).castToInt32(t));
+					return true;
+				}
+                if(key.equals("death_message")){
+                    e.setDeathMessage(value.nval());
                     return true;
                 }
                 if(key.equals("drops")){
@@ -803,6 +812,14 @@ public class PlayerEvents {
                     ((MCPlayerDeathEvent)event).setDeathMessage(value.isNull()?null:value.val());
                     return true;
                 }
+				if (key.equals("keep_level")) {
+					e.setKeepLevel(Static.getBoolean(value));
+					return true;
+				}
+				if (key.equals("new_level")) {
+					e.setNewLevel(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
             }
             return false;
         }

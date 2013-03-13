@@ -1,30 +1,32 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.core.events.BindableEvent;
-import java.util.List;
+import com.laytonsmith.abstraction.MCPlayer;
 
 /**
  *
  * @author layton
  */
-public interface MCPlayerDeathEvent extends BindableEvent{
+public interface MCPlayerDeathEvent extends MCEntityDeathEvent {
 
-    public List<MCItemStack> getDrops();
-    
-    public MCEntity getEntity();
-    
-    public int getDroppedExp();
+	public MCPlayer getEntity();
 
-    public String getDeathMessage();
+	public String getDeathMessage();
 
-    public void setDroppedExp(int i);
+	public void setDeathMessage(String nval);
 
-    public void setDeathMessage(String nval);
-
-    public void clearDrops();
-    
-    public void addDrop(MCItemStack is);
-    
+	public boolean getKeepLevel();
+	
+	public void setKeepLevel(boolean keepLevel);
+	
+	public int getNewExp();
+	
+	public void setNewExp(int exp);
+	
+	public int getNewLevel();
+	
+	public void setNewLevel(int level);
+	
+	public int getNewTotalExp();
+	
+	public void setNewTotalExp(int totalExp);
 }

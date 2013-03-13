@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -242,6 +243,61 @@ public class Debug {
             return new CVoid(t);
         }
     }
+	
+	@api
+	public static class trace extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args[0] instanceof IVariable){
+				if(Prefs.DebugMode()){
+					IVariable ivar = (IVariable)args[0];
+					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getName(), t);
+					System.out.println(ivar.getName() + ": " + val.val());
+				}
+				return new CVoid(t);
+			} else {
+				throw new Exceptions.CastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
+			}
+			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
+			//if so, remove this function entirely
+		}
+
+		@Override
+		public boolean preResolveVariables() {
+			return false;
+		}
+
+		public String getName() {
+			return "trace";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {ivar} If debug mode is on, outputs debug information about a variable. Unlike debug, this only accepts an ivar; it is a meta function."
+					+ " The runtime will then take the variable, and output information about it, in a human readable format, including"
+					+ " the variable's name and value. If debug mode is off, the function is ignored.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 
 //    @api
 //    public static class debug_log_events extends AbstractFunction {

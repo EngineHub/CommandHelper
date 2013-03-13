@@ -8,7 +8,7 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCFirework;
+import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -426,7 +426,7 @@ public class Interpreter {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
-		public MCFirework GetFirework() {
+		public MCFireworkBuilder GetFireworkBuilder() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 

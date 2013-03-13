@@ -7,7 +7,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -55,12 +54,20 @@ public class BukkitEntityListener implements Listener{
 		EventUtils.TriggerListener(Driver.ITEM_PICKUP, "item_pickup", ppie);
 	}
 	
-    @EventHandler(priority=EventPriority.LOWEST)
-    public void onEntityDeath(PlayerDeathEvent event) {
-		BukkitPlayerEvents.BukkitMCPlayerDeathEvent pde = new BukkitPlayerEvents.BukkitMCPlayerDeathEvent(event);
-		EventUtils.TriggerExternal(pde);
-        EventUtils.TriggerListener(Driver.PLAYER_DEATH, "player_death", pde);
-    }
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void onEntityDeath(EntityDeathEvent event) {
+		BukkitEntityEvents.BukkitMCEntityDeathEvent ede;
+		if (event instanceof PlayerDeathEvent) {
+			ede = new BukkitPlayerEvents.BukkitMCPlayerDeathEvent((PlayerDeathEvent) event);
+		} else {
+			ede = new BukkitEntityEvents.BukkitMCEntityDeathEvent(event);
+		}
+		EventUtils.TriggerExternal(ede);
+		EventUtils.TriggerListener(Driver.ENTITY_DEATH, "entity_death", ede);
+		if (event instanceof PlayerDeathEvent) {
+			EventUtils.TriggerListener(Driver.PLAYER_DEATH, "player_death", ede);
+		}
+	}
     
     @EventHandler(priority=EventPriority.LOWEST)
     public void onTargetLiving(EntityTargetEvent event) {
@@ -71,20 +78,18 @@ public class BukkitEntityListener implements Listener{
     
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onEntityDamage(EntityDamageEvent event) {
-		BukkitEntityEvents.BukkitMCEntityDamageEvent ede = new BukkitEntityEvents.BukkitMCEntityDamageEvent(event);
-		EventUtils.TriggerExternal(ede);
-		EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede);
-	}
-	
-	@EventHandler(priority=EventPriority.LOWEST)
-	public void onEntityDamageEntity(EntityDamageByEntityEvent event) {
-		BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent edbee = new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent((EntityDamageByEntityEvent) event);
-		EventUtils.TriggerExternal(edbee);	
-		
-		if (edbee.getEntity() instanceof MCPlayer) {
-			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE_PLAYER, "entity_damage_player", edbee);
+		BukkitEntityEvents.BukkitMCEntityDamageEvent ede;
+		if (event instanceof EntityDamageByEntityEvent) {
+			ede = new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent((EntityDamageByEntityEvent) event);
+			EventUtils.TriggerExternal(ede);
+			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede);
+			if (ede.getEntity() instanceof MCPlayer) {
+				EventUtils.TriggerListener(Driver.ENTITY_DAMAGE_PLAYER, "entity_damage_player", ede);
+			}
+		} else {
+			ede = new BukkitEntityEvents.BukkitMCEntityDamageEvent(event);
+			EventUtils.TriggerExternal(ede);
+			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede);
 		}
-		
-		EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", edbee);
 	}
 }

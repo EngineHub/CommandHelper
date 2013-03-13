@@ -1177,7 +1177,7 @@ public class Minecraft {
 				}
 			}
 			
-			MCFirework fw = StaticLayer.GetConvertor().GetFirework();
+			MCFireworkBuilder fw = StaticLayer.GetConvertor().GetFireworkBuilder();
 			fw.setStrength(strength);
 			fw.setFlicker(flicker);
 			fw.setTrail(trail);
@@ -1190,8 +1190,7 @@ public class Minecraft {
 				fw.addFadeColor(color);
 			}
 			
-			fw.launch(loc);
-			return new CVoid(t);
+			return new CInt(fw.launch(loc), t);
 		}
 		
 		private Set<MCColor> parseColors(Construct c, Target t){

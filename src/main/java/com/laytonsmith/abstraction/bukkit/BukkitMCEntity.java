@@ -13,7 +13,6 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -66,12 +65,17 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         return e;
     }
 
-    public MCEntityDamageEvent getLastDamageCause() {
-    	if (e.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-    		return new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent((EntityDamageByEntityEvent) e.getLastDamageCause());
-    	}
-        return new BukkitEntityEvents.BukkitMCEntityDamageEvent(e.getLastDamageCause());
-    }
+	public MCEntityDamageEvent getLastDamageCause() {
+		EntityDamageEvent ldc = e.getLastDamageCause();
+		if (ldc == null) {
+			return null;
+		}
+		if (ldc instanceof EntityDamageByEntityEvent) {
+			return new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent(
+					(EntityDamageByEntityEvent) ldc);
+		}
+		return new BukkitEntityEvents.BukkitMCEntityDamageEvent(ldc);
+	}
 
     public MCLivingEntity getLivingEntity() {
         if(e instanceof LivingEntity){

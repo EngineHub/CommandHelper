@@ -35,11 +35,12 @@ public class ItemMeta {
 	}
 	
 	private static final String applicableItemMeta = "<ul>"
-			+ "<li>All items - display (string), lore (array of strings)</li>"
+			+ "<li>All items - display (string), lore (array of strings), enchants (array of enchantment arrays)</li>"
 			+ "<li>Books - title (string), author (string), pages (array of strings)</li>"
 			+ "<li>EnchantedBooks - stored (array of enchantment arrays (see Example))</li>"
 			+ "<li>Leather Armor - color (color array (see Example))</li>"
 			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"
+			+ "<li>Potions - potions (array of potion arrays), main(int, the id of the main effect)</li>"
 			+ "</ul>";
 	
 	//TODO: All these functions need to switch over from ObjectGenerator to the MObject syntax.
@@ -113,15 +114,19 @@ public class ItemMeta {
 					new ExampleScript("Demonstrates a generic item without meta", "msg(get_itemmeta(null))", 
 							"null"),
 					new ExampleScript("Demonstrates a generic item with meta", "msg(get_itemmeta(null))", 
-							"{display: AmazingSword, lore: {Look at my sword, my sword is amazing}}"),
+							"{display: AmazingSword, enchants: {}, lore: {Look at my sword, my sword is amazing}}"),
 					new ExampleScript("Demonstrates a written book", "msg(get_itemmeta(null))", 
-							"{author: Notch, display: null, lore: null, pages: {This is page 1, This is page 2}, title: Example Book}"),
+							"{author: Notch, display: null, enchants: {}, lore: null,"
+							+ " pages: {This is page 1, This is page 2}, title: Example Book}"),
 					new ExampleScript("Demonstrates an EnchantedBook", "msg(get_itemmeta(null))", 
-							"{display: null, lore: null, stored: {{elevel: 1, etype: ARROW_FIRE}}}"),
+							"{display: null, enchants: {}, lore: null, stored: {{elevel: 1, etype: ARROW_FIRE}}}"),
 					new ExampleScript("Demonstrates a piece of leather armor", "msg(get_itemmeta(null))", 
-							"{color: {b: 106, g: 160, r: 64}, display: null, lore: null}"),
+							"{color: {b: 106, g: 160, r: 64}, display: null, enchants: {}, lore: null}"),
 					new ExampleScript("Demonstrates a skull", "msg(get_itemmeta(null))", 
-							"{display: null, lore: null, owner: Herobrine}")
+							"{display: null, enchants: {}, lore: null, owner: Herobrine}"),
+					new ExampleScript("Demonstrates a custom potion", "msg(get_itemmeta(null))", 
+							"{display: null, enchants: {}, lore: null, main: 8,"
+							+ " potions: {{ambient: true, id: 8, seconds: 180, strength: 5}}}")
 			};
 		}
 		
@@ -204,19 +209,22 @@ public class ItemMeta {
 					new ExampleScript("Demonstrates removing all meta", "set_itemmeta(null, null)", 
 							"This will make the item in your hand completely ordinary"),
 					new ExampleScript("Demonstrates a generic item with meta", 
-							"set_itemmeta(null, array('display': 'Amazing Sword', 'lore': array('Look at my sword', 'my sword is amazing')))", 
+							"set_itemmeta(null, array(display: 'Amazing Sword', lore: array('Look at my sword', 'my sword is amazing')))", 
 							"The item in your hands is now amazing"),
 					new ExampleScript("Demonstrates a written book", 
-							"set_itemmeta(null, array('author': 'Writer', 'pages': array('Once upon a time', 'The end.'), 'title': 'Epic Story'})", 
+							"set_itemmeta(null, array(author: 'Writer', pages: array('Once upon a time', 'The end.'), title: 'Epic Story'})", 
 							"This will write a very short story"),
 					new ExampleScript("Demonstrates an EnchantedBook", 
-							"set_itemmeta(null, array('stored': array(array('elevel': 25, 'etype': DAMAGE_ALL), array('etype': DURABILITY, 'elevel': 3))))", 
+							"set_itemmeta(null, array(stored: array(array(elevel: 25, etype: DAMAGE_ALL), array(etype: DURABILITY, elevel: 3))))", 
 							"This book now contains Unbreaking 3 and Sharpness 25"),
 					new ExampleScript("Demonstrates coloring leather armor", 
-							"set_itemmeta(102, array('color': array(r: 50 b: 150, g: 100)))", 
+							"set_itemmeta(102, array(color: array(r: 50 b: 150, g: 100)))", 
 							"This will make your chestplate blue-ish"),
-					new ExampleScript("Demonstrates a skull", "set_itemmeta(103, array('owner': 'Notch'))", 
-							"This puts Notch's skin on the skull you are wearing")
+					new ExampleScript("Demonstrates a skull", "set_itemmeta(103, array(owner: 'Notch'))", 
+							"This puts Notch's skin on the skull you are wearing"),
+					new ExampleScript("Demonstrates making a custom potion", 
+							"set_itemmeta(5, array(potions: array(id: 8, strength: 4, seconds: 90, ambient: true)))", 
+							"Turns the potion in slot 5 into a Potion of Leaping V")
 			};
 		}
 		

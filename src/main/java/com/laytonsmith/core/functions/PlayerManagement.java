@@ -2129,15 +2129,8 @@ public class PlayerManagement {
 			if (args.length > 0) {
 				p = Static.GetPlayer(args[0], t);
 			}
-			CArray ret = new CArray(t);
-			for (MCLivingEntity.MCEffect e : p.getEffects()) {
-				CArray potion = new CArray(t);
-				potion.set("potionID", new CInt(e.getPotionID(), t), t);
-				potion.set("strength", new CInt(e.getStrength(), t), t);
-				potion.set("seconds", new CInt(e.getSecondsRemaining(), t), t);
-				ret.push(potion);
-			}
-			return ret;
+			Static.AssertPlayerNonNull(p, t);
+			return ObjectGenerator.GetGenerator().potions(p.getEffects(), t);
 		}
 
 		public String getName() {
@@ -2151,7 +2144,7 @@ public class PlayerManagement {
 		public String docs() {
 			return "array {[player]} Returns an array of effects that are currently active on a given player."
 					+ " The array will be full of playerEffect objects, which contain three fields, \"potionID\","
-					+ " \"strength\", and \"seconds\" remaining.";
+					+ " \"strength\", \"seconds\" remaining, and whether the effect is \"ambient\".";
 		}
 		
 		public Argument returnType() {
