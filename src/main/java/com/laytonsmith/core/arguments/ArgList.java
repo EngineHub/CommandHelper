@@ -265,7 +265,11 @@ public class ArgList {
 	
 	/**
 	 * Returns an enum of the appropriate type. This is required for
-	 * use if returning an enum, the normal get() method will not work.
+	 * use if returning an enum, the normal get() method will not work. This may return
+	 * null, however the field may be annotated with NonNull, in which case the code doesn't
+	 * need to check for null, the compiler (or runtime) will have already dealt with it by
+	 * that point. If the argument wasn't annotated with NonNull, then it is possible that it
+	 * will be null.
 	 * @param <T>
 	 * @param name
 	 * @param t

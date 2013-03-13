@@ -10,6 +10,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.arguments.Generic;
@@ -23,6 +24,8 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MEquipment;
 import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.MPotion;
+import com.laytonsmith.core.natives.annotations.NonNull;
 import com.laytonsmith.core.natives.annotations.Ranged;
 import java.util.ArrayList;
 import java.util.List;
@@ -408,11 +411,11 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent;
-			int id = Static.getInt32(args[0], t);
+			int id = args[0].primitive(t).castToInt32(t);
 			try {
 				ent = Static.getEntity(id, t);
 			} catch (ConfigRuntimeException cre) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			}
 			return new CString(ent.getType().name(), t);
 		}
@@ -539,7 +542,7 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity mob = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity mob = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t);
 		}
 
@@ -548,8 +551,18 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "array {entityID} Returns an array of potion arrays showing"
+			return "Returns an array of potion arrays showing"
 					+ " the effects on this mob.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(MPotion.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The entity ID of the mob to check.", CInt.class, "entityId")
+					);
 		}
 		
 		@Override
@@ -603,15 +616,15 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			int id = args[0].primitive(t).castToInt32(t);
 			MCLivingEntity mob = Static.getLivingEntity(id, t);
-			int effect = Static.getInt32(args[1], t);
-			int strength = Static.getInt32(args[2], t);
+			int effect = args[1].primitive(t).castToInt32(t);
+			int strength = args[2].primitive(t).castToInt32(t);
 			int seconds = 30;
 			boolean ambient = false;
 			if (args.length >= 4) {
-				seconds = Static.getInt32(args[3], t);
+				seconds = args[3].primitive(t).castToInt32(t);
 			}
 			if (args.length == 5) {
-				ambient = Static.getBoolean(args[4]);
+				ambient = args[4].primitive(t).castToBoolean();
 			}
 
 			if (seconds == 0) {
@@ -983,7 +996,7 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			return new CInt(le.getMaxHealth(), t);
 		}
 
@@ -992,7 +1005,17 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "int {entityID} Returns the maximum health of this living entity.";
+			return "Returns the maximum health of this living entity.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityId")
+					);
 		}
 		
 	}
@@ -1002,8 +1025,8 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			le.setMaxHealth(Static.getInt32(args[1], t));
+			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
+			le.setMaxHealth(args[1].primitive(t).castToInt32(t));
 			return new CVoid(t);
 		}
 
@@ -1012,9 +1035,20 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, int} Sets the max health of this living entity."
+			return "Sets the max health of this living entity."
 					+ " this is persistent for players, and will not reset even"
 					+ " after server restarts.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID"),
+						new Argument("", CInt.class, "max")
+					);
 		}
 		
 		@Override
@@ -1029,7 +1063,9 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			ArgList list = getBuilder().parse(args, this, t);
+			int id = list.getInt("entityID", t);
+			MCEntity ent = Static.getEntity(id, t);
 			return new CInt(Static.ticksToMs(ent.getFireTicks())/1000, t);
 		}
 
@@ -1038,8 +1074,18 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "int {entityID} Returns the number of seconds until this entity"
+			return "Returns the number of seconds until this entity"
 					+ " stops being on fire, 0 if it already isn't.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID")
+					);
 		}
 		
 	}
@@ -1049,11 +1095,11 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
-			int setTicks = (int) Static.msToTicks(Static.getInt(args[1], t)*1000);
-			if (setTicks < 0) {
-				throw new Exceptions.FormatException("Seconds cannot be less than 0", t);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			int id = list.getInt("entityID", t);
+			int seconds = list.getInt("seconds", t);
+			MCEntity ent = Static.getEntity(id, t);
+			int setTicks = (int) Static.msToTicks(seconds * 1000);
 			ent.setFireTicks(setTicks);
 			return new CVoid(t);
 		}
@@ -1063,9 +1109,19 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, seconds} Sets the entity on fire for the"
-					+ " given number of seconds. Throws a FormatException"
-					+ " if seconds is less than 0.";
+			return "Sets the entity on fire for the"
+					+ " given number of seconds.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID"),
+						new Argument("", CInt.class, "seconds").addAnnotation(new Ranged(0, true, Integer.MAX_VALUE, true))
+					);
 		}
 		
 	}
@@ -1075,13 +1131,10 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
-			MCEntityEffect mee;
-			try {
-				mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
-			} catch (IllegalArgumentException iae) {
-				throw new Exceptions.FormatException("Unknown effect at arg 2.", t);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			int id = list.getInt("entityID", t);
+			MCEntityEffect mee = list.getEnum("effect", MCEntityEffect.class);
+			MCEntity ent = Static.getEntity(id, t);
 			ent.playEffect(mee);
 			return new CVoid(t);
 		}
@@ -1091,13 +1144,23 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, effect} Plays the given visual effect on the"
+			return "Plays the given visual effect on the"
 					+ " entity. Non-applicable effects simply won't happen. Note:"
 					+ " the death effect makes the mob invisible to players and"
 					+ " immune to melee attacks. When used on players, they are"
 					+ " shown the respawn menu, but because they are not actually"
-					+ " dead, they can only log out. Possible effects are: "
-					+ StringUtils.Join(MCEntityEffect.values(), ", ", ", or ", " or ");
+					+ " dead, they can only log out.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID"),
+						new Argument("", MCEntityEffect.class, "effect").addAnnotation(new NonNull())
+					);
 		}
 		
 	}

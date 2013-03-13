@@ -110,7 +110,8 @@ public class EntityEvents {
 			return Driver.ENTITY_DEATH;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
 				if (key.equals("xp")) {

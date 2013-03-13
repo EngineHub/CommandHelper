@@ -15,6 +15,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.MEnum;
+import com.laytonsmith.core.natives.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -417,7 +418,7 @@ public class Exceptions {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-					new Argument("The type of the exception to throw", ExceptionType.class, "exceptionType"),
+					new Argument("The type of the exception to throw", ExceptionType.class, "exceptionType").addAnnotation(new NonNull()),
 					new Argument("The message to include as a part of the exception", CString.class, "msg")
 					);
 		}

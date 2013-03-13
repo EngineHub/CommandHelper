@@ -489,7 +489,7 @@ public class ObjectGenerator {
 						}
 					}
 					if (ma.containsKey("main")) {
-						((MCPotionMeta) meta).setMainEffect(Static.getInt32(ma.get("main", t), t));
+						((MCPotionMeta) meta).setMainEffect(ma.get("main", t).primitive(t).castToInt32(t));
 					}
 				}
 			} catch(Exception ex) {
@@ -633,7 +633,7 @@ public class ObjectGenerator {
 			try {
 				CArray ea = (CArray) enchantArray.get(key, t);
 				MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(ea.get("etype", t).val());
-				int elevel = Static.getInt32(ea.get("elevel", t), t);
+				int elevel = ea.get("elevel", t).primitive(t).castToInt32(t);
 				if (etype == null) {
 					throw new ConfigRuntimeException("Unknown enchantment type at " + key, 
 							ExceptionType.EnchantmentException, t);
@@ -667,18 +667,18 @@ public class ObjectGenerator {
 				int potionID = 0, strength = 0, seconds = 30;
 				boolean ambient = false;
 				if (effect.containsKey("id")) {
-					potionID = Static.getInt32(effect.get("id", t), t);
+					potionID = effect.get("id", t).primitive(t).castToInt32(t);
 				} else {
 					throw new Exceptions.FormatException("No potion ID was given at index " + key, t);
 				}
 				if (effect.containsKey("strength")) {
-					strength = Static.getInt32(effect.get("strength", t), t);
+					strength = effect.get("strength", t).primitive(t).castToInt32(t);
 				}
 				if (effect.containsKey("seconds")) {
-					seconds = Static.getInt32(effect.get("seconds", t), t);
+					seconds = effect.get("seconds", t).primitive(t).castToInt32(t);
 				}
 				if (effect.containsKey("ambient")) {
-					ambient = Static.getBoolean(effect.get("ambient", t));
+					ambient = effect.get("ambient", t).primitive(t).castToBoolean();
 				}
 				ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient));
 			} else {

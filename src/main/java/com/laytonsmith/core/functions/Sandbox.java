@@ -227,7 +227,7 @@ public class Sandbox {
 			if(item != null){
 				return new CInt(item.getEntityId(), t);
 			}
-            return new CNull(t);
+            return Construct.GetNullConstruct(t);
         }
     }    
 

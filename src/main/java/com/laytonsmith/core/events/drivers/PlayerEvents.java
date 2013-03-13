@@ -780,7 +780,7 @@ public class PlayerEvents {
 
         //Given the paramters, change the underlying event
 		@Override
-        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (super.modifyEvent(key, value, event, t)) {
 				return true;
 			} else if (event instanceof MCPlayerDeathEvent) {
@@ -791,7 +791,7 @@ public class PlayerEvents {
 					return true;
 				}
                 if(key.equals("death_message")){
-                    e.setDeathMessage(value.nval());
+                    e.setDeathMessage(value.isNull()?null:value.val());
                     return true;
                 }
                 if(key.equals("drops")){
@@ -813,11 +813,11 @@ public class PlayerEvents {
                     return true;
                 }
 				if (key.equals("keep_level")) {
-					e.setKeepLevel(Static.getBoolean(value));
+					e.setKeepLevel(value.primitive(t).castToBoolean());
 					return true;
 				}
 				if (key.equals("new_level")) {
-					e.setNewLevel(Static.getInt32(value, Target.UNKNOWN));
+					e.setNewLevel(value.primitive(t).castToInt32(t));
 					return true;
 				}
             }

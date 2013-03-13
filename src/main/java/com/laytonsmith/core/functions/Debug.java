@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.HeapDumper;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.arguments.Generic;
@@ -260,16 +261,13 @@ public class Debug {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof IVariable){
-				if(Prefs.DebugMode()){
-					IVariable ivar = (IVariable)args[0];
-					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getName(), t);
-					System.out.println(ivar.getName() + ": " + val.val());
-				}
-				return new CVoid(t);
-			} else {
-				throw new Exceptions.CastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
+			ArgList list = getBuilder().parse(args, this, t);
+			IVariable ivar = list.get("variable");
+			if(Prefs.DebugMode()){
+				Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar, t);
+				System.out.println(ivar.getName() + ": " + val.val());
 			}
+			return new CVoid(t);
 			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
 			//if so, remove this function entirely
 		}
@@ -288,9 +286,19 @@ public class Debug {
 		}
 
 		public String docs() {
-			return "void {ivar} If debug mode is on, outputs debug information about a variable. Unlike debug, this only accepts an ivar; it is a meta function."
+			return "If debug mode is on, outputs debug information about a variable. Unlike debug, this only accepts an ivar; it is a meta function."
 					+ " The runtime will then take the variable, and output information about it, in a human readable format, including"
 					+ " the variable's name and value. If debug mode is off, the function is ignored.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The variable to output", IVariable.class, "variable")
+					);
 		}
 
 		public CHVersion since() {

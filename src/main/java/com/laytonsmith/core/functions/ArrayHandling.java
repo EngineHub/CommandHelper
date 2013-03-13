@@ -19,6 +19,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.annotations.NonNull;
 import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -1411,8 +1412,7 @@ public class ArrayHandling {
 		public String docs() {
 			return "Works like array_sort, but does the sort on another"
 					+ " thread, then calls the closure and sends it the sorted array. This is useful if the array"
-					+ " is large enough to actually \"stall\" the server when doing the sort. Sort type should be"
-					+ " one of " + StringUtils.Join(CArray.SortType.values(), ", ", " or ");
+					+ " is large enough to actually \"stall\" the server when doing the sort.";
 		}
 
 		public Argument returnType() {
@@ -1422,7 +1422,7 @@ public class ArrayHandling {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 					new Argument("The array to be sorted", CArray.class, "array").setGenerics(Generic.ANY),
-					new Argument("The sort type", CArray.SortType.class, "sortType").setOptionalDefault(CArray.SortType.REGULAR),
+					new Argument("The sort type", CArray.SortType.class, "sortType").setOptionalDefault(CArray.SortType.REGULAR).addAnnotation(new NonNull()),
 					new Argument("The closure that recieves the sorted array once finished", CClosure.class, "closure").setGenerics(new Generic("?", CArray.class)));
 		}
 
