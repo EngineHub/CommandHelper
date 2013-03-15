@@ -57,6 +57,7 @@ public class BukkitPlayerListener implements Listener {
 		BukkitPlayerEvents.BukkitMCPlayerInteractEvent pie = new BukkitPlayerEvents.BukkitMCPlayerInteractEvent(e);
 		EventUtils.TriggerExternal(pie);
 		EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "player_interact", pie);
+		EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "pressure_plate_activated", pie);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
