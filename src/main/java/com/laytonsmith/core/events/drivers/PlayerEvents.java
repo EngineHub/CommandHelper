@@ -495,7 +495,7 @@ public class PlayerEvents {
     }
 
     @api
-    public static class player_interact extends AbstractEvent{
+    public static class player_interact extends AbstractEvent {
 
         public String getName() {
             return "player_interact";
@@ -599,6 +599,71 @@ public class PlayerEvents {
         }
 
     }
+	
+	@api
+    public static class pressure_plate_activated extends AbstractEvent {
+
+		public String getName() {
+			return "pressure_plate_activated";
+		}
+
+		public String docs() {
+			return "{location: The location of the pressure plate} "
+                    + "Fires when a player steps on a pressure plate"
+                    + "{location: The location of the pressure plate |"
+                    + " player: The player associated with this event}"
+                    + "{}"
+                    + "{}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerInteractEvent){
+                MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
+                if(!((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
+                    return false;
+                }
+				if(prefilter.containsKey("location")){
+					MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, Target.UNKNOWN);
+					if(!pie.getClickedBlock().getLocation().equals(loc)){
+						return false;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manual) {
+			MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
+            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location"), null, Target.UNKNOWN).getBlock();
+            MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, MCAction.PHYSICAL, null, b, MCBlockFace.UP);
+            return e;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCPlayerInteractEvent){
+                MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation()));
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to PlayerInteractEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_INTERACT;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 
     @api
     public static class player_spawn extends AbstractEvent {
