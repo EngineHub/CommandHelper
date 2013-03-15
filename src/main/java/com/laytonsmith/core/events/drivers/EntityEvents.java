@@ -62,7 +62,7 @@ public class EntityEvents {
 					+ " {id|drops|xp}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if (e instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent event = (MCEntityDeathEvent) e;
@@ -115,15 +115,15 @@ public class EntityEvents {
 			if (event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
 				if (key.equals("xp")) {
-					e.setDroppedExp(Static.getInt32(value, Target.UNKNOWN));
+					e.setDroppedExp(value.primitive(t).castToInt32(t));
 					return true;
 				}
 				if(key.equals("drops")){
-					if(value instanceof CNull){
+					if(value.isNull()){
 						value = new CArray(Target.UNKNOWN);
 					}
 					if(!(value instanceof CArray)){
-						throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
+						throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, t);
 					}
 					e.clearDrops();
 					CArray drops = (CArray) value;

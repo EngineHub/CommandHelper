@@ -13,6 +13,11 @@ public class MVector3D extends MObject {
 	public double x;
 	public double y;
 	public double z;
+	public double magnitude;
+	
+	public void setMagnitude(){
+		magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+	}
 
 	@Override
 	protected String alias(String field) {

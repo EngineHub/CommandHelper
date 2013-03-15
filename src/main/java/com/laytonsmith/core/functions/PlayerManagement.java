@@ -25,6 +25,9 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.MPotion;
+import com.laytonsmith.core.natives.MVector3D;
+import com.laytonsmith.core.natives.annotations.NonNull;
 import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.MObject;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -1373,17 +1376,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "string {[player]} Returns the player's game mode. It will be one of \"CREATIVE\" or \"SURVIVAL\".";
+			return "Returns the player's game mode.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MCGameMode.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -1431,18 +1433,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], mode} Sets the player's game mode. mode must be either \"CREATIVE\" or \"SURVIVAL\""
-					+ " (case doesn't matter)";
+			return "Sets the player's game mode";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", MCGameMode.class, "mode").addAnnotation(new NonNull())
 					);
 		}
 
@@ -1463,27 +1464,10 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer m = null;
-			String mode = "";
-			MCGameMode gm;
-			if (p instanceof MCPlayer) {
-				m = (MCPlayer) p;
-			}
-			if (args.length == 2) {
-				m = Static.GetPlayer(args[0], t);
-				mode = args[1].val();
-			} else {
-				mode = args[0].val();
-			}
-
-			try {
-				gm = MCGameMode.valueOf(mode.toUpperCase());
-			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException("Mode must be either 'CREATIVE', 'SURVIVAL', or 'ADVENTURE'", ExceptionType.FormatException, t);
-			}
-			Static.AssertPlayerNonNull(m, t);
-			m.setGameMode(gm);
+			ArgList list = getBuilder().parse(args, this, t);
+			MCPlayer p = Static.GetPlayer(list.getStringWithNull("player", t), env, t);
+			MCGameMode mode = list.getEnum("mode", MCGameMode.class);
+			p.setGameMode(mode);
 			return new CVoid(t);
 		}
 	}
@@ -1500,18 +1484,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99. (100 would be next level,"
+			return "Gets the experience of a player within this level, as a percentage, from 0 to 99. (100 would be next level,"
 					+ " therefore, 0.)";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -1557,17 +1540,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], xp} Sets the experience of a player within the current level, as a percentage, from 0 to 100.";
+			return "Sets the experience of a player within the current level, as a percentage, from 0 to 99.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "xp").addAnnotation(new Ranged(0, 100))
 					);
 		}
 
@@ -1618,17 +1601,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], exp} Gives the player the specified amount of xp.";
+			return "Gives the player the specified amount of xp.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "xp")
 					);
 		}
 
@@ -1680,17 +1663,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "int {[player]} Gets the player's level.";
+			return "Gets the player's level.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -1736,17 +1718,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], level} Sets the level of a player.";
+			return "Sets the level of a player.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "level").addAnnotation(Ranged.POSITIVE)
 					);
 		}
 
@@ -1797,17 +1779,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "int {[player]} Gets the total experience of a player.";
+			return "Gets the total experience of a player.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -1853,17 +1834,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], xp} Sets the total experience of a player.";
+			return "Sets the total experience of a player.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "xp").addAnnotation(Ranged.POSITIVE)
 					);
 		}
 
@@ -1918,17 +1899,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "int {[player]} Returns the player's current food level.";
+			return "Returns the player's current food level.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -1974,17 +1954,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], level} Sets the player's food level. This is an integer from 0-?";
+			return "Sets the player's food level.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "level").addAnnotation(Ranged.POSITIVE)
 					);
 		}
 
@@ -2035,10 +2015,9 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {player, potionID, strength, [seconds], [ambient]} Effect is 1-19. Seconds defaults to 30."
-					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
-					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects for a"
-					+ " complete list of potions that can be added. To remove an effect, set the duration to 0 seconds."
+			return "Adds (or removes) a potion effect from a player. See http://www.minecraftwiki.net/wiki/Potion_effects for a"
+					+ " complete list of potions that can be added, and their effects."
+					+ " To remove an effect, set the duration or strength to 0."
 					+ " Strength is the number of levels to add to the base power (effect level 1)."
 					+ " It returns true if the effect was added or removed as desired. It returns false if the effect was"
 					+ " not added or removed as desired (however, this currently only will happen if an effect is attempted"
@@ -2046,13 +2025,16 @@ public class PlayerManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("The effect ID to be added", CInt.class, "potionID").addAnnotation(new Ranged(1, true, 19, true)),
+						new Argument("The strength of the potion", CInt.class, "strength").addAnnotation(Ranged.POSITIVE),
+						new Argument("The duration of the effect", CInt.class, "seconds").setOptionalDefault(30).addAnnotation(Ranged.POSITIVE),
+						new Argument("If true, the effect is more noticable", CBoolean.class, "ambient").setOptionalDefault(false)
 					);
 		}
 
@@ -2074,24 +2056,17 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCPlayer m = Static.GetPlayer(args[0].val(), t);
-
-			int effect = args[1].primitive(t).castToInt32(t);
-
-			int strength = args[2].primitive(t).castToInt32(t);
-			int seconds = 30;
-			boolean ambient = false;
-			if (args.length >= 4) {
-				seconds = args[3].primitive(t).castToInt32(t);
-			}
-			if (args.length == 5) {
-				ambient = args[4].primitive(t).castToBoolean();
-			}
-			Static.AssertPlayerNonNull(m, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			MCPlayer player = Static.GetPlayer(list.getStringWithNull("player", t), env, t);
+			int potionID = list.getInt("potionID", t);
+			int strength = list.getInt("strength", t);
+			int seconds = list.getInt("seconds", t);
+			boolean ambient = list.getBoolean("ambient", t);
+			
 			if (seconds == 0) {
-				return new CBoolean(m.removeEffect(effect), t);
+				return new CBoolean(player.removeEffect(potionID), t);
 			} else {
-				m.addEffect(effect, strength, seconds, ambient, t);
+				player.addEffect(potionID, strength, seconds, ambient, t);
 				return new CBoolean(true, t);
 			}
 		}
@@ -2142,19 +2117,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "array {[player]} Returns an array of effects that are currently active on a given player."
-					+ " The array will be full of playerEffect objects, which contain three fields, \"potionID\","
-					+ " \"strength\", \"seconds\" remaining, and whether the effect is \"ambient\".";
+			return "Returns an array of effects that are currently active on a given player.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CArray.class).setGenerics(new Generic(MPotion.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -2175,17 +2147,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], health} Sets the player's health. health should be an integer from 0-20.";
+			return "Sets the player's health.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "health").addAnnotation(new Ranged(0, true, 20, true))
 					);
 		}
 
@@ -2206,23 +2178,10 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer m = null;
-			if (p instanceof MCPlayer) {
-				m = (MCPlayer) p;
-			}
-			int health = 0;
-			if (args.length == 2) {
-				m = Static.GetPlayer(args[0].val(), t);
-				health = args[1].primitive(t).castToInt32(t);
-			} else {
-				health = args[0].primitive(t).castToInt32(t);
-			}
-			if (health < 0 || health > 20) {
-				throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, t);
-			}
-			Static.AssertPlayerNonNull(m, t);
-			m.setHealth(health);
+			ArgList list = getBuilder().parse(args, this, t);
+			MCPlayer player = Static.GetPlayer(list.getStringWithNull("player", t), env, t);
+			int health = list.get("health");
+			player.setHealth(health);
 			return new CVoid(t);
 		}
 	}
@@ -2239,19 +2198,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {player} Returns whether or not the specified player is online. Note"
+			return "Returns whether or not the specified player is online. Note"
 					+ " that the name must match exactly, but it will not throw a PlayerOfflineException"
 					+ " if the player is not online, or if the player doesn't even exist.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The player to check. The name must be an exact match", CString.class, "player")
 					);
 		}
 
@@ -2308,18 +2266,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {player} Returns whether or not this player is whitelisted. Note that"
+			return "Returns whether or not this player is whitelisted. Note that"
 					+ " this will work with offline players, but the name must be exact.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the player. This must be an exact match", CString.class, "player")
 					);
 		}
 
@@ -2363,18 +2320,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player. Note that"
+			return "Sets the whitelist flag of the specified player. Note that"
 					+ " this will work with offline players, but the name must be exact.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the player. This must be an exact match.", CString.class, "player"),
+						new Argument("", CBoolean.class, "isWhitelisted")
 					);
 		}
 
@@ -2414,7 +2371,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {player} Returns whether or not this player is banned. Note that"
+			return "Returns whether or not this player is banned. Note that"
 					+ " this will work with offline players, but the name must be exact. At this"
 					+ " time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
@@ -2422,13 +2379,12 @@ public class PlayerManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the player. This must be an exact match.", CString.class, "player")
 					);
 		}
 
@@ -2466,7 +2422,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {player, isBanned} Sets the ban flag of the specified player. Note that"
+			return "Sets the ban flag of the specified player. Note that"
 					+ " this will work with offline players, but the name must be exact. At this"
 					+ " time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
@@ -2474,13 +2430,13 @@ public class PlayerManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The name of the player. This must be an exact match.", CString.class, "player"),
+						new Argument("", CBoolean.class, "isBanned")
 					);
 		}
 
@@ -2520,18 +2476,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {[player]} Returns whether or not the specified player (or the current"
+			return "Returns whether or not the specified player (or the current"
 					+ " player if not specified) is op";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -2573,17 +2528,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "array {[player], locationArray} Sets the player's compass target, and returns the old location.";
+			return "Sets the player's compass target, and returns the old location.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", MLocation.class, "location")
 					);
 		}
 
@@ -2634,17 +2589,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "array {[player]} Gets the compass target of the specified player";
+			return "Gets the compass target of the specified player";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -2686,19 +2640,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "int {[player]} Returns the number of ticks remaining that this player will"
+			return "Returns the number of ticks remaining that this player will"
 					+ " be on fire for. If the player is not on fire, 0 is returned, which incidentally"
 					+ " is false.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -2741,18 +2694,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], ticks} Sets the player on fire for the specified number of"
+			return "Sets the player on fire for the specified number of"
 					+ " ticks. If a boolean is given for ticks, false is 0, and true is 20.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "ticks")
 					);
 		}
 
@@ -2783,7 +2736,7 @@ public class PlayerManagement {
 			}
 			int tick = 0;
 			if (ticks instanceof CBoolean) {
-				boolean value = ((CBoolean) ticks).getBoolean();
+				boolean value = ((CBoolean) ticks).primitive(t).castToBoolean();
 				if (value) {
 					tick = 20;
 				}
@@ -2808,17 +2761,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {[player]} Returns whether or not the player has the ability to fly";
+			return "Returns whether or not the player has the ability to fly";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -2867,15 +2819,14 @@ public class PlayerManagement {
 			return super.docs() + " DEPRECATED(use set_pflight instead)";
 		}
 		
+		@Override
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return super.returnType();
 		}
 
+		@Override
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return super.arguments();
 		}
 
 		public Set<OptimizationOption> optimizationOptions() {
@@ -2902,17 +2853,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], flight} Sets whether or not this player is allowed to fly";
+			return "Sets whether or not this player is allowed to fly";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CBoolean.class, "flight")
 					);
 		}
 
@@ -2981,15 +2932,14 @@ public class PlayerManagement {
 			return super.docs() + " DEPRECATED(use set_ptime instead)";
 		}
 		
+		@Override
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return super.returnType();
 		}
 
+		@Override
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return super.arguments();
 		}
 
 		public Set<Optimizable.OptimizationOption> optimizationOptions() {
@@ -3017,7 +2967,7 @@ public class PlayerManagement {
 
 		public String docs() {
 			StringBuilder doc = new StringBuilder();
-			doc.append("void {[player], time} Sets the time of a given player. Should be a number from 0 to"
+			doc.append("Sets the time of a given player. Should be a number from 0 to"
 					+ " 24000, if not, it is modulo scaled. Alternatively, common time notation (9:30pm, 4:00 am)"
 					+ " is acceptable, and convenient english mappings also exist:");
 			doc.append("<ul>");
@@ -3029,13 +2979,13 @@ public class PlayerManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, CString.class, "time")
 					);
 		}
 
@@ -3120,18 +3070,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "int {[player]} Returns the time of the specified player, as an integer from"
+			return "Returns the time of the specified player, as an integer from"
 					+ " 0 to 24000-1";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -3176,17 +3125,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player]} Resets the time of the player to the time of the world.";
+			return "Resets the time of the player to the time of the world.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -3263,7 +3211,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], [listName]} Sets the player's list name."
+			return "Sets the player's list name."
 					+ " The name cannot be longer than 16 characters, but colors are supported."
 					+ " Setting the name to null resets it. If the name specified is already taken,"
 					+ " a FormatException is thrown, and if the length of the name is greater than 16"
@@ -3271,13 +3219,13 @@ public class PlayerManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CString.class, "listName").setOptionalDefaultNull()
 					);
 		}
 
@@ -3318,17 +3266,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "string {[player]} Returns the list name of the specified player, or the current player if none specified.";
+			return "Returns the list name of the specified player, or the current player if none specified.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -3349,20 +3296,19 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "array {[player]} Returns an associative array that represents the player's velocity."
+			return "Returns an associative array that represents the player's velocity."
 					+ " The array contains the following items: magnitude, x, y, z. These represent a"
 					+ " 3 dimensional Vector. The important part is x, y, z, however, the magnitude is provided"
 					+ " for you as a convenience. (It should equal sqrt(x ** 2 + y ** 2 + z ** 2))";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MVector3D.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -3383,13 +3329,13 @@ public class PlayerManagement {
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
-			CArray vector = CArray.GetAssociativeArray(t);
 			MCPlayer.Velocity velocity = p.getVelocity();
-			vector.set("magnitude", new CDouble(velocity.magnitude, t), t);
-			vector.set("x", new CDouble(velocity.x, t), t);
-			vector.set("y", new CDouble(velocity.y, t), t);
-			vector.set("z", new CDouble(velocity.z, t), t);
-			return vector;
+			MVector3D vector = new MVector3D();
+			vector.magnitude = velocity.magnitude;
+			vector.x = velocity.x;
+			vector.y = velocity.y;
+			vector.z = velocity.z;
+			return vector.deconstruct(t);
 		}
 
 		public CHVersion since() {
@@ -3475,7 +3421,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {[player], vector | [player], x, y, z} Sets a player's velocity. vector must be an"
+			return "Sets a player's velocity. vector must be an"
 					+ " associative array with x, y, and z keys defined (if magnitude is set, it is ignored)."
 					+ " If the vector's magnitude is greater than 10, the command is cancelled, because the"
 					+ " server won't allow the player to move faster than that. A warning is issued, and false"
@@ -3484,13 +3430,21 @@ public class PlayerManagement {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1,
+							PLAYER_ARG,
+							new Argument("", MVector3D.class, "velocityVector")
+						),
+						new Signature(2, 
+							PLAYER_ARG,
+							new Argument("", CDouble.class, "x"),
+							new Argument("", CDouble.class, "y"),
+							new Argument("", CDouble.class, "z")
+						)
 					);
 		}
 
@@ -3536,18 +3490,19 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], locationArray, itemID} Changes a block, but only temporarily, and only for the specified player."
+			return "Changes a block, but only temporarily, and only for the specified player."
 					+ " This can be used to \"fake\" blocks for a player. ItemID is in the 1[:1] data format.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", MLocation.class, "location"),
+						new Argument("", CInt.class, CString.class, "itemID")
 					);
 		}
 
@@ -3588,17 +3543,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "int {[player]} Returns the player's hunger level";
+			return "Returns the player's hunger level";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -3643,17 +3597,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], hunger} Sets a player's hunger level";
+			return "Sets a player's hunger level";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "hunger").addAnnotation(Ranged.POSITIVE)
 					);
 		}
 
@@ -3695,17 +3649,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "double {[player]} Returns the player's saturation level";
+			return "Returns the player's saturation level";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CDouble.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -3751,17 +3704,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], saturation} ";
+			return "Sets the player's saturation. While the value can be higher, normally their saturation will only get to 20.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG,
+						new Argument("", CInt.class, "saturation").addAnnotation(Ranged.POSITIVE)
 					);
 		}
 
@@ -3794,30 +3747,21 @@ public class PlayerManagement {
 			} catch (Exception e) {
 				return Construct.GetNullConstruct(t);
 			}
-//			if (loc == null) {
-//				return new CNull(t);
-//			}
-//			MCWorld w = loc.getWorld();
-			return new CArray(t,
-					new CDouble(loc.getX(), t),
-					new CDouble(loc.getY(), t),
-					new CDouble(loc.getZ(), t),
-					new CString(w.getName(), t));
+			MLocation l = new MLocation(loc);
+			return l.deconstruct(t);
 		}
 
 		public String docs() {
-			return "array {[playerName]} Returns an array of x, y, z, coords of the bed of the player specified, or the player running the command otherwise."
-					+ "The array returned will also include the bed's world in index 3 of the array. This is set when a player sleeps or by set_pbed_location.";
+			return "Returns the location of the bed of the player. This is set when a player sleeps or by set_pbed_location.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", MLocation.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -3850,18 +3794,25 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the bed of the player to the specified coordinates."
+			return "Sets the location of the bed of the player to the specified coordinates."
 					+ " If player is omitted, the current player is used.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Signature(1, 
+							PLAYER_ARG,
+							new Argument("", MLocation.class, "location")
+						), new Signature(2,
+							PLAYER_ARG,
+							new Argument("", CDouble.class, "x"),
+							new Argument("", CDouble.class, "y"),
+							new Argument("", CDouble.class, "z")
+						)
 					);
 		}
 
@@ -3955,17 +3906,16 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "mixed {[player]} Returns name of vehicle which player is in or null if player is outside the vehicle";
+			return "Returns the id of the vehicle the player is in or null if the player is not in a vehicle.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -4012,17 +3962,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {[player]} Leave vehicle by player or return false if player is outside the vehicle";
+			return "Causes the player to leave the vehicle they are riding and returns true, or does nothing and returns"
+					+ " false if the player is not in a vehicle";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						PLAYER_ARG
 					);
 		}
 
@@ -4087,7 +4037,15 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "array {} Returns an array of every player who has played on this server.";
+			return "Returns an array of every player who has played on this server.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 
 		public CHVersion since() {
@@ -4134,8 +4092,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {player} Returns whether the given player has ever been on this server."
+			return "Returns whether the given player has ever been on this server."
 					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "player")
+					);
 		}
 
 		public CHVersion since() {
@@ -4188,8 +4156,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "int {[player]} Returns the time this player first logged onto this server, or 0 if they never have."
+			return "Returns the time this player first logged onto this server (as a unix timestamp), or 0 if they never have."
 					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "player").setOptionalDefaultNull()
+					);
 		}
 
 		public CHVersion since() {
@@ -4242,8 +4220,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "int {[player]} Returns the time this player was last seen on this server, or 0 if they never were."
+			return "Returns the time this player was last seen on this server (as a unix time stamp), or 0 if they never were."
 					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "player").setOptionalDefaultNull()
+					);
 		}
 
 		public CHVersion since() {

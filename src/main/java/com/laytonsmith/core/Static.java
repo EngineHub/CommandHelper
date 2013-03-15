@@ -403,6 +403,14 @@ public final class Static {
     }
 
     private static Map<String, MCPlayer> injectedPlayers = new HashMap<String, MCPlayer>();
+	/**
+	 * @deprecated Use {@link #GetPlayer(java.lang.String, com.laytonsmith.core.environments.Environment, com.laytonsmith.core.constructs.Target)}
+	 * instead for new code.
+	 * @param player
+	 * @param t
+	 * @return
+	 * @throws ConfigRuntimeException 
+	 */
     public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {        
         MCPlayer m = null;
 		try{
@@ -421,9 +429,36 @@ public final class Static {
         return m;
     }
 
+	/**
+	 * @deprecated Use {@link #GetPlayer(java.lang.String, com.laytonsmith.core.environments.Environment, com.laytonsmith.core.constructs.Target)}
+	 * instead, since that method checks all conditions, and throws the proper exceptions if no player was provided.
+	 * @param player
+	 * @param t
+	 * @return
+	 * @throws ConfigRuntimeException 
+	 */
     public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
         return GetPlayer(player.val(), t);
     }
+	
+	/**
+	 * Returns the player, either from the environment (if the player argument is null) or the
+	 * player specified if not. If neither is set, a proper exception is thrown.
+	 * @param player
+	 * @param env
+	 * @param t
+	 * @return
+	 * @throws ConfigRuntimeException 
+	 */
+	public static MCPlayer GetPlayer(String player, Environment env, Target t) throws ConfigRuntimeException {
+		if(player == null){
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			Static.AssertPlayerNonNull(p, t);
+			return p;
+		} else {
+			return Static.GetPlayer(player, t);
+		}
+	}
 
 	/**
 	 * @deprecated Use Construct.isNull directly.

@@ -1,21 +1,18 @@
 package com.laytonsmith.core.natives.annotations;
 
 import com.laytonsmith.annotations.documentation;
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.compiler.CompilerWarning;
 
 /**
  *
- * @author lsmith
  */
+@typename("SupressWarning")
 public class SupressWarning extends MAnnotation {
 	
 	@documentation(docs="The name of the warning to supress")
 	public CompilerWarning value;
-
-	public String getName() {
-		return "SupressWarning";
-	}
 
 	public String docs() {
 		return "Supresses a warning on a single code component, which allows for more precise warning supression if there is a specific reason you are"

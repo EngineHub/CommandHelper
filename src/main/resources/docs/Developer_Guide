@@ -73,6 +73,60 @@ and tag it with @api. It is important to read and be very familiar with the meth
 in %%GET_SIMPLE_CLASS|.*|Function%%, so you know which methods that are optional should
 be overridden.
 
+=== Using the new argument builder ===
+The new argument builder greatly simplifies argument parsing, by providing generic type safety, range, and other
+compile time and runtime checks. This also provides the advantage of putting the documentation right
+next to the elements, and creating more documentation from the elements themselves, instead of relying on the
+programmer to provide the data correctly. This makes it so that if the documentation doesn't list a restriction,
+for instance, but the restriction being missing is a bug, then the bug will be in both the documentation AND the
+code, and will therefore be much easier to catch. Besides restrictions, which are discussed below, the biggest thing
+this provides is type safety. Until strong typing is fully supported, the system will be mostly a runtime-only check,
+though hard coded values that are incorrect will be able to be caught at runtime. Generics are also supported, 
+and are required for return types that return closures and arrays, and eventually
+all parameters that are closures or arrays. These restrictions will be caught via unit test, as Java has no way
+to make this a compile error. Additionally, several restrictions (used as MAnnotations) may be added, which will provide
+runtime checks on the data passed in, or will check at compile time if possible. These restrictions are built in to
+the typing system, and ensure that the data passed in with be within those restrictions, whether they were checked
+at runtime or compile time. Using the new argument builder itself is optional. Providing the return type and arguments
+with the returnType() and arguments() methods is not optional, but using it to re-parse the data is. The way it works is
+that the function's arguments list is retrieved by the typing system once, to verify the arguments, using generic algorithms.
+The function itself can then use the builder to cast the data into the correct types, which is guaranteed to succeed at that point
+(barring programmer error, which will cause an Error to be thrown), and the code after that can safely assert that the restrictions
+placed on the parameters is true. However, if the code itself duplicates these checks, or manually casts the values, that will
+continue to work, since the raw arguments are passed in to the function as is. However, new code is strongly advised to use
+the builder, since eventually, backwards compatibility may be broken, and the parameters may not be passed in except as a list.
+Additionally, if the code simply requires the arguments to be processed manually, it is a sign that the arguments themselves
+are too complicated, and should be simplified.
+
+=== Restrictions ===
+Restrictions work like parameter annotations in Java, for instance, if you had the following method signature in Java:
+<pre>
+public void func(String s, @Annotation String y){
+
+}
+</pre>
+
+The parameter "y" is tagged with the @Annotation tag, which may provide meta information to some reflective library. In MethodScript,
+the MAnnotations available in Java will eventually be available to scripts, but in the meantime, they are only available to built in
+functions. Regardless, the parameter restrictions will all work the same, they work to reduce the effort required to checking rote
+aspects of the parameter, and provide a way for the runtime to generically handle those cases. Additionally, the compiler is aware of
+many of these annotations, and where possible, will provide the same functionality, but at compile time, where possible, allowing errors
+to be caught more quickly. 
+
+The annotations that are supported by either the compiler or runtime are listed below, but all of them must implement 
+%%GET_SIMPLE_CLASS|.*compiler|CompilerAwareAnnotation%% to be valid parameter annotations. Each annotation has it's own
+documentation in the normal API.
+
+==== @{NonNull} ====
+Parameters tagged with this cannot be assigned null.
+
+==== @{Ranged} ====
+Parameters tagged with this must be between a given range. There is the option of setting the limits
+to be either inclusive or exclusive.
+
+==== @{FormatString} ====
+Parameters tagged with this must match a regex. It is only taggable on CStrings.
+
 === Documentation and argument builder ===
 Each function has embedded java doc and type information. This is extremely important
 to keep accurate, both for the sake of the user, and for a technical need. The docs()
