@@ -89,11 +89,68 @@ msg(@A->method2(2))
 would output 2, since we called the method that returns our input plus @b, 
 which in this case is 0.
 
-We can only have one constructor per object, but we can use default parameters, 
-and static methods can be created to fake multiple constructors, or we can use
-type unions. 
+We can only have multiple constructors per object, but we can use default parameters, 
+and static methods to reduce the number. Regardless, all the constructors must have
+unique signatures, so they can be uniquely identified based on the parameters passed in.
 The constructor is simply a method that is defined with the same name of the 
-class, and no return type.
+class, and no return type. Since there can be multiple constructors, and since you
+don't need the constructor after construction, and can't get a reference an instance
+before constructing it, if you need to reflectively access a constructor method, you 
+must use the special reflection utilities to construct an object dynamically.
+
+=== Dereferencing with the <code>-></code> operator ===
+
+When you create an instance of an object, you can ''dereference'' it, that is, access
+it's members and methods with the <code>-></code> operator (called the
+''arrow operator''). Assuming there is a class A that has a member of type B, called
+@b, and B has a member of type C, called @c, then the following example demonstrates
+how to access those members.
+
+<pre>
+A @a = new A();
+msg(@a->b); # Msgs out the toString for the inner @b member.
+msg(@a->@b); # Also works
+msg(@a->b->c); # Since @b is also an object, we can further dereference it.
+</pre>
+
+For members, after the initial reference to @a, which requires the @ sign, all
+other calls to members (not methods) are allowed to leave off the @ sign. Methods
+may not have an @ sign however.
+
+Methods are dereferenced the same way as a member, except they are sent parameters
+as well.
+
+<pre>
+A @a = new A();
+msg(@a->myMethod());
+</pre>
+
+If you leave off the end parenthesis, this will return the method closure, so
+be careful not to leave the parenthesis off if you are attempting to call the method,
+because the compiler cannot catch that error for you in all cases. 
+
+The arrow operator is not to be confused with the <code>::</code> operator, which
+is used for static members and methods.
+
+==== NullPointerException ====
+
+If a variable that is null is dereferenced, a NullPointerException is thrown.
+
+<pre>
+A @a = null;
+msg(@a->b); # Throws a NPE, because @a is null
+</pre>
+
+You may catch this exception just like any other exception.
+
+=== Static access operator <code>::</code> ===
+The <code>::</code> operator (known as the static access operator) is how you 
+"dereference" a static parameter. Unlike the arrow operator, derefencing
+static members and methods will never throw a NullPointerException, since
+static code doesn't require an instance. In general, the usage is the same
+as the arrow operator, but does allow for several advanced operations. See the
+section below on Class objects and the <code>self</code> keyword.
+
 
 === Inheritance ===
 
@@ -169,6 +226,10 @@ have been a compile error. Should a call to super() be inapplicable, because
 the superclass does not define a constructor with no arguments, it is a compile
 error unless each constructor in the subclass calls at least one of the superclass's
 constructors with super().
+
+=== The <code>this</code> keyword ===
+
+TODO:
 
 ==== <code>final</code> keyword ====
 The final keyword has three uses, preventing a method from being overridden,
@@ -714,5 +775,118 @@ class B {
 }
 </pre>
 
+=== Inner classes ===
 
+Classes themselves may be defined inside other classes as well. There are two
+types of inner classes, static and non-static. Static inner classes are the
+easiest to understand, so that will be covered first.
+
+==== <code>static</code> inner classes ====
+
+When we create a static inner class, it is essentially a way to namespace another
+class. Common sense dictates that the two classes should be closely related, but
+they are otherwise completely independent of each other. We define the class like normal,
+but using the <code>static</code> keyword.
+
+<pre>
+class Outer {
+	public static class Inner {
+
+	}
+}
+</pre>
+
+By convention, inner class definitions appear at the bottom of the outer class, but
+can be declared anywhere directly inside of the outer class. When we create a new
+class this way, we construct it the same as the outer class, but we must qualify it
+as if the outer class were part of the namespace.
+
+<pre>
+Outer::Inner @c = new Outer::Inner();
+</pre>
+
+Beyond this, the inner class will behave just as any other outer class would, assuming
+it is public. If the class itself is defined as protected or private, it is only available
+to subclasses, or just this class, respectively. From within the outer class (or a subclass of
+that), it is not needed to fully qualify the name of the class, so simply writing the inner class
+name will work.
+
+<pre>
+# From inside of Outer
+Inner @c = new Inner();
+</pre>
+
+Inner static classes have access to all of their parent's static members and methods, unlike
+outer classes, so the following code is acceptable:
+
+<pre>
+class Outer {
+	private static String Method(){
+		return('string');
+	}
+
+	static class Inner {
+		public static GetString(){
+			# This refers to the outer class's method
+			return Method();
+		}
+	}
+}
+</pre>
+
+==== Non-static inner classes ====
+
+Unlike static inner classes, a non-static inner class is associated with an instance of
+the outer class. This means that a new instance cannot be constructed without an instance of
+the outer class, though the inner class can access the outer class's non-static members.
+
+<pre>
+class Outer {
+	members {
+		public int @i = 2;
+		public Inner @inner = new Inner(); # From here, we can construct a new Inner class
+	}
+	public class Inner { # Note the lack of the static keyword
+		public GetI(){
+			return(@i);
+		}
+	}
+}
+</pre>
+
+Notice the creation of the Inner class in the outer class's members. This works
+because that member will be initialized upon construction of the object, at which
+point an instance will obviously exist. When constructed from outside of the class
+however, we must qualify it with an instance.
+
+<pre>
+Outer @outer = new Outer();
+Inner @inner = new @outer->Inner();
+</pre>
+
+Because this works like a member or method, we cannot have both an inner class and
+a method/member named the same.
+
+When running inside of the inner class, the <code>this</code> keyword refers to the outer
+class, but you can access the inner class's "this" pointer by using a special notation.
+Consider the following example, where there is an @i member in both the outer and inner
+class.
+
+<pre>
+class Outer {
+	members {
+		public int @i = 2;
+	}
+	public class Inner {
+		members {
+			public int @i = 3;
+		}
+		public print(){
+			msg('Outer class\'s @i: '.@i);					# 2
+			msg('Also the outer class\'s @i: '.this->i);	# 2
+			msg('Inner class\'s @i: '.Inner->this->i);		# 3
+		}
+	}
+}
+</pre>
 {{LearningTrail}}
