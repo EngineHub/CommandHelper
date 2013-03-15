@@ -621,14 +621,14 @@ public class PlayerEvents {
                     + "{}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
                 if(!((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
                     return false;
                 }
 				if(prefilter.containsKey("location")){
-					MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, Target.UNKNOWN);
+					MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, t);
 					if(!pie.getClickedBlock().getLocation().equals(loc)){
 						return false;
 					}
@@ -665,7 +665,7 @@ public class PlayerEvents {
 			return Driver.PLAYER_INTERACT;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			return false;
 		}
 
