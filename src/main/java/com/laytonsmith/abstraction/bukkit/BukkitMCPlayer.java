@@ -188,7 +188,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public boolean isOp() {
         return p.isOp();
     }
-	
+
 	public void setOp(boolean bln) {
 		p.setOp(bln);
 	}
@@ -425,5 +425,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	public boolean isFlying() {
 		return p.isFlying();
+	}
+
+	public void updateInventory() {
+		p.updateInventory();
 	}
 }
