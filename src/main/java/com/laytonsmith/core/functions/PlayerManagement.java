@@ -1232,137 +1232,137 @@ public class PlayerManagement {
 		
 	}
 
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class pfacing extends AbstractFunction {
-
-		public String getName() {
-			return "pfacing";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{0, 1, 2, 3};
-		}
-
-		public String docs() {
-			return "Gets the direction the player is facing. ---- A note on the meaning of the values: The values returned will always be"
-					+ " as such: pitch will always be a number between 90 and -90, with -90 being the player looking up, and 90 being the player looking down. Yaw will"
-					+ " always be a number between 0 and 359.9~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
-					+ " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";
-		}
-		
-		public Argument returnType() {
-			return new Argument("", C.class);
-		}
-
-		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
-		}
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			//Getter
-			if (args.length == 0 || args.length == 1) {
-				MCLocation l = null;
-				if (args.length == 0) {
-					if (p instanceof MCPlayer) {
-						l = ((MCPlayer) p).getLocation();
-					}
-				} else if (args.length == 1) {
-					//if it's a number, we are setting F. Otherwise, it's a getter for the MCPlayer specified.
-					try {
-						Integer.parseInt(args[0].val());
-					} catch (NumberFormatException e) {
-						MCPlayer p2 = Static.GetPlayer(args[0], t);
-						l = p2.getLocation();
-					}
-				}
-				if (l != null) {
-					float yaw = l.getYaw();
-					float pitch = l.getPitch();
-					//normalize yaw
-					if (yaw < 0) {
-						yaw = (((yaw) % 360) + 360);
-					}
-					return new CArray(t, new CDouble(yaw, t), new CDouble(pitch, t));
-				}
-			}
-			//Setter
-			MCPlayer toSet = null;
-			float yaw = 0;
-			float pitch = 0;
-			if (args.length == 1) {
-				//We are setting F for this MCPlayer
-				if (p instanceof MCPlayer) {
-					toSet = (MCPlayer) p;
-					pitch = toSet.getLocation().getPitch();
-				}
-				int g = args[0].primitive(t).castToInt32(t);
-				if (g < 0 || g > 3) {
-					throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
-							ExceptionType.RangeException, t);
-				}
-				yaw = g * 90;
-			} else if (args.length == 2) {
-				//Either we are setting this MCPlayer's pitch and yaw, or we are setting the specified MCPlayer's F.
-				//Check to see if args[0] is a number
-				try {
-					Float.parseFloat(args[0].val());
-					//It's the yaw, pitch variation
-					if (p instanceof MCPlayer) {
-						toSet = (MCPlayer) p;
-					}
-					yaw = (float) args[0].primitive(t).castToDouble(t);
-					pitch = (float) args[1].primitive(t).castToDouble(t);
-				} catch (NumberFormatException e) {
-					//It's the MCPlayer, F variation
-					toSet = Static.GetPlayer(args[0], t);
-					pitch = toSet.getLocation().getPitch();
-					int g = args[1].primitive(t).castToInt32(t);
-					if (g < 0 || g > 3) {
-						throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
-								ExceptionType.RangeException, t);
-					}
-					yaw = g * 90;
-				}
-			} else if (args.length == 3) {
-				//It's the MCPlayer, yaw, pitch variation
-				toSet = Static.GetPlayer(args[0], t);
-				yaw = (float) args[1].primitive(t).castToDouble(t);
-				pitch = (float) args[2].primitive(t).castToDouble(t);
-			}
-
-			//Error check our data
-			if (pitch > 90 || pitch < -90) {
-				throw new ConfigRuntimeException("pitch must be between -90 and 90",
-						ExceptionType.RangeException, t);
-			}
-			Static.AssertPlayerNonNull(toSet, t);
-			MCLocation l = toSet.getLocation().clone();
-			l.setPitch(pitch);
-			l.setYaw(yaw);
-			toSet.teleport(l);
-			return new CVoid(t);
-		}
-	}
+//	@api(environments = {CommandHelperEnvironment.class})
+//	public static class pfacing extends AbstractFunction {
+//
+//		public String getName() {
+//			return "pfacing";
+//		}
+//
+//		public Integer[] numArgs() {
+//			return new Integer[]{0, 1, 2, 3};
+//		}
+//
+//		public String docs() {
+//			return "Gets the direction the player is facing. ---- A note on the meaning of the values: The values returned will always be"
+//					+ " as such: pitch will always be a number between 90 and -90, with -90 being the player looking up, and 90 being the player looking down. Yaw will"
+//					+ " always be a number between 0 and 359.9~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
+//					+ " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";
+//		}
+//		
+//		public Argument returnType() {
+//			return new Argument("", C.class);
+//		}
+//
+//		public ArgumentBuilder arguments() {
+//			return ArgumentBuilder.Build(
+//						new Argument("", C.class, ""),
+//						new Argument("", C.class, "")
+//					);
+//		}
+//
+//		public ExceptionType[] thrown() {
+//			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
+//		}
+//
+//		public boolean isRestricted() {
+//			return true;
+//		}
+//
+//		public CHVersion since() {
+//			return CHVersion.V3_1_3;
+//		}
+//
+//		public Boolean runAsync() {
+//			return false;
+//		}
+//
+//		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+//			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+//			//Getter
+//			if (args.length == 0 || args.length == 1) {
+//				MCLocation l = null;
+//				if (args.length == 0) {
+//					if (p instanceof MCPlayer) {
+//						l = ((MCPlayer) p).getLocation();
+//					}
+//				} else if (args.length == 1) {
+//					//if it's a number, we are setting F. Otherwise, it's a getter for the MCPlayer specified.
+//					try {
+//						Integer.parseInt(args[0].val());
+//					} catch (NumberFormatException e) {
+//						MCPlayer p2 = Static.GetPlayer(args[0], t);
+//						l = p2.getLocation();
+//					}
+//				}
+//				if (l != null) {
+//					float yaw = l.getYaw();
+//					float pitch = l.getPitch();
+//					//normalize yaw
+//					if (yaw < 0) {
+//						yaw = (((yaw) % 360) + 360);
+//					}
+//					return new CArray(t, new CDouble(yaw, t), new CDouble(pitch, t));
+//				}
+//			}
+//			//Setter
+//			MCPlayer toSet = null;
+//			float yaw = 0;
+//			float pitch = 0;
+//			if (args.length == 1) {
+//				//We are setting F for this MCPlayer
+//				if (p instanceof MCPlayer) {
+//					toSet = (MCPlayer) p;
+//					pitch = toSet.getLocation().getPitch();
+//				}
+//				int g = args[0].primitive(t).castToInt32(t);
+//				if (g < 0 || g > 3) {
+//					throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
+//							ExceptionType.RangeException, t);
+//				}
+//				yaw = g * 90;
+//			} else if (args.length == 2) {
+//				//Either we are setting this MCPlayer's pitch and yaw, or we are setting the specified MCPlayer's F.
+//				//Check to see if args[0] is a number
+//				try {
+//					Float.parseFloat(args[0].val());
+//					//It's the yaw, pitch variation
+//					if (p instanceof MCPlayer) {
+//						toSet = (MCPlayer) p;
+//					}
+//					yaw = (float) args[0].primitive(t).castToDouble(t);
+//					pitch = (float) args[1].primitive(t).castToDouble(t);
+//				} catch (NumberFormatException e) {
+//					//It's the MCPlayer, F variation
+//					toSet = Static.GetPlayer(args[0], t);
+//					pitch = toSet.getLocation().getPitch();
+//					int g = args[1].primitive(t).castToInt32(t);
+//					if (g < 0 || g > 3) {
+//						throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
+//								ExceptionType.RangeException, t);
+//					}
+//					yaw = g * 90;
+//				}
+//			} else if (args.length == 3) {
+//				//It's the MCPlayer, yaw, pitch variation
+//				toSet = Static.GetPlayer(args[0], t);
+//				yaw = (float) args[1].primitive(t).castToDouble(t);
+//				pitch = (float) args[2].primitive(t).castToDouble(t);
+//			}
+//
+//			//Error check our data
+//			if (pitch > 90 || pitch < -90) {
+//				throw new ConfigRuntimeException("pitch must be between -90 and 90",
+//						ExceptionType.RangeException, t);
+//			}
+//			Static.AssertPlayerNonNull(toSet, t);
+//			MCLocation l = toSet.getLocation().clone();
+//			l.setPitch(pitch);
+//			l.setYaw(yaw);
+//			toSet.teleport(l);
+//			return new CVoid(t);
+//		}
+//	}
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pmode extends AbstractFunction {
