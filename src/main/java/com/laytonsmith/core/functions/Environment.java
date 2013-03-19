@@ -1031,7 +1031,7 @@ public class Environment {
 				com.laytonsmith.core.environments.Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
-			MCLocation location = list.get("location");
+			MLocation location = list.get("location");
 			MSound sound = list.get("sound");
 			List<MCPlayer> players = new ArrayList<MCPlayer>();
 			CArray acplayers = list.getEmptyArrayIfNull("players");
@@ -1040,7 +1040,7 @@ public class Environment {
 			}
 			
 			for (MCPlayer p : players) {
-				p.playSound(location, sound.sound, sound.volume, sound.pitch);
+				p.playSound(location.getMCLocation(), sound.sound, sound.volume, sound.pitch);
 			}
 			return new CVoid(t);
 		}

@@ -19,11 +19,6 @@ public class CFunction extends Construct {
     public CFunction(String name, Target t) {
         super(name, t);
     }
-
-    @Override
-    public String toString() {
-        return val();
-    }
     
     @Override
     public CFunction clone() throws CloneNotSupportedException{

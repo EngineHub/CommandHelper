@@ -1,6 +1,7 @@
 package com.laytonsmith.core.natives;
 
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.documentation;
 import com.laytonsmith.annotations.typename;
@@ -27,6 +28,10 @@ public class MLocation extends MObject implements Documentation {
 		this.world = loc.getWorld().getName();
 		this.yaw = loc.getYaw();
 		this.pitch = loc.getPitch();
+	}
+	
+	public MCLocation getMCLocation(){
+		return StaticLayer.GetLocation(StaticLayer.GetServer().getWorld(world), x, y, z, yaw, pitch);
 	}
 	
 	@documentation(docs="The x coordinate in this location")
@@ -61,10 +66,12 @@ public class MLocation extends MObject implements Documentation {
 		}
 	}
 
+	@Override
 	public String docs() {
 		return "A location array represents a location in the map.";
 	}
 
+	@Override
 	public CHVersion since() {
 		return CHVersion.V3_3_0;
 	}

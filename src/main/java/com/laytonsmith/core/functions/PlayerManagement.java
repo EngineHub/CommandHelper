@@ -2180,7 +2180,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			MCPlayer player = Static.GetPlayer(list.getStringWithNull("player", t), env, t);
-			int health = list.get("health");
+			int health = list.getInt("health", t);
 			player.setHealth(health);
 			return new CVoid(t);
 		}
