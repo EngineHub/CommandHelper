@@ -475,7 +475,7 @@ public final class Static {
 
 	/**
 	 * Returns the entity with the specified id. If it doesn't exist,
-	 * a ConfigRuntimeException is thrown.
+	 * a ConfigRuntimeException is thrown, null is never returned.
 	 * @param id
 	 * @return
 	 */

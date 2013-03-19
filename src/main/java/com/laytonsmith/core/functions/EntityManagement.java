@@ -442,19 +442,16 @@ public class EntityManagement {
 	@api
 	public static class get_entity_age extends EntityGetterFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity ent = Static.getEntity(id, t);
-			if (ent == null) {
-				return new CNull(t);
-			} else {
-				return new CInt(ent.getTicksLived(), t);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			MCEntity ent = Static.getEntity(list.getInt("entityID", t), t);
+			return new CInt(ent.getTicksLived(), t);
 		}
 
 		public String getName() {
@@ -466,7 +463,17 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "int {entityID} Returns the entity age as an integer, represented by server ticks.";
+			return "Returns the entity age as an integer, represented by server ticks.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The age of the entity, in server ticks", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID").addAnnotation(new NonNull())
+					);
 		}
 	}
 
@@ -480,20 +487,11 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			int age = Static.getInt32(args[1], t);
-
-			if (age < 1) {
-				throw new ConfigRuntimeException("Entity age can't be less than 1 server tick.", ExceptionType.RangeException, t);
-			}
-
-			MCEntity ent = Static.getEntity(id, t);
-			if (ent == null) {
-				return new CNull(t);
-			} else {
-				ent.setTicksLived(age);
-				return new CVoid(t);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			MCEntity ent = Static.getEntity(list.getInt("entityID", t), t);
+			int age = list.getInt("age", t);
+			ent.setTicksLived(age);
+			return new CVoid(t);
 		}
 
 		public String getName() {
@@ -505,7 +503,18 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, int} Sets the age of the entity to the specified int, represented by server ticks.";
+			return "Sets the age of the entity to the specified int, represented by server ticks.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID"),
+						new Argument("The age of the entity, in server ticks", CInt.class, "age").addAnnotation(Ranged.POSITIVE).addAnnotation(new NonNull())
+					);
 		}
 	}
 
