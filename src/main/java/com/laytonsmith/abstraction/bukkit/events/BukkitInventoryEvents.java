@@ -30,18 +30,18 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 public class BukkitInventoryEvents {
 	public static class BukkitMCInventoryEvent implements MCInventoryEvent {
 		InventoryEvent event;
-		
+
 		public BukkitMCInventoryEvent(InventoryEvent e) {
 			event = e;
 		}
-		
+
 		public List<MCHumanEntity> getViewers() {
 			List<MCHumanEntity> viewers = Collections.emptyList();
-			
+
 			for (HumanEntity viewer : event.getViewers()) {
 				viewers.add(new BukkitMCHumanEntity(viewer));
 			}
-			
+
 			return viewers;
 		}
 
@@ -57,36 +57,36 @@ public class BukkitInventoryEvents {
 			return event;
 		}
 	}
-	
-	public static class BukkitMCInventoryOpenEvent extends BukkitMCInventoryEvent 
+
+	public static class BukkitMCInventoryOpenEvent extends BukkitMCInventoryEvent
 	implements MCInventoryOpenEvent {
 		InventoryOpenEvent ioe;
-		
+
 		public BukkitMCInventoryOpenEvent(InventoryOpenEvent e) {
 			super(e);
 			ioe = e;
 		}
-		
+
 		public MCHumanEntity getPlayer() {
 			return new BukkitMCHumanEntity(ioe.getPlayer());
 		}
 	}
-	
-	public static class BukkitMCInventoryCloseEvent extends BukkitMCInventoryEvent 
+
+	public static class BukkitMCInventoryCloseEvent extends BukkitMCInventoryEvent
 	implements MCInventoryCloseEvent {
 		InventoryCloseEvent ice;
-		
+
 		public BukkitMCInventoryCloseEvent(InventoryCloseEvent e) {
 			super(e);
 			ice = e;
 		}
-		
+
 		public MCHumanEntity getPlayer() {
 			return new BukkitMCHumanEntity(ice.getPlayer());
 		}
 	}
 
-	public static class BukkitMCInventoryClickEvent extends BukkitMCInventoryEvent 
+	public static class BukkitMCInventoryClickEvent extends BukkitMCInventoryEvent
 	implements MCInventoryClickEvent {
 
 		InventoryClickEvent ic;
@@ -94,7 +94,7 @@ public class BukkitInventoryEvents {
 			super(e);
 			this.ic = e;
 		}
-		
+
 		public MCItemStack getCurrentItem() {
 			return new BukkitMCItemStack(ic.getCurrentItem());
 		}
@@ -105,6 +105,10 @@ public class BukkitInventoryEvents {
 
 		public int getSlot() {
 			return ic.getSlot();
+		}
+
+		public int getRawSlot() {
+			return ic.getRawSlot();
 		}
 
 		public MCSlotType getSlotType() {
@@ -128,11 +132,19 @@ public class BukkitInventoryEvents {
 		}
 
 		public void setCurrentItem(MCItemStack slot) {
-			ic.setCurrentItem(((BukkitMCItemStack) slot).asItemStack());
+			if (slot != null) {
+				ic.setCurrentItem(((BukkitMCItemStack) slot).asItemStack());
+			} else {
+				ic.setCurrentItem(null);
+			}
 		}
 
 		public void setCursor(MCItemStack cursor) {
 			ic.setCursor(((BukkitMCItemStack) cursor).asItemStack());
 		}
+
+        public void setCancelled(boolean cancelled) {
+            ic.setCancelled(cancelled);
+        }
 	}
 }

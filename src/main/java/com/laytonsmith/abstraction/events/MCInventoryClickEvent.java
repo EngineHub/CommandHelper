@@ -12,13 +12,15 @@ public interface MCInventoryClickEvent extends MCInventoryEvent {
 	public MCItemStack getCurrentItem();
 	public MCItemStack getCursor();
 	public int getSlot();
+	public int getRawSlot();
 	public MCSlotType getSlotType();
 	public MCHumanEntity getWhoClicked();
-	
+
 	public boolean isLeftClick();
 	public boolean isRightClick();
 	public boolean isShiftClick();
-	
+
 	public void setCurrentItem(MCItemStack slot);
 	public void setCursor(MCItemStack cursor);
+	public void setCancelled(boolean cancelled);
 }

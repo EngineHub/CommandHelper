@@ -275,8 +275,10 @@ public class WorldEdit {
                 String worldName = args[1].val();
                 //Fill these data structures in with the information we need
                 List<Location> points = new ArrayList<Location>();
-                List<String> owners = new ArrayList<String>();
-                List<String> members = new ArrayList<String>();
+                List<String> ownersPlayers = new ArrayList<String>();
+                List<String> ownersGroups = new ArrayList<String>();
+                List<String> membersPlayers = new ArrayList<String>();
+                List<String> membersGroups = new ArrayList<String>();
                 Map<String, String> flags = new HashMap<String, String>();
                 int priority = -1;
                 float volume = -1;
@@ -290,8 +292,10 @@ public class WorldEdit {
                     throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, t);
                 }
 
-                owners.addAll(region.getOwners().getPlayers());
-                members.addAll(region.getMembers().getPlayers());
+                ownersPlayers.addAll(region.getOwners().getPlayers());
+                ownersGroups.addAll(region.getOwners().getGroups());
+                membersPlayers.addAll(region.getMembers().getPlayers());
+                membersGroups.addAll(region.getMembers().getGroups());
                 for (Map.Entry<Flag<?>, Object> ent : region.getFlags().entrySet()) {
                     flags.put(ent.getKey().getName(), String.valueOf(ent.getValue()));
                 }
@@ -316,12 +320,21 @@ public class WorldEdit {
 					MLocation ml = new MLocation(new BukkitMCLocation(l));
                     ri.regionBounds.add(ml);
                 }
-                for (String owner : owners) {
-                    ri.owners.add(owner);
+                CArray ownerSet = new CArray(t);
+                for (String owner : ownersPlayers) {
+                    ownerSet.push(new CString(owner, t));
                 }
-                for (String member : members) {
-                    ri.members.add(member);
+				for (String owner : ownersGroups) {
+                    ownerSet.push(new CString("*" + owner, t));
                 }
+                CArray memberSet = new CArray(t);
+                for (String member : membersPlayers) {
+                    memberSet.push(new CString(member, t));
+                }
+				for (String member : membersGroups) {
+                    memberSet.push(new CString("*" + member, t));
+                }
+                CArray flagSet = new CArray(t);
                 for (Map.Entry<String, String> flag : flags.entrySet()) {
 					ri.flags.put(flag.getKey(), flag.getValue());
                 }
