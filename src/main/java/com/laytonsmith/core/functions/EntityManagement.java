@@ -28,7 +28,7 @@ public class EntityManagement {
 	public static String docs(){
         return "This class of functions allow entities to be managed.";
     }
-	
+
 	public static abstract class EntityFunction extends AbstractFunction {
 		public boolean isRestricted() {
 			return true;
@@ -42,23 +42,23 @@ public class EntityManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	public static abstract class EntityGetterFunction extends EntityFunction {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
-		
+
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 	}
-	
+
 	public static abstract class EntitySetterFunction extends EntityFunction {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
 					ExceptionType.BadEntityException};
 		}
-		
+
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
@@ -68,7 +68,7 @@ public class EntityManagement {
 	public static class all_entities extends EntityFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException, 
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException,
 					ExceptionType.CastException};
 		}
 
@@ -295,7 +295,7 @@ public class EntityManagement {
 			if (ent == null) {
 				return new CVoid(t);
 			} else if (ent instanceof MCHumanEntity) {
-				throw new ConfigRuntimeException("Cannot remove human entity (" + ent.getEntityId() + ")!", 
+				throw new ConfigRuntimeException("Cannot remove human entity (" + ent.getEntityId() + ")!",
 						ExceptionType.BadEntityException, t);
 			} else {
 				ent.remove();
@@ -322,7 +322,7 @@ public class EntityManagement {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
-		
+
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent;
@@ -346,11 +346,81 @@ public class EntityManagement {
 	}
 
 	@api
+	public static class get_entity_age extends EntityGetterFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			MCEntity ent = Static.getEntity(id, t);
+			if (ent == null) {
+				return new CNull(t);
+			} else {
+				return new CInt(ent.getTicksLived(), t);
+			}
+		}
+
+		public String getName() {
+			return "get_entity_age";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "int {entityID} Returns the entity age as an integer, represented by server ticks.";
+		}
+	}
+
+	@api
+	public static class set_entity_age extends EntityFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
+					ExceptionType.RangeException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			int age = Static.getInt32(args[1], t);
+
+			if (age < 1) {
+				throw new ConfigRuntimeException("Entity age can't be less than 1 server tick.", ExceptionType.RangeException, t);
+			}
+
+			MCEntity ent = Static.getEntity(id, t);
+			if (ent == null) {
+				return new CNull(t);
+			} else {
+				ent.setTicksLived(age);
+				return new CVoid(t);
+			}
+		}
+
+		public String getName() {
+			return "set_entity_age";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "void {entityID, int} Sets the age of the entity to the specified int, represented by server ticks.";
+		}
+	}
+
+	@api
 	public static class get_mob_age extends EntityGetterFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException, 
+			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException,
 					ExceptionType.BadEntityException};
 		}
 
@@ -382,7 +452,7 @@ public class EntityManagement {
 	public static class set_mob_age extends EntityFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException, 
+			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException,
 					ExceptionType.BadEntityException};
 		}
 
@@ -439,15 +509,15 @@ public class EntityManagement {
 			return "array {entityID} Returns an array of potion arrays showing"
 					+ " the effects on this mob.";
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{new ExampleScript("Basic use", "msg(get_mob_effects(259))", 
+			return new ExampleScript[]{new ExampleScript("Basic use", "msg(get_mob_effects(259))",
 					"{{ambient: false, id: 1, seconds: 30, strength: 1}}")};
 		}
-		
+
 	}
-	
+
 	@api
 	public static class set_mob_effect extends EntityFunction {
 
@@ -471,11 +541,11 @@ public class EntityManagement {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, 
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
 					ExceptionType.BadEntityException, ExceptionType.RangeException};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) 
+		public Construct exec(Target t, Environment env, Construct... args)
 				throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 
@@ -504,7 +574,7 @@ public class EntityManagement {
 	public static class shoot_projectile extends EntityFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException, 
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException,
 					ExceptionType.PlayerOfflineException};
 		}
 
@@ -642,7 +712,7 @@ public class EntityManagement {
 				try {
 					entityType = MCEntityType.valueOf(type.toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException(String.format("Wrong entity type: %s", type), 
+					throw new ConfigRuntimeException(String.format("Wrong entity type: %s", type),
 							ExceptionType.BadEntityException, t);
 				}
 
@@ -687,7 +757,7 @@ public class EntityManagement {
 					+ " If there is no target, null is returned instead.";
 		}
 	}
-	
+
 	//@api
 	public static class set_mob_target extends EntitySetterFunction {
 
@@ -716,7 +786,7 @@ public class EntityManagement {
 					+ " It can also be set to null to clear the current target.";
 		}
 	}
-	
+
 	@api
 	public static class get_mob_equipment extends EntityGetterFunction {
 
@@ -738,17 +808,17 @@ public class EntityManagement {
 		public String docs() {
 			return "equipmentArray {entityID} Returns an associative array showing the equipment this entity is wearing.";
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 					new ExampleScript("Getting a mob's equipment", "get_mob_equipment(276)", "{boots: null,"
-							+ " chestplate: null, helmet: {data: 0, enchants: {} meta: null, type: 91}, leggings: null," 
+							+ " chestplate: null, helmet: {data: 0, enchants: {} meta: null, type: 91}, leggings: null,"
 							+ " weapon: {data: 5, enchants: {} meta: {display: Excalibur, lore: null}, type: 276}}")
 			};
 		}
 	}
-	
+
 	@api
 	public static class set_mob_equipment extends EntitySetterFunction {
 
@@ -781,11 +851,11 @@ public class EntityManagement {
 
 		public String docs() {
 			return "void {entityID, array} Takes an associative array with keys representing equipment slots and values"
-					+ " of itemArrays, the same used by set_pinv. The equipment slots are: " 
+					+ " of itemArrays, the same used by set_pinv. The equipment slots are: "
 					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
 		}
 	}
-	
+
 	@api
 	public static class get_max_health extends EntityGetterFunction {
 
@@ -802,9 +872,9 @@ public class EntityManagement {
 		public String docs() {
 			return "int {entityID} Returns the maximum health of this living entity.";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class set_max_health extends EntitySetterFunction {
 
@@ -824,14 +894,14 @@ public class EntityManagement {
 					+ " this is persistent for players, and will not reset even"
 					+ " after server restarts.";
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{new ExampleScript("Basic use", 
+			return new ExampleScript[]{new ExampleScript("Basic use",
 					"set_max_health(256, 10)", "The entity will now only have 5 hearts max.")};
 		}
 	}
-	
+
 	@api
 	public static class entity_onfire extends EntityGetterFunction {
 
@@ -849,9 +919,9 @@ public class EntityManagement {
 			return "int {entityID} Returns the number of seconds until this entity"
 					+ " stops being on fire, 0 if it already isn't.";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class set_entity_onfire extends EntitySetterFunction {
 
@@ -875,9 +945,9 @@ public class EntityManagement {
 					+ " given number of seconds. Throws a FormatException"
 					+ " if seconds is less than 0.";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class play_entity_effect extends EntitySetterFunction {
 
@@ -907,6 +977,6 @@ public class EntityManagement {
 					+ " dead, they can only log out. Possible effects are: "
 					+ StringUtils.Join(MCEntityEffect.values(), ", ", ", or ", " or ");
 		}
-		
+
 	}
 }
