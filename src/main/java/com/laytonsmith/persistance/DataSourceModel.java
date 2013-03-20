@@ -62,7 +62,7 @@ public final class DataSourceModel {
 			}
 		} else {
 			//This is the node we want to put the data in
-			treeNode.data.setValue(node.toString());
+			treeNode.data.setValue(node==null?null:node.toString());
 		}
 	}
 
