@@ -221,6 +221,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             //It's a single value, but we're gonna wrap it in an array, then deconstruct it
             s = "[" + s + "]";
             JSONArray array = (JSONArray) JSONValue.parse(s);
+			if(array == null){
+				//It's a null value
+				return new CNull(t);
+			}
             Object o = array.get(0);
             return convertJSON(o, t);
         }
