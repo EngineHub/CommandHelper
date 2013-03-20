@@ -146,9 +146,9 @@ public class Persistance {
 				try {
 					obj = env.getEnv(GlobalEnv.class).GetPersistanceNetwork().get(("storage." + namespace).split("\\."));
 				} catch (DataSourceException ex) {
-					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 				} catch(IllegalArgumentException e){
-					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 				}
 				if (obj == null) {
 					return new CNull(t);
@@ -219,9 +219,9 @@ public class Persistance {
 			try {
 				list = p.getNamespace(keyChain.toArray(new String[keyChain.size()]));
 			} catch (DataSourceException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
 			CArray ca = new CArray(t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
@@ -282,9 +282,9 @@ public class Persistance {
 			try {
 				return new CBoolean(env.getEnv(GlobalEnv.class).GetPersistanceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")), t);
 			} catch (DataSourceException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
 		}
 
@@ -331,13 +331,13 @@ public class Persistance {
 			try {
 				environment.getEnv(GlobalEnv.class).GetPersistanceNetwork().set(("storage." + namespace).split("\\."), null);
 			} catch (DataSourceException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch (ReadOnlyException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
 			return new CVoid(t);
 		}
