@@ -94,3 +94,40 @@ proc(_format_table, @data,
 	)
 	return('\n'.@string.@divider.'\n')
 )
+
+proc(_profileDataSources,
+	msg(color(gold).'Starting profiling...')
+	@names = reflect_pull('datasources')
+	@data = array(array_merge(array('iterations:'), @iterations, array('File size with '.@iterations[-1].' values')))
+	foreach(@names, @name,
+		if(@name != 'redis'){
+			if(file_size('../../persistance/persistance.'.@name) != 0){
+				die(color(red).'The persistance/ folder does not appear to be empty, cannot proceed.')
+			}
+		}
+	)
+	foreach(@names, @name){
+		@rowData = array(@name)
+		foreach(@iterations, @iteration){
+					@start = time()
+					foreach(cslice(1,@iteration), @i){
+							store_value(@name, 'val'.@i, 'value')
+					}
+					foreach(cslice(1,@iteration), @i){
+							get_value(@name, 'val'.@i)
+					}
+					@stop = time()
+					@time = @stop - @start
+					@time = _human_readable_time(@time)
+					msg(@name.' took '.@time.' to complete with '.@iteration.' values')
+					array_push(@rowData, @time)
+		}
+		if(@name != 'redis'){
+			array_push(@rowData, _human_readable_bytes(file_size('../../persistance/persistance.'.@name)))
+		} else {
+			array_push(@rowData, 'Unknown')
+		}
+		array_push(@data, @rowData)
+	}
+	msg('Data gathering complete, here are your results: \n'._format_table(@data))
+)
