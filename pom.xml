@@ -270,6 +270,13 @@
 			<artifactId>jsch</artifactId>
 			<version>0.1.48</version>
 		</dependency>
+
+		<!-- Charset detection library -->
+		<dependency>
+			<groupId>net.sourceforge.jchardet</groupId>
+			<artifactId>jchardet</artifactId>
+			<version>1.0</version>
+		</dependency>
         
 		<!-- Test libraries -->
 		<dependency>
@@ -427,6 +434,7 @@
 									<include>org.apache.commons:commons-io:jar:*</include>
 									<include>org.xerial:sqlite-jdbc:jar:*</include>
 									<include>org.mcstats:metrics:jar:*</include>
+									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
 								</includes>
 							</artifactSet>
 							<filters>
@@ -478,8 +486,13 @@
 									<includes>
 										<include>**</include>
 									</includes>
-								</filter>                                                        
-                                
+								</filter>                                           
+                                <filter>
+									<artifact>net.sourceforge.jchardet:jchardet:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
 							</filters>
 						</configuration>
 					</execution>

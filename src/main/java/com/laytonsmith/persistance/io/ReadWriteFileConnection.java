@@ -17,6 +17,11 @@ import org.apache.log4j.lf5.util.StreamUtils;
 public class ReadWriteFileConnection implements ConnectionMixin{
 	//Do not change the name of this. It is read reflectively during testing
 	protected final File file;
+	/**
+	 * The encoding that was determined to be the encoding for this file,
+	 * if set, or UTF-8 by default, if the file doesn't exist.
+	 */
+	protected String encoding = "UTF-8";
 	protected final ZipReader reader;
 	protected final String blankDataModel;
 	protected byte[] data = new byte[0];
@@ -38,6 +43,9 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 	 */
 	public ReadWriteFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException{
 		file = new File(workingDirectory, (uri.getHost() == null ? "" : uri.getHost()) + uri.getPath());
+		if(file.exists()){
+			encoding = FileUtility.getFileCharset(file);
+		}
 		reader = new ZipReader(file);
 		if(!reader.isZipped()){
 			if(reader.getTopLevelFile().getParentFile() != null){
@@ -60,7 +68,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 			return reader.getFileContents();
 		}
 		this.data = StreamUtils.getBytes(FileUtility.readAsStream(file));
-		return new String(this.data, "UTF-8");
+		return new String(this.data, encoding);
 	}
 
 	public void writeData(final String data) throws  ReadOnlyException, IOException, UnsupportedOperationException {		
@@ -74,7 +82,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		if(!file.exists()){
 			throw new FileNotFoundException(file.getAbsolutePath() + " does not exist!");
 		}
-		this.data = data.getBytes("UTF-8");
+		this.data = data.getBytes(encoding);
 		writer.mark();
 	}
 

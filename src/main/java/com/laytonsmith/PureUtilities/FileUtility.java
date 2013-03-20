@@ -4,6 +4,10 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.mutable.MutableObject;
+import org.mozilla.intl.chardet.nsDetector;
+import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
+import org.mozilla.intl.chardet.nsPSMDetector;
 
 /**
  *
@@ -362,6 +366,49 @@ public class FileUtility {
 			return ret;
 		} else {
 			return file.delete();
+		}
+	}
+	
+	/**
+	 * Returns the most likely character encoding for this file. The default is
+	 * "ASCII" and is probably the most common.
+	 * @param file
+	 * @return
+	 * @throws IOException 
+	 */
+	public static String getFileCharset(File file) throws IOException {
+		int lang = nsPSMDetector.ALL;
+		nsDetector det = new nsDetector(lang);
+		final MutableObject result = new MutableObject("ASCII");
+		det.Init(new nsICharsetDetectionObserver() {
+
+			public void Notify(String charset) {
+				result.setValue(charset);
+			}
+		});
+		
+		BufferedInputStream imp = null;
+		try{
+			imp = new BufferedInputStream(new FileInputStream(file));
+			byte[] buf = new byte[1024];
+			int len;
+			boolean done = false;
+			boolean isAscii = true;
+			
+			while((len=imp.read(buf, 0, buf.length)) != -1){
+				if(isAscii){
+					isAscii = det.isAscii(buf, len);
+				}
+				if(!isAscii && !done){
+					done = det.DoIt(buf, len, false);
+				}
+			}
+			det.DataEnd();
+			return (String)result.getValue();
+		} finally {
+			if(imp != null){
+				imp.close();
+			}
 		}
 	}
 }
