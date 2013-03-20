@@ -854,6 +854,13 @@ public class EntityManagement {
 					+ " of itemArrays, the same used by set_pinv. The equipment slots are: "
 					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(type: 261)))", "Gives a bow to a skeleton")
+			};
+		}
 	}
 
 	@api
