@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.annotations.abstractionenum;
+import com.laytonsmith.core.Prefs;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -33,62 +34,70 @@ public final class Implementation {
 		}
 
 		//Fire off our abstractionenum checks in a new Thread
-		if(type != Type.TEST && type != Type.SHELL){
+		if (type != Type.TEST && type != Type.SHELL) {
 			Thread abstractionenumsThread;
 			abstractionenumsThread = new Thread(new Runnable() {
 				public void run() {
-					//This goes ahead and runs the cache, which we can offset to our own thread.
-					StaticLayer.GetConvertor().getMaxBlockID();
 					try {
-						//Let the server startup data blindness go by first, so we display any error messages prominently,
-						//since an Error is a case of very bad code that shouldn't have been released to begin with.
-						Thread.sleep(15000);
-					} catch (InterruptedException ex) {
-						//
-					}
-					Class[] abstractionenums = ClassDiscovery.GetClassesWithAnnotation(abstractionenum.class);
-					for (Class c : abstractionenums) {
-						abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);
-						if (EnumConvertor.class.isAssignableFrom(c)) {
-							EnumConvertor<Enum, Enum> convertor;
-							try {
-								//Now, if this is not the current server type, skip it
-								if(annotation.implementation() != serverType){
-									continue;
-								}
-								//Next, verify usage of the annotation (it is an error if not used properly)
-								//All EnumConvertor subclasses should have public static getConvertor methods, let's grab it now
-								Method m = c.getDeclaredMethod("getConvertor");
-								convertor = (EnumConvertor<Enum, Enum>) m.invoke(null);
-								//Go through and check for a proper mapping both ways, from concrete to abstract, and vice versa.
-								//At this point, if there is an error, it is only a warning, NOT an error.
-								Class abstractEnum = annotation.forAbstractEnum();
-								Class concreteEnum = annotation.forConcreteEnum();
-								checkEnumConvertors(convertor, abstractEnum, concreteEnum, false);
-								checkEnumConvertors(convertor, concreteEnum, abstractEnum, true);
-
-							} catch (IllegalAccessException ex) {
-								throw new Error(ex);
-							} catch (IllegalArgumentException ex) {
-								throw new Error(ex);
-							} catch (InvocationTargetException ex) {
-								throw new Error(ex);
-							} catch (NoSuchMethodException ex) {
-								throw new Error(serverType.getBranding() + ": The method with signature public static " + c.getName() + " getConvertor() was not found in " + c.getClass()
-										+ " Please add the following code: \n"
-										+ "private static " + c.getName() + " instance;\n"
-										+ "public static " + c.getName() + " getConvertor(){\n"
-										+ "\tif(instance == null){\n"
-										+ "\t\tinstance = new " + c.getName() + "();\n"
-										+ "\t}\n"
-										+ "\treturn instance;\n"
-										+ "}\n"
-										+ "If you do not know what  error is, please report this to the developers.");
-							}
-						} else {
-							throw new Error("Only classes that extend EnumConvertor may use @abstractionenum. " + c.getName() + " does not, yet it uses the annotation.");
+						//This goes ahead and runs the cache, which we can offset to our own thread.
+						StaticLayer.GetConvertor().getMaxBlockID();
+						try {
+							//Let the server startup data blindness go by first, so we display any error messages prominently,
+							//since an Error is a case of very bad code that shouldn't have been released to begin with.
+							Thread.sleep(15000);
+						} catch (InterruptedException ex) {
+							//
 						}
+						Class[] abstractionenums = ClassDiscovery.GetClassesWithAnnotation(abstractionenum.class);
+						for (Class c : abstractionenums) {
+							abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);
+							if (EnumConvertor.class.isAssignableFrom(c)) {
+								EnumConvertor<Enum, Enum> convertor;
+								try {
+									//Now, if this is not the current server type, skip it
+									if (annotation.implementation() != serverType) {
+										continue;
+									}
+									//Next, verify usage of the annotation (it is an error if not used properly)
+									//All EnumConvertor subclasses should have public static getConvertor methods, let's grab it now
+									Method m = c.getDeclaredMethod("getConvertor");
+									convertor = (EnumConvertor<Enum, Enum>) m.invoke(null);
+									//Go through and check for a proper mapping both ways, from concrete to abstract, and vice versa.
+									//At this point, if there is an error, it is only a warning, NOT an error.
+									Class abstractEnum = annotation.forAbstractEnum();
+									Class concreteEnum = annotation.forConcreteEnum();
+									checkEnumConvertors(convertor, abstractEnum, concreteEnum, false);
+									checkEnumConvertors(convertor, concreteEnum, abstractEnum, true);
 
+								} catch (IllegalAccessException ex) {
+									throw new Error(ex);
+								} catch (IllegalArgumentException ex) {
+									throw new Error(ex);
+								} catch (InvocationTargetException ex) {
+									throw new Error(ex);
+								} catch (NoSuchMethodException ex) {
+									throw new Error(serverType.getBranding() + ": The method with signature public static " + c.getName() + " getConvertor() was not found in " + c.getClass()
+											+ " Please add the following code: \n"
+											+ "private static " + c.getName() + " instance;\n"
+											+ "public static " + c.getName() + " getConvertor(){\n"
+											+ "\tif(instance == null){\n"
+											+ "\t\tinstance = new " + c.getName() + "();\n"
+											+ "\t}\n"
+											+ "\treturn instance;\n"
+											+ "}\n"
+											+ "If you do not know what  error is, please report this to the developers.");
+								}
+							} else {
+								throw new Error("Only classes that extend EnumConvertor may use @abstractionenum. " + c.getName() + " does not, yet it uses the annotation.");
+							}
+
+						}
+					} catch (Exception e) {
+						if (Prefs.DebugMode()) {
+							//If we're in debug mode, sure, go ahead and print the stack trace,
+							//but otherwise we don't want to bother the user.
+							e.printStackTrace();
+						}
 					}
 				}
 			}, "Abstraction Enum Verification Thread");
@@ -101,13 +110,13 @@ public final class Implementation {
 	private static void checkEnumConvertors(EnumConvertor convertor, Class to, Class from, boolean isToConcrete) {
 		for (Object enumConst : from.getEnumConstants()) {
 			ReflectionUtils.set(EnumConvertor.class, convertor, "useError", false);
-			try{
+			try {
 				if (isToConcrete) {
 					convertor.getConcreteEnum((Enum) enumConst);
 				} else {
 					convertor.getAbstractedEnum((Enum) enumConst);
 				}
-			} catch(IllegalArgumentException e){
+			} catch (IllegalArgumentException e) {
 				//Ignored, it should have already logged it
 			}
 			ReflectionUtils.set(EnumConvertor.class, convertor, "useError", true);
@@ -127,7 +136,7 @@ public final class Implementation {
 		private final String branding;
 
 		/**
-		 * 
+		 *
 		 * @param branding This MUST be a universally acceptable folder name.
 		 */
 		private Type(String branding) {
@@ -136,7 +145,8 @@ public final class Implementation {
 
 		/**
 		 * Returns the branding string for this implementation.
-		 * @return 
+		 *
+		 * @return
 		 */
 		public String getBranding() {
 			return branding;
