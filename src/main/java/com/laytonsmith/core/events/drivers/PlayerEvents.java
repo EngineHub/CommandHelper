@@ -608,9 +608,13 @@ public class PlayerEvents {
 		}
 
 		public String docs() {
-			return "{location: The location of the pressure plate} "
+			return "{location: The location of the pressure plate | activated: If true, only will trigger when the plate is stepped on. Currently,"
+					+ " this will only be true, since the event is only triggered on activations, not deactivations, but is reserved for future use.} "
                     + "Fires when a player steps on a pressure plate"
                     + "{location: The location of the pressure plate |"
+					+ " activated: If true, then the player has stepped on the plate, if false, they have gotten off of it. Currently,"
+					+ " this will always be true, because the event is only triggered for activations, not deactivations, but is reserved"
+					+ " for future use. |"
                     + " player: The player associated with this event}"
                     + "{}"
                     + "{}";
@@ -627,6 +631,9 @@ public class PlayerEvents {
 					if(!pie.getClickedBlock().getLocation().equals(loc)){
 						return false;
 					}
+				}
+				if(prefilter.containsKey("activated")){
+					//TODO: Once activation is supported, check for that here
 				}
 				return true;
 			}
@@ -645,6 +652,8 @@ public class PlayerEvents {
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
                 map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation()));
+				//TODO: Once activation is supported, set that appropriately here.
+				map.put("activated", new CBoolean(true, Target.UNKNOWN));
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to PlayerInteractEvent");

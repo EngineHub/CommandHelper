@@ -2,7 +2,6 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
@@ -24,7 +23,6 @@ import com.sk89q.worldedit.bukkit.BukkitUtil;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.RegionSelector;
-import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 import com.sk89q.worldguard.protection.databases.RegionDBUtil;
@@ -246,8 +244,10 @@ public class WorldEdit {
                 String worldName = args[1].val();
                 //Fill these data structures in with the information we need
                 List<Location> points = new ArrayList<Location>();
-                List<String> owners = new ArrayList<String>();
-                List<String> members = new ArrayList<String>();
+                List<String> ownersPlayers = new ArrayList<String>();
+                List<String> ownersGroups = new ArrayList<String>();
+                List<String> membersPlayers = new ArrayList<String>();
+                List<String> membersGroups = new ArrayList<String>();
                 Map<String, String> flags = new HashMap<String, String>();
                 int priority = -1;
                 float volume = -1;
@@ -261,8 +261,10 @@ public class WorldEdit {
                     throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, t);
                 }
 
-                owners.addAll(region.getOwners().getPlayers());
-                members.addAll(region.getMembers().getPlayers());
+                ownersPlayers.addAll(region.getOwners().getPlayers());
+                ownersGroups.addAll(region.getOwners().getGroups());
+                membersPlayers.addAll(region.getMembers().getPlayers());
+                membersGroups.addAll(region.getMembers().getGroups());
                 for (Map.Entry<Flag<?>, Object> ent : region.getFlags().entrySet()) {
                     flags.put(ent.getKey().getName(), String.valueOf(ent.getValue()));
                 }
@@ -293,12 +295,18 @@ public class WorldEdit {
                     pointSet.push(point);
                 }
                 CArray ownerSet = new CArray(t);
-                for (String owner : owners) {
+                for (String owner : ownersPlayers) {
                     ownerSet.push(new CString(owner, t));
                 }
+				for (String owner : ownersGroups) {
+                    ownerSet.push(new CString("*" + owner, t));
+                }
                 CArray memberSet = new CArray(t);
-                for (String member : members) {
+                for (String member : membersPlayers) {
                     memberSet.push(new CString(member, t));
+                }
+				for (String member : membersGroups) {
+                    memberSet.push(new CString("*" + member, t));
                 }
                 CArray flagSet = new CArray(t);
                 for (Map.Entry<String, String> flag : flags.entrySet()) {
