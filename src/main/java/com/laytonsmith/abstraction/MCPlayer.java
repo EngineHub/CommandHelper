@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCWeatherType;
 
 import java.net.InetSocketAddress;
 
@@ -40,6 +41,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
     public long getPlayerTime();
 
+	public MCWeatherType getPlayerWeather();
+
     public int getRemainingFireTicks();
 
     public int getTotalExperience();
@@ -53,6 +56,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public boolean removeEffect(int effect);
 
     public void resetPlayerTime();
+
+	public void resetPlayerWeather();
 
     public void setAllowFlight(boolean flight);
 
@@ -69,6 +74,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public void setPlayerListName(String listName);
 
     public void setPlayerTime(Long time);
+
+	public void setPlayerWeather(MCWeatherType type);
 
     public void setRemainingFireTicks(int i);
 
