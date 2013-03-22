@@ -72,6 +72,8 @@ public interface MCEntity extends MCMetadatable {
 	public boolean isEmpty();
 
 	public boolean isInsideVehicle();
+	
+	public boolean isOnGround();
 
 	public boolean leaveVehicle();
 

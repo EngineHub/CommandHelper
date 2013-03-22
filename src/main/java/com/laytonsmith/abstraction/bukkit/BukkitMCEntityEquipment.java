@@ -76,6 +76,54 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 			}
 		}
 	}
+	
+	public Map<MCEquipmentSlot, Float> getAllDropChances() {
+		Map<MCEquipmentSlot, Float> slots = new EnumMap<MCEquipmentSlot, Float>(MCEquipmentSlot.class);
+		for (MCEquipmentSlot key : MCEquipmentSlot.values()) {
+			switch (key) {
+				case WEAPON:
+					slots.put(key, getWeaponDropChance());
+					break;
+				case HELMET:
+					slots.put(key, getHelmetDropChance());
+					break;
+				case CHESTPLATE:
+					slots.put(key, getChestplateDropChance());
+					break;
+				case LEGGINGS:
+					slots.put(key, getLeggingsDropChance());
+					break;
+				case BOOTS:
+					slots.put(key, getBootsDropChance());
+					break;
+			}
+		}
+		return slots;
+	}
+	
+	public void setAllDropChances(Map<MCEquipmentSlot, Float> slots) {
+		float chance;
+		for (MCEquipmentSlot key : slots.keySet()) {
+			chance = slots.get(key);
+			switch (key) {
+				case WEAPON:
+					setWeaponDropChance(chance);
+					break;
+				case HELMET:
+					setHelmetDropChance(chance);
+					break;
+				case CHESTPLATE:
+					setChestplateDropChance(chance);
+					break;
+				case LEGGINGS:
+					setLeggingsDropChance(chance);
+					break;
+				case BOOTS:
+					setBootsDropChance(chance);
+					break;
+			}
+		}
+	}
 
 	// For the purposes of faking a normal inventory, we most likely will not be accessing
 	// anything below this line, but they are here for flexibility and completion

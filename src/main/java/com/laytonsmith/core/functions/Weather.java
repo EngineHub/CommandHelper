@@ -39,9 +39,7 @@ public class Weather {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			int x;
-			int y;
-			int z;
+			int x, y, z, ent;
 			MCWorld w = null;
 			boolean safe = false;
 			int safeIndex = 1;
@@ -63,20 +61,23 @@ public class Weather {
 			}
 			if (w != null) {
 				if (!safe) {
-					w.strikeLightning(StaticLayer.GetLocation(w, x, y + 1, z));
+					ent = w.strikeLightning(StaticLayer.GetLocation(w, x, y + 1, z)).getEntityId();
 				} else {
-					w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z));
+					ent = w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z)).getEntityId();
 				}
 			} else {
 				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
 
-			return new CVoid(t);
+			return new CInt(ent, t);
 		}
 
 		public String docs() {
-			return "void {strikeLocArray, [safe] | x, y, z, [safe]} Makes lightning strike at the x y z coordinates specified in the array(x, y, z). Safe"
-					+ " defaults to false, but if true, lightning striking a player will not hurt them.";
+			return "int {strikeLocArray, [safe] | x, y, z, [safe]} Makes"
+					+ " lightning strike at the x y z coordinates specified"
+					+ " in the array(x, y, z). Safe  defaults to false, but"
+					+ " if true, lightning striking a player will not hurt"
+					+ " them. Returns the entityID of the lightning bolt.";
 		}
 
 		public boolean isRestricted() {

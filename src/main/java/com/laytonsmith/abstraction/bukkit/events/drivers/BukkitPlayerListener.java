@@ -198,4 +198,12 @@ public class BukkitPlayerListener implements Listener {
 			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce);
 		}
 	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onConsume(PlayerItemConsumeEvent event) {
+		BukkitPlayerEvents.BukkitMCPlayerItemConsumeEvent pic = 
+				new BukkitPlayerEvents.BukkitMCPlayerItemConsumeEvent(event);
+		EventUtils.TriggerExternal(pic);
+		EventUtils.TriggerListener(Driver.PLAYER_CONSUME, "player_consume", pic);
+	}
 }
