@@ -16,6 +16,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -91,5 +92,13 @@ public class BukkitEntityListener implements Listener{
 			EventUtils.TriggerExternal(ede);
 			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede);
 		}
+	}
+	
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void onPHit(ProjectileHitEvent event) {
+		BukkitEntityEvents.BukkitMCProjectileHitEvent phe = 
+				new BukkitEntityEvents.BukkitMCProjectileHitEvent(event);
+		EventUtils.TriggerExternal(phe);
+		EventUtils.TriggerListener(Driver.PROJECTILE_HIT, "projectile_hit", phe);
 	}
 }

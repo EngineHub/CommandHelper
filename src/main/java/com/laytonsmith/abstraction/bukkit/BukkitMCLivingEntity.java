@@ -312,4 +312,20 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		}
 		((Creature) le).setTarget(target == null ? null : ((BukkitMCLivingEntity) target).asLivingEntity());
 	}
+
+	public String getCustomName() {
+		return le.getCustomName();
+	}
+
+	public boolean isCustomNameVisible() {
+		return le.isCustomNameVisible();
+	}
+
+	public void setCustomName(String name) {
+		le.setCustomName(name);
+	}
+
+	public void setCustomNameVisible(boolean visible) {
+		le.setCustomNameVisible(visible);
+	}
 }

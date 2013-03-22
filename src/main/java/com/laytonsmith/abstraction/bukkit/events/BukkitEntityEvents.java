@@ -2,7 +2,9 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
@@ -11,6 +13,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCProjectile;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -29,6 +32,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -39,6 +44,66 @@ import org.bukkit.inventory.ItemStack;
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCProjectileHitEvent implements MCProjectileHitEvent {
+		
+		ProjectileHitEvent phe;
+		public BukkitMCProjectileHitEvent(ProjectileHitEvent event) {
+			phe = event;
+		}
+
+		public Object _GetObject() {
+			return phe;
+		}
+		
+		public MCProjectile getEntity() {
+			return new BukkitMCProjectile(phe.getEntity());
+		}
+
+		public MCEntityType getEntityType() {
+			return MCEntityType.valueOf(phe.getEntityType().name());
+		}
+		
+		public static BukkitMCProjectileHitEvent _instantiate(MCProjectile p) {
+			return new BukkitMCProjectileHitEvent(
+					new ProjectileHitEvent(
+							((BukkitMCProjectile) p).asProjectile()));
+		}
+		
+	}
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPotionSplashEvent extends BukkitMCProjectileHitEvent
+			implements MCPotionSplashEvent {
+		
+		PotionSplashEvent pse;
+		public BukkitMCPotionSplashEvent(PotionSplashEvent event) {
+			super(event);
+			pse = event;
+		}
+
+		public Object _GetObject() {
+			return pse;
+		}
+
+		public Set<MCLivingEntity> getAffectedEntities() {
+			Set<MCLivingEntity> ret = new HashSet<MCLivingEntity>();
+			for (LivingEntity le : pse.getAffectedEntities()) {
+				ret.add((MCLivingEntity) BukkitConvertor.BukkitGetCorrectEntity(le));
+			}
+			return ret;
+		}
+
+		public double getIntensity(MCLivingEntity le) {
+			return pse.getIntensity(((BukkitMCLivingEntity) le).asLivingEntity());
+		}
+
+		public void setIntensity(MCLivingEntity le, double intensity) {
+			pse.setIntensity(((BukkitMCLivingEntity) le).asLivingEntity(), intensity);
+		}
+		
+	}
 	
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCEntityDeathEvent implements MCEntityDeathEvent {

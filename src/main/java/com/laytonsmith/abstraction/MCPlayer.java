@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCWeather;
 
 import java.net.InetSocketAddress;
 
@@ -28,6 +29,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
     public float getExp();
 
+	public float getFlySpeed();
+
     public int getFoodLevel();
 
     public MCPlayerInventory getInventory();
@@ -40,9 +43,13 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
     public long getPlayerTime();
 
+	public MCWeather getPlayerWeather();
+
     public int getRemainingFireTicks();
 
     public int getTotalExperience();
+
+	public float getWalkSpeed();
 
     public void giveExp(int xp);
 
@@ -54,6 +61,10 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
     public void resetPlayerTime();
 
+	public void resetPlayerWeather();
+
+	public void sendTexturePack(String url);
+
     public void setAllowFlight(boolean flight);
 
     public void setCompassTarget(MCLocation l);
@@ -62,6 +73,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
     public void setExp(float i);
 
+	public void setFlying(boolean flight);
+
     public void setFoodLevel(int f);
 
     public void setLevel(int xp);
@@ -69,6 +82,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public void setPlayerListName(String listName);
 
     public void setPlayerTime(Long time);
+
+	public void setPlayerWeather(MCWeather type);
 
     public void setRemainingFireTicks(int i);
 

@@ -40,9 +40,9 @@ public interface MCWorld extends AbstractionObject{
 
     public MCItem dropItem(MCLocation l, MCItemStack is);
 
-    public void strikeLightning(MCLocation GetLocation);
+	public MCLightningStrike strikeLightning(MCLocation GetLocation);
 
-    public void strikeLightningEffect(MCLocation GetLocation);
+	public MCLightningStrike strikeLightningEffect(MCLocation GetLocation);
 
     public void setStorm(boolean b);
 	public void setThundering(boolean b);

@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -18,6 +19,7 @@ import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
+import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -29,6 +31,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +46,94 @@ public class EntityEvents {
         return "Contains events related to an entity";
     }
 
+    @api
+    public static class projectile_hit extends AbstractEvent {
+
+		public String getName() {
+			return "projectile_hit";
+		}
+
+		public String docs() {
+			return "{type: <macro> the entity type of the projectile}"
+					+ " Fires when a projectile collides with something."
+					+ " {type | id: the entityID of the projectile |" 
+					+ " location: where it makes contact | shooter}"
+					+ " {shooter: the entityID of the mob/player that fired"
+					+ " the projectile, or null if it is from a dispenser}"
+					+ " {id}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, 
+				BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCProjectileHitEvent) {
+				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
+				Prefilters.match(prefilter, "type", e.getEntityType().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			int id = Static.getInt32(manualObject.get("id"), Target.UNKNOWN);
+			MCEntity p = Static.getEntity(id, Target.UNKNOWN);
+			if (!(p instanceof MCProjectile)) {
+				throw new ConfigRuntimeException("The id was not a projectile", 
+						ExceptionType.BadEntityException, Target.UNKNOWN);
+			}
+			return EventBuilder.instantiate(MCProjectileHitEvent.class, p);
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event)
+				throws EventException {
+			if (event instanceof MCProjectileHitEvent) {
+				Target t = Target.UNKNOWN;
+				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				MCProjectile pro = e.getEntity();
+				ret.put("id", new CInt(pro.getEntityId(), t));
+				ret.put("type", new CString(pro.getType().name(), t));
+				CArray loc = ObjectGenerator.GetGenerator().location(pro.getLocation());
+				ret.put("location", loc);
+				MCLivingEntity shooter = pro.getShooter();
+				if (shooter == null) {
+					ret.put("shooter", new CNull(t));
+				} else {
+					ret.put("shooter", new CInt(shooter.getEntityId(), t));
+				}
+				return ret;
+			} else {
+				throw new EventException("Could not convert to ProjectileHit");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.PROJECTILE_HIT;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			if (event instanceof MCProjectileHitEvent) {
+				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
+				if (key.equalsIgnoreCase("shooter")) {
+					MCLivingEntity le;
+					if (value instanceof CNull) {
+						le = null;
+					} else {
+						int id = Static.getInt32(value, Target.UNKNOWN);
+						le = Static.getLivingEntity(id, Target.UNKNOWN);
+					}
+					e.getEntity().setShooter(le);
+				}
+			}
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+    	
+    }
+    
 	@api
 	public static class entity_death extends AbstractEvent {
 

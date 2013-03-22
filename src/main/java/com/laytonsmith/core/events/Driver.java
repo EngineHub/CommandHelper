@@ -36,6 +36,9 @@ public enum Driver {
 	INVENTORY_CLICK,
 	INVENTORY_OPEN,
 	INVENTORY_CLOSE,
+	PLAYER_CONSUME,
+	PROJECTILE_HIT,
+	POTION_SPLASH,
 	/**
 	 * Used by events fired from the extension system.
 	 */

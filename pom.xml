@@ -81,6 +81,18 @@
 				<role>contributor</role>
 			</roles>
 		</contributor>
+		<contributor>
+			<name>ACzChef</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>MariuszT</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
 	</contributors>
 	<issueManagement>
 		<system>sk89q's Redmine</system>
@@ -159,7 +171,7 @@
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.5-R0.1-SNAPSHOT</version>
+			<version>1.5.1-R0.1-SNAPSHOT</version>
 		</dependency>
         
 		<!-- CraftBukkit Dependency for experimental features
