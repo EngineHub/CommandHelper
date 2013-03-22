@@ -348,10 +348,6 @@ public class EntityManagement {
 	@api
 	public static class get_entity_age extends EntityGetterFunction {
 
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
-
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
@@ -367,18 +363,15 @@ public class EntityManagement {
 			return "get_entity_age";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
 		public String docs() {
 			return "int {entityID} Returns the entity age as an integer, represented by server ticks.";
 		}
 	}
 
 	@api
-	public static class set_entity_age extends EntityFunction {
+	public static class set_entity_age extends EntitySetterFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
 					ExceptionType.RangeException};
@@ -404,10 +397,6 @@ public class EntityManagement {
 
 		public String getName() {
 			return "set_entity_age";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
 		}
 
 		public String docs() {
@@ -985,5 +974,43 @@ public class EntityManagement {
 					+ StringUtils.Join(MCEntityEffect.values(), ", ", ", or ", " or ");
 		}
 
+	}
+	
+	@api
+	public static class get_mob_name extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			return new CString(le.getCustomName(), t);
+		}
+
+		public String getName() {
+			return "get_mob_name";
+		}
+
+		public String docs() {
+			return "string {entityID} Returns the name of the given mob.";
+		}
+	}
+	
+	@api
+	public static class set_mob_name extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			le.setCustomName(args[1].val());
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_mob_name";
+		}
+
+		public String docs() {
+			return "void {entityID, name} Sets the name of the given mob. This"
+					+ " automatically truncates if it is more than 64 characters.";
+		}
 	}
 }

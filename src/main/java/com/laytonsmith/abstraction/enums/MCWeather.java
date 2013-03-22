@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.enums;
 
-public enum MCWeatherType {
+public enum MCWeather {
 	CLEAR,
 	DOWNFALL
 }
