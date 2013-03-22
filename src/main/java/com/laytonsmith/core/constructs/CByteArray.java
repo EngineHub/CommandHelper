@@ -246,28 +246,33 @@ public class CByteArray extends Construct implements Sizable {
 	//Supplemental methods
 	/**
 	 * Writes out a UTF-8 encoded string to the buffer. First, it writes out
-	 * an int representing the length of the string.
+	 * a short representing the length of the string.
 	 * @param string
 	 * @param pos 
+	 * @throws IndexOutOfBoundsException If the length of the string is greater than 65536 bytes.
 	 */
-	public void writeUTF8String(String string, Integer pos){
+	public void writeUTF8String(String string, Integer pos) throws IndexOutOfBoundsException {
 		byte[] array;
 		try {
 			array = string.getBytes("UTF-8");
 		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
-		checkSize(array.length + Sizes.sizeof(int.class), pos);
+		checkSize(array.length + Sizes.sizeof(short.class), pos);
 		if(pos != null){
 			data.position(pos);
 		}
-		data.putInt(array.length);
+		if(array.length > Short.MAX_VALUE){
+			throw new IndexOutOfBoundsException("The length of the string cannot be greater than " + Short.MAX_VALUE + ". If you must encode a string"
+					+ " longer than this, you must write the string out yourself.");
+		}
+		data.putShort((short)array.length);
 		data.put(array);
 	}
 	
 	/**
 	 * Reads in a UTF-8 encoded string. It is assumed that 
-	 * the string begins with a 32 bit length marker.
+	 * the string begins with a 16 bit length marker.
 	 * @param pos
 	 * @return 
 	 */
@@ -275,7 +280,7 @@ public class CByteArray extends Construct implements Sizable {
 		if(pos != null){
 			data.position(pos);
 		}
-		byte[] array = new byte[data.getInt()];
+		byte[] array = new byte[data.getShort()];
 		data.get(array);
 		try {
 			return new String(array, "UTF-8");

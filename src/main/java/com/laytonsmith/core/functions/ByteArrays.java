@@ -404,12 +404,16 @@ public class ByteArrays {
 			CByteArray ba = getBA(args, t);
 			String s = args[1].val();
 			Integer pos = set_getPos(args, t);
-			ba.writeUTF8String(s, pos);
+			try{
+				ba.writeUTF8String(s, pos);
+			} catch(IndexOutOfBoundsException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			}
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, string, [pos]} Writes the length of the string to the byte array, (interpreted as UTF-8),"
+			return "void {byte_array, string, [pos]} Writes the length of the string to the byte array, as a short, (interpreted as UTF-8),"
 					+ " then writes the UTF-8 string itself. If an external application requires the string to be serialized"
 					+ " in a different manner, then use the string-byte_array conversion methods in StringHandling, however"
 					+ " strings written in this manner are compatible with ba_get_string.";
