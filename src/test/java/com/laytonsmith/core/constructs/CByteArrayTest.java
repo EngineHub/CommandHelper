@@ -75,21 +75,21 @@ public class CByteArrayTest {
 		assertEquals(2, ba.asByteArrayCopy().length);
 	}
 	
-	@Test public void testString1(){
+	@Test public void testString1() throws Exception{
 		CByteArray ba = new CByteArray(Target.UNKNOWN);
-		ba.writeUTF8String("1", null);
+		ba.writeUTF8String("1", null, null);
 		assertEquals(5, ba.asByteArrayCopy().length);
 	}
 	
-	@Test public void testString2(){
+	@Test public void testString2() throws Exception {
 		CByteArray ba = new CByteArray(Target.UNKNOWN);
-		ba.writeUTF8String("String", null);
-		assertEquals("String", ba.readUTF8String(0));
+		ba.writeUTF8String("String", null, null);
+		assertEquals("String", ba.readUTF8String(0, null));
 	}
 	
-	@Test public void testBytes1(){
+	@Test public void testBytes1() throws Exception {
 		CByteArray ba1 = new CByteArray(Target.UNKNOWN);
-		ba1.writeUTF8String("A string", null);
+		ba1.writeUTF8String("A string", null, null);
 		CByteArray ba2 = new CByteArray(Target.UNKNOWN);
 		ba2.putBytes(ba1, null);
 		assertArrayEquals(ba1.asByteArrayCopy(), ba2.asByteArrayCopy());

@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.io.UnsupportedEncodingException;
 
 /**
  * 
@@ -237,14 +238,22 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			return new CString(ba.readUTF8String(pos), t);
+			String encoding = null;
+			if(args.length == 3){
+				encoding = args[2].nval();
+			}
+			try{
+				return new CString(ba.readUTF8String(pos, encoding), t);
+			} catch(UnsupportedEncodingException e){
+				throw new Exceptions.FormatException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
-			return "string {byte_array, [pos]} Returns a UTF-8 encoded string, from the given position, or wherever the"
+			return "string {byte_array, [pos], [encoding]} Returns a UTF-8 encoded string, from the given position, or wherever the"
 					+ " marker is currently at by default. The string is assumed to have encoded the length of the string"
 					+ " with a 32 bit integer, then the string bytes. (This will be the case is the byte_array was encoded"
-					+ " with ba_set_string.)";
+					+ " with ba_set_string.) The encoding of the string may be set, but defaults to UTF-8.";
 		}
 		
 	}
@@ -404,19 +413,25 @@ public class ByteArrays {
 			CByteArray ba = getBA(args, t);
 			String s = args[1].val();
 			Integer pos = set_getPos(args, t);
+			String encoding = null;
+			if(args.length == 3){
+				encoding = args[2].nval();
+			}
 			try{
-				ba.writeUTF8String(s, pos);
+				ba.writeUTF8String(s, pos, encoding);
 			} catch(IndexOutOfBoundsException e){
 				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(UnsupportedEncodingException e){
+				throw new Exceptions.FormatException(e.getMessage(), t);
 			}
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, string, [pos]} Writes the length of the string to the byte array, as a short, (interpreted as UTF-8),"
+			return "void {byte_array, string, [pos], [encoding]} Writes the length of the string to the byte array, as a short, (interpreted as UTF-8),"
 					+ " then writes the UTF-8 string itself. If an external application requires the string to be serialized"
 					+ " in a different manner, then use the string-byte_array conversion methods in StringHandling, however"
-					+ " strings written in this manner are compatible with ba_get_string.";
+					+ " strings written in this manner are compatible with ba_get_string. The encoding may be set, but defaults to UTF-8.";
 		}
 		
 	}

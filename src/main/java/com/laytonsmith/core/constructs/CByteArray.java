@@ -249,15 +249,15 @@ public class CByteArray extends Construct implements Sizable {
 	 * a short representing the length of the string.
 	 * @param string
 	 * @param pos 
+	 * @param encoding Defaults to UTF-8 if null, but may be specified otherwise
 	 * @throws IndexOutOfBoundsException If the length of the string is greater than 65536 bytes.
 	 */
-	public void writeUTF8String(String string, Integer pos) throws IndexOutOfBoundsException {
+	public void writeUTF8String(String string, Integer pos, String encoding) throws IndexOutOfBoundsException, UnsupportedEncodingException {
 		byte[] array;
-		try {
-			array = string.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException ex) {
-			throw new Error(ex);
+		if(encoding == null){
+			encoding = "UTF-8";
 		}
+		array = string.getBytes(encoding);
 		checkSize(array.length + Sizes.sizeof(short.class), pos);
 		if(pos != null){
 			data.position(pos);
@@ -274,19 +274,19 @@ public class CByteArray extends Construct implements Sizable {
 	 * Reads in a UTF-8 encoded string. It is assumed that 
 	 * the string begins with a 16 bit length marker.
 	 * @param pos
+	 * @param encoding If null, defaults to UTF-8, but may be specified directly.
 	 * @return 
 	 */
-	public String readUTF8String(Integer pos){
+	public String readUTF8String(Integer pos, String encoding) throws UnsupportedEncodingException {
 		if(pos != null){
 			data.position(pos);
 		}
+		if(encoding == null){
+			encoding = "UTF-8";
+		}
 		byte[] array = new byte[data.getShort()];
 		data.get(array);
-		try {
-			return new String(array, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
-			throw new Error(ex);
-		}
+		return new String(array, encoding);
 	}
 	
 	/**
