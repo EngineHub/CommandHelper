@@ -78,7 +78,7 @@ public class CByteArrayTest {
 	@Test public void testString1() throws Exception{
 		CByteArray ba = new CByteArray(Target.UNKNOWN);
 		ba.writeUTF8String("1", null, null);
-		assertEquals(5, ba.asByteArrayCopy().length);
+		assertEquals(3, ba.asByteArrayCopy().length);
 	}
 	
 	@Test public void testString2() throws Exception {
