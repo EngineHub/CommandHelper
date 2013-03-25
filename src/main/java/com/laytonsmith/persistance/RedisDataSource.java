@@ -17,7 +17,7 @@ import redis.clients.jedis.JedisShardInfo;
  *
  * @author lsmith
  */
-//@datasource("redis")
+@datasource("redis")
 public class RedisDataSource extends AbstractDataSource {
 
 	private Jedis connection;

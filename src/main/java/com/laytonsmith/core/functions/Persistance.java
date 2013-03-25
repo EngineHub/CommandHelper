@@ -92,7 +92,7 @@ public class Persistance {
 			} catch(IllegalArgumentException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			} catch (Exception ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			}
 			return new CVoid(t);
 		}
