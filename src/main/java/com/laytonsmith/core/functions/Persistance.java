@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
@@ -36,6 +37,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class store_value extends AbstractFunction {
 
 		public String getName() {
@@ -109,6 +111,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class get_value extends AbstractFunction {
 
 		public String getName() {
@@ -176,6 +179,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class get_values extends AbstractFunction {
 
 		public String getName() {
@@ -248,6 +252,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class has_value extends AbstractFunction {
 
 		public String getName() {
@@ -295,6 +300,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class clear_value extends AbstractFunction {
 
 		public String getName() {

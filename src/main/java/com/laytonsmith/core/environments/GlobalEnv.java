@@ -25,6 +25,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	private ExecutionQueue executionQueue = null;
 	private Profiler profiler = null;
+	//This is changed reflectively in a test, please don't rename.
 	private PersistanceNetwork persistanceNetwork = null;
 	private PermissionsResolver permissionsResolver = null;
 	private Map<String, Boolean> flags = new HashMap<String, Boolean>();

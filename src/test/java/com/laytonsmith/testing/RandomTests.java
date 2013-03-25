@@ -1,17 +1,24 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.PermissionsResolver;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import static com.laytonsmith.testing.StaticTest.SRun;
+import com.laytonsmith.persistance.PersistanceNetwork;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +34,9 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
+import static com.laytonsmith.testing.StaticTest.*;
+import java.io.File;
+import java.net.URI;
 
 /**
  *
@@ -258,6 +268,32 @@ public class RandomTests {
 		String ret = SRun("reflect_docs('reflect_docs', 'return')", null);
 		assertEquals("string", ret);
 	}
+	
+	@Test
+	public void testGetValues() throws Exception {
+		try{
+			Environment env = Static.GenerateStandaloneEnvironment(new PermissionsResolver.PermissiveResolver());
+			GlobalEnv g = env.getEnv(GlobalEnv.class);
+			ConnectionMixinFactory.ConnectionMixinOptions options;
+			options = new ConnectionMixinFactory.ConnectionMixinOptions();
+			options.setWorkingDirectory(new File("."));
+			PersistanceNetwork network = new PersistanceNetwork("**=json://persistance.json", new URI("default"), options);
+			ReflectionUtils.set(GlobalEnv.class, g, "persistanceNetwork", network);
+			Run("store_value('t.test1', 'test')\n"
+					+ "store_value('t.test2', 'test')\n"
+					+ "store_value('t.test3.third', 'test')\n"
+					+ "msg(get_values('t'))", fakePlayer, new MethodScriptComplete() {
+
+				public void done(String output) {
+					//
+				}
+			}, env);
+			verify(fakePlayer).sendMessage("{t.test1: test, t.test2: test, t.test3.third: test}");
+		} finally {
+			new File("persistance.json").deleteOnExit();
+		}
+	}
+	
 //    @Test
 //    public void testBlah() throws Throwable{
 //	    StaticTest.InstallFakeConvertor(fakePlayer);
