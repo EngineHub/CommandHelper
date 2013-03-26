@@ -180,6 +180,7 @@ public final class DataSourceModel {
 				//recurse down now
 				traverse(child, ongoingKey, keys);
 			}
+			ongoingKey.remove(ongoingKey.size() - 1);
 		} else {
 			//This is it, we're done here, so we can put the key in the list now, then pop off the last element in the ongoingKey
 			ongoingKey.add(treeNode.getData().getKey());

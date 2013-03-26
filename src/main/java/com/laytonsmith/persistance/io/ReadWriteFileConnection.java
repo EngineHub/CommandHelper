@@ -21,7 +21,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 	 * The encoding that was determined to be the encoding for this file,
 	 * if set, or UTF-8 by default, if the file doesn't exist.
 	 */
-	protected String encoding = "UTF-8";
+	protected String encoding = "ASCII";
 	protected final ZipReader reader;
 	protected final String blankDataModel;
 	protected byte[] data = new byte[0];

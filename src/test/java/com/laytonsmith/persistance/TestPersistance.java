@@ -237,7 +237,7 @@ public class TestPersistance {
 		MemoryDataSource.ClearDatabases();
 		assertFalse(network.hasKey(key));
 	}
-
+	
 	public String doOutput(String uri, Map<String[], String> data) {
 		try {
 			DataSource ds = DataSourceFactory.GetDataSource(uri, options);
