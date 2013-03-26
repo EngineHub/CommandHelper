@@ -4,6 +4,8 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -260,6 +262,18 @@ public class BukkitMCServer implements MCServer {
 		}
 		
 		return new BukkitMCInventory(Bukkit.createInventory(ih, size, title));
+	}
+	
+	public void banIP(String address) {
+		s.banIP(address);
+	}
+	
+	public Set<String> getIPBans() {
+		return s.getIPBans();
+	}
+	
+	public void unbanIP(String address) {
+		s.unbanIP(address);
 	}
 
 }

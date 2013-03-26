@@ -1191,4 +1191,91 @@ public class Minecraft {
 			return CHVersion.V3_3_1;
 		}	
 	}
+	
+	@api
+	public static class get_ip_bans extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCServer s = Static.getServer();
+			CArray ret = new CArray(t);
+			for (String ip : s.getIPBans()) {
+				ret.push(new CString(ip, t));
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "get_ip_bans";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "array {} Returns an array of entries from banned-ips.txt.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class set_ip_banned extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCServer s = Static.getServer();
+			String ip = args[0].val();
+			if (Static.getBoolean(args[1])) {
+				s.banIP(ip);
+			} else {
+				s.unbanIP(ip);
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_ip_banned";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "void {address, banned} If banned is true, address is added to banned-ips.txt,"
+					+ " if false, the address is removed.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 }

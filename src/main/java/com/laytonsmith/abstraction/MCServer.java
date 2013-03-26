@@ -2,6 +2,8 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import java.util.List;
+import java.util.Set;
+
 import net.milkbowl.vault.economy.Economy;
 
 
@@ -39,6 +41,10 @@ public interface MCServer extends AbstractionObject{
     public List<MCOfflinePlayer> getBannedPlayers();
     public List<MCOfflinePlayer> getWhitelistedPlayers();
     public List<MCOfflinePlayer> getOperators();
+
+	public void banIP(String address);
+	public Set<String> getIPBans();
+	public void unbanIP(String address);
 
     public Economy getEconomy();
 

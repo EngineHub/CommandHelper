@@ -469,8 +469,8 @@ public class World {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			String name = args[0].val();
-			if(args.length == 4){
+			MCWorldCreator creator = StaticLayer.GetConvertor().getWorldCreator(args[0].val());
+			if(args.length >= 4){
 				MCWorldType type;
 				MCWorldEnvironment environment;
 				long seed = Static.getInt(args[3], t);
@@ -486,12 +486,12 @@ public class World {
 					throw new ConfigRuntimeException(args[2].val() + " is not a valid environment type. Must be one of: "
 							+ StringUtils.Join(MCWorldEnvironment.values(), ", "), ExceptionType.FormatException, t);
 				}
-				MCWorldCreator creator = StaticLayer.GetConvertor().getWorldCreator(name);
 				creator.type(type).environment(environment).seed(seed);
-				creator.createWorld();
-			} else {
-				StaticLayer.GetConvertor().getWorldCreator(name).createWorld();
 			}
+			if (args.length == 5) {
+				creator.generator(args[4].val());
+			}
+			creator.createWorld();
 			return new CVoid(t);
 		}
 
@@ -500,15 +500,16 @@ public class World {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 4};
+			return new Integer[]{1, 4, 5};
 		}
 
 		public String docs() {
-			return "void {name, [type, environment, seed]} Creates a new world with the specified options."
+			return "void {name, [type, environment, seed,] [generator]} Creates a new world with the specified options."
 					+ " If the world already exists, it will be loaded from disk, and the last 3 arguments may be"
 					+ " ignored. name is the name of the world, type is one of " 
 					+ StringUtils.Join(MCWorldType.values(), ", ") + ", environment is one of "
-					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ", and seed is an integer.";
+					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ", and seed is an integer."
+					+ " Generator is the name of a world generator loaded on the server.";
 		}
 
 		public CHVersion since() {
@@ -687,6 +688,55 @@ public class World {
 				+ " falling block of the specified id and type at the specified location, applying"
 				+ " vector array as a velocity if given. Values for the vector array are doubles, and 1.0"
 				+ " seems to imply about 3 times walking speed. Gravity applies for y.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class world_info extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCWorld w = Static.getServer().getWorld(args[0].val());
+			if (w == null) {
+				throw new ConfigRuntimeException("Unknown world: " + args[0],
+						ExceptionType.InvalidWorldException, t);
+			}
+			CArray ret = new CArray(t);
+			ret.set("name", new CString(w.getName(), t), t);
+			ret.set("seed", new CInt(w.getSeed(), t), t);
+			ret.set("environment", new CString(w.getEnvironment().name(), t), t);
+			ret.set("generator", new CString(w.getGenerator(), t), t);
+			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
+			return ret;
+		}
+
+		public String getName() {
+			return "world_info";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "array {world} Returns an associative array of all the info needed to duplicate the world."
+					+ " The keys are name, seed, environment, generator, and worldtype.";
 		}
 
 		public CHVersion since() {
