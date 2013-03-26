@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.ArgumentSuite;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Util;
+import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
@@ -25,6 +26,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  *
@@ -302,24 +305,21 @@ public class Main {
 		return ret;
 	}
 
-	private static String loadSelfVersion() throws Exception {
-		String version = null;
-
+	public static String loadSelfVersion() throws Exception {
 		File file = new File(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()), "plugin.yml");
-		if (!file.exists()) {
+		ZipReader reader = new ZipReader(file);
+		if (!reader.exists()) {
 			throw new Exception(new FileNotFoundException(String.format("%s does not exist", file.getPath())));
 		}
 		try {
-			DataSource ds = new YMLDataSource(new URI("yml://" + file.getAbsolutePath()), new ConnectionMixinFactory.ConnectionMixinOptions());
-			version = ds.get(new String[]{"version"}, false);
-			if (version == null) {
-				throw new Exception("Invalid plugin.yml supplied");
-			}
+			String contents = reader.getFileContents();
+			Yaml yaml = new Yaml();
+			Map<String, Object> map = (Map<String, Object>)yaml.load(contents);
+			return (String)map.get("version");
 		} catch (IOException ex) {
 			throw new Exception(ex);
 		} catch (Exception ex) {
 			throw new Exception(ex);
 		}
-		return version;
 	}
 }

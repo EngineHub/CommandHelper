@@ -2,8 +2,12 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -17,6 +21,7 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * A script is a section of code that has been preprocessed and split into separate 
@@ -239,67 +244,95 @@ public class Script {
                         }
                     }
                 }
-                
-                if(f.useSpecialExec()){
-					ProfilePoint p = null;
-					if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
-						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
+				ArrayList<Construct> args = new ArrayList<Construct>();
+                try{
+					if(f.useSpecialExec()){
+						ProfilePoint p = null;
+						if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
+							p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
+						}
+						Construct ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
+						if(p != null){
+							p.stop();
+						}
+						return ret;
 					}
-                    Construct ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
-					if(p != null){
-						p.stop();
-					}
-					return ret;
-                }
 
-                ArrayList<Construct> args = new ArrayList<Construct>();
-                for (ParseTree c2 : c.getChildren()) {
-                    args.add(eval(c2, env));
-                }
-                if (f.isRestricted()) {
-                    boolean perm = Static.hasCHPermission(f.getName(), env);
-                    if (!perm) {
-                        throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
-                                ExceptionType.InsufficientPermissionException, m.getTarget());
-                    }
-                }
-                Object[] a = args.toArray();
-                Construct[] ca = new Construct[a.length];
-                for (int i = 0; i < a.length; i++) {
-                    ca[i] = (Construct) a[i];
-                    //CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
-                    if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
-                            || ca[i] instanceof CInt || ca[i] instanceof CNull
-                            || ca[i] instanceof CString || ca[i] instanceof CVoid 
-                            || ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
-                            && (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
-                        throw new ConfigRuntimeException("Invalid Construct (" 
-                                + ca[i].getClass() + ") being passed as an argument to a function (" 
-                                + f.getName() + ")", null, m.getTarget());
-                    }
-                    if(env.getEnv(GlobalEnv.class).GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
-                        continue;
-                    }
-                    while(f.preResolveVariables() && ca[i] instanceof IVariable){
-                        IVariable cur = (IVariable)ca[i];
-                        ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
-                    }
-                }
+					for (ParseTree c2 : c.getChildren()) {
+						args.add(eval(c2, env));
+					}
+					if (f.isRestricted()) {
+						boolean perm = Static.hasCHPermission(f.getName(), env);
+						if (!perm) {
+							throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
+									ExceptionType.InsufficientPermissionException, m.getTarget());
+						}
+					}
+					Object[] a = args.toArray();
+					Construct[] ca = new Construct[a.length];
+					for (int i = 0; i < a.length; i++) {
+						ca[i] = (Construct) a[i];
+						//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
+						if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
+								|| ca[i] instanceof CInt || ca[i] instanceof CNull
+								|| ca[i] instanceof CString || ca[i] instanceof CVoid 
+								|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
+								&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
+							throw new ConfigRuntimeException("Invalid Construct (" 
+									+ ca[i].getClass() + ") being passed as an argument to a function (" 
+									+ f.getName() + ")", null, m.getTarget());
+						}
+						if(env.getEnv(GlobalEnv.class).GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
+							continue;
+						}
+						while(f.preResolveVariables() && ca[i] instanceof IVariable){
+							IVariable cur = (IVariable)ca[i];
+							ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+						}
+					}
 
-				{ 
-					//It takes a moment to generate the toString of some things, so lets not do it
-					//if we actually aren't going to profile
-					ProfilePoint p = null;				
-					if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){						
-						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
+					{ 
+						//It takes a moment to generate the toString of some things, so lets not do it
+						//if we actually aren't going to profile
+						ProfilePoint p = null;				
+						if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){						
+							p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
+						}
+						Construct ret = f.exec(m.getTarget(), env, ca);
+						if(p != null){
+							p.stop();
+						}
+						return ret;
 					}
-					Construct ret = f.exec(m.getTarget(), env, ca);
-					if(p != null){
-						p.stop();
+				//We want to catch and rethrow the ones we know how to catch, and then
+				//catch and report anything else.
+				} catch(ConfigRuntimeException e){
+					throw e;
+				} catch(ProgramFlowManipulationException e){
+					throw e;
+				} catch(Exception e){
+					String version = "Unknown";
+					try{
+						version = Main.loadSelfVersion();
+					} catch(Exception ex){
+						//Ignored
 					}
-					return ret;
+					String emsg = TermColors.RED + "Uh oh! You've found an error in " + Implementation.GetServerType().getBranding()
+							 + ". This is an error caused by your code, so you may be able to find a workaround,"
+							+ " but is ultimately an error in " + Implementation.GetServerType().getBranding()
+							+ " itself. The line of code that caused the error was this:\n" + TermColors.WHITE + f.getName() + "(";
+					List<String> args2 = new ArrayList<String>();
+					for(Construct cc : args){
+						args2.add(cc.toString());
+					}
+					emsg += StringUtils.Join(args2, ", ");
+					emsg += ")\n" + TermColors.RED + "Please report this error to the developers, and be sure to include the version numbers: Server version: "
+							+ StaticLayer.GetConvertor().GetServer().getModVersion() + "; "
+							+ Implementation.GetServerType().getBranding() + " version: " + version + ". Here's the stacktrace:\n" + TermColors.RESET;
+					emsg += Static.GetStacktraceString(e);
+					Static.getLogger().log(Level.SEVERE, emsg);
+					throw new CancelCommandException(null, Target.UNKNOWN);
 				}
-
         } else if (m.getCType() == ConstructType.VARIABLE) {            
             return new CString(m.val(), m.getTarget());
         } else {
