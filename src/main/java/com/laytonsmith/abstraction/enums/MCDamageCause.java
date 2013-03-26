@@ -111,6 +111,7 @@ public enum MCDamageCause {
 		MELTING,
 		WITHER,
 		FALLING_BLOCK,
+		THORNS,
         /**
          * Custom damage.
          * <p />
