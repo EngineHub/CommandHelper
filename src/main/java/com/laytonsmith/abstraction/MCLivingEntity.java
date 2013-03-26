@@ -19,6 +19,7 @@ public interface MCLivingEntity extends MCEntity {
     public void damage(int amount);
     public void damage(int amount, MCEntity source);
 	public boolean getCanPickupItems();
+	public String getCustomName();
 	public MCEntityEquipment getEquipment();
     public double getEyeHeight();
     public double getEyeHeight(boolean ignoreSneaking);
@@ -36,9 +37,12 @@ public interface MCLivingEntity extends MCEntity {
     public int getMaximumNoDamageTicks();
     public int getNoDamageTicks();
     public int getRemainingAir();
+	public boolean isCustomNameVisible();
     public MCProjectile launchProjectile(MCProjectileType projectile);
 	public void resetMaxHealth();
 	public void setCanPickupItems(boolean pickup);
+	public void setCustomName(String name);
+	public void setCustomNameVisible(boolean visible);
     public void setHealth(int health);
     public void setLastDamage(int damage);
 	public void setMaxHealth(int health);

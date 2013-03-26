@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class TestPersistance {
 	ConnectionMixinFactory.ConnectionMixinOptions options;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		testData.put(new String[]{"a", "b"}, "value1");
 		testData.put(new String[]{"a", "b", "c1"}, "value2");
 		testData.put(new String[]{"a", "b", "c2"}, "value3");
@@ -238,6 +239,26 @@ public class TestPersistance {
 		assertFalse(network.hasKey(key));
 	}
 	
+	@Test
+	public void testGetValues() throws Exception {
+		PersistanceNetwork network = new PersistanceNetwork("**=json://folder/persistance.json", new URI("default"), options);
+		try{
+			network.set(new String[]{"t", "test1"}, "test");
+			network.set(new String[]{"t", "test2"}, "test");
+			network.set(new String[]{"t", "test3", "third"}, "test");
+			Map<String[], String> list = network.getNamespace(new String[]{"t"});
+			List<String> output = new ArrayList<String>();
+			for(String[] key : list.keySet()){
+				output.add(StringUtils.Join(key, ".") + ": " + list.get(key));
+			}
+			Collections.sort(output);
+			String out = StringUtils.Join(output, ", ");
+			assertEquals("t.test1: test, t.test2: test, t.test3.third: test", out);
+		} finally {
+			deleteFiles("folder/");
+		}
+	}
+
 	public String doOutput(String uri, Map<String[], String> data) {
 		try {
 			DataSource ds = DataSourceFactory.GetDataSource(uri, options);

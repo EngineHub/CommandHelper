@@ -144,13 +144,15 @@ public class BukkitMCWorld implements MCWorld {
         return new BukkitMCItem(w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
     }
 
-    public void strikeLightning(MCLocation GetLocation) {
-        w.strikeLightning(((BukkitMCLocation) GetLocation).l);
-    }
+	public MCLightningStrike strikeLightning(MCLocation GetLocation) {
+		return new BukkitMCLightningStrike(
+				w.strikeLightning(((BukkitMCLocation) GetLocation).l));
+	}
 
-    public void strikeLightningEffect(MCLocation GetLocation) {
-        w.strikeLightningEffect(((BukkitMCLocation) GetLocation).l);
-    }
+	public MCLightningStrike strikeLightningEffect(MCLocation GetLocation) {
+		return new BukkitMCLightningStrike(
+				w.strikeLightningEffect(((BukkitMCLocation) GetLocation).l));
+	}
 
     public void setStorm(boolean b) {
         w.setStorm(b);

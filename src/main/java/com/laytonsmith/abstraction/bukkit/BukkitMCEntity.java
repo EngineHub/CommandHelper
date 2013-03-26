@@ -154,6 +154,10 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public boolean isInsideVehicle() {
 		return e.isInsideVehicle();
 	}
+	
+	public boolean isOnGround() {
+		return e.isOnGround();
+	}
 
 	public boolean isLivingEntity() {
         return e instanceof LivingEntity;

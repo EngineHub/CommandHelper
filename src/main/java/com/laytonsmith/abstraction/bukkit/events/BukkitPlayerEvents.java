@@ -35,6 +35,34 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BukkitPlayerEvents {
 
+	public static class BukkitMCPlayerItemConsumeEvent 
+			implements MCPlayerItemConsumeEvent {
+		PlayerItemConsumeEvent pic;
+		public BukkitMCPlayerItemConsumeEvent(PlayerItemConsumeEvent event) {
+			pic = event;
+		}
+		
+		public MCItemStack getItem() {
+			return new BukkitMCItemStack(pic.getItem());
+		}
+
+		public void setItem(MCItemStack item) {
+			pic.setItem(((BukkitMCItemStack) item).asItemStack());
+		}
+
+		public Object _GetObject() {
+			return pic;
+		}
+		
+		public static BukkitMCPlayerItemConsumeEvent _instantiate(
+				MCPlayer player, MCItemStack item) {
+			return new BukkitMCPlayerItemConsumeEvent(
+					new PlayerItemConsumeEvent(((BukkitMCPlayer) player)._Player(), 
+							((BukkitMCItemStack) item).asItemStack()));
+		}
+		
+	}
+	
     public static class BukkitMCPlayerKickEvent implements MCPlayerKickEvent {
         PlayerKickEvent e;
 

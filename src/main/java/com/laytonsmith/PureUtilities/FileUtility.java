@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.mutable.MutableObject;
 import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
@@ -383,7 +382,7 @@ public class FileUtility {
 		det.Init(new nsICharsetDetectionObserver() {
 
 			public void Notify(String charset) {
-				result.setValue(charset);
+				result.setObject(charset);
 			}
 		});
 		
@@ -404,7 +403,7 @@ public class FileUtility {
 				}
 			}
 			det.DataEnd();
-			return (String)result.getValue();
+			return (String)result.getObject();
 		} finally {
 			if(imp != null){
 				imp.close();
