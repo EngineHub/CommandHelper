@@ -694,9 +694,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCServer server = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
-
-
+			MCServer server = StaticLayer.GetServer();
 			int index = -1;
 			if (args.length == 0) {
 				index = -1;
