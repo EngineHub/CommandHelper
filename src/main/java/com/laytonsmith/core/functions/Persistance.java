@@ -335,7 +335,7 @@ public class Persistance {
 			String namespace = GetNamespace(args, null, getName(), t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
-				environment.getEnv(GlobalEnv.class).GetPersistanceNetwork().set(("storage." + namespace).split("\\."), null);
+				environment.getEnv(GlobalEnv.class).GetPersistanceNetwork().clearKey(("storage." + namespace).split("\\."));
 			} catch (DataSourceException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch (ReadOnlyException ex) {
