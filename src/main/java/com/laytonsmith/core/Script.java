@@ -324,13 +324,13 @@ public class Script {
 					List<String> args2 = new ArrayList<String>();
 					for(Construct cc : args){
 						if(cc == null){
-							args2.add("null");
+							args2.add("java-null");
 						} else {
 							args2.add(cc.getValue());
 						}
 					}
 					emsg += StringUtils.Join(args2, ", ");
-					emsg += ")\n" + TermColors.RED + "Please report this error to the developers, and be sure to include the version numbers: Server version: "
+					emsg += ")\n" + TermColors.RED + "on or around " + m.getTarget() + ".\nPlease report this error to the developers, and be sure to include the version numbers: Server version: "
 							+ StaticLayer.GetConvertor().GetServer().getModVersion() + "; "
 							+ Implementation.GetServerType().getBranding() + " version: " + version + ". Here's the stacktrace:\n" + TermColors.RESET;
 					emsg += Static.GetStacktraceString(e);
