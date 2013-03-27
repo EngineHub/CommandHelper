@@ -323,7 +323,11 @@ public class Script {
 							+ " itself. The line of code that caused the error was this:\n" + TermColors.WHITE + f.getName() + "(";
 					List<String> args2 = new ArrayList<String>();
 					for(Construct cc : args){
-						args2.add(cc.getValue());
+						if(cc == null){
+							args2.add("null");
+						} else {
+							args2.add(cc.getValue());
+						}
 					}
 					emsg += StringUtils.Join(args2, ", ");
 					emsg += ")\n" + TermColors.RED + "Please report this error to the developers, and be sure to include the version numbers: Server version: "
