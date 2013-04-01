@@ -44,7 +44,10 @@ import java.util.regex.Pattern;
  */
 public class PlayerManagement {
 	
-	private static final Argument PLAYER_ARG = new Argument("The name of the player to run the function with. If not provided,"
+	/**
+	 * A pre-built argument that represents the player. The name of the variable is "player", and defaults to null.
+	 */
+	public static final Argument PLAYER_ARG = new Argument("The name of the player to run the function with. If not provided,"
 			+ " the player running the current execution context is used.", CString.class, "player").setOptionalDefaultNull();
 
 	public static String docs() {

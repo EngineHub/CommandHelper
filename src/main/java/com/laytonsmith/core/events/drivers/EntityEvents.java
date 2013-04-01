@@ -31,6 +31,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.HashMap;
@@ -64,7 +65,7 @@ public class EntityEvents {
 		}
 
 		public boolean matches(Map<String, Construct> prefilter, 
-				BindableEvent event) throws PrefilterNonMatchException {
+				BindableEvent event, Target t) throws PrefilterNonMatchException {
 			if (event instanceof MCProjectileHitEvent) {
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
 				Prefilters.match(prefilter, "type", e.getEntityType().name(), PrefilterType.MACRO);
@@ -74,7 +75,7 @@ public class EntityEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			int id = Static.getInt32(manualObject.get("id"), Target.UNKNOWN);
+			int id = manualObject.get("id").primitive(Target.UNKNOWN).castToInt32(Target.UNKNOWN);
 			MCEntity p = Static.getEntity(id, Target.UNKNOWN);
 			if (!(p instanceof MCProjectile)) {
 				throw new ConfigRuntimeException("The id was not a projectile", 
@@ -96,7 +97,7 @@ public class EntityEvents {
 				ret.put("location", loc);
 				MCLivingEntity shooter = pro.getShooter();
 				if (shooter == null) {
-					ret.put("shooter", new CNull(t));
+					ret.put("shooter", Construct.GetNullConstruct(t));
 				} else {
 					ret.put("shooter", new CInt(shooter.getEntityId(), t));
 				}
@@ -110,16 +111,15 @@ public class EntityEvents {
 			return Driver.PROJECTILE_HIT;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (event instanceof MCProjectileHitEvent) {
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
 				if (key.equalsIgnoreCase("shooter")) {
 					MCLivingEntity le;
-					if (value instanceof CNull) {
+					if (value.isNull()) {
 						le = null;
 					} else {
-						int id = Static.getInt32(value, Target.UNKNOWN);
+						int id = value.primitive(t).castToInt32(t);
 						le = Static.getLivingEntity(id, Target.UNKNOWN);
 					}
 					e.getEntity().setShooter(le);

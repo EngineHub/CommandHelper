@@ -67,8 +67,7 @@ public class PlayerEvents {
 					+ " {player|item}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
-				throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent event = (MCPlayerItemConsumeEvent) e;
 				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), PrefilterType.ITEM_MATCH);
@@ -100,12 +99,11 @@ public class PlayerEvents {
 			return Driver.PLAYER_CONSUME;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (event instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent e = (MCPlayerItemConsumeEvent) event;
 				if (key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, t));
 					return true;
 				}
 			}
@@ -1141,7 +1139,7 @@ public class PlayerEvents {
                         for(String index : ((CArray)value).keySet()){
                             Construct v = ((CArray)value).get(index);
                             try{
-                                list.add(Static.GetPlayer(v, Target.UNKNOWN));
+                                list.add(Static.GetPlayer(v, t));
                             } catch(ConfigRuntimeException ex){
                                 //Ignored
                             }
@@ -1153,9 +1151,9 @@ public class PlayerEvents {
                 }
 				if("format".equals(key)){
 					try{
-						e.setFormat(value.nval());
+						e.setFormat(value.primitive(t).castToString());
 					} catch(UnknownFormatConversionException ex){
-						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
+						throw new Exceptions.FormatException(ex.getMessage(), t);
 					}
 				}
                 return true;

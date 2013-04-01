@@ -18,6 +18,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.documentation;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.arguments.Generic;
@@ -29,6 +30,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.annotations.FormatString;
 import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.MObject;
 import java.io.IOException;
@@ -1299,7 +1301,7 @@ public class Minecraft {
 	public static class send_texturepack extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -1312,8 +1314,11 @@ public class Minecraft {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
-			p.sendTexturePack(args[1].val());
+			ArgList list = getBuilder().parse(args, this, t);
+			String player = list.getStringWithNull("player", t);
+			String url = list.getString("url", t);
+			MCPlayer p = Static.GetPlayer(player, environment, t);
+			p.sendTexturePack(url);
 			return new CVoid(t);
 		}
 
@@ -1331,6 +1336,17 @@ public class Minecraft {
 					+ " past, they will recieve a confirmation dialog before downloading"
 					+ " and switching to the new pack. Clients that ignore server textures"
 					+ " will not recieve the request, so this function will not affect them.";
+		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PlayerManagement.PLAYER_ARG,
+						new Argument("The url to send.", CString.class, "url")
+					);
 		}
 
 		public CHVersion since() {

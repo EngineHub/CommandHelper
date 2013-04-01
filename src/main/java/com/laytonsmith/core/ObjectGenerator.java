@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -179,7 +180,7 @@ public class ObjectGenerator {
      * @param f
      * @return
      */
-    public MCItemStack item(Construct i, Target t) {
+    public MCItemStack item(Mixed i, Target t) {
         if (i.isNull()) {
             return EmptyItem();
         }

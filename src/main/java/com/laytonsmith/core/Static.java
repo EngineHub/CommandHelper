@@ -445,7 +445,8 @@ public final class Static {
 	
 	/**
 	 * Returns the player, either from the environment (if the player argument is null) or the
-	 * player specified if not. If neither is set, a proper exception is thrown.
+	 * player specified if not. If neither is set, a proper exception is thrown. If then environment is
+	 * null, the player must be valid, but a null env is a valid parameter value.
 	 * @param player
 	 * @param env
 	 * @param t
@@ -454,7 +455,10 @@ public final class Static {
 	 */
 	public static MCPlayer GetPlayer(String player, Environment env, Target t) throws ConfigRuntimeException {
 		if(player == null){
-			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = null;
+			if(env != null){
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			}
 			Static.AssertPlayerNonNull(p, t);
 			return p;
 		} else {
