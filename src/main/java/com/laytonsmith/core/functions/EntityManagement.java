@@ -25,6 +25,7 @@ import com.laytonsmith.core.natives.MEquipment;
 import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
 import com.laytonsmith.core.natives.MPotion;
+import com.laytonsmith.core.natives.annotations.FormatString;
 import com.laytonsmith.core.natives.annotations.NonNull;
 import com.laytonsmith.core.natives.annotations.Ranged;
 import java.util.ArrayList;
@@ -441,12 +442,6 @@ public class EntityManagement {
 
 	@api
 	public static class get_entity_age extends EntityGetterFunction {
-
-		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
-
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
@@ -456,10 +451,6 @@ public class EntityManagement {
 
 		public String getName() {
 			return "get_entity_age";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{1};
 		}
 
 		public String docs() {
@@ -478,8 +469,9 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class set_entity_age extends EntityFunction {
+	public static class set_entity_age extends EntitySetterFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
 					ExceptionType.RangeException};
@@ -496,10 +488,6 @@ public class EntityManagement {
 
 		public String getName() {
 			return "set_entity_age";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
 		}
 
 		public String docs() {
@@ -1068,6 +1056,13 @@ public class EntityManagement {
 						new Argument("", MEquipment.class, "equipment")
 					);
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(type: 261)))", "Gives a bow to a skeleton")
+			};
+		}
 	}
 
 	@api
@@ -1242,5 +1237,72 @@ public class EntityManagement {
 					);
 		}
 
+	}
+	
+	@api
+	public static class get_mob_name extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			int entityID = list.getInt("entityID", t);
+			MCLivingEntity le = Static.getLivingEntity(entityID, t);
+			return new CString(le.getCustomName(), t);
+		}
+
+		public String getName() {
+			return "get_mob_name";
+		}
+
+		public String docs() {
+			return "Returns the name of the given mob.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The name of the given mob", CString.class);
+		}
+		
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The entity ID", CInt.class, "entityID")
+					);
+		}
+	}
+	
+	@api
+	public static class set_mob_name extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			int entityID = list.getInt("entityID", t);
+			String name = list.getString("name", t);
+			MCLivingEntity le = Static.getLivingEntity(entityID, t);
+			le.setCustomName(name);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_mob_name";
+		}
+
+		public String docs() {
+			return "Sets the name of the given mob. This"
+					+ " automatically truncates if it is more than 64 characters.";
+		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+		
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The entity ID", CInt.class, "entityID"),
+						new Argument("The name to give the entity", CString.class, "name").addAnnotation(new FormatString(".{0,64}"))
+					);
+		}
+
+		
+		
 	}
 }

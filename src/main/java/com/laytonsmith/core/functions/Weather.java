@@ -43,9 +43,7 @@ public class Weather {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			int x;
-			int y;
-			int z;
+			int x, y, z, ent;
 			MCWorld w = null;
 			boolean safe = false;
 			int safeIndex = 1;
@@ -67,15 +65,15 @@ public class Weather {
 			}
 			if (w != null) {
 				if (!safe) {
-					w.strikeLightning(StaticLayer.GetLocation(w, x, y + 1, z));
+					ent = w.strikeLightning(StaticLayer.GetLocation(w, x, y + 1, z)).getEntityId();
 				} else {
-					w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z));
+					ent = w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z)).getEntityId();
 				}
 			} else {
 				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
 
-			return new CVoid(t);
+			return new CInt(ent, t);
 		}
 
 		public String docs() {
@@ -84,7 +82,7 @@ public class Weather {
 		}
 		
 		public Argument returnType() {
-			return Argument.VOID;
+			return new Argument("The entityID of the lightning bolt", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {

@@ -38,7 +38,7 @@
 	</developers>
 	<contributors>
 		<!-- If I left you out, let me know, and I'll gladly add you! Also, there are more
-  fields that can be filled out, if you want more information added in, I'll do that too -->
+		fields that can be filled out, if you want more information added in, I'll do that too -->
 		<contributor>
 			<name>opoq</name>
 			<roles>
@@ -77,6 +77,18 @@
 		</contributor>
 		<contributor>
 			<name>jb_aero</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>ACzChef</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>MariuszT</name>
 			<roles>
 				<role>contributor</role>
 			</roles>
@@ -159,7 +171,7 @@
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.5-R0.1-SNAPSHOT</version>
+			<version>1.5.1-R0.1-SNAPSHOT</version>
 		</dependency>
         
 		<!-- CraftBukkit Dependency for experimental features
@@ -198,20 +210,20 @@
 		</dependency>
         
 		<!-- Used for potion effects
-  <dependency>
-   <groupId>org.bukkit</groupId>
-   <artifactId>minecraft-server</artifactId>
-   <version>1.8.1</version>
-   <type>jar</type>
-  </dependency> -->
+		<dependency>
+		 <groupId>org.bukkit</groupId>
+		 <artifactId>minecraft-server</artifactId>
+		 <version>1.8.1</version>
+		 <type>jar</type>
+		</dependency> -->
         
 		<!-- Used for IRC hooks -->
 		<!--<dependency> NOT READY YET
-   <groupId>org.jibble</groupId>
-   <artifactId>pircbot</artifactId>
-   <version>1.5.0</version>
-   <scope>compile</scope>
-  </dependency>-->
+		 <groupId>org.jibble</groupId>
+		 <artifactId>pircbot</artifactId>
+		 <version>1.5.0</version>
+		 <scope>compile</scope>
+		</dependency>-->
         
 		<!-- Profiling library -->
 		<dependency>
@@ -235,6 +247,15 @@
 			<version>3.7.2</version>
 			<scope>compile</scope>
 		</dependency>
+		
+		<!-- Redis -->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>2.0.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
         
 		<!-- Yaml parsing -->
 		<dependency>
@@ -252,23 +273,30 @@
         
 		<!-- Evil-y things (currently not used) -->
 		<!--<dependency>
-   <groupId>cglib</groupId>
-   <artifactId>cglib</artifactId>
-   <version>2.2.2</version>
-   <scope>compile</scope>
-   <type>jar</type>
-  </dependency>
-  <dependency>
-   <groupId>org.javassist</groupId>
-   <artifactId>javassist</artifactId>
-   <version>3.15.0-GA</version>
-   <type>jar</type>
-  </dependency>-->			
+		 <groupId>cglib</groupId>
+		 <artifactId>cglib</artifactId>
+		 <version>2.2.2</version>
+		 <scope>compile</scope>
+		 <type>jar</type>
+		</dependency>
+		<dependency>
+		 <groupId>org.javassist</groupId>
+		 <artifactId>javassist</artifactId>
+		 <version>3.15.0-GA</version>
+		 <type>jar</type>
+		</dependency>-->			
 		<!-- Embedded SSH Client -->
 		<dependency>
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
 			<version>0.1.48</version>
+		</dependency>
+
+		<!-- Charset detection library -->
+		<dependency>
+			<groupId>net.sourceforge.jchardet</groupId>
+			<artifactId>jchardet</artifactId>
+			<version>1.0</version>
 		</dependency>
         
 		<!-- Test libraries -->
@@ -427,6 +455,8 @@
 									<include>org.apache.commons:commons-io:jar:*</include>
 									<include>org.xerial:sqlite-jdbc:jar:*</include>
 									<include>org.mcstats:metrics:jar:*</include>
+									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
+									<include>redis.clients:jedis:jar:*</include>
 								</includes>
 							</artifactSet>
 							<filters>
@@ -478,8 +508,19 @@
 									<includes>
 										<include>**</include>
 									</includes>
-								</filter>                                                        
-                                
+								</filter>                                           
+								<filter>
+									<artifact>net.sourceforge.jchardet:jchardet:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>redis.clients:jedis:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
 							</filters>
 						</configuration>
 					</execution>

@@ -62,7 +62,7 @@ public final class DataSourceModel {
 			}
 		} else {
 			//This is the node we want to put the data in
-			treeNode.data.setValue(node.toString());
+			treeNode.data.setValue(node==null?null:node.toString());
 		}
 	}
 
@@ -180,6 +180,7 @@ public final class DataSourceModel {
 				//recurse down now
 				traverse(child, ongoingKey, keys);
 			}
+			ongoingKey.remove(ongoingKey.size() - 1);
 		} else {
 			//This is it, we're done here, so we can put the key in the list now, then pop off the last element in the ongoingKey
 			ongoingKey.add(treeNode.getData().getKey());

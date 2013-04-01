@@ -12,42 +12,19 @@
 	if(!$proceed){
 		msg('Please ensure that your persistance.config file has the following values:')
 		foreach(reflect_pull('datasources'), @protocol,
-			msg(color(gold).'storage.'.@protocol.'.**='.@protocol.'://persistance/persistance.'.@protocol)
+			if(@protocol != 'redis'){
+				msg(color(gold).'storage.'.@protocol.'.**='.@protocol.'://persistance/persistance.'.@protocol)
+			}
 		)
-		msg('Additionally, ensure that the persistance/ folder is empty')
+		msg(color(gold).'storage.redis.**=redis://localhost')
+		msg('Additionally, ensure that the persistance/ folder is empty, and that a redis server is running (if you wish to test redis)')
+		msg('If you do not wish to test redis, be sure to put a dummy value in place of the redis network, perhaps using mem')
 		msg('Reload aliases, then run '.color(aqua).'/profiledatasources true'.color(reset).' to proceed')
 		msg(color(red).'THIS MUST BE RUN FROM COMMAND LINE, WITH NO USERS ONLINE')
 		msg(color(red).'THIS WILL FREEZE YOUR SERVER FOR POSSIBLY QUITE A WHILE')
 		msg(color(red).'DURING THE COURSE OF THE PROFILING RUNS')
 	} else {
-		msg(color(gold).'Starting profiling...')
-		@names = reflect_pull('datasources')
-		@data = array(array_merge(array('iterations:'), @iterations, array('File size with '.@iterations[-1].' values')))
-		foreach(@names, @name,
-			if(file_size('../../persistance/persistance.'.@name) != 0){
-				die(color(red).'The persistance/ folder does not appear to be empty, cannot proceed.')
-			}
-		)
-		foreach(@names, @name){
-			@rowData = array(@name)
-			foreach(@iterations, @iteration){
-						@start = time()
-						foreach(cslice(1,@iteration), @i){
-								store_value(@name, 'val'.@i, 'value')
-						}
-						foreach(cslice(1,@iteration), @i){
-								get_value(@name, 'val'.@i)
-						}
-						@stop = time()
-						@time = @stop - @start
-						@time = _human_readable_time(@time)
-						msg(@name.' took '.@time.' to complete with '.@iteration.' values')
-						array_push(@rowData, @time)
-			}
-			array_push(@rowData, _human_readable_bytes(file_size('../../persistance/persistance.'.@name)))
-			array_push(@data, @rowData)
-		}
-		msg('Data gathering complete, here are your results: \n'._format_table(@data))
+		_profileDataSources()
 	}
 
 <<<

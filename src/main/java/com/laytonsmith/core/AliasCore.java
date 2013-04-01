@@ -214,9 +214,11 @@ public class AliasCore {
 							}
 						} catch (ConfigRuntimeException e) {
 							//Unlike system scripts, this should just report the problem to the player
-							e.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
+							//env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
 							Static.getAliasCore().removePlayerReference(player);
+							e.setEnv(env);
 							ConfigRuntimeException.React(e, env);
+							match = true;
 						} catch (ConfigCompileException e) {
 							//Something strange happened, and a bad alias was added
 							//to the database. Our best course of action is to just

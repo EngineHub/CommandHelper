@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.UnknownFormatConversionException;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +48,75 @@ public class PlayerEvents {
     public static String docs(){
         return "Contains events related to a player";
     }
+
+	@api
+	public static class player_consume extends AbstractEvent {
+
+		public String getName() {
+			return "player_consume";
+		}
+
+		public String docs() {
+			return "{item: <item match>}"
+					+ " Fires as a player is finishing eating/drinking an item."
+					+ " Cancelling the event will cause any effects to not be"
+					+ " applied and the item to not be taken from the player."
+					+ " {player: the player consuming | item: the item being consumed}"
+					+ " {item: A different item to be consumed, changing this will"
+					+ " cause the original item to remain in the inventory}"
+					+ " {player|item}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if (e instanceof MCPlayerItemConsumeEvent) {
+				MCPlayerItemConsumeEvent event = (MCPlayerItemConsumeEvent) e;
+				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), PrefilterType.ITEM_MATCH);
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			MCPlayer p = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
+			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item"), Target.UNKNOWN);
+			return EventBuilder.instantiate(MCPlayerItemConsumeEvent.class, p, i);
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event)
+				throws EventException {
+			if (event instanceof MCPlayerItemConsumeEvent) {
+				MCPlayerItemConsumeEvent e = (MCPlayerItemConsumeEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				Construct item = ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN);
+				ret.put("item", item);
+				return ret;
+			} else {
+				throw new EventException("Cannot convert to MCPlayerItemConsumeEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_CONSUME;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			if (event instanceof MCPlayerItemConsumeEvent) {
+				MCPlayerItemConsumeEvent e = (MCPlayerItemConsumeEvent) event;
+				if (key.equalsIgnoreCase("item")) {
+					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 
     @api
     public static class player_kick extends AbstractEvent {
@@ -1082,7 +1152,11 @@ public class PlayerEvents {
                     }
                 }
 				if("format".equals(key)){
-					e.setFormat(value.isNull()?null:value.val());
+					try{
+						e.setFormat(value.nval());
+					} catch(UnknownFormatConversionException ex){
+						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
+					}
 				}
                 return true;
             }

@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
@@ -39,6 +40,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class store_value extends AbstractFunction {
 
 		public String getName() {
@@ -108,7 +110,7 @@ public class Persistance {
 			} catch(IllegalArgumentException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			} catch (Exception ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			}
 			return new CVoid(t);
 		}
@@ -125,6 +127,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class get_value extends AbstractFunction {
 
 		public String getName() {
@@ -175,9 +178,9 @@ public class Persistance {
 				try {
 					obj = env.getEnv(GlobalEnv.class).GetPersistanceNetwork().get(("storage." + namespace).split("\\."));
 				} catch (DataSourceException ex) {
-					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 				} catch(IllegalArgumentException e){
-					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 				}
 				if (obj == null) {
 					return Construct.GetNullConstruct(t);
@@ -205,6 +208,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class get_values extends AbstractFunction {
 
 		public String getName() {
@@ -256,9 +260,9 @@ public class Persistance {
 			try {
 				list = p.getNamespace(keyChain.toArray(new String[keyChain.size()]));
 			} catch (DataSourceException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
 			CArray ca = new CArray(t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
@@ -285,6 +289,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class has_value extends AbstractFunction {
 
 		public String getName() {
@@ -332,9 +337,9 @@ public class Persistance {
 			try {
 				return new CBoolean(env.getEnv(GlobalEnv.class).GetPersistanceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")), t);
 			} catch (DataSourceException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
 		}
 
@@ -345,6 +350,7 @@ public class Persistance {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@noboilerplate
 	public static class clear_value extends AbstractFunction {
 
 		public String getName() {
@@ -392,15 +398,15 @@ public class Persistance {
 			String namespace = GetNamespace(args, null, getName(), t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
-				environment.getEnv(GlobalEnv.class).GetPersistanceNetwork().set(("storage." + namespace).split("\\."), null);
+				environment.getEnv(GlobalEnv.class).GetPersistanceNetwork().clearKey(("storage." + namespace).split("\\."));
 			} catch (DataSourceException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch (ReadOnlyException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
 			return new CVoid(t);
 		}

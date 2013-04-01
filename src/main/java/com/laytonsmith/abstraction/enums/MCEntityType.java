@@ -70,6 +70,11 @@ public enum MCEntityType implements MEnum {
     PLAYER,
     COMPLEX_PART,
 	FIREWORK,
+	MINECART_CHEST,
+	MINECART_FURNACE,
+	MINECART_TNT,
+	MINECART_HOPPER,
+	MINECART_MOB_SPAWNER,
     /**
      * An unknown entity without an Entity Class
      */

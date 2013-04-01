@@ -57,9 +57,9 @@ public class UserManager {
     
     public int addAlias(String alias, PersistanceNetwork persist) throws ConfigCompileException, DataSourceException, ReadOnlyException, IOException {
         try{
-            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias, new File("User Alias"), false)).get(0).compile();
+            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias, new File("User Alias (" + name + ")"), false)).get(0).compile();
         } catch(IndexOutOfBoundsException e){
-            throw new ConfigCompileException("Improperly formatted alias", new Target(0, new File("User Alias"), 0));
+            throw new ConfigCompileException("Improperly formatted alias", new Target(0, new File("User Alias (" + name + ")"), 0));
         }
         Map<String[], String> list = persist.getNamespace(new String[]{"user", name, "aliases"});
         Integer nextValue = 0;
@@ -84,7 +84,7 @@ public class UserManager {
         if(script_cache.containsKey(alias)){
             tokens = script_cache.get(alias);
         } else {
-            tokens = MethodScriptCompiler.lex(alias, new File("User Alias"), false);
+            tokens = MethodScriptCompiler.lex(alias, new File("User Alias (" + name + ")"), false);
             script_cache.put(alias, tokens);
         }
         return MethodScriptCompiler.preprocess(tokens).get(0);

@@ -17,6 +17,8 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.annotations.NonNull;
+import java.io.UnsupportedEncodingException;
 
 /**
  * 
@@ -366,24 +368,30 @@ public class ByteArrays {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			Integer pos = list.getIntegerWithNull("pos", t);
-			return new CString(ba.readUTF8String(pos), t);
+			String encoding = list.getString("encoding", t);
+			try{
+				return new CString(ba.readUTF8String(pos, encoding), t);
+			} catch(UnsupportedEncodingException e){
+				throw new Exceptions.FormatException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
 			return "Returns a UTF-8 encoded string, from the given position, or wherever the"
 					+ " marker is currently at by default. The string is assumed to have encoded the length of the string"
 					+ " with a 32 bit integer, then the string bytes. (This will be the case is the byte_array was encoded"
-					+ " with ba_set_string.)";
+					+ " with ba_set_string.) The encoding of the string may be set, but defaults to UTF-8.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("The variable length string read in", CInt.class);
+			return new Argument("The variable length string read in", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("The byte array to operate on", CByteArray.class, "ba"),
-						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull(),
+						new Argument("The encoding to use", CString.class, "encoding").setOptionalDefault("UTF-8").addAnnotation(new NonNull())
 					);
 		}
 		
@@ -649,15 +657,22 @@ public class ByteArrays {
 			CByteArray ba = list.get("ba");
 			String s = list.getString("val", t);
 			Integer pos = list.getIntegerWithNull("pos", t);
-			ba.writeUTF8String(s, pos);
+			String encoding = list.getString("encoding", t);
+			try{
+				ba.writeUTF8String(s, pos, encoding);
+			} catch(IndexOutOfBoundsException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(UnsupportedEncodingException e){
+				throw new Exceptions.FormatException(e.getMessage(), t);
+			}
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "Writes the length of the string to the byte array, (interpreted as UTF-8),"
+			return "Writes the length of the string to the byte array, as a short, (interpreted as UTF-8),"
 					+ " then writes the UTF-8 string itself. If an external application requires the string to be serialized"
 					+ " in a different manner, then use the string-byte_array conversion methods in StringHandling, however"
-					+ " strings written in this manner are compatible with ba_get_string.";
+					+ " strings written in this manner are compatible with ba_get_string. The encoding may be set, but defaults to UTF-8.";
 		}
 		
 		public Argument returnType() {
@@ -668,7 +683,8 @@ public class ByteArrays {
 			return ArgumentBuilder.Build(
 						new Argument("The byte array to operate on", CByteArray.class, "ba"),
 						new Argument("The string value to push on to this byte array", CString.class, "val"),
-						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull(),
+						new Argument("The encoding to use when creating the string", CString.class, "encoding").setOptionalDefault("UTF-8").addAnnotation(new NonNull())
 					);
 		}
 		

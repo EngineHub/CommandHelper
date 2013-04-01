@@ -1,12 +1,12 @@
 As a special restriction, by submitting code that modifies the core compiler,
 the core functions (platform independent functions such as if, while, for, etc), 
-language constructs, optimizer, exceptions, tools, PureUtilities, or any other
-portion that is unrelated to the Minecraft aware portions, you agree to release
-this code into the copyright of Layton Smith. Furthermore, the core language
-grammar is copyright Layton Smith, in all cases. Note that this does not affect
-the release license. All code is still released under MIT. In layman's terms, 
-this means that you cannot submit code that adds Objects, for instance, and keep
-the copyright on it, you must release that to me. 
+language constructs, optimizer, exceptions, tools, PureUtilities, Persistance and
+Persistance Network, or any other portion that is unrelated to the Minecraft
+aware portions, you agree to release this code into the copyright of Layton Smith.
+Furthermore, the core language grammar is copyright Layton Smith, in all cases. 
+Note that this does not affect the release license. All code is still released 
+under MIT. In layman's terms, this means that you cannot submit code that adds 
+Objects, for instance, and keep the copyright on it, you must release that to me. 
 
 This is because I intend for MethodScript to live past Minecraft, and I do not
 want to be burdened by license restrictions. In all likelihood, I will always

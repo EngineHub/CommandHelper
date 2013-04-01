@@ -7,8 +7,10 @@ import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -126,6 +128,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return p.getPlayerTime();
     }
 
+	public MCWeather getPlayerWeather() {
+		return BukkitMCWeather.getConvertor().getAbstractedEnum(p.getPlayerWeather());
+	}
+
     public int getRemainingFireTicks() {
         return p.getFireTicks();
     }
@@ -167,6 +173,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			return 17 + (level - 15) * 3;
 		}
 		return 17;
+	}
+
+	public float getFlySpeed() {
+		return p.getFlySpeed();
+	}
+
+	public float getWalkSpeed() {
+		return p.getWalkSpeed();
 	}
 
     public void giveExp(int xp) {
@@ -222,11 +236,19 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.resetPlayerTime();
     }
 
+	public void resetPlayerWeather() {
+		p.resetPlayerWeather();
+	}
+
     public void sendMessage(String string) {
 		//The client doesn't like tabs
 		string = string.replaceAll("\t", "    ");
         p.sendMessage(string);
     }
+
+	public void sendTexturePack(String url) {
+		p.setTexturePack(url);
+	}
 
     public void setAllowFlight(boolean flight) {
         p.setAllowFlight(flight);
@@ -248,6 +270,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.setExp(i);
     }
 
+	public void setFlying(boolean flight) {
+		p.setFlying(flight);
+	}
+
     public void setFoodLevel(int f) {
         p.setFoodLevel(f);
     }
@@ -266,6 +292,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void setPlayerTime(Long time) {
         p.setPlayerTime(time, false);
     }
+
+	public void setPlayerWeather(MCWeather type) {
+		p.setPlayerWeather(BukkitMCWeather.getConvertor().getConcreteEnum(type));
+	}
 
     public void setRemainingFireTicks(int i) {
         p.setFireTicks(i);
