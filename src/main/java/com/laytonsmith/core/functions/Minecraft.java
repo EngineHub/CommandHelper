@@ -1388,7 +1388,15 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "array {} Returns an array of entries from banned-ips.txt.";
+			return "Returns an array of entries from banned-ips.txt.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 
 		public CHVersion since() {
@@ -1413,12 +1421,14 @@ public class Minecraft {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			String address = list.getString("address", t);
+			boolean banned = list.getBoolean("banned", t);
 			MCServer s = Static.getServer();
-			String ip = args[0].val();
-			if (Static.getBoolean(args[1])) {
-				s.banIP(ip);
+			if (banned) {
+				s.banIP(address);
 			} else {
-				s.unbanIP(ip);
+				s.unbanIP(address);
 			}
 			return new CVoid(t);
 		}
@@ -1432,8 +1442,19 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {address, banned} If banned is true, address is added to banned-ips.txt,"
+			return "If banned is true, address is added to banned-ips.txt,"
 					+ " if false, the address is removed.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "address"),
+						new Argument("", CBoolean.class, "banned")
+					);
 		}
 
 		public CHVersion since() {

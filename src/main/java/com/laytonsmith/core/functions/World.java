@@ -13,6 +13,8 @@ import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.documentation;
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
@@ -27,6 +29,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
 import com.laytonsmith.core.natives.MVector3D;
+import com.laytonsmith.core.natives.interfaces.MObject;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -826,6 +829,20 @@ public class World {
 		}
 	}
 	
+	@typename("WorldInfo")
+	public static class MWorldInfo extends MObject {
+		@documentation(docs="")
+		public String name;
+		@documentation(docs="")
+		public long seed;
+		@documentation(docs="")
+		public String environment;
+		@documentation(docs="")
+		public String generator;
+		@documentation(docs="")
+		public String worldtype;
+	}
+	
 	@api
 	public static class world_info extends AbstractFunction {
 
@@ -848,13 +865,13 @@ public class World {
 				throw new ConfigRuntimeException("Unknown world: " + args[0],
 						ExceptionType.InvalidWorldException, t);
 			}
-			CArray ret = new CArray(t);
-			ret.set("name", new CString(w.getName(), t), t);
-			ret.set("seed", new CInt(w.getSeed(), t), t);
-			ret.set("environment", new CString(w.getEnvironment().name(), t), t);
-			ret.set("generator", new CString(w.getGenerator(), t), t);
-			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
-			return ret;
+			MWorldInfo wi = new MWorldInfo();
+			wi.name = w.getName();
+			wi.seed = w.getSeed();
+			wi.environment = w.getEnvironment().name();
+			wi.generator = w.getGenerator();
+			wi.worldtype = w.getWorldType().name();
+			return wi.deconstruct(t);
 		}
 
 		public String getName() {
@@ -866,8 +883,17 @@ public class World {
 		}
 
 		public String docs() {
-			return "array {world} Returns an associative array of all the info needed to duplicate the world."
-					+ " The keys are name, seed, environment, generator, and worldtype.";
+			return "Returns a WorldInfo object of all the info needed to duplicate the world.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", MWorldInfo.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "world")
+					);
 		}
 
 		public CHVersion since() {

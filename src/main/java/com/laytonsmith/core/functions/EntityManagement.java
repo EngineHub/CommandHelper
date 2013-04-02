@@ -1304,9 +1304,6 @@ public class EntityManagement {
 						new Argument("The name to give the entity", CString.class, "name").addAnnotation(new FormatString(".{0,64}"))
 					);
 		}
-
-		
-		
 	}
 	
 	@api(environments = {CommandHelperEnvironment.class})
@@ -1320,15 +1317,13 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			int qty = 1;
 			CArray ret = new CArray(t);
-			MCEntityType entType;
-			MCLocation l;
-			MCEntity ent;
-			if (args.length == 3) {
-				l = ObjectGenerator.GetGenerator().location(args[2], null, t);
-			} else {
+			ArgList list = getBuilder().parse(args, this, t);
+			MCEntityType entType = list.getEnum("entityType", MCEntityType.class);
+			int qty = list.getInt("qty", t);
+			MCLocation l = list.get("location");
+			if(l == null){
+				MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if (cs instanceof MCPlayer) {
 					l = ((MCPlayer) cs).getLocation();
 				} else if (cs instanceof MCBlockCommandSender){
@@ -1338,18 +1333,8 @@ public class EntityManagement {
 							ExceptionType.PlayerOfflineException, t);
 				}
 			}
-			if (args.length >= 2) {
-				qty = Static.getInt32(args[1], t);
-			}
-			try {
-				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
-				if (!entType.isSpawnable()) {
-					throw new Exceptions.FormatException("Unspawnable entitytype: " + args[0].val(), t);
-				}
-			} catch (IllegalArgumentException iae) {
-				throw new Exceptions.FormatException("Unknown entitytype: " + args[0].val(), t);
-			}
 			for (int i = 0; i < qty; i++) {
+				MCEntity ent;
 				switch (entType) {
 					case DROPPED_ITEM:
 						CArray c = new CArray(t);
@@ -1385,13 +1370,25 @@ public class EntityManagement {
 					spawnable.add(type.name());
 				}
 			}
-			return "array {entityType, [qty], [location]} Spawns the specified number of entities of the given type"
+			return "Spawns the specified number of entities of the given type"
 					+ " at the given location. Returns an array of entityIDs of what is spawned. Qty defaults to 1"
 					+ " and location defaults to the location of the commandsender, if it is a block or player."
 					+ " If the commandsender is console, location must be supplied. ---- Entitytype can be one of " 
 					+ StringUtils.Join(spawnable, ", ", " or ", ", or ") 
 					+ ". Falling_blocks will be sand by default, and dropped_items will be stone,"
 					+ " as these entities already have their own functions for spawning.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The entityIDs of the spawned entities", CArray.class).setGenerics(new Generic(CInt.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The entity type. Note that only the spawnable types are valid", MCEntityType.class, "entityType"),
+						new Argument("", CInt.class, "qty").setOptionalDefault(1).addAnnotation(Ranged.POSITIVE).addAnnotation(new NonNull()),
+						new Argument("", MLocation.class, "location").setOptionalDefaultNull()
+					);
 		}
 	}
 }

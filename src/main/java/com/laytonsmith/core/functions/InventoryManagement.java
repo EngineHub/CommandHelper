@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.arguments.Generic;
@@ -16,6 +17,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MItemMeta;
 import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
@@ -247,9 +249,19 @@ public class InventoryManagement {
         }
 
         public String docs() {
-            return "void {[player]} Shows a workbench to the current player, "
+            return "Shows a workbench to the current player, "
 					+ "or a specified player.";
         }
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PlayerManagement.PLAYER_ARG
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
@@ -294,10 +306,20 @@ public class InventoryManagement {
         }
 
         public String docs() {
-            return "void {[player]} Shows an enchanting to the current player, "
+            return "Shows an enchanting to the current player, "
 					+ " or a specified player. Note that power is defined by how many"
 					+ " bookcases are near.";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PlayerManagement.PLAYER_ARG
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
@@ -775,7 +797,7 @@ public class InventoryManagement {
 		}
 
 		public String docs() {
-			return "void {[player], pinvArray} Sets a player's enderchest's inventory to the specified inventory object."
+			return "Sets a player's enderchest's inventory to the specified inventory object."
 					+ " An inventory object is one that matches what is returned by penderchest(), so set_penderchest(penderchest()),"
 					+ " while pointless, would be a correct call. ---- The array must be associative, "
 					+ " however, it may skip items, in which case, only the specified values will be changed. If"
@@ -787,7 +809,17 @@ public class InventoryManagement {
 					+ " enchantment mechanism to add enchantments, so any enchantment value will work. If"
 					+ " type uses the old format (for instance, \"35:11\"), then the second number is taken"
 					+ " to be the data, making this backwards compatible (and sometimes more convenient).";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
 
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PlayerManagement.PLAYER_ARG,
+						new Argument("", CArray.class, "pinvArray").setGenerics(new Generic(MItemStack.class))
+					);
 		}
 
 		public Exceptions.ExceptionType[] thrown() {
@@ -874,7 +906,7 @@ public class InventoryManagement {
 		}
 
 		public String docs() {
-			return "mixed {[player, [index]]} Gets the inventory information for the specified player's enderchest, or the current player if none specified. If the index is specified, only the slot "
+			return "Gets the inventory information for the specified player's enderchest, or the current player if none specified. If the index is specified, only the slot "
 					+ " given will be returned."
 					+ " The index of the array in the array is 0 - 26, which corresponds to the slot in the enderchest inventory."
 					+ " If there is no item at the slot specified, null is returned."
@@ -884,6 +916,17 @@ public class InventoryManagement {
 					+ " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
 					+ " of enchant objects, with 0 or more associative arrays which look like:"
 					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CArray.class, MItemStack.class).setGenerics(CArray.class, new Generic(MItemStack.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PlayerManagement.PLAYER_ARG,
+						new Argument("", CInt.class, "index").setOptionalDefaultNull().addAnnotation(new Ranged(0, true, 26, true))
+					);
 		}
 
 		public Exceptions.ExceptionType[] thrown() {
@@ -904,41 +947,16 @@ public class InventoryManagement {
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			ArgList list = getBuilder().parse(args, this, t);
+			String player = list.getStringWithNull("player", t);
+			Integer index = list.getIntegerWithNull("index", t);
+			MCPlayer m = Static.GetPlayer(player, env, t);
 
-			Integer index = -1;
-			boolean all = false;
-			MCPlayer m = null;
-
-			if (args.length == 0) {
-				all = true;
-
-				if (p instanceof MCPlayer) {
-					m = (MCPlayer) p;
-				}
-			} else if (args.length == 1) {
-				all = true;
-
-				m = Static.GetPlayer(args[0], t);
-			} else if (args.length == 2) {
-				if (args[1] instanceof CNull) {
-					throw new ConfigRuntimeException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
-				} else {
-					index = Static.getInt32(args[1], t);
-				}
-
-				all = false;
-				m = Static.GetPlayer(args[0], t);
-			}
-
-			Static.AssertPlayerNonNull(m, t);
-
-			if (all) {
+			if (index == null) {
 				CArray ret = CArray.GetAssociativeArray(t);
-
 				for (int i = 0; i < 27; i++) {
 					ret.set(i, getInvSlot(m, i, t), t);
 				}
-
 				return ret;
 			} else {
 				return getInvSlot(m, index, t);
