@@ -19,7 +19,7 @@ public enum MCProjectileType implements MEnum {
 	//FISHING_HOOK,
 	SMALL_FIREBALL,
 	SNOWBALL,
-	//SPLASH_POTION,
+	SPLASH_POTION,
 	//THROWN_EXP_BOTTLE,
 	WITHER_SKULL;
 

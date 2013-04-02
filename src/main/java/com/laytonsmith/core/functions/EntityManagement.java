@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -838,7 +839,9 @@ public class EntityManagement {
 										new CString(loc.getWorld().getName(), t)
 								), loc.getWorld(), t
 							).getChunk().getEntities()) {
-
+						if (e.getWorld() != loc.getWorld()) {
+							continue;
+						}
 						if (e.getLocation().distance(loc) <= dist && e.getLocation().getBlock() != loc.getBlock()) {
 							if (types.isEmpty() || types.contains(e.getType().name())) {
 								entities.push(new CInt(e.getEntityId(), t));
@@ -1304,5 +1307,91 @@ public class EntityManagement {
 
 		
 		
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class spawn_entity extends EntityFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+					ExceptionType.BadEntityException, ExceptionType.InvalidWorldException,
+					ExceptionType.PlayerOfflineException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			int qty = 1;
+			CArray ret = new CArray(t);
+			MCEntityType entType;
+			MCLocation l;
+			MCEntity ent;
+			if (args.length == 3) {
+				l = ObjectGenerator.GetGenerator().location(args[2], null, t);
+			} else {
+				if (cs instanceof MCPlayer) {
+					l = ((MCPlayer) cs).getLocation();
+				} else if (cs instanceof MCBlockCommandSender){
+					l = ((MCBlockCommandSender) cs).getBlock().getRelative(MCBlockFace.UP).getLocation();
+				} else {
+					throw new ConfigRuntimeException("A physical commandsender must exist or location must be explicit.",
+							ExceptionType.PlayerOfflineException, t);
+				}
+			}
+			if (args.length >= 2) {
+				qty = Static.getInt32(args[1], t);
+			}
+			try {
+				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
+				if (!entType.isSpawnable()) {
+					throw new Exceptions.FormatException("Unspawnable entitytype: " + args[0].val(), t);
+				}
+			} catch (IllegalArgumentException iae) {
+				throw new Exceptions.FormatException("Unknown entitytype: " + args[0].val(), t);
+			}
+			for (int i = 0; i < qty; i++) {
+				switch (entType) {
+					case DROPPED_ITEM:
+						CArray c = new CArray(t);
+						c.set("type", new CInt(1, t), t);
+						c.set("qty", new CInt(qty, t), t);
+						MCItemStack is = ObjectGenerator.GetGenerator().item(c, t);
+						ent = l.getWorld().dropItem(l, is);
+						qty = 0;
+						break;
+					case FALLING_BLOCK:
+						ent = l.getWorld().spawnFallingBlock(l, 12, (byte) 0);
+						break;
+					default:
+						ent = l.getWorld().spawn(l, entType);
+				}
+				ret.push(new CInt(ent.getEntityId(), t));
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "spawn_entity";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+
+		public String docs() {
+			List<String> spawnable = new ArrayList<String>();
+			for (MCEntityType type : MCEntityType.values()) {
+				if (type.isSpawnable()) {
+					spawnable.add(type.name());
+				}
+			}
+			return "array {entityType, [qty], [location]} Spawns the specified number of entities of the given type"
+					+ " at the given location. Returns an array of entityIDs of what is spawned. Qty defaults to 1"
+					+ " and location defaults to the location of the commandsender, if it is a block or player."
+					+ " If the commandsender is console, location must be supplied. ---- Entitytype can be one of " 
+					+ StringUtils.Join(spawnable, ", ", " or ", ", or ") 
+					+ ". Falling_blocks will be sand by default, and dropped_items will be stone,"
+					+ " as these entities already have their own functions for spawning.";
+		}
 	}
 }

@@ -4,7 +4,9 @@ import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 
@@ -83,5 +85,17 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	public MCInventory getInventory() {
 		return new BukkitMCInventory(he.getInventory());
+	}
+
+	public MCInventory getEnderChest() {
+		return new BukkitMCInventory(he.getEnderChest());
+	}
+	
+	public MCInventoryView openWorkbench(MCLocation loc, boolean force) {
+		return new BukkitMCInventoryView(he.openWorkbench((Location)loc.getHandle(), force));
+	}
+	
+	public MCInventoryView openEnchanting(MCLocation loc, boolean force) {
+		return new BukkitMCInventoryView(he.openEnchanting((Location)loc.getHandle(), force));
 	}
 }

@@ -15,9 +15,11 @@ public interface MCHumanEntity extends MCInventoryHolder, MCLivingEntity, MCAnim
 	public int getSleepTicks();
 	public boolean isBlocking();
 	public boolean isSleeping();
-	//public MCInventoryView openEnchanting(MCLocation location, boolean force);
+	public MCInventoryView openEnchanting(MCLocation location, boolean force);
 	public MCInventoryView openInventory(MCInventory inventory);
 	public MCInventoryView getOpenInventory();
+	public MCInventory getEnderChest();
+	public MCInventoryView openWorkbench(MCLocation loc, boolean force);
 	//public MCInventoryView	openWorkbench(MCLocation location, boolean force);
 	void	setGameMode(MCGameMode mode);
 	void	setItemInHand(MCItemStack item);

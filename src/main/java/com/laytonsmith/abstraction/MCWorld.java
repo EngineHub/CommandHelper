@@ -9,6 +9,8 @@ import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
+import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;
 import java.util.List;
@@ -20,7 +22,13 @@ import java.util.List;
 public interface MCWorld extends AbstractionObject{
 	public List<MCEntity> getEntities();
     public List<MCLivingEntity> getLivingEntities();
+
     public String getName();
+	public long getSeed();
+	public MCWorldEnvironment getEnvironment();
+	public String getGenerator();
+	public MCWorldType getWorldType();
+
     public MCBlock getBlockAt(int x, int y, int z);
 	public MCChunk getChunkAt(int x, int z);
 	public MCChunk getChunkAt(MCBlock b);

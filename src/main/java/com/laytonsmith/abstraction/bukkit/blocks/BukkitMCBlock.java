@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
@@ -143,7 +144,16 @@ public class BukkitMCBlock implements MCBlock{
 	public MCLocation getLocation() {
 		return new BukkitMCLocation(b.getLocation());
 	}
-    
-	
-    
+
+	public int getLightLevel() {
+		return b.getLightLevel();
+	}
+
+	public int getBlockPower() {
+		return b.getBlockPower();
+	}
+
+	public MCBlock getRelative(MCBlockFace face) {
+		return new BukkitMCBlock(b.getRelative(face.getModX(), face.getModY(), face.getModZ()));
+	}
 }

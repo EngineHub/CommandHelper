@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
@@ -119,9 +120,8 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	public MCEntityType getType() {
-    	EntityType type = e.getType();
-    	return MCEntityType.valueOf(type.name());
-    }
+		return BukkitMCEntityType.getConvertor().getAbstractedEnum(e.getType());
+	}
 
 	public UUID getUniqueId() {
 		return e.getUniqueId();
