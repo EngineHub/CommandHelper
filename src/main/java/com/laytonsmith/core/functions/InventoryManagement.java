@@ -180,6 +180,101 @@ public class InventoryManagement {
             return CHVersion.V3_3_1;
         }
     }
+	
+	@api(environments = {CommandHelperEnvironment.class})
+    public static class pworkbench extends AbstractFunction {
+
+        public Exceptions.ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p;
+			
+			if (args.length == 1) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			}
+			
+			p.openWorkbench(p.getLocation(), true);
+            
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "pworkbench";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[player]} Shows a workbench to the current player, "
+					+ "or a specified player.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+	
+	@api(environments = {CommandHelperEnvironment.class})
+    public static class penchanting extends AbstractFunction {
+
+        public Exceptions.ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p;
+			
+			if (args.length == 1) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			}
+			
+			p.openEnchanting(p.getLocation(), true);
+            
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "penchanting";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[player]} Shows an enchanting to the current player, "
+					+ " or a specified player. Note that power is defined by how many"
+					+ " bookcases are near.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
 
     @api(environments={CommandHelperEnvironment.class})
     public static class set_pinv extends AbstractFunction {
@@ -582,6 +677,203 @@ public class InventoryManagement {
             return CHVersion.V3_3_0;
         }
     }
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_penderchest extends AbstractFunction {
+
+		public String getName() {
+			return "set_penderchest";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {[player], pinvArray} Sets a player's enderchest's inventory to the specified inventory object."
+					+ " An inventory object is one that matches what is returned by penderchest(), so set_penderchest(penderchest()),"
+					+ " while pointless, would be a correct call. ---- The array must be associative, "
+					+ " however, it may skip items, in which case, only the specified values will be changed. If"
+					+ " a key is out of range, or otherwise improper, a warning is emitted, and it is skipped,"
+					+ " but the function will not fail as a whole. A simple way to set one item in a player's"
+					+ " enderchest would be: set_penderchest(array(2: array(type: 1, qty: 64))) This sets the chest's second slot"
+					+ " to be a stack of stone. set_penderchest(array(103: array(type: 298))) gives them a hat."
+					+ " Note that this uses the unsafe"
+					+ " enchantment mechanism to add enchantments, so any enchantment value will work. If"
+					+ " type uses the old format (for instance, \"35:11\"), then the second number is taken"
+					+ " to be the data, making this backwards compatible (and sometimes more convenient).";
+
+		}
+
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			
+			MCPlayer m = null;
+			
+			if (p instanceof MCPlayer) {
+				m = (MCPlayer) p;
+			}
+			
+			Construct arg;
+			
+			if (args.length == 2) {
+				m = Static.GetPlayer(args[0], t);
+				arg = args[1];
+			} else {
+				arg = args[0];
+			}
+			
+			if (!(arg instanceof CArray)) {
+				throw new ConfigRuntimeException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), Exceptions.ExceptionType.CastException, t);
+			}
+			
+			CArray array = (CArray) arg;
+			
+			Static.AssertPlayerNonNull(m, t);
+			
+			for (String key : array.keySet()) {
+				try {
+					int index = -2;
+					
+					try {
+						index = Integer.parseInt(key);
+					} catch (NumberFormatException e) {
+						if (key.isEmpty()) {
+							throw new ConfigRuntimeException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
+						} else {
+							throw e;
+						}
+					}
+					
+					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), t);
+					
+					if (index >= 0 && index <= 26) {
+						m.getEnderChest().setItem(index, is);
+					} else {
+						ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_penderchest(), so ignoring.");
+					}
+				} catch (NumberFormatException e) {
+					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_penderchest(), but \"" + key + "\" was found. Ignoring.");
+				}
+			}
+			
+			return new CVoid(t);
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class penderchest extends AbstractFunction {
+
+		public String getName() {
+			return "penderchest";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1, 2};
+		}
+
+		public String docs() {
+			return "mixed {[player, [index]]} Gets the inventory information for the specified player's enderchest, or the current player if none specified. If the index is specified, only the slot "
+					+ " given will be returned."
+					+ " The index of the array in the array is 0 - 26, which corresponds to the slot in the enderchest inventory."
+					+ " If there is no item at the slot specified, null is returned."
+					+ " ---- If all slots are requested, an associative array of item objects is returned, and if"
+					+ " only one item is requested, just that single item object is returned. An item object"
+					+ " consists of the following associative array(type: The id of the item, data: The data value of the item,"
+					+ " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
+					+ " of enchant objects, with 0 or more associative arrays which look like:"
+					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
+		}
+
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+
+			Integer index = -1;
+			boolean all = false;
+			MCPlayer m = null;
+
+			if (args.length == 0) {
+				all = true;
+
+				if (p instanceof MCPlayer) {
+					m = (MCPlayer) p;
+				}
+			} else if (args.length == 1) {
+				all = true;
+
+				m = Static.GetPlayer(args[0], t);
+			} else if (args.length == 2) {
+				if (args[1] instanceof CNull) {
+					throw new ConfigRuntimeException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
+				} else {
+					index = Static.getInt32(args[1], t);
+				}
+
+				all = false;
+				m = Static.GetPlayer(args[0], t);
+			}
+
+			Static.AssertPlayerNonNull(m, t);
+
+			if (all) {
+				CArray ret = CArray.GetAssociativeArray(t);
+
+				for (int i = 0; i < 27; i++) {
+					ret.set(i, getInvSlot(m, i, t), t);
+				}
+
+				return ret;
+			} else {
+				return getInvSlot(m, index, t);
+			}
+		}
+
+		private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
+			MCInventory inv = m.getEnderChest();
+
+			MCItemStack is;
+
+			if (slot >= 0 && slot <= 26) {
+				is = inv.getItem(slot);
+			} else {
+				throw new ConfigRuntimeException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
+			}
+
+			return ObjectGenerator.GetGenerator().item(is, t);
+		}
+	}
 	
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_inventory_item extends AbstractFunction{
