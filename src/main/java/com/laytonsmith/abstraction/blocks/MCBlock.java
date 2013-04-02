@@ -54,4 +54,10 @@ public interface MCBlock {
     public Collection<MCItemStack> getDrops();
 
 	public Collection<MCItemStack> getDrops(MCItemStack tool);
+
+	public int getLightLevel();
+
+	public int getBlockPower();
+
+	public MCBlock getRelative(MCBlockFace face);
 }

@@ -43,4 +43,8 @@ public class BukkitMCWorldCreator implements MCWorldCreator {
 		return this;
 	}
 	
+	public MCWorldCreator generator(String generator) {
+		creator.generator(generator);
+		return this;
+	}
 }
