@@ -19,13 +19,18 @@ import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCWolfType;
+import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
+import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSkeletonType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -111,6 +116,26 @@ public class BukkitMCWorld implements MCWorld {
         return w.getName();
     }
 
+	public long getSeed() {
+		return w.getSeed();
+	}
+
+	public MCWorldEnvironment getEnvironment() {
+		return BukkitMCWorldEnvironment.getConvertor().getAbstractedEnum(w.getEnvironment());
+	}
+
+	public String getGenerator() {
+		try {
+			return w.getGenerator().toString();
+		} catch (NullPointerException npe) {
+			return "default";
+		}
+	}
+	
+	public MCWorldType getWorldType() {
+		return BukkitMCWorldType.getConvertor().getAbstractedEnum(w.getWorldType());
+	}
+
     public MCBlock getBlockAt(int x, int y, int z) {
         if (w.getBlockAt(x, y, z) == null) {
             return null;
@@ -124,7 +149,8 @@ public class BukkitMCWorld implements MCWorld {
 
 	public MCEntity spawn(MCLocation l, MCEntityType entType) {
 		return BukkitConvertor.BukkitGetCorrectEntity(w.spawnEntity(
-				((BukkitMCLocation) l).asLocation(), EntityType.valueOf(entType.name())));
+				((BukkitMCLocation) l).asLocation(),
+				BukkitMCEntityType.getConvertor().getConcreteEnum(MCEntityType.valueOf(entType.name()))));
 	}
 
     public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data) {

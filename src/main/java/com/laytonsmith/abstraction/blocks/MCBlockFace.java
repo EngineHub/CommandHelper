@@ -5,10 +5,10 @@ package com.laytonsmith.abstraction.blocks;
  * @author layton
  */
 public enum MCBlockFace {
-    NORTH(-1, 0, 0),
-    EAST(0, 0, -1),
-    SOUTH(1, 0, 0),
-    WEST(0, 0, 1),
+    NORTH(0, 0, -1),
+    EAST(1, 0, 0),
+    SOUTH(0, 0, 1),
+    WEST(-1, 0, 0),
     UP(0, 1, 0),
     DOWN(0, -1, 0),
     NORTH_EAST(NORTH, EAST),

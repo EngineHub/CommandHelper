@@ -13,4 +13,5 @@ public interface MCWorldCreator {
 	MCWorldCreator type(MCWorldType type);
 	MCWorldCreator environment(MCWorldEnvironment environment);
 	MCWorldCreator seed(long seed);
+	MCWorldCreator generator(String generator);
 }
