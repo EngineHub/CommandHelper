@@ -1051,7 +1051,7 @@ public class EntityManagement {
 			}
 			try {
 				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
-				if (!spawnable(entType)) {
+				if (!entType.isSpawnable()) {
 					throw new Exceptions.FormatException("Unspawnable entitytype: " + args[0].val(), t);
 				}
 			} catch (IllegalArgumentException iae) {
@@ -1068,7 +1068,7 @@ public class EntityManagement {
 						qty = 0;
 						break;
 					case FALLING_BLOCK:
-						ent = l.getWorld().spawnFallingBlock(l, 1, (byte) 0);
+						ent = l.getWorld().spawnFallingBlock(l, 12, (byte) 0);
 						break;
 					default:
 						ent = l.getWorld().spawn(l, entType);
@@ -1087,36 +1087,19 @@ public class EntityManagement {
 		}
 
 		public String docs() {
+			List<String> spawnable = new ArrayList<String>();
+			for (MCEntityType type : MCEntityType.values()) {
+				if (type.isSpawnable()) {
+					spawnable.add(type.name());
+				}
+			}
 			return "array {entityType, [qty], [location]} Spawns the specified number of entities of the given type"
 					+ " at the given location. Returns an array of entityIDs of what is spawned. Qty defaults to 1"
 					+ " and location defaults to the location of the commandsender, if it is a block or player."
-					+ " Entitytype can be one of " + StringUtils.Join(spawnable(), ", ", " or ", ", or ");
-		}
-		
-		private boolean spawnable(MCEntityType t) {
-			switch (t) {
-				case COMPLEX_PART:
-				case ENDER_PEARL:
-				case ENDER_SIGNAL:
-				case FISHING_HOOK:
-				case ITEM_FRAME:
-				case PAINTING:
-				case PLAYER:
-				case UNKNOWN:
-					return false;
-				default:
-					return true;
-			}
-		}
-		
-		private List<MCEntityType> spawnable() {
-			List<MCEntityType> l = new ArrayList<MCEntityType>();
-			for (MCEntityType t : MCEntityType.values()) {
-				if (spawnable(t)) {
-					l.add(t);
-				}
-			}
-			return l;
+					+ " If the commandsender is console, location must be supplied. ---- Entitytype can be one of " 
+					+ StringUtils.Join(spawnable, ", ", " or ", ", or ") 
+					+ ". Falling_blocks will be sand by default, and dropped_items will be stone,"
+					+ " as these entities already have their own functions for spawning.";
 		}
 	}
 }
