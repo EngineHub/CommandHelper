@@ -1321,7 +1321,11 @@ public class EntityManagement {
 			ArgList list = getBuilder().parse(args, this, t);
 			MCEntityType entType = list.getEnum("entityType", MCEntityType.class);
 			int qty = list.getInt("qty", t);
-			MCLocation l = list.get("location");
+			MLocation ml = list.get("location");
+			MCLocation l = null;
+			if(ml != null){
+				l = ml.getMCLocation();
+			}
 			if(l == null){
 				MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if (cs instanceof MCPlayer) {
