@@ -20,6 +20,7 @@ import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
+import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.server.ServerEvent;
 import org.bukkit.event.vehicle.VehicleEvent;
@@ -59,7 +60,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
                 Entity entity = ((EntityEvent)e).getEntity();
                 map.put("player", new CString(((Player)entity).getName(), Target.UNKNOWN));
             }
-        } else if(e instanceof FurnaceBurnEvent || e instanceof FurnaceSmeltEvent){
+        } else if(e instanceof InventoryEvent || e instanceof FurnaceBurnEvent || e instanceof FurnaceSmeltEvent){
             macro = "inventory";
         } else if(e instanceof PlayerEvent){
             map.put("player", new CString(((PlayerEvent)e).getPlayer().getName(), Target.UNKNOWN));

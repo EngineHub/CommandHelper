@@ -14,6 +14,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -100,5 +101,12 @@ public class BukkitEntityListener implements Listener{
 				new BukkitEntityEvents.BukkitMCProjectileHitEvent(event);
 		EventUtils.TriggerExternal(phe);
 		EventUtils.TriggerListener(Driver.PROJECTILE_HIT, "projectile_hit", phe);
+	}
+	
+	@EventHandler(priority= EventPriority.LOWEST)
+	public void onPortalEnter(EntityPortalEnterEvent event) {
+		BukkitEntityEvents.BukkitMCEntityEnterPortalEvent pe = new BukkitEntityEvents.BukkitMCEntityEnterPortalEvent(event);
+		EventUtils.TriggerExternal(pe);
+		EventUtils.TriggerListener(Driver.ENTITY_ENTER_PORTAL, "entity_enter_portal", pe);
 	}
 }
