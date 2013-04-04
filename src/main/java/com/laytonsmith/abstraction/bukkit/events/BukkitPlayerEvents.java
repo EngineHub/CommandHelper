@@ -5,14 +5,19 @@ package com.laytonsmith.abstraction.bukkit.events;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
+import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
+import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
@@ -599,4 +604,42 @@ public class BukkitPlayerEvents {
 
 	}
 
+	public static class BukkitMCPlayerFishEvent implements MCPlayerFishEvent {
+	
+		PlayerFishEvent e;
+		public BukkitMCPlayerFishEvent(PlayerFishEvent event) {
+			e = event;
+		}
+		
+		public Object _GetObject() {
+			return e;
+		}
+	
+		public MCEntity getCaught() {
+			if (e.getCaught() == null) {
+				return null;
+			}
+			return new BukkitMCEntity(e.getCaught());
+		}
+	
+		public int getExpToDrop() {
+			return e.getExpToDrop();
+		}
+	
+		public MCFishHook getHook() {
+			return new BukkitMCFishHook(e.getHook());
+		}
+	
+		public MCFishingState getState() {
+			return BukkitMCFishingState.getConvertor().getAbstractedEnum(e.getState());
+		}
+	
+		public void setExpToDrop(int exp) {
+			e.setExpToDrop(exp);
+		}
+		
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getPlayer());
+		}
+	}
 }

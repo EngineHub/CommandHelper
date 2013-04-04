@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 
 /**
@@ -24,6 +25,8 @@ public interface MCLocation extends AbstractionObject{
     public void setPitch(float p);
     public void setYaw(float y);
 	public void breakBlock();
+	
+	public Velocity getDirection();
 
     public MCLocation clone();
 }
