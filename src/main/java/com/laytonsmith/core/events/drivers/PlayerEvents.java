@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
@@ -25,6 +26,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Exceptions.FormatException;
 import com.laytonsmith.core.functions.StringHandling;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1560,5 +1562,85 @@ public class PlayerEvents {
 
 	}
 
-
+	@api
+	public static class player_fish extends AbstractEvent {
+	
+		public String getName() {
+			return "player_fish";
+		}
+	
+		public String docs() {
+			return "{state: <macro> Can be one of" + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
+					+ " | player: <macro> The player who is fishing}"
+					+ " Fires when a player casts or reels a fishing rod {player | state | chance | xp"
+					+ " | hook: the fishhook entity | caught: the id of the snared entity, can be a fish item}"
+					+ " {chance: the chance of catching a fish from pulling the bobber at random"
+					+ " | xp: the exp the player will get from catching a fish}"
+					+ " {}";
+		}
+	
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if (e instanceof MCPlayerFishEvent) {
+				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
+				Prefilters.match(prefilter, "state", event.getState().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+	
+		public BindableEvent convert(CArray manualObject) {
+			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+		}
+	
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if (e instanceof MCPlayerFishEvent) {
+				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
+				Target t = Target.UNKNOWN;
+				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("state", new CString(event.getState().name(), t));
+				ret.put("hook", new CInt(event.getHook().getEntityId(), t));
+				ret.put("xp", new CInt(event.getExpToDrop(), t));
+				Construct caught = new CNull(t);
+				if (event.getCaught() instanceof MCEntity) {
+					caught = new CInt(event.getCaught().getEntityId(), t);
+				}
+				ret.put("caught", caught);
+				ret.put("chance", new CDouble(event.getHook().getBiteChance(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCPlayerFishEvent");
+			}
+		}
+	
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			if (event instanceof MCPlayerFishEvent) {
+				MCPlayerFishEvent e = (MCPlayerFishEvent) event;
+				if (key.equals("chance")) {
+					double chance = Static.getDouble(value, Target.UNKNOWN);
+					if (chance > 1.0 || chance < 0.0) {
+						throw new Exceptions.FormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
+					}
+					e.getHook().setBiteChance(chance);
+					return true;
+				}
+				if (key.equals("xp")) {
+					e.setExpToDrop(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	
+		public Driver driver() {
+			return Driver.PLAYER_FISH;
+		}
+	
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 }

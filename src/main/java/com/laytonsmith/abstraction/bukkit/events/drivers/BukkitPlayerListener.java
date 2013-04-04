@@ -206,4 +206,11 @@ public class BukkitPlayerListener implements Listener {
 		EventUtils.TriggerExternal(pic);
 		EventUtils.TriggerListener(Driver.PLAYER_CONSUME, "player_consume", pic);
 	}
+	
+	@EventHandler(priority= EventPriority.LOWEST)
+	public void onFish(PlayerFishEvent event) {
+		BukkitPlayerEvents.BukkitMCPlayerFishEvent fish = new BukkitPlayerEvents.BukkitMCPlayerFishEvent(event);
+		EventUtils.TriggerExternal(fish);
+		EventUtils.TriggerListener(Driver.PLAYER_FISH, "player_fish", fish);
+	}
 }

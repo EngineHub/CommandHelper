@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCChunk;
+import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -121,6 +122,10 @@ public class BukkitMCLocation implements MCLocation {
 
 	public void breakBlock() {
 		l.getBlock().breakNaturally();
+	}
+
+	public Velocity getDirection() {
+		return new Velocity(1, l.getDirection().getX(), l.getDirection().getY(), l.getDirection().getZ());
 	}
 
 	public MCChunk getChunk() {
