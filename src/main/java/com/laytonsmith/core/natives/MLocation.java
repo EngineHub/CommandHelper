@@ -2,7 +2,6 @@ package com.laytonsmith.core.natives;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.documentation;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
@@ -13,7 +12,6 @@ import com.laytonsmith.core.natives.interfaces.MObject;
  *
  * @author lsmith
  */
-@api
 @typename("Location")
 public class MLocation extends MObject implements Documentation {
 	
