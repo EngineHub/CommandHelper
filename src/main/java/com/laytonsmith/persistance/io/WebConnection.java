@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.WebUtility;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -12,8 +13,17 @@ import java.net.URL;
  */
 public class WebConnection implements ConnectionMixin{
 	URL source;
-	public WebConnection(URI uri) throws MalformedURLException{		
-		source = uri.toURL();
+	public WebConnection(URI uri, boolean useHTTPS) throws MalformedURLException{
+		URI newURI;
+		try {
+			newURI = new URI("http" + (useHTTPS?"s":"") + "://" + uri.getHost() + uri.getPath()
+				+ (uri.getQuery()==null?"":"?" + uri.getQuery())
+				+ (uri.getFragment()==null?"":"#" + uri.getFragment()));
+		} catch (URISyntaxException ex) {
+			//This shouldn't happen, because the URI we received should be correct. If this happens, it's my fault :x
+			throw new Error("Bad URI?");
+		}
+		source = newURI.toURL();
 	}
 
 	public String getData() throws IOException {
