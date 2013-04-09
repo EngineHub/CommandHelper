@@ -752,7 +752,8 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists != null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException(String.format("The region (%s) already exists in world (%s),"
+						+ " and cannot be created again.", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
             if (!(args[args.length - 1] instanceof CArray)) {
