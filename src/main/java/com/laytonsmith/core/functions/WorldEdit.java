@@ -460,7 +460,7 @@ public class WorldEdit {
 					}
 
 					if (listRegions.isEmpty()) {
-						return new CBoolean(false, t);
+						return new CArray(t);
 					}
 
 					return listRegions;
@@ -752,7 +752,8 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists != null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException(String.format("The region (%s) already exists in world (%s),"
+						+ " and cannot be created again.", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
             if (!(args[args.length - 1] instanceof CArray)) {
@@ -876,7 +877,7 @@ public class WorldEdit {
             ProtectedRegion oldRegion = mgr.getRegion(region);
 
             if (oldRegion == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
             if (!(args[args.length - 1] instanceof CArray)) {
@@ -1009,7 +1010,7 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
             mgr.removeRegion(region);
@@ -1173,7 +1174,7 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
 			RegionDBUtil.addToDomain(regionExists.getOwners(), owners, 0);
@@ -1273,7 +1274,7 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
 			RegionDBUtil.removeFromDomain(regionExists.getOwners(), owners, 0);
@@ -1373,7 +1374,7 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
 			RegionDBUtil.addToDomain(regionExists.getMembers(), members, 0);
@@ -1473,7 +1474,7 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
 			RegionDBUtil.removeFromDomain(regionExists.getMembers(), members, 0);
@@ -1543,7 +1544,7 @@ public class WorldEdit {
 					region = new GlobalProtectedRegion(regionName);
 					mgr.addRegion(region);
 				} else {
-					throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", regionName, world.getName()), ExceptionType.PluginInternalException, t);
+					throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", regionName, world.getName()), ExceptionType.PluginInternalException, t);
 				}
 			}
 
@@ -1684,7 +1685,7 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists == null) {
-				throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+				throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
 			regionExists.setPriority(priority);
@@ -1747,7 +1748,7 @@ public class WorldEdit {
             ProtectedRegion child = mgr.getRegion(regionName);
 
             if (child == null) {
-				throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", regionName, world.getName()), ExceptionType.PluginInternalException, t);
+				throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", regionName, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
 			if (args.length == 2) {
@@ -1760,7 +1761,7 @@ public class WorldEdit {
 				ProtectedRegion parent = mgr.getRegion(parentName);
 
 				if (parent == null) {
-					throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", parentName, world.getName()), ExceptionType.PluginInternalException, t);
+					throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", parentName, world.getName()), ExceptionType.PluginInternalException, t);
 				}
 
 				try {

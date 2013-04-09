@@ -1665,7 +1665,7 @@ public class Math {
 
 		public String docs() {
 			//lolcopypaste
-			return "double {number} Returns the angle theta from the conversion"
+			return "double {y, x} Returns the angle theta from the conversion"
 					+ " of rectangular coordinates (x, y) to polar coordinates"
 					+ " (r, theta). This method computes the phase theta by"
 					+ " computing an arc tangent of y/x in the range of -pi to pi.";
