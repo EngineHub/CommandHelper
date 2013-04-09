@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
@@ -1125,8 +1126,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], mode} Sets the player's game mode. mode must be either \"CREATIVE\" or \"SURVIVAL\""
-					+ " (case doesn't matter)";
+			return "void {[player], mode} Sets the player's game mode. mode must be one of: " + StringUtils.Join(MCGameMode.values(), ", ", ", or ");
 		}
 
 		public ExceptionType[] thrown() {

@@ -6,13 +6,13 @@ http://www.oracle.com/technetwork/java/javase/documentation/codeconvtoc-136057.h
 There are a few exceptions and clarifications however:
 
 * Line Length
-Avoid lines longer than 80 characters. When wrapping lines, follow these conventions:
+Avoid lines longer than about 120 characters. When wrapping lines, follow these conventions:
 
 	* Break after a comma
 	* Break before an operator
 	* Indent to the current level + 2 tabs on the following lines, if the code
 	  directly beneath it is on a different indention level
-	* If breaking in the middle of a  long string, the space should start the newline. 
+	* If breaking in the middle of a long string, the space should start the newline. 
 		String s = "This is a long string, which has a"
 					+ " break in the middle";
 
@@ -39,14 +39,21 @@ All braceable statements MUST use braces, and newlines.
 	if(condition) {
 		code;
 	}
-	NOT
+	NEVER
 	if(condition) code;
-	USUALLY NOT
+	NEVER
 	if(condition){ code; }
 
-if you have a series of several if statements that only have one statement, and
-it makes sense to have them all lined up, the third example may be used, but is
-still discouraged. Regardless, the statements must ALWAYS have braces.
-
 * Commits
-If you have more than 2 commits, please rebase.
+If you have more than 2 commits, please rebase, unless the commit has already
+been reviewed, in which case new commits should remain separate. (This allows reviewers
+to just see the changes in the new commits, instead of having to re-review all changes.)
+
+Before committing, be sure to go through this checklist:
+	* The boilerplate unit tests should all pass. Unit tests for unrelated code does not need to pass,
+	  if they weren't already passing.
+	* Documentation for functions must be complete. Be sure that the return type and arguments are accurate.
+	* Be sure that only code in the com.laytonsmith.abstraction.bukkit.* packages accesses bukkit code directly.
+	  All other files should access the abstraction layer.
+	* Be sure that enums that map server values have a EnumConvertor class as well. Never do enum lookups directly
+	  by name.
