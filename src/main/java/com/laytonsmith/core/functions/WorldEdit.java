@@ -401,7 +401,7 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "boolean {world, region1, [array(region2, [regionN...])]} Returns an array of regions names which intersect with defined region."
+            return "array {world, region1, [array(region2, [regionN...])]} Returns an array of regions names which intersect with defined region."
 					+ " You can pass an array of regions to verify or omit this parameter and all regions in selected world will be checked.";
         }
 
@@ -467,7 +467,7 @@ public class WorldEdit {
                 }
             } catch (Exception e) {
             }
-            return new CBoolean(false, t);
+            return new CArray(t);
         }
     }
 

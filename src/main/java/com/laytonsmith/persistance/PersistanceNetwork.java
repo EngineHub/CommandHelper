@@ -85,11 +85,15 @@ public class PersistanceNetwork {
 	 * Returns the value for this key, or null if it doesn't exist.
 	 *
 	 * @param key
+	 * @param isMainThread If true, then async connections will fail. This should be set by the calling 
+	 * code to determine whether or not this thread is considered the "main thread" and if blocking calls
+	 * are acceptable.
 	 * @return
 	 * @throws DataSourceException
 	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public synchronized String get(String[] key) throws DataSourceException, IllegalArgumentException {
+	public synchronized String get(String[] key/*boolean isMainThread*/) throws DataSourceException, IllegalArgumentException {
+		//TODO: Use isMainThread here
 		DataSource ds = getDataSource(filter.getConnection(key));
 		return ds.get(key, false);
 	}
@@ -147,7 +151,8 @@ public class PersistanceNetwork {
 	 * @return
 	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public synchronized Map<String[], String> getNamespace(String[] namespace) throws DataSourceException, IllegalArgumentException {
+	public synchronized Map<String[], String> getNamespace(String[] namespace /*, boolean isMainThread*/) throws DataSourceException, IllegalArgumentException {
+		//TODO: isMainThread needs to be used here somewhere, I think?
 		List<URI> uris = filter.getAllConnections(namespace);
 		//First we have to get the namespaces. We can get a list of all the connections
 		//we need to search, then grab all the data in them, but then we need to use

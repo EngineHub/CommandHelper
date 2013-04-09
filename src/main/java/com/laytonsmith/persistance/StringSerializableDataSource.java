@@ -51,7 +51,7 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 		try {
 			data = getConnectionMixin().getData();
 		} catch (Exception e) {
-			throw new DataSourceException("Could not populate the data source with data", e);
+			throw new DataSourceException("Could not populate the data source with data: " + e.getMessage(), e);
 		}
 		populateModel(data);
 	}

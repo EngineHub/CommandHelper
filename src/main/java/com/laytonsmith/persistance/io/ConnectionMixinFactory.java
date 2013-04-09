@@ -48,7 +48,7 @@ public class ConnectionMixinFactory {
 		if(modifiers.contains(DataSource.DataSourceModifier.HTTP) || modifiers.contains(DataSource.DataSourceModifier.HTTPS)){
 			try {
 				//This is a WebConnection
-				return new WebConnection(uri);
+				return new WebConnection(uri, modifiers.contains(DataSource.DataSourceModifier.HTTP)?false:true);
 			} catch (MalformedURLException ex) {
 				throw new DataSourceException("Malformed URL.", ex);
 			}
@@ -65,7 +65,7 @@ public class ConnectionMixinFactory {
 					return new ReadWriteFileConnection(uri, options.workingDirectory, blankDataModel);
 				}
 			} catch (IOException ex) {
-				throw new DataSourceException("IOException.", ex);
+				throw new DataSourceException("IOException: " + ex.getMessage(), ex);
 			}
 		}
 	}
