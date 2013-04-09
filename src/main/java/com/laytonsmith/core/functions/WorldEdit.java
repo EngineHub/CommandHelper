@@ -460,7 +460,7 @@ public class WorldEdit {
 					}
 
 					if (listRegions.isEmpty()) {
-						return new CBoolean(false, t);
+						return new CArray(t);
 					}
 
 					return listRegions;
