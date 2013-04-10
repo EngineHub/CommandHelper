@@ -185,7 +185,7 @@ public class ItemMeta {
 							"set_itemmeta(null, array(display: 'Amazing Sword', lore: array('Look at my sword', 'my sword is amazing')))", 
 							"The item in your hands is now amazing"),
 					new ExampleScript("Demonstrates a written book", 
-							"set_itemmeta(null, array(author: 'Writer', pages: array('Once upon a time', 'The end.'), title: 'Epic Story'})", 
+							"set_itemmeta(null, array(author: 'Writer', pages: array('Once upon a time', 'The end.'), title: 'Epic Story'))", 
 							"This will write a very short story"),
 					new ExampleScript("Demonstrates an EnchantedBook", 
 							"set_itemmeta(null, array(stored: array(array(elevel: 25, etype: DAMAGE_ALL), array(etype: DURABILITY, elevel: 3))))", 
