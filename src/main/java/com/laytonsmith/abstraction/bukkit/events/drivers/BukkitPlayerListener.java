@@ -30,6 +30,20 @@ public class BukkitPlayerListener implements Listener {
         EventUtils.TriggerExternal(pke);
 		EventUtils.TriggerListener(Driver.PLAYER_KICK, "player_kick", pke);
     }
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerBedEnter(PlayerBedEnterEvent e) {
+		BukkitPlayerEvents.BukkitMCPlayerBedEnterEvent bee = new BukkitPlayerEvents.BukkitMCPlayerBedEnterEvent(e);
+        EventUtils.TriggerExternal(bee);
+		EventUtils.TriggerListener(Driver.PLAYER_ENTER_BED, "player_enter_bed", bee);
+    }
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerBedLeave(PlayerBedLeaveEvent e) {
+		BukkitPlayerEvents.BukkitMCPlayerBedLeaveEvent ble = new BukkitPlayerEvents.BukkitMCPlayerBedLeaveEvent(e);
+        EventUtils.TriggerExternal(ble);
+		EventUtils.TriggerListener(Driver.PLAYER_LEAVE_BED, "player_leave_bed", ble);
+    }
     
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerLogin(PlayerLoginEvent e) {

@@ -71,6 +71,48 @@ public class BukkitPlayerEvents {
         }
 		
 	}
+	
+	public static class BukkitMCPlayerBedEnterEvent implements MCPlayerBedEnterEvent {
+		PlayerBedEnterEvent event;
+
+		public BukkitMCPlayerBedEnterEvent(PlayerBedEnterEvent event) {
+			this.event = event;
+		}
+		
+		public MCBlock getBed() {
+			return new BukkitMCBlock(event.getBed());
+		}
+
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(event.getPlayer());
+		}
+
+		public Object _GetObject() {
+			return event;
+		}
+		
+	}
+	
+	public static class BukkitMCPlayerBedLeaveEvent implements MCPlayerBedLeaveEvent {
+		PlayerBedLeaveEvent event;
+
+		public BukkitMCPlayerBedLeaveEvent(PlayerBedLeaveEvent event) {
+			this.event = event;
+		}
+		
+		public MCBlock getBed() {
+			return new BukkitMCBlock(event.getBed());
+		}
+
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(event.getPlayer());
+		}
+
+		public Object _GetObject() {
+			return event;
+		}
+		
+	}
 		
     public static class BukkitMCPlayerKickEvent implements MCPlayerKickEvent {
         PlayerKickEvent e;
