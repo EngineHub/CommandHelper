@@ -276,4 +276,11 @@ public class BukkitMCServer implements MCServer {
 		s.unbanIP(address);
 	}
 
+	public MCScoreboard getMainScoreboard() {
+		return new BukkitMCScoreboard(s.getScoreboardManager().getMainScoreboard());
+	}
+
+	public MCScoreboard getNewScoreboard() {
+		return new BukkitMCScoreboard(s.getScoreboardManager().getNewScoreboard());
+	}
 }

@@ -46,6 +46,11 @@ public interface MCServer extends AbstractionObject{
 	public Set<String> getIPBans();
 	public void unbanIP(String address);
 
+	public MCScoreboard getMainScoreboard();
+
+	//May want to initialize this onEnable and make a Static reference to it later
+	public MCScoreboard getNewScoreboard();
+
     public Economy getEconomy();
 
     public void runasConsole(String cmd);
