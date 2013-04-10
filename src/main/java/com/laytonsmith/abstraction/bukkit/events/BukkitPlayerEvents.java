@@ -65,9 +65,13 @@ public class BukkitPlayerEvents {
 					new PlayerItemConsumeEvent(((BukkitMCPlayer) player)._Player(), 
 							((BukkitMCItemStack) item).asItemStack()));
 		}
+
+		public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(pic.getPlayer());
+        }
 		
 	}
-	
+		
     public static class BukkitMCPlayerKickEvent implements MCPlayerKickEvent {
         PlayerKickEvent e;
 
