@@ -194,6 +194,12 @@ public class Exceptions {
 		 * Thrown if a field was read only, but a write operation was attempted.
 		 */
 		ReadOnlyException("Thrown if a field was read only, but a write operation was attempted.", CHVersion.V3_3_1),
+		
+		/*
+		 * Thrown if trying to register a plugin channel that is already registered, 
+		 * or unregister one that isn't registered.
+		 */
+		PluginChannelException("Thrown if trying to register a plugin channel that is already registered, or unregister one that isn't registered.", CHVersion.V3_3_1);
 		;
 		
 		private String docs;

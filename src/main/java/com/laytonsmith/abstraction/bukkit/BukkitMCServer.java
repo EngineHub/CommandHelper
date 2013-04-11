@@ -1,7 +1,9 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
+import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -274,6 +276,10 @@ public class BukkitMCServer implements MCServer {
 	
 	public void unbanIP(String address) {
 		s.unbanIP(address);
+	}
+
+	public MCMessenger getMessenger() {
+		return new BukkitMCMessenger(s.getMessenger());
 	}
 
 }
