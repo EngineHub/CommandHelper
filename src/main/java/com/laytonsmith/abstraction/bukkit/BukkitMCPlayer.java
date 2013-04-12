@@ -460,4 +460,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void updateInventory() {
 		p.updateInventory();
 	}
+
+	public MCScoreboard getScoreboard() {
+		return new BukkitMCScoreboard(p.getScoreboard());
+	}
+
+	public void setScoreboard(MCScoreboard board) {
+		p.setScoreboard(((BukkitMCScoreboard) board).s);
+	}
 }
