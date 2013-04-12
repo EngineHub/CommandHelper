@@ -672,6 +672,96 @@ public class PlayerEvents {
 
     }
 	
+    public abstract static class player_bed_event extends AbstractEvent {
+		
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerBedEvent){
+                MCPlayerBedEvent be = (MCPlayerBedEvent)e;
+				
+				if(prefilter.containsKey("location")){
+					MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, Target.UNKNOWN);
+					
+					if(!be.getBed().getLocation().equals(loc)){
+						return false;
+					}
+				}
+				
+				return true;
+			}
+			
+			return false;
+		}
+
+		public BindableEvent convert(CArray manual) {
+			MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
+            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location"), null, Target.UNKNOWN).getBlock();
+            
+			MCPlayerBedEvent e = EventBuilder.instantiate(MCPlayerBedEvent.class, p, b);
+            
+			return e;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCPlayerBedEvent){
+                MCPlayerBedEvent bee = (MCPlayerBedEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+				
+                map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation()));
+				map.put("player", new CString(bee.getPlayer().getName(), Target.UNKNOWN));
+				
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to an appropriate PlayerBedEvent.");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_BED_EVENT;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class player_enter_bed extends player_bed_event {
+		
+		public String docs() {
+			return "{location: The location of the bed} "
+                    + "Fires when a player tries to enter a bed."
+                    + "{location: The location of the bed |"
+                    + " player: The player associated with this event}"
+                    + "{}"
+                    + "{location|player}";
+		}
+
+		public String getName() {
+			return "player_enter_bed";
+		}
+	}
+	
+	@api
+	public static class player_leave_bed extends player_bed_event {
+		
+		public String docs() {
+			return "{location: The location of the bed} "
+                    + "Fires when a player leaves a bed."
+                    + "{location: The location of the bed |"
+                    + " player: The player associated with this event}"
+                    + "{}"
+                    + "{location|player}";
+		}
+
+		public String getName() {
+			return "player_leave_bed";
+		}
+	}
+	
 	@api
     public static class pressure_plate_activated extends AbstractEvent {
 
