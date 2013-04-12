@@ -76,7 +76,7 @@ public final class Implementation {
 								} catch (InvocationTargetException ex) {
 									throw new Error(ex);
 								} catch (NoSuchMethodException ex) {
-									throw new Error(serverType.getBranding() + ": The method with signature public static " + c.getName() + " getConvertor() was not found in " + c.getClass()
+									throw new Error(serverType.getBranding() + ": The method with signature public static " + c.getName() + " getConvertor() was not found in " + c.getName()
 											+ " Please add the following code: \n"
 											+ "private static " + c.getName() + " instance;\n"
 											+ "public static " + c.getName() + " getConvertor(){\n"
