@@ -1,6 +1,7 @@
 package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.PropertiesManager;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.constructs.Target;
@@ -89,20 +90,14 @@ public class DataSourceFilter {
 			throw new NullPointerException("defaultURI cannot be null");
 		}
 
-		Properties p = new Properties();
-		try {
-			StringReader sr = new StringReader(filters);
-			p.load(sr);
-		} catch (IOException ex) {
-			//Won't happen.
-		}
+		PropertiesManager p = new PropertiesManager(filters);
 		//We now have the whole list of filters=connection. We need to parse out and
 		//find the connection aliases and normal filters, then parse those individually.
 		//First, find the aliases, so we can go ahead and distribute those out when
 		//we get to them.
 		Map<String, String> aliases = new HashMap<String, String>();
 		boolean hasDefault = false;
-		for (String key : p.stringPropertyNames()) {
+		for (String key : p.keySet()) {
 			key = key.trim();
 			if (key.matches("\\$[^a-zA-Z_]+")) {
 				//Bad alias, bail                
@@ -113,7 +108,7 @@ public class DataSourceFilter {
 				if(aliases.containsKey(key)){
 					throw new DataSourceException("Duplicate aliases defined: " + key);
 				}
-				aliases.put(key, p.getProperty(key));
+				aliases.put(key, p.get(key));
 			}
 			if(key.equals("**")){
 				hasDefault = true;
@@ -122,7 +117,7 @@ public class DataSourceFilter {
 
 
 		//Ok, now let's load up the actual connections.
-		for (String key : p.stringPropertyNames()) {
+		for (String key : p.keySet()) {
 			if (!key.matches("\\$.*")) {
 				if (key.matches("[^a-zA-Z0-9_\\*]")) {
 					//Bad character in the filter. Bail.
@@ -137,7 +132,7 @@ public class DataSourceFilter {
 
 				//Ok, have the pattern, now lets see if the value is an alias
 
-				String value = p.getProperty(key);
+				String value = p.get(key);
 				String originalValue = value;
 				//Used for more meaningful error messages below
 				boolean isAlias = false;
@@ -333,15 +328,6 @@ public class DataSourceFilter {
 				//whichever one is lowest, is the closest.
 				String originalKey = original.get(p);
 				int dist = StringUtils.LevenshteinDistance(key, originalKey.replaceAll("\\*", "").replaceAll("[\\(\\)]", ""));
-				//TODO: Unfortunately, the properties file doesn't keep crap in order for us, so right now,
-				//if there is a tie, it is undefined what will happen. Instead of letting this happen
-				//without a warning, we want to issue a warning, though we will arbitrarily select one.
-				if (dist == lowest) {
-					CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, "Two keys equally match for the key \"" + key
-						+ "\". Both " + original.get(closest) + " and " + original.get(p)
-						+ " match just as well. For the time being, this is an undefined result, but"
-						+ " for this time, " + original.get(closest) + " is being selected.", Target.UNKNOWN);
-				}
 				if (dist < lowest) {
 					closest = p;
 					lowest = dist;

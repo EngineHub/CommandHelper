@@ -229,26 +229,24 @@ public class Preferences {
             if(!header.trim().isEmpty()){
                 b.append(header).append(nl).append(nl);
             }
-            Iterator it = prefs.entrySet().iterator();
-            while(it.hasNext()){
-                Map.Entry<String, Preference> e = (Map.Entry<String, Preference>) it.next();
-                Preference p = e.getValue();
-                String description = "This value is not used in " + appName;
-                if(!p.description.trim().isEmpty()){
-                    description = p.description;
-                }
-                StringBuilder c = new StringBuilder();
-                boolean first = true;
-                for(String line : description.split("\n|\r\n|\n\r")){
-                    if(first){
-                        c.append("#").append(line);
-                        first = false;
-                    } else {
-                        c.append(nl).append("#").append(line);
-                    }
-                }
-                b.append(c).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
-            }
+			for (Map.Entry<String, Preference> e : prefs.entrySet()) {
+				Preference p = e.getValue();
+				String description = "This value is not used in " + appName;
+				if(!p.description.trim().isEmpty()){
+					description = p.description;
+				}
+				StringBuilder c = new StringBuilder();
+				boolean first = true;
+				for(String line : description.split("\n|\r\n|\n\r")){
+					if(first){
+						c.append("#").append(line);
+						first = false;
+					} else {
+						c.append(nl).append("#").append(line);
+					}
+				}
+				b.append(c).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
+			}
             if(prefFile != null && !prefFile.exists()){
                 prefFile.getAbsoluteFile().getParentFile().mkdirs();
                 prefFile.createNewFile();
