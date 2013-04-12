@@ -4,8 +4,13 @@
  */
 package com.laytonsmith.abstraction.bukkit.events;
 
+import java.net.InetAddress;
+
 import com.laytonsmith.abstraction.events.MCConsoleCommandEvent;
+import com.laytonsmith.abstraction.events.MCServerPingEvent;
+
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 
 /**
  *
@@ -33,5 +38,41 @@ public class BukkitMiscEvents {
 		
 		
 		
+	}
+
+	public static class BukkitMCServerPingEvent implements MCServerPingEvent {
+	
+		ServerListPingEvent slp;
+		public BukkitMCServerPingEvent(ServerListPingEvent event) {
+			slp = event;
+		}
+		
+		public Object _GetObject() {
+			return slp;
+		}
+	
+		public InetAddress getAddress() {
+			return slp.getAddress();
+		}
+	
+		public int getMaxPlayers() {
+			return slp.getMaxPlayers();
+		}
+	
+		public String getMOTD() {
+			return slp.getMotd();
+		}
+	
+		public int getNumPlayers() {
+			return slp.getNumPlayers();
+		}
+	
+		public void setMaxPlayers(int max) {
+			slp.setMaxPlayers(max);
+		}
+	
+		public void setMOTD(String motd) {
+			slp.setMotd(motd);
+		}
 	}
 }

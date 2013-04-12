@@ -6,7 +6,6 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -15,6 +14,7 @@ import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
+import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
@@ -476,7 +476,7 @@ public class EntityEvents {
             if (e instanceof MCPlayerDropItemEvent) {
                 MCPlayerDropItemEvent event = (MCPlayerDropItemEvent)e;
                 
-                Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItemDrop()), Prefilters.PrefilterType.ITEM_MATCH);
+                Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItemDrop().getItemStack()), Prefilters.PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "player", event.getPlayer().getName(), Prefilters.PrefilterType.MACRO);
                 
                 return true;
@@ -490,7 +490,8 @@ public class EntityEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 
                 map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-                map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop(), Target.UNKNOWN));
+                map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), Target.UNKNOWN));
+                map.put("id", new CInt(event.getItemDrop().getEntityId(), Target.UNKNOWN));
                 
                 return map;
             } else {
@@ -505,7 +506,7 @@ public class EntityEvents {
                 if (key.equalsIgnoreCase("item")) {
                     MCItemStack stack = ObjectGenerator.GetGenerator().item((Construct)value, Target.UNKNOWN);
                     
-                    e.setItem(stack);
+                    e.setItemStack(stack);
                     
                     return true;
                 }
@@ -535,7 +536,7 @@ public class EntityEvents {
 			if (e instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent)e;
 				
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), Prefilters.PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem().getItemStack()), Prefilters.PrefilterType.ITEM_MATCH);
 				Prefilters.match(prefilter, "player", event.getPlayer().getName(), Prefilters.PrefilterType.MACRO);
 				
 				return true;
@@ -555,8 +556,9 @@ public class EntityEvents {
 				
                 //Fill in the event parameters
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-                map.put("item", ObjectGenerator.GetGenerator().item(event.getItem(), Target.UNKNOWN));
-                map.put("remaining", new CInt(event.getRemaining(), Target.UNKNOWN));
+				map.put("id", new CInt(event.getItem().getEntityId(), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(event.getItem().getItemStack(), Target.UNKNOWN));
+				map.put("remaining", new CInt(event.getRemaining(), Target.UNKNOWN));
 				
                 return map;
             } else {
@@ -575,7 +577,7 @@ public class EntityEvents {
 				if (key.equalsIgnoreCase("item")) {
 					MCItemStack stack = ObjectGenerator.GetGenerator().item((Construct)value, Target.UNKNOWN);
 					
-					e.setItem(stack);
+					e.setItemStack(stack);
 					
 					return true;
 				}
@@ -777,6 +779,66 @@ public class EntityEvents {
         
     }
     
+	@api
+	public static class entity_enter_portal extends AbstractEvent {
+	
+		public String getName() {
+			return "entity_enter_portal";
+		}
+	
+		public String docs() {
+			return "{type: <macro> the type of entity | block: <math match> the blockID of the portal}"
+					+ " Fires when an entity touches a portal block."
+					+ " {id: the entityID of the entity | location: the location of the block touched | type | block}"
+					+ " {}"
+					+ " {}";
+		}
+	
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if (e instanceof MCEntityEnterPortalEvent) {
+				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
+				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "block", event.getLocation().getBlock().getTypeId(), PrefilterType.MATH_MATCH);
+				return true;
+			}
+			return false;
+		}
+	
+		public BindableEvent convert(CArray manualObject) {
+			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+		}
+	
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if (e instanceof MCEntityEnterPortalEvent) {
+				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
+				Target t = Target.UNKNOWN;
+				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("type", new CString(event.getEntity().getType().name(), t));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation()));
+				ret.put("block", new CInt(event.getLocation().getBlock().getTypeId(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCPortalEnterEvent");
+			}
+		}
+	
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			return false;
+		}
+	
+		public Driver driver() {
+			return Driver.ENTITY_ENTER_PORTAL;
+		}
+	
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
 	public static Map<String, Construct> parseEntityDamageEvent(MCEntityDamageEvent event,
 			Map<String, Construct> map) {
 		if (event != null) {

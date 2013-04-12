@@ -2,7 +2,7 @@
 
 package com.laytonsmith.testing;
 
-import com.laytonsmith.core.compiler.Optimizable;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
@@ -92,12 +92,6 @@ public class StaticTest {
 
         TestDocs(f);
 
-
-        //if creating a version string from this yeilds bogus data, it will throw an
-        //exception for us.
-        if (f.since().getVersionString().length() <= 0) {
-            Version v = f.since().getVersion();
-        }
         if (f.numArgs().length == 0) {
             fail("numArgs must return an Integer array with more than zero values");
         }

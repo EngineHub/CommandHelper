@@ -205,7 +205,7 @@ public abstract class AbstractDataSource implements DataSource {
 			errors.add(uri.toString() + " contains both prettyprint and readonly modifiers, which doesn't make sense, because we cannot write out the file; prettyprint will be ignored.");
 			modifiers.remove(DataSourceModifier.PRETTYPRINT);
 		}
-		if ((modifiers.contains(DataSourceModifier.HTTP) || modifiers.contains(DataSourceModifier.HTTPS) && modifiers.contains(DataSourceModifier.SSH))) {
+		if ((modifiers.contains(DataSourceModifier.HTTP) || modifiers.contains(DataSourceModifier.HTTPS)) && modifiers.contains(DataSourceModifier.SSH)) {
 			errors.add(uri.toString() + " contains both http(s) and ssh modifiers.");
 		}
 		if (modifiers.contains(DataSourceModifier.HTTP) && modifiers.contains(DataSourceModifier.HTTPS)) {

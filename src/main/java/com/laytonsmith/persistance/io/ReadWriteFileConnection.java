@@ -42,7 +42,11 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 	 * the reads and writes.
 	 */
 	public ReadWriteFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException{
-		file = new File(workingDirectory, (uri.getHost() == null ? "" : uri.getHost()) + uri.getPath());
+		String path = (uri.getHost() == null ? "" : uri.getHost()) + uri.getPath();
+		if(uri.getHost() == null){
+			throw new IOException("Could not read the URI: " + uri.toString() + ". Did you forget the \"//\"?");
+		}
+		file = new File(workingDirectory, path);
 		if(file.exists()){
 			encoding = FileUtility.getFileCharset(file);
 		}

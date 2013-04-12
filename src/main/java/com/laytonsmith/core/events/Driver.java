@@ -20,6 +20,7 @@ public enum Driver {
     PLAYER_CHAT, 
     PLAYER_COMMAND, 
     PLAYER_KICK,
+	PLAYER_BED_EVENT,
     WORLD_CHANGED,
     SIGN_CHANGED,
 	SERVER_COMMAND,
@@ -39,6 +40,9 @@ public enum Driver {
 	PLAYER_CONSUME,
 	PROJECTILE_HIT,
 	POTION_SPLASH,
+	PLAYER_FISH,
+	SERVER_PING,
+	ENTITY_ENTER_PORTAL,
 	/**
 	 * Used by events fired from the extension system.
 	 */

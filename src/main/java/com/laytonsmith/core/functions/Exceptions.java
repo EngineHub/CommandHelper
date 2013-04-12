@@ -203,6 +203,14 @@ public class Exceptions {
 		 * Thrown if a field was read only, but a write operation was attempted.
 		 */
 		ReadOnlyException("Thrown if a field was read only, but a write operation was attempted.", CHVersion.V3_3_1),
+		/**
+		 * Thrown if a scoreboard error occurs, such as attempting to create a
+		 * team or objective with a name that is already in use,
+		 * or trying to access one that doesn't exist. 
+		 */
+		ScoreboardException("Thrown if a scoreboard error occurs, such as attempting to create a"
+				+ " team or objective with a name that is already in use,"
+				+ " or trying to access one that doesn't exist.", CHVersion.V3_3_1),
 		;
 		
 		private String docs;

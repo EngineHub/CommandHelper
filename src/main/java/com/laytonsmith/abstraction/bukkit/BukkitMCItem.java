@@ -20,7 +20,7 @@ public class BukkitMCItem extends BukkitMCEntity implements MCItem{
 	}
 	
 	public MCItemStack getItemStack(){
-		return (MCItemStack) i.getItemStack();
+		return new BukkitMCItemStack(i.getItemStack());
 	}
 	
 	public int getPickupDelay(){
@@ -28,7 +28,7 @@ public class BukkitMCItem extends BukkitMCEntity implements MCItem{
 	}
 	
 	public void setItemStack(MCItemStack stack){
-		i.setItemStack((ItemStack) stack);
+		i.setItemStack(((BukkitMCItemStack) stack).asItemStack());
 	}
 	
 	public void setPickupDelay(int delay){

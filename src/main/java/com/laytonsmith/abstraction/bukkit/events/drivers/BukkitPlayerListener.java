@@ -30,6 +30,20 @@ public class BukkitPlayerListener implements Listener {
         EventUtils.TriggerExternal(pke);
 		EventUtils.TriggerListener(Driver.PLAYER_KICK, "player_kick", pke);
     }
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerBedEnter(PlayerBedEnterEvent e) {
+		BukkitPlayerEvents.BukkitMCPlayerBedEvent be = new BukkitPlayerEvents.BukkitMCPlayerBedEvent(e);
+        EventUtils.TriggerExternal(be);
+		EventUtils.TriggerListener(Driver.PLAYER_BED_EVENT, "player_enter_bed", be);
+    }
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerBedLeave(PlayerBedLeaveEvent e) {
+		BukkitPlayerEvents.BukkitMCPlayerBedEvent be = new BukkitPlayerEvents.BukkitMCPlayerBedEvent(e);
+        EventUtils.TriggerExternal(be);
+		EventUtils.TriggerListener(Driver.PLAYER_BED_EVENT, "player_leave_bed", be);
+    }
     
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerLogin(PlayerLoginEvent e) {
@@ -205,5 +219,12 @@ public class BukkitPlayerListener implements Listener {
 				new BukkitPlayerEvents.BukkitMCPlayerItemConsumeEvent(event);
 		EventUtils.TriggerExternal(pic);
 		EventUtils.TriggerListener(Driver.PLAYER_CONSUME, "player_consume", pic);
+	}
+	
+	@EventHandler(priority= EventPriority.LOWEST)
+	public void onFish(PlayerFishEvent event) {
+		BukkitPlayerEvents.BukkitMCPlayerFishEvent fish = new BukkitPlayerEvents.BukkitMCPlayerFishEvent(event);
+		EventUtils.TriggerExternal(fish);
+		EventUtils.TriggerListener(Driver.PLAYER_FISH, "player_fish", fish);
 	}
 }

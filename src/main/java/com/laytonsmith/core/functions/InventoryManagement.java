@@ -269,6 +269,60 @@ public class InventoryManagement {
     }
 	
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class show_enderchest extends AbstractFunction {
+
+		public Exceptions.ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer player;
+			MCPlayer other;
+			
+			if (args.length == 1) {
+				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				other = Static.GetPlayer(args[0], t);
+			} else if (args.length == 2) {
+				other = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[1], t);
+			} else {
+				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				other = player;
+			}
+			
+			player.openInventory(other.getEnderChest());
+			
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "show_enderchest";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1, 2};
+		}
+
+		public String docs() {
+			return "void {[player [, player]]} Shows the enderchest of either the current player "
+					+ " or the specified player if given. If a second player is specified, shows the"
+					+ " second player the contents of the first player's enderchest.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
     public static class penchanting extends AbstractFunction {
 
         public Exceptions.ExceptionType[] thrown() {

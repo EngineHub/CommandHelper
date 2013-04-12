@@ -1,6 +1,6 @@
 
 
-package com.laytonsmith.core;
+package com.laytonsmith.PureUtilities;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * When comparing two versions, the tag is not considered.
  * @author Layton
  */
-public class Version implements Comparable<Version>{
+public class SimpleVersion implements Version {
     
     private int major;
     private int minor;
@@ -19,13 +19,13 @@ public class Version implements Comparable<Version>{
     private String tag;
     
     /**
-     * Creates a new Version object from a string version number. The tag is
+     * Creates a new SimpleVersion object from a string version number. The tag is
      * optional, but all other parameters are required. If left off, each version
      * part is set to 0.
-     * @param version 
+     * @param version The version, as a string
      */
     Pattern p = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\s+(.*))?");
-    public Version(String version){
+    public SimpleVersion(String version){
         Matcher m = p.matcher(version);
         if(m.find()){
             major = Integer.parseInt(m.group(1)==null?"0":m.group(1));
@@ -38,16 +38,64 @@ public class Version implements Comparable<Version>{
         }
     }
     
-    public Version(int major, int minor, int supplemental, String tag){
+	/**
+	 * Creates a new version with programmatic parameters.
+	 * @param major
+	 * @param minor
+	 * @param supplemental
+	 * @param tag 
+	 */
+    public SimpleVersion(int major, int minor, int supplemental, String tag){
         this.major = major;
         this.minor = minor;
         this.supplemental = supplemental;
         this.tag = tag;
     }
     
-    public Version(int major, int minor, int supplemental){
+	/**
+	 * Creates a new version with programmatic parameters, and an emtpy tag.
+	 * @param major
+	 * @param minor
+	 * @param supplemental 
+	 */
+    public SimpleVersion(int major, int minor, int supplemental){
         this(major, minor, supplemental, "");
     }
+	
+	/**
+	 * Returns the major version.
+	 * @return 
+	 */
+	@Override
+	public int getMajor() {
+		return major;
+	}
+	
+	/**
+	 * Returns the minor version.
+	 * @return 
+	 */
+	@Override
+	public int getMinor() {
+		return minor;
+	}
+	
+	/**
+	 * Returns the supplemental version.
+	 * @return 
+	 */
+	@Override
+	public int getSupplemental() {
+		return supplemental;
+	}
+	
+	/**
+	 * Returns the tag in this version.
+	 * @return 
+	 */
+	public String getTag(){
+		return tag;
+	}
     
     @Override
     public String toString(){
@@ -55,19 +103,19 @@ public class Version implements Comparable<Version>{
     }
 
     public int compareTo(Version o) {
-        if(major < o.major){
+        if(major < o.getMajor()){
             return -1;
-        } else if(major > o.major){
+        } else if(major > o.getMajor()){
             return 1;
         } else {
-            if(minor < o.minor){
+            if(minor < o.getMinor()){
                 return -1;
-            } else if(minor > o.minor){
+            } else if(minor > o.getMinor()){
                 return 1;
             } else {
-                if(supplemental < o.supplemental){
+                if(supplemental < o.getSupplemental()){
                     return -1;
-                } else if(supplemental > o.supplemental){
+                } else if(supplemental > o.getSupplemental()){
                     return 1;
                 } else {
                     return 0;
@@ -80,7 +128,7 @@ public class Version implements Comparable<Version>{
     public boolean equals(Object obj) {
         if(obj instanceof Version){
             Version v = (Version) obj;
-            if(major == v.major && minor == v.minor && supplemental == v.supplemental){
+            if(major == v.getMajor() && minor == v.getMinor() && supplemental == v.getSupplemental()){
                 return true;
             } else {
                 return false;

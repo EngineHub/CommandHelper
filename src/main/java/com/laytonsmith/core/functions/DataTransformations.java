@@ -13,17 +13,21 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.Map;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  *
  * @author lsmith
  */
 public class DataTransformations {
-	public static String docs(){
+
+	public static String docs() {
 		return "This class provides functions that are able to transform data from native objects to"
 				+ " their serialized forms, i.e. json, ini, etc.";
 	}
-	
+
 	@api
 	public static class json_encode extends AbstractFunction {
 
@@ -74,9 +78,8 @@ public class DataTransformations {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
-	
+
 	@api
 	public static class json_decode extends AbstractFunction {
 
@@ -128,6 +131,93 @@ public class DataTransformations {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+	}
+
+	@api
+	public static class yml_encode extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray ca = Static.getArray(args[0], t);
+			boolean prettyPrint = false;
+			if(args.length == 2){
+				prettyPrint = Static.getBoolean(args[1]);
+			}
+			DumperOptions options = new DumperOptions();
+			if (prettyPrint) {
+				options.setPrettyFlow(true);
+			}
+			Yaml yaml = new Yaml(options);
+			return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
+		}
+
+		public String getName() {
+			return "yml_encode";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "string {array, [prettyPrint]} Converts an array into a YML encoded string. Only associative arrays are supported."
+					+ " prettyPrint defaults to false.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class yml_decode extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String data = args[0].val();
+			Yaml yaml = new Yaml();
+			Map<String, Object> map = (Map<String, Object>) yaml.load(data);
+			return Construct.GetConstruct(map);
+		}
+
+		public String getName() {
+			return "yml_decode";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "array {string} Takes a YML encoded string, and returns an associative array,"
+					+ " depending on the contents of the YML string. If the YML string is improperly formatted,"
+					+ " a FormatException is thrown.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 }

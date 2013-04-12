@@ -277,7 +277,7 @@ public class DocGen {
                     }
                 }
 
-                String since = (f instanceof Documentation ?((Documentation)f).since().getVersionString():"0.0.0");
+                String since = (f instanceof Documentation ?((Documentation)f).since().toString():"0.0.0");
                 DocInfo di = new DocInfo(doc);
 				boolean hasExample = false;
 				if(f instanceof Function && ((Function)f).examples() != null && ((Function)f).examples().length > 0){
@@ -393,7 +393,7 @@ public class DocGen {
                 String eventData = EventData.Get(m.group(3).split("\\|"), type);
                 String mutability = MutabilityData.Get(m.group(4).split("\\|"), type);
                 //String manualTrigger = ManualTriggerData.Get(m.group(5).split("\\|"), type);
-                String since = d.since().getVersionString();
+                String since = d.since().toString();
 
                 if (type.equals("html")) {
                     doc.append("<tr><td style=\"vertical-align:top\">").append(name).append("</td><td style=\"vertical-align:top\">").append(description).append("</td><td style=\"vertical-align:top\">").append(prefilter).append("</td><td style=\"vertical-align:top\">").append(eventData).append("</td><td style=\"vertical-align:top\">").append(mutability).append("</td><td style=\"vertical-align:top\">").append(since).append("</td></tr>\n");

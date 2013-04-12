@@ -2,6 +2,8 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Version;
+
 /**
  * Classes that implement this method know how to provide some documentation to the DocGen
  * class.
@@ -26,5 +28,5 @@ public interface Documentation {
      * follow the format 0.0.0
      * @return 
      */
-    public CHVersion since();
+    public Version since();
 }

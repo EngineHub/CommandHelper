@@ -199,6 +199,14 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCTNT((TNTPrimed)be);
 		}
 		
+		if (be instanceof Fish) {
+			return new BukkitMCFishHook((Fish) be);
+		}
+		
+		if (be instanceof Fireball) {
+			return new BukkitMCFireball((Fireball) be);
+		}
+		
     	if(be instanceof Projectile){
             return new BukkitMCProjectile((Projectile)be);
         }
@@ -215,6 +223,10 @@ public class BukkitConvertor extends AbstractConvertor {
             return new BukkitMCOcelot(be);
         }
     	
+		if (be instanceof Enderman) {
+			return new BukkitMCEnderman((Enderman) be);
+		}
+		
     	if(be instanceof Ageable){
     		return new BukkitMCAgeable(be);
     	}

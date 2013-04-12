@@ -9,6 +9,7 @@ import java.util.Set;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -31,6 +32,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -219,11 +221,11 @@ public class BukkitEntityEvents {
             this.e = e;
         }
         
-        public MCItemStack getItemDrop() {
-            return new BukkitMCItemStack(e.getItemDrop().getItemStack());
+        public MCItem getItemDrop() {
+            return new BukkitMCItem(e.getItemDrop());
         }
         
-        public void setItem(MCItemStack stack) {
+        public void setItemStack(MCItemStack stack) {
             BukkitMCItemStack s = (BukkitMCItemStack) stack;
             if(s.getTypeId() == 0) {
                 e.getItemDrop().remove();
@@ -260,11 +262,11 @@ public class BukkitEntityEvents {
 			return e.getRemaining();
 		}
 
-		public MCItemStack getItem() {
-			return new BukkitMCItemStack(e.getItem().getItemStack());
+		public MCItem getItem() {
+			return new BukkitMCItem(e.getItem());
 		}
 
-		public void setItem(MCItemStack stack) {
+		public void setItemStack(MCItemStack stack) {
 			BukkitMCItemStack s = (BukkitMCItemStack)stack;
 				e.setCancelled(true);
 				e.getItem().remove();
@@ -273,7 +275,7 @@ public class BukkitEntityEvents {
 			} else {
 				e.getPlayer().getInventory().addItem(s.asItemStack());
 				//and for added realism :)
-				e.getPlayer().playSound(e.getItem().getLocation(), Sound.ITEM_PICKUP, 1, 2);
+				e.getPlayer().getWorld().playSound(e.getItem().getLocation(), Sound.ITEM_PICKUP, 1, 2);
 			}
 		}
 
@@ -381,4 +383,24 @@ public class BukkitEntityEvents {
             return MCTargetReason.valueOf(pie.getReason().name());
         }
     }
+
+	public static class BukkitMCEntityEnterPortalEvent implements MCEntityEnterPortalEvent {
+	
+		EntityPortalEnterEvent epe;
+		public BukkitMCEntityEnterPortalEvent(EntityPortalEnterEvent event) {
+			epe = event;
+		}
+		
+		public Object _GetObject() {
+			return epe;
+		}
+	
+		public MCEntity getEntity() {
+			return new BukkitMCEntity(epe.getEntity());
+		}
+	
+		public MCLocation getLocation() {
+			return new BukkitMCLocation(epe.getLocation());
+		}
+	}
 }
