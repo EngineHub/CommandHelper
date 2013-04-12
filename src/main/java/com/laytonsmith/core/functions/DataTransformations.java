@@ -115,7 +115,7 @@ public class DataTransformations {
 	public static class yml_encode extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {
