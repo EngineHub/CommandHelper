@@ -13,6 +13,7 @@ public class RollingAverage {
 	private Double[] data;
 	private int insertionIndex;
 	private int dataSize;
+	private double initialValue;
 	
 	/**
 	 * Creates a new rolling average object.
@@ -26,10 +27,11 @@ public class RollingAverage {
 		Arrays.fill(data, null);
 		dataSize = datasetSize;
 		insertionIndex = 0;
+		this.initialValue = initialValue;
 	}
 	
 	/**
-	 * Adds
+	 * Adds a new data point
 	 * @param d 
 	 */
 	public void addData(double d){
@@ -40,14 +42,23 @@ public class RollingAverage {
 		}
 	}
 	
+	/**
+	 * Returns the rolling average.
+	 * @return 
+	 */
 	public double getAverage(){
 		double sum = 0;
 		int count = 0;
+		boolean hasValue = false;
 		for(Double d : data){
 			if(d != null){
+				hasValue = true;
 				sum += d;
 				count++;
 			}
+		}
+		if(!hasValue){
+			return initialValue;
 		}
 		return sum / count;
 	}

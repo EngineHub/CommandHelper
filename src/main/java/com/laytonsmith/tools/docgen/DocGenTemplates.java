@@ -199,7 +199,7 @@ public class DocGenTemplates {
 							throw new Error("Invalid documentation for " + c.getSimpleName());
 						}
 						b.append("|-\n| ").append(name).append(" || ").append(description)
-							.append(" || ").append(example).append(" || ").append(ds.since().getVersionString()).append("\n");
+							.append(" || ").append(example).append(" || ").append(ds.since().toString()).append("\n");
 					} catch(Exception e){
 						throw new Error(e);
 					}
@@ -248,7 +248,7 @@ public class DocGenTemplates {
 			for(Documentation d : ExceptionType.values()){
 				b.append("===").append(d.getName()).append("===\n");
 				b.append(d.docs());
-				b.append("\n\nSince: ").append(d.since().getVersionString()).append("\n\n");
+				b.append("\n\nSince: ").append(d.since().toString()).append("\n\n");
 			}
 			return b.toString();
 		}

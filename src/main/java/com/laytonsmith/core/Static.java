@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.*;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -324,8 +325,8 @@ public final class Static {
      * @return
      * @throws NotInitializedYetException 
      */
-    public static Version getVersion() throws NotInitializedYetException {
-        Version v = com.laytonsmith.commandhelper.CommandHelperPlugin.version;
+    public static SimpleVersion getVersion() throws NotInitializedYetException {
+        SimpleVersion v = com.laytonsmith.commandhelper.CommandHelperPlugin.version;
         if (v == null) {
             throw new NotInitializedYetException("The plugin has not been initialized yet");
         }

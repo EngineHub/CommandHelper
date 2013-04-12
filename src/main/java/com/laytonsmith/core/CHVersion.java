@@ -1,10 +1,13 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.SimpleVersion;
+import com.laytonsmith.PureUtilities.Version;
+
 /**
  *
  * @author layton
  */
-public enum CHVersion {
+public enum CHVersion implements Version {
     V0_0_0("0.0.0"), //Unreleased version
     V3_0_1("3.0.1"),
     V3_0_2("3.0.2"),
@@ -14,13 +17,9 @@ public enum CHVersion {
     V3_2_0("3.2.0"), 
     V3_3_0("3.3.0"), 
     V3_3_1("3.3.1");
-    final Version version;
+    final SimpleVersion version;
     private CHVersion(String version){
-        this.version = new Version(version);
-    }
-    
-    public Version getVersion(){
-        return this.version;
+        this.version = new SimpleVersion(version);
     }
     
     public String getVersionString(){
@@ -31,4 +30,21 @@ public enum CHVersion {
     public String toString(){
         return this.version.toString();
     }
+
+	public int compareTo(Version o) {
+		return this.version.compareTo(o);
+	}
+
+	public int getMajor() {
+		return this.version.getMajor();
+	}
+
+	public int getMinor() {
+		return this.version.getMinor();
+	}
+
+	public int getSupplemental() {
+		return this.version.getSupplemental();
+	}
+	
 }

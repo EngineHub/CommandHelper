@@ -135,22 +135,6 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return 
      */
     public static String json_encode(Construct c, Target t) throws MarshalException{
-        return json_encode(c, false, t);
-    }
-
-    /**
-     * Use the other one.
-     * @deprecated 
-     * @param c
-     * @param raw
-     * @param line_num
-     * @param f
-     * @return
-     * @throws MarshalException
-     * @deprecated
-     */
-    @Deprecated
-    public static String json_encode(Construct c, boolean raw, Target t) throws MarshalException {
         return JSONValue.toJSONString(json_encode0(c, t));
     }
     
@@ -306,7 +290,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             //associative array
             CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);           
             Map m = (Map)o;
-            for(Object key : m.entrySet()){
+            for(Object key : m.keySet()){
                 a.set(key.toString(), GetConstruct(m.get(key)), Target.UNKNOWN);
             }
             return a;

@@ -18,6 +18,7 @@
  */
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -68,7 +69,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	private static AliasCore ac;
 	public static MCServer myServer;
-	public static Version version;
+	public static SimpleVersion version;
 	public static CommandHelperPlugin self;
 	public static WorldEditPlugin wep;
 	public static ExecutorService hostnameLookupThreadPool;
@@ -140,7 +141,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		Static.getLogger().info("CommandHelper/CommandHelper " + getDescription().getVersion() + " enabled");
-		version = new Version(getDescription().getVersion());
+		version = new SimpleVersion(getDescription().getVersion());
 		PermissionsResolverManager.initialize(this);
 		permissionsResolver = new CommandHelperPermissionsResolver(PermissionsResolverManager.getInstance());
 		Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
