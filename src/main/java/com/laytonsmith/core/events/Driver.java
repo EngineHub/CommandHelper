@@ -43,6 +43,7 @@ public enum Driver {
 	PLAYER_FISH,
 	SERVER_PING,
 	ENTITY_ENTER_PORTAL,
+	PLUGIN_MESSAGE_RECEIVED,
 	/**
 	 * Used by events fired from the extension system.
 	 */
