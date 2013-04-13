@@ -21,7 +21,7 @@ public class Exceptions {
 		return "This class contains functions related to Exception handling in MethodScript";
 	}
 	
-	public static class CastException extends ConfigRuntimeException{
+	public static class CastException extends ConfigRuntimeException {
 
 		public CastException(String msg, Target t) {
 			super(msg, ExceptionType.CastException, t);
@@ -32,7 +32,7 @@ public class Exceptions {
 		}				
 	}
 	
-	public static class FormatException extends ConfigRuntimeException{
+	public static class FormatException extends ConfigRuntimeException {
 
 		public FormatException(String msg, Target t) {
 			super(msg, ExceptionType.FormatException, t);
@@ -41,11 +41,9 @@ public class Exceptions {
 		public FormatException(String msg, Target t, Throwable cause) {
 			super(msg, ExceptionType.FormatException, t, cause);
 		}
-		
-		
 	}
 	
-	public static class RangeException extends ConfigRuntimeException{
+	public static class RangeException extends ConfigRuntimeException {
 
 		public RangeException(String msg, Target t) {
 			super(msg, ExceptionType.RangeException, t);
@@ -54,8 +52,17 @@ public class Exceptions {
 		public RangeException(String msg, Target t, Throwable cause) {
 			super(msg, ExceptionType.RangeException, t, cause);
 		}
-		
-		
+	}
+	
+	public static class LengthException extends ConfigRuntimeException {
+
+		public LengthException(String msg, Target t) {
+			super(msg, ExceptionType.LengthException, t);
+		}
+
+		public LengthException(String msg, Target t, Throwable cause) {
+			super(msg, ExceptionType.LengthException, t, cause);
+		}
 	}
 
 	public enum ExceptionType implements Documentation {
@@ -202,7 +209,7 @@ public class Exceptions {
 		ScoreboardException("Thrown if a scoreboard error occurs, such as attempting to create a"
 				+ " team or objective with a name that is already in use,"
 				+ " or trying to access one that doesn't exist.", CHVersion.V3_3_1),
-		/*
+		/**
 		 * Thrown if trying to register a plugin channel that is already registered, 
 		 * or unregister one that isn't registered.
 		 */
