@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCInventoryType;
+import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import java.util.List;
 import java.util.Set;
 
@@ -54,4 +55,5 @@ public interface MCServer extends AbstractionObject{
     public Economy getEconomy();
 
     public void runasConsole(String cmd);
+	public MCMessenger getMessenger();
 }
