@@ -202,6 +202,14 @@ public class Exceptions {
 		ScoreboardException("Thrown if a scoreboard error occurs, such as attempting to create a"
 				+ " team or objective with a name that is already in use,"
 				+ " or trying to access one that doesn't exist.", CHVersion.V3_3_1),
+		/*
+		 * Thrown if trying to register a plugin channel that is already registered, 
+		 * or unregister one that isn't registered.
+		 */
+		PluginChannelException("Thrown if trying to register a plugin channel that is"
+				+ " already registered, or unregister one that isn't registered.", 
+				CHVersion.V3_3_1);
+
 		;
 		
 		private String docs;
