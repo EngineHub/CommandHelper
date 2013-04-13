@@ -31,7 +31,7 @@ public class BukkitMCObjective implements MCObjective {
 		if (ds == null) {
 			return null;
 		}
-		return BukkitMCDisplaySlot.getConverter().getAbstractedEnum(ds);
+		return BukkitMCDisplaySlot.getConvertor().getAbstractedEnum(ds);
 	}
 
 	public String getName() {
@@ -55,7 +55,7 @@ public class BukkitMCObjective implements MCObjective {
 	}
 
 	public void setDisplaySlot(MCDisplaySlot slot) {
-		o.setDisplaySlot(BukkitMCDisplaySlot.getConverter().getConcreteEnum(slot));
+		o.setDisplaySlot(BukkitMCDisplaySlot.getConvertor().getConcreteEnum(slot));
 	}
 
 	public void unregister() {

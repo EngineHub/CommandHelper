@@ -25,11 +25,11 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	}
 
 	public void clearSlot(MCDisplaySlot slot) {
-		s.clearSlot(BukkitMCDisplaySlot.getConverter().getConcreteEnum(slot));
+		s.clearSlot(BukkitMCDisplaySlot.getConvertor().getConcreteEnum(slot));
 	}
 
 	public MCObjective getObjective(MCDisplaySlot slot) {
-		Objective o = s.getObjective(BukkitMCDisplaySlot.getConverter().getConcreteEnum(slot));
+		Objective o = s.getObjective(BukkitMCDisplaySlot.getConvertor().getConcreteEnum(slot));
 		if (o == null) {
 			return null;
 		}
@@ -110,5 +110,13 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	public void resetScores(MCOfflinePlayer player) {
 		s.resetScores((OfflinePlayer) player.getHandle());
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof MCScoreboard) {
+			return s.equals(((BukkitMCScoreboard) obj).s);
+		}
+		return false;
 	}
 }

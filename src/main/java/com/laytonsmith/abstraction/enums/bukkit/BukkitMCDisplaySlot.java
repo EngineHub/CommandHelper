@@ -18,11 +18,11 @@ import com.laytonsmith.annotations.abstractionenum;
 )
 public class BukkitMCDisplaySlot extends EnumConvertor<MCDisplaySlot, DisplaySlot>{
 
-	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot instance;
+	private static BukkitMCDisplaySlot instance;
 	
-	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot getConverter() {
+	public static BukkitMCDisplaySlot getConvertor() {
 		if (instance == null) {
-			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot();
+			instance = new BukkitMCDisplaySlot();
 		}
 		return instance;
 	}
