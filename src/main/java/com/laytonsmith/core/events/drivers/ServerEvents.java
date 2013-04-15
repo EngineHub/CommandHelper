@@ -23,6 +23,7 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -46,8 +47,7 @@ public class ServerEvents {
 					+ " {}";
 		}
 	
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
-				throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Prefilters.match(prefilter, "players", event.getNumPlayers(), PrefilterType.MATH_MATCH);
@@ -83,8 +83,7 @@ public class ServerEvents {
 			}
 		}
 	
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (event instanceof MCServerPingEvent) {
 				MCServerPingEvent e = (MCServerPingEvent) event;
 				if (key.equals("motd")) {
@@ -92,7 +91,7 @@ public class ServerEvents {
 					return true;
 				}
 				if (key.equals("maxplayers")) {
-					e.setMaxPlayers(Static.getInt32(value, Target.UNKNOWN));
+					e.setMaxPlayers(value.primitive(t).castToInt32(t));
 					return true;
 				}
 			}

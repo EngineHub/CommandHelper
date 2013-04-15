@@ -3,9 +3,11 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -13,6 +15,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.annotations.NonNull;
 import java.util.Map;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -113,7 +116,7 @@ public class DataTransformations {
 		}
 
 		public String docs() {
-			return "array {string} Takes a JSON encoded string, and returns an array, either normal or associative,"
+			return "Takes a JSON encoded string, and returns an array, either normal or associative,"
 					+ " depending on the contents of the JSON string. If the JSON string is improperly formatted,"
 					+ " a FormatException is thrown.";
 		}
@@ -149,11 +152,9 @@ public class DataTransformations {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CArray ca = Static.getArray(args[0], t);
-			boolean prettyPrint = false;
-			if(args.length == 2){
-				prettyPrint = Static.getBoolean(args[1]);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			CArray ca = list.get("array");
+			boolean prettyPrint = list.getBoolean("prettyPrint", t);
 			DumperOptions options = new DumperOptions();
 			if (prettyPrint) {
 				options.setPrettyFlow(true);
@@ -171,8 +172,18 @@ public class DataTransformations {
 		}
 
 		public String docs() {
-			return "string {array, [prettyPrint]} Converts an array into a YML encoded string. Only associative arrays are supported."
-					+ " prettyPrint defaults to false.";
+			return "Converts an array into a YML encoded string. Only associative arrays are supported.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The YML encoded string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The array to encode", CString.class, "array"),
+						new Argument("If true, the returned string will be \"pretty printed\".", CBoolean.class, "prettyPrint").setOptionalDefault(false).addAnnotation(new NonNull())
+					);
 		}
 
 		public CHVersion since() {
@@ -211,9 +222,19 @@ public class DataTransformations {
 		}
 
 		public String docs() {
-			return "array {string} Takes a YML encoded string, and returns an associative array,"
+			return "Takes a YML encoded string, and returns an associative array,"
 					+ " depending on the contents of the YML string. If the YML string is improperly formatted,"
 					+ " a FormatException is thrown.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The array from the decoded YML string", CArray.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The YML encoded string", CString.class, "string")
+					);
 		}
 
 		public CHVersion since() {

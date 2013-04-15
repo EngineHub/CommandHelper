@@ -333,9 +333,16 @@ public class Script {
 						args2.add(cc.val());
 					}
 				}
+				//Server might not be available in this platform, so let's be sure to ignore those exceptions
+				String modVersion = "Unsupported platform";
+				try{
+					modVersion = StaticLayer.GetConvertor().GetServer().getModVersion();
+				} catch(Exception ex){
+					modVersion = Implementation.GetServerType().name();
+				}
 				emsg += StringUtils.Join(args2, ", ");
 				emsg += ")\n" + TermColors.RED + "on or around " + m.getTarget() + ".\nPlease report this error to the developers, and be sure to include the version numbers: Server version: "
-						+ StaticLayer.GetConvertor().GetServer().getModVersion() + "; "
+						+ modVersion + "; "
 						+ Implementation.GetServerType().getBranding() + " version: " + version + ". Here's the stacktrace:\n" + TermColors.RESET;
 				emsg += Static.GetStacktraceString(e);
 				Static.getLogger().log(Level.SEVERE, emsg);
@@ -390,20 +397,6 @@ public class Script {
 							return false;
 						}
 					}
-					//Server might not be available in this platform, so let's be sure to ignore those exceptions
-					String modVersion = "Unsupported platform";
-					try{
-						modVersion = StaticLayer.GetConvertor().GetServer().getModVersion();
-					} catch(Exception ex){
-						modVersion = Implementation.GetServerType().name();
-					}
-					emsg += StringUtils.Join(args2, ", ");
-					emsg += ")\n" + TermColors.RED + "on or around " + m.getTarget() + ".\nPlease report this error to the developers, and be sure to include the version numbers: Server version: "
-							+ modVersion + "; "
-							+ Implementation.GetServerType().getBranding() + " version: " + version + ". Here's the stacktrace:\n" + TermColors.RESET;
-					emsg += Static.GetStacktraceString(e);
-					Static.getLogger().log(Level.SEVERE, emsg);
-					throw new CancelCommandException(null, Target.UNKNOWN);
 				}
 				if (j == cleft.size() - 1) {
 					if (cleft.get(j) instanceof Variable) {//.getCType() == ConstructType.VARIABLE) {

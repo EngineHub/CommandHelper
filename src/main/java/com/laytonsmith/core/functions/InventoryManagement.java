@@ -312,9 +312,20 @@ public class InventoryManagement {
 		}
 
 		public String docs() {
-			return "void {[player [, player]]} Shows the enderchest of either the current player "
+			return "Shows the enderchest of either the current player "
 					+ " or the specified player if given. If a second player is specified, shows the"
 					+ " second player the contents of the first player's enderchest.";
+		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PlayerManagement.PLAYER_ARG,
+						new Argument("", CString.class, "toPlayer").setOptionalDefaultNull()
+					);
 		}
 
 		public CHVersion since() {

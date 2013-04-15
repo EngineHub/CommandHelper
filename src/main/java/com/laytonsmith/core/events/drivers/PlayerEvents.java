@@ -673,7 +673,7 @@ public class PlayerEvents {
 	
     public abstract static class player_bed_event extends AbstractEvent {
 		
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerBedEvent){
                 MCPlayerBedEvent be = (MCPlayerBedEvent)e;
 				
@@ -718,7 +718,7 @@ public class PlayerEvents {
 			return Driver.PLAYER_BED_EVENT;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			return false;
 		}
 
@@ -1690,7 +1690,7 @@ public class PlayerEvents {
 					+ " {}";
 		}
 	
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if (e instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
@@ -1714,7 +1714,7 @@ public class PlayerEvents {
 				ret.put("state", new CString(event.getState().name(), t));
 				ret.put("hook", new CInt(event.getHook().getEntityId(), t));
 				ret.put("xp", new CInt(event.getExpToDrop(), t));
-				Construct caught = new CNull(t);
+				Construct caught = Construct.GetNullConstruct(t);
 				if (event.getCaught() instanceof MCEntity) {
 					caught = new CInt(event.getCaught().getEntityId(), t);
 				}
@@ -1726,12 +1726,11 @@ public class PlayerEvents {
 			}
 		}
 	
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (event instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent e = (MCPlayerFishEvent) event;
 				if (key.equals("chance")) {
-					double chance = Static.getDouble(value, Target.UNKNOWN);
+					double chance = value.primitive(t).castToDouble(t);
 					if (chance > 1.0 || chance < 0.0) {
 						throw new Exceptions.FormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
 					}
@@ -1739,7 +1738,7 @@ public class PlayerEvents {
 					return true;
 				}
 				if (key.equals("xp")) {
-					e.setExpToDrop(Static.getInt32(value, Target.UNKNOWN));
+					e.setExpToDrop(value.primitive(t).castToInt32(t));
 					return true;
 				}
 			}

@@ -14,6 +14,7 @@ import com.laytonsmith.annotations.convert;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;

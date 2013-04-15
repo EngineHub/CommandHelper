@@ -11,12 +11,19 @@ import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.MObject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -40,6 +47,14 @@ public class Scoreboards {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+	
+	public static class Objective extends MObject {
+		public String name;
+		public String displayName;
+		public MCDisplaySlot slot;
+		public boolean modifiable;
+		public String criteria;
 	}
 	
 	@api
@@ -66,17 +81,13 @@ public class Scoreboards {
 			}
 			CArray ret = new CArray(t);
 			for (MCObjective o : os) {
-				CArray obj = CArray.GetAssociativeArray(t);
-				obj.set("name", new CString(o.getName(), t), t);
-				obj.set("displayName", new CString(o.getDisplayName(), t), t);
-				Construct slot = new CNull(t);
-				if (o.getDisplaySlot() != null) {
-					slot = new CString(o.getDisplaySlot().name(), t);
-				}
-				obj.set("slot", slot, t);
-				obj.set("modifiable", new CBoolean(o.isModifiable(), t), t);
-				obj.set("criteria", new CString(o.getCriteria(), t), t);
-				ret.push(obj);
+				Objective obj = new Objective();
+				obj.name = o.getName();
+				obj.displayName = o.getDisplayName();
+				obj.slot = o.getDisplaySlot();
+				obj.modifiable = o.isModifiable();
+				obj.criteria = o.getCriteria();
+				ret.push(obj.deconstruct(t));
 			}
 			return ret;
 		}
@@ -90,12 +101,30 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "array {[criteria]} Returns an array of arrays about the objectives in the current scoreboard."
+			return "Returns an array of arrays about the objectives in the current scoreboard."
 					+ " If criteria is given, only objectives with that criteria will be returned."
 					+ " The arrays contain the keys name, displayname, slot, modifiable, and criteria.";
 		}
+
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(Objective.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", MCCriteria.class, "criteria").setOptionalDefault(MCCriteria.DUMMY)
+					);
+		}
 	}
 	
+	public static class Team extends MObject {
+		public String name;
+		public String displayName;
+		public String prefix;
+		public String suffix;
+		public int size;
+		public List<String> players;
+	}
 	@api
 	public static class get_teams extends SBFunction {
 
@@ -108,18 +137,18 @@ public class Scoreboards {
 			Set<MCTeam> ts = Static.getServer().getMainScoreboard().getTeams();
 			CArray ret = new CArray(t);
 			for (MCTeam team : ts) {
-				CArray to = CArray.GetAssociativeArray(t);
-				to.set("name", new CString(team.getName(), t), t);
-				to.set("displayname", new CString(team.getDisplayName(), t), t);
-				to.set("prefix", new CString(team.getPrefix(), t), t);
-				to.set("suffix", new CString(team.getSuffix(), t), t);
-				to.set("size", new CInt(team.getSize(), t), t);
-				CArray pl = new CArray(t);
+				Team to = new Team();
+				to.name = team.getName();
+				to.displayName = team.getDisplayName();
+				to.prefix = team.getPrefix();
+				to.suffix = team.getSuffix();
+				to.size = team.getSize();
+				List<String> pl = new ArrayList<String>();
 				for (MCOfflinePlayer ofp : team.getPlayers()) {
-					pl.push(new CString(ofp.getName(), t));
+					pl.add(ofp.getName());
 				}
-				to.set("players", pl, t);
-				ret.push(to);
+				to.players = pl;
+				ret.push(to.deconstruct(t));
 			}
 			return ret;
 		}
@@ -133,8 +162,15 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "array {} Returns an array of arrays about the teams on the current scoreboard."
-					+ " The arrays contain the keys name, displayname, prefix, suffix, size, and players.";
+			return "Returns an array of Teams, which describes the teams on the current scoreboard.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(Team.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 	}
 	
@@ -154,7 +190,7 @@ public class Scoreboards {
 				try {
 					criteria = MCCriteria.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException iae) {
-
+					//Ignored
 				}
 			}
 			try {
@@ -175,11 +211,21 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {name[, criteria]} Adds a new objective to the scoreboard,"
+			return "Adds a new objective to the scoreboard,"
 					+ " throwing an exception if the name is already in use."
-					+ " The vanilla criteria names are " + StringUtils.Join(MCCriteria.values(), ", ", ", and ")
-					+ ". You can put anything, but if none of the other values match,"
-					+ " 'dummy' will be used. Those values which are not 'dummy' are server-managed.";
+					+ " You can put anything for the criteria, but only the Criteria enum values are server"
+					+ " supported.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "name"),
+						new Argument("", MCCriteria.class, CString.class, "criteria").setOptionalDefault(MCCriteria.DUMMY)
+					);
 		}
 	}
 	
@@ -212,9 +258,25 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {name} Adds a new team to the scoreboard,"
+			return "Adds a new team to the scoreboard,"
 					+ " throws an exception if a team already exists with the given name.";
 		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "name")
+					);
+		}
+	}
+	
+	@typename("ObjectiveDisplay")
+	public static class ObjectiveDisplay extends MObject {
+		public String name;
+		public MCDisplaySlot slot;
 	}
 	
 	@api
@@ -233,38 +295,23 @@ public class Scoreboards {
 				throw new ConfigRuntimeException("No objective by that name exists.",
 						ExceptionType.ScoreboardException, t);
 			}
-			CArray dis = new CArray(t);
+			ObjectiveDisplay dis;
 			if (args[1] instanceof CArray) {
-				dis = (CArray) args[1];
+				dis = MObject.Construct(ObjectiveDisplay.class, (CArray) args[1], t);
 			} else {
-				dis.set("name", args[1], t);
+				dis = new ObjectiveDisplay();
+				dis.name = args[1].val();
 			}
-			if (dis.containsKey("slot")) {
-				MCDisplaySlot slot;
-				if (dis.get("slot", t) instanceof CNull) {
-					slot = null;
-				} else {
-					try {
-						slot = MCDisplaySlot.valueOf(dis.get("slot", t).val().toUpperCase());
-					} catch (IllegalArgumentException iae) {
-						throw new Exceptions.FormatException("Unknown DisplaySlot", t);
-					}
-				}
-				o.setDisplaySlot(slot);
-			}
-			if (dis.containsKey("name")) {
-				String dname;
-				if (dis.get("name", t) instanceof CNull) {
-					dname = o.getName();
-				} else {
-					dname = dis.get("name", t).val();
-				}
-				if (dname.length() > 32) {
-					throw new ConfigRuntimeException("Display name can only be 32 characters but was " + dname.length(),
+			if(dis.name != null){
+				if (dis.name.length() > 32) {
+					throw new ConfigRuntimeException("Display name can only be 32 characters but was " + dis.name.length(),
 							ExceptionType.LengthException, t);
 				}
-				o.setDisplayName(dname);
+				o.setDisplayName(dis.name);
+			} else {
+				o.setDisplayName(o.getName());
 			}
+			o.setDisplaySlot(dis.slot);
 			return new CVoid(t);
 		}
 
@@ -286,6 +333,24 @@ public class Scoreboards {
 					+ StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
 					+ ". Displayname can be a max of 32 characters.";
 		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "objectiveName"),
+						new Argument("", CString.class, ObjectiveDisplay.class, "objective")
+					);
+		}
+	}
+	
+	@typename("TeamDisplay")
+	public static class TeamDisplay extends MObject {
+		public String name;
+		public String prefix;
+		public String suffix;
 	}
 	
 	@api
@@ -304,50 +369,39 @@ public class Scoreboards {
 				throw new ConfigRuntimeException("No team by that name exists.",
 						ExceptionType.ScoreboardException, t);
 			}
-			CArray dis = new CArray(t);
+			TeamDisplay dis;
 			if (args[1] instanceof CArray) {
-				dis = (CArray) args[1];
+				dis = MObject.Construct(TeamDisplay.class, (CArray)args[1], t);
 			} else {
-				dis.set("name", args[1], t);
+				dis = new TeamDisplay();
+				dis.name = args[1].val();
 			}
-			if (dis.containsKey("name")) {
-				String dname;
-				if (dis.get("name", t) instanceof CNull) {
-					dname = o.getName();
-				} else {
-					dname = dis.get("name", t).val();
-				}
-				if (dname.length() > 32) {
-					throw new ConfigRuntimeException("Display name can only be 32 characters but was " + dname.length(),
+			if (dis.name != null) {
+				if (dis.name.length() > 32) {
+					throw new ConfigRuntimeException("Display name can only be 32 characters but was " + dis.name.length(),
 							ExceptionType.LengthException, t);
 				}
-				o.setDisplayName(dname);
+				o.setDisplayName(dis.name);
+			} else {
+				o.setDisplayName(o.getName());
 			}
-			if (dis.containsKey("prefix")) {
-				String prefix;
-				if (dis.get("prefix", t) instanceof CNull) {
-					prefix = "";
-				} else {
-					prefix = dis.get("prefix", t).val();
-				}
-				if (prefix.length() > 16) {
-					throw new ConfigRuntimeException("Prefix can only be 16 characters but was " + prefix.length(),
+			if (dis.prefix != null) {
+				if (dis.prefix.length() > 16) {
+					throw new ConfigRuntimeException("Prefix can only be 16 characters but was " + dis.prefix.length(),
 							ExceptionType.LengthException, t);
 				}
-				o.setPrefix(prefix);
+				o.setPrefix(dis.prefix);
+			} else {
+				o.setPrefix("");
 			}
-			if (dis.containsKey("suffix")) {
-				String suffix;
-				if (dis.get("suffix", t) instanceof CNull) {
-					suffix = "";
-				} else {
-					suffix = dis.get("suffix", t).val();
-				}
-				if (suffix.length() > 16) {
-					throw new ConfigRuntimeException("Suffix can only be 16 characters but was " + suffix.length(),
+			if (dis.suffix != null) {
+				if (dis.suffix.length() > 16) {
+					throw new ConfigRuntimeException("Suffix can only be 16 characters but was " + dis.suffix.length(),
 							ExceptionType.LengthException, t);
 				}
-				o.setSuffix(suffix);
+				o.setSuffix(dis.suffix);
+			} else {
+				o.setSuffix("");
 			}
 			return new CVoid(t);
 		}
@@ -366,9 +420,18 @@ public class Scoreboards {
 					+ " it is assumed to be the displayname, otherwise arg 2 should be an array"
 					+ " with keys 'name', 'prefix', and/or 'suffix', affecting their respective properties."
 					+ " Null name resets it to the actual name, and null prefix or suffix removes it from"
-					+ " all displays. Slot can be one of: "
-					+ StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
-					+ ". Displayname can be a max of 32 characters, prefix and suffix can only be 16.";
+					+ " all displays. name can be a max of 32 characters, prefix and suffix can only be 16.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "teamName"),
+						new Argument("", CString.class, TeamDisplay.class, "info")
+					);
 		}
 	}
 	
@@ -400,9 +463,20 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {teamName, player} Adds a player to a team, given the team exists."
+			return "Adds a player to a team, given the team exists."
 					+ " Offline players can be added, so the name must be exact."
 					+ " The player will be removed from any other team on the same scoreboard.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "teamName"),
+						new Argument("", CString.class, "player")
+					);
 		}
 	}
 	
@@ -433,9 +507,20 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "boolean {teamname, player} Attempts to remove a player from a team,"
+			return "Attempts to remove a player from a team,"
 					+ " and returns true if successful. If the player was not part of"
 					+ " the team, returns false.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "teamName"),
+						new Argument("", CString.class, "player")
+					);
 		}
 		
 	}
@@ -471,7 +556,17 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {objectivename} Unregisters an objective from the scoreboard.";
+			return "Unregisters an objective from the scoreboard.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "objectiveName")
+					);
 		}
 	}
 	
@@ -506,7 +601,17 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {teamname} Unregisters a team from the scoreboard.";
+			return "Unregisters a team from the scoreboard.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "teamName")
+					);
 		}
 	}
 	
@@ -537,8 +642,19 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "int {objectiveName, player} Returns the player's score for the given objective."
+			return "Returns the player's score for the given objective."
 					+ " Works for offline players, so the name must be exact.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "objectiveName"),
+						new Argument("", CString.class, "player")
+					);
 		}
 	}
 	
@@ -557,7 +673,7 @@ public class Scoreboards {
 						ExceptionType.ScoreboardException, t);
 			}
 			MCOfflinePlayer ofp = Static.getServer().getOfflinePlayer(args[1].val());
-			o.getScore(ofp).setScore(Static.getInt32(args[2], t));
+			o.getScore(ofp).setScore(args[2].primitive(t).castToInt32(t));
 			return new CVoid(t);
 		}
 
@@ -570,8 +686,20 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {objectiveName, player, int} Sets the player's score for the given objective."
+			return "Sets the player's score for the given objective."
 					+ " Works for offline players, so the name must be exact.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "objectiveName"),
+						new Argument("", CString.class, "player"),
+						new Argument("", CInt.class, "score")
+					);
 		}
 	}
 }
