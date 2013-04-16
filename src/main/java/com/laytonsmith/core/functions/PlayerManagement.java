@@ -267,13 +267,8 @@ public class PlayerManagement {
 		}
 	}
 
-<<<<<<< HEAD
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pwalkspeed extends AbstractFunction {
-=======
-		@api(environments = {CommandHelperEnvironment.class})
-	public static class set_walkspeed extends AbstractFunction {
->>>>>>> parent of b5f7979... Updated my code corrected code
 
 		public String getName() {
 			return "set_pwalkspeed";
