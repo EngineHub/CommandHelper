@@ -30,6 +30,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public float getExp();
 
 	public float getFlySpeed();
+	
+	public void setFlySpeed(float speed);
 
     public int getFoodLevel();
 
