@@ -1,5 +1,4 @@
 
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
@@ -178,7 +177,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public float getFlySpeed() {
 		return p.getFlySpeed();
 	}
-
+	
+	public void setWalkSpeed(float speed) {
+		p.setWalkSpeed(speed);
+	}
+	
 	public float getWalkSpeed() {
 		return p.getWalkSpeed();
 	}
