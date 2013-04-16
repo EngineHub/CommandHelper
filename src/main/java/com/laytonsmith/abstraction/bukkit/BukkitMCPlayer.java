@@ -178,7 +178,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public float getFlySpeed() {
 		return p.getFlySpeed();
 	}
-	
 
 	public float getWalkSpeed() {
 		return p.getWalkSpeed();
@@ -472,9 +471,5 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	public void setScoreboard(MCScoreboard board) {
 		p.setScoreboard(((BukkitMCScoreboard) board).s);
-	}
-
-	public void setFlySpeed(float speed) {
-		p.setFlySpeed(speed);
 	}
 }
