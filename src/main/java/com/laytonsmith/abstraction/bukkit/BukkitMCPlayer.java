@@ -182,6 +182,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public float getWalkSpeed() {
 		return p.getWalkSpeed();
 	}
+	
+	public void setWalkSpeed(float speed) {
+		p.setWalkSpeed(speed);
+	}
 
     public void giveExp(int xp) {
         p.giveExp(xp);
