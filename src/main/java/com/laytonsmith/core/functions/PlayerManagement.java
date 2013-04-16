@@ -268,7 +268,7 @@ public class PlayerManagement {
 	}
 
 		@api(environments = {CommandHelperEnvironment.class})
-	public static class set_walkspeed extends AbstractFunction {
+	public static class set_pwalkspeed extends AbstractFunction {
 
 		public String getName() {
 			return "set_pwalkspeed";
