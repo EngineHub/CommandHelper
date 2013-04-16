@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCInstrument;
@@ -52,6 +51,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public int getTotalExperience();
 
 	public float getWalkSpeed();
+	public void setWalkSpeed();
 
     public void giveExp(int xp);
 
