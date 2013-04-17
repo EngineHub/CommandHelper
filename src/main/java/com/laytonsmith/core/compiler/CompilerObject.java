@@ -103,6 +103,18 @@ class CompilerObject {
 			t = new Token(TType.STRING, constant.val(), constant.getTarget());
 		}							
 		if (t.type == TType.BARE_STRING && peek().type == TType.FUNC_START) {
+			//If the last child isn't an autoconcat, we need to go ahead and
+			//add that here. This will happen in the case of something like:
+			//func(func1(), func2() func2())
+			if(pointer.numberOfChildren() > 1 
+					&& !(pointer.getLastChild().getData() instanceof CFunction 
+					&& ((CFunction) pointer.getLastChild().getData()).val().equals(__autoconcat__))){
+				ParseTree lastChild = pointer.getLastChild();
+				pointer.removeChildAt(pointer.numberOfChildren() - 1);
+				pushNode(new CFunction(__autoconcat__, Target.UNKNOWN));
+				pointer.addChild(lastChild);
+				autoConcatCounter++;
+			}
 			consume(); //Consume the left parenthesis
 			CFunction f = new CFunction(t.val(), t.getTarget());
 			functionLines.add(peek().getTarget());

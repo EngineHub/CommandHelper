@@ -452,7 +452,7 @@ public class StaticTest {
         env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
         List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null, false));
         for(Script s : scripts){
-            s.compile();
+            s.compile(env);
             if(s.match(command)){
                 s.run(s.getVariables(command), env, null);
             }

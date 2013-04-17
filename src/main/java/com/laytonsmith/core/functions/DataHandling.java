@@ -184,57 +184,6 @@ public class DataHandling {
 			throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
 		}
 
-//		private static class Chain {
-//
-//			ArrayList<Construct> indexChain = new ArrayList<Construct>();
-//		}
-//
-//		private void prepare(CArrayReference container, Chain c) {
-//			if (container.array instanceof CArrayReference) {
-//				prepare((CArrayReference) container.array, c);
-//				c.indexChain.add(container.index);
-//			} else {
-//				c.indexChain.add(container.index);
-//			}
-//		}
-
-//		public Construct array_assign(Target t, Environment env, Construct arrayAndIndex, Construct toSet) {
-//			Construct ival = toSet;
-//			while (ival instanceof IVariable) {
-//				IVariable cur = (IVariable) ival;
-//				ival = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
-//			}
-//			Chain c = new Chain();
-//			prepare((CArrayReference) arrayAndIndex, c);
-//			CArray inner = (CArray) ((CArrayReference) arrayAndIndex).getInternalArray();
-//			for (int i = 0; i < c.indexChain.size(); i++) {
-//				if (i == c.indexChain.size() - 1) {
-//					//Last one, set it
-//					inner.set(c.indexChain.get(i), ival, t);
-//				} else {
-//					boolean makeIt = false;
-//					Construct ct = null;
-//					if (!inner.containsKey(c.indexChain.get(i).val())) {
-//						makeIt = true;
-//					} else {
-//						ct = inner.get(c.indexChain.get(i), t);
-//						if (!(ct instanceof CArray)) {
-//							makeIt = true;
-//						}
-//					}
-//					if (makeIt) {
-//						Construct newArray = new CArray(t);
-//						inner.set(c.indexChain.get(i), newArray, t);
-//						ct = newArray;
-//					}
-//					inner = (CArray) ct;
-//				}
-//			}
-//			String name = ((CArrayReference) arrayAndIndex).name.getName();
-//			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(name, (CArray) ((CArrayReference) arrayAndIndex).getInternalArray(), t));
-//			return new IVariable("=anon", ival, t);
-//		}
-
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
@@ -1815,18 +1764,10 @@ public class DataHandling {
 			String name = "";
 			List<IVariable> vars = new ArrayList<IVariable>();
 			ParseTree tree = null;
-			boolean usesAssign = false;
 			for (int i = 0; i < nodes.length; i++) {
 				if (i == nodes.length - 1) {
 					tree = nodes[i];
 				} else {
-					if (nodes[i].getData() instanceof CFunction) {
-						if (((CFunction) nodes[i].getData()).val().equals("assign")) {
-							if (nodes[i].getChildAt(1).getData().isDynamic()) {
-								usesAssign = true;
-							}
-						}
-					}
 					Construct cons = parent.eval(nodes[i], env);
 					if (i == 0 && cons instanceof IVariable) {
 						throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, t);
@@ -1844,9 +1785,6 @@ public class DataHandling {
 				}
 			}
 			Procedure myProc = new Procedure(name, vars, tree, t);
-			if (usesAssign) {
-				myProc.definitelyNotConstant();
-			}
 			return myProc;
 		}
 
@@ -1904,19 +1842,7 @@ public class DataHandling {
 				//Oh. Well, we tried.
 				return null;
 			}
-		}
-//        @Override
-//        public boolean canOptimizeDynamic() {
-//            return true;
-//        }
-//
-//        @Override
-//        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-//            //We seriously lose out on the ability to optimize this procedure
-//            //if we are assigning a dynamic value as a default, but we have to check
-//            //that here. If we don't, we lose the information
-//            return ;
-//        }                
+		}         
 	}
 
 	@api

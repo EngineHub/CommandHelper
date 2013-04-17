@@ -26,7 +26,10 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
@@ -342,7 +345,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 				String alias = CommandHelperPlugin.joinString(args, " ");
 				try {
-					int id = um.addAlias(alias, persistanceNetwork);
+					CompilerEnvironment cenv = new CompilerEnvironment(Implementation.Type.BUKKIT, api.Platforms.INTERPRETER_JAVA);
+					Environment env = Environment.createEnvironment(cenv);
+					int id = um.addAlias(alias, persistanceNetwork, env);
 					if (id > -1) {
 						Static.SendMessage(player, MCChatColor.YELLOW + "Alias added with id '" + id + "'");
 					}

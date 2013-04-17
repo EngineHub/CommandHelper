@@ -15,7 +15,11 @@ import java.util.Stack;
  * @author Layton
  */
 public class IVariableList implements Cloneable {
-	Stack<Map<IVariable, Construct>> varStack = new Stack<Map<IVariable, Construct>>();
+	private Stack<Map<IVariable, Construct>> varStack = new Stack<Map<IVariable, Construct>>();
+	
+	public IVariableList(){
+		pushScope();
+	}
     
 	/**
 	 * Pushes a new scope onto the stack. Variables that are defined in here

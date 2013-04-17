@@ -123,7 +123,7 @@ public class Procedure implements Cloneable {
 
     @Override
     public String toString() {
-        return name + "(" + StringUtil.joinString(varList.keySet(), ", ", 0) + ")";
+        return "proc " + name + "(" + StringUtil.joinString(varList.keySet(), ", ", 0) + ")";
     }
 
     /**
@@ -194,8 +194,4 @@ public class Procedure implements Cloneable {
         }
         return clone;
     }
-
-	public void definitelyNotConstant() {
-		possiblyConstant = false;
-	}
 }

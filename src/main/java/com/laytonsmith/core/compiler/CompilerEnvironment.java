@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -174,6 +175,7 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl, Runtime
 	 */
 	public void pushProcedureScope(){
 		procedures.push(new ArrayList<Procedure>());
+		pushVariableStack();
 	}
 	
 	/**
@@ -182,6 +184,7 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl, Runtime
 	public void popProcedureScope(){
 		try{
 			procedures.pop();
+			popVariableStack();
 		} catch(EmptyStackException e){
 			throw new Error(e);
 		}
@@ -211,6 +214,5 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl, Runtime
 		}
 		throw new ConfigCompileException("Unknown procedure \"" + name + "\"", t);
 	}
-	
 	
 }

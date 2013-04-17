@@ -55,9 +55,9 @@ public class UserManager {
         return lastCommand;
     }
     
-    public int addAlias(String alias, PersistanceNetwork persist) throws ConfigCompileException, DataSourceException, ReadOnlyException, IOException {
+    public int addAlias(String alias, PersistanceNetwork persist, Environment env) throws ConfigCompileException, DataSourceException, ReadOnlyException, IOException {
         try{
-            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias, new File("User Alias (" + name + ")"), false)).get(0).compile();
+            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias, new File("User Alias (" + name + ")"), false)).get(0).compile(env);
         } catch(IndexOutOfBoundsException e){
             throw new ConfigCompileException("Improperly formatted alias", new Target(0, new File("User Alias (" + name + ")"), 0));
         }

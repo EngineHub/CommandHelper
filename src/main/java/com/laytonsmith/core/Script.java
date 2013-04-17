@@ -212,7 +212,7 @@ public class Script {
 		//TODO: Reevaluate if this line is needed. The script doesn't know the label inherently, the
 		//environment does, and setting it this way taints the environment.
 		CurrentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
-		if (m instanceof CFunction) {// == ConstructType.FUNCTION) {
+		if (m instanceof CFunction) {
 			env.getEnv(GlobalEnv.class).SetScript(this);
 			if (m.val().matches("^_[^_].*")) {
 				//Not really a function, so we can't put it in Function.
@@ -237,18 +237,7 @@ public class Script {
 				//Turn it into a config runtime exception. This shouldn't ever happen though.
 				throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getTarget());
 			}
-//                //We have special handling for loop and other control flow functions
-//                if(f instanceof assign){
-//                    if(c.getChildAt(0).getData() instanceof CFunction){
-//                        CFunction test = (CFunction)c.getChildAt(0).getData();
-//                        if(test.val().equals("array_get")){
-//                            env.getEnv(GlobalEnv.class).SetFlag("array_get_alt_mode", true);
-//                            Construct arrayAndIndex = eval(c.getChildAt(0), env);
-//                            env.getEnv(GlobalEnv.class).ClearFlag("array_get_alt_mode");
-//                            return ((assign)f).array_assign(m.getTarget(), env, arrayAndIndex, eval(c.getChildAt(1), env));
-//                        }
-//                    }
-//                }
+
 			if (f.isRestricted()) {
 				boolean perm = Static.hasCHPermission(f.getName(), env);
 				if (!perm) {
@@ -489,11 +478,11 @@ public class Script {
 		return vars;
 	}
 
-	public Script compile() throws ConfigCompileException {
+	public Script compile(Environment compileEnvironment) throws ConfigCompileException {
 		try {
 			verifyLeft();
 			compileLeft();
-			compileRight();
+			compileRight(compileEnvironment);
 		} catch (ConfigCompileException e) {
 			compilerError = true;
 			throw e;
@@ -706,7 +695,7 @@ public class Script {
 		return true;
 	}
 
-	public void compileRight() throws ConfigCompileException {
+	public void compileRight(Environment compileEnvironment) throws ConfigCompileException {
 		TokenStream temp = new TokenStream(new ArrayList<Token>(), fileOptions);
 		right = new ArrayList<TokenStream>();
 		for (Token t : fullRight) {
@@ -723,7 +712,7 @@ public class Script {
 		right.add(temp);
 		cright = new ArrayList<ParseTree>();
 		for (TokenStream l : right) {
-			cright.add(MethodScriptCompiler.compile(l, CurrentEnv));
+			cright.add(MethodScriptCompiler.compile(l, compileEnvironment));
 		}
 	}
 

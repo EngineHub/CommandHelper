@@ -190,7 +190,7 @@ public class AliasCore {
 						//RunnableAlias b = ac.getRunnableAliases(command, player);
 						try {
 
-							ac.compile();
+							ac.compile(env);
 
 							if (ac.match(command)) {
 								Static.getAliasCore().addPlayerReference(player);
@@ -317,7 +317,7 @@ public class AliasCore {
 			localPackages.compileMS(player, env);
 			compilerMS.stop();
 			ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
-			localPackages.compileMSA(scripts, player);
+			localPackages.compileMSA(scripts, player, env);
 			compilerMSA.stop();
 
 		} catch (IOException ex) {
@@ -482,7 +482,7 @@ public class AliasCore {
 			ms.add(new FileInfo(s, path));
 		}
 
-		public void compileMSA(List<Script> scripts, MCPlayer player) {
+		public void compileMSA(List<Script> scripts, MCPlayer player, Environment env) {
 
 			for (FileInfo fi : msa) {
 				List<Script> tempScripts;
@@ -491,7 +491,7 @@ public class AliasCore {
 					for (Script s : tempScripts) {
 						try {
 							try {
-								s.compile();
+								s.compile(env);
 								s.checkAmbiguous((ArrayList<Script>) scripts);
 								scripts.add(s);
 							} catch (ConfigCompileException e) {

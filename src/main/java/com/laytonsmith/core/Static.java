@@ -829,7 +829,7 @@ public final class Static {
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScript", "default"), 
 				new Profiler(new File(platformFolder, "profiler.config")), persistanceNetwork, permissionsResolver, platformFolder);
 		gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
-		CompilerEnvironment ceEnv = new CompilerEnvironment(Implementation.Type.SHELL, api.Platforms.INTERPRETER_JAVA);
+		CompilerEnvironment ceEnv = new CompilerEnvironment(Implementation.Type.TEST, api.Platforms.INTERPRETER_JAVA);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment(), ceEnv);
 	}
 	

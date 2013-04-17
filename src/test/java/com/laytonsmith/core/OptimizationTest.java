@@ -258,6 +258,11 @@ public class OptimizationTest {
 		assertEquals("postinc(@a)", optimize("(@a++)"));
 	}
 	
+	@Test public void testSideBySideFunctionsAreConcated() throws Exception {
+		assertEquals("concat(array('a'),sconcat(array('a'),array('a')))", 
+				optimize("concat(array('a'), array('a') array('a'))"));
+	}
+	
 	
 	
     

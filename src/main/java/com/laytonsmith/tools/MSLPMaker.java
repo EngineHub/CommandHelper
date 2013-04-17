@@ -57,7 +57,7 @@ public class MSLPMaker {
                 tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents(), fi.file(), false));
                 for (Script s : tempScripts) {
                     try {
-                        s.compile();
+                        s.compile(env);
                         s.checkAmbiguous(allScripts);
                         allScripts.add(s);
                     } catch (ConfigCompileException e) {

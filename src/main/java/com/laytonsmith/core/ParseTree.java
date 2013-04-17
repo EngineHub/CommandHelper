@@ -154,6 +154,22 @@ public class ParseTree implements Cloneable{
 	}
 	
 	/**
+	 * Returns the first child. This will throw an exception if there are no children.
+	 * @return 
+	 */
+	public ParseTree getFirstChild(){
+		return children.get(0);
+	}
+	
+	/**
+	 * Returns the last child. This will throw an exception if there are no children.
+	 * @return 
+	 */
+	public ParseTree getLastChild(){
+		return children.get(children.size() - 1);
+	}
+	
+	/**
 	 * Returns the data in this node
 	 * @return 
 	 */

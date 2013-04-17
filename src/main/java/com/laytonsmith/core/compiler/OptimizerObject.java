@@ -4,13 +4,16 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.compiler.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.StringHandling;
@@ -32,6 +35,9 @@ class OptimizerObject {
 	
 	private final static String __autoconcat__ = new CompilerFunctions.__autoconcat__().getName();
 	private final static String cc = new StringHandling.cc().getName();
+	private final static String assign = new DataHandling.assign().getName();
+	private final static String proc = new DataHandling.proc().getName();
+	
 
 	public OptimizerObject(ParseTree root, Environment compilerEnvironment) {
 		this.root = root;
@@ -40,28 +46,32 @@ class OptimizerObject {
 
 	public ParseTree optimize() throws ConfigCompileException {
 		//If at any point we get a PullMeUpException, we just set root = to that node
-		env.getEnv(CompilerEnvironment.class).pushProcedureScope();
 		optimize01(root, env);
 		optimize02(root, env, false);
+		env.getEnv(CompilerEnvironment.class).pushProcedureScope();
 		try{
 			optimize03(root, env, false); // Once
 		} catch(PullMeUpException e){
 			root = e.getNode();
 		}
+		env.getEnv(CompilerEnvironment.class).popProcedureScope();
 		optimize04(root, env, new ArrayList<String>());
 		optimize05(root, env);
+		env.getEnv(CompilerEnvironment.class).pushProcedureScope();
 		try{
 			optimize03(root, env, true); // Twice
 		} catch(PullMeUpException e){
 			root = e.getNode();
 		}
+		env.getEnv(CompilerEnvironment.class).popProcedureScope();
+		env.getEnv(CompilerEnvironment.class).pushProcedureScope();
 		try{
 			optimize03(root, env, true); // Thrice
 		} catch(PullMeUpException e){
 			root = e.getNode();
 		}
-		optimize02(root, env, true); // Gotta do this one again too
 		env.getEnv(CompilerEnvironment.class).popProcedureScope();
+		optimize02(root, env, true); // Gotta do this one again too
 
 		return root;
 	}
@@ -236,25 +246,62 @@ class OptimizerObject {
 	 * @throws ConfigCompileException
 	 */
 	private void optimize03(ParseTree tree, Environment compilerEnvironment, boolean optimizeProcs) throws ConfigCompileException, PullMeUpException {
-		//Depth first
-		for(int i = 0; i < tree.numberOfChildren(); i++){
-			ParseTree child = tree.getChildAt(i);
-			try{
-				optimize03(child, compilerEnvironment, optimizeProcs);
-			} catch(PullMeUpException e){
-				tree.getChildren().set(i, e.getNode());
-			}
-		}
 		
-		CompilerEnvironment env = compilerEnvironment.getEnv(CompilerEnvironment.class);
 		if(!(tree.getData() instanceof CFunction)){
 			//Not a function, no optimization needed
 			return;
 		}
-		if(optimizeProcs && ((CFunction)tree.getData()).isProcedure()){
+		CompilerEnvironment env = compilerEnvironment.getEnv(CompilerEnvironment.class);
+		if(optimizeProcs && tree.getData() instanceof CFunction && proc.equals(tree.getData().val())){
 			//Different way to optimize these, but it won't happen the first go through
-			//TODO
+			//It is a procedure, so we need to drop down into it (adding it first to the stack
+			//in case of recursion) then call optimize03 again, then pop.
+			String name = tree.getChildAt(0).getData().primitive(tree.getTarget()).castToString();
+			List<IVariable> ivars = new ArrayList<IVariable>();
+			for(int i = 1; i < tree.getChildren().size() - 1; i++){
+				ParseTree v = tree.getChildAt(i);
+				//(const) assignments and ivars are allowed here only
+				Construct var;
+				if(v.getData() instanceof CFunction && assign.equals(((CFunction)v.getData()).getFunction().getName())){
+					//It's an assign, so grab the second element from it, and check if it's const
+					//If so, just toss the value, we don't need it right now. If not, throw a compile error
+					//TODO: Actually, we need to check if the value is immutable, not const, but whatever for now.
+					if(!v.getChildAt(1).isConst()){
+						throw new ConfigCompileException("Default values in a procedure must be constant", v.getTarget());
+					}
+					var = v.getChildAt(0).getData();
+				} else {
+					var = v.getData();
+				}
+				if(!(var instanceof IVariable)){
+					throw new ConfigCompileException("Procedure defined incorrectly. Expected a variable, but got a " + v.getChildAt(0).getData().typeName(), v.getTarget());
+				}
+				ivars.add((IVariable) var);
+			}
+			env.addProcedure(new Procedure(name, ivars, tree.getChildAt(tree.getChildren().size() - 1), tree.getTarget()));
+			env.pushProcedureScope();
+			//Now drop into the proc's actual code
+			optimize03(tree.getChildAt(tree.getChildren().size() - 1), compilerEnvironment, optimizeProcs);
+			env.popProcedureScope();
 		} else {
+			//Depth first
+			for(int i = 0; i < tree.numberOfChildren(); i++){
+				ParseTree child = tree.getChildAt(i);
+				try{
+					optimize03(child, compilerEnvironment, optimizeProcs);
+				} catch(PullMeUpException e){
+					tree.getChildren().set(i, e.getNode());
+				}
+			}
+			//If this is a procedure, then optimizeProcs is false, so we just need to continue past it for now.
+			//(The contents will have already been optimized)
+			if(tree.getData() instanceof CFunction && ((CFunction)tree.getData()).isProcedure()){
+				if(optimizeProcs){
+					//If this is not a valid procedure at this point, this will throw the exception for us.
+					env.getProcedure(tree.getData().val(), tree.getTarget());
+				}
+				return;
+			}
 			Function func = ((CFunction)tree.getData()).getFunction();
 			if(func instanceof Optimizable){
 				Optimizable f = (Optimizable)func;
