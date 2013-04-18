@@ -16,7 +16,6 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.persistance.DataSource;
 import java.io.IOException;
 import java.lang.reflect.Constructor;

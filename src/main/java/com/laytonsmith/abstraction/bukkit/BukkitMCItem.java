@@ -4,7 +4,6 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
 import org.bukkit.entity.Item;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *

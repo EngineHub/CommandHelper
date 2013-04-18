@@ -11,8 +11,6 @@ import com.laytonsmith.core.functions.Exceptions;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An MObject is a definition of an array with a certain configuration. While an MObject can be constructed

@@ -7,7 +7,6 @@ import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;

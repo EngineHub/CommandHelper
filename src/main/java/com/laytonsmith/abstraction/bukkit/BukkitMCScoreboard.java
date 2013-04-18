@@ -1,14 +1,5 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.bukkit.OfflinePlayer;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
-
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCScore;
@@ -16,6 +7,13 @@ import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
+import java.util.HashSet;
+import java.util.Set;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 public class BukkitMCScoreboard implements MCScoreboard {
 

@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.inventory.meta.FireworkMeta;
 import com.laytonsmith.abstraction.MCFireworkMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
 
 public class BukkitMCFireworkMeta extends BukkitMCItemMeta implements MCFireworkMeta {
 

@@ -1,18 +1,16 @@
 package com.laytonsmith.abstraction;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemMeta;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta {
 

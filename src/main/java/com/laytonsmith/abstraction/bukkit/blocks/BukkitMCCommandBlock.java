@@ -1,8 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.blocks;
 
-import org.bukkit.block.CommandBlock;
-
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
+import org.bukkit.block.CommandBlock;
 
 /**
  * 

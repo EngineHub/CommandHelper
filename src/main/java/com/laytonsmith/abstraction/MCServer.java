@@ -4,7 +4,6 @@ import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import java.util.List;
 import java.util.Set;
-
 import net.milkbowl.vault.economy.Economy;
 
 

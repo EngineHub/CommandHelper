@@ -1,11 +1,10 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
-import org.bukkit.scoreboard.DisplaySlot;
-
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.annotations.abstractionenum;
+import org.bukkit.scoreboard.DisplaySlot;
 
 /**
  * 

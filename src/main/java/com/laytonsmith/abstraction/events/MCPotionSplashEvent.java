@@ -1,8 +1,7 @@
 package com.laytonsmith.abstraction.events;
 
-import java.util.Set;
-
 import com.laytonsmith.abstraction.MCLivingEntity;
+import java.util.Set;
 
 /**
  * 

@@ -1,8 +1,7 @@
 package com.laytonsmith.abstraction.events;
 
-import java.net.InetAddress;
-
 import com.laytonsmith.core.events.BindableEvent;
+import java.net.InetAddress;
 
 /**
  * 

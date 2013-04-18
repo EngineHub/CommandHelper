@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.UUID;
 import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;

@@ -1,14 +1,13 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import org.bukkit.DyeColor;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Wolf;
-
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTameable;
 import com.laytonsmith.abstraction.entities.MCWolf;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
+import org.bukkit.DyeColor;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Wolf;
 
 /**
  * 

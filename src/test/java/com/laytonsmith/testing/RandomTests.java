@@ -19,10 +19,13 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import static com.laytonsmith.testing.StaticTest.*;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -34,9 +37,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
-import static com.laytonsmith.testing.StaticTest.*;
-import java.io.File;
-import java.net.URI;
 
 /**
  *

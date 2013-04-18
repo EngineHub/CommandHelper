@@ -1,14 +1,14 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemFactory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemFactory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * 

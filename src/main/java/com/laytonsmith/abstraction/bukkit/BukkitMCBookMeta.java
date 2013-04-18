@@ -1,10 +1,9 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import java.util.List;
-
-import org.bukkit.inventory.meta.BookMeta;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCBookMeta;
+import java.util.List;
+import org.bukkit.inventory.meta.BookMeta;
 
 public class BukkitMCBookMeta extends BukkitMCItemMeta implements MCBookMeta {
 

@@ -1,9 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.inventory.meta.Repairable;
-
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCRepairable;
+import org.bukkit.inventory.meta.Repairable;
 
 /**
  *

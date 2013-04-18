@@ -1,7 +1,6 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.shutdown;
 import com.laytonsmith.annotations.startup;

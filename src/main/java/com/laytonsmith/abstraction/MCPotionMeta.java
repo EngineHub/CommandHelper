@@ -1,9 +1,8 @@
 package com.laytonsmith.abstraction;
 
-import java.util.List;
-
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
 import com.laytonsmith.core.constructs.Target;
+import java.util.List;
 
 public interface MCPotionMeta extends MCItemMeta {
 

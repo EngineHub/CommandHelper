@@ -1,8 +1,7 @@
 package com.laytonsmith.abstraction;
 
-import java.util.Set;
-
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
+import java.util.Set;
 
 public interface MCScoreboard {
 	public void clearSlot(MCDisplaySlot slot);

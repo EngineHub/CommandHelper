@@ -26,7 +26,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.core.functions.Exceptions.FormatException;
 import com.laytonsmith.core.functions.StringHandling;
 import java.util.ArrayList;
 import java.util.Arrays;

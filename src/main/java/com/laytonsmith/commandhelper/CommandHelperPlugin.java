@@ -18,8 +18,8 @@
  */
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.*;

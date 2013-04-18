@@ -1,11 +1,6 @@
 
 package com.laytonsmith.abstraction.bukkit.events;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
@@ -23,7 +18,10 @@ import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
-
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;

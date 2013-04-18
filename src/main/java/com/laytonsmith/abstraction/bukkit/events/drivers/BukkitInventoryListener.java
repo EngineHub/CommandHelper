@@ -1,16 +1,15 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCInventoryClickEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCInventoryCloseEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCInventoryOpenEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 

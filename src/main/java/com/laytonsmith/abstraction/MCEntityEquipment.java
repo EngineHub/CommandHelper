@@ -1,8 +1,7 @@
 package com.laytonsmith.abstraction;
 
-import java.util.Map;
-
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import java.util.Map;
 
 /**
  *

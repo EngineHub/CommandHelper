@@ -13,7 +13,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;

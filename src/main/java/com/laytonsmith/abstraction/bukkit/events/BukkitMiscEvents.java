@@ -2,13 +2,11 @@ package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
-import java.net.InetAddress;
-
 import com.laytonsmith.abstraction.events.MCConsoleCommandEvent;
 import com.laytonsmith.abstraction.events.MCPluginIncomingMessageEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
+import java.net.InetAddress;
 import org.bukkit.entity.Player;
-
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 

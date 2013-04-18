@@ -2,7 +2,6 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.*;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;

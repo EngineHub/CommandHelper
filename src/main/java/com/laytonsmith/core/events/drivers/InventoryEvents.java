@@ -1,7 +1,5 @@
 package com.laytonsmith.core.events.drivers;
 
-import java.util.Map;
-
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -21,6 +19,7 @@ import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import java.util.Map;
 
 /**
  *

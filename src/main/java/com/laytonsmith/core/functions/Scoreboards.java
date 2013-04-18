@@ -1,9 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -19,6 +15,9 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 

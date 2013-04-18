@@ -14,8 +14,6 @@ import java.util.HashSet;
 import org.junit.*;
 import static org.junit.Assert.assertEquals;
 import org.junit.runner.RunWith;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;

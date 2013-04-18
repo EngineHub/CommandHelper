@@ -1,10 +1,9 @@
 package com.laytonsmith.abstraction.events;
 
-import java.util.List;
-
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.core.events.BindableEvent;
+import java.util.List;
 
 /**
  * 

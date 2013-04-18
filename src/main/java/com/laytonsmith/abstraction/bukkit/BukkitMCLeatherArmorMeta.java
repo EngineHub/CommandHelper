@@ -7,7 +7,6 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 /**

@@ -4,8 +4,6 @@
  */
 package com.laytonsmith.core.events.drivers;
 
-import java.util.Map;
-
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -23,6 +21,7 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import java.util.Map;
 
 /**
  *

@@ -7,7 +7,6 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
