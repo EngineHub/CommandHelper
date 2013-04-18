@@ -23,9 +23,11 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.annotations.FormatString;
 import com.laytonsmith.core.natives.interfaces.MObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * 
@@ -226,9 +228,19 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "scoreboard {player} Returns the id of the scoreboard assigned to a player."
+			return "Returns the id of the scoreboard assigned to a player."
 					+ " If it is not already cached, it will be added using the player's name."
 					+ " Using this method, it should be possible to import scoreboards created by other plugins.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "player")
+					);
 		}
 	}
 	
@@ -242,7 +254,7 @@ public class Scoreboards {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCPlayer p = Static.GetPlayer(args[0].val(), environment, t);
 			p.setScoreboard(getBoard(args[1].val(), t));
 			return new CVoid(t);
 		}
@@ -256,8 +268,19 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {player, scoreboard} Sets the scoreboard to be used by a player."
+			return "Sets the scoreboard to be used by a player."
 					+ " The scoreboard argument is the id of a registered scoreboard.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "player"),
+						new Argument("", CString.class, "scoreboard")
+					);
 		}
 	}
 	
@@ -287,9 +310,17 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "array {} Returns an array of the registered scoreboard ID's."
+			return "Returns an array of the registered scoreboard ID's."
 					+ " The special scoreboard '"+ MAIN + "' represents the server's main"
 					+ " scoreboard which can be managed by the vanilla /scoreboard command.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 	}
 	
@@ -444,8 +475,18 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {name} Creates a new scoreboard identified by the given name,"
+			return "Creates a new scoreboard identified by the given name,"
 					+ " and stores it internally for later use. Throws an exception if the name is already in use.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "name")
+					);
 		}
 	}
 	
@@ -820,7 +861,7 @@ public class Scoreboards {
 			String id = args[0].val();
 			boolean nullify = true;
 			if (args.length == 2) {
-				nullify = Static.getBoolean(args[1]);
+				nullify = args[1].primitive(t).castToBoolean();
 			}
 			if (nullify) {
 				MCScoreboard s = getBoard(id, t);
@@ -850,11 +891,22 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {scoreboard, [nullify]} Stops tracking the given scoreboard, unless it is '"
-					+ MAIN + "', because that never goes away. If nullify is true (defaults to true),"
+			return "Stops tracking the given scoreboard. If nullify is true,"
 					+ " all scores, teams, and objectives will be cleared,"
 					+ " and all tracked players currently online will be switched to the main scoreboard,"
-					+ " essentially removing all references to the board so it can be garbage-collected.";
+					+ " essentially removing all references to the board so it can be garbage-collected."
+					+ " The scoreboard cannot be \"" + MAIN + "\" because that board never goes away.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "scoreboard").addAnnotation(new FormatString("(?i)(?!" + Pattern.quote(MAIN) + ")")),
+						new Argument("", CBoolean.class, "nullify").setOptionalDefault(true)
+					);
 		}
 	}
 	
@@ -1048,13 +1100,9 @@ public class Scoreboards {
 				throw new ScoreboardException("No team by that name exists.", t);
 			}
 			if (args[1] instanceof CArray) {
-				CArray options = (CArray) args[1];
-				if (options.containsKey("friendlyfire")) {
-					team.setAllowFriendlyFire(Static.getBoolean(options.get("friendlyfire", t)));
-				}
-				if (options.containsKey("friendlyinvisibles")) {
-					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t)));
-				}
+				Team.TeamOptions options = MObject.Construct(Team.TeamOptions.class, (CArray)args[1], t);				
+				team.setAllowFriendlyFire(options.friendlyfire);
+				team.setCanSeeFriendlyInvisibles(options.friendlyinvisibles);
 			} else {
 				throw new Exceptions.FormatException("Expected arg 2 to be an array.", t);
 			}
@@ -1070,8 +1118,19 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array,"
-					+ " checking for keys 'friendlyfire' and 'friendlyinvisibles'. " + DEF_MSG;
+			return "Sets various options about the team. " + DEF_MSG;
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "teamName"),
+						new Argument("", Team.TeamOptions.class, "options"),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
+					);
 		}
 		
 	}

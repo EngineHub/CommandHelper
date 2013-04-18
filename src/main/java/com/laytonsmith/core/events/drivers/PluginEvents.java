@@ -14,6 +14,7 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Map;
 
 /**
@@ -42,7 +43,7 @@ public class PluginEvents {
 					+ " {player|channel|bytes}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent)e;
 				
@@ -86,7 +87,7 @@ public class PluginEvents {
 			return Driver.PLUGIN_MESSAGE_RECEIVED;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			return false;
 		}
 
