@@ -253,7 +253,7 @@ public class EntityManagement {
 		}
 
 	}
-
+	
 	@api
 	public static class set_entity_velocity extends EntitySetterFunction {
 
