@@ -47,6 +47,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
     public int getRemainingFireTicks();
 
+	public MCScoreboard getScoreboard();
+
     public int getTotalExperience();
 
 	public float getWalkSpeed();
@@ -86,6 +88,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public void setPlayerWeather(MCWeather type);
 
     public void setRemainingFireTicks(int i);
+
+	public void setScoreboard(MCScoreboard board);
 
     public void setTempOp(Boolean value) throws Exception;
 

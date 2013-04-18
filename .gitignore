@@ -11,6 +11,7 @@ nbactions-release-profile.xml
 nbactions.xml
 true
 /logs/
+/.logs/
 /preferences.txt
 .DS_Store
 /test-backend/

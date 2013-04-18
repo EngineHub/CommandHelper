@@ -470,7 +470,7 @@ public class PlayerManagement {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException,
-					ExceptionType.FormatException, ExceptionType.CastException};
+					ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.PluginInternalException};
 		}
 
 		public boolean isRestricted() {
@@ -507,7 +507,14 @@ public class PlayerManagement {
 				}
 			}
 			Static.AssertPlayerNonNull(p, t);
-			MCBlock b = p.getTargetBlock(trans, 10000, false);
+			MCBlock b;
+			try {
+				b = p.getTargetBlock(trans, 10000, false);
+			} catch (IllegalStateException ise) {
+				throw new ConfigRuntimeException("The server's method of finding the target block has failed."
+						+ " There is nothing that can be done about this except standing somewhere else.",
+						ExceptionType.PluginInternalException, t);
+			}
 			if (b == null) {
 				throw new ConfigRuntimeException("No block in sight, or block too far",
 						ExceptionType.RangeException, t);
@@ -823,7 +830,12 @@ public class PlayerManagement {
 			}
 			if (index == 2 || index == -1) {
 				//MCPlayer cursor
-				MCBlock b = p.getTargetBlock(null, 200);
+				MCBlock b;
+				try {
+					b = p.getTargetBlock(null, 200);
+				} catch (IllegalStateException ise) {
+					b = null;
+				}
 				if (b == null) {
 					retVals.add(Construct.GetNullConstruct(t));
 				} else {

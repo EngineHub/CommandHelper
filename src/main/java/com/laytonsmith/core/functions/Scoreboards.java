@@ -1,12 +1,14 @@
 package com.laytonsmith.core.functions;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCScoreboard;
-import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
@@ -30,48 +32,283 @@ import java.util.List;
  * @author jb_aero
  */
 public class Scoreboards {
+	
 	public static String docs() {
 		return "A class of functions for manipulating the server scoreboard.";
 	}
 	
-	public static abstract class SBFunction extends AbstractFunction {
+	/**
+	 * The displayname storing the server's main scoreboard
+	 */
+	public static final String MAIN = "main";
+	private static final String DEF_MSG = "Scoreboard defaults to '" + MAIN + "' if not given.";
+	private static Map<String, MCScoreboard> boards = new HashMap<String, MCScoreboard>();
+	
+	static {
+		if (!isBoard(MAIN)) {
+			addBoard(MAIN, Static.getServer().getMainScoreboard(), Target.UNKNOWN);
+		}
+	}
+	
+	/**
+	 * Checks if a scoreboard is being tracked
+	 * @param id Name to check for
+	 * @return if there is a scoreboard with the given id
+	 */
+	public static boolean isBoard(String id) {
+		return boards.containsKey(id);
+	}
 
+	/**
+	 * Checks if a scoreboard is being tracked
+	 * @param board Scoreboard to check for
+	 * @return if the given scoreboard is already being tracked
+	 */
+	public static boolean isBoard(MCScoreboard board) {
+		for (MCScoreboard s : boards.values()) {
+			if (s.equals(board)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Adds a scoreboard to the cache
+	 * @param id The displayname to save the new scoreboard as
+	 * @param board Scoreboard, either from {@link MCServer#getNewScoreboard} or {@link MCPlayer#getScoreboard()}
+	 * @param t
+	 * @throws ConfigRuntimeException if the cache already contains the board or the id
+	 */
+	public static void addBoard(String id, MCScoreboard board, Target t) {
+		if (isBoard(id)) {
+			throw new ScoreboardException("That id is already in use.", t);
+		}
+		if (isBoard(board)) {
+			throw new ScoreboardException("That Scoreboard is already added.", t);
+		}
+		boards.put(id, board);
+	}
+	
+	/**
+	 * Gets a scoreboard from the cache
+	 * @param id Name of the scoreboard to look for
+	 * @param t
+	 * @return the scoreboard with the given id
+	 * @throws ConfigRuntimeException if the cache does not contain id
+	 */
+	public static MCScoreboard getBoard(String id, Target t) {
+		if (!isBoard(id)) {
+			throw new ScoreboardException("The specified scoreboard does not exist.", t);
+		}
+		return boards.get(id);
+	}
+	
+	/**
+	 * Searches the cache for the given scoreboard, and returns the ID matching it.
+	 * @param board The scoreboard to find the ID for
+	 * @param t
+	 * @return the ID of the scoreboard
+	 * @throws ConfigRuntimeException if the cache does not contain the given scoreboard
+	 */
+	public static String getBoardID(MCScoreboard board, Target t) {
+		for (Map.Entry<String, MCScoreboard> e : boards.entrySet()) {
+			if (board.equals(e.getValue())) {
+				return e.getKey();
+			}
+		}
+		throw new ScoreboardException("The given scoreboard has not been registered yet.", t);
+	}
+	
+	/**
+	 * Removes a scoreboard from the cache, without clearing any of its data
+	 * @param id The scoreboard to remove
+	 * @param t
+	 * @throws ConfigRuntimeException if used on MAIN or if the cache does not contain id
+	 */
+	public static void removeBoard(String id, Target t) {
+		if (id.equalsIgnoreCase(MAIN)) {
+			throw new ScoreboardException("Cannot remove the main server scoreboard.", t);
+		}
+		if (!isBoard(id)) {
+			throw new ScoreboardException("The specified scoreboard does not exist.", t);
+		}
+		boards.remove(id);
+	}
+	
+	/**
+	 * A shortcut for making a scoreboard argument optional
+	 * @param numArgsToReadName the number of arguments that will cause the function to check user input
+	 * @param indexOfName the index that will contain the displayname of the scoreboard
+	 * @param t
+	 * @param args the array of arguments passed to the function
+	 * @return the scoreboard chosen, defaulting to main if numArgsToReadName was not matched
+	 */
+	public static MCScoreboard assignBoard(int numArgsToReadName, int indexOfName, Target t, Construct... args) {
+		if (args.length == numArgsToReadName) {
+			return getBoard(args[indexOfName].val(), t);
+		}
+		return getBoard(MAIN, t);
+	}
+	
+	public static class ScoreboardException extends ConfigRuntimeException {
+		public ScoreboardException(String msg, Target t) {
+			super(msg, ExceptionType.ScoreboardException, t);
+		}
+	}
+	
+	/**
+	 * Contains methods that should be the same for most scoreboard functions
+	 */
+	public static abstract class SBFunction extends AbstractFunction {
+		
+		/**
+		 * @return true
+		 */
 		public boolean isRestricted() {
 			return true;
 		}
-
+		/**
+		 * @return false
+		 */
 		public Boolean runAsync() {
 			return false;
 		}
-
+		/**
+		 * @return {@link CHVersion#V3_3_1}
+		 */
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+		/**
+		 * @return Array containing only {@link ExceptionType#ScoreboardException}
+		 */
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.ScoreboardException};
 		}
 	}
 	
 	public static class Objective extends MObject {
 		public String name;
-		public String displayName;
+		public String displayname;
 		public MCDisplaySlot slot;
 		public boolean modifiable;
 		public String criteria;
 	}
 	
 	@api
-	public static class get_objectives extends SBFunction {
+	public static class get_pscoreboard extends SBFunction {
 
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.ScoreboardException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = Static.GetPlayer(args[0], t);
+			String ret;
+			try {
+				ret = getBoardID(p.getScoreboard(), t);
+			} catch (ConfigRuntimeException cre) {
+				ret = p.getName();
+				addBoard(ret, p.getScoreboard(), t);
+			}
+			return new CString(ret, t);
+		}
+
+		public String getName() {
+			return "get_pscoreboard";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "scoreboard {player} Returns the id of the scoreboard assigned to a player."
+					+ " If it is not already cached, it will be added using the player's name."
+					+ " Using this method, it should be possible to import scoreboards created by other plugins.";
+		}
+	}
+	
+	@api
+	public static class set_pscoreboard extends SBFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.ScoreboardException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = Static.GetPlayer(args[0], t);
+			p.setScoreboard(getBoard(args[1].val(), t));
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_pscoreboard";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "void {player, scoreboard} Sets the scoreboard to be used by a player."
+					+ " The scoreboard argument is the id of a registered scoreboard.";
+		}
+	}
+	
+	@api
+	public static class get_scoreboards extends SBFunction {
+
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCScoreboard s = Static.getServer().getMainScoreboard();
+			CArray ret = new CArray(t);
+			for (String id : boards.keySet()) {
+				ret.push(new CString(id, t));
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "get_scoreboards";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "array {} Returns an array of the registered scoreboard ID's."
+					+ " The special scoreboard '"+ MAIN + "' represents the server's main"
+					+ " scoreboard which can be managed by the vanilla /scoreboard command.";
+		}
+	}
+	
+	@api
+	public static class get_objectives extends SBFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCScoreboard s;
+			if (args.length == 0) {
+				s = getBoard(MAIN, t);
+			} else {
+				s = getBoard(args[0].val(), t);
+			}
 			Set<MCObjective> os;
-			if (args.length == 1) {
+			if (args.length == 2) {
 				MCCriteria crit;
 				try {
-					crit = MCCriteria.valueOf(args[0].val());
+					crit = MCCriteria.valueOf(args[1].val());
 				} catch (IllegalArgumentException iae) {
 					crit = MCCriteria.DUMMY;
 				}
@@ -83,7 +320,7 @@ public class Scoreboards {
 			for (MCObjective o : os) {
 				Objective obj = new Objective();
 				obj.name = o.getName();
-				obj.displayName = o.getDisplayName();
+				obj.displayname = o.getDisplayName();
 				obj.slot = o.getDisplaySlot();
 				obj.modifiable = o.isModifiable();
 				obj.criteria = o.getCriteria();
@@ -97,11 +334,12 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{0, 1};
+			return new Integer[]{0, 1, 2};
 		}
 
 		public String docs() {
-			return "Returns an array of arrays about the objectives in the current scoreboard."
+			return "Returns an array of arrays about the objectives"
+					+ " on the given scoreboard, which defaults to '" + MAIN + "' if not given."
 					+ " If criteria is given, only objectives with that criteria will be returned."
 					+ " The arrays contain the keys name, displayname, slot, modifiable, and criteria.";
 		}
@@ -119,30 +357,41 @@ public class Scoreboards {
 	
 	public static class Team extends MObject {
 		public String name;
-		public String displayName;
+		public String displayname;
 		public String prefix;
 		public String suffix;
 		public int size;
 		public List<String> players;
+		public TeamOptions options;
+		
+		@typename("TeamOptions")
+		public static class TeamOptions extends MObject {
+			public boolean friendlyfire;
+			public boolean friendlyinvisibles;
+		}
 	}
 	@api
 	public static class get_teams extends SBFunction {
 
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
-		}
-
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			Set<MCTeam> ts = Static.getServer().getMainScoreboard().getTeams();
+			MCScoreboard s;
+			if (args.length == 0) {
+				s = getBoard(MAIN, t);
+			} else {
+				s = getBoard(args[0].val(), t);
+			}
 			CArray ret = new CArray(t);
-			for (MCTeam team : ts) {
+			for (MCTeam team : s.getTeams()) {
 				Team to = new Team();
 				to.name = team.getName();
-				to.displayName = team.getDisplayName();
+				to.displayname = team.getDisplayName();
 				to.prefix = team.getPrefix();
 				to.suffix = team.getSuffix();
 				to.size = team.getSize();
+				to.options = new Team.TeamOptions();
+				to.options.friendlyfire = team.allowFriendlyFire();
+				to.options.friendlyinvisibles = team.canSeeFriendlyInvisibles();
 				List<String> pl = new ArrayList<String>();
 				for (MCOfflinePlayer ofp : team.getPlayers()) {
 					pl.add(ofp.getName());
@@ -158,11 +407,12 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{0};
+			return new Integer[]{0, 1};
 		}
 
 		public String docs() {
-			return "Returns an array of Teams, which describes the teams on the current scoreboard.";
+			return "Returns an array of arrays about the teams on the given scoreboard,"
+					+ " which defaults to '" + MAIN + "' if not given.";
 		}
 		
 		public Argument returnType() {
@@ -170,34 +420,62 @@ public class Scoreboards {
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.NONE;
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
+					);
+		}
+	}
+	
+	@api
+	public static class create_scoreboard extends SBFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			addBoard(args[0].val(), Static.getServer().getNewScoreboard(), t);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "create_scoreboard";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {name} Creates a new scoreboard identified by the given name,"
+					+ " and stores it internally for later use. Throws an exception if the name is already in use.";
 		}
 	}
 	
 	@api
 	public static class create_objective extends SBFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException};
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
-
+		
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCScoreboard s = Static.getServer().getMainScoreboard();
+			MCScoreboard s = assignBoard(3, 2, t, args);
 			String name = args[0].val();
+			if (name.length() > 16) {
+				throw new Exceptions.LengthException("Objective names should be no more than 16 characters", t);
+			}
 			MCCriteria criteria = MCCriteria.DUMMY;
 			if (args.length == 2) {
 				try {
 					criteria = MCCriteria.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException iae) {
-					//Ignored
+					// Leave as dummy
 				}
 			}
 			try {
 				s.registerNewObjective(name, criteria.getCriteria());
 			} catch (IllegalArgumentException iae) {
-				throw new ConfigRuntimeException("An objective by that name already exists.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("An objective by that name already exists.", t);
 			}
 			return new CVoid(t);
 		}
@@ -207,14 +485,15 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{1, 2, 3};
 		}
 
 		public String docs() {
 			return "Adds a new objective to the scoreboard,"
-					+ " throwing an exception if the name is already in use."
-					+ " You can put anything for the criteria, but only the Criteria enum values are server"
-					+ " supported.";
+					+ " throwing a ScoreboardException if the name is already in use. You can put anything,"
+					+ " but if none of the other values match, 'dummy' will be used."
+					+ " Those values which are not 'dummy' are server-managed."
+					+ " Throws a LengthException if the name is more than 16 characters. " + DEF_MSG;
 		}
 		
 		public Argument returnType() {
@@ -224,7 +503,8 @@ public class Scoreboards {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "name"),
-						new Argument("", MCCriteria.class, CString.class, "criteria").setOptionalDefault(MCCriteria.DUMMY)
+						new Argument("", MCCriteria.class, CString.class, "criteria").setOptionalDefault(MCCriteria.DUMMY),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
 					);
 		}
 	}
@@ -232,19 +512,22 @@ public class Scoreboards {
 	@api
 	public static class create_team extends SBFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException};
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
-
+		
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCScoreboard s = Static.getServer().getMainScoreboard();
+			MCScoreboard s = assignBoard(2, 1, t, args);
 			String name = args[0].val();
+			if (name.length() > 16) {
+				throw new Exceptions.LengthException("Team names should be no more than 16 characters.", t);
+			}
 			try {
 				s.registerNewTeam(name);
 			} catch (IllegalArgumentException iae) {
-				throw new ConfigRuntimeException("A team by that name already exists.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("A team by that name already exists.", t);
 			}
 			return new CVoid(t);
 		}
@@ -254,12 +537,13 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		public String docs() {
 			return "Adds a new team to the scoreboard,"
-					+ " throws an exception if a team already exists with the given name.";
+					+ " throws a ScoreboardException if a team already exists with the given name."
+					+ " Throws a LengthException if the team name is more than 16 characters. " + DEF_MSG;
 		}
 		
 		public Argument returnType() {
@@ -268,20 +552,22 @@ public class Scoreboards {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", CString.class, "name")
+						new Argument("", CString.class, "name"),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
 					);
 		}
 	}
 	
 	@typename("ObjectiveDisplay")
 	public static class ObjectiveDisplay extends MObject {
-		public String name;
+		public String displayname;
 		public MCDisplaySlot slot;
 	}
 	
 	@api
 	public static class set_objective_display extends SBFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.LengthException,
 					ExceptionType.ScoreboardException};
@@ -289,25 +575,24 @@ public class Scoreboards {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCScoreboard s = Static.getServer().getMainScoreboard();
+			MCScoreboard s = assignBoard(3, 2, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if (o == null) {
-				throw new ConfigRuntimeException("No objective by that name exists.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("No objective by that name exists.", t);
 			}
 			ObjectiveDisplay dis;
 			if (args[1] instanceof CArray) {
 				dis = MObject.Construct(ObjectiveDisplay.class, (CArray) args[1], t);
 			} else {
 				dis = new ObjectiveDisplay();
-				dis.name = args[1].val();
+				dis.displayname = args[1].val();
 			}
-			if(dis.name != null){
-				if (dis.name.length() > 32) {
-					throw new ConfigRuntimeException("Display name can only be 32 characters but was " + dis.name.length(),
+			if(dis.displayname != null){
+				if (dis.displayname.length() > 32) {
+					throw new ConfigRuntimeException("Display name can only be 32 characters but was " + dis.displayname.length(),
 							ExceptionType.LengthException, t);
 				}
-				o.setDisplayName(dis.name);
+				o.setDisplayName(dis.displayname);
 			} else {
 				o.setDisplayName(o.getName());
 			}
@@ -324,14 +609,13 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {objectiveName, array | objectiveName, displayName} Sets the display"
-					+ " name and/or slot of the given objective. If arg 2 is not an array,"
+			return "void {objectiveName, array, [scoreboard] | objectiveName, displayname, [scoreboard]}"
+					+ " Sets the display name and/or slot of the given objective. If arg 2 is not an array,"
 					+ " it is assumed to be the displayname, otherwise arg 2 should be an array"
-					+ " with keys 'name' and/or 'slot', affecting their respective properties."
+					+ " with keys 'displayname' and/or 'slot', affecting their respective properties."
 					+ " Null name resets it to the actual name, and null slot removes it from"
-					+ " all displays. Slot can be one of: "
-					+ StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
-					+ ". Displayname can be a max of 32 characters.";
+					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
+					+ ". Displayname can be a max of 32 characters, otherwise it throws a LengthException. " + DEF_MSG;
 		}
 		
 		public Argument returnType() {
@@ -348,7 +632,7 @@ public class Scoreboards {
 	
 	@typename("TeamDisplay")
 	public static class TeamDisplay extends MObject {
-		public String name;
+		public String displayname;
 		public String prefix;
 		public String suffix;
 	}
@@ -356,32 +640,31 @@ public class Scoreboards {
 	@api
 	public static class set_team_display extends SBFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.LengthException,
-					ExceptionType.ScoreboardException};
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCScoreboard s = Static.getServer().getMainScoreboard();
+			MCScoreboard s = assignBoard(3, 2, t, args);
 			MCTeam o = s.getTeam(args[0].val());
 			if (o == null) {
-				throw new ConfigRuntimeException("No team by that name exists.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("No team by that name exists.", t);
 			}
 			TeamDisplay dis;
 			if (args[1] instanceof CArray) {
 				dis = MObject.Construct(TeamDisplay.class, (CArray)args[1], t);
 			} else {
 				dis = new TeamDisplay();
-				dis.name = args[1].val();
+				dis.displayname = args[1].val();
 			}
-			if (dis.name != null) {
-				if (dis.name.length() > 32) {
-					throw new ConfigRuntimeException("Display name can only be 32 characters but was " + dis.name.length(),
+			if (dis.displayname != null) {
+				if (dis.displayname.length() > 32) {
+					throw new ConfigRuntimeException("Display name can only be 32 characters but was " + dis.displayname.length(),
 							ExceptionType.LengthException, t);
 				}
-				o.setDisplayName(dis.name);
+				o.setDisplayName(dis.displayname);
 			} else {
 				o.setDisplayName(o.getName());
 			}
@@ -411,16 +694,18 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		public String docs() {
-			return "void {teamName, array | teamName, displayName} Sets the display"
-					+ " name, prefix, and/or suffix of the given team. If arg 2 is not an array,"
-					+ " it is assumed to be the displayname, otherwise arg 2 should be an array"
-					+ " with keys 'name', 'prefix', and/or 'suffix', affecting their respective properties."
+			return "void {teamName, array, [scoreboard] | teamName, displayname, [scoreboard]}"
+					+ " Sets the display name, prefix, and/or suffix of the given team."
+					+ " If arg 2 is not an array, it is assumed to be the displayname,"
+					+ " otherwise arg 2 should be an array with keys 'displayname', 'prefix',"
+					+ " and/or 'suffix', affecting their respective properties."
 					+ " Null name resets it to the actual name, and null prefix or suffix removes it from"
-					+ " all displays. name can be a max of 32 characters, prefix and suffix can only be 16.";
+					+ " all displays. Displayname can be a max of 32 characters,"
+					+ " prefix and suffix can only be 16, otherwise a LengthException is thrown. " + DEF_MSG;
 		}
 		
 		public Argument returnType() {
@@ -430,27 +715,31 @@ public class Scoreboards {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "teamName"),
-						new Argument("", CString.class, TeamDisplay.class, "info")
+						new Argument("", CString.class, TeamDisplay.class, "info"),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
 					);
 		}
 	}
 	
 	@api
 	public static class team_add_player extends SBFunction {
-
+		
+		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException};
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCServer s = Static.getServer();
-			MCTeam team = s.getMainScoreboard().getTeam(args[0].val());
+			MCScoreboard s = assignBoard(3, 2, t, args);
+			MCTeam team = s.getTeam(args[0].val());
 			if (team == null) {
-				throw new ConfigRuntimeException("No team by that name exists.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("No team by that name exists.", t);
 			}
-			team.addPlayer(s.getOfflinePlayer(args[1].val()));
+			if (args[1].val().length() > 16) {
+				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
+			}
+			team.addPlayer(Static.getServer().getOfflinePlayer(args[1].val()));
 			return new CVoid(t);
 		}
 
@@ -459,13 +748,14 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		public String docs() {
 			return "Adds a player to a team, given the team exists."
-					+ " Offline players can be added, so the name must be exact."
-					+ " The player will be removed from any other team on the same scoreboard.";
+					+ " Offline players can be added, so the name must be exact. Alternatively,"
+					+ " this allows you to add fake players, but names can still only be 16 characters."
+					+ " The player will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
 		
 		public Argument returnType() {
@@ -475,7 +765,8 @@ public class Scoreboards {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "teamName"),
-						new Argument("", CString.class, "player")
+						new Argument("", CString.class, "player"),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
 					);
 		}
 	}
@@ -483,19 +774,15 @@ public class Scoreboards {
 	@api
 	public static class team_remove_player extends SBFunction {
 
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException};
-		}
-
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCServer s = Static.getServer();
-			MCTeam team = s.getMainScoreboard().getTeam(args[0].val());
+			MCScoreboard s = assignBoard(3, 2, t, args);
+			MCTeam team = s.getTeam(args[0].val());
 			if (team == null) {
-				throw new ConfigRuntimeException("No team by that name exists.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("No team by that name exists.", t);
 			}
-			return new CBoolean(team.removePlayer(s.getOfflinePlayer(args[1].val())), t);
+			return new CBoolean(team.removePlayer(
+					Static.getServer().getOfflinePlayer(args[1].val())), t);
 		}
 
 		public String getName() {
@@ -503,7 +790,7 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		public String docs() {
@@ -519,30 +806,71 @@ public class Scoreboards {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "teamName"),
-						new Argument("", CString.class, "player")
+						new Argument("", CString.class, "player"),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
 					);
 		}
-		
+	}
+	
+	@api
+	public static class remove_scoreboard extends SBFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			String id = args[0].val();
+			boolean nullify = true;
+			if (args.length == 2) {
+				nullify = Static.getBoolean(args[1]);
+			}
+			if (nullify) {
+				MCScoreboard s = getBoard(id, t);
+				for (MCOfflinePlayer p : s.getPlayers()) {
+					s.resetScores(p);
+					if (p.isOnline()) {
+						p.getPlayer().setScoreboard(getBoard(MAIN, t));
+					}
+				}
+				for (MCTeam g : s.getTeams()) {
+					g.unregister();
+				}
+				for (MCObjective o : s.getObjectives()) {
+					o.unregister();
+				}
+			}
+			removeBoard(id, t);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "remove_scoreboard";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {scoreboard, [nullify]} Stops tracking the given scoreboard, unless it is '"
+					+ MAIN + "', because that never goes away. If nullify is true (defaults to true),"
+					+ " all scores, teams, and objectives will be cleared,"
+					+ " and all tracked players currently online will be switched to the main scoreboard,"
+					+ " essentially removing all references to the board so it can be garbage-collected.";
+		}
 	}
 	
 	@api
 	public static class remove_objective extends SBFunction {
 
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException};
-		}
-
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCObjective o = Static.getServer().getMainScoreboard().getObjective(args[0].val());
+			MCScoreboard s = assignBoard(2, 1, t, args);
+			MCObjective o = s.getObjective(args[0].val());
 			try {
 				o.unregister();
 			} catch (NullPointerException npe) {
-				throw new ConfigRuntimeException("The objective does not exist.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("The objective does not exist.", t);
 			} catch (IllegalStateException ise) {
-				throw new ConfigRuntimeException("The objective has already been unregistered.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("The objective has already been unregistered.", t);
 			}
 			return new CVoid(t);
 		}
@@ -552,11 +880,11 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		public String docs() {
-			return "Unregisters an objective from the scoreboard.";
+			return "Unregisters an objective from the scoreboard. " + DEF_MSG;
 		}
 		
 		public Argument returnType() {
@@ -565,7 +893,8 @@ public class Scoreboards {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", CString.class, "objectiveName")
+						new Argument("", CString.class, "objectiveName"),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
 					);
 		}
 	}
@@ -573,21 +902,16 @@ public class Scoreboards {
 	@api
 	public static class remove_team extends SBFunction {
 
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException};
-		}
-
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCTeam team = Static.getServer().getMainScoreboard().getTeam(args[0].val());
+			MCScoreboard s = assignBoard(2, 1, t, args);
+			MCTeam team = s.getTeam(args[0].val());
 			try {
 				team.unregister();
 			} catch (NullPointerException npe) {
-				throw new ConfigRuntimeException("The team does not exist.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("The team does not exist.", t);
 			} catch (IllegalStateException ise) {
-				throw new ConfigRuntimeException("The team has already been unregistered.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("The team has already been unregistered.", t);
 			}
 			return new CVoid(t);
 		}
@@ -597,11 +921,11 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		public String docs() {
-			return "Unregisters a team from the scoreboard.";
+			return "Unregisters a team from the scoreboard. " + DEF_MSG;
 		}
 		
 		public Argument returnType() {
@@ -610,40 +934,37 @@ public class Scoreboards {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", CString.class, "teamName")
+						new Argument("", CString.class, "teamName"),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
 					);
 		}
 	}
 	
 	@api
-	public static class get_score extends SBFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException};
-		}
+	public static class get_pscore extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCObjective o = Static.getServer().getMainScoreboard().getObjective(args[0].val());
+			MCScoreboard s = assignBoard(3, 2, t, args);
+			MCObjective o = s.getObjective(args[0].val());
 			if (o == null) {
-				throw new ConfigRuntimeException("The given objective does not exist.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("The given objective does not exist.", t);
 			}
 			MCOfflinePlayer ofp = Static.getServer().getOfflinePlayer(args[1].val());
 			return new CInt(o.getScore(ofp).getScore(), t);
 		}
 
 		public String getName() {
-			return "get_score";
+			return "get_pscore";
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		public String docs() {
 			return "Returns the player's score for the given objective."
-					+ " Works for offline players, so the name must be exact.";
+					+ " Works for offline players, so the name must be exact. " + DEF_MSG;
 		}
 		
 		public Argument returnType() {
@@ -653,24 +974,29 @@ public class Scoreboards {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "objectiveName"),
-						new Argument("", CString.class, "player")
+						new Argument("", CString.class, "player"),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
 					);
 		}
 	}
 	
 	@api
-	public static class set_score extends SBFunction {
+	public static class set_pscore extends SBFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException};
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
-
+		
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCObjective o = Static.getServer().getMainScoreboard().getObjective(args[0].val());
+			MCScoreboard s = assignBoard(4, 3, t, args);
+			MCObjective o = s.getObjective(args[0].val());
 			if (o == null) {
-				throw new ConfigRuntimeException("The given objective does not exist.",
-						ExceptionType.ScoreboardException, t);
+				throw new ScoreboardException("The given objective does not exist.", t);
+			}
+			if (args[1].val().length() > 16) {
+				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
 			}
 			MCOfflinePlayer ofp = Static.getServer().getOfflinePlayer(args[1].val());
 			o.getScore(ofp).setScore(args[2].primitive(t).castToInt32(t));
@@ -678,16 +1004,18 @@ public class Scoreboards {
 		}
 
 		public String getName() {
-			return "set_score";
+			return "set_pscore";
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{3};
+			return new Integer[]{3, 4};
 		}
 
 		public String docs() {
 			return "Sets the player's score for the given objective."
-					+ " Works for offline players, so the name must be exact.";
+					+ " Works for offline players, so the name must be exact. Alternatively,"
+					+ " you can set scores for fake players to create custom displays,"
+					+ " but the 16 character name limit still applies. " + DEF_MSG;
 		}
 		
 		public Argument returnType() {
@@ -698,8 +1026,53 @@ public class Scoreboards {
 			return ArgumentBuilder.Build(
 						new Argument("", CString.class, "objectiveName"),
 						new Argument("", CString.class, "player"),
-						new Argument("", CInt.class, "score")
+						new Argument("", CInt.class, "score"),
+						new Argument("", CString.class, "scoreboard").setOptionalDefault(MAIN)
 					);
 		}
+	}
+	
+	@api
+	public static class set_team_options extends SBFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.ScoreboardException, ExceptionType.FormatException};
+		}
+		
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCScoreboard s = assignBoard(3, 2, t, args);
+			MCTeam team = s.getTeam(args[0].val());
+			if (team == null) {
+				throw new ScoreboardException("No team by that name exists.", t);
+			}
+			if (args[1] instanceof CArray) {
+				CArray options = (CArray) args[1];
+				if (options.containsKey("friendlyfire")) {
+					team.setAllowFriendlyFire(Static.getBoolean(options.get("friendlyfire", t)));
+				}
+				if (options.containsKey("friendlyinvisibles")) {
+					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t)));
+				}
+			} else {
+				throw new Exceptions.FormatException("Expected arg 2 to be an array.", t);
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_team_options";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array,"
+					+ " checking for keys 'friendlyfire' and 'friendlyinvisibles'. " + DEF_MSG;
+		}
+		
 	}
 }

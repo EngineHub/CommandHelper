@@ -7,6 +7,8 @@ import com.laytonsmith.core.events.BindableEvent;
  *
  * @author Jason Unger <entityreborn@gmail.com>
  */
-public interface MCPlayerEvent extends BindableEvent {
-	MCPlayer getPlayer();
+public interface MCPluginIncomingMessageEvent extends BindableEvent {
+	public String getChannel();
+	public byte[] getBytes();
+	public MCPlayer getPlayer();
 }
