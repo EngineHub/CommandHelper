@@ -48,6 +48,10 @@ All braceable statements MUST use braces, and newlines.
 If you have more than 2 commits, please rebase, unless the commit has already
 been reviewed, in which case new commits should remain separate. (This allows reviewers
 to just see the changes in the new commits, instead of having to re-review all changes.)
+Do not make formatting changes to unrelated code, unless the entire commit is *soley* formatting
+changes. In general though, even that is discouraged, because the full commit needs to be reviewed
+regardless, and it's far easier for a single individual to do global code cleanup tools, rather
+than many individuals.
 
 Before committing, be sure to go through this checklist:
 	* The boilerplate unit tests should all pass. Unit tests for unrelated code does not need to pass,
