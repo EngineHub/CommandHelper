@@ -172,9 +172,14 @@ public class BukkitConvertor extends AbstractConvertor {
     	}
     	//TODO: Change this to a reflection mechanism, this is getting tiresome to do.
 		//truth.
+    	if (be instanceof EnderSignal) {
+    		return new BukkitMCEnderSignal((EnderSignal) be);
+    	}
+    	
 		if (be instanceof Firework) {
 			return new BukkitMCFirework((Firework) be);
 		}
+		
 		if(be instanceof FallingBlock){
 			return new BukkitMCFallingBlock((FallingBlock) be);
 		}
@@ -225,6 +230,10 @@ public class BukkitConvertor extends AbstractConvertor {
     	
 		if (be instanceof Enderman) {
 			return new BukkitMCEnderman((Enderman) be);
+		}
+		
+		if (be instanceof Sheep) {
+			return new BukkitMCSheep((Sheep) be);
 		}
 		
     	if(be instanceof Ageable){

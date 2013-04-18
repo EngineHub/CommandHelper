@@ -408,10 +408,18 @@ public class Scoreboards {
 	@api
 	public static class create_objective extends SBFunction {
 
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
+		}
+		
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
 			String name = args[0].val();
+			if (name.length() > 16) {
+				throw new Exceptions.LengthException("Objective names should be no more than 16 characters", t);
+			}
 			MCCriteria criteria = MCCriteria.DUMMY;
 			if (args.length == 2) {
 				try {
@@ -438,20 +446,29 @@ public class Scoreboards {
 
 		public String docs() {
 			return "void {name, [criteria, [scoreboard]]} Adds a new objective to the scoreboard,"
-					+ " throwing an exception if the name is already in use. The vanilla criteria names are "
+					+ " throwing a ScoreboardException if the name is already in use. The vanilla criteria names are "
 					+ StringUtils.Join(MCCriteria.values(), ", ", ", and ") + ". You can put anything,"
 					+ " but if none of the other values match, 'dummy' will be used."
-					+ " Those values which are not 'dummy' are server-managed. " + DEF_MSG;
+					+ " Those values which are not 'dummy' are server-managed."
+					+ " Throws a LengthException if the name is more than 16 characters. " + DEF_MSG;
 		}
 	}
 	
 	@api
 	public static class create_team extends SBFunction {
 
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
+		}
+		
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, 1, t, args);
 			String name = args[0].val();
+			if (name.length() > 16) {
+				throw new Exceptions.LengthException("Team names should be no more than 16 characters.", t);
+			}
 			try {
 				s.registerNewTeam(name);
 			} catch (IllegalArgumentException iae) {
@@ -470,7 +487,8 @@ public class Scoreboards {
 
 		public String docs() {
 			return "void {name, [scoreboard]} Adds a new team to the scoreboard,"
-					+ " throws an exception if a team already exists with the given name. " + DEF_MSG;
+					+ " throws a ScoreboardException if a team already exists with the given name."
+					+ " Throws a LengthException if the team name is more than 16 characters. " + DEF_MSG;
 		}
 	}
 	
@@ -517,8 +535,8 @@ public class Scoreboards {
 					dname = dis.get("displayname", t).val();
 				}
 				if (dname.length() > 32) {
-					throw new ConfigRuntimeException("Displayname can only be 32 characters but was "
-							+ dname.length(), ExceptionType.LengthException, t);
+					throw new Exceptions.LengthException("Displayname can only be 32 characters but was "
+							+ dname.length(), t);
 				}
 				o.setDisplayName(dname);
 			}
@@ -573,8 +591,8 @@ public class Scoreboards {
 					dname = dis.get("displayname", t).val();
 				}
 				if (dname.length() > 32) {
-					throw new ConfigRuntimeException("Displayname can only be 32 characters but was "
-							+ dname.length(), ExceptionType.LengthException, t);
+					throw new Exceptions.LengthException("Displayname can only be 32 characters but was "
+							+ dname.length(), t);
 				}
 				o.setDisplayName(dname);
 			}
@@ -586,8 +604,8 @@ public class Scoreboards {
 					prefix = dis.get("prefix", t).val();
 				}
 				if (prefix.length() > 16) {
-					throw new ConfigRuntimeException("Prefix can only be 16 characters but was "
-							+ prefix.length(), ExceptionType.LengthException, t);
+					throw new Exceptions.LengthException("Prefix can only be 16 characters but was "
+							+ prefix.length(), t);
 				}
 				o.setPrefix(prefix);
 			}
@@ -599,8 +617,8 @@ public class Scoreboards {
 					suffix = dis.get("suffix", t).val();
 				}
 				if (suffix.length() > 16) {
-					throw new ConfigRuntimeException("Suffix can only be 16 characters but was "
-							+ suffix.length(), ExceptionType.LengthException, t);
+					throw new Exceptions.LengthException("Suffix can only be 16 characters but was "
+							+ suffix.length(), t);
 				}
 				o.setSuffix(suffix);
 			}
@@ -629,6 +647,11 @@ public class Scoreboards {
 	
 	@api
 	public static class team_add_player extends SBFunction {
+		
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
+		}
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -636,6 +659,9 @@ public class Scoreboards {
 			MCTeam team = s.getTeam(args[0].val());
 			if (team == null) {
 				throw new ScoreboardException("No team by that name exists.", t);
+			}
+			if (args[1].val().length() > 16) {
+				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
 			}
 			team.addPlayer(Static.getServer().getOfflinePlayer(args[1].val()));
 			return new CVoid(t);
@@ -651,7 +677,8 @@ public class Scoreboards {
 
 		public String docs() {
 			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists."
-					+ " Offline players can be added, so the name must be exact."
+					+ " Offline players can be added, so the name must be exact. Alternatively,"
+					+ " this allows you to add fake players, but names can still only be 16 characters."
 					+ " The player will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
 	}
@@ -821,12 +848,20 @@ public class Scoreboards {
 	@api
 	public static class set_pscore extends SBFunction {
 
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
+		}
+		
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(4, 3, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if (o == null) {
 				throw new ScoreboardException("The given objective does not exist.", t);
+			}
+			if (args[1].val().length() > 16) {
+				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
 			}
 			MCOfflinePlayer ofp = Static.getServer().getOfflinePlayer(args[1].val());
 			o.getScore(ofp).setScore(Static.getInt32(args[2], t));
@@ -843,7 +878,9 @@ public class Scoreboards {
 
 		public String docs() {
 			return "void {objectiveName, player, int, [scoreboard]} Sets the player's score for the given objective."
-					+ " Works for offline players, so the name must be exact. " + DEF_MSG;
+					+ " Works for offline players, so the name must be exact. Alternatively,"
+					+ " you can set scores for fake players to create custom displays,"
+					+ " but the 16 character name limit still applies. " + DEF_MSG;
 		}
 	}
 	
