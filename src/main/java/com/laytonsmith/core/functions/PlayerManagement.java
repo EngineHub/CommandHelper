@@ -2016,7 +2016,7 @@ public class PlayerManagement {
 		}
 	}
 
-		@api(environments = {CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pwalkspeed extends AbstractFunction {
 
 		public String getName() {
@@ -2122,7 +2122,7 @@ public class PlayerManagement {
 	}
 	
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class set_flyspeed extends AbstractFunction {
+	public static class set_pflyspeed extends AbstractFunction {
 
 		public String getName() {
 			return "set_pflyspeed";
