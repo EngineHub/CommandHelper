@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  *
@@ -66,7 +67,12 @@ public class RedisDataSource extends AbstractDataSource {
 	protected boolean set0(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		connect();
 		String ckey = StringUtils.Join(key, ".");
-		String status = connection.set(ckey, value);
+		String status;
+		try{
+			status = connection.set(ckey, value);
+		} catch(JedisConnectionException e){
+			throw new DataSourceException(e);
+		}
 		return "OK".equals(status);
 	}
 
@@ -74,19 +80,32 @@ public class RedisDataSource extends AbstractDataSource {
 	protected void clearKey0(String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		connect();
 		String ckey = StringUtils.Join(key, ".");
-		connection.del(ckey);
+		try{
+			connection.del(ckey);
+		} catch(JedisConnectionException e){
+			throw new DataSourceException(e);
+		}
 	}
 
 	@Override
 	protected String get0(String[] key, boolean bypassTransient) throws DataSourceException {
 		connect();
 		String ckey = StringUtils.Join(key, ".");
-		return connection.get(ckey);
+		try{
+			return connection.get(ckey);
+		} catch(JedisConnectionException e){
+			throw new DataSourceException(e);
+		}
 	}
 
 	public Set<String[]> keySet() throws DataSourceException {
 		connect();
-		Set<String> ret = connection.keys("*");
+		Set<String> ret;
+		try{
+			ret = connection.keys("*");
+		} catch(JedisConnectionException e){
+			throw new DataSourceException(e);
+		}
 		Set<String[]> parsed = new HashSet<String[]>();
 		for(String s : ret){
 			parsed.add(s.split("\\."));

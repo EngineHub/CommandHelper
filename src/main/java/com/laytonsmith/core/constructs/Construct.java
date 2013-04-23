@@ -18,9 +18,7 @@ import org.json.simple.JSONValue;
  * @author layton
  */
 public abstract class Construct implements Cloneable, Comparable<Construct>, Mixed{
-
-
-
+	
     public enum ConstructType {
 
         TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 

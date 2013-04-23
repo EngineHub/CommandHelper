@@ -441,18 +441,26 @@ public class Compiler {
 	@api
 	public static class npe extends DummyFunction {
 
+		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0};
+			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			Object o = null;
-			o.toString();
-			return new CVoid(t);
+			String s = null;
+			if(args.length == 1){
+				s = args[0].val();
+			}
+			if(s == null){
+				throw new NullPointerException();
+			} else {
+				throw new NullPointerException(s);
+			}
 		}
 	}
 

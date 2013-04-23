@@ -320,13 +320,27 @@ public class Script {
 					String emsg = TermColors.RED + "Uh oh! You've found an error in " + Implementation.GetServerType().getBranding()
 							 + ". This is an error caused by your code, so you may be able to find a workaround,"
 							+ " but is ultimately an error in " + Implementation.GetServerType().getBranding()
-							+ " itself. The line of code that caused the error was this:\n" + TermColors.WHITE + f.getName() + "(";
+							+ " itself. The line of code that caused the error was this:\n" + TermColors.WHITE;
 					List<String> args2 = new ArrayList<String>();
+					Map<String, String> vars = new HashMap<String, String>();
+					
 					for(Construct cc : args){
+						if(cc instanceof IVariable){
+							Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc).getName(), cc.getTarget()).ival();
+							String vval = ccc.val();
+							if(ccc instanceof CString){
+								vval = ccc.asString().getQuote();
+							}
+							vars.put(((IVariable)cc).getName(), vval);
+						}
 						if(cc == null){
 							args2.add("java-null");
+						} else if(cc instanceof CString){
+							args2.add(cc.asString().getQuote());
+						} else if(cc instanceof IVariable){
+							args2.add(((IVariable)cc).getName());
 						} else {
-							args2.add(cc.getValue());
+							args2.add(cc.val());
 						}
 					}
 					//Server might not be available in this platform, so let's be sure to ignore those exceptions
@@ -336,6 +350,10 @@ public class Script {
 					} catch(Exception ex){
 						modVersion = Implementation.GetServerType().name();
 					}
+					if(!vars.isEmpty()){
+						emsg += StringUtils.Join(vars, " = ", "\n") + "\n";
+					}
+					emsg += f.getName() + "(";
 					emsg += StringUtils.Join(args2, ", ");
 					emsg += ")\n" + TermColors.RED + "on or around " + m.getTarget() + ".\nPlease report this error to the developers, and be sure to include the version numbers: Server version: "
 							+ modVersion + "; "
