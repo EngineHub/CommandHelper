@@ -285,4 +285,16 @@ public class ArrayHandlingTest {
 			throw new Exception("Did not return the expected value");
 		}
 	}
+	
+	@Test public void testArrayUnique1() throws Exception {
+		assertEquals("{1}", SRun("array_unique(array(1, 1, 1), false)", fakePlayer));
+	}
+	
+	@Test public void testArrayUnique2() throws Exception {
+		assertEquals("{1, 1}", SRun("array_unique(array(1, '1'), true)", fakePlayer));
+	}
+	
+	@Test public void testArrayUnique3() throws Exception {
+		assertEquals("{1}", SRun("array_unique(array(1, '1'), false)", fakePlayer));
+	}
 }
