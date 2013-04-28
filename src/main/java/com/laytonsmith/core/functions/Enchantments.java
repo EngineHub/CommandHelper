@@ -505,11 +505,8 @@ public class Enchantments {
 			 * cache here, and save time on duplicate lookups.
 			 */
 			if (cache.containsKey(args[0].val())) {
-				try {
-					return cache.get(args[0].val()).clone();
-				} catch (CloneNotSupportedException ex) {
-					throw new ConfigRuntimeException(ex.getMessage(), null, t, ex);
-				}
+				return cache.get(args[0].val()).clone();
+
 			}
 			CArray ca = new CArray(t);
 			for (MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
@@ -518,11 +515,8 @@ public class Enchantments {
 				}
 			}
 			cache.put(args[0].val(), ca);
-			try {
-				return ca.clone();
-			} catch (CloneNotSupportedException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), null, t, ex);
-			}
+			return ca.clone();
+
 		}
 	}
 

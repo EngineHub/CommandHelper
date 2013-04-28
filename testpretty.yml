@@ -1,0 +1,6 @@
+a:
+  b: {
+    c1: value2,
+    c2: value3,
+    _: value1
+  }
