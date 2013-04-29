@@ -30,6 +30,7 @@ public enum Driver {
     ENTITY_DAMAGE_PLAYER, 
 	ENTITY_DAMAGE,
 	ENTITY_DEATH,
+	ENTITY_EXPLODE,
 	CREATURE_SPAWN,
 	PLAYER_MOVE,  
 	ITEM_PICKUP,
@@ -44,6 +45,9 @@ public enum Driver {
 	SERVER_PING,
 	ENTITY_ENTER_PORTAL,
 	PLUGIN_MESSAGE_RECEIVED,
+	VEHICLE_ENTER,
+	VEHICLE_LEAVE,
+	VEHICLE_COLLIDE,
 	/**
 	 * Used by events fired from the extension system.
 	 */

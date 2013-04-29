@@ -554,7 +554,7 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		public String docs() {
