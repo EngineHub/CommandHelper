@@ -31,7 +31,44 @@ public class Meta {
 	public static String docs() {
 		return "These functions provide a way to run other commands";
 	}
+/*
+	@api
+	public static class first_load extends AbstractFunction {
 
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CBoolean(CommandHelperPlugin.isFirstLoad(), t);
+		}
+
+		public String getName() {
+			return "first_load";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "boolean {} Returns true if the scripts have not been reloaded since the plugin was enabled."
+					+ " In otherwords, using this in main.ms will return false when you do /reloadaliases.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+*/
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class runas extends AbstractFunction {
 
