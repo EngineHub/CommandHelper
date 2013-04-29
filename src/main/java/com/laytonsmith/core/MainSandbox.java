@@ -4,7 +4,10 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Regex;
 import com.laytonsmith.core.functions.StringHandling;
+import com.laytonsmith.database.DB;
+import com.laytonsmith.database.MySQL;
 import java.net.InetAddress;
+import java.sql.ResultSet;
 
 /**
  * This class is for testing concepts
@@ -100,15 +103,24 @@ public class MainSandbox {
 //		
 //		System.out.println("reg_split took " + (stopRegSplit - startRegSplit) + "ms under " + times + " iterations.");
 //		System.out.println("split took " + (stopSplit - startSplit) + "ms under " + times + " iterations.");
-		InetAddress i1 = InetAddress.getByName("173.194.37.72");
-		System.out.println("i1.toString(): " + i1.toString());
-		System.out.println("i1.getHostAddress(): " + i1.getHostAddress());
-		InetAddress i2 = InetAddress.getByName("173.194.37.72");
-		System.out.println("i2.toString(): " + i2.toString());
-		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
-		System.out.println("i2.getHostName(): " + i2.getHostName());
-		System.out.println("i2.toString(): " + i2.toString());
-		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
+//		InetAddress i1 = InetAddress.getByName("173.194.37.72");
+//		System.out.println("i1.toString(): " + i1.toString());
+//		System.out.println("i1.getHostAddress(): " + i1.getHostAddress());
+//		InetAddress i2 = InetAddress.getByName("173.194.37.72");
+//		System.out.println("i2.toString(): " + i2.toString());
+//		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
+//		System.out.println("i2.getHostName(): " + i2.getHostName());
+//		System.out.println("i2.toString(): " + i2.toString());
+//		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
+		
+		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
+		DB db = new MySQL();
+		db.connect(conn);
+		Object o = db.query("SHOW TABLES;");
+		if(o instanceof ResultSet){
+			ResultSet rs = (ResultSet)o;
+		}
+		System.out.println(o);
 	}
 	
 	

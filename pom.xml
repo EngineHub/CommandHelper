@@ -241,6 +241,7 @@
 		</dependency>
         
 		<!-- Database -->
+		<!-- SQLite -->
 		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
@@ -252,7 +253,16 @@
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
-			<version>2.0.0</version>
+			<version>2.1.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		
+		<!-- MySQL -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.24</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -457,6 +467,7 @@
 									<include>org.mcstats:metrics:jar:*</include>
 									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
 									<include>redis.clients:jedis:jar:*</include>
+									<include>mysql:mysql-connector-java:jar:*</include>
 								</includes>
 							</artifactSet>
 							<filters>
@@ -517,6 +528,12 @@
 								</filter>
 								<filter>
 									<artifact>redis.clients:jedis:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>mysql:mysql-connector-java:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
