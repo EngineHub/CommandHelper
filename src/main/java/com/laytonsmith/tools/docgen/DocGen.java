@@ -203,7 +203,8 @@ public class DocGen {
             } catch (InvocationTargetException ex) {
             } catch (NoSuchMethodException e) {
             } catch (Exception e){
-				e.printStackTrace();
+				e.printStackTrace(System.err);
+				System.err.println("Continuing however.");
 			}
             StringBuilder intro = new StringBuilder();
             if (type.equals("html")) {

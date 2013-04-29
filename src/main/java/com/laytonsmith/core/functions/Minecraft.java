@@ -174,6 +174,8 @@ public class Minecraft {
 						i = Integer.parseInt(split[0]);
 						i2 = Integer.parseInt(split[1]);
 					} catch (NumberFormatException e) {
+					} catch (ArrayIndexOutOfBoundsException e){
+						throw new Exceptions.FormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
 			} else if (args[0] instanceof CArray) {

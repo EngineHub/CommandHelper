@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.NotInitializedYetException;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
@@ -38,7 +39,13 @@ public class Scoreboards {
 	
 	static {
 		if (!isBoard(MAIN)) {
-			addBoard(MAIN, Static.getServer().getMainScoreboard(), Target.UNKNOWN);
+			try{
+				addBoard(MAIN, Static.getServer().getMainScoreboard(), Target.UNKNOWN);
+			} catch(NotInitializedYetException e){
+				//This should only happen during testing or from the shell (or some other cases) so just log
+				//it and continue on.
+				e.printStackTrace(System.err);
+			}
 		}
 	}
 	
