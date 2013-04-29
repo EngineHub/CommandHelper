@@ -1659,7 +1659,7 @@ public class PlayerEvents {
 		}
 	
 		public String docs() {
-			return "{state: <macro> Can be one of" + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
+			return "{state: <macro> Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
 					+ " | player: <macro> The player who is fishing}"
 					+ " Fires when a player casts or reels a fishing rod {player | state | chance | xp"
 					+ " | hook: the fishhook entity | caught: the id of the snared entity, can be a fish item}"

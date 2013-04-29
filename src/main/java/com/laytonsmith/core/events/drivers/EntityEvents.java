@@ -3,11 +3,15 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
@@ -15,6 +19,7 @@ import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
+import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
@@ -32,7 +37,10 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -44,9 +52,107 @@ public class EntityEvents {
     public static String docs(){
         return "Contains events related to an entity";
     }
+    
+	@api
+	public static class entity_explode extends AbstractEvent {
 
-    @api
-    public static class projectile_hit extends AbstractEvent {
+		public String getName() {
+			return "entity_explode";
+		}
+
+		public String docs() {
+			return "{type: <macro> The type of entity exploding. If null is used here, it will match events that"
+					+ " lack a specific entity, such as using the explosion function} Fires when an explosion occurs."
+					+ " The entity itself may not exist if triggered by a plugin. Cancelling this event only protects blocks,"
+					+ " entities are handled in damage events. {id: entityID, or null if no entity"
+					+ " | type: entitytype, or null if no entity | location: where the explosion occurs | blocks | yield}"
+					+ " {blocks: An array of blocks destroyed by the explosion. | yield: Percent of the blocks destroyed"
+					+ " that should drop items. A value greater than 100 will cause more drops than the original blocks.}"
+					+ " {}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCEntityExplodeEvent) {
+				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
+				if (prefilter.containsKey("type")) {
+					if (e.getEntity() == null){
+						if (prefilter.get("type") instanceof CNull || prefilter.get("type").val().equals("null")) {
+							return true;
+						}
+						return false;
+					}
+					Prefilters.match(prefilter, "type", e.getEntity().getType().name(), PrefilterType.MACRO);
+				}
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCEntityExplodeEvent) {
+				Target t = Target.UNKNOWN;
+				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				CArray blocks = new CArray(t);
+				for (MCBlock b : e.getBlocks()) {
+					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()));
+				}
+				ret.put("blocks", blocks);
+				Construct entity = new CNull(t);
+				Construct entitytype = new CNull(t);
+				if (e.getEntity() != null) {
+					entity = new CInt(e.getEntity().getEntityId(), t);
+					entitytype = new CString(e.getEntity().getType().name(), t);
+				}
+				ret.put("id", entity);
+				ret.put("type", entitytype);
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLocation()));
+				ret.put("yield", new CDouble(e.getYield(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityExplodeEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.ENTITY_EXPLODE;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCEntityExplodeEvent) {
+				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
+				if (key.equals("yield")) {
+					e.setYield(Static.getDouble32(value, Target.UNKNOWN));
+					return true;
+				}
+				if (key.equals("blocks")) {
+					if (value instanceof CArray) {
+						CArray ba = (CArray) value;
+						List<MCBlock> blocks = new ArrayList<MCBlock>();
+						for (String b : ba.keySet()) {
+							MCWorld w = e.getLocation().getWorld();
+							MCLocation loc = ObjectGenerator.GetGenerator().location(ba.get(b), w, Target.UNKNOWN);
+							blocks.add(loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+						}
+						e.setBlocks(blocks);
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class projectile_hit extends AbstractEvent {
 
 		public String getName() {
 			return "projectile_hit";
