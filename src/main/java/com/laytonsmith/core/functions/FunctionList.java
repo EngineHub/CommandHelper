@@ -84,34 +84,6 @@ public class FunctionList {
 			}
             System.out.println(Implementation.GetServerType().getBranding() + ": Loaded " + size + " function" + (functions.size()==1?"":"s"));
         }
-        
-        
-
-        //Now pull all the jars from plugins/CommandHelper/functions
-        //TODO Finishing this has been defered until a later date
-        //        File f = new File("plugins/CommandHelper/functions");
-        //        f.mkdirs();
-        //        PluginLoader.loadJars(f.getAbsolutePath());
-        //        for(File file : f.listFiles()){
-        //            try {
-        //                Yaml yaml = new Yaml(new SafeConstructor());
-        //                JarFile jar = new JarFile(file);
-        //                JarEntry entry = jar.getJarEntry("main.yml");
-        //                if (entry == null) {
-        //                    throw new InvalidPluginException(new FileNotFoundException("Jar does not contain main.yml"));
-        //                }
-        //                InputStream stream = jar.getInputStream(entry);
-        //                Map<String, Object> map = (Map<String, Object>)yaml.load(stream);
-        //                System.out.println(map);
-        //                stream.close();
-        //                jar.close();
-        //            } catch(InvalidPluginException ex){
-        //                Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
-        //            } catch (IOException ex) {
-        //                Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
-        //        }
-        //        }
-
     }
 
     
