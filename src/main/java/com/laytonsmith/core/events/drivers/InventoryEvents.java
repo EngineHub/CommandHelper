@@ -88,8 +88,16 @@ public class InventoryEvents {
 				map.put("rawslot", new CInt(e.getRawSlot(), Target.UNKNOWN));
 				map.put("slottype", new CString(e.getSlotType().name(), Target.UNKNOWN));
 				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), Target.UNKNOWN));
-				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
-				map.put("inventorysize", new CInt(e.getInventory().getSize(), Target.UNKNOWN));
+				
+				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
+				MCInventory inv = e.getInventory();
+				for (int i = 0; i < inv.getSize(); i++) {
+					Construct c = ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN);
+					items.set(i, c, Target.UNKNOWN);
+				}
+				map.put("inventory", items);
+				map.put("inventorytype", new CString(inv.getType().name(), Target.UNKNOWN));
+				map.put("inventorysize", new CInt(inv.getSize(), Target.UNKNOWN));
 
 				return map;
 			} else {
