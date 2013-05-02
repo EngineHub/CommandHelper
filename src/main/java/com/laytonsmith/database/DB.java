@@ -32,7 +32,7 @@ public abstract class DB {
     }
 
     public enum SupportedDBConnectors {
-
+		MYSQL,
         SQLITE;
     }
 
@@ -48,6 +48,10 @@ public abstract class DB {
             cache.put(connectionName, c);
             return c;
         }
+		
+		public static CConnection GetConnection(SupportedDBConnectors type, String hostename, String database, int port, String username, String password){
+			return new CConnection(type, hostename, database, port, username, password);
+		}
 
         private static CConnection ConnectionLookup(String name) throws SQLException {
 			return null;
@@ -92,13 +96,15 @@ public abstract class DB {
         }
         SupportedDBConnectors type;
         String hostname;
+		String database;
         Integer port;
         String username;
         String password;
 
-        private CConnection(SupportedDBConnectors type, String hostname, int port, String username, String password) {
+        private CConnection(SupportedDBConnectors type, String hostname, String database, int port, String username, String password) {
             this.type = type;
             this.hostname = hostname;
+			this.database = database;
             this.port = port;
             this.username = username;
             this.password = password;

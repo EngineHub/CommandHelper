@@ -1,11 +1,5 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.inventory.InventoryClickEvent;
-
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
@@ -19,6 +13,10 @@ import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
 import com.laytonsmith.abstraction.events.MCInventoryEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
+import java.util.Collections;
+import java.util.List;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;

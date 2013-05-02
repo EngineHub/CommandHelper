@@ -1,11 +1,10 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.MCHanging;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Hanging;
-
-import com.laytonsmith.abstraction.MCHanging;
-import com.laytonsmith.abstraction.blocks.MCBlockFace;
 
 public class BukkitMCHanging extends BukkitMCEntity implements MCHanging {
 

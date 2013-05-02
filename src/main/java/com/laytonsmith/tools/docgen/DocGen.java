@@ -202,7 +202,10 @@ public class DocGen {
             } catch (IllegalArgumentException ex) {
             } catch (InvocationTargetException ex) {
             } catch (NoSuchMethodException e) {
-            }
+            } catch (Exception e){
+				e.printStackTrace(System.err);
+				System.err.println("Continuing however.");
+			}
             StringBuilder intro = new StringBuilder();
             if (type.equals("html")) {
                 if (className != null) {

@@ -1,12 +1,11 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import org.bukkit.entity.Enderman;
-import org.bukkit.material.MaterialData;
-
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
 import com.laytonsmith.abstraction.entities.MCEnderman;
+import org.bukkit.entity.Enderman;
+import org.bukkit.material.MaterialData;
 
 public class BukkitMCEnderman extends BukkitMCLivingEntity implements
 		MCEnderman {

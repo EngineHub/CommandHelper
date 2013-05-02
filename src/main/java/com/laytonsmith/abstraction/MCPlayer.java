@@ -4,7 +4,6 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCWeather;
-
 import java.net.InetSocketAddress;
 
 /**
@@ -30,6 +29,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public float getExp();
 
 	public float getFlySpeed();
+	
+	public void setFlySpeed(float speed);
 
     public int getFoodLevel();
 
@@ -52,6 +53,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public int getTotalExperience();
 
 	public float getWalkSpeed();
+	
+	public void setWalkSpeed(float speed);
 
     public void giveExp(int xp);
 

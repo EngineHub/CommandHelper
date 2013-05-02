@@ -13,6 +13,8 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MEnum;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A class that represents a dynamic array.
@@ -443,8 +445,13 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
     }
 
     @Override
-    public CArray clone() throws CloneNotSupportedException {
-        CArray clone = (CArray) super.clone();
+    public CArray clone() {
+        CArray clone;
+		try {
+			clone = (CArray) super.clone();
+		} catch (CloneNotSupportedException ex) {
+			throw new RuntimeException(ex);
+		}
         clone.associative_mode = associative_mode;
         if(!associative_mode){
             if (array != null) {

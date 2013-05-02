@@ -2,7 +2,6 @@
 
 package com.laytonsmith.testing;
 
-import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCMaterial;

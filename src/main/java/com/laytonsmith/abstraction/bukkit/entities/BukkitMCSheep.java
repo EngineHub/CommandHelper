@@ -1,11 +1,10 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import org.bukkit.entity.Sheep;
-
 import com.laytonsmith.abstraction.bukkit.BukkitMCAgeable;
 import com.laytonsmith.abstraction.entities.MCSheep;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
+import org.bukkit.entity.Sheep;
 
 public class BukkitMCSheep extends BukkitMCAgeable implements MCSheep {
 

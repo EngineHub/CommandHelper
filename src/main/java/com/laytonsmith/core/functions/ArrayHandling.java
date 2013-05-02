@@ -25,10 +25,13 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -1745,60 +1748,85 @@ public class ArrayHandling {
 						"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))"),};
 		}
 	}
-//	@api
-//	public static class array_unique extends AbstractFunction{
-//
-//		public ExceptionType[] thrown() {
-//			return new ExceptionType[]{ExceptionType.CastException};
-//		}
-//
-//		public boolean isRestricted() {
-//			return false;
-//		}
-//
-//		public Boolean runAsync() {
-//			return null;
-//		}
-//
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			CArray array = Static.getArray(args[0], t);
-//			boolean compareTypes = true;
-//			if(args.length == 2){
-//				compareTypes = Static.getBoolean(args[1]);
-//			}
-//
-//					
-//			
-//		}
-//
-//		public String getName() {
-//			return "array_unique";
-//		}
-//
-//		public Integer[] numArgs() {
-//			return new Integer[]{1, 2};
-//		}
-//
-//		public String docs() {
-//			return "array {array, [compareTypes]} Removes all non-unique values from an array. ---- compareTypes is true by default, which means that in the array"
-//					+ " array(1, '1'), nothing would be removed from the array, since both values are different data types. However, if compareTypes is true,"
-//					+ " then the first value would remain, but the second value would be removed. A reference to the array is returned, however, note that the removals"
-//					+ " are in-place, so the reference will be to the same array passed in. After values are removed, (if a normal array) the array will be resized"
-//					+ " down to fit the new size.";
-//		}
-//
-//		public CHVersion since() {
-//			return CHVersion.V3_3_1;
-//		}
-//
-//		@Override
-//		public ExampleScript[] examples() throws ConfigCompileException {
-//			return new ExampleScript[]{
-//				new ExampleScript("Basic usage", "array_unique(array(1, 2, 2, 3, 4))"),
-//				new ExampleScript("No removal of different datatypes", "array_unique(array(1, '1'))"),
-//				new ExampleScript("Removal of different datatypes, by setting compareTypes to false", "array_unique(array(1, '1'), false)"),
-//			};
-//		}				
-//		
-//	}
+	
+	@api
+	public static class array_unique extends AbstractFunction{
+
+		private final static equals equals = new equals();
+		private final static BasicLogic.sequals sequals = new BasicLogic.sequals();
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray array = Static.getArray(args[0], t);
+			boolean compareTypes = true;
+			if(args.length == 2){
+				compareTypes = Static.getBoolean(args[1]);
+			}		
+			if(array.inAssociativeMode()){
+				return array.clone();
+			} else {
+				CArray newArray = new CArray(t);
+				//These are the values to skip in future iterations
+				Set<Integer> skip = new HashSet<Integer>();
+				for(int i = 0; i < array.size(); i++){
+					boolean foundMatch = false;
+					Construct item1 = array.get(i);
+					for(int j = i + 1; j < array.size(); j++){
+						if(skip.contains(j)){
+							continue;
+						}
+						Construct item2 = array.get(j);
+						if((compareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2)))
+								|| (!compareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)))){
+							skip.add(j);
+							if(!foundMatch){
+								newArray.push(item1);
+							}
+							foundMatch = true;
+						}
+					}
+				}
+				return newArray;
+			}
+		}
+
+		public String getName() {
+			return "array_unique";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "array {array, [compareTypes]} Removes all non-unique values from an array. ---- compareTypes is true by default, which means that in the array"
+					+ " array(1, '1'), nothing would be removed from the array, since both values are different data types. However, if compareTypes is false,"
+					+ " then the first value would remain, but the second value would be removed. A new array is returned. If the array is associative, by definition,"
+					+ " there are no unique values, so a clone of the array is returned.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "array_unique(array(1, 2, 2, 3, 4))"),
+				new ExampleScript("No removal of different datatypes", "array_unique(array(1, '1'))"),
+				new ExampleScript("Removal of different datatypes, by setting compareTypes to false", "array_unique(array(1, '1'), false)"),
+			};
+		}				
+		
+	}
 }

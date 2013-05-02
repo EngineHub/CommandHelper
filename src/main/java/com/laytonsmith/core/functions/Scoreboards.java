@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.NotInitializedYetException;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
@@ -40,7 +41,7 @@ public class Scoreboards {
 	}
 	
 	/**
-	 * The displayname storing the server's main scoreboard
+	 * The name storing the server's main scoreboard
 	 */
 	public static final String MAIN = "main";
 	private static final String DEF_MSG = "Scoreboard defaults to '" + MAIN + "' if not given.";
@@ -48,7 +49,13 @@ public class Scoreboards {
 	
 	static {
 		if (!isBoard(MAIN)) {
-			addBoard(MAIN, Static.getServer().getMainScoreboard(), Target.UNKNOWN);
+			try{
+				addBoard(MAIN, Static.getServer().getMainScoreboard(), Target.UNKNOWN);
+			} catch(NotInitializedYetException e){
+				//This should only happen during testing or from the shell (or some other cases) so just log
+				//it and continue on.
+				e.printStackTrace(System.err);
+			}
 		}
 	}
 	
@@ -77,7 +84,7 @@ public class Scoreboards {
 	
 	/**
 	 * Adds a scoreboard to the cache
-	 * @param id The displayname to save the new scoreboard as
+	 * @param id The name to save the new scoreboard as
 	 * @param board Scoreboard, either from {@link MCServer#getNewScoreboard} or {@link MCPlayer#getScoreboard()}
 	 * @param t
 	 * @throws ConfigRuntimeException if the cache already contains the board or the id
@@ -141,7 +148,7 @@ public class Scoreboards {
 	/**
 	 * A shortcut for making a scoreboard argument optional
 	 * @param numArgsToReadName the number of arguments that will cause the function to check user input
-	 * @param indexOfName the index that will contain the displayname of the scoreboard
+	 * @param indexOfName the index that will contain the name of the scoreboard
 	 * @param t
 	 * @param args the array of arguments passed to the function
 	 * @return the scoreboard chosen, defaulting to main if numArgsToReadName was not matched
@@ -187,9 +194,9 @@ public class Scoreboards {
 		 */
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.ScoreboardException};
+	
 		}
 	}
-	
 	public static class Objective extends MObject {
 		public String name;
 		public String displayname;
@@ -254,7 +261,7 @@ public class Scoreboards {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0].val(), environment, t);
+			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.setScoreboard(getBoard(args[1].val(), t));
 			return new CVoid(t);
 		}
@@ -268,19 +275,8 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "Sets the scoreboard to be used by a player."
+			return "void {player, scoreboard} Sets the scoreboard to be used by a player."
 					+ " The scoreboard argument is the id of a registered scoreboard.";
-		}
-		
-		public Argument returnType() {
-			return Argument.VOID;
-		}
-
-		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", CString.class, "player"),
-						new Argument("", CString.class, "scoreboard")
-					);
 		}
 	}
 	
@@ -646,7 +642,7 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		public String docs() {
@@ -1083,6 +1079,7 @@ public class Scoreboards {
 					);
 		}
 	}
+
 	
 	@api
 	public static class set_team_options extends SBFunction {

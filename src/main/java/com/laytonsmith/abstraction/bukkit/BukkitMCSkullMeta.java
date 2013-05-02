@@ -1,10 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCSkullMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 

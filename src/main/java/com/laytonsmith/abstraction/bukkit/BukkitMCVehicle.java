@@ -1,9 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.MCVehicle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Vehicle;
-
-import com.laytonsmith.abstraction.MCVehicle;
 
 /**
  * 

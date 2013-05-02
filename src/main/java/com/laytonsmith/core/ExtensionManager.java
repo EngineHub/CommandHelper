@@ -1,10 +1,11 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ReflectionUtils;
+import com.laytonsmith.PureUtilities.StackTraceUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.shutdown;
 import com.laytonsmith.annotations.startup;
+import com.laytonsmith.core.constructs.Target;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -36,6 +37,7 @@ public class ExtensionManager {
 					cl.add(child);
 					ClassDiscovery.GetClassesWithinPackageHierarchy("jar:" + f.toURI().toURL().toString(), cl);
 					ClassDiscovery.InstallDiscoveryLocation("jar:" + f.toURI().toURL().toString());
+					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
 				} catch (MalformedURLException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -59,7 +61,7 @@ public class ExtensionManager {
 					m.setAccessible(true);
 					m.invoke(null);
 				} catch(Exception e){
-					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, "Method " + m + " threw an exception during runtime", e);
+					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + m.getDeclaringClass() + "#" + m.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
 				}
 			}
 		}
@@ -70,14 +72,14 @@ public class ExtensionManager {
 				for(Method m : ClassDiscovery.GetMethodsWithAnnotation(shutdown.class)){
 					if(m.getParameterTypes().length != 0){
 						//Error, but skip this one, don't throw an exception ourselves, just log it.
-						Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, "Method annotated with @" + shutdown.class.getSimpleName() 
-								+ " takes parameters; it should not.");
+						CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method annotated with @" + shutdown.class.getSimpleName() 
+								+ " takes parameters; it should not. (Found in " + m.getDeclaringClass().getName() + "#" + m.getName() + ")", Target.UNKNOWN);
 					} else {
 						try{
 							m.setAccessible(true);
 							m.invoke(null);
 						} catch(Exception e){
-							Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, "Method " + m + " threw an exception during runtime", e);
+							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + m.getDeclaringClass() + "#" + m.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
 						}
 					}
 				}

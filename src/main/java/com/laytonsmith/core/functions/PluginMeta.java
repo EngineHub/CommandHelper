@@ -193,18 +193,8 @@ public class PluginMeta {
 		}
 
 		public String docs() {
-			return "Registers a plugin channel for CommandHelper to listen on."
+			return "void {channel} Registers a plugin channel for CommandHelper to listen on."
 					+ " Incoming messages can be inspected by binding to 'plugin_message_received'.";
-		}
-		
-		public Argument returnType() {
-			return Argument.VOID;
-		}
-
-		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", CString.class, "channel")
-					);
 		}
 
 		public CHVersion since() {
@@ -249,17 +239,7 @@ public class PluginMeta {
 		}
 
 		public String docs() {
-			return "Unregisters a plugin channel CommandHelper is listening on, if any.";
-		}
-		
-		public Argument returnType() {
-			return Argument.VOID;
-		}
-
-		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", CString.class, "channel")
-					);
+			return "void {channel} Unregisters a plugin channel CommandHelper is listening on, if any.";
 		}
 
 		public CHVersion since() {
@@ -297,18 +277,8 @@ public class PluginMeta {
 		}
 
 		public String docs() {
-			return "Returns true if commandhelper is listening to"
+			return "boolean {channel} Returns true if commandhelper is listening to"
 					+ " the given plugin channel.";
-		}
-		
-		public Argument returnType() {
-			return new Argument("", CBoolean.class);
-		}
-
-		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", CString.class, "channel")
-					);
 		}
 
 		public CHVersion since() {
@@ -351,16 +321,8 @@ public class PluginMeta {
 		}
 
 		public String docs() {
-			return "Returns an array of strings containing the channels"
+			return "array {} Returns an array of strings containing the channels"
 					+ " CommandHelper is listening on.";
-		}
-		
-		public Argument returnType() {
-			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
-		}
-
-		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.NONE;
 		}
 
 		public CHVersion since() {

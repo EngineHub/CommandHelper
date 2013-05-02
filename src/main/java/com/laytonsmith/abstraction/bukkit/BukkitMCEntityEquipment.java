@@ -1,12 +1,10 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
-
+import java.util.EnumMap;
+import java.util.Map;
 import org.bukkit.inventory.EntityEquipment;
 
 /**

@@ -55,7 +55,8 @@ public class CHLog {
 //        PROCEDURES("procedures", "Logs when a procedure is created", Level.OFF),
         INCLUDES("includes", "Logs what file is requested when include() is used", LogLevel.OFF),
         GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", LogLevel.ERROR),
-        META("meta", "Functions in the meta class use this tag", LogLevel.OFF)
+        META("meta", "Functions in the meta class use this tag", LogLevel.OFF),
+		EXTENSIONS("extensions", "Extension related logs use this tag", LogLevel.OFF)
         ;
         
         

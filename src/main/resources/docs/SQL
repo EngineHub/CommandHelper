@@ -1,0 +1,30 @@
+{{unimplemented}}
+
+MethodScript provides various methods for connecting to and running SQL commands.
+The methods exposed ALWAYS use prepared queries, making your code far less prone
+to database injection attacks, as well as better compile time checks where possible.
+
+The SQL framework uses JDBC to connect, so any database backend compatible with
+JDBC is supported with MethodScript. You must have an SQL server set up and running
+already, which is beyond the scope of this article.
+
+== Configuration ==
+
+To simplify connection information to various databases, MethodScript allows two
+ways of connecting to a server. Either via ''profiles'' or via in code connection
+information. When connecting statically, connection via profiles is the preferred
+solution, since it makes coding easier, and makes it harder to accidentally leak
+database credentials when sharing code. To create a profile, create a file in the
+<code>profiles</code> directory. The name of the file should be the profile name.
+If any directories are in the profiles folder, they are ignored. The profile file
+is an ini style file, which should contain the same information that is used during
+the connection if you were using the query method that takes a connection object,
+however, if the profile doesn't exist at script startup time, it will immediately
+cause an error, instead of waiting until runtime. If the connection information
+is incorrect, that is a runtime error. Connections to different SQL server types
+may require different connection information, so you'll need to see the connection
+configuration information for each supported server type.
+
+
+
+{{LearningTrail}}

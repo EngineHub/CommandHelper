@@ -1,11 +1,10 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.scoreboard.Score;
-
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCScore;
 import com.laytonsmith.abstraction.MCScoreboard;
+import org.bukkit.scoreboard.Score;
 
 public class BukkitMCScore implements MCScore {
 

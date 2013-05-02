@@ -18,8 +18,8 @@
  */
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.*;
@@ -83,6 +83,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public PermissionsResolver permissionsResolver;
 	public PersistanceNetwork persistanceNetwork;
 	public File chDirectory = new File("plugins/CommandHelper");
+	public boolean firstLoad = true;
 	/**
 	 * Listener for the plugin system.
 	 */
@@ -104,7 +105,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void onLoad() {
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 		Installer.Install(chDirectory);
-		ExtensionManager.Initialize(new File(chDirectory, "extensions"));
 	}
 
 	/**
@@ -144,6 +144,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		Static.getLogger().info("CommandHelper/CommandHelper " + getDescription().getVersion() + " enabled");
+		if(firstLoad){
+			ExtensionManager.Initialize(new File(chDirectory, "extensions"));
+			firstLoad = false;
+		}
 		version = new SimpleVersion(getDescription().getVersion());
 		PermissionsResolverManager.initialize(this);
 		permissionsResolver = new CommandHelperPermissionsResolver(PermissionsResolverManager.getInstance());

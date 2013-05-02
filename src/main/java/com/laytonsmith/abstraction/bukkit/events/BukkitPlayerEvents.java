@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit.events;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -486,6 +487,10 @@ public class BukkitPlayerEvents {
         public MCPlayer getEntity() {
             return new BukkitMCPlayer(pde.getEntity());
         }
+		
+		public MCEntity getKiller() {
+			return StaticLayer.GetCorrectEntity(new BukkitMCEntity(pde.getEntity().getKiller()));
+		}
 
         public String getDeathMessage() {
             return pde.getDeathMessage();

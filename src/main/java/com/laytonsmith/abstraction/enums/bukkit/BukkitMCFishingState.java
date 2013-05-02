@@ -1,11 +1,10 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
-import org.bukkit.event.player.PlayerFishEvent;
-
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.annotations.abstractionenum;
+import org.bukkit.event.player.PlayerFishEvent;
 
 @abstractionenum(
 		implementation= Implementation.Type.BUKKIT,

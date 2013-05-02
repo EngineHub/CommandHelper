@@ -1,13 +1,12 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Ocelot;
-
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTameable;
 import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Ocelot;
 
 public class BukkitMCOcelot extends BukkitMCTameable implements MCOcelot {
 

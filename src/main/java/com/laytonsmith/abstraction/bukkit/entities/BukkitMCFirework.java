@@ -1,11 +1,10 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import org.bukkit.entity.Firework;
-
 import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCFireworkMeta;
 import com.laytonsmith.abstraction.entities.MCFirework;
+import org.bukkit.entity.Firework;
 
 public class BukkitMCFirework extends BukkitMCEntity implements MCFirework {
 

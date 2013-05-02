@@ -1,12 +1,8 @@
 
 package com.laytonsmith.abstraction.bukkit.events;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItem;
@@ -15,6 +11,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCProjectile;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -23,8 +20,12 @@ import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
-
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -32,6 +33,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
@@ -47,6 +49,52 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BukkitEntityEvents {
 	
+	public static class BukkitMCEntityExplodeEvent implements MCEntityExplodeEvent {
+
+		EntityExplodeEvent e;
+		public BukkitMCEntityExplodeEvent(EntityExplodeEvent event) {
+			e = event;
+		}
+		
+		public Object _GetObject() {
+			return e;
+		}
+
+		public MCEntity getEntity() {
+			if (e.getEntity() != null) {
+				return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
+			}
+			return null;
+		}
+
+		public List<MCBlock> getBlocks() {
+			List<MCBlock> ret = new ArrayList<MCBlock>();
+			for (Block b : e.blockList()) {
+				ret.add(new BukkitMCBlock(b));
+			}
+			return ret;
+		}
+		
+		public void setBlocks(List<MCBlock> blocks) {
+			e.blockList().clear();
+			for (MCBlock b : blocks) {
+				e.blockList().add(((BukkitMCBlock) b).__Block());
+			}
+		}
+
+		public MCLocation getLocation() {
+			return new BukkitMCLocation(e.getLocation());
+		}
+
+		public float getYield() {
+			return e.getYield();
+		}
+
+		public void setYield(float power) {
+			e.setYield(power);
+		}
+	}
+
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCProjectileHitEvent implements MCProjectileHitEvent {
 		

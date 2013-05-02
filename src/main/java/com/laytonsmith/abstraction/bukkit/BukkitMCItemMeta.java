@@ -7,12 +7,10 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
 

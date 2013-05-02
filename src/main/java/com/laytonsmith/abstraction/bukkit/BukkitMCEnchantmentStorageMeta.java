@@ -1,12 +1,11 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
+import java.util.HashMap;
+import java.util.Map;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
 /**
  *
