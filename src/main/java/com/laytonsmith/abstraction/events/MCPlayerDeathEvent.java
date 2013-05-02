@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.events;
 
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCPlayer;
 
 /**
@@ -29,4 +30,6 @@ public interface MCPlayerDeathEvent extends MCEntityDeathEvent {
 	public int getNewTotalExp();
 	
 	public void setNewTotalExp(int totalExp);
+	
+	public MCEntity getKiller();
 }
