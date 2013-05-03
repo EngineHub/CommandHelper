@@ -98,7 +98,7 @@ public class Meta {
 				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "Using runas(~op, " + args[1].asString().getQuote() 
 						+ ") is deprecated. Use sudo(" + args[1].asString().getQuote() + ") instead.", t);
 				new sudo().exec(t, env, args[1]);
-			} else if (args[0].val().equals("~console")) {
+			} else if (args[0].val().equals(Static.getConsoleName())) {
 				CHLog.GetLogger().Log(CHLog.Tags.META, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
 				if (Prefs.DebugMode()) {
 					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
@@ -135,7 +135,7 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "void {player, command} Runs a command as a particular user. The special user '~console' can be used to run it as a console"
+			return "void {player, command} Runs a command as a particular user. The special user '" + Static.getConsoleName() + "' can be used to run it as a console"
 					+ " user. Using '~op' is deprecated, and will be removed after the next release, use sudo() instead."
 					+ " Commands cannot be run as an offline player. If the first argument is an array of usernames, the command"
 					+ " will be run in the context of each user in the array.";

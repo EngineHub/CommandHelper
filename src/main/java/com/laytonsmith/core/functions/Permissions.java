@@ -1,5 +1,7 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.MCBlockCommandSender;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
@@ -66,8 +68,9 @@ public class Permissions {
 			String permission = null;
 
 			if (args.length == 1) {
-				if (environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCConsoleCommandSender) {
-					//Console always has permission
+				final MCCommandSender mcc = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				if (mcc instanceof MCConsoleCommandSender || mcc instanceof MCBlockCommandSender) {
+					// Console and CommandBlocks always have permission
 					return new CBoolean(true, t);
 				}
 
@@ -89,8 +92,8 @@ public class Permissions {
 				}
 			}
 
-			if ("~console".equals(player.toLowerCase())) {
-				//Console always has permission
+			if (Static.getConsoleName().equals(player.toLowerCase()) || player.startsWith(Static.getBlockPrefix())) {
+				// Console and CommandBlocks always have permission
 				return new CBoolean(true, t);
 			}
 
