@@ -16,7 +16,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -27,7 +26,9 @@ import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.exceptions.NonScriptError;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  * 
@@ -50,7 +51,7 @@ public class VehicleEvents {
 					+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t) throws PrefilterNonMatchException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -83,7 +84,7 @@ public class VehicleEvents {
 			return Driver.VEHICLE_ENTER;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			return false;
 		}
 
@@ -107,7 +108,7 @@ public class VehicleEvents {
 					+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t) throws PrefilterNonMatchException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -140,7 +141,7 @@ public class VehicleEvents {
 			return Driver.VEHICLE_LEAVE;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			return false;
 		}
 
@@ -171,7 +172,7 @@ public class VehicleEvents {
 					+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent event = (MCVehicleCollideEvent) e;
 				Prefilters.match(prefilter, "type", event.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -186,9 +187,7 @@ public class VehicleEvents {
 								.getEntity().getType().name(), PrefilterType.MACRO);
 						break;
 						default:
-							throw new ConfigRuntimeException("Greetings from the future! If you are seeing this message,"
-									+ " Minecraft has reached the point where vehicles can hit things that are neither"
-									+ " a block nor an entity.", Target.UNKNOWN);
+							throw new NonScriptError("Unhandled case");
 				}
 				return true;
 			}
@@ -207,8 +206,8 @@ public class VehicleEvents {
 				ret.put("type", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CInt(e.getVehicle().getEntityId(), t));
 				ret.put("collisiontype", new CString(e.getCollisionType().name(), t));
-				Construct block = new CNull(t);
-				Construct entity = new CNull(t);
+				Construct block = Construct.GetNullConstruct(t);
+				Construct entity = Construct.GetNullConstruct(t);
 				boolean collide = true;
 				boolean pickup = false;
 				switch (e.getCollisionType()) {
@@ -241,15 +240,15 @@ public class VehicleEvents {
 			return Driver.VEHICLE_COLLIDE;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (event instanceof MCVehicleEnitityCollideEvent) {
 				MCVehicleEnitityCollideEvent e = (MCVehicleEnitityCollideEvent) event;
 				if (key.equals("collide")) {
-					e.setCollisionCancelled(!Static.getBoolean(value));
+					e.setCollisionCancelled(!value.primitive(t).castToBoolean());
 					return true;
 				}
 				if (key.equals("pickup")) {
-					e.setPickupCancelled(!Static.getBoolean(value));
+					e.setPickupCancelled(!value.primitive(t).castToBoolean());
 					return true;
 				}
 			}

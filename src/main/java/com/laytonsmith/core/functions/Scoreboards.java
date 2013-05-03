@@ -275,8 +275,19 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {player, scoreboard} Sets the scoreboard to be used by a player."
+			return "Sets the scoreboard to be used by a player."
 					+ " The scoreboard argument is the id of a registered scoreboard.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "player"),
+						new Argument("", CString.class, "scoreboard")
+					);
 		}
 	}
 	

@@ -2492,7 +2492,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], speed} Sets players speed. The speed must be between -1 or 1";
+			return "Sets players speed. The speed must be between -1 or 1";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PLAYER_ARG,
+						new Argument("", CDouble.class, "speed").addAnnotation(new Ranged(-1, true, 1, true))
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2520,10 +2531,10 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if (args.length == 2) {
-				m = Static.GetPlayer(args[0], t);
-				speed = Static.getDouble(args[1], t);
+				m = Static.GetPlayer(args[0].val(), env, t);
+				speed = args[1].primitive(t).castToDouble(t);
 			} else {
-				speed = Static.getDouble(args[0], t);
+				speed = args[0].primitive(t).castToDouble(t);
 			}
 
 			if(speed < -1 || speed > 1) {
@@ -2548,7 +2559,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player]} Gets the players speed. The speed must be between -1 or 1";
+			return "Gets the players speed. The speed must be between -1 or 1";
+		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PLAYER_ARG
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2576,12 +2597,12 @@ public class PlayerManagement {
 			}
 			
 			if (args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0].val(), env, t);
 			}
 			
 			Static.AssertPlayerNonNull(m, t);
 
-			return new CDouble(((double) m.getWalkSpeed()), t);
+			return new CDouble(m.getWalkSpeed(), t);
 		}
 	}
 	
@@ -2597,7 +2618,18 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], speed} Sets players fly speed. The speed must be between -1 or 1";
+			return "Sets players fly speed. The speed must be between -1 or 1";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PLAYER_ARG,
+						new Argument("", CDouble.class, "speed").addAnnotation(new Ranged(-1, true, 1, true))
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2619,16 +2651,16 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			double speed = 0;
+			float speed = 0;
 			
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
 			if (args.length == 2) {
-				m = Static.GetPlayer(args[0], t);
-				speed = Static.getDouble(args[1], t);
+				m = Static.GetPlayer(args[0].val(), env, t);
+				speed = args[1].primitive(t).castToDouble32(t);
 			} else {
-				speed = Static.getDouble(args[0], t);
+				speed = args[0].primitive(t).castToDouble32(t);
 			}
 
 			if(speed < -1 || speed > 1) {
@@ -2636,7 +2668,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			
-			m.setFlySpeed((float) speed);
+			m.setFlySpeed(speed);
 			return new CVoid(t);
 		}
 	}
@@ -2653,7 +2685,17 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player]} Gets the players speed. The speed must be between -1 or 1";
+			return "Gets the players speed. The speed must be between -1 or 1";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						PLAYER_ARG
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2681,12 +2723,12 @@ public class PlayerManagement {
 			}
 			
 			if (args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0].val(), env, t);
 			}
 			
 			Static.AssertPlayerNonNull(m, t);
 
-			return new CDouble(((double) m.getFlySpeed()), t);
+			return new CDouble(m.getFlySpeed(), t);
 		}
 	}
 	

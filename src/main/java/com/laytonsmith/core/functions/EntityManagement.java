@@ -8,12 +8,8 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
@@ -27,17 +23,14 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MEquipment;
-import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
 import com.laytonsmith.core.natives.MPotion;
 import com.laytonsmith.core.natives.annotations.FormatString;
 import com.laytonsmith.core.natives.annotations.NonNull;
 import com.laytonsmith.core.natives.annotations.Ranged;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  *
@@ -1408,15 +1401,15 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity horse, rider;
 			boolean success;
-			if (args[0] instanceof CNull) {
+			if (args[0].isNull()) {
 				horse = null;
 			} else {
-				horse = Static.getEntity(Static.getInt32(args[0], t), t);
+				horse = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			}
-			if (args[1] instanceof CNull) {
+			if (args[1].isNull()) {
 				rider = null;
 			} else {
-				rider = Static.getEntity(Static.getInt32(args[1], t), t);
+				rider = Static.getEntity(args[1].primitive(t).castToInt32(t), t);
 			}
 			if ((horse == null && rider == null) || horse == rider) {
 				throw new Exceptions.FormatException("Horse and rider cannot be the same entity", t);
@@ -1435,12 +1428,24 @@ public class EntityManagement {
 		}
 	
 		public String docs() {
-			return "boolean {horse, rider} Sets the way two entities are stacked. Horse and rider are entity ids."
+			return "Sets the way two entities are stacked. Horse and rider are entity ids."
 					+ " If rider is null, horse will eject its current rider, if it has one. If horse is null,"
 					+ " rider will leave whatever it is riding. If horse and rider are both valid entities,"
 					+ " rider will ride horse. The function returns the success of whatever operation is done."
 					+ " If horse and rider are both null, or otherwise the same, a FormatException is thrown.";
 		}
+
+		public Argument returnType() {
+			return new Argument("", CBoolean.class);
+		}
+		
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "horse"),
+						new Argument("", CInt.class, "rider")
+					);
+		}
+		
 	}
 	
 	@api
@@ -1448,7 +1453,7 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity ent = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			if (ent.getPassenger() instanceof MCEntity) {
 				return new CInt(ent.getPassenger().getEntityId(), t);
 			}
@@ -1460,7 +1465,17 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "mixed {entityID} Returns the ID of the given entity's rider, or null if it doesn't have one.";
+			return "Returns the ID of the given entity's rider, or null if it doesn't have one.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID")
+					);
 		}
 	}
 	
@@ -1469,11 +1484,11 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity ent = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			if (ent.isInsideVehicle()) {
 				return new CInt(ent.getVehicle().getEntityId(), t);
 			}
-			return new CNull(t);
+			return Construct.GetNullConstruct(t);
 		}
 
 		public String getName() {
@@ -1481,7 +1496,18 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "mixed {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
+			return "Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
 		}
+
+		public Argument returnType() {
+			return new Argument("", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CInt.class, "entityID")
+					);
+		}
+		
 	}
 }

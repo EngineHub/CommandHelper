@@ -8,6 +8,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
@@ -17,6 +18,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.annotations.NonNull;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -296,10 +298,21 @@ public class DataTransformations {
 		}
 
 		public String docs() {
-			return "string {array, [comment]} Encodes an array into an INI format output. An associative array is expected, and"
+			return "Encodes an array into an INI format output. An associative array is expected, and"
 					+ " a format exception is thrown if it is a normal array. The comment is optional, but if provided will"
 					+ " be added to the header of the returned string. All values are toString'd before output, so things like"
 					+ " arrays, if stored as a value, will not be returned as arrays.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CArray.class, "array"),
+						new Argument("", CString.class, "comment").setOptionalDefaultNull()
+					);
 		}
 
 		public Version since() {
@@ -347,11 +360,21 @@ public class DataTransformations {
 		}
 
 		public String docs() {
-			return "array {string} Returns an array, given an INI format input. INI files are loosely defined"
+			return "Returns an array, given an INI format input. INI files are loosely defined"
 					+ " as a set of key->value pairs, which lends itself to an associative array format. Key value"
 					+ " pairs are denoted usually by a <code>key=value</code> format. The specific rules for"
 					+ " decoding an INI file can be found [http://docs.oracle.com/javase/6/docs/api/java/util/Properties.html#load%28java.io.Reader%29 here]."
 					+ " An associative array is returned.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CString.class, "string")
+					);
 		}
 
 		public Version since() {

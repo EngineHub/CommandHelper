@@ -1770,7 +1770,7 @@ public class ArrayHandling {
 			CArray array = Static.getArray(args[0], t);
 			boolean compareTypes = true;
 			if(args.length == 2){
-				compareTypes = Static.getBoolean(args[1]);
+				compareTypes = args[1].primitive(t).castToBoolean();
 			}		
 			if(array.inAssociativeMode()){
 				return array.clone();
@@ -1786,8 +1786,8 @@ public class ArrayHandling {
 							continue;
 						}
 						Construct item2 = array.get(j);
-						if((compareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2)))
-								|| (!compareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)))){
+						if((compareTypes && sequals.exec(t, environment, item1, item2).castToBoolean())
+								|| (!compareTypes && equals.exec(t, environment, item1, item2).castToBoolean())){
 							skip.add(j);
 							if(!foundMatch){
 								newArray.push(item1);
@@ -1809,10 +1809,21 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "array {array, [compareTypes]} Removes all non-unique values from an array. ---- compareTypes is true by default, which means that in the array"
+			return "Removes all non-unique values from an array. ---- compareTypes is true by default, which means that in the array"
 					+ " array(1, '1'), nothing would be removed from the array, since both values are different data types. However, if compareTypes is false,"
 					+ " then the first value would remain, but the second value would be removed. A new array is returned. If the array is associative, by definition,"
 					+ " there are no unique values, so a clone of the array is returned.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(Generic.ANY);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CArray.class, "array"),
+						new Argument("", CBoolean.class, "compareTypes").setOptionalDefault(true)
+					);
 		}
 
 		public CHVersion since() {
