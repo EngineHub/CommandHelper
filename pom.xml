@@ -573,6 +573,7 @@
                         
 						<!-- Include custom, none specific classes -->
 						<include>**/RandomTests.java</include>
+						<include>**/LintTests.java</include>
 					</includes>
 				</configuration>
 			</plugin>

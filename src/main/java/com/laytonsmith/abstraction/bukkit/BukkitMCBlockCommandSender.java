@@ -14,12 +14,8 @@ public class BukkitMCBlockCommandSender extends BukkitMCCommandSender implements
 
 	BlockCommandSender bcs;
 	public BukkitMCBlockCommandSender(AbstractionObject a){
-        this((BlockCommandSender)null);
-        if(a instanceof MCBlockCommandSender){
-            this.c = ((BlockCommandSender)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
+        super(a);
+		this.bcs = a.getHandle();
 	}
 	
 	public BukkitMCBlockCommandSender(BlockCommandSender bcs){

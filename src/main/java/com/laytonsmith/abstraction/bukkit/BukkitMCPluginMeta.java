@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPluginMeta;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -13,7 +14,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
  */
 public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageListener {
 
-	Plugin plugin;
+	@WrappedItem Plugin plugin;
 	public BukkitMCPluginMeta(Plugin plugin){
 		super();
 		this.plugin = plugin;

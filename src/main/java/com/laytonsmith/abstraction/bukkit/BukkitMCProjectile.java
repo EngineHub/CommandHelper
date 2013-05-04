@@ -3,11 +3,12 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.Projectile;
 
 public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	
-	Projectile proj;
+	@WrappedItem Projectile proj;
 	public BukkitMCProjectile(Projectile e) {
 		super(e);
 		this.proj = e;

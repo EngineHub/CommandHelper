@@ -2,6 +2,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCLightningStrike;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.LightningStrike;
 
 /**
@@ -10,7 +11,7 @@ import org.bukkit.entity.LightningStrike;
  */
 public class BukkitMCLightningStrike extends BukkitMCEntity implements MCLightningStrike{
 
-	LightningStrike ls;
+	@WrappedItem LightningStrike ls;
 	
 	public BukkitMCLightningStrike(LightningStrike ls){
 		super(ls);

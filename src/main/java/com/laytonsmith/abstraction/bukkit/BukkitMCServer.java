@@ -4,6 +4,7 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
+import com.laytonsmith.annotations.WrappedItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +24,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
  */
 public class BukkitMCServer implements MCServer {
     
-    Server s;
+    @WrappedItem Server s;
     public BukkitMCServer(){
         this.s = Bukkit.getServer();
     }

@@ -11,6 +11,8 @@ import java.util.concurrent.Callable;
  */
 public abstract class AbstractConvertor implements Convertor{
 	
+	protected AbstractConvertor(){}
+	
 	private List<Runnable> shutdownHooks = new ArrayList<Runnable>();
 
 	public void addShutdownHook(Runnable r) {

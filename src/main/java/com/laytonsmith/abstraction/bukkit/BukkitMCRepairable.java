@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCRepairable;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.inventory.meta.Repairable;
 
 /**
@@ -10,7 +11,7 @@ import org.bukkit.inventory.meta.Repairable;
  */
 public class BukkitMCRepairable implements MCRepairable {
 
-	Repairable r;
+	@WrappedItem Repairable r;
 	public BukkitMCRepairable(Repairable rep) {
 		this.r = rep;
 	}

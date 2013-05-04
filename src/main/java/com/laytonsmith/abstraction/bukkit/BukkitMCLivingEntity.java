@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -9,6 +10,7 @@ import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
+import com.laytonsmith.annotations.WrappedItem;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -35,11 +37,21 @@ import org.bukkit.util.BlockIterator;
  */
 public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEntity {
 
-	LivingEntity le;
+	@WrappedItem LivingEntity le;
 
 	public BukkitMCLivingEntity(LivingEntity le) {
 		super(le);
 		this.le = le;
+	}
+	
+	public BukkitMCLivingEntity(AbstractionObject a){
+		super(a);
+		this.le = a.getHandle();
+	}
+
+	@Override
+	public LivingEntity getHandle() {
+		return le;
 	}
 
 	public int getHealth() {
@@ -67,7 +79,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 	}
 
 	public void damage(int amount, MCEntity source) {
-		le.damage(amount, ((BukkitMCEntity) source).asEntity());
+		le.damage(amount, ((BukkitMCEntity) source).getHandle());
 	}
 
 	public double getEyeHeight() {

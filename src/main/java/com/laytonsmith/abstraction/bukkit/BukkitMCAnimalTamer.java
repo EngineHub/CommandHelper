@@ -6,6 +6,8 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.annotations.WrappedItem;
+import com.laytonsmith.annotations.testing.AbstractConstructor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.HumanEntity;
@@ -15,21 +17,17 @@ import org.bukkit.entity.HumanEntity;
  * @author layton
  */
 public class BukkitMCAnimalTamer implements MCAnimalTamer{
-    AnimalTamer at;
+    @WrappedItem AnimalTamer at;
     public BukkitMCAnimalTamer(AnimalTamer at){
         this.at = at;
     }
     
-    public BukkitMCAnimalTamer(AbstractionObject a){
-        this((AnimalTamer)null);
-        if(a instanceof MCAnimalTamer){
-            this.at = ((AnimalTamer)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
+    @AbstractConstructor
+	public BukkitMCAnimalTamer(AbstractionObject a){
+        this.at = a.getHandle();
     }
     
-    public Object getHandle(){
+    public AnimalTamer getHandle(){
         return at;
     }
 

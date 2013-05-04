@@ -1787,6 +1787,10 @@ public class WorldEdit {
     }
 
     public static abstract class SKFunction extends AbstractFunction {
+		
+		protected SKFunction(){
+			
+		}
 
         public boolean isRestricted() {
             return true;

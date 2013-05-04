@@ -4,12 +4,13 @@ import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
 import com.laytonsmith.abstraction.entities.MCEnderman;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.Enderman;
 import org.bukkit.material.MaterialData;
 
 public class BukkitMCEnderman extends BukkitMCLivingEntity implements
 		MCEnderman {
-	Enderman e;
+	@WrappedItem Enderman e;
 	public BukkitMCEnderman(Enderman ent) {
 		super(ent);
 		e = ent;

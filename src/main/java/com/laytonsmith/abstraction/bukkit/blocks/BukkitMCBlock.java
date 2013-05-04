@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.annotations.WrappedItem;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.Material;
@@ -27,7 +28,7 @@ import org.bukkit.inventory.ItemStack;
  * @author layton
  */
 public class BukkitMCBlock implements MCBlock{
-    Block b;
+    @WrappedItem Block b;
     public BukkitMCBlock(Block b){
         this.b = b;
     }

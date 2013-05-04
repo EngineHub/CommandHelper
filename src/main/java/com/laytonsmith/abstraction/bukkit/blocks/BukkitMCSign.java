@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit.blocks;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.block.Sign;
 
 /**
@@ -13,7 +14,7 @@ import org.bukkit.block.Sign;
  */
 public class BukkitMCSign implements MCSign {
     
-    Sign s;
+    @WrappedItem Sign s;
 
     public BukkitMCSign(Sign sign) {
         this.s = sign;

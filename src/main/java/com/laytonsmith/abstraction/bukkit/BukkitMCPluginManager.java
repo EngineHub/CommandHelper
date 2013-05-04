@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginManager;
+import com.laytonsmith.annotations.WrappedItem;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.plugin.Plugin;
@@ -16,7 +17,7 @@ import org.bukkit.plugin.PluginManager;
  */
 public class BukkitMCPluginManager implements MCPluginManager {
 
-    PluginManager p;
+    @WrappedItem PluginManager p;
     public BukkitMCPluginManager(PluginManager pluginManager) {
         this.p = pluginManager;
     }

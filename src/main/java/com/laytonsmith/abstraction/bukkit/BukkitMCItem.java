@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.Item;
 
 /**
@@ -11,7 +12,7 @@ import org.bukkit.entity.Item;
  */
 public class BukkitMCItem extends BukkitMCEntity implements MCItem{
 	
-	Item i;
+	@WrappedItem Item i;
 	
 	public BukkitMCItem(Item i){
 		super(i);

@@ -7,6 +7,9 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
+import com.laytonsmith.abstraction.entities.MCOcelot;
+import com.laytonsmith.abstraction.entities.MCSheep;
+import com.laytonsmith.abstraction.entities.MCWolf;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -31,6 +34,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSkeletonType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
+import com.laytonsmith.annotations.WrappedItem;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -52,7 +56,7 @@ import org.bukkit.material.MaterialData;
  */
 public class BukkitMCWorld implements MCWorld {
 
-    World w;
+    @WrappedItem World w;
 
     public BukkitMCWorld(World w) {
         this.w = w;
@@ -333,8 +337,8 @@ public class BukkitMCWorld implements MCWorld {
                 e.setPassenger(l.getWorld().spawn(l, Skeleton.class));
             }
 			if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all 
-				if (((BukkitMCEntity)e).asEntity() instanceof Sheep) {
-					Sheep s = (Sheep) ((BukkitMCEntity)e).asEntity();
+				if (e instanceof MCSheep) {
+					Sheep s = e.getHandle();
 					MCDyeColor color = MCDyeColor.WHITE;
 					for (String type : subTypes) {
 						try {
@@ -346,21 +350,21 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Ocelot){
-					Ocelot o = (Ocelot)((BukkitMCEntity)e).asEntity();
+				if(e instanceof MCOcelot){
+					Ocelot o = e.getHandle();
 					MCOcelotType otype = MCOcelotType.WILD_OCELOT;
 					for (String type : subTypes) {
 						try {
-							otype = MCOcelotType.valueOf(type);
 							o.setCatType(BukkitMCOcelotType.getConvertor().getConcreteEnum(otype));
+							otype = MCOcelotType.valueOf(type);
 						} catch (IllegalArgumentException ex){
 							throw new ConfigRuntimeException(type + " is not an ocelot type",
 									ExceptionType.FormatException, t);					
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Creeper){
-					Creeper c = (Creeper)((BukkitMCEntity)e).asEntity();
+				if(e.getHandle() instanceof Creeper){
+					Creeper c = e.getHandle();
 					for (String type : subTypes) {
 						try {
 							MCCreeperType ctype = MCCreeperType.valueOf(type);
@@ -377,8 +381,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Wolf){
-					Wolf w = (Wolf)((BukkitMCEntity)e).asEntity();
+				if(e instanceof MCWolf){
+					Wolf w = e.getHandle();
 					for (String type : subTypes) {
 						try {
 							MCWolfType wtype = MCWolfType.valueOf(type);
@@ -398,8 +402,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof PigZombie){
-					PigZombie pz = (PigZombie)((BukkitMCEntity)e).asEntity();
+				if(e.getHandle() instanceof PigZombie){
+					PigZombie pz = e.getHandle();
 					for (String type : subTypes) {
 						if(!"".equals(type)){
 							try{
@@ -411,8 +415,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if (((BukkitMCEntity)e).asEntity() instanceof Villager) {
-					Villager v = (Villager) ((BukkitMCEntity)e).asEntity();
+				if (e.getHandle() instanceof Villager) {
+					Villager v = e.getHandle();
 					MCProfession job = MCProfession.FARMER;
 					for (String type : subTypes){
 						try {
@@ -424,8 +428,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if (((BukkitMCEntity)e).asEntity() instanceof Enderman) {
-					Enderman en = (Enderman) ((BukkitMCEntity)e).asEntity();
+				if (e.getHandle() instanceof Enderman) {
+					Enderman en = e.getHandle();
 					for (String type : subTypes){
 						try {
 							MaterialData held = new MaterialData(Material.valueOf(type));
@@ -436,8 +440,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Slime){
-					Slime sl = (Slime)((BukkitMCEntity)e).asEntity();
+				if(e.getHandle() instanceof Slime){
+					Slime sl = e.getHandle();
 					for (String type : subTypes) {
 						if(!"".equals(type)){
 							try{
@@ -449,8 +453,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Skeleton){
-					Skeleton sk = (Skeleton)((BukkitMCEntity)e).asEntity();
+				if(e.getHandle() instanceof Skeleton){
+					Skeleton sk = e.getHandle();
 					MCSkeletonType stype = MCSkeletonType.NORMAL;
 					for (String type : subTypes) {
 						try {
@@ -462,8 +466,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if((((BukkitMCEntity)e).asEntity() instanceof Zombie) && !(((BukkitMCEntity)e).asEntity() instanceof PigZombie)){
-					Zombie z = (Zombie)((BukkitMCEntity)e).asEntity();
+				if(e.getHandle() instanceof Zombie && !(e.getHandle() instanceof PigZombie)){
+					Zombie z = e.getHandle();
 					for (String type : subTypes) {
 						try {
 							MCZombieType ztype = MCZombieType.valueOf(type);
@@ -483,8 +487,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Pig){
-					Pig p = (Pig)((BukkitMCEntity)e).asEntity();
+				if(e.getHandle() instanceof Pig){
+					Pig p = e.getHandle();
 					for (String type : subTypes) {
 						try {
 							MCPigType ptype = MCPigType.valueOf(type);

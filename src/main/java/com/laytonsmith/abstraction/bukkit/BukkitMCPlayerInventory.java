@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayerInventory;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -14,7 +15,7 @@ import org.bukkit.inventory.PlayerInventory;
  */
 public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlayerInventory {
 
-    private PlayerInventory i;
+    @WrappedItem private PlayerInventory i;
     public BukkitMCPlayerInventory(PlayerInventory inventory) {
 		super(inventory);
         this.i = inventory;

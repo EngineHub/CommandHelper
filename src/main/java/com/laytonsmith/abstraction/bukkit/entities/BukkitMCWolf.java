@@ -4,6 +4,7 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTameable;
 import com.laytonsmith.abstraction.entities.MCWolf;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.DyeColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -15,7 +16,7 @@ import org.bukkit.entity.Wolf;
  */
 public class BukkitMCWolf extends BukkitMCTameable implements MCWolf {
 	
-	Wolf w;
+	@WrappedItem Wolf w;
 	public BukkitMCWolf(Entity be) {
 		super(be);
 		this.w = (Wolf) be;

@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCMaterialData;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.material.MaterialData;
 
 /**
@@ -11,7 +12,7 @@ import org.bukkit.material.MaterialData;
  * @author layton
  */
 public class BukkitMCMaterialData implements MCMaterialData{
-    MaterialData md;
+    @WrappedItem MaterialData md;
     public BukkitMCMaterialData(MaterialData md){
         this.md = md;
     }

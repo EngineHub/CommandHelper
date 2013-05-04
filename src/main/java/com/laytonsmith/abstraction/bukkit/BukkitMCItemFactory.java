@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class BukkitMCItemFactory implements MCItemFactory {
 
-	ItemFactory f;
+	@WrappedItem ItemFactory f;
 	public BukkitMCItemFactory(ItemFactory itemFactory) {
 		this.f = itemFactory;
 	}

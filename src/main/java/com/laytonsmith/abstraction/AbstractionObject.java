@@ -1,5 +1,8 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.annotations.testing.MustOverride;
+import com.laytonsmith.annotations.testing.SubclassesMustHaveAnnotation;
+
 /**
  * All AbstractionObject implementations should know how to both return their underlying object,
  * and construct a new object, given that it is a compatible type. This has the advantage of keeping
@@ -9,26 +12,26 @@ package com.laytonsmith.abstraction;
  * source below.
  * @author layton
  */
-public interface AbstractionObject {
+public interface AbstractionObject{
     /**
      * The underlying object that the abstraction object wraps. This can be used in combination with
-     * instanceof MCType to determine if the wrapped type can be cast to Type.
+     * instanceof WrapperType to determine if the wrapped type can be cast to Type.
      * @return 
      */
-    public Object getHandle();
+    <T> T getHandle();
 }
 
 /*
+
+Object o;
+
+@AbstractConstructor
 public BukkitMC<>(AbstractionObject a){
-    this((<>)null);
-    if(a instanceof MC<>){
-        this.<> = ((<>)a.getHandle());
-    } else {
-        throw new ClassCastException();
-    }
+    o = a.getHandle();
 }
 
 public Object getHandle(){
-    return <>;
+    return o;
 }
+
  */

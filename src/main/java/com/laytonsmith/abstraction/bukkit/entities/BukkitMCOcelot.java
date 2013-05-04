@@ -4,13 +4,14 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTameable;
 import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Ocelot;
 
 public class BukkitMCOcelot extends BukkitMCTameable implements MCOcelot {
 
-	Ocelot o;
+	@WrappedItem Ocelot o;
 	public BukkitMCOcelot(Entity be) {
 		super(be);
 		this.o = (Ocelot) be;

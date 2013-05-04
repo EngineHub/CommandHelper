@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction.bukkit;
 import org.bukkit.entity.Pig;
 
 import com.laytonsmith.abstraction.entities.MCPig;
+import com.laytonsmith.annotations.WrappedItem;
 
 /**
  * 
@@ -10,7 +11,7 @@ import com.laytonsmith.abstraction.entities.MCPig;
  */
 public class BukkitMCPig extends BukkitMCAgeable implements MCPig {
 
-	Pig p;
+	@WrappedItem Pig p;
 	public BukkitMCPig(Pig be) {
 		super(be);
 		p = be;

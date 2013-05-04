@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit.blocks;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.block.BlockState;
 
 /**
@@ -13,7 +14,7 @@ import org.bukkit.block.BlockState;
  */
 public class BukkitMCBlockState implements MCBlockState {
     
-    BlockState bs;
+    @WrappedItem BlockState bs;
 
     public BukkitMCBlockState(BlockState state) {
         this.bs = state;

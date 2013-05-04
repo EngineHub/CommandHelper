@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.Chunk;
 
 /**
@@ -11,7 +12,7 @@ import org.bukkit.Chunk;
  * @author import
  */
 public class BukkitMCChunk implements MCChunk {
-	Chunk c;
+	@WrappedItem Chunk c;
 
 	public BukkitMCChunk(Chunk c) {
 		this.c = c;

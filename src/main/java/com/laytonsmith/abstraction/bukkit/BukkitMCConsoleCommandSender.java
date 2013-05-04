@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.command.ConsoleCommandSender;
 
 /**
@@ -11,7 +12,7 @@ import org.bukkit.command.ConsoleCommandSender;
  */
 public class BukkitMCConsoleCommandSender extends BukkitMCCommandSender implements MCConsoleCommandSender{
 
-    ConsoleCommandSender ccs;
+    @WrappedItem ConsoleCommandSender ccs;
     public BukkitMCConsoleCommandSender(ConsoleCommandSender ccs){
         super(ccs);
         this.ccs = ccs;

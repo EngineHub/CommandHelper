@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.block.CommandBlock;
 
 /**
@@ -10,7 +11,7 @@ import org.bukkit.block.CommandBlock;
 public class BukkitMCCommandBlock extends BukkitMCBlockState implements
 		MCCommandBlock {
 
-	CommandBlock cb;
+	@WrappedItem CommandBlock cb;
 	public BukkitMCCommandBlock(CommandBlock block) {
 		super(block);
 		cb = block;

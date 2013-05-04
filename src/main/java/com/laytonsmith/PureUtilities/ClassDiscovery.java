@@ -4,6 +4,7 @@ package com.laytonsmith.PureUtilities;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -52,6 +53,7 @@ public final class ClassDiscovery {
 		classAnnotationCache.clear();
 		fieldAnnotationCache.clear();
 		methodAnnotationCache.clear();
+		constructorAnnotationCache.clear();
 	}
 
 	/**
@@ -73,6 +75,7 @@ public final class ClassDiscovery {
 	private static Map<Class<? extends Annotation>, Set<Class>> classAnnotationCache = new HashMap<Class<? extends Annotation>, Set<Class>>();
 	private static Map<Class<? extends Annotation>, Set<Field>> fieldAnnotationCache = new HashMap<Class<? extends Annotation>, Set<Field>>();
 	private static Map<Class<? extends Annotation>, Set<Method>> methodAnnotationCache = new HashMap<Class<? extends Annotation>, Set<Method>>();
+	private static Map<Class<? extends Annotation>, Set<Constructor>> constructorAnnotationCache = new HashMap<Class<? extends Annotation>, Set<Constructor>>();
 	
 	private static final Set<ClassLoader> defaultClassLoaders = new HashSet<ClassLoader>();
 	static{ defaultClassLoaders.add(ClassDiscovery.class.getClassLoader()); }
@@ -183,6 +186,12 @@ public final class ClassDiscovery {
 		return ret;
 	}
 
+	/**
+	 * Returns an array of all known classes that are annotated with the given
+	 * annotation.
+	 * @param annotation
+	 * @return 
+	 */
 	public static Class[] GetClassesWithAnnotation(Class<? extends Annotation> annotation) {
 		if(classAnnotationCache.containsKey(annotation)){
 			return new HashSet<Class>(classAnnotationCache.get(annotation))
@@ -198,6 +207,12 @@ public final class ClassDiscovery {
 		return classes.toArray(new Class[classes.size()]);
 	}
 	
+	/**
+	 * Returns an array of all known fields that are annotated with the given
+	 * annotation.
+	 * @param annotation
+	 * @return 
+	 */
 	public static Field[] GetFieldsWithAnnotation(Class<? extends Annotation> annotation){
 		if(fieldAnnotationCache.containsKey(annotation)){
 			return new HashSet<Field>(fieldAnnotationCache.get(annotation))
@@ -219,6 +234,12 @@ public final class ClassDiscovery {
 		return fields.toArray(new Field[fields.size()]);
 	}
 	
+	/**
+	 * Returns an array of all known methods that are annotated with the given
+	 * annotation.
+	 * @param annotation
+	 * @return 
+	 */
 	public static Method[] GetMethodsWithAnnotation(Class<? extends Annotation> annotation){
 		if(methodAnnotationCache.containsKey(annotation)){
 			return new HashSet<Method>(methodAnnotationCache.get(annotation))
@@ -241,10 +262,37 @@ public final class ClassDiscovery {
 	}
 	
 	/**
+	 * Returns an array of all known constructors that are annotated with the given
+	 * annotation.
+	 * @param annotation
+	 * @return 
+	 */
+	public static Constructor[] GetConstructorsWithAnnotation(Class<? extends Annotation> annotation){
+		if(constructorAnnotationCache.containsKey(annotation)){
+			return new HashSet<Constructor>(constructorAnnotationCache.get(annotation))
+					.toArray(new Constructor[constructorAnnotationCache.get(annotation).size()]);
+		}
+		Set<Constructor> constructors = new HashSet<Constructor>();
+		for(Class c : GetClassesWithinPackageHierarchy()){
+			try{
+				for(Constructor m : c.getDeclaredConstructors()){
+					if(m.getAnnotation(annotation) != null){
+						constructors.add(m);
+					}
+				}
+			} catch(Throwable t){
+				//Ignored
+			}
+		}
+		constructorAnnotationCache.put(annotation, constructors);
+		return constructors.toArray(new Constructor[constructors.size()]);
+	}
+	
+	/**
 	 * Returns a list of all known or discoverable classes in this class loader.
 	 * @return 
 	 */
-	static Set<Class> GetAllClasses(){
+	public static Set<Class> GetAllClasses(){
 		Set<Class> classes = new HashSet<Class>();
 		Set<ClassLoader> classLoaders = new HashSet<ClassLoader>();
 		classLoaders.add(ClassDiscovery.class.getClassLoader());
@@ -379,11 +427,67 @@ public final class ClassDiscovery {
 	}
 	
 	/**
+	 * Gets all concrete classes that are direct subtypes of the specified class.
+	 * @param superType
+	 * @param classLoaders
+	 * @return 
+	 */
+	public static Class[] GetAllDirectSubclassesOfType(Class superType, Set<ClassLoader> classLoaders){
+		Set<Class> ret = new HashSet<Class>();
+		for(Class c : GetAllClassesOfSubtype(superType, classLoaders)){
+			if(c.getSuperclass() == superType || Arrays.asList(c.getInterfaces()).contains(superType)){
+				ret.add(c);
+			}
+		}
+		return ret.toArray(new Class[ret.size()]);
+	}
+	
+	/**
+	 * Returns a list of all known interfaces that extend the given interface, either
+	 * directly or indirectly, including the interface itself.
+	 * If {@code inter} isn't an interface, a RuntimeException is thrown.
+	 * @param inter
+	 * @return 
+	 */
+	public static Class[] GetAllExtendingInterfaces(Class inter) throws RuntimeException {
+		if(!inter.isInterface()){
+			throw new RuntimeException("The parameter passed to GetAllExtendingInterfaces must be an interface.");
+		}
+		Set<Class> ret = new HashSet<Class>();
+		ret.add(inter);
+		for(Class c : GetAllClasses()){
+			if(!c.isInterface() || !doesExtend(c, inter)){
+				continue;
+			}
+			ret.add(c);
+		}
+		return ret.toArray(new Class[ret.size()]);
+	}
+	
+	private static boolean doesExtend(Class test, Class testFor){
+		if(Arrays.asList(test.getInterfaces()).contains(testFor)){
+			//perfect, it does
+			return true;
+		}
+		//Ok, it doesn't directly, but we need to recurse down first
+		for(Class c : test.getInterfaces()){
+			if(doesExtend(c, testFor)){
+				return true;
+			}
+		}
+		//Nope, doesn't at all
+		return false;
+	}
+	
+	/**
 	 * Gets all concrete classes that either extend (in the case of a class) or implement
 	 * (in the case of an interface) this superType. Additionally, if superType is a concrete
 	 * class, it itself will be returned in the list. Note that by "concrete class" it is meant
-	 * that the class is instantiatable, so abstract classes would not be returned.
+	 * that the class is instantiatable, so abstract classes would not be returned, or interfaces that
+	 * extend the superType if it's an interface itself.
 	 * @param superType
+	 * @param classLoaders A set of classloaders to search through. If this is null, the current thread's
+	 * classloader is used.
 	 * @return 
 	 */
 	public static Class[] GetAllClassesOfSubtype(Class superType, Set<ClassLoader> classLoaders){

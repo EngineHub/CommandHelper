@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -14,7 +15,7 @@ import org.bukkit.entity.Player;
  */
 public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOfflinePlayer{
 
-    OfflinePlayer op;
+    @WrappedItem OfflinePlayer op;
     BukkitMCOfflinePlayer(OfflinePlayer offlinePlayer) {
         super(offlinePlayer);
         this.op = offlinePlayer;

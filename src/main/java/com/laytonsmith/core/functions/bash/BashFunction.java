@@ -10,6 +10,8 @@ import com.laytonsmith.core.snapins.PackagePermission;
  * @author layton
  */
 public abstract class BashFunction implements FunctionBase, CompiledFunction, Documentation {
+	
+	protected BashFunction(){}
 
     public boolean appearInDocumentation() {
         return true;

@@ -457,6 +457,8 @@ public class ByteArrays {
 	}
 	
 	private static abstract class ba extends AbstractFunction {
+		
+		protected ba(){}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -480,6 +482,8 @@ public class ByteArrays {
 	}
 	
 	public static abstract class ba_put extends ba {
+		
+		protected ba_put(){}
 
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
@@ -488,6 +492,8 @@ public class ByteArrays {
 	}
 	
 	public static abstract class ba_get extends ba {
+		
+		protected ba_get(){}
 
 		@Override
 		public ExceptionType[] thrown() {

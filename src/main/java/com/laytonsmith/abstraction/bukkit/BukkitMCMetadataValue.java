@@ -2,11 +2,12 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.metadata.MetadataValue;
 
 public class BukkitMCMetadataValue implements MCMetadataValue {
 
-	MetadataValue val;
+	@WrappedItem MetadataValue val;
 	
 	public BukkitMCMetadataValue(MetadataValue v) {
 		this.val = v;

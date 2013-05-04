@@ -161,6 +161,8 @@ public class Scoreboards {
 	 */
 	public static abstract class SBFunction extends AbstractFunction {
 		
+		protected SBFunction(){}
+		
 		/**
 		 * @return true
 		 */

@@ -4,21 +4,22 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.annotations.WrappedItem;
+import com.laytonsmith.annotations.testing.AbstractConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
 
 public class BukkitMCMetadatable implements MCMetadatable {
-	Metadatable meta;
+	@WrappedItem Metadatable meta;
 	public BukkitMCMetadatable(Metadatable m) {
 		this.meta = m;
 	}
 	
+	@AbstractConstructor
 	public BukkitMCMetadatable(AbstractionObject a) {
-		if (a instanceof MCMetadatable) {
-			this.meta = (Metadatable)a.getHandle();
-		}
+		this.meta = a.getHandle();
 	}
 
 	public List<MCMetadataValue> getMetadata(String metadataKey) {
@@ -44,7 +45,7 @@ public class BukkitMCMetadatable implements MCMetadatable {
 		meta.setMetadata(metadataKey, ((BukkitMCMetadataValue)newMetadataValue).asMetadataValue());
 	}
 
-	public Object getHandle() {
+	public Metadatable getHandle() {
 		return meta;
 	}
 	

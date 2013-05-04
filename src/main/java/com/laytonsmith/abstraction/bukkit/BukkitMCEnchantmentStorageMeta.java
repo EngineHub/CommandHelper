@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
+import com.laytonsmith.annotations.WrappedItem;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.enchantments.Enchantment;
@@ -14,7 +15,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements
 		MCEnchantmentStorageMeta {
 
-	EnchantmentStorageMeta es;
+	@WrappedItem EnchantmentStorageMeta es;
 	public BukkitMCEnchantmentStorageMeta(EnchantmentStorageMeta im) {
 		super(im);
 		this.es = im;

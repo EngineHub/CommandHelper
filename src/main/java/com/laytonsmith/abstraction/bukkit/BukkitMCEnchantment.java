@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.enchantments.Enchantment;
 
 /**
@@ -12,7 +13,7 @@ import org.bukkit.enchantments.Enchantment;
  * @author layton
  */
 public class BukkitMCEnchantment implements MCEnchantment{
-    Enchantment e;
+    @WrappedItem Enchantment e;
     public BukkitMCEnchantment(Enchantment e){
 		if(e == null){
 			throw new NullPointerException();

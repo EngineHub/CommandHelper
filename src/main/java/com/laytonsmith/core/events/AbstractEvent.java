@@ -21,6 +21,8 @@ import java.util.Map;
  * @author layton
  */
 public abstract class AbstractEvent implements Event, Comparable<Event> {
+	
+	protected AbstractEvent(){}
     
     private EventMixinInterface mixin;
 //    protected EventHandlerInterface handler;

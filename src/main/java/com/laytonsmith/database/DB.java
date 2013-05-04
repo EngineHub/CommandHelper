@@ -14,6 +14,8 @@ import java.util.Set;
  * @author layton
  */
 public abstract class DB {
+	
+	protected DB(){}
 
     private static class Statics {
 

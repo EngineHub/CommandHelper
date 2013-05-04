@@ -2,13 +2,14 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCHanging;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Hanging;
 
 public class BukkitMCHanging extends BukkitMCEntity implements MCHanging {
 
-	Hanging h;
+	@WrappedItem Hanging h;
 	public BukkitMCHanging(Entity e) {
 		super(e);
 		this.h = (Hanging) e;

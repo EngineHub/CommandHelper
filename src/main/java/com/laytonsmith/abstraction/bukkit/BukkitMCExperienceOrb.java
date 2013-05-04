@@ -2,6 +2,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCExperienceOrb;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.ExperienceOrb;
 
 /**
@@ -10,7 +11,7 @@ import org.bukkit.entity.ExperienceOrb;
  */
 public class BukkitMCExperienceOrb extends BukkitMCEntity implements MCExperienceOrb {
 
-	ExperienceOrb eo;
+	@WrappedItem ExperienceOrb eo;
 	
 	public BukkitMCExperienceOrb(ExperienceOrb eo){
 		super(eo);

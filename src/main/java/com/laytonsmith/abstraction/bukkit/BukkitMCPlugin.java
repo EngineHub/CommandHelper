@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -12,7 +13,7 @@ import org.bukkit.plugin.Plugin;
  */
 public class BukkitMCPlugin implements MCPlugin {
 
-    Plugin p;
+    @WrappedItem Plugin p;
     public BukkitMCPlugin(Plugin plugin) {
         this.p = plugin;
     }

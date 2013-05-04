@@ -2,12 +2,13 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCBookMeta;
+import com.laytonsmith.annotations.WrappedItem;
 import java.util.List;
 import org.bukkit.inventory.meta.BookMeta;
 
 public class BukkitMCBookMeta extends BukkitMCItemMeta implements MCBookMeta {
 
-	BookMeta bm;
+	@WrappedItem BookMeta bm;
 	public BukkitMCBookMeta(BookMeta im) {
 		super(im);
 		this.bm = im;

@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
@@ -17,7 +18,7 @@ import org.bukkit.WorldType;
  */
 public class BukkitMCWorldCreator implements MCWorldCreator {
 	
-	WorldCreator creator;
+	@WrappedItem WorldCreator creator;
 	public BukkitMCWorldCreator(String name){
 		creator = new WorldCreator(name);
 	}

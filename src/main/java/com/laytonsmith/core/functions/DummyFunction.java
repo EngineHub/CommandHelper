@@ -10,6 +10,8 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
  * @author Layton
  */
 public abstract class DummyFunction extends AbstractFunction{
+	
+	protected DummyFunction(){}
 
 	public ExceptionType[] thrown() {
 		return ExceptionType.values();

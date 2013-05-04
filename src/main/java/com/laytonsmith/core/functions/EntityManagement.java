@@ -37,6 +37,8 @@ public class EntityManagement {
     }
 
 	public static abstract class EntityFunction extends AbstractFunction {
+		protected EntityFunction(){}
+		
 		public boolean isRestricted() {
 			return true;
 		}
@@ -51,6 +53,8 @@ public class EntityManagement {
 	}
 
 	public static abstract class EntityGetterFunction extends EntityFunction {
+		protected EntityGetterFunction(){}
+		
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
@@ -61,6 +65,8 @@ public class EntityManagement {
 	}
 
 	public static abstract class EntitySetterFunction extends EntityFunction {
+		protected EntitySetterFunction(){}
+		
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
 					ExceptionType.BadEntityException};

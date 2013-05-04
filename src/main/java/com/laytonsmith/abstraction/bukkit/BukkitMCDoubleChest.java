@@ -2,6 +2,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -11,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BukkitMCDoubleChest extends BukkitMCInventory {
 	
-	Inventory left;
+	@WrappedItem Inventory left;
 	Inventory right;
 	public BukkitMCDoubleChest(Inventory left, Inventory right){
 		super(left);

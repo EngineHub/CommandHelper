@@ -2,11 +2,12 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCSkullMeta;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.inventory.meta.SkullMeta;
 
 public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 
-	SkullMeta sm;
+	@WrappedItem SkullMeta sm;
 	public BukkitMCSkullMeta(SkullMeta im) {
 		super(im);
 		this.sm = im;

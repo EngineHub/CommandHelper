@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
@@ -16,7 +17,7 @@ import org.bukkit.inventory.Inventory;
  */
 public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
     
-    HumanEntity he;
+    @WrappedItem HumanEntity he;
 
     public BukkitMCHumanEntity(HumanEntity humanEntity) {
         super(humanEntity);

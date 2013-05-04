@@ -6,13 +6,14 @@ import com.laytonsmith.abstraction.MCScore;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 
 public class BukkitMCObjective implements MCObjective {
 
-	Objective o;
+	@WrappedItem Objective o;
 	public BukkitMCObjective(Objective obj) {
 		o = obj;
 	}

@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.Material;
 
 /**
@@ -10,7 +11,7 @@ import org.bukkit.Material;
  * @author layton
  */
 public class BukkitMCMaterial implements MCMaterial {
-    Material m;
+    @WrappedItem Material m;
 
     public BukkitMCMaterial(Material type) {
         this.m = type;

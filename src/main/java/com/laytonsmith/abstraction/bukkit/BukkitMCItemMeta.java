@@ -7,6 +7,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.annotations.WrappedItem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class BukkitMCItemMeta implements MCItemMeta {
 
-	ItemMeta im;
+	@WrappedItem ItemMeta im;
 	public BukkitMCItemMeta(ItemMeta im) {
 		this.im = im;
 	}

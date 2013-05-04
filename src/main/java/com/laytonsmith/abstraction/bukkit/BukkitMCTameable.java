@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
@@ -13,7 +14,7 @@ import org.bukkit.entity.Tameable;
  */
 public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable{
 
-    Tameable t;
+    @WrappedItem Tameable t;
     public BukkitMCTameable(Entity t){
         super((LivingEntity) t);
         this.t = (Tameable)t;

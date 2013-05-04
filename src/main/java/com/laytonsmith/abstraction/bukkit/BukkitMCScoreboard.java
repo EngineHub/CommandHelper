@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
+import com.laytonsmith.annotations.WrappedItem;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.OfflinePlayer;
@@ -17,7 +18,7 @@ import org.bukkit.scoreboard.Team;
 
 public class BukkitMCScoreboard implements MCScoreboard {
 
-	Scoreboard s;
+	@WrappedItem Scoreboard s;
 	public BukkitMCScoreboard(Scoreboard sb) {
 		s = sb;
 	}

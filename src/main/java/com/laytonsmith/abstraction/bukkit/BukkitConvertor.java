@@ -266,7 +266,7 @@ public class BukkitConvertor extends AbstractConvertor {
 
     public MCEntity GetCorrectEntity(MCEntity e) {
 
-        Entity be = ((BukkitMCEntity)e).asEntity();
+        Entity be = ((BukkitMCEntity)e).getHandle();
         return BukkitConvertor.BukkitGetCorrectEntity(be);
     }
 

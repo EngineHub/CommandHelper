@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
+import com.laytonsmith.annotations.WrappedItem;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +20,7 @@ import org.bukkit.inventory.ItemStack;
  * @author Layton
  */
 public class BukkitMCInventory implements MCInventory {
-	private Inventory i;
+	@WrappedItem private Inventory i;
     public BukkitMCInventory(Inventory inventory) {
         this.i = inventory;
     }

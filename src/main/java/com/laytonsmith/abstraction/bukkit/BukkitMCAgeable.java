@@ -2,6 +2,8 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAgeable;
+import com.laytonsmith.annotations.WrappedItem;
+import com.laytonsmith.annotations.testing.AbstractConstructor;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -12,16 +14,22 @@ import org.bukkit.entity.LivingEntity;
  */
 public class BukkitMCAgeable extends BukkitMCLivingEntity implements MCAgeable {
 
-	Ageable a;
+	@WrappedItem Ageable a;
 	public BukkitMCAgeable(Entity be) {
 		super((LivingEntity) be);
 		this.a = (Ageable) be;
 	}
 	
+	@AbstractConstructor
 	public BukkitMCAgeable(AbstractionObject ao){
-        super((LivingEntity)ao.getHandle());
-        this.a = ((Ageable)ao.getHandle());
+        super(ao);
+        this.a = ao.getHandle();
     }
+
+	@Override
+	public Ageable getHandle() {
+		return a;
+	}
 	
 	public boolean getCanBreed() {
 		return a.canBreed();

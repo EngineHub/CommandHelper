@@ -2,6 +2,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCEnderCrystal;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.EnderCrystal;
 
 /**
@@ -10,7 +11,7 @@ import org.bukkit.entity.EnderCrystal;
  */
 public class BukkitMCEnderCrystal extends BukkitMCEntity implements MCEnderCrystal{
 	
-	EnderCrystal ec;
+	@WrappedItem EnderCrystal ec;
 	public BukkitMCEnderCrystal(EnderCrystal ec){
 		super(ec);
 		this.ec = ec;

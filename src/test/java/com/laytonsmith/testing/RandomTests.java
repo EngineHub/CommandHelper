@@ -2,9 +2,11 @@ package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.annotations.testing.AbstractConstructor;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
@@ -23,10 +25,15 @@ import static com.laytonsmith.testing.StaticTest.*;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -63,34 +70,8 @@ public class RandomTests {
 	@Test
 	public void testAllBoilerplate() {
 		Map<String, Throwable> uhohs = new HashMap<String, Throwable>();
-		String[] requiredMethods = new String[]{"toString", "equals", "hashCode"};
 		//Ensure that all the abstraction objects overloaded
 		StaticTest.InstallFakeServerFrontend();
-		outer:
-		for (Class c : ClassDiscovery.GetAllClassesOfSubtype(AbstractionObject.class, null)) {
-			inner:
-			for (Class inter : c.getInterfaces()) {
-				for (Class extended : inter.getInterfaces()) {
-					if (extended == AbstractionObject.class) {
-						//This is a direct subclass of an interface that implements AbstractionObject, so check
-						//to ensure that the equals, toString, and hashCode methods are overloaded.
-						break inner;
-					}
-				}
-				//It's not, so just skip it.
-				continue outer;
-			}
-			Method[] methods = c.getDeclaredMethods();
-			required:
-			for (String required : requiredMethods) {
-				for (Method method : methods) {
-					if (method.getName().equals(required)) {
-						continue required;
-					}
-				}
-				uhohs.put(c.getName() + " " + required, new NoSuchMethodException(c.getSimpleName() + " does not define " + required));
-			}
-		}
 		Set<String> classDocs = new TreeSet<String>();
 
 		for (FunctionBase f : FunctionList.getFunctionList(null)) {

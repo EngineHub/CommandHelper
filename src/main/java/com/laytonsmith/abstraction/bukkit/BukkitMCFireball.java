@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCFireball;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.Fireball;
 import org.bukkit.util.Vector;
 
@@ -10,7 +11,7 @@ import org.bukkit.util.Vector;
  */
 public class BukkitMCFireball extends BukkitMCProjectile implements MCFireball {
 
-	Fireball f;
+	@WrappedItem Fireball f;
 	public BukkitMCFireball(Fireball be) {
 		super(be);
 		f = be;

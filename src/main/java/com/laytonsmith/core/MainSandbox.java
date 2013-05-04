@@ -1,5 +1,10 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.testing.AbstractConstructor;
+import com.laytonsmith.annotations.testing.MustOverride;
+import com.laytonsmith.annotations.testing.SubclassesMustHaveAnnotation;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Regex;
@@ -8,6 +13,7 @@ import com.laytonsmith.database.DB;
 import com.laytonsmith.database.MySQL;
 import java.net.InetAddress;
 import java.sql.ResultSet;
+import java.util.Arrays;
 
 /**
  * This class is for testing concepts
@@ -113,15 +119,17 @@ public class MainSandbox {
 //		System.out.println("i2.toString(): " + i2.toString());
 //		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
 		
-		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
-		DB db = new MySQL();
-		db.connect(conn);
-		Object o = db.query("SHOW TABLES;");
-		if(o instanceof ResultSet){
-			ResultSet rs = (ResultSet)o;
-		}
-		System.out.println(o);
+//		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
+//		DB db = new MySQL();
+//		db.connect(conn);
+//		Object o = db.query("SHOW TABLES;");
+//		if(o instanceof ResultSet){
+//			ResultSet rs = (ResultSet)o;
+//		}
+//		System.out.println(o);
+		
+		System.out.println(Arrays.toString(AbstractionUtils.getHighestLevelTypes()));
 	}
-	
+
 	
 }

@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 
@@ -13,7 +14,7 @@ import org.bukkit.entity.EntityType;
  */
 public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCreatureSpawner{
 	
-	CreatureSpawner cs;
+	@WrappedItem CreatureSpawner cs;
 	public BukkitMCCreatureSpawner(CreatureSpawner cs){
 		super(cs);
 		this.cs = cs;

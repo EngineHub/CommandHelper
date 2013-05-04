@@ -673,6 +673,10 @@ public class PlayerEvents {
 	
     public abstract static class player_bed_event extends AbstractEvent {
 		
+		protected player_bed_event(){
+			
+		}
+		
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerBedEvent){
                 MCPlayerBedEvent be = (MCPlayerBedEvent)e;

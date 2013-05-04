@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.Location;
 
 /**
@@ -16,7 +17,7 @@ import org.bukkit.Location;
  * @author layton
  */
 public class BukkitMCLocation implements MCLocation {
-    Location l;
+    @WrappedItem Location l;
     public BukkitMCLocation(Location l) {
         this.l = l;
     }

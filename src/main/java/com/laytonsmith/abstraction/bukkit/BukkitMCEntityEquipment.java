@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.annotations.WrappedItem;
 import java.util.EnumMap;
 import java.util.Map;
 import org.bukkit.inventory.EntityEquipment;
@@ -13,7 +14,7 @@ import org.bukkit.inventory.EntityEquipment;
  */
 public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
-	private EntityEquipment ee;
+	@WrappedItem private EntityEquipment ee;
 
 	public BukkitMCEntityEquipment(EntityEquipment equipment) {
 		this.ee = equipment;

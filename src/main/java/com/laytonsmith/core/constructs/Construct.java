@@ -63,14 +63,14 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         return target;
     }
 
-    public Construct(String value, ConstructType ctype, int line_num, File file, int column) {
+    protected Construct(String value, ConstructType ctype, int line_num, File file, int column) {
         this.value = value;
 		Static.AssertNonNull(value, "The string value may not be null.");
         this.ctype = ctype;
         this.target = new Target(line_num, file, column);
     }
     
-    public Construct(String value, ConstructType ctype, Target t){
+    protected Construct(String value, ConstructType ctype, Target t){
         this.value = value;
 		Static.AssertNonNull(value, "The string value may not be null.");
         this.ctype = ctype;

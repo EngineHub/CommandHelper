@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.inventory.InventoryView;
 
 /**
@@ -13,7 +14,7 @@ import org.bukkit.inventory.InventoryView;
  */
 public class BukkitMCInventoryView implements MCInventoryView {
 	
-	InventoryView iv;
+	@WrappedItem InventoryView iv;
 
 	public BukkitMCInventoryView(InventoryView iv) {
 		this.iv = iv;

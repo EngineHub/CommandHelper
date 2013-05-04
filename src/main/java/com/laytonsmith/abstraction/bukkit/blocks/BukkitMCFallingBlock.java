@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction.bukkit.blocks;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.entity.FallingBlock;
 
 /**
@@ -11,7 +12,7 @@ import org.bukkit.entity.FallingBlock;
  * @author import
  */
 public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlock {
-	FallingBlock f;
+	@WrappedItem FallingBlock f;
 	
 	public BukkitMCFallingBlock(FallingBlock f) {
 		super(f);
@@ -38,7 +39,8 @@ public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlo
 		f.setDropItem(drop);
 	}
 
-	public Object getHandle() {
+	@Override
+	public FallingBlock getHandle() {
 		return f;
 	}
 	

@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
+import com.laytonsmith.annotations.WrappedItem;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -33,7 +34,7 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCCommandSender, MCOfflinePlayer {
 
-    Player p;
+    @WrappedItem Player p;
 
 	public BukkitMCPlayer(Player player) {
         super(player);

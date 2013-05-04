@@ -4,11 +4,12 @@ import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCScore;
 import com.laytonsmith.abstraction.MCScoreboard;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.scoreboard.Score;
 
 public class BukkitMCScore implements MCScore {
 
-	Score s;
+	@WrappedItem Score s;
 	public BukkitMCScore(Score score) {
 		s = score;
 	}
