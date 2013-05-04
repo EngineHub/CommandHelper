@@ -149,7 +149,12 @@ public class Echoes {
             if(args.length < 2){
                 throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, t);
             }
-            MCPlayer p = Static.GetPlayer(args[0], t);
+			MCCommandSender p;
+			if (Static.getConsoleName().equals(args[0].val())) {
+				p = Static.getServer().getConsole();
+			} else {
+				p = Static.GetPlayer(args[0], t);
+			}
             if(p == null){
                 throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, t);
             }
@@ -428,11 +433,12 @@ public class Echoes {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{1, 2};
         }
 
         public String docs() {
-            return "void {message} Broadcasts a message to all players on the server";
+            return "void {message, [permission]} Broadcasts a message to all players on the server."
+            		+ " If permission is given, only players with that permission will see the broadcast.";
         }
         
         public ExceptionType[] thrown(){
@@ -453,7 +459,15 @@ public class Echoes {
                 throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.NullPointerException, t);
             }
             final MCServer server = Static.getServer();
-			server.broadcastMessage(args[0].val());
+            String permission = null;
+            if (args.length == 2 && !(args[1] instanceof CNull)) {
+            	permission = args[1].val();
+            }
+            if (permission == null) {
+            	server.broadcastMessage(args[0].val());
+            } else {
+            	server.broadcastMessage(args[0].val(), permission);
+            }
             return new CVoid(t);
         }
         public Boolean runAsync(){
