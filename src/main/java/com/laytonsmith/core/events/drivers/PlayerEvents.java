@@ -1338,8 +1338,8 @@ public class PlayerEvents {
             return "{player: <macro> The player that switched worlds "
                     + "| from: <string match> The world the player is coming from "
                     + "| to: <string match> The world the player is now in}"
-					+ "This event is fired off when a player changes worlds. This event is not cancellable,"
-					+ " so to prevent the event it, the player_teleport event must be checked."
+					+ " This event is fired off when a player changes worlds. This event is not cancellable,"
+					+ " so to prevent it, the player_teleport event must be checked."
                     + "{player | from: The world the player is coming from | to: The world the player is now in}"
                     + "{}"
                     + "{player, from}";
