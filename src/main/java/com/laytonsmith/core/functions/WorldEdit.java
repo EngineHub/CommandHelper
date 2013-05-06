@@ -1785,6 +1785,48 @@ public class WorldEdit {
             return CHVersion.V3_3_1;
         }
     }
+	
+	@api(environments=CommandHelperEnvironment.class)
+	public static class sk_can_build extends SKFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidPluginException, ExceptionType.PlayerOfflineException,
+					ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			Static.checkPlugin("WorldGuard", t);
+			MCPlayer p;
+			MCLocation loc;
+			if (args.length == 1) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if (p == null) {
+					throw new ConfigRuntimeException("A player was expected.", ExceptionType.PlayerOfflineException, t);
+				}
+				loc = ObjectGenerator.GetGenerator().location(args[0], p.getWorld(), t);
+			} else {
+				
+				p = Static.GetPlayer(args[0], t);
+				loc = ObjectGenerator.GetGenerator().location(args[1], p.getWorld(), t);
+			}
+			return new CBoolean(Static.getWorldGuardPlugin(t).canBuild(((BukkitMCPlayer) p)._Player(),
+					((BukkitMCLocation) loc)._Location()), t);
+		}
+
+		public String getName() {
+			return "sk_can_build";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "boolean {[player,] locationArray} Returns whether or not player can build at the location,"
+					+ " according to WorldGuard. If player is not given, the current player is used.";
+		}
+	}
 
     public static abstract class SKFunction extends AbstractFunction {
 

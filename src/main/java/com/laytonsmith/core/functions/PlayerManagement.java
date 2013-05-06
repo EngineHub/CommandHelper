@@ -52,20 +52,29 @@ public class PlayerManagement {
 
 			// assuming p is not null, just return the name set by the CommandSender
 			// for player entities in CraftBukkit, this is the player's name, and
-			// for the console it's "CONSOLE".
+			// for the console it's "CONSOLE". For CommandBlocks it's "@" unless it has been renamed.
 			if (p == null) {
 				return new CNull(t);
 			} else {
 				String name = p.getName();
-				return new CString(("CONSOLE".equals(name)) ? "~console" : name, t);
+				if (p instanceof MCConsoleCommandSender || "CONSOLE".equals(name)) {
+					name = Static.getConsoleName();
+				}
+				if (p instanceof MCBlockCommandSender) {
+					name = Static.getBlockPrefix() + name;
+				}
+				return new CString(name, t);
 			}
 		}
 
 		public String docs() {
-			return "string {[playerName]} Returns the full name of the partial Player name specified or the Player running the command otherwise. If the command is being run from"
-					+ " the console, then the string '~console' is returned. If the command is coming from elsewhere, returns a string chosen by the sender of this command (or null)."
-					+ " Note that most functions won't support the user '~console' (they'll throw a PlayerOfflineException), but you can use this to determine"
-					+ " where a command is being run from.";
+			return "string {[playerName]} Returns the full name of the partial Player name specified or the Player running the command otherwise."
+					+ " If the command is being run from the console, then the string '" + Static.getConsoleName()
+					+ "' is returned. If the command came from a CommandBlock, the block's name prefixed with "
+					+ Static.getBlockPrefix() + " is returned. If the command is coming from elsewhere,"
+					+ " returns a string chosen by the sender of this command (or null)."
+					+ " Note that most functions won't support console or block names (they'll throw a PlayerOfflineException),"
+					+ " but you can use this to determine where a command is being run from.";
 		}
 
 		public ExceptionType[] thrown() {
