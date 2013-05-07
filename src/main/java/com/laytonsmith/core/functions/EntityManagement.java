@@ -673,18 +673,7 @@ public class EntityManagement {
 
 			for (int chX = 0 - chunkRadius; chX <= chunkRadius; chX++) {
 				for (int chZ = 0 - chunkRadius; chZ <= chunkRadius; chZ++) {
-					int x = (int) loc.getX();
-					int y = (int) loc.getY();
-					int z = (int) loc.getZ();
-					for (MCEntity e : ObjectGenerator.GetGenerator()
-							.location(
-								new CArray(t,
-										new CInt(x + (chX * 16), t),
-										new CInt(y, t),
-										new CInt(z + (chZ * 16), t),
-										new CString(loc.getWorld().getName(), t)
-								), loc.getWorld(), t
-							).getChunk().getEntities()) {
+					for (MCEntity e : loc.getChunk().getEntities()) {
 						if (e.getWorld() != loc.getWorld()) {
 							continue;
 						}
