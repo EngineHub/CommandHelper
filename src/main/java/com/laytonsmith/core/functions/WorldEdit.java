@@ -617,7 +617,7 @@ public class WorldEdit {
 
             MCWorld w = null;
             MCCommandSender c = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-            if (c != null && !( c instanceof MCPlayer)) {
+            if (c instanceof MCPlayer) {
                 w = ((MCPlayer)c).getWorld();
             }
 
