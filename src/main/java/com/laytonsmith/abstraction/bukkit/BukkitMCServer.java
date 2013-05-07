@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
@@ -25,19 +26,8 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 public class BukkitMCServer implements MCServer {
     
     @WrappedItem Server s;
-    public BukkitMCServer(){
-        this.s = Bukkit.getServer();
-    }
-    
-    public BukkitMCServer(Server server) {
-		this.s = server;
-	}
 
-	public Object getHandle(){
-        return s;
-    }
-    
-    public Server __Server(){
+	public Server getHandle(){
         return s;
     }
 
@@ -52,38 +42,34 @@ public class BukkitMCServer implements MCServer {
         Player[] pa = s.getOnlinePlayers();
         MCPlayer[] mcpa = new MCPlayer[pa.length];
         for(int i = 0; i < pa.length; i++){
-            mcpa[i] = new BukkitMCPlayer(pa[i]);
+            mcpa[i] = AbstractionUtils.wrap(pa[i]);
         }
         return mcpa;
     }
-
-    public static MCServer Get() {
-        return new BukkitMCServer();
-    }
     
     public boolean dispatchCommand(MCCommandSender sender, String command){
-        return s.dispatchCommand(new BukkitMCCommandSender(sender).c, command);
+        return s.dispatchCommand((CommandSender)sender.getHandle(), command);
     }
 
     public MCPluginManager getPluginManager() {
         if(s.getPluginManager() == null){
             return null;
         }
-        return new BukkitMCPluginManager(s.getPluginManager());
+        return AbstractionUtils.wrap(s.getPluginManager());
     }
 
     public MCPlayer getPlayer(String name) {
         if(s.getPlayer(name) == null){
             return null;
         }
-        return new BukkitMCPlayer(s.getPlayer(name));
+        return AbstractionUtils.wrap(s.getPlayer(name));
     }
 
     public MCWorld getWorld(String name) {
         if(s.getWorld(name) == null){
             return null;
         }
-        return new BukkitMCWorld(s.getWorld(name));
+        return AbstractionUtils.wrap(s.getWorld(name));
     }
     
     public List<MCWorld> getWorlds(){
@@ -92,7 +78,7 @@ public class BukkitMCServer implements MCServer {
         }
         List<MCWorld> list = new ArrayList<MCWorld>();
         for(World w : s.getWorlds()){
-            list.add(new BukkitMCWorld(w));
+            list.add((MCWorld) AbstractionUtils.wrap(w));
         }
         return list;
     }
@@ -102,11 +88,11 @@ public class BukkitMCServer implements MCServer {
     }
 
 	public MCItemFactory getItemFactory() {
-		return new BukkitMCItemFactory(s.getItemFactory());
+		return AbstractionUtils.wrap(s.getItemFactory());
 	}
 
     public MCOfflinePlayer getOfflinePlayer(String player) {
-        return new BukkitMCOfflinePlayer(s.getOfflinePlayer(player));
+        return AbstractionUtils.wrap(s.getOfflinePlayer(player));
     }
 
 	public MCOfflinePlayer[] getOfflinePlayers() {
@@ -116,7 +102,7 @@ public class BukkitMCServer implements MCServer {
 		OfflinePlayer[] offp = s.getOfflinePlayers();
 		MCOfflinePlayer[] mcoff = new MCOfflinePlayer[offp.length];
 		for (int i = 0; i < offp.length; i++) {
-			mcoff[i] = new BukkitMCOfflinePlayer(offp[i]);
+			mcoff[i] = AbstractionUtils.wrap(offp[i]);
 		}
 		return mcoff;
 	}
@@ -228,7 +214,7 @@ public class BukkitMCServer implements MCServer {
 		InventoryHolder ih = null;
 		
 		if (holder instanceof MCPlayer) {
-			ih = ((BukkitMCPlayer)holder)._Player();
+			ih = holder.getHandle();
 		} else if (holder instanceof MCHumanEntity) {
 			ih = ((BukkitMCHumanEntity)holder).asHumanEntity();
 		} else if (holder.getHandle() instanceof InventoryHolder) {
@@ -242,7 +228,7 @@ public class BukkitMCServer implements MCServer {
 		InventoryHolder ih = null;
 		
 		if (holder instanceof MCPlayer) {
-			ih = ((BukkitMCPlayer)holder)._Player();
+			ih = holder.getHandle();
 		} else if (holder instanceof MCHumanEntity) {
 			ih = ((BukkitMCHumanEntity)holder).asHumanEntity();
 		} else if (holder.getHandle() instanceof InventoryHolder) {
@@ -256,7 +242,7 @@ public class BukkitMCServer implements MCServer {
 		InventoryHolder ih = null;
 		
 		if (holder instanceof MCPlayer) {
-			ih = ((BukkitMCPlayer)holder)._Player();
+			ih = holder.getHandle();
 		} else if (holder instanceof MCHumanEntity) {
 			ih = ((BukkitMCHumanEntity)holder).asHumanEntity();
 		} else if (holder.getHandle() instanceof InventoryHolder) {
@@ -279,14 +265,14 @@ public class BukkitMCServer implements MCServer {
 	}
 	
 	public MCMessenger getMessenger() {
-		return new BukkitMCMessenger(s.getMessenger());
-}
+		return AbstractionUtils.wrap(s.getMessenger());
+	}
 
 	public MCScoreboard getMainScoreboard() {
-		return new BukkitMCScoreboard(s.getScoreboardManager().getMainScoreboard());
+		return AbstractionUtils.wrap(s.getScoreboardManager().getMainScoreboard());
 	}
 
 	public MCScoreboard getNewScoreboard() {
-		return new BukkitMCScoreboard(s.getScoreboardManager().getNewScoreboard());
+		return AbstractionUtils.wrap(s.getScoreboardManager().getNewScoreboard());
 	}
 }

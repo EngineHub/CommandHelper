@@ -14,21 +14,6 @@ import org.bukkit.enchantments.Enchantment;
  */
 public class BukkitMCEnchantment implements MCEnchantment{
     @WrappedItem Enchantment e;
-    public BukkitMCEnchantment(Enchantment e){
-		if(e == null){
-			throw new NullPointerException();
-		}
-        this.e = e;
-    }
-    
-    public BukkitMCEnchantment(AbstractionObject a){
-        this((Enchantment)null);
-        if(a instanceof MCEnchantment){
-            this.e = ((Enchantment)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
     
     public Object getHandle(){
         return e;

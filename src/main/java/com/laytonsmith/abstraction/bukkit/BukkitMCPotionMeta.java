@@ -1,7 +1,9 @@
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
+import com.laytonsmith.abstraction.MCPotionMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemMeta;
+import com.laytonsmith.annotations.WrappedItem;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -14,11 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta {
 
-	PotionMeta pm;
-	public BukkitMCPotionMeta(PotionMeta pomet) {
-		super(pomet);
-		pm = pomet;
-	}
+	@WrappedItem PotionMeta pm;
 	
 	public boolean addCustomEffect(int potionID, int strength, int seconds, boolean ambient, boolean overwrite, Target t) {
 		int maxID = PotionEffectType.values().length;

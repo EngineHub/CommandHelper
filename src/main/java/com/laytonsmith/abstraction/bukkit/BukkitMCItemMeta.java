@@ -5,6 +5,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.annotations.WrappedItem;
@@ -22,13 +23,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class BukkitMCItemMeta implements MCItemMeta {
 
 	@WrappedItem ItemMeta im;
-	public BukkitMCItemMeta(ItemMeta im) {
-		this.im = im;
-	}
-
-	public BukkitMCItemMeta(AbstractionObject o) {
-		im = (ItemMeta)o;
-	}
 	
 	public boolean hasDisplayName() {
 		return im.hasDisplayName();
@@ -61,7 +55,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public Map<MCEnchantment, Integer> getEnchants() {
 		Map<MCEnchantment, Integer> map = new HashMap<MCEnchantment, Integer>();
 		for(Entry<Enchantment, Integer> entry : im.getEnchants().entrySet()) {
-			map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
+			map.put((MCEnchantment) AbstractionUtils.wrap(entry.getKey()), entry.getValue());
 		}
 		return map;
 	}

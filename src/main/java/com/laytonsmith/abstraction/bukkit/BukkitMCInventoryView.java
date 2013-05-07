@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
@@ -15,10 +16,6 @@ import org.bukkit.inventory.InventoryView;
 public class BukkitMCInventoryView implements MCInventoryView {
 	
 	@WrappedItem InventoryView iv;
-
-	public BukkitMCInventoryView(InventoryView iv) {
-		this.iv = iv;
-	}
 	
 	@Override
 	public String toString() {
@@ -56,11 +53,11 @@ public class BukkitMCInventoryView implements MCInventoryView {
 	}
 
 	public MCItemStack getItem(int slot) {
-		return new BukkitMCItemStack(iv.getItem(slot));
+		return AbstractionUtils.wrap(iv.getItem(slot));
 	}
 
 	public MCHumanEntity getPlayer() {
-		return new BukkitMCHumanEntity(iv.getPlayer());
+		return AbstractionUtils.wrap(iv.getPlayer());
 	}
 
 	public String getTitle() {
@@ -77,6 +74,10 @@ public class BukkitMCInventoryView implements MCInventoryView {
 
 	public void setItem(int slot, MCItemStack item) {
 		iv.setItem(slot, (((BukkitMCItemStack)item).__ItemStack()));
+	}
+
+	public <T> T getHandle() {
+		return (T) iv;
 	}
 	
 }

@@ -2,6 +2,7 @@
 
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
@@ -46,7 +47,7 @@ public class CommandHelperInterpreterListener implements Listener {
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerChat(final AsyncPlayerChatEvent event) {
         if (interpreterMode.contains(event.getPlayer().getName())) {
-            final MCPlayer p = new BukkitMCPlayer(event.getPlayer());
+            final MCPlayer p = AbstractionUtils.wrap(event.getPlayer());
             event.setCancelled(true);                    
             StaticLayer.SetFutureRunnable(0, new Runnable() {
 
@@ -70,7 +71,7 @@ public class CommandHelperInterpreterListener implements Listener {
 			return;
 		}
         if (interpreterMode.contains(event.getPlayer().getName())) {
-            MCPlayer p = new BukkitMCPlayer(event.getPlayer());
+            MCPlayer p = AbstractionUtils.wrap(event.getPlayer());
             textLine(p, event.getMessage());
             event.setCancelled(true);
         }

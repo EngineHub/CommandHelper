@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCWorld;
@@ -13,10 +14,6 @@ import org.bukkit.Chunk;
  */
 public class BukkitMCChunk implements MCChunk {
 	@WrappedItem Chunk c;
-
-	public BukkitMCChunk(Chunk c) {
-		this.c = c;
-	}
 	
 	public int getX() {
 		return c.getX();
@@ -29,13 +26,13 @@ public class BukkitMCChunk implements MCChunk {
 	public MCEntity[] getEntities() {
 		MCEntity[] ret = new MCEntity[c.getEntities().length];
 		for (int i=0; i < c.getEntities().length; i++) {
-			ret[i] = new BukkitMCEntity(c.getEntities()[i]);
+			ret[i] = AbstractionUtils.wrap(c.getEntities()[i]);
 		}
 		return ret;
 	}
 
 	public MCWorld getWorld() {
-		return new BukkitMCWorld(c.getWorld());
+		return AbstractionUtils.wrap(c.getWorld());
 	}
 	
 	public Object getHandle() {

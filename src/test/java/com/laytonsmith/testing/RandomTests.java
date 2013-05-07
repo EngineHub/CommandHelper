@@ -241,7 +241,7 @@ public class RandomTests {
 	@Test
 	public void testCastFromBukkitMCPlayerToBukkitMCCommandSender() throws ConfigCompileException {
 		Player p = mock(Player.class);
-		BukkitMCCommandSender c = new BukkitMCCommandSender(new BukkitMCPlayer(p));
+		BukkitMCCommandSender c = AbstractionUtils.wrap(p);
 	}
 
 	@Test

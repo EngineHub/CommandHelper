@@ -14,6 +14,7 @@ import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
@@ -38,11 +39,11 @@ public class BukkitBlockEvents {
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(event.getPlayer());
+            return AbstractionUtils.wrap(event.getPlayer());
         }
 
         public MCBlock getBlock() {
-            return new BukkitMCBlock(event.getBlock());
+            return AbstractionUtils.wrap(event.getBlock());
         }
 
 		public int getExpToDrop() {
@@ -68,19 +69,19 @@ public class BukkitBlockEvents {
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(event.getPlayer());
+            return AbstractionUtils.wrap(event.getPlayer());
         }
 
         public MCBlock getBlock() {
-            return new BukkitMCBlock(event.getBlock());
+            return AbstractionUtils.wrap(event.getBlock());
         }
 
         public MCBlock getBlockAgainst() {
-            return new BukkitMCBlock(event.getBlockAgainst());
+            return AbstractionUtils.wrap(event.getBlockAgainst());
         }
 
         public MCItemStack getItemInHand() {
-            return new BukkitMCItemStack(event.getItemInHand());
+            return AbstractionUtils.wrap(event.getItemInHand());
         }
 
         public boolean canBuild() {
@@ -88,7 +89,7 @@ public class BukkitBlockEvents {
         }
 
         public MCBlockState getBlockReplacedState() {            
-            return new BukkitMCBlockState(event.getBlockReplacedState());
+            return AbstractionUtils.wrap(event.getBlockReplacedState());
         }
     }
 
@@ -106,12 +107,12 @@ public class BukkitBlockEvents {
             for (int i = 0; i < signtext.size(); i++) {
                 text[i] = signtext.get(i).toString();
             }
-            return new BukkitMCSignChangeEvent(new SignChangeEvent(( (BukkitMCBlock) sign ).__Block(), ( (BukkitMCPlayer) player )._Player(),
+            return new BukkitMCSignChangeEvent(new SignChangeEvent(( (BukkitMCBlock) sign ).__Block(), (Player) player.getHandle(),
                     text));
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pie.getPlayer());
+            return AbstractionUtils.wrap(pie.getPlayer());
         }
 
         public CString getLine(int index) {
@@ -139,7 +140,7 @@ public class BukkitBlockEvents {
         }
 
         public MCBlock getBlock() {
-            return new BukkitMCBlock(pie.getBlock());
+            return AbstractionUtils.wrap(pie.getBlock());
         }
 
         public Object _GetObject() {

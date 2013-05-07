@@ -1,7 +1,9 @@
 package com.laytonsmith.abstraction.bukkit.pluginmessages;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import com.laytonsmith.abstraction.pluginmessages.MCPluginMessageListenerRegistration;
+import com.laytonsmith.annotations.WrappedItem;
 import com.laytonsmith.commandhelper.CommandHelperMessageListener;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.Set;
@@ -13,11 +15,8 @@ import org.bukkit.plugin.messaging.PluginMessageListenerRegistration;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class BukkitMCMessenger implements MCMessenger {
-	Messenger messenger;
-
-	public BukkitMCMessenger(Messenger messager) {
-		this.messenger = messager;
-	}
+	
+	@WrappedItem Messenger messenger;
 	
 	public MCPluginMessageListenerRegistration registerIncomingPluginChannel(
 			String channel) {
@@ -27,7 +26,7 @@ public class BukkitMCMessenger implements MCMessenger {
 			CommandHelperPlugin.self, channel, 
 			CommandHelperMessageListener.getInstance());
 
-		return new BukkitMCPluginMessageListenerRegistration(reg);
+		return AbstractionUtils.wrap(reg);
 	}
 	
 	public boolean isIncomingChannelRegistered(String channel) {
@@ -42,5 +41,9 @@ public class BukkitMCMessenger implements MCMessenger {
 	
 	public Set<String> getIncomingChannels() {
 		return messenger.getIncomingChannels(CommandHelperPlugin.self);
+	}
+
+	public Messenger getHandle() {
+		return messenger;
 	}
 }

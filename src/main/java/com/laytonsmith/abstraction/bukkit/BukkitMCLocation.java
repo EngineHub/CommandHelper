@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.MCLocation;
@@ -18,18 +19,6 @@ import org.bukkit.Location;
  */
 public class BukkitMCLocation implements MCLocation {
     @WrappedItem Location l;
-    public BukkitMCLocation(Location l) {
-        this.l = l;
-    }
-
-    public BukkitMCLocation(AbstractionObject a) {
-        this((Location)null);
-        if (a instanceof MCLocation) {
-            this.l = ((Location)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
 
     public Object getHandle() {
         return l;
@@ -48,14 +37,14 @@ public class BukkitMCLocation implements MCLocation {
     }
 
 	public double distance(MCLocation o) {
-		return l.distance(((BukkitMCLocation)o)._Location());
+		return l.distance((Location)o.getHandle());
 	}
 
     public MCWorld getWorld() {
         if (l.getWorld() == null) {
             return null;
         }
-        return new BukkitMCWorld(l.getWorld());
+        return AbstractionUtils.wrap(l.getWorld());
     }
 
     public float getYaw() {
@@ -82,11 +71,7 @@ public class BukkitMCLocation implements MCLocation {
         if (l == null || l.getBlock() == null) {
             return null;
         }
-        return new BukkitMCBlock(l.getBlock());
-    }
-
-    public Location _Location() {
-        return l;
+        return AbstractionUtils.wrap(l.getBlock());
     }
 
     public void setPitch(float p) {
@@ -99,7 +84,7 @@ public class BukkitMCLocation implements MCLocation {
 
     @Override
     public MCLocation clone() {
-        return new BukkitMCLocation(l.clone());
+        return AbstractionUtils.wrap(l.clone());
     }
 
     public Location asLocation() {
@@ -130,7 +115,7 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	public MCChunk getChunk() {
-		return new BukkitMCChunk(l.getChunk());
+		return AbstractionUtils.wrap(l.getChunk());
 	}
 
 

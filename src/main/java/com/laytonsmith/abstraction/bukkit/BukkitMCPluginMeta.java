@@ -1,8 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPluginMeta;
-import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -14,7 +14,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
  */
 public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageListener {
 
-	@WrappedItem Plugin plugin;
+	Plugin plugin;
 	public BukkitMCPluginMeta(Plugin plugin){
 		super();
 		this.plugin = plugin;
@@ -32,7 +32,7 @@ public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageLis
 
 	@Override
 	protected void sendIncomingMessage0(MCPlayer player, String channel, byte[] message) {
-		Player p = ((BukkitMCPlayer)player)._Player();
+		Player p = player.getHandle();
 		Bukkit.getMessenger().dispatchIncomingMessage(p, channel, message);
 	}
 
@@ -47,7 +47,7 @@ public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageLis
 	}
 
 	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-		triggerOnMessage(new BukkitMCPlayer(player), channel, message);
+		triggerOnMessage((MCPlayer)AbstractionUtils.wrap(player), channel, message);
 	}
 	
 }

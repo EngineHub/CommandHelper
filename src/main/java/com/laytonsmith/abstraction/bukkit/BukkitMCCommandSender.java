@@ -2,11 +2,9 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.annotations.WrappedItem;
-import com.laytonsmith.annotations.testing.AbstractConstructor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -18,14 +16,6 @@ import org.bukkit.entity.Player;
 public class BukkitMCCommandSender implements MCCommandSender{
 
     @WrappedItem CommandSender c;
-    public BukkitMCCommandSender(CommandSender c){
-        this.c = c;
-    }
-    
-	@AbstractConstructor
-    public BukkitMCCommandSender(AbstractionObject a){
-        this.c = a.getHandle();
-    }
     
     public CommandSender getHandle(){
         return c;

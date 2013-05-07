@@ -62,7 +62,7 @@ public class BukkitEntityEvents {
 
 		public MCEntity getEntity() {
 			if (e.getEntity() != null) {
-				return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
+				return AbstractionUtils.wrap(e.getEntity());
 			}
 			return null;
 		}
@@ -70,7 +70,7 @@ public class BukkitEntityEvents {
 		public List<MCBlock> getBlocks() {
 			List<MCBlock> ret = new ArrayList<MCBlock>();
 			for (Block b : e.blockList()) {
-				ret.add(new BukkitMCBlock(b));
+				ret.add((MCBlock) AbstractionUtils.wrap(b));
 			}
 			return ret;
 		}
@@ -83,7 +83,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCLocation getLocation() {
-			return new BukkitMCLocation(e.getLocation());
+			return AbstractionUtils.wrap(e.getLocation());
 		}
 
 		public float getYield() {
@@ -108,7 +108,7 @@ public class BukkitEntityEvents {
 		}
 		
 		public MCProjectile getEntity() {
-			return new BukkitMCProjectile(phe.getEntity());
+			return AbstractionUtils.wrap(phe.getEntity());
 		}
 
 		public MCEntityType getEntityType() {
@@ -140,7 +140,7 @@ public class BukkitEntityEvents {
 		public Set<MCLivingEntity> getAffectedEntities() {
 			Set<MCLivingEntity> ret = new HashSet<MCLivingEntity>();
 			for (LivingEntity le : pse.getAffectedEntities()) {
-				ret.add((MCLivingEntity) BukkitConvertor.BukkitGetCorrectEntity(le));
+				ret.add((MCLivingEntity) AbstractionUtils.wrap(le));
 			}
 			return ret;
 		}
@@ -176,7 +176,7 @@ public class BukkitEntityEvents {
             List<MCItemStack> drops = new ArrayList<MCItemStack>();
 			
             for(ItemStack is : islist){
-                drops.add(new BukkitMCItemStack(is));
+                drops.add((MCItemStack) AbstractionUtils.wrap(is));
             }
 			
             return drops;
@@ -191,7 +191,7 @@ public class BukkitEntityEvents {
         }
 
 		public MCLivingEntity getEntity() {
-			return new BukkitMCLivingEntity(e.getEntity());
+			return AbstractionUtils.wrap(e.getEntity());
 		}
 
 		public void setDroppedExp(int exp) {
@@ -213,11 +213,11 @@ public class BukkitEntityEvents {
 		}
 
 		public MCLivingEntity getEntity() {
-			return (MCLivingEntity) BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
+			return AbstractionUtils.wrap(e.getEntity());
 		}
 
 		public MCLocation getLocation() {
-			return new BukkitMCLocation(e.getLocation());
+			return AbstractionUtils.wrap(e.getLocation());
 		}
 
 		public MCSpawnReason getSpawnReason() {
@@ -244,7 +244,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCEntity getEntity() {
-			return BukkitConvertor.BukkitGetCorrectEntity(e.getRightClicked());
+			return AbstractionUtils.wrap(e.getRightClicked());
 		}
 
 		public boolean isCancelled() {
@@ -256,7 +256,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(e.getPlayer());
+			return AbstractionUtils.wrap(e.getPlayer());
 		}
 		
 	}
@@ -270,7 +270,7 @@ public class BukkitEntityEvents {
         }
         
         public MCItem getItemDrop() {
-            return new BukkitMCItem(e.getItemDrop());
+            return AbstractionUtils.wrap(e.getItemDrop());
         }
         
         public void setItemStack(MCItemStack stack) {
@@ -291,7 +291,7 @@ public class BukkitEntityEvents {
         }
         
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(e.getPlayer());
+            return AbstractionUtils.wrap(e.getPlayer());
         }
         
         public Object _GetObject() {
@@ -311,7 +311,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCItem getItem() {
-			return new BukkitMCItem(e.getItem());
+			return AbstractionUtils.wrap(e.getItem());
 		}
 
 		public void setItemStack(MCItemStack stack) {
@@ -336,7 +336,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(e.getPlayer());
+			return AbstractionUtils.wrap(e.getPlayer());
 		}
 
 		public Object _GetObject() {
@@ -362,7 +362,7 @@ public class BukkitEntityEvents {
         }
 
         public MCEntity getEntity() {
-            return BukkitConvertor.BukkitGetCorrectEntity(event.getEntity());
+            return AbstractionUtils.wrap(event.getEntity());
         }
 
         public int getDamage() {
@@ -385,7 +385,7 @@ public class BukkitEntityEvents {
         }
 
         public MCEntity getDamager() {
-            return BukkitConvertor.BukkitGetCorrectEntity(event.getDamager());
+            return AbstractionUtils.wrap(event.getDamager());
         }
     }
 
@@ -398,9 +398,9 @@ public class BukkitEntityEvents {
             pie = e;
         }
 
-        public static BukkitMCTargetEvent _instantiate(Entity entity, LivingEntity target, EntityTargetEvent.TargetReason reason) {
+        public static BukkitMCTargetEvent _instantiate(Entity entity, MCLivingEntity target, EntityTargetEvent.TargetReason reason) {
             return new BukkitMCTargetEvent(new EntityTargetEvent(( (BukkitMCEntity) entity ).getHandle(),
-                    (LivingEntity) ( (BukkitMCLivingEntity) target ).getLivingEntity(), reason));
+                    (LivingEntity) target.getHandle(), reason));
         }
 
         public Object _GetObject() {
@@ -408,7 +408,7 @@ public class BukkitEntityEvents {
         }
 
         public MCEntity getTarget() {
-            return BukkitConvertor.BukkitGetCorrectEntity(pie.getTarget());
+            return AbstractionUtils.wrap(pie.getTarget());
         }
 
         public void setTarget(MCEntity target) {
@@ -420,11 +420,11 @@ public class BukkitEntityEvents {
         }
 
         public MCEntity getEntity() {
-            return BukkitConvertor.BukkitGetCorrectEntity(pie.getEntity());
+            return AbstractionUtils.wrap(pie.getEntity());
         }
 
         public MCEntityType getEntityType() {
-            return BukkitConvertor.BukkitGetCorrectEntity(pie.getEntity()).getType();
+            return AbstractionUtils.wrap(pie.getEntity().getType());
         }
 
         public MCTargetReason getReason() {
@@ -444,11 +444,11 @@ public class BukkitEntityEvents {
 		}
 	
 		public MCEntity getEntity() {
-			return new BukkitMCEntity(epe.getEntity());
+			return AbstractionUtils.wrap(epe.getEntity());
 		}
 	
 		public MCLocation getLocation() {
-			return new BukkitMCLocation(epe.getLocation());
+			return AbstractionUtils.wrap(epe.getLocation());
 		}
 	}
 }

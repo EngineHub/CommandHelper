@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.enums.MCDisplaySlot;
  * 
  * @author jb_aero
  */
-public interface MCObjective {
+public interface MCObjective extends AbstractionObject {
 	public String getCriteria();
 	public String getDisplayName();
 	public MCDisplaySlot getDisplaySlot();

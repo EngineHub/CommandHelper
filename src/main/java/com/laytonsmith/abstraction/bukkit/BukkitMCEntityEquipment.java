@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -14,11 +15,7 @@ import org.bukkit.inventory.EntityEquipment;
  */
 public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
-	@WrappedItem private EntityEquipment ee;
-
-	public BukkitMCEntityEquipment(EntityEquipment equipment) {
-		this.ee = equipment;
-	}
+	@WrappedItem EntityEquipment ee;
 	
 	public void clearEquipment() {
 		ee.clear();
@@ -128,23 +125,23 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	// anything below this line, but they are here for flexibility and completion
 	
 	public MCItemStack getWeapon() {
-		return new BukkitMCItemStack(ee.getItemInHand());
+		return AbstractionUtils.wrap(ee.getItemInHand());
 	}
 
 	public MCItemStack getHelmet() {
-		return new BukkitMCItemStack(ee.getHelmet());
+		return AbstractionUtils.wrap(ee.getHelmet());
 	}
 
 	public MCItemStack getChestplate() {
-		return new BukkitMCItemStack(ee.getChestplate());
+		return AbstractionUtils.wrap(ee.getChestplate());
 	}
 
 	public MCItemStack getLeggings() {
-		return new BukkitMCItemStack(ee.getLeggings());
+		return AbstractionUtils.wrap(ee.getLeggings());
 	}
 
 	public MCItemStack getBoots() {
-		return new BukkitMCItemStack(ee.getBoots());
+		return AbstractionUtils.wrap(ee.getBoots());
 	}
 
 	public void setWeapon(MCItemStack stack) {
@@ -205,6 +202,10 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	public void setBootsDropChance(float chance) {
 		ee.setBootsDropChance(chance);
+	}
+
+	public <T> T getHandle() {
+		return (T) ee;
 	}
 
 }

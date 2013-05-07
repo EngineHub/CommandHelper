@@ -12,10 +12,6 @@ public class BukkitMCCommandBlock extends BukkitMCBlockState implements
 		MCCommandBlock {
 
 	@WrappedItem CommandBlock cb;
-	public BukkitMCCommandBlock(CommandBlock block) {
-		super(block);
-		cb = block;
-	}
 	
 	public String getCommand() {
 		return cb.getCommand();

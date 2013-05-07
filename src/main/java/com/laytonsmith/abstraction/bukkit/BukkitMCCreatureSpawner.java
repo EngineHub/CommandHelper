@@ -15,10 +15,6 @@ import org.bukkit.entity.EntityType;
 public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCreatureSpawner{
 	
 	@WrappedItem CreatureSpawner cs;
-	public BukkitMCCreatureSpawner(CreatureSpawner cs){
-		super(cs);
-		this.cs = cs;
-	}
 
 	public MCEntityType getSpawnedType() {
 		return MCEntityType.valueOf(cs.getSpawnedType().name());

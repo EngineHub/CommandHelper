@@ -90,18 +90,24 @@ public class AbstractionUtils {
 	
 	private static <T extends AbstractionObject> T instantiate(Class<? extends AbstractionObject> type, Object instance){
 		Object wrapper = ReflectionUtils.newInstance(type);
-		for(Field f : type.getDeclaredFields()){
-			if(f.getAnnotation(WrappedItem.class) != null){
-				//This is it
-				if(f.getType().isAssignableFrom(instance.getClass())){
-					ReflectionUtils.set(wrapper.getClass(), wrapper, f.getName(), instance);
-				} else {
-					//This is unit tested for, but just in case
-					throw new RuntimeException("There is an error in the abstraction layer, with the " + type.getName() + " class. Please report this error to the developers.");
+		//We have to set the variable in all the parent classes as well as this one
+		Class c = type;
+		do{
+			for(Field f : c.getDeclaredFields()){
+				if(f.getAnnotation(WrappedItem.class) != null){
+					//This is it
+					if(f.getType().isAssignableFrom(instance.getClass())){
+						ReflectionUtils.set(wrapper.getClass(), wrapper, f.getName(), instance);
+					} else {
+						//This is unit tested for, but just in case
+						throw new RuntimeException("There is an error in the abstraction layer, with the " + c.getName() 
+								+ " class. The superclass of the type of " + type.getName() + " is not compatible with the wrapped"
+								+ " object subtype chain (" + instance.getClass().getName() + "). Please report this error to the developers.");
+					}
+					break;
 				}
-				break;
 			}
-		}
+		} while((c = c.getSuperclass()) != null);
 		return (T) wrapper;
 	}
 	

@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -16,10 +17,6 @@ import org.bukkit.entity.Player;
 public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOfflinePlayer{
 
     @WrappedItem OfflinePlayer op;
-    BukkitMCOfflinePlayer(OfflinePlayer offlinePlayer) {
-        super(offlinePlayer);
-        this.op = offlinePlayer;
-    }
 
     public boolean isOnline() {
         return op.isOnline();
@@ -47,7 +44,7 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 
     public MCPlayer getPlayer() {
         if(op instanceof Player) {
-            return new BukkitMCPlayer(((Player)op));
+            return AbstractionUtils.wrap(((Player)op));
         }
         return null;
     }
@@ -65,6 +62,6 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 	}
 
 	public MCLocation getBedSpawnLocation() {
-        return new BukkitMCLocation(op.getBedSpawnLocation());
+        return AbstractionUtils.wrap(op.getBedSpawnLocation());
     }
 }

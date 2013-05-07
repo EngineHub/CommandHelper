@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
@@ -20,10 +21,15 @@ import org.bukkit.inventory.ItemStack;
  * @author Layton
  */
 public class BukkitMCInventory implements MCInventory {
-	@WrappedItem private Inventory i;
-    public BukkitMCInventory(Inventory inventory) {
-        this.i = inventory;
-    }
+	@WrappedItem Inventory i;
+	
+	protected BukkitMCInventory(Inventory i){
+		this.i = i;
+	}
+	
+	protected BukkitMCInventory(){
+		
+	}
 
 	public MCInventoryType getType() {
 		return MCInventoryType.valueOf(this.i.getType().name());
@@ -34,7 +40,7 @@ public class BukkitMCInventory implements MCInventory {
 	}
 
 	public MCItemStack getItem(int slot) {
-        return new BukkitMCItemStack(i.getItem(slot));
+        return AbstractionUtils.wrap(i.getItem(slot));
     }
 
     public void setItem(int slot, MCItemStack stack) {
@@ -78,7 +84,7 @@ public class BukkitMCInventory implements MCInventory {
 		for (Map.Entry<Integer, ItemStack> entry : h.entrySet()) {
 			Integer key = entry.getKey();
 			ItemStack value = entry.getValue();
-			m.put(key, new BukkitMCItemStack(value));
+			m.put(key, (MCItemStack) AbstractionUtils.wrap(value));
 		}
 		return m;
 	}
@@ -87,14 +93,14 @@ public class BukkitMCInventory implements MCInventory {
 		List<MCHumanEntity> retn = new ArrayList<MCHumanEntity>();
 		
 		for (HumanEntity human: i.getViewers()) {
-			retn.add(new BukkitMCHumanEntity((human)));
+			retn.add((MCHumanEntity)AbstractionUtils.wrap(human));
 		}
 		
 		return retn;
 	}
 	
 	public MCInventoryHolder getHolder() {
-		return new BukkitMCInventoryHolder(i.getHolder());
+		return AbstractionUtils.wrap(i.getHolder());
 	}
 	
 	public String getTitle() {

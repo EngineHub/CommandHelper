@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
@@ -18,20 +19,17 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class BukkitMCItemFactory implements MCItemFactory {
 
 	@WrappedItem ItemFactory f;
-	public BukkitMCItemFactory(ItemFactory itemFactory) {
-		this.f = itemFactory;
-	}
 
 	public MCItemMeta asMetaFor(MCItemMeta meta, MCItemStack stack) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
 		ItemStack bstack = ((BukkitMCItemStack) stack).asItemStack();
-		return BukkitConvertor.BukkitGetCorrectMeta(f.asMetaFor(bmeta, bstack));
+		return AbstractionUtils.wrap(f.asMetaFor(bmeta, bstack));
 	}
 
 	public MCItemMeta asMetaFor(MCItemMeta meta, MCMaterial material) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
 		Material bmat = Material.getMaterial(material.getType());
-		return BukkitConvertor.BukkitGetCorrectMeta(f.asMetaFor(bmeta, bmat));
+		return AbstractionUtils.wrap(f.asMetaFor(bmeta, bmat));
 	}
 
 	public boolean equals(MCItemMeta meta1, MCItemMeta meta2) {
@@ -47,7 +45,7 @@ public class BukkitMCItemFactory implements MCItemFactory {
 			return null;
 		}
 		ItemMeta im = f.getItemMeta(Material.getMaterial(material.getType()));
-		return BukkitConvertor.BukkitGetCorrectMeta(im);
+		return AbstractionUtils.wrap(im);
 	}
 
 	public boolean isApplicable(MCItemMeta meta, MCItemStack stack) {
@@ -60,6 +58,10 @@ public class BukkitMCItemFactory implements MCItemFactory {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
 		Material bmat = Material.getMaterial(material.getType());
 		return f.isApplicable(bmeta, bmat);
+	}
+
+	public <T> T getHandle() {
+		return (T) f;
 	}
 
 }

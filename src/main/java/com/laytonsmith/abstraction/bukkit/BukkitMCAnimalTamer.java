@@ -2,12 +2,11 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.annotations.WrappedItem;
-import com.laytonsmith.annotations.testing.AbstractConstructor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.HumanEntity;
@@ -18,14 +17,6 @@ import org.bukkit.entity.HumanEntity;
  */
 public class BukkitMCAnimalTamer implements MCAnimalTamer{
     @WrappedItem AnimalTamer at;
-    public BukkitMCAnimalTamer(AnimalTamer at){
-        this.at = at;
-    }
-    
-    @AbstractConstructor
-	public BukkitMCAnimalTamer(AbstractionObject a){
-        this.at = a.getHandle();
-    }
     
     public AnimalTamer getHandle(){
         return at;
@@ -33,7 +24,7 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
 
     public MCOfflinePlayer getOfflinePlayer() {
         if(at instanceof OfflinePlayer){
-            return new BukkitMCOfflinePlayer((OfflinePlayer)at);
+            return AbstractionUtils.wrap((OfflinePlayer)at);
         }
         return null;
     }
@@ -48,7 +39,7 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
 
     public MCHumanEntity getHumanEntity() {
         if(at instanceof HumanEntity){
-            return new BukkitMCHumanEntity((HumanEntity)at);
+            return AbstractionUtils.wrap((HumanEntity)at);
         }
         return null;
     }

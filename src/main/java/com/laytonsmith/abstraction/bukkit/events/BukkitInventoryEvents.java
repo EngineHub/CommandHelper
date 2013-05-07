@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
@@ -37,18 +38,18 @@ public class BukkitInventoryEvents {
 			List<MCHumanEntity> viewers = Collections.emptyList();
 
 			for (HumanEntity viewer : event.getViewers()) {
-				viewers.add(new BukkitMCHumanEntity(viewer));
+				viewers.add((MCHumanEntity) AbstractionUtils.wrap(viewer));
 			}
 
 			return viewers;
 		}
 
 		public MCInventoryView getView() {
-			return new BukkitMCInventoryView(event.getView());
+			return AbstractionUtils.wrap(event.getView());
 		}
 
 		public MCInventory getInventory() {
-			return new BukkitMCInventory(event.getInventory());
+			return AbstractionUtils.wrap(event.getInventory());
 		}
 
 		public Object _GetObject() {
@@ -66,7 +67,7 @@ public class BukkitInventoryEvents {
 		}
 
 		public MCHumanEntity getPlayer() {
-			return new BukkitMCHumanEntity(ioe.getPlayer());
+			return AbstractionUtils.wrap(ioe.getPlayer());
 		}
 	}
 
@@ -80,7 +81,7 @@ public class BukkitInventoryEvents {
 		}
 
 		public MCHumanEntity getPlayer() {
-			return new BukkitMCHumanEntity(ice.getPlayer());
+			return AbstractionUtils.wrap(ice.getPlayer());
 		}
 	}
 
@@ -94,11 +95,11 @@ public class BukkitInventoryEvents {
 		}
 
 		public MCItemStack getCurrentItem() {
-			return new BukkitMCItemStack(ic.getCurrentItem());
+			return AbstractionUtils.wrap(ic.getCurrentItem());
 		}
 
 		public MCItemStack getCursor() {
-			return new BukkitMCItemStack(ic.getCursor());
+			return AbstractionUtils.wrap(ic.getCursor());
 		}
 
 		public int getSlot() {
@@ -114,7 +115,7 @@ public class BukkitInventoryEvents {
 		}
 
 		public MCHumanEntity getWhoClicked() {
-			return new BukkitMCHumanEntity(ic.getWhoClicked());
+			return AbstractionUtils.wrap(ic.getWhoClicked());
 		}
 
 		public boolean isLeftClick() {

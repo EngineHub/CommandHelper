@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.events.MCConsoleCommandEvent;
@@ -60,7 +61,7 @@ public class BukkitMiscEvents {
 		}
 
 		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(player);
+			return AbstractionUtils.wrap(player);
 		}
 
 		public Object _GetObject() {

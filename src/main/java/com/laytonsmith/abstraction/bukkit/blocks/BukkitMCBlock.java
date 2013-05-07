@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit.blocks;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
@@ -29,9 +30,6 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BukkitMCBlock implements MCBlock{
     @WrappedItem Block b;
-    public BukkitMCBlock(Block b){
-        this.b = b;
-    }
     
     public int getTypeId(){
         if(b == null){
@@ -57,20 +55,20 @@ public class BukkitMCBlock implements MCBlock{
             return null;
         }
 		if(b.getState() instanceof CreatureSpawner){
-			return new BukkitMCCreatureSpawner((CreatureSpawner)b.getState());
+			return AbstractionUtils.wrap((CreatureSpawner)b.getState());
 		}
-        return new BukkitMCBlockState(b.getState());
+        return AbstractionUtils.wrap(b.getState());
     }
 
     public MCMaterial getType() {
         if(b.getType() == null){
             return null;
         }
-        return new BukkitMCMaterial(b.getType());
+        return AbstractionUtils.wrap(b.getType());
     }
 
     public MCWorld getWorld() {
-        return new BukkitMCWorld(b.getWorld());
+        return AbstractionUtils.wrap(b.getWorld());
     }
 
     public int getX() {
@@ -90,7 +88,7 @@ public class BukkitMCBlock implements MCBlock{
     }
 
     public MCSign getSign() {
-        return new BukkitMCSign((Sign)b.getState());
+        return AbstractionUtils.wrap((Sign)b.getState());
     }
 
     public boolean isSign() {
@@ -104,7 +102,7 @@ public class BukkitMCBlock implements MCBlock{
     public Collection<MCItemStack> getDrops() {
         Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
         for(ItemStack is : b.getDrops()){
-            collection.add(new BukkitMCItemStack(is));
+            collection.add((MCItemStack)AbstractionUtils.wrap(is));
         }
         return collection;
     }
@@ -112,7 +110,7 @@ public class BukkitMCBlock implements MCBlock{
 	public Collection<MCItemStack> getDrops(MCItemStack tool) {
 		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
 		for(ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())){
-			collection.add(new BukkitMCItemStack(is));
+			collection.add((MCItemStack)AbstractionUtils.wrap(is));
 		}
 		return collection;
 	}
@@ -143,7 +141,7 @@ public class BukkitMCBlock implements MCBlock{
 	}
 
 	public MCLocation getLocation() {
-		return new BukkitMCLocation(b.getLocation());
+		return AbstractionUtils.wrap(b.getLocation());
 	}
 
 	public int getLightLevel() {
@@ -155,6 +153,10 @@ public class BukkitMCBlock implements MCBlock{
 	}
 
 	public MCBlock getRelative(MCBlockFace face) {
-		return new BukkitMCBlock(b.getRelative(face.getModX(), face.getModY(), face.getModZ()));
+		return AbstractionUtils.wrap(b.getRelative(face.getModX(), face.getModY(), face.getModZ()));
+	}
+
+	public <T> T getHandle() {
+		return (T) b;
 	}
 }

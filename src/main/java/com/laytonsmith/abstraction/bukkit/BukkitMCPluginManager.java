@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginManager;
 import com.laytonsmith.annotations.WrappedItem;
@@ -18,20 +19,8 @@ import org.bukkit.plugin.PluginManager;
 public class BukkitMCPluginManager implements MCPluginManager {
 
     @WrappedItem PluginManager p;
-    public BukkitMCPluginManager(PluginManager pluginManager) {
-        this.p = pluginManager;
-    }
     
-    public BukkitMCPluginManager(AbstractionObject a){
-        this((PluginManager)null);
-        if(a instanceof MCPluginManager){
-            this.p = ((PluginManager)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
-    
-    public Object getHandle(){
+    public PluginManager getHandle(){
         return p;
     }
 
@@ -39,7 +28,7 @@ public class BukkitMCPluginManager implements MCPluginManager {
         if(p.getPlugin(name) == null){
             return null;
         }
-        return new BukkitMCPlugin(p.getPlugin(name));
+        return AbstractionUtils.wrap(p.getPlugin(name));
     }
     
     public PluginManager __PluginManager(){
@@ -66,7 +55,7 @@ public class BukkitMCPluginManager implements MCPluginManager {
 		Plugin[] plugs = p.getPlugins();
 		
 		for (Plugin plug : plugs) {
-			retn.add(new BukkitMCPlugin(plug));
+			retn.add((MCPlugin) AbstractionUtils.wrap(plug));
 		}
 		
 		return retn;

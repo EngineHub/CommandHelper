@@ -14,18 +14,6 @@ import org.bukkit.plugin.Plugin;
 public class BukkitMCPlugin implements MCPlugin {
 
     @WrappedItem Plugin p;
-    public BukkitMCPlugin(Plugin plugin) {
-        this.p = plugin;
-    }
-    
-    public BukkitMCPlugin(AbstractionObject a){
-        this((Plugin)null);
-        if(a instanceof MCPlugin){
-            this.p = ((Plugin)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
     
     public Object getHandle(){
         return p;

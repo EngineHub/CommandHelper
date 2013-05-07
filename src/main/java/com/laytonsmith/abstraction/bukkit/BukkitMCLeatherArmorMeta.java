@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.annotations.WrappedItem;
@@ -16,15 +15,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
  */
 public class BukkitMCLeatherArmorMeta extends BukkitMCItemMeta implements MCLeatherArmorMeta {
 	@WrappedItem LeatherArmorMeta lam;
-	public BukkitMCLeatherArmorMeta(LeatherArmorMeta im) {
-		super(im);
-		lam = im;
-	}
-
-	public BukkitMCLeatherArmorMeta(AbstractionObject o) {
-		super(o);
-		lam = (LeatherArmorMeta)o;
-	}
 
 	public MCColor getColor() {
 		return BukkitMCColor.GetMCColor(lam.getColor());

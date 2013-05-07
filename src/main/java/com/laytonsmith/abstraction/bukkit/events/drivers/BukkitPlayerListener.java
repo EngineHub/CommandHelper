@@ -1,5 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -13,6 +15,7 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -84,7 +87,7 @@ public class BukkitPlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled=true)
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
 		if(CommandHelperPlugin.self.interpreterListener
-                .isInInterpreterMode(new BukkitMCPlayer(event.getPlayer()))){
+                .isInInterpreterMode((MCPlayer) AbstractionUtils.wrap(event.getPlayer()))){
             //They are in interpreter mode, so we want it to handle this, not everything else.
             return;
         }
@@ -189,7 +192,7 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
 		BukkitMCPlayer currentPlayer = (BukkitMCPlayer) Static.GetPlayer(event.getPlayer().getName(), Target.UNKNOWN);
 		//Apparently this happens sometimes, so prevent it
-		if (!event.getFrom().equals(currentPlayer._Player().getWorld())) {
+		if (!event.getFrom().equals(((Player)currentPlayer.getHandle()).getWorld())) {
 			BukkitPlayerEvents.BukkitMCWorldChangedEvent wce = new BukkitPlayerEvents.BukkitMCWorldChangedEvent(event);
 			EventUtils.TriggerExternal(wce);
 			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce);

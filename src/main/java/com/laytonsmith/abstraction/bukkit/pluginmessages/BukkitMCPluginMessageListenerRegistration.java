@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.pluginmessages;
 
 import com.laytonsmith.abstraction.pluginmessages.MCPluginMessageListenerRegistration;
+import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.plugin.messaging.PluginMessageListenerRegistration;
 
 /**
@@ -8,10 +9,9 @@ import org.bukkit.plugin.messaging.PluginMessageListenerRegistration;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class BukkitMCPluginMessageListenerRegistration implements MCPluginMessageListenerRegistration {
-	PluginMessageListenerRegistration registration;
+	@WrappedItem PluginMessageListenerRegistration registration;
 
-	public BukkitMCPluginMessageListenerRegistration(PluginMessageListenerRegistration registration) {
-		this.registration = registration;
+	public PluginMessageListenerRegistration getHandle() {
+		return registration;
 	}
-	
 }

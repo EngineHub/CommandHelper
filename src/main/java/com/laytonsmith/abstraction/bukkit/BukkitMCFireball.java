@@ -12,10 +12,6 @@ import org.bukkit.util.Vector;
 public class BukkitMCFireball extends BukkitMCProjectile implements MCFireball {
 
 	@WrappedItem Fireball f;
-	public BukkitMCFireball(Fireball be) {
-		super(be);
-		f = be;
-	}
 
 	public Velocity getDirection() {
 		return new Velocity(1, f.getDirection().getX(), f.getDirection().getY(), f.getDirection().getZ());

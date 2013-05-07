@@ -12,10 +12,6 @@ import com.laytonsmith.annotations.WrappedItem;
 public class BukkitMCPig extends BukkitMCAgeable implements MCPig {
 
 	@WrappedItem Pig p;
-	public BukkitMCPig(Pig be) {
-		super(be);
-		p = be;
-	}
 
 	public boolean isSaddled() {
 		return p.hasSaddle();

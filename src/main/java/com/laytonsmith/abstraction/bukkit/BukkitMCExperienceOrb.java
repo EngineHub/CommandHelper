@@ -13,11 +13,6 @@ public class BukkitMCExperienceOrb extends BukkitMCEntity implements MCExperienc
 
 	@WrappedItem ExperienceOrb eo;
 	
-	public BukkitMCExperienceOrb(ExperienceOrb eo){
-		super(eo);
-		this.eo = eo;
-	}
-	
 	public int getExperience(){
 		return eo.getExperience();
 	}

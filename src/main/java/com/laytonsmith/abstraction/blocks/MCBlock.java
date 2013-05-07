@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.blocks;
 
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
@@ -11,7 +12,7 @@ import java.util.Collection;
  *
  * @author layton
  */
-public interface MCBlock {
+public interface MCBlock extends AbstractionObject {
 
     public int getTypeId();
 

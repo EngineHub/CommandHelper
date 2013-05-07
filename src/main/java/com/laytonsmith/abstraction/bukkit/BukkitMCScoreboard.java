@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCScore;
@@ -19,9 +20,6 @@ import org.bukkit.scoreboard.Team;
 public class BukkitMCScoreboard implements MCScoreboard {
 
 	@WrappedItem Scoreboard s;
-	public BukkitMCScoreboard(Scoreboard sb) {
-		s = sb;
-	}
 
 	public void clearSlot(MCDisplaySlot slot) {
 		s.clearSlot(BukkitMCDisplaySlot.getConvertor().getConcreteEnum(slot));
@@ -32,7 +30,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 		if (o == null) {
 			return null;
 		}
-		return new BukkitMCObjective(o);
+		return AbstractionUtils.wrap(o);
 	}
 
 	public MCObjective getObjective(String name) {
@@ -40,13 +38,13 @@ public class BukkitMCScoreboard implements MCScoreboard {
 		if (o == null) {
 			return null;
 		}
-		return new BukkitMCObjective(o);
+		return AbstractionUtils.wrap(o);
 	}
 
 	public Set<MCObjective> getObjectives() {
 		Set<MCObjective> ret = new HashSet<MCObjective>();
 		for (Objective o : s.getObjectives()) {
-			ret.add(new BukkitMCObjective(o));
+			ret.add((MCObjective) AbstractionUtils.wrap(o));
 		}
 		return ret;
 	}
@@ -54,7 +52,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	public Set<MCObjective> getObjectivesByCriteria(String criteria) {
 		Set<MCObjective> ret = new HashSet<MCObjective>();
 		for (Objective o : s.getObjectivesByCriteria(criteria)) {
-			ret.add(new BukkitMCObjective(o));
+			ret.add((MCObjective) AbstractionUtils.wrap(o));
 		}
 		return ret;
 	}
@@ -62,7 +60,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	public Set<MCOfflinePlayer> getPlayers() {
 		Set<MCOfflinePlayer> ret = new HashSet<MCOfflinePlayer>();
 		for (OfflinePlayer o : s.getPlayers()) {
-			ret.add(new BukkitMCOfflinePlayer(o));
+			ret.add((MCOfflinePlayer) AbstractionUtils.wrap(o));
 		}
 		return ret;
 	}
@@ -72,13 +70,13 @@ public class BukkitMCScoreboard implements MCScoreboard {
 		if(t == null) {
 			return null;
 		}
-		return new BukkitMCTeam(t);
+		return AbstractionUtils.wrap(t);
 	}
 
 	public Set<MCScore> getScores(MCOfflinePlayer player) {
 		Set<MCScore> ret = new HashSet<MCScore>();
 		for (Score o : s.getScores((OfflinePlayer) player.getHandle())) {
-			ret.add(new BukkitMCScore(o));
+			ret.add((MCScore) AbstractionUtils.wrap(o));
 		}
 		return ret;
 	}
@@ -88,23 +86,23 @@ public class BukkitMCScoreboard implements MCScoreboard {
 		if(t == null) {
 			return null;
 		}
-		return new BukkitMCTeam(t);
+		return AbstractionUtils.wrap(t);
 	}
 
 	public Set<MCTeam> getTeams() {
 		Set<MCTeam> ret = new HashSet<MCTeam>();
 		for (Team t : s.getTeams()) {
-			ret.add(new BukkitMCTeam(t));
+			ret.add((MCTeam) AbstractionUtils.wrap(t));
 		}
 		return ret;
 	}
 
 	public MCObjective registerNewObjective(String name, String criteria) {
-		return new BukkitMCObjective(s.registerNewObjective(name, criteria));
+		return AbstractionUtils.wrap(s.registerNewObjective(name, criteria));
 	}
 
 	public MCTeam registerNewTeam(String name) {
-		return new BukkitMCTeam(s.registerNewTeam(name));
+		return AbstractionUtils.wrap(s.registerNewTeam(name));
 	}
 
 	public void resetScores(MCOfflinePlayer player) {
@@ -117,5 +115,9 @@ public class BukkitMCScoreboard implements MCScoreboard {
 			return s.equals(((BukkitMCScoreboard) obj).s);
 		}
 		return false;
+	}
+
+	public <T> T getHandle() {
+		return (T)s;
 	}
 }

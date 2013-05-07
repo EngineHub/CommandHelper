@@ -49,7 +49,7 @@ public class BukkitPlayerEvents {
 		}
 		
 		public MCItemStack getItem() {
-			return new BukkitMCItemStack(pic.getItem());
+			return AbstractionUtils.wrap(pic.getItem());
 		}
 
 		public void setItem(MCItemStack item) {
@@ -63,12 +63,12 @@ public class BukkitPlayerEvents {
 		public static BukkitMCPlayerItemConsumeEvent _instantiate(
 				MCPlayer player, MCItemStack item) {
 			return new BukkitMCPlayerItemConsumeEvent(
-					new PlayerItemConsumeEvent(((BukkitMCPlayer) player)._Player(), 
+					new PlayerItemConsumeEvent((Player) player.getHandle(), 
 							((BukkitMCItemStack) item).asItemStack()));
 		}
 
 		public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pic.getPlayer());
+            return AbstractionUtils.wrap(pic.getPlayer());
         }
 		
 	}
@@ -79,12 +79,12 @@ public class BukkitPlayerEvents {
 
 		public BukkitMCPlayerBedEvent(PlayerBedEnterEvent event) {
 			this.event = event;
-			this.block = new BukkitMCBlock(event.getBed());
+			this.block = AbstractionUtils.wrap(event.getBed());
 		}
 		
 		public BukkitMCPlayerBedEvent(PlayerBedLeaveEvent event) {
 			this.event = event;
-			this.block = new BukkitMCBlock(event.getBed());
+			this.block = AbstractionUtils.wrap(event.getBed());
 		}
 		
 		public MCBlock getBed() {
@@ -92,7 +92,7 @@ public class BukkitPlayerEvents {
 		}
 
 		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(event.getPlayer());
+			return AbstractionUtils.wrap(event.getPlayer());
 		}
 
 		public Object _GetObject() {
@@ -136,7 +136,7 @@ public class BukkitPlayerEvents {
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(e.getPlayer());
+            return AbstractionUtils.wrap(e.getPlayer());
         }
 
     }
@@ -149,15 +149,15 @@ public class BukkitPlayerEvents {
 		}
 
 		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(e.getPlayer());
+			return AbstractionUtils.wrap(e.getPlayer());
 		}
 
 		public MCLocation getFrom() {
-			return new BukkitMCLocation(e.getFrom());
+			return AbstractionUtils.wrap(e.getFrom());
 		}
 
 		public MCLocation getTo() {
-			return new BukkitMCLocation(e.getTo());
+			return AbstractionUtils.wrap(e.getTo());
 		}
 
 		public String getCause() {
@@ -165,7 +165,7 @@ public class BukkitPlayerEvents {
 		}
 
 		public void setTo(MCLocation newloc) {
-			World w = ((BukkitMCWorld)newloc.getWorld()).__World();
+			World w = newloc.getHandle();
 			Location loc = new Location(
 				w,
 				newloc.getX(),
@@ -227,7 +227,7 @@ public class BukkitPlayerEvents {
 		}
 
 		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(event.getPlayer());
+			return AbstractionUtils.wrap(event.getPlayer());
 		}
 
 	}
@@ -285,7 +285,7 @@ public class BukkitPlayerEvents {
         }
 
         public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message, String format){
-			AsyncPlayerChatEvent apce = new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message,
+			AsyncPlayerChatEvent apce = new AsyncPlayerChatEvent(false, (Player)player.getHandle(), message,
                     new HashSet<Player>(Arrays.asList(Bukkit.getServer().getOnlinePlayers())));
 			apce.setFormat(format);
             return new BukkitMCPlayerChatEvent(apce);
@@ -302,7 +302,7 @@ public class BukkitPlayerEvents {
         public List<MCPlayer> getRecipients() {
             List<MCPlayer> players = new ArrayList<MCPlayer>();
             for(Player p : pce.getRecipients()){
-                players.add(new BukkitMCPlayer(p));
+                players.add((MCPlayer) AbstractionUtils.wrap(p));
             }
             return players;
         }
@@ -310,12 +310,12 @@ public class BukkitPlayerEvents {
         public void setRecipients(List<MCPlayer> list) {
             pce.getRecipients().clear();
             for(MCPlayer p  : list){
-                pce.getRecipients().add(((BukkitMCPlayer)p)._Player());
+                pce.getRecipients().add((Player) p.getHandle());
             }
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pce.getPlayer());
+            return AbstractionUtils.wrap(pce.getPlayer());
         }
 
 		public String getFormat() {
@@ -339,7 +339,7 @@ public class BukkitPlayerEvents {
         }
 
         public static BukkitMCPlayerQuitEvent _instantiate(MCPlayer player, String message){
-            return new BukkitMCPlayerQuitEvent(new PlayerQuitEvent(((BukkitMCPlayer)player)._Player(), message));
+            return new BukkitMCPlayerQuitEvent(new PlayerQuitEvent((Player)player.getHandle(), message));
         }
 
         public String getMessage() {
@@ -351,7 +351,7 @@ public class BukkitPlayerEvents {
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pce.getPlayer());
+            return AbstractionUtils.wrap(pce.getPlayer());
         }
 
     }
@@ -365,7 +365,7 @@ public class BukkitPlayerEvents {
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pje.getPlayer());
+            return AbstractionUtils.wrap(pje.getPlayer());
         }
 
         public String getJoinMessage() {
@@ -381,7 +381,7 @@ public class BukkitPlayerEvents {
         }
 
         public static PlayerJoinEvent _instantiate(MCPlayer player, String message) {
-            return new PlayerJoinEvent(((BukkitMCPlayer)player)._Player(), message);
+            return new PlayerJoinEvent((Player)player.getHandle(), message);
         }
 
     }
@@ -397,7 +397,7 @@ public class BukkitPlayerEvents {
 
         public static BukkitMCPlayerInteractEvent _instantiate(MCPlayer player, MCAction action, MCItemStack itemstack,
                 MCBlock clickedBlock, MCBlockFace clickedFace){
-            return new BukkitMCPlayerInteractEvent(new PlayerInteractEvent(((BukkitMCPlayer)player)._Player(),
+            return new BukkitMCPlayerInteractEvent(new PlayerInteractEvent((Player)player.getHandle(),
                     BukkitMCAction.getConvertor().getConcreteEnum(action), ((BukkitMCItemStack)itemstack).__ItemStack(),
                     ((BukkitMCBlock)clickedBlock).__Block(), BlockFace.valueOf(clickedFace.name())));
         }
@@ -407,11 +407,11 @@ public class BukkitPlayerEvents {
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pie.getPlayer());
+            return AbstractionUtils.wrap(pie.getPlayer());
         }
 
         public MCBlock getClickedBlock() {
-            return new BukkitMCBlock(pie.getClickedBlock());
+            return AbstractionUtils.wrap(pie.getClickedBlock());
         }
 
         public MCBlockFace getBlockFace() {
@@ -419,7 +419,7 @@ public class BukkitPlayerEvents {
         }
 
         public MCItemStack getItem() {
-            return new BukkitMCItemStack(pie.getItem());
+            return AbstractionUtils.wrap(pie.getItem());
         }
 
         public Object _GetObject() {
@@ -441,20 +441,20 @@ public class BukkitPlayerEvents {
         }
 
         public static BukkitMCPlayerRespawnEvent _instantiate(MCPlayer player, MCLocation location, boolean isBedSpawn) {
-            return new BukkitMCPlayerRespawnEvent(new PlayerRespawnEvent(((BukkitMCPlayer)player)._Player(),
-					((BukkitMCLocation)location)._Location(), isBedSpawn));
+            return new BukkitMCPlayerRespawnEvent(new PlayerRespawnEvent((Player)player.getHandle(),
+					(Location)location.getHandle(), isBedSpawn));
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pre.getPlayer());
+            return AbstractionUtils.wrap(pre.getPlayer());
         }
 
         public void setRespawnLocation(MCLocation location) {
-            pre.setRespawnLocation(((BukkitMCLocation)location)._Location());
+            pre.setRespawnLocation((Location)location.getHandle());
         }
 
         public MCLocation getRespawnLocation() {
-            return new BukkitMCLocation(pre.getRespawnLocation());
+            return AbstractionUtils.wrap(pre.getRespawnLocation());
         }
 
         public Boolean isBedSpawn() {
@@ -476,20 +476,20 @@ public class BukkitPlayerEvents {
             return pde;
         }
 
-        public static BukkitMCPlayerDeathEvent _instantiate(MCPlayer entity, List<MCItemStack> listOfDrops,
+        public static BukkitMCPlayerDeathEvent _instantiate(MCPlayer player, List<MCItemStack> listOfDrops,
                 int droppedExp, String deathMessage){
             List<ItemStack> drops = new ArrayList<ItemStack>();
 			
-            return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer)entity)._Player(), drops, droppedExp, deathMessage));
+            return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent((Player)player.getHandle(), drops, droppedExp, deathMessage));
         }
         
         @Override
         public MCPlayer getEntity() {
-            return new BukkitMCPlayer(pde.getEntity());
+            return AbstractionUtils.wrap(pde.getEntity());
         }
 		
 		public MCEntity getKiller() {
-			return StaticLayer.GetCorrectEntity(new BukkitMCEntity(pde.getEntity().getKiller()));
+			return AbstractionUtils.wrap(pde.getEntity().getKiller());
 		}
 
         public String getDeathMessage() {
@@ -555,11 +555,11 @@ public class BukkitPlayerEvents {
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pcpe.getPlayer());
+            return AbstractionUtils.wrap(pcpe.getPlayer());
         }
 
-        public static BukkitMCPlayerCommandEvent _instantiate(MCPlayer entity, String command){
-            return new BukkitMCPlayerCommandEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer)entity)._Player(), command));
+        public static BukkitMCPlayerCommandEvent _instantiate(MCPlayer player, String command){
+            return new BukkitMCPlayerCommandEvent(new PlayerCommandPreprocessEvent((Player)player.getHandle(), command));
         }
 
         public void setCommand(String val) {
@@ -580,23 +580,23 @@ public class BukkitPlayerEvents {
         }
 
         public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pcwe.getPlayer());
+            return AbstractionUtils.wrap(pcwe.getPlayer());
         }
 
         public MCWorld getFrom() {
-            return new BukkitMCWorld(pcwe.getFrom());
+            return AbstractionUtils.wrap(pcwe.getFrom());
         }
 
         public MCWorld getTo() {
-            return new BukkitMCWorld(pcwe.getPlayer().getWorld());
+            return AbstractionUtils.wrap(pcwe.getPlayer().getWorld());
         }
 
         public Object _GetObject() {
             return pcwe;
         }
 
-        public static BukkitMCWorldChangedEvent _instantiate(MCPlayer entity, MCWorld from){
-            return new BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent(((BukkitMCPlayer)entity)._Player(), ((BukkitMCWorld)from).__World()));
+        public static BukkitMCWorldChangedEvent _instantiate(MCPlayer player, MCWorld from){
+            return new BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent((Player)player.getHandle(), (World)from.getHandle()));
         }
 
     }
@@ -609,9 +609,9 @@ public class BukkitPlayerEvents {
 		BukkitMCPlayer player;
 		boolean cancelled = false;
 		public BukkitMCPlayerMovedEvent(Player p, Location from, Location to){
-			this.player = new BukkitMCPlayer(p);
-			this.from = new BukkitMCLocation(from);
-			this.to = new BukkitMCLocation(to);
+			this.player = AbstractionUtils.wrap(p);
+			this.from = AbstractionUtils.wrap(from);
+			this.to = AbstractionUtils.wrap(to);
 		}
 
 		public MCLocation getFrom() {
@@ -655,7 +655,7 @@ public class BukkitPlayerEvents {
 			if (e.getCaught() == null) {
 				return null;
 			}
-			return new BukkitMCEntity(e.getCaught());
+			return AbstractionUtils.wrap(e.getCaught());
 		}
 	
 		public int getExpToDrop() {
@@ -663,7 +663,7 @@ public class BukkitPlayerEvents {
 		}
 	
 		public MCFishHook getHook() {
-			return new BukkitMCFishHook(e.getHook());
+			return AbstractionUtils.wrap(e.getHook());
 		}
 	
 		public MCFishingState getState() {
@@ -675,7 +675,7 @@ public class BukkitPlayerEvents {
 		}
 		
 		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(e.getPlayer());
+			return AbstractionUtils.wrap(e.getPlayer());
 		}
 	}
 }

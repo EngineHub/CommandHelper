@@ -691,11 +691,6 @@ public class StaticTest {
 		public MCMaterial getMaterial(int id) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
-
-		@Override
-		public MCItemMeta GetCorrectMeta(MCItemMeta im) {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
         
     }
     

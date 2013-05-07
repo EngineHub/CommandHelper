@@ -41,6 +41,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -98,12 +99,12 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin(t).getSession(( (BukkitMCPlayer) m )._Player()).getRegionSelector(BukkitUtil.getLocalWorld(( (BukkitMCWorld) m.getWorld() ).__World()));
+            RegionSelector sel = Static.getWorldEditPlugin(t).getSession((Player)m.getHandle()).getRegionSelector(BukkitUtil.getLocalWorld((World)m.getWorld().getHandle()));
             if (!( sel instanceof CuboidRegionSelector )) {
                 throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
             }
             if (setter) {
-                sel.selectPrimary(BukkitUtil.toVector(( (BukkitMCLocation) l )._Location()));
+                sel.selectPrimary(BukkitUtil.toVector((Location)l.getHandle()));
                 return new CVoid(t);
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos1();
@@ -164,13 +165,13 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin(t).getSession(( (BukkitMCPlayer) m )._Player()).getRegionSelector(BukkitUtil.getLocalWorld(( (BukkitMCWorld) m.getWorld() ).__World()));
+            RegionSelector sel = Static.getWorldEditPlugin(t).getSession((Player) m.getHandle()).getRegionSelector(BukkitUtil.getLocalWorld((World)m.getWorld().getHandle()));
             if (!( sel instanceof CuboidRegionSelector )) {
                 throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
             }
 
             if (setter) {
-                sel.selectSecondary(BukkitUtil.toVector(( (BukkitMCLocation) l )._Location()));
+                sel.selectSecondary(BukkitUtil.toVector((Location)l.getHandle()));
                 return new CVoid(t);
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos2();
@@ -1569,7 +1570,7 @@ public class WorldEdit {
 				}
 
 				try {
-					groupValue = groupFlag.parseInput(Static.getWorldGuardPlugin(t), new BukkitMCCommandSender(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())._CommandSender(), group);
+					groupValue = groupFlag.parseInput(Static.getWorldGuardPlugin(t), (CommandSender)env.getEnv(CommandHelperEnvironment.class).GetCommandSender().getHandle(), group);
 				} catch (InvalidFlagFormat e) {
 					throw new ConfigRuntimeException(String.format("Unknown group (%s).", group), ExceptionType.PluginInternalException, t);
 				}
@@ -1578,7 +1579,7 @@ public class WorldEdit {
 
 			if (flagValue != null) {
 				try {
-					setFlag(t, region, foundFlag, new BukkitMCCommandSender(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())._CommandSender(), flagValue);
+					setFlag(t, region, foundFlag, (CommandSender)env.getEnv(CommandHelperEnvironment.class).GetCommandSender().getHandle(), flagValue);
 
 				} catch (Exception e) {
 					throw new ConfigRuntimeException(String.format("Unknown flag value specified: (%s).", flagValue), ExceptionType.PluginInternalException, t);

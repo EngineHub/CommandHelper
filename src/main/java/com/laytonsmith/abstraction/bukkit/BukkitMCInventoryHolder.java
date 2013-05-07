@@ -12,10 +12,6 @@ import org.bukkit.inventory.InventoryHolder;
 public class BukkitMCInventoryHolder implements MCInventoryHolder {
 	@WrappedItem InventoryHolder holder;
 	
-	public BukkitMCInventoryHolder(InventoryHolder i) {
-		holder = i;
-	}
-	
 	public MCInventory getInventory() {
 		return new BukkitMCInventory(holder.getInventory());
 	}

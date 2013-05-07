@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.inventory.Inventory;
@@ -16,6 +17,12 @@ public class BukkitMCDoubleChest extends BukkitMCInventory {
 	Inventory right;
 	public BukkitMCDoubleChest(Inventory left, Inventory right){
 		super(left);
+		this.left = left;
+		this.right = right;
+	}
+	
+	protected BukkitMCDoubleChest(){
+		throw new RuntimeException(BukkitMCDoubleChest.class.getName() + " cannot be built automatically. Please report this error to the developers.");
 	}
 
 	@Override
@@ -31,7 +38,7 @@ public class BukkitMCDoubleChest extends BukkitMCInventory {
 		} else {
 			is = right.getItem(slot - left.getSize());
 		}
-		return new BukkitMCItemStack(is);
+		return AbstractionUtils.wrap(is);
 	}
 
 	@Override

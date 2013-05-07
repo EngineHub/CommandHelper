@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
@@ -18,11 +19,6 @@ import org.bukkit.inventory.Inventory;
 public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
     
     @WrappedItem HumanEntity he;
-
-    public BukkitMCHumanEntity(HumanEntity humanEntity) {
-        super(humanEntity);
-        he = humanEntity;
-    }
 	
 	public HumanEntity asHumanEntity() {
 		return he;
@@ -45,11 +41,11 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
             return null;
         }
         
-        return new BukkitMCItemStack(he.getItemInHand());
+        return AbstractionUtils.wrap(he.getItemInHand());
     }
 
 	public MCItemStack getItemOnCursor() {
-		return new BukkitMCItemStack(he.getItemOnCursor());
+		return AbstractionUtils.wrap(he.getItemOnCursor());
 	}
 
 	public int getSleepTicks() {
@@ -77,11 +73,11 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	}
 
 	public MCInventoryView openInventory(MCInventory inventory) {
-		return new BukkitMCInventoryView(he.openInventory((Inventory)inventory.getHandle()));
+		return AbstractionUtils.wrap(he.openInventory((Inventory)inventory.getHandle()));
 	}
 
 	public MCInventoryView getOpenInventory() {
-		return new BukkitMCInventoryView(he.getOpenInventory());
+		return AbstractionUtils.wrap(he.getOpenInventory());
 	}
 
 	public MCInventory getInventory() {
@@ -93,10 +89,10 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	}
 	
 	public MCInventoryView openWorkbench(MCLocation loc, boolean force) {
-		return new BukkitMCInventoryView(he.openWorkbench((Location)loc.getHandle(), force));
+		return AbstractionUtils.wrap(he.openWorkbench((Location)loc.getHandle(), force));
 	}
 	
 	public MCInventoryView openEnchanting(MCLocation loc, boolean force) {
-		return new BukkitMCInventoryView(he.openEnchanting((Location)loc.getHandle(), force));
+		return AbstractionUtils.wrap(he.openEnchanting((Location)loc.getHandle(), force));
 	}
 }

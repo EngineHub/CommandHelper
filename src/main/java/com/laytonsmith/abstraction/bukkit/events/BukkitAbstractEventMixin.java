@@ -13,6 +13,7 @@ import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.EventException;
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.Server;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -83,7 +84,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
     @Override
     public void manualTrigger(BindableEvent e){
         if(e._GetObject() instanceof org.bukkit.event.Event){
-            ((BukkitMCServer)Static.getServer()).__Server().getPluginManager().callEvent((org.bukkit.event.Event)e._GetObject());
+            ((Server)Static.getServer().getHandle()).getPluginManager().callEvent((org.bukkit.event.Event)e._GetObject());
         }
     }
 

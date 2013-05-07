@@ -7,15 +7,10 @@ import com.laytonsmith.annotations.WrappedItem;
 import org.bukkit.command.ConsoleCommandSender;
 
 /**
- *
- * @author layton
+ * TODO: Is this class even needed anymore?
  */
 public class BukkitMCConsoleCommandSender extends BukkitMCCommandSender implements MCConsoleCommandSender{
 
     @WrappedItem ConsoleCommandSender ccs;
-    public BukkitMCConsoleCommandSender(ConsoleCommandSender ccs){
-        super(ccs);
-        this.ccs = ccs;
-    }
     
 }

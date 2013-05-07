@@ -57,10 +57,6 @@ public interface Convertor {
     public void ClearFutureRunnable(int id);
 
     public int SetFutureRepeater(long ms, long initialDelay, Runnable r);
-
-    public MCEntity GetCorrectEntity(MCEntity e);
-
-	public MCItemMeta GetCorrectMeta(MCItemMeta im);
 	
 	/**
 	 * Gets the inventory of the specified entity, or null if the entity id

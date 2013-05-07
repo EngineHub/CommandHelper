@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -38,16 +39,6 @@ import org.bukkit.util.BlockIterator;
 public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEntity {
 
 	@WrappedItem LivingEntity le;
-
-	public BukkitMCLivingEntity(LivingEntity le) {
-		super(le);
-		this.le = le;
-	}
-	
-	public BukkitMCLivingEntity(AbstractionObject a){
-		super(a);
-		this.le = a.getHandle();
-	}
 
 	@Override
 	public LivingEntity getHandle() {
@@ -91,11 +82,11 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 	}
 
 	public MCLocation getEyeLocation() {
-		return new BukkitMCLocation(le.getEyeLocation());
+		return AbstractionUtils.wrap(le.getEyeLocation());
 	}
 
 	public MCPlayer getKiller() {
-		return new BukkitMCPlayer(le.getKiller());
+		return AbstractionUtils.wrap(le.getKiller());
 	}
 
 	public int getLastDamage() {
@@ -108,7 +99,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		List<MCBlock> retn = new ArrayList<MCBlock>();
 
 		for (Block b : lst) {
-			retn.add(new BukkitMCBlock(b));
+			retn.add((MCBlock) AbstractionUtils.wrap(b));
 		}
 
 		return retn;
@@ -120,7 +111,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		List<MCBlock> retn = new ArrayList<MCBlock>();
 
 		for (Block b : lst) {
-			retn.add(new BukkitMCBlock(b));
+			retn.add((MCBlock) AbstractionUtils.wrap(b));
 		}
 
 		return retn;
@@ -143,7 +134,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 	}
 
 	public MCBlock getTargetBlock(HashSet<Byte> b, int i) {
-		return new BukkitMCBlock(le.getTargetBlock(b, i));
+		return AbstractionUtils.wrap(le.getTargetBlock(b, i));
 	}
 
 	public MCBlock getTargetBlock(HashSet<Short> b, int i, boolean castToByte) {
@@ -157,7 +148,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 			}
 			return getTargetBlock(bb, i);
 		}
-		return new BukkitMCBlock(getFirstTargetBlock(b, i));
+		return AbstractionUtils.wrap(getFirstTargetBlock(b, i));
 	}
 
 	private Block getFirstTargetBlock(HashSet<Short> transparent, int maxDistance) {
@@ -262,7 +253,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		Class<? extends Entity> c = et.getEntityClass();
 		Projectile proj = le.launchProjectile(c.asSubclass(Projectile.class));
 
-		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj);
+		MCEntity e = AbstractionUtils.wrap(proj);
 
 		if (e instanceof MCProjectile) {
 			return (MCProjectile) e;
@@ -296,7 +287,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 	}
 
 	public MCEntityEquipment getEquipment() {
-		return new BukkitMCEntityEquipment(le.getEquipment());
+		return AbstractionUtils.wrap(le.getEquipment());
 	}
 	
 	public boolean getCanPickupItems() {
@@ -313,7 +304,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 					ExceptionType.BadEntityException, t);
 		}
 		LivingEntity target = ((Creature) le).getTarget();
-		return target == null ? null : new BukkitMCLivingEntity(target);
+		return (MCLivingEntity) (target == null ? null : AbstractionUtils.wrap(target));
 	}
 
 	public void setTarget(MCLivingEntity target, Target t) {

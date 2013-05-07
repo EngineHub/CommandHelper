@@ -4,7 +4,7 @@ package com.laytonsmith.abstraction;
  *
  * @author jb_aero
  */
-public interface MCRepairable {
+public interface MCRepairable extends AbstractionObject {
 	
 	public boolean hasRepairCost();
 	public int getRepairCost();

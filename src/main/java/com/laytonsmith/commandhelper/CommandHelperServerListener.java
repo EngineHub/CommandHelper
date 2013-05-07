@@ -2,6 +2,7 @@
 
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
@@ -31,10 +32,10 @@ public class CommandHelperServerListener implements Listener{
 		//Run this first, so external events can intercept it.
 		BukkitMiscEvents.BukkitMCConsoleCommandEvent cce = new BukkitMiscEvents.BukkitMCConsoleCommandEvent(event);
 		EventUtils.TriggerExternal(cce);
-        MCCommandSender player = new BukkitMCCommandSender(event.getSender());
+        MCCommandSender player = AbstractionUtils.wrap(event.getSender());
         if(event.getSender() instanceof ConsoleCommandSender){
             //Need the more specific subtype for player()
-            player = new BukkitMCConsoleCommandSender((ConsoleCommandSender)event.getSender());
+            player = AbstractionUtils.wrap((ConsoleCommandSender)event.getSender());
         }
         boolean match = false;
         try {

@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -22,20 +23,8 @@ import org.bukkit.material.MaterialData;
  */
 public class BukkitMCItemStack implements MCItemStack {
     @WrappedItem ItemStack is;
-    public BukkitMCItemStack(ItemStack is){
-        this.is = is;
-    }
     
-    public BukkitMCItemStack(AbstractionObject a){
-        this((ItemStack)null);
-        if(a instanceof MCItemStack){
-            this.is = ((ItemStack)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
-    
-    public Object getHandle(){
+    public ItemStack getHandle(){
         return is;
     }
     
@@ -43,7 +32,7 @@ public class BukkitMCItemStack implements MCItemStack {
         if(is == null || is.getData() == null){
             return null;
         }
-        return new BukkitMCMaterialData(is.getData());
+        return AbstractionUtils.wrap(is.getData());
     }
     
     public short getDurability(){
@@ -87,7 +76,7 @@ public class BukkitMCItemStack implements MCItemStack {
         }
         Map<MCEnchantment, Integer> map = new HashMap<MCEnchantment, Integer>();
         for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
-            map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
+            map.put((MCEnchantment) AbstractionUtils.wrap(entry.getKey()), entry.getValue());
         }
         return map;
     }
@@ -103,7 +92,7 @@ public class BukkitMCItemStack implements MCItemStack {
         if(is == null){
             return null;
         }
-        return new BukkitMCMaterial(is.getType());
+        return AbstractionUtils.wrap(is.getType());
     }
 
     public void setTypeId(int type) {
@@ -162,7 +151,7 @@ public class BukkitMCItemStack implements MCItemStack {
 	}
 	
 	public MCItemMeta getItemMeta() {
-		return BukkitConvertor.BukkitGetCorrectMeta(is.getItemMeta());
+		return AbstractionUtils.wrap(is.getItemMeta());
 	}
 
 	public void setItemMeta(MCItemMeta im) {

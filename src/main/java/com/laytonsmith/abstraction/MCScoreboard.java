@@ -3,7 +3,7 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import java.util.Set;
 
-public interface MCScoreboard {
+public interface MCScoreboard extends AbstractionObject {
 	public void clearSlot(MCDisplaySlot slot);
 	public MCObjective getObjective(MCDisplaySlot slot);
 	public MCObjective getObjective(String name);

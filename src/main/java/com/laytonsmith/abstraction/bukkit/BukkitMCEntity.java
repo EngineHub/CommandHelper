@@ -11,7 +11,6 @@ import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.annotations.WrappedItem;
-import com.laytonsmith.annotations.testing.AbstractConstructor;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,16 +31,6 @@ import org.bukkit.util.Vector;
 public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
     @WrappedItem Entity e;
-    public BukkitMCEntity(Entity e) {
-    	super(e);
-        this.e = e;
-    }
-	
-	@AbstractConstructor
-	public BukkitMCEntity(AbstractionObject a){
-		super(a);
-		this.e = a.getHandle();
-	}
 
     public boolean eject() {
 		return e.eject();
@@ -81,18 +70,11 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		return new BukkitEntityEvents.BukkitMCEntityDamageEvent(ldc);
 	}
 
-    public MCLivingEntity getLivingEntity() {
-        if(e instanceof LivingEntity){
-            return new BukkitMCLivingEntity((LivingEntity)e);
-        }
-        return null;
-    }
-
     public MCLocation getLocation() {
         if(e.getLocation() == null){
             return null;
         }
-        return new BukkitMCLocation(e.getLocation());
+        return AbstractionUtils.wrap(e.getLocation());
     }
 
 	public int getMaxFireTicks() {
@@ -104,18 +86,18 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		List<MCEntity> retn = new ArrayList<MCEntity>();
 
 		for(Entity e : lst) {
-			retn.add(BukkitConvertor.BukkitGetCorrectEntity(e));
+			retn.add((MCEntity)AbstractionUtils.wrap(e));
 		}
 
 		return retn;
 	}
 
 	public MCEntity getPassenger() {
-		return BukkitConvertor.BukkitGetCorrectEntity(e.getPassenger());
+		return AbstractionUtils.wrap(e.getPassenger());
 	}
 
 	public MCServer getServer() {
-		return new BukkitMCServer(e.getServer());
+		return AbstractionUtils.wrap(e.getServer());
 	}
 
 	public int getTicksLived() {
@@ -131,7 +113,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	public MCEntity getVehicle() {
-		return new BukkitMCEntity(e);
+		return AbstractionUtils.wrap(e);
 	}
 
 	public Velocity getVelocity() {
@@ -143,7 +125,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         if (e == null || e.getWorld() == null) {
             return null;
         }
-        return new BukkitMCWorld(e.getWorld());
+        return AbstractionUtils.wrap(e.getWorld());
     }
 
 	public boolean isDead() {
@@ -229,7 +211,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	 * @return
 	 */
 	public MCLocation asyncGetLocation() {
-		return new BukkitMCLocation(e.getLocation());
+		return AbstractionUtils.wrap(e.getLocation());
 	}
 
 }

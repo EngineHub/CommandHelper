@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
 import org.bukkit.event.vehicle.VehicleCollisionEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
@@ -40,7 +41,7 @@ public class BukkitVehicleEvents {
 			if (vec.getEntity() == null) {
 				return null;
 			}
-			return BukkitConvertor.BukkitGetCorrectEntity(vec.getEntity());
+			return AbstractionUtils.wrap(vec.getEntity());
 		}
 
 		public boolean isCollisionCancelled() {
@@ -76,7 +77,7 @@ public class BukkitVehicleEvents {
 		}
 		
 		public MCBlock getBlock() {
-			return new BukkitMCBlock(vbc.getBlock());
+			return AbstractionUtils.wrap(vbc.getBlock());
 		}
 
 		@Override
@@ -99,7 +100,7 @@ public class BukkitVehicleEvents {
 			if (vee.getEntered() == null) {
 				return null;
 			}
-			return BukkitConvertor.BukkitGetCorrectEntity(vee.getEntered());
+			return AbstractionUtils.wrap(vee.getEntered());
 		}
 	}
 	
@@ -117,7 +118,7 @@ public class BukkitVehicleEvents {
 			if (vee.getExited() == null) {
 				return null;
 			}
-			return BukkitConvertor.BukkitGetCorrectEntity(vee.getExited());
+			return AbstractionUtils.wrap(vee.getExited());
 		}
 	}
 	
@@ -130,7 +131,7 @@ public class BukkitVehicleEvents {
 		
 		public MCVehicle getVehicle() {
 			if (ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
-				return (MCVehicle) BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
+				return AbstractionUtils.wrap(ve.getVehicle());
 			}
 			return null;
 		}

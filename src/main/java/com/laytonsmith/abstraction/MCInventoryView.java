@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.enums.MCInventoryType;
  *
  * @author Layton
  */
-public interface MCInventoryView {
+public interface MCInventoryView extends AbstractionObject {
 
 	public MCInventory getBottomInventory();
 

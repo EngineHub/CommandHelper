@@ -12,13 +12,6 @@ import org.bukkit.inventory.meta.Repairable;
 public class BukkitMCRepairable implements MCRepairable {
 
 	@WrappedItem Repairable r;
-	public BukkitMCRepairable(Repairable rep) {
-		this.r = rep;
-	}
-
-	public BukkitMCRepairable(AbstractionObject o) {
-		this.r = (Repairable) o;
-	}
 
 	public boolean hasRepairCost() {
 		return r.hasRepairCost();
@@ -30,6 +23,10 @@ public class BukkitMCRepairable implements MCRepairable {
 
 	public void setRepairCost(int cost) {
 		r.setRepairCost(cost);
+	}
+
+	public <T> T getHandle() {
+		return (T) r;
 	}
 
 }

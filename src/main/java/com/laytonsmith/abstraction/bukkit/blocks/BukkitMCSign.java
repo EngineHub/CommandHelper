@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit.blocks;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
@@ -16,10 +17,6 @@ public class BukkitMCSign implements MCSign {
     
     @WrappedItem Sign s;
 
-    public BukkitMCSign(Sign sign) {
-        this.s = sign;
-    }
-
     public void setLine(int i, String line1) {
         s.setLine(i, line1);
         s.update();
@@ -30,11 +27,15 @@ public class BukkitMCSign implements MCSign {
     }
 
     public MCMaterialData getData() {
-        return new BukkitMCMaterialData(s.getData());
+        return AbstractionUtils.wrap(s.getData());
     }
 
     public int getTypeId() {
         return s.getTypeId();
     }
+
+	public <T> T getHandle() {
+		return (T) s;
+	}
     
 }

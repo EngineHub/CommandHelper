@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
@@ -22,9 +23,13 @@ public class BukkitMCWorldCreator implements MCWorldCreator {
 	public BukkitMCWorldCreator(String name){
 		creator = new WorldCreator(name);
 	}
+	
+	protected BukkitMCWorldCreator(){
+		
+	}
 
 	public MCWorld createWorld() {
-		return new BukkitMCWorld(creator.createWorld());
+		return AbstractionUtils.wrap(creator.createWorld());
 	}
 
 	public MCWorldCreator type(MCWorldType type) {
@@ -47,5 +52,9 @@ public class BukkitMCWorldCreator implements MCWorldCreator {
 	public MCWorldCreator generator(String generator) {
 		creator.generator(generator);
 		return this;
+	}
+
+	public <T> T getHandle() {
+		return (T) creator;
 	}
 }

@@ -6,7 +6,7 @@ import java.util.Set;
  * 
  * @author jb_aero
  */
-public interface MCTeam {
+public interface MCTeam extends AbstractionObject {
 	public void addPlayer(MCOfflinePlayer player);
 	public boolean allowFriendlyFire();
 	public boolean canSeeFriendlyInvisibles();

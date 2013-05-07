@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
  * 
  * @author jb_aero
  */
-public interface MCItemFactory {
+public interface MCItemFactory extends AbstractionObject {
 
 	public MCItemMeta asMetaFor(MCItemMeta meta, MCItemStack stack);
 	public MCItemMeta asMetaFor(MCItemMeta meta, MCMaterial material);

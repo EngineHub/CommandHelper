@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCScore;
@@ -14,9 +15,6 @@ import org.bukkit.scoreboard.Objective;
 public class BukkitMCObjective implements MCObjective {
 
 	@WrappedItem Objective o;
-	public BukkitMCObjective(Objective obj) {
-		o = obj;
-	}
 
 	public String getCriteria() {
 		return o.getCriteria();
@@ -39,11 +37,11 @@ public class BukkitMCObjective implements MCObjective {
 	}
 
 	public MCScore getScore(MCOfflinePlayer player) {
-		return new BukkitMCScore(o.getScore((OfflinePlayer) player.getHandle()));
+		return AbstractionUtils.wrap(o.getScore((OfflinePlayer) player.getHandle()));
 	}
 
 	public MCScoreboard getScoreboard() {
-		return new BukkitMCScoreboard(o.getScoreboard());
+		return AbstractionUtils.wrap(o.getScoreboard());
 	}
 
 	public boolean isModifiable() {
@@ -60,5 +58,9 @@ public class BukkitMCObjective implements MCObjective {
 
 	public void unregister() {
 		o.unregister();
+	}
+
+	public <T> T getHandle() {
+		return (T) o;
 	}
 }

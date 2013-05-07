@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
@@ -11,13 +12,9 @@ import org.bukkit.material.MaterialData;
 public class BukkitMCEnderman extends BukkitMCLivingEntity implements
 		MCEnderman {
 	@WrappedItem Enderman e;
-	public BukkitMCEnderman(Enderman ent) {
-		super(ent);
-		e = ent;
-	}
 
 	public MCMaterialData getCarriedMaterial() {
-		return new BukkitMCMaterialData(e.getCarriedMaterial());
+		return AbstractionUtils.wrap(e.getCarriedMaterial());
 	}
 	
 	public int getCarriedType() {

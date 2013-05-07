@@ -57,10 +57,6 @@ import org.bukkit.material.MaterialData;
 public class BukkitMCWorld implements MCWorld {
 
     @WrappedItem World w;
-
-    public BukkitMCWorld(World w) {
-        this.w = w;
-    }
 	
 	@Override
 	public boolean equals(Object o) {
@@ -77,20 +73,7 @@ public class BukkitMCWorld implements MCWorld {
 		return this.w.toString();
 	}
     
-    public BukkitMCWorld(AbstractionObject a){
-        this((World)null);
-        if(a instanceof MCWorld){
-            this.w = ((World)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
-    
     public Object getHandle(){
-        return w;
-    }
-
-    public World __World() {
         return w;
     }
 
@@ -100,7 +83,7 @@ public class BukkitMCWorld implements MCWorld {
 		}
 		List<MCEntity> list = new ArrayList<MCEntity>();
 		for (Entity e : w.getEntities()) {
-			list.add(new BukkitMCEntity(e));
+			list.add((MCEntity)AbstractionUtils.wrap(e));
 		}
 		return list;
 	}
@@ -111,7 +94,7 @@ public class BukkitMCWorld implements MCWorld {
         }
         List<MCLivingEntity> list = new ArrayList<MCLivingEntity>();
         for (LivingEntity e : w.getLivingEntities()) {
-            list.add(new BukkitMCLivingEntity(e));
+            list.add((MCLivingEntity)AbstractionUtils.wrap(e));
         }
         return list;
     }
@@ -144,15 +127,15 @@ public class BukkitMCWorld implements MCWorld {
         if (w.getBlockAt(x, y, z) == null) {
             return null;
         }
-        return new BukkitMCBlock(w.getBlockAt(x, y, z));
+        return AbstractionUtils.wrap(w.getBlockAt(x, y, z));
     }
 
     public MCEntity spawn(MCLocation l, Class mobType) {
-        return BukkitConvertor.BukkitGetCorrectEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
+        return AbstractionUtils.wrap(w.spawn(((BukkitMCLocation) l).l, mobType));
     }
 
 	public MCEntity spawn(MCLocation l, MCEntityType entType) {
-		return BukkitConvertor.BukkitGetCorrectEntity(w.spawnEntity(
+		return AbstractionUtils.wrap(w.spawnEntity(
 				((BukkitMCLocation) l).asLocation(),
 				BukkitMCEntityType.getConvertor().getConcreteEnum(MCEntityType.valueOf(entType.name()))));
 	}
@@ -167,20 +150,20 @@ public class BukkitMCWorld implements MCWorld {
 	}
 
     public MCItem dropItemNaturally(MCLocation l, MCItemStack is) {
-        return new BukkitMCItem(w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
+        return AbstractionUtils.wrap(w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
     }
 
     public MCItem dropItem(MCLocation l, MCItemStack is) {
-        return new BukkitMCItem(w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
+        return AbstractionUtils.wrap(w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
     }
 
 	public MCLightningStrike strikeLightning(MCLocation GetLocation) {
-		return new BukkitMCLightningStrike(
+		return AbstractionUtils.wrap(
 				w.strikeLightning(((BukkitMCLocation) GetLocation).l));
 	}
 
 	public MCLightningStrike strikeLightningEffect(MCLocation GetLocation) {
-		return new BukkitMCLightningStrike(
+		return AbstractionUtils.wrap(
 				w.strikeLightningEffect(((BukkitMCLocation) GetLocation).l));
 	}
 
@@ -189,7 +172,7 @@ public class BukkitMCWorld implements MCWorld {
     }
 
     public MCLocation getSpawnLocation() {
-        return new BukkitMCLocation(w.getSpawnLocation());
+        return AbstractionUtils.wrap(w.getSpawnLocation());
     }
 
     public void refreshChunk(int x, int z) {
@@ -219,7 +202,7 @@ public class BukkitMCWorld implements MCWorld {
 		while(b.getType() == Material.AIR && b.getY() > 0){
 			b = b.getRelative(BlockFace.DOWN);
 		}
-		return new BukkitMCBlock(b);
+		return AbstractionUtils.wrap(b);
 	}
 
     public void explosion(double x, double y, double z, float size, boolean safe) {
@@ -523,7 +506,7 @@ public class BukkitMCWorld implements MCWorld {
 
 	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data) {
 		Location mcloc = (Location)((BukkitMCLocation)loc).getHandle();
-		return new BukkitMCFallingBlock(w.spawnFallingBlock(mcloc, type, data));
+		return AbstractionUtils.wrap(w.spawnFallingBlock(mcloc, type, data));
 	}
 
 	public boolean regenerateChunk(int x, int z) {
@@ -531,15 +514,15 @@ public class BukkitMCWorld implements MCWorld {
 	}
 
 	public MCChunk getChunkAt(int x, int z) {
-		return new BukkitMCChunk(w.getChunkAt(x, z));
+		return AbstractionUtils.wrap(w.getChunkAt(x, z));
 	}
 	
 	public MCChunk getChunkAt(MCBlock b) {
-		return new BukkitMCChunk(w.getChunkAt(((BukkitMCBlock) b).__Block()));
+		return AbstractionUtils.wrap(w.getChunkAt(((BukkitMCBlock) b).__Block()));
 	}
 	
 	public MCChunk getChunkAt(MCLocation l) {
-		return new BukkitMCChunk(w.getChunkAt(((BukkitMCLocation) l).asLocation()));
+		return AbstractionUtils.wrap(w.getChunkAt(((BukkitMCLocation) l).asLocation()));
 	}
 
 	public void setThundering(boolean b) {

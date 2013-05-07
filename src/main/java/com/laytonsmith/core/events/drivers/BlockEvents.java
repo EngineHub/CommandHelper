@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -135,7 +136,7 @@ public class BlockEvents {
             CArray drops = new CArray(Target.UNKNOWN);
             Collection<MCItemStack> items = event.getBlock().getDrops(event.getPlayer().getItemInHand());
             for (Iterator<MCItemStack> iter = items.iterator(); iter.hasNext();) {
-                MCItemStack stack = new BukkitMCItemStack((MCItemStack) iter.next());
+                MCItemStack stack = AbstractionUtils.wrap(iter.next());
                 CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, Target.UNKNOWN);
                 drops.push(item);
             }

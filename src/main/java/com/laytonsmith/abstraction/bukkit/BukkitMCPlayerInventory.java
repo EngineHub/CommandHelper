@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.annotations.WrappedItem;
@@ -16,19 +17,6 @@ import org.bukkit.inventory.PlayerInventory;
 public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlayerInventory {
 
     @WrappedItem private PlayerInventory i;
-    public BukkitMCPlayerInventory(PlayerInventory inventory) {
-		super(inventory);
-        this.i = inventory;
-    }
-    
-    public BukkitMCPlayerInventory(AbstractionObject a){
-        this((PlayerInventory)null);
-        if(a instanceof MCPlayerInventory){
-            this.i = ((PlayerInventory)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
 
     public void setHelmet(MCItemStack stack) {
         this.i.setHelmet(((BukkitMCItemStack)stack).is);
@@ -59,19 +47,19 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
     }
 
     public MCItemStack getHelmet() {
-        return new BukkitMCItemStack(this.i.getHelmet());
+        return AbstractionUtils.wrap(this.i.getHelmet());
     }
 
     public MCItemStack getChestplate() {
-        return new BukkitMCItemStack(this.i.getChestplate());
+        return AbstractionUtils.wrap(this.i.getChestplate());
     }
 
     public MCItemStack getLeggings() {
-        return new BukkitMCItemStack(this.i.getLeggings());
+        return AbstractionUtils.wrap(this.i.getLeggings());
     }
 
     public MCItemStack getBoots() {
-        return new BukkitMCItemStack(this.i.getBoots());
+        return AbstractionUtils.wrap(this.i.getBoots());
     }
 
 	public int getHeldItemSlot() {

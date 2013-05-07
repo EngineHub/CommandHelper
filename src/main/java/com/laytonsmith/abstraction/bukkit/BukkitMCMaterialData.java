@@ -13,18 +13,6 @@ import org.bukkit.material.MaterialData;
  */
 public class BukkitMCMaterialData implements MCMaterialData{
     @WrappedItem MaterialData md;
-    public BukkitMCMaterialData(MaterialData md){
-        this.md = md;
-    }
-    
-    public BukkitMCMaterialData(AbstractionObject a){
-        this((MaterialData)null);
-        if(a instanceof MCMaterialData){
-            this.md = ((MaterialData)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
     
     public Object getHandle(){
         return md;

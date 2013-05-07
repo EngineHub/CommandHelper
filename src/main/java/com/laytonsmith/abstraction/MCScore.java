@@ -4,7 +4,7 @@ package com.laytonsmith.abstraction;
  * 
  * @author jb_aero
  */
-public interface MCScore {
+public interface MCScore extends AbstractionObject {
 	public MCObjective getObjective();
 	public MCOfflinePlayer getPlayer();
 	public int getScore();

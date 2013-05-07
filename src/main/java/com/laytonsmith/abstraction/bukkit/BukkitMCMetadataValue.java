@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.annotations.WrappedItem;
@@ -9,9 +10,6 @@ public class BukkitMCMetadataValue implements MCMetadataValue {
 
 	@WrappedItem MetadataValue val;
 	
-	public BukkitMCMetadataValue(MetadataValue v) {
-		this.val = v;
-	}
 	public boolean asBoolean() {
 		return val.asBoolean();
 	}
@@ -45,7 +43,7 @@ public class BukkitMCMetadataValue implements MCMetadataValue {
 	}
 
 	public MCPlugin getOwningPlugin() {
-		return new BukkitMCPlugin(val.getOwningPlugin());
+		return AbstractionUtils.wrap(val.getOwningPlugin());
 	}
 
 	public void invalidate() {
@@ -55,11 +53,9 @@ public class BukkitMCMetadataValue implements MCMetadataValue {
 	public Object value() {
 		return val.value();
 	}
-	public MetadataValue getHandle() {
-		return val;
+	
+	public <T> T getHandle() {
+		return (T) val;
 	}
-    public MetadataValue asMetadataValue() {
-        return val;
-    }
 
 }

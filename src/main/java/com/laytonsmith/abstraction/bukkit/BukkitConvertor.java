@@ -4,9 +4,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
-import com.laytonsmith.abstraction.bukkit.entities.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.abstraction.enums.MCTone;
@@ -45,9 +43,9 @@ public class BukkitConvertor extends AbstractConvertor {
     public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
         World w2 = null;
         if(w != null){
-            w2 = ((BukkitMCWorld)w).__World();
+            w2 = w.getHandle();
         }
-        return new BukkitMCLocation(new Location(w2, x, y, z, yaw, pitch));
+        return AbstractionUtils.wrap(new Location(w2, x, y, z, yaw, pitch));
     }
 
     public Class GetServerEventMixin() {
@@ -58,7 +56,7 @@ public class BukkitConvertor extends AbstractConvertor {
         MCEnchantment[] ea = new MCEnchantment[Enchantment.values().length];
         Enchantment[] oea = Enchantment.values();
         for (int i = 0; i < ea.length; i++) {
-            ea[i] = new BukkitMCEnchantment(oea[i]);
+            ea[i] = AbstractionUtils.wrap(oea[i]);
         }
         return ea;
 
@@ -68,10 +66,10 @@ public class BukkitConvertor extends AbstractConvertor {
         try{
             //If they are looking it up by number, we can support that
             int i = Integer.valueOf(name);
-            return new BukkitMCEnchantment(Enchantment.getById(i));
+            return AbstractionUtils.wrap(Enchantment.getById(i));
         } catch(NumberFormatException e){
 			try{
-				return new BukkitMCEnchantment(Enchantment.getByName(name));
+				return AbstractionUtils.wrap(Enchantment.getByName(name));
 			} catch(NullPointerException ee){
 				return null;
 			}
@@ -79,18 +77,18 @@ public class BukkitConvertor extends AbstractConvertor {
     }
 
     public MCServer GetServer() {
-        return BukkitMCServer.Get();
+        return AbstractionUtils.wrap(Bukkit.getServer());
     }
 
 	public MCMaterial getMaterial(int id) {
-		return new BukkitMCMaterial(Material.getMaterial(id));
+		return AbstractionUtils.wrap(Material.getMaterial(id));
 	}
 
     public MCItemStack GetItemStack(int type, int qty) {
-        return new BukkitMCItemStack(new ItemStack(type, qty));
+        return AbstractionUtils.wrap(new ItemStack(type, qty));
     }
     public MCItemStack GetItemStack(int type, int data, int qty) {
-        return new BukkitMCItemStack(new ItemStack(type, qty, (short)0, (byte)data));
+        return AbstractionUtils.wrap(new ItemStack(type, qty, (short)0, (byte)data));
     }
     
     public static final BukkitBlockListener BlockListener = new BukkitBlockListener();
@@ -166,140 +164,6 @@ public class BukkitConvertor extends AbstractConvertor {
         }
     }
     
-    public static MCEntity BukkitGetCorrectEntity(Entity be){
-    	if (be == null) {
-    		return null;
-    	}
-    	//TODO: Change this to a reflection mechanism, this is getting tiresome to do.
-		//truth.
-    	if (be instanceof EnderSignal) {
-    		return new BukkitMCEnderSignal((EnderSignal) be);
-    	}
-    	
-		if (be instanceof Firework) {
-			return new BukkitMCFirework((Firework) be);
-		}
-		
-		if(be instanceof FallingBlock){
-			return new BukkitMCFallingBlock((FallingBlock) be);
-		}
-		
-		if(be instanceof Item){
-			return new BukkitMCItem((Item)be);
-		}
-		
-		if(be instanceof LightningStrike){
-			return new BukkitMCLightningStrike((LightningStrike)be);
-		}
-		
-		if(be instanceof ExperienceOrb){
-			return new BukkitMCExperienceOrb((ExperienceOrb)be);
-		}
-		
-		if(be instanceof EnderCrystal){
-			return new BukkitMCEnderCrystal((EnderCrystal)be);
-		}
-		
-		if(be instanceof TNTPrimed){
-			return new BukkitMCTNT((TNTPrimed)be);
-		}
-		
-		if (be instanceof Fish) {
-			return new BukkitMCFishHook((Fish) be);
-		}
-		
-		if (be instanceof Fireball) {
-			return new BukkitMCFireball((Fireball) be);
-		}
-		
-    	if(be instanceof Projectile){
-            return new BukkitMCProjectile((Projectile)be);
-        }
-    	
-    	if(be instanceof Hanging){
-    		return new BukkitMCHanging(be);
-    	}
-    	
-    	if(be instanceof Wolf){
-            return new BukkitMCWolf(be);
-        }
-    	
-    	if(be instanceof Ocelot){
-            return new BukkitMCOcelot(be);
-        }
-    	
-		if (be instanceof Enderman) {
-			return new BukkitMCEnderman((Enderman) be);
-		}
-		
-		if (be instanceof Sheep) {
-			return new BukkitMCSheep((Sheep) be);
-		}
-		
-		if (be instanceof Pig) {
-			return new BukkitMCPig((Pig) be);
-		}
-		
-    	if(be instanceof Ageable){
-    		return new BukkitMCAgeable(be);
-    	}
-    	
-    	if(be instanceof Vehicle){
-    		return new BukkitMCVehicle(be);
-    	}
-        
-        if(be instanceof Player){
-            return new BukkitMCPlayer((Player)be);
-        }
-        
-        if(be instanceof HumanEntity){
-            return new BukkitMCHumanEntity((HumanEntity)be);
-        }
-        
-        if(be instanceof LivingEntity){
-            return new BukkitMCLivingEntity(((LivingEntity)be));
-        }
-        
-        throw new Error("While trying to find the correct entity type for " + be.getClass().getName() + ", was unable"
-                + " to find the appropriate implementation. Please alert the developers of this stack trace.");
-    }
-
-    public MCEntity GetCorrectEntity(MCEntity e) {
-
-        Entity be = ((BukkitMCEntity)e).getHandle();
-        return BukkitConvertor.BukkitGetCorrectEntity(be);
-    }
-
-	public MCItemMeta GetCorrectMeta(MCItemMeta im) {
-		ItemMeta bim = ((BukkitMCItemMeta) im).asItemMeta();
-		return BukkitConvertor.BukkitGetCorrectMeta(bim);
-	}
-
-	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
-		if (im instanceof BookMeta) {
-			return new BukkitMCBookMeta((BookMeta) im);
-		}
-		if (im instanceof EnchantmentStorageMeta) {
-			return new BukkitMCEnchantmentStorageMeta((EnchantmentStorageMeta) im);
-		}
-		if (im instanceof FireworkEffectMeta) {
-			
-		}
-		if (im instanceof FireworkMeta) {
-			return new BukkitMCFireworkMeta((FireworkMeta) im);
-		}
-		if (im instanceof LeatherArmorMeta) {
-			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
-		}
-		if (im instanceof PotionMeta) {
-			return new BukkitMCPotionMeta((PotionMeta) im);
-		}
-		if (im instanceof SkullMeta) {
-			return new BukkitMCSkullMeta((SkullMeta) im);
-		}
-		return new BukkitMCItemMeta(im);
-	}
-    
 	public MCInventory GetEntityInventory(int entityID) {
 		Entity entity = null;
 		outer: for(World w : Bukkit.getWorlds()){
@@ -315,9 +179,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(entity instanceof InventoryHolder){
 			if(entity instanceof Player){
-				return new BukkitMCPlayerInventory(((Player)entity).getInventory());
+				return AbstractionUtils.wrap(((Player)entity).getInventory());
 			} else {
-				return new BukkitMCInventory(((InventoryHolder)entity).getInventory());
+				return AbstractionUtils.wrap(((InventoryHolder)entity).getInventory());
 			}
 		} else {
 			return null;
@@ -331,7 +195,7 @@ public class BukkitConvertor extends AbstractConvertor {
 				DoubleChest dc = (DoubleChest)(b.getState());
 				return new BukkitMCDoubleChest(dc.getLeftSide().getInventory(), dc.getRightSide().getInventory());
 			} else {
-				return new BukkitMCInventory(((InventoryHolder)b.getState()).getInventory());
+				return AbstractionUtils.wrap(((InventoryHolder)b.getState()).getInventory());
 			}
 		} else {
 			return null;

@@ -11,15 +11,6 @@ import org.bukkit.entity.Sheep;
 public class BukkitMCSheep extends BukkitMCAgeable implements MCSheep {
 
 	@WrappedItem Sheep s;
-	public BukkitMCSheep(Sheep be) {
-		super(be);
-		this.s = be;
-	}
-	
-	public BukkitMCSheep(AbstractionObject a){
-		super(a);
-		this.s = a.getHandle();
-	}
 
 	@Override
 	public Sheep getHandle() {

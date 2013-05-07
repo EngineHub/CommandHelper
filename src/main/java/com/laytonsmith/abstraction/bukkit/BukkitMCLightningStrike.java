@@ -13,11 +13,6 @@ public class BukkitMCLightningStrike extends BukkitMCEntity implements MCLightni
 
 	@WrappedItem LightningStrike ls;
 	
-	public BukkitMCLightningStrike(LightningStrike ls){
-		super(ls);
-		this.ls = ls;
-	}
-	
 	public boolean isEffect(){
 		return ls.isEffect();
 	}

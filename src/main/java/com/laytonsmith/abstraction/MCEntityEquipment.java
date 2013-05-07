@@ -7,7 +7,7 @@ import java.util.Map;
  *
  * @author jb_aero
  */
-public interface MCEntityEquipment {
+public interface MCEntityEquipment extends AbstractionObject {
 
 	public void clearEquipment();
 	public int getSize();

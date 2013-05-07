@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction;
 
-public interface MCMetadataValue {
+public interface MCMetadataValue extends AbstractionObject {
 	public boolean asBoolean();
 
 	public byte asByte();
@@ -22,6 +22,4 @@ public interface MCMetadataValue {
 	public void invalidate();
 
 	public Object value();
-
-	public Object getHandle();
 }

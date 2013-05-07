@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
@@ -12,9 +13,6 @@ import org.bukkit.scoreboard.Team;
 public class BukkitMCTeam implements MCTeam {
 
 	@WrappedItem Team t;
-	public BukkitMCTeam(Team team) {
-		t = team;
-	}
 
 	public void addPlayer(MCOfflinePlayer player) {
 		t.addPlayer((OfflinePlayer) player.getHandle());
@@ -39,7 +37,7 @@ public class BukkitMCTeam implements MCTeam {
 	public Set<MCOfflinePlayer> getPlayers() {
 		Set<MCOfflinePlayer> ret = new HashSet<MCOfflinePlayer>();
 		for (OfflinePlayer o : t.getPlayers()) {
-			ret.add(new BukkitMCOfflinePlayer(o));
+			ret.add((MCOfflinePlayer) AbstractionUtils.wrap(o));
 		}
 		return ret;
 	}
@@ -49,7 +47,7 @@ public class BukkitMCTeam implements MCTeam {
 	}
 
 	public MCScoreboard getScoreboard() {
-		return new BukkitMCScoreboard(t.getScoreboard());
+		return AbstractionUtils.wrap(t.getScoreboard());
 	}
 
 	public int getSize() {
@@ -90,5 +88,9 @@ public class BukkitMCTeam implements MCTeam {
 
 	public void unregister() {
 		t.unregister();
+	}
+
+	public <T> T getHandle() {
+		return (T) t;
 	}
 }

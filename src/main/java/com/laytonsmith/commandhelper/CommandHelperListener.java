@@ -18,6 +18,7 @@
  */
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
@@ -94,7 +95,7 @@ public class CommandHelperListener implements Listener {
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
         if(CommandHelperPlugin.self.interpreterListener
-                .isInInterpreterMode(new BukkitMCPlayer(event.getPlayer()))){
+                .isInInterpreterMode((MCPlayer) AbstractionUtils.wrap(event.getPlayer()))){
             //They are in interpreter mode, so we want it to handle this, not everything else.
             return;
         }
@@ -113,7 +114,7 @@ public class CommandHelperListener implements Listener {
             }
         }
         String cmd = event.getMessage();        
-        MCPlayer player = new BukkitMCPlayer(event.getPlayer());
+        MCPlayer player = AbstractionUtils.wrap(event.getPlayer());
         Static.PlayDirty();
         if (cmd.equals("/.") || cmd.equals("/repeat")) {
             return;
@@ -160,12 +161,12 @@ public class CommandHelperListener implements Listener {
 
     @EventHandler(priority= EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        Static.HostnameCache(new BukkitMCPlayer(event.getPlayer()));
+        Static.HostnameCache((MCPlayer) AbstractionUtils.wrap(event.getPlayer()));
     }
     
     @EventHandler(priority= EventPriority.NORMAL)
     public void onPlayerLogin(PlayerLoginEvent event){
-        Static.SetPlayerHost(new BukkitMCPlayer(event.getPlayer()), event.getHostname());
+        Static.SetPlayerHost((MCPlayer) AbstractionUtils.wrap(event.getPlayer()), event.getHostname());
     }
     
 

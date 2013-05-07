@@ -36,17 +36,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
     @WrappedItem Player p;
 
-	public BukkitMCPlayer(Player player) {
-        super(player);
-        this.p = player;
-    }
-
-	public Player _Player() {
-        return p;
-    }
-
     public boolean canSee(MCPlayer p) {
-        return this.p.canSee(((BukkitMCPlayer)p)._Player());
+        return this.p.canSee((Player) p.getHandle());
     }
 
     public void chat(String chat) {
@@ -62,7 +53,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
     public MCLocation getCompassTarget() {
-        return new BukkitMCLocation(p.getCompassTarget());
+        return AbstractionUtils.wrap(p.getCompassTarget());
     }
 
     public String getDisplayName() {
@@ -85,12 +76,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         if (p == null || p.getInventory() == null) {
             return null;
         }
-        return new BukkitMCPlayerInventory(p.getInventory());
+        return AbstractionUtils.wrap(p.getInventory());
     }
 
     public MCItemStack getItemAt(Integer slot) {
         if (slot == null) {
-            return new BukkitMCItemStack(p.getItemInHand());
+            return AbstractionUtils.wrap(p.getItemInHand());
         }
         ItemStack is = null;
         //Special slots
@@ -109,7 +100,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         if (is == null) {
             return null;
         } else {
-            return new BukkitMCItemStack(is);
+            return AbstractionUtils.wrap(is);
         }
     }
 
@@ -122,7 +113,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
     public MCPlayer getPlayer() {
-        return new BukkitMCPlayer(p);
+        return AbstractionUtils.wrap(p);
     }
 
     public long getPlayerTime() {
@@ -388,9 +379,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
     public void setVanished(boolean set, MCPlayer to) {
         if (!set) {
-            p.showPlayer(((BukkitMCPlayer)to)._Player());
+            p.showPlayer((Player) to.getHandle());
         } else {
-            p.hidePlayer(((BukkitMCPlayer)to)._Player());
+            p.hidePlayer((Player) to.getHandle());
         }
     }
 
@@ -446,7 +437,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	public MCLocation getBedSpawnLocation() {
-	    return new BukkitMCLocation(p.getBedSpawnLocation());
+	    return AbstractionUtils.wrap(p.getBedSpawnLocation());
 	}
 
 	public void setBedSpawnLocation(MCLocation l) {
@@ -454,7 +445,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	public MCEntity getVehicle() {
-		return new BukkitMCEntity(p.getVehicle());
+		return AbstractionUtils.wrap(p.getVehicle());
 	}
 
 	public void sendPluginMessage(String channel, byte[] message) {
@@ -471,7 +462,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	public MCScoreboard getScoreboard() {
-		return new BukkitMCScoreboard(p.getScoreboard());
+		return AbstractionUtils.wrap(p.getScoreboard());
 	}
 
 	public void setScoreboard(MCScoreboard board) {

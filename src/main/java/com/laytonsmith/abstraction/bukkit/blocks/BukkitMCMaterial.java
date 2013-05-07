@@ -13,10 +13,6 @@ import org.bukkit.Material;
 public class BukkitMCMaterial implements MCMaterial {
     @WrappedItem Material m;
 
-    public BukkitMCMaterial(Material type) {
-        this.m = type;
-    }
-
     public short getMaxDurability() {
         return this.m.getMaxDurability();
     }
@@ -28,5 +24,9 @@ public class BukkitMCMaterial implements MCMaterial {
     public int getMaxStackSize() {
         return m.getMaxStackSize();
     }
+
+	public <T> T getHandle() {
+		return (T) m;
+	}
     
 }

@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit.blocks;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
@@ -16,16 +17,16 @@ public class BukkitMCBlockState implements MCBlockState {
     
     @WrappedItem BlockState bs;
 
-    public BukkitMCBlockState(BlockState state) {
-        this.bs = state;
-    }
-
     public MCMaterialData getData() {
-        return new BukkitMCMaterialData(bs.getData());
+        return AbstractionUtils.wrap(bs.getData());
     }
 
     public int getTypeId() {
         return bs.getTypeId();
     }
+
+	public <T> T getHandle() {
+		return (T) bs;
+	}
     
 }

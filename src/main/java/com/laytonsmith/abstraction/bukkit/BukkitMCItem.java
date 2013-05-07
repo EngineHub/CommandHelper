@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionUtils;
 import com.laytonsmith.abstraction.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.annotations.WrappedItem;
@@ -14,13 +15,8 @@ public class BukkitMCItem extends BukkitMCEntity implements MCItem{
 	
 	@WrappedItem Item i;
 	
-	public BukkitMCItem(Item i){
-		super(i);
-		this.i = i;
-	}
-	
 	public MCItemStack getItemStack(){
-		return new BukkitMCItemStack(i.getItemStack());
+		return AbstractionUtils.wrap(i.getItemStack());
 	}
 	
 	public int getPickupDelay(){
