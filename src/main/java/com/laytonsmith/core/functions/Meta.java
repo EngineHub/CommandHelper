@@ -134,6 +134,12 @@ public class Meta {
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String cmd = args[0].val().substring(1);
+			//If the command sender is null, then just try to run() this. It's unclear to me what
+			//would cause this for sure, but just in case. Regardless, this allows us to consolidate the error checking
+			//into the run function
+			if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() == null){
+				return new run().exec(t, env, args);
+			}
 			//Store their current op status
 			Boolean isOp = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().isOp();
 
