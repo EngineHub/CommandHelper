@@ -20,6 +20,8 @@ public interface MCServer extends AbstractionObject{
     public MCWorld getWorld(String name);
     public List<MCWorld> getWorlds();
     public void broadcastMessage(String message);
+	public void broadcastMessage(String message, String permission);
+	public MCConsoleCommandSender getConsole();
 	public MCItemFactory getItemFactory();
 	public MCInventory createInventory(MCInventoryHolder owner, MCInventoryType type);
 	public MCInventory createInventory(MCInventoryHolder owner, int size, String title);
@@ -47,8 +49,6 @@ public interface MCServer extends AbstractionObject{
 	public void unbanIP(String address);
 
 	public MCScoreboard getMainScoreboard();
-
-	//May want to initialize this onEnable and make a Static reference to it later
 	public MCScoreboard getNewScoreboard();
 
     public Economy getEconomy();

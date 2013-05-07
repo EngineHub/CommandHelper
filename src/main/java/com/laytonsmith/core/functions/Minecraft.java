@@ -1021,6 +1021,9 @@ public class Minecraft {
 			
 			if(options.containsKey("strength")){
 				strength = Static.getInt32(options.get("strength"), t);
+				if (strength < 0 || strength > 128) {
+					throw new ConfigRuntimeException("Strength must be between 0 and 128", ExceptionType.RangeException, t);
+				}
 			}
 			if(options.containsKey("flicker")){
 				flicker = Static.getBoolean(options.get("flicker"));

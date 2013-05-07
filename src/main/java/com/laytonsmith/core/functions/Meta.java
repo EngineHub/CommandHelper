@@ -31,7 +31,44 @@ public class Meta {
 	public static String docs() {
 		return "These functions provide a way to run other commands";
 	}
+/*
+	@api
+	public static class first_load extends AbstractFunction {
 
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CBoolean(CommandHelperPlugin.isFirstLoad(), t);
+		}
+
+		public String getName() {
+			return "first_load";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "boolean {} Returns true if the scripts have not been reloaded since the plugin was enabled."
+					+ " In otherwords, using this in main.ms will return false when you do /reloadaliases.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+*/
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class runas extends AbstractFunction {
 
@@ -61,7 +98,7 @@ public class Meta {
 				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "Using runas(~op, " + args[1].asString().getQuote() 
 						+ ") is deprecated. Use sudo(" + args[1].asString().getQuote() + ") instead.", t);
 				new sudo().exec(t, env, args[1]);
-			} else if (args[0].val().equals("~console")) {
+			} else if (args[0].val().equals(Static.getConsoleName())) {
 				CHLog.GetLogger().Log(CHLog.Tags.META, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
 				if (Prefs.DebugMode()) {
 					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
@@ -98,7 +135,7 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "void {player, command} Runs a command as a particular user. The special user '~console' can be used to run it as a console"
+			return "void {player, command} Runs a command as a particular user. The special user '" + Static.getConsoleName() + "' can be used to run it as a console"
 					+ " user. Using '~op' is deprecated, and will be removed after the next release, use sudo() instead."
 					+ " Commands cannot be run as an offline player. If the first argument is an array of usernames, the command"
 					+ " will be run in the context of each user in the array.";
