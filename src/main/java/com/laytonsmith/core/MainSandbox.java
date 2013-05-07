@@ -1,6 +1,8 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.AbstractionUtils;
+import com.laytonsmith.annotations.WrappedItem;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.testing.AbstractConstructor;
 import com.laytonsmith.annotations.testing.MustOverride;
@@ -14,6 +16,12 @@ import com.laytonsmith.database.MySQL;
 import java.net.InetAddress;
 import java.sql.ResultSet;
 import java.util.Arrays;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_4_5.entity.CraftCreeper;
+import org.bukkit.craftbukkit.v1_4_5.entity.CraftWolf;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Wolf;
 
 /**
  * This class is for testing concepts
@@ -128,7 +136,7 @@ public class MainSandbox {
 //		}
 //		System.out.println(o);
 		
-		System.out.println(Arrays.toString(AbstractionUtils.getHighestLevelTypes()));
+		System.out.println(AbstractionUtils.doLookup(Creeper.class).getName());
 	}
 
 	

@@ -2,10 +2,14 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.annotations.WrappedItem;
+import com.sk89q.util.ReflectionUtil;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,15 +22,9 @@ public class AbstractionUtils {
 	private AbstractionUtils(){}
 	
 	/**
-	 * This maps from the wrapper to the wrapped type
-	 */
-	private static Map<Class<? extends AbstractionObject>, Class> abstractionClasses = null;
-	/**
 	 * This maps from the wrapped type to the wrapper
 	 */
 	private static Map<Class, Class<? extends AbstractionObject>> abstractionTypes = null;
-	
-	private static Set<Class> highestLevelTypes = null;
 	
 	static {
 		init();
@@ -44,28 +42,71 @@ public class AbstractionUtils {
 		if(item == null){
 			return null;
 		}
-		Class search = item.getClass();
-		
-		while(search.getSuperclass() != null){
-			for(Field f : ClassDiscovery.GetFieldsWithAnnotation(WrappedItem.class)){
-				//
-			}
-		}
-		throw new AbstractionException("Could not find a match for " + item.getClass().getName() + " in the abstraction library.");
+		return instantiate(doLookup(item.getClass()), item);
 	}
 	
 	/**
-	 * Returns a list of the highest level types in the abstraction layer. These are the base types
-	 * in the library, and so long as the object sent to wrap() extends at least one of these objects,
-	 * it is guaranteed to be found.
-	 * @return 
+	 * Given a class type, returns the abstraction layer wrapper for it. It may not exist, in which
+	 * case it will throw an AbstractionException.
+	 * @param clazz
+	 * @return
+	 * @throws com.laytonsmith.abstraction.AbstractionUtils.AbstractionException 
 	 */
-	public static Class[] getHighestLevelTypes(){
-		return highestLevelTypes.toArray(new Class[highestLevelTypes.size()]);
+	public static Class<? extends AbstractionObject> doLookup(Class<?> clazz) throws AbstractionException {
+		if(abstractionTypes.containsKey(clazz)){
+			return abstractionTypes.get(clazz);
+		} else {
+			Class found = null;
+			//It's not directly included. This may not be a problem though, we need to walk through the superclasses.
+			if(found == null){
+				Class c = clazz;
+				while((c = c.getSuperclass()) != null){
+					if(abstractionTypes.containsKey(c)){
+						found = c;
+						break;
+					}
+				}
+			}
+			if(found == null){
+				//Ok, still not found? Now we need to look through the implemented interfaces. Unfortunately, there's
+				//no awesome way to do this, because if two interfaces are implemented, it's equally likely we want either,
+				//so it's arbitrary which one we return. However, the getSuperInterfaces class will return them in the order
+				//from left to right of most likely, so while undefined, which is returned is consistent, and reasonable.
+				for(Class c : getAllSuperInterfaces(clazz, new ArrayList<Class>())){
+					if(abstractionTypes.containsKey(c)){
+						found = c;
+						break;
+					}
+				}
+			}
+			if(found != null){
+				//Cool, it's in here. Let's add this type though, so future lookups are faster
+				abstractionTypes.put(found, abstractionTypes.get(found));
+				return abstractionTypes.get(found);
+			}
+		}
+		throw new AbstractionException("Could not find a match for " + clazz.getName() + " in the abstraction library.");
+	}
+	
+	private static <T extends AbstractionObject> T instantiate(Class<? extends AbstractionObject> type, Object instance){
+		Object wrapper = ReflectionUtils.newInstance(type);
+		for(Field f : type.getDeclaredFields()){
+			if(f.getAnnotation(WrappedItem.class) != null){
+				//This is it
+				if(f.getType().isAssignableFrom(instance.getClass())){
+					ReflectionUtils.set(wrapper.getClass(), wrapper, f.getName(), instance);
+				} else {
+					//This is unit tested for, but just in case
+					throw new RuntimeException("There is an error in the abstraction layer, with the " + type.getName() + " class. Please report this error to the developers.");
+				}
+				break;
+			}
+		}
+		return (T) wrapper;
 	}
 	
 	private static void init() {
-		if(abstractionClasses == null){
+		if(abstractionTypes == null){
 			initialize();
 		}
 	}
@@ -75,41 +116,20 @@ public class AbstractionUtils {
 	 * to speed up future operations.
 	 */
 	public static void initialize() {
-		abstractionClasses = new HashMap<Class<? extends AbstractionObject>, Class>();
 		abstractionTypes = new HashMap<Class, Class<? extends AbstractionObject>>();
 		for(Field f : ClassDiscovery.GetFieldsWithAnnotation(WrappedItem.class)){
-			//There's a unit test for this to make sure that this cast will actually work at runtime.
-			abstractionClasses.put((Class<? extends AbstractionObject>)f.getDeclaringClass(), f.getType());
+			//There's a unit test for this to make sure that this cast will actually work correctly at runtime.
 			abstractionTypes.put(f.getType(), (Class<? extends AbstractionObject>)f.getDeclaringClass());			
-		}
-		highestLevelTypes = new HashSet<Class>();
-		Set<Class> types = abstractionTypes.keySet();
-		outer: for(Class c : types){
-			if(c.isInterface()){
-				//Slightly different handling here, since going up is a tree,
-				//we have to recurse instead of loop.
-				highestLevelTypes.addAll(getAllSuperInterfaces(c, new HashSet<Class>()));
-			} else {
-				Class cc = c;
-				while((cc = cc.getSuperclass()) != null){
-					if(types.contains(cc)){
-						//Nope, one of the supertypes is accounted for,
-						//so this isn't a highest level type.
-						continue outer;
-					}
-				}
-				//Ah, ok, it is a highest level type
-				highestLevelTypes.add(c);
-			}
 		}
 	}
 	
-	private static Set<Class> getAllSuperInterfaces(Class base, Set<Class> types){
+	private static List<Class> getAllSuperInterfaces(Class base, List<Class> types){
 		if(base.getInterfaces().length == 0){
 			types.add(base);
 		} else {
 			//This isn't, but lets look at the parents
 			for(Class s : base.getInterfaces()){
+				types.add(s);
 				getAllSuperInterfaces(s, types);
 			}
 		}
@@ -117,16 +137,8 @@ public class AbstractionUtils {
 	}
 	
 	/**
-	 * Given a class type for an object that has a given type, returns the outer wrapping class
-	 * for that type. This is not to be confused with the {@link #wrap(java.lang.Object)} method, which
-	 * actually returns an instance of the nearest appropriate class.
-	 * @param c
-	 * @return 
+	 * Thrown to indicate that an appropriate object couldn't be found.
 	 */
-	public static Class<? extends AbstractionObject> getExactClass(Class c){
-		return abstractionTypes.get(c);
-	}
-	
 	public static class AbstractionException extends RuntimeException {
 
 		public AbstractionException(String message) {
