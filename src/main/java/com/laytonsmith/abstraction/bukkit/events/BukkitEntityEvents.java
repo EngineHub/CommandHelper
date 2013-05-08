@@ -17,6 +17,7 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
@@ -62,7 +63,7 @@ public class BukkitEntityEvents {
 
 		public MCEntity getEntity() {
 			if (e.getEntity() != null) {
-				return AbstractionUtils.wrap(e.getEntity());
+				return AbstractionUtils.wrap(MCEntity.class, e.getEntity());
 			}
 			return null;
 		}
@@ -70,7 +71,7 @@ public class BukkitEntityEvents {
 		public List<MCBlock> getBlocks() {
 			List<MCBlock> ret = new ArrayList<MCBlock>();
 			for (Block b : e.blockList()) {
-				ret.add((MCBlock) AbstractionUtils.wrap(b));
+				ret.add(AbstractionUtils.wrap(MCBlock.class, b));
 			}
 			return ret;
 		}
@@ -83,7 +84,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCLocation getLocation() {
-			return AbstractionUtils.wrap(e.getLocation());
+			return AbstractionUtils.wrap(MCLocation.class, e.getLocation());
 		}
 
 		public float getYield() {
@@ -108,7 +109,7 @@ public class BukkitEntityEvents {
 		}
 		
 		public MCProjectile getEntity() {
-			return AbstractionUtils.wrap(phe.getEntity());
+			return AbstractionUtils.wrap(MCProjectile.class, phe.getEntity());
 		}
 
 		public MCEntityType getEntityType() {
@@ -140,7 +141,7 @@ public class BukkitEntityEvents {
 		public Set<MCLivingEntity> getAffectedEntities() {
 			Set<MCLivingEntity> ret = new HashSet<MCLivingEntity>();
 			for (LivingEntity le : pse.getAffectedEntities()) {
-				ret.add((MCLivingEntity) AbstractionUtils.wrap(le));
+				ret.add(AbstractionUtils.wrap(MCLivingEntity.class, le));
 			}
 			return ret;
 		}
@@ -176,7 +177,7 @@ public class BukkitEntityEvents {
             List<MCItemStack> drops = new ArrayList<MCItemStack>();
 			
             for(ItemStack is : islist){
-                drops.add((MCItemStack) AbstractionUtils.wrap(is));
+                drops.add(AbstractionUtils.wrap(MCItemStack.class, is));
             }
 			
             return drops;
@@ -191,7 +192,7 @@ public class BukkitEntityEvents {
         }
 
 		public MCLivingEntity getEntity() {
-			return AbstractionUtils.wrap(e.getEntity());
+			return AbstractionUtils.wrap(MCLivingEntity.class, e.getEntity());
 		}
 
 		public void setDroppedExp(int exp) {
@@ -213,11 +214,11 @@ public class BukkitEntityEvents {
 		}
 
 		public MCLivingEntity getEntity() {
-			return AbstractionUtils.wrap(e.getEntity());
+			return AbstractionUtils.wrap(MCLivingEntity.class, e.getEntity());
 		}
 
 		public MCLocation getLocation() {
-			return AbstractionUtils.wrap(e.getLocation());
+			return AbstractionUtils.wrap(MCLocation.class, e.getLocation());
 		}
 
 		public MCSpawnReason getSpawnReason() {
@@ -244,7 +245,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCEntity getEntity() {
-			return AbstractionUtils.wrap(e.getRightClicked());
+			return AbstractionUtils.wrap(MCEntity.class, e.getRightClicked());
 		}
 
 		public boolean isCancelled() {
@@ -256,7 +257,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCPlayer getPlayer() {
-			return AbstractionUtils.wrap(e.getPlayer());
+			return AbstractionUtils.wrap(MCPlayer.class, e.getPlayer());
 		}
 		
 	}
@@ -270,7 +271,7 @@ public class BukkitEntityEvents {
         }
         
         public MCItem getItemDrop() {
-            return AbstractionUtils.wrap(e.getItemDrop());
+            return AbstractionUtils.wrap(MCItem.class, e.getItemDrop());
         }
         
         public void setItemStack(MCItemStack stack) {
@@ -291,7 +292,7 @@ public class BukkitEntityEvents {
         }
         
         public MCPlayer getPlayer() {
-            return AbstractionUtils.wrap(e.getPlayer());
+            return AbstractionUtils.wrap(MCPlayer.class, e.getPlayer());
         }
         
         public Object _GetObject() {
@@ -311,7 +312,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCItem getItem() {
-			return AbstractionUtils.wrap(e.getItem());
+			return AbstractionUtils.wrap(MCItem.class, e.getItem());
 		}
 
 		public void setItemStack(MCItemStack stack) {
@@ -336,7 +337,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCPlayer getPlayer() {
-			return AbstractionUtils.wrap(e.getPlayer());
+			return AbstractionUtils.wrap(MCPlayer.class, e.getPlayer());
 		}
 
 		public Object _GetObject() {
@@ -362,7 +363,7 @@ public class BukkitEntityEvents {
         }
 
         public MCEntity getEntity() {
-            return AbstractionUtils.wrap(event.getEntity());
+            return AbstractionUtils.wrap(MCEntity.class, event.getEntity());
         }
 
         public int getDamage() {
@@ -385,7 +386,7 @@ public class BukkitEntityEvents {
         }
 
         public MCEntity getDamager() {
-            return AbstractionUtils.wrap(event.getDamager());
+            return AbstractionUtils.wrap(MCEntity.class, event.getDamager());
         }
     }
 
@@ -408,7 +409,7 @@ public class BukkitEntityEvents {
         }
 
         public MCEntity getTarget() {
-            return AbstractionUtils.wrap(pie.getTarget());
+            return AbstractionUtils.wrap(MCEntity.class, pie.getTarget());
         }
 
         public void setTarget(MCEntity target) {
@@ -420,11 +421,11 @@ public class BukkitEntityEvents {
         }
 
         public MCEntity getEntity() {
-            return AbstractionUtils.wrap(pie.getEntity());
+            return AbstractionUtils.wrap(MCEntity.class, pie.getEntity());
         }
 
         public MCEntityType getEntityType() {
-            return AbstractionUtils.wrap(pie.getEntity().getType());
+            return BukkitMCEntityType.getConvertor().getAbstractedEnum(pie.getEntity().getType());
         }
 
         public MCTargetReason getReason() {
@@ -444,11 +445,11 @@ public class BukkitEntityEvents {
 		}
 	
 		public MCEntity getEntity() {
-			return AbstractionUtils.wrap(epe.getEntity());
+			return AbstractionUtils.wrap(MCEntity.class, epe.getEntity());
 		}
 	
 		public MCLocation getLocation() {
-			return AbstractionUtils.wrap(epe.getLocation());
+			return AbstractionUtils.wrap(MCLocation.class, epe.getLocation());
 		}
 	}
 }

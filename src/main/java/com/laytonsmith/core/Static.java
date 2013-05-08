@@ -624,7 +624,7 @@ public final class Static {
 		for (MCWorld w : Static.getServer().getWorlds()) {
 			for (MCEntity e : w.getEntities()) {
 				if (e.getEntityId() == id) {
-					return AbstractionUtils.wrap(e);
+					return e;
 				}
 			}
 		}
@@ -642,7 +642,7 @@ public final class Static {
             for (MCLivingEntity e : w.getLivingEntities()) {
                 if (e.getEntityId() == id) {
                 	try {
-                		return AbstractionUtils.wrap(e);
+                		return e;
                 	} catch (ClassCastException cce) {
                 		throw new ConfigRuntimeException("The entity found was misinterpreted by the converter, this is"
                 				+ " a developer mistake, please file a ticket.", ExceptionType.BadEntityException, t);

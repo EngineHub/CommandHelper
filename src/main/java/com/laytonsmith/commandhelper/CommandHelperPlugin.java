@@ -112,13 +112,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		//Metrics
 		try {
 			org.mcstats.Metrics m = new Metrics(this);
-			m.addCustomData(new Metrics.Plotter("Player count") {
-
-				@Override
-				public int getValue() {
-					return Static.getServer().getOnlinePlayers().length;
-				}
-			});
 			m.start();
 		} catch (IOException e) {
 			// Failed to submit the stats :-(
@@ -250,7 +243,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				&& (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias") || cmd.getName().equals("recompile"))) {
 			MCPlayer player = null;
 			if (sender instanceof Player) {
-				player = AbstractionUtils.wrap((Player) sender);
+				player = AbstractionUtils.wrap(MCPlayer.class, sender);
 			}
 			ac.reload(player);
 //            if(ac.reload(player)){
@@ -280,14 +273,14 @@ public class CommandHelperPlugin extends JavaPlugin {
 				ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender) sender, cmd2);
 				serverListener.onServerCommand(sce);
 			} else if(sender instanceof BlockCommandSender){
-				MCCommandSender s = AbstractionUtils.wrap((BlockCommandSender)sender);
+				MCCommandSender s = AbstractionUtils.wrap(MCCommandSender.class, sender);
 				String cmd2 = StringUtils.Join(args, " ");
 				Static.getAliasCore().alias(cmd2, s, new ArrayList<Script>());
 			}
 			return true;
 		} else if (sender instanceof Player) {
 			try {
-				return runCommand((MCPlayer)AbstractionUtils.wrap(sender), cmd.getName(), args);
+				return runCommand(AbstractionUtils.wrap(MCPlayer.class, sender), cmd.getName(), args);
 			} catch (DataSourceException ex) {
 				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (ReadOnlyException ex) {

@@ -4,14 +4,11 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.annotations.WrappedItem;
-import com.sk89q.util.ReflectionUtil;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This class provides various utilities for managing the abstraction layer
@@ -38,11 +35,11 @@ public class AbstractionUtils {
 	 * in the abstraction layer.
 	 * @return 
 	 */
-	public static <T extends AbstractionObject> T wrap(Object item) throws AbstractionException {
+	public static <T extends AbstractionObject> T wrap(Class<T> clazz, Object item) throws AbstractionException {
 		if(item == null){
 			return null;
 		}
-		return instantiate(doLookup(item.getClass()), item);
+		return (T) instantiate(doLookup(clazz, item.getClass()), item);
 	}
 	
 	/**
@@ -52,12 +49,12 @@ public class AbstractionUtils {
 	 * @return
 	 * @throws com.laytonsmith.abstraction.AbstractionUtils.AbstractionException 
 	 */
-	public static Class<? extends AbstractionObject> doLookup(Class<?> clazz) throws AbstractionException {
+	public static Class<? extends AbstractionObject> doLookup(Class<? extends AbstractionObject> hint, Class<?> clazz) throws AbstractionException {
 		if(abstractionTypes.containsKey(clazz)){
 			return abstractionTypes.get(clazz);
 		} else {
-			Class found = null;
 			//It's not directly included. This may not be a problem though, we need to walk through the superclasses.
+			Class found = null;
 			if(found == null){
 				Class c = clazz;
 				while((c = c.getSuperclass()) != null){
@@ -72,12 +69,20 @@ public class AbstractionUtils {
 				//no awesome way to do this, because if two interfaces are implemented, it's equally likely we want either,
 				//so it's arbitrary which one we return. However, the getSuperInterfaces class will return them in the order
 				//from left to right of most likely, so while undefined, which is returned is consistent, and reasonable.
-				for(Class c : getAllSuperInterfaces(clazz, new ArrayList<Class>())){
-					if(abstractionTypes.containsKey(c)){
-						found = c;
+				Class c = clazz;
+				outer: do{
+					boolean breakOut = false;
+					for(Class cc : getAllSuperInterfaces(c, new ArrayList<Class>())){
+						if(hint.isAssignableFrom(cc) && abstractionTypes.containsKey(cc)){
+							found = cc;
+							breakOut = true;
+							break;
+						}
+					}
+					if(breakOut){
 						break;
 					}
-				}
+				} while((c = c.getSuperclass()) != null);
 			}
 			if(found != null){
 				//Cool, it's in here. Let's add this type though, so future lookups are faster
@@ -97,7 +102,7 @@ public class AbstractionUtils {
 				if(f.getAnnotation(WrappedItem.class) != null){
 					//This is it
 					if(f.getType().isAssignableFrom(instance.getClass())){
-						ReflectionUtils.set(wrapper.getClass(), wrapper, f.getName(), instance);
+						ReflectionUtils.set(c, wrapper, f.getName(), instance);
 					} else {
 						//This is unit tested for, but just in case
 						throw new RuntimeException("There is an error in the abstraction layer, with the " + c.getName() 

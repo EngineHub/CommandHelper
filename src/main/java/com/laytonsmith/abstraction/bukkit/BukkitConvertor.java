@@ -45,7 +45,7 @@ public class BukkitConvertor extends AbstractConvertor {
         if(w != null){
             w2 = w.getHandle();
         }
-        return AbstractionUtils.wrap(new Location(w2, x, y, z, yaw, pitch));
+        return AbstractionUtils.wrap(MCLocation.class, new Location(w2, x, y, z, yaw, pitch));
     }
 
     public Class GetServerEventMixin() {
@@ -56,7 +56,7 @@ public class BukkitConvertor extends AbstractConvertor {
         MCEnchantment[] ea = new MCEnchantment[Enchantment.values().length];
         Enchantment[] oea = Enchantment.values();
         for (int i = 0; i < ea.length; i++) {
-            ea[i] = AbstractionUtils.wrap(oea[i]);
+            ea[i] = AbstractionUtils.wrap(MCEnchantment.class, oea[i]);
         }
         return ea;
 
@@ -66,10 +66,10 @@ public class BukkitConvertor extends AbstractConvertor {
         try{
             //If they are looking it up by number, we can support that
             int i = Integer.valueOf(name);
-            return AbstractionUtils.wrap(Enchantment.getById(i));
+            return AbstractionUtils.wrap(MCEnchantment.class, Enchantment.getById(i));
         } catch(NumberFormatException e){
 			try{
-				return AbstractionUtils.wrap(Enchantment.getByName(name));
+				return AbstractionUtils.wrap(MCEnchantment.class, Enchantment.getByName(name));
 			} catch(NullPointerException ee){
 				return null;
 			}
@@ -77,18 +77,20 @@ public class BukkitConvertor extends AbstractConvertor {
     }
 
     public MCServer GetServer() {
-        return AbstractionUtils.wrap(Bukkit.getServer());
+        return AbstractionUtils.wrap(MCServer.class, Bukkit.getServer());
     }
 
 	public MCMaterial getMaterial(int id) {
-		return AbstractionUtils.wrap(Material.getMaterial(id));
+		return AbstractionUtils.wrap(MCMaterial.class, Material.getMaterial(id));
 	}
 
     public MCItemStack GetItemStack(int type, int qty) {
-        return AbstractionUtils.wrap(new ItemStack(type, qty));
+        return AbstractionUtils.wrap(MCItemStack.class, new ItemStack(type, qty));
     }
+	
+	@Deprecated
     public MCItemStack GetItemStack(int type, int data, int qty) {
-        return AbstractionUtils.wrap(new ItemStack(type, qty, (short)0, (byte)data));
+        return AbstractionUtils.wrap(MCItemStack.class, new ItemStack(type, qty, (short)0, (byte)data));
     }
     
     public static final BukkitBlockListener BlockListener = new BukkitBlockListener();

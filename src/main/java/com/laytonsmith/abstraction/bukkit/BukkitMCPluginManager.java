@@ -28,7 +28,7 @@ public class BukkitMCPluginManager implements MCPluginManager {
         if(p.getPlugin(name) == null){
             return null;
         }
-        return AbstractionUtils.wrap(p.getPlugin(name));
+        return AbstractionUtils.wrap(MCPlugin.class, p.getPlugin(name));
     }
     
     public PluginManager __PluginManager(){
@@ -55,7 +55,7 @@ public class BukkitMCPluginManager implements MCPluginManager {
 		Plugin[] plugs = p.getPlugins();
 		
 		for (Plugin plug : plugs) {
-			retn.add((MCPlugin) AbstractionUtils.wrap(plug));
+			retn.add(AbstractionUtils.wrap(MCPlugin.class, plug));
 		}
 		
 		return retn;
