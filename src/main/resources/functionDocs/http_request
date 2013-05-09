@@ -1,0 +1,125 @@
+void {url, callback | url, settings} Makes an HTTP request to the given url. ----
+If the second parameter is a closure, it works the same as giving the closure to
+the success parameter in the settings object. The settings object is an array
+with the following fields, all of which are optional aside from the complete member.
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="6%" | Setting
+! scope="col" width="10%" | Type
+! scope="col" width="6%" | Default
+! scope="col" width="78%" | Description
+|-
+| method
+| string
+| null
+| One of the following methods: %%enum|HTTPMethod%%. If null, it will use GET if there are no
+params, or POST if there are.
+|-
+| headers
+| array
+| null
+| Sets the headers for the HTTP request. Depending on if useDefaultHeaders is true or not,
+certain headers may be set for you already. The array should be an associative array. The keys
+of course will be strings, but the value may either be a string or an array of strings. If the
+value is an array of strings, it will be parsed appropriately. If a cookiejar is supplied,
+then the cookies will be automatically set in the headers, regardless of the value of the useDefaultHeaders
+setting.
+|-
+| params
+| array
+| null
+| An associative array of parameters to send. If the method is GET, they will be encoded into
+the URL, otherwise they will be part request body. If the URL and the params include
+the same parameter, the result is undefined. Regardless, the parameters will be encoded properly
+when passed in as part of the params object, so it is recommended to use this always, especially
+if dealing with user input or other possibly unescaped content. The subtype of the array may be any
+primitive or an array of primitives. Sub arrays are encoded properly.
+|-
+| cookiejar
+| array
+| null
+| An array of cookies. If the parameter is null, then cookies will not be managed at all by this
+function, but if the array is empty (or already contains some cookies) then the cookies will be
+managed automatically. If you intend on using cookies, it is strongly recommended that you allow
+this system to automatically parse the cookies from the responses and set the cookies in the cookie
+jar, as there are many security flaws that can be introduced with a poor cookie manager implementation,
+and care has been taken to implement this correctly. Regardless, each cookie will be an array with the
+following fields set: 
+
+* string domain - The domain under which this cookie applies
+* string name - The name of this cookie
+* string value - The value of this cookie
+* string path - The path under which this cookie applies in the domain
+* int expiration - When the cookie expires. 0 means it never expires, because it is a session cookie.
+The function will not send expired cookies, and will remove them from the cookie jar automatically. 
+Session cookies cannot technically expire, and must be removed manually by you, if you are storing cookies
+for a long period of time.
+* boolean httpOnly - If true, this cookie only applies in http, not https requests.
+* boolean secureOnly - If true, this cookie only applies in https, not http.
+|-
+| followRedirects
+| boolean
+| true
+| If true, the system will automatically follow 3xx series redirect codes, and will then access the resulting
+page, instead of simply returning at that point. The default is true, because more often than not, you shouldn't
+care if a page redirects a few times first, and only want the resulting page.
+|-
+| success
+| closure
+| required parameter
+| This is the only required parameter. When the request finishes on the background thread, it the resulting HTTP
+response is returned to this closure. The closure should accept 1 parameter, which will be the HTTP response object,
+which contains the following fields:
+
+* string body - The body content of the response. This is usually the only thing of interest in the response.
+* array headers - An associative array of arrays of the returned headers.
+Often times headers are not repeated, so @response['headers']['Server'][0] for instance will be acceptable.
+Headers are not usually needed for non-referencial purposes anyways.
+* int responseCode - The response code of the request, for instance 404 for pages that aren't found.
+* int responseText - The response text of the request, for instance "Not Found" for a 404
+* string httpVersion - The HTTP version the server is using, for instance "1.1"
+|-
+| error
+| closure
+| null
+| If the request fails for whatever reason, this receives the exception generated. By default, the exception
+is logged using the default uncaught exception handler.
+|-
+| timeout
+| int
+| 60000
+| Sets the timeout that the background thread will wait for before giving up. 0 means no timeout, though this
+isn't recommended, because this could cause future calls to http_request to fail, because there is a limited number
+of web requests that can be running concurrently.
+|-
+| username
+| string
+| null
+| Sets the username to use in response to basic HTTP authentication challenges.
+|-
+| password
+| string
+| null
+| Sets the password to use in response to basic HTTP authentication challenges.
+|}
+
+The most basic usage is to get the html of the google homepage, not worrying about cookies
+or anything complicated. That code is very straightforward:
+
+<pre>
+http_request('http://www.google.com', closure(@response,
+	msg(@response['body'])
+))
+</pre>
+
+The settings can adjust the more complicated options needed to do more complex tasks, but for
+most basic needs, the usage is very straightforward. One thing you may more commonly find yourself needing
+is cookie support. Cookies are managed by default by the framework, though you must provide a "cookie jar"
+for it to use. The cookie is just an array which you give it, it can be empty at first, or you
+can add cookies manually, if you know exactly what you're doing. After a "session" you can either
+throw out all the cookies, or use http_clear_session_cookies on the cookie jar object, which will clear
+the appropriate cookies for you. You may keep as many separate cookie jars as you like, and each is
+considered a separate "session".
+
+A FormatException will be thrown by the function itself if the URL is malformed.

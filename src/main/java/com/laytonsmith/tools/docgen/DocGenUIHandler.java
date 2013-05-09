@@ -1,6 +1,10 @@
 package com.laytonsmith.tools.docgen;
 
-import com.laytonsmith.PureUtilities.WebUtility;
+import com.laytonsmith.PureUtilities.Web.CookieJar;
+import com.laytonsmith.PureUtilities.Web.HTTPMethod;
+import com.laytonsmith.PureUtilities.Web.HTTPResponse;
+import com.laytonsmith.PureUtilities.Web.RequestSettings;
+import com.laytonsmith.PureUtilities.Web.WebUtility;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.annotations.api;
@@ -20,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.SortedSet;
@@ -49,9 +54,9 @@ public class DocGenUIHandler {
 		DocGenUI.main(args);
 	}
 	
-	private static final Map<String, String> baseHeaders = new HashMap<String, String>();
+	private static final Map<String, List<String>> baseHeaders = new HashMap<String, List<String>>();
 	static{
-		baseHeaders.put("User-Agent", "CommandHelper-DocUploader");		
+		baseHeaders.put("User-Agent", Arrays.asList(new String[]{"CommandHelper-DocUploader"}));
 	}
 
 	URL url;
@@ -408,7 +413,7 @@ public class DocGenUIHandler {
 		}
 		return map;
 	}
-	private static WebUtility.HTTPCookies cookieStash = new WebUtility.HTTPCookies();
+	private static CookieJar cookieStash = new CookieJar();
 	private static XMLDocument getXML(URL url, Map<String, String> params) throws APIException{
 		return getXML(url, params, true);
 	}
@@ -428,10 +433,10 @@ public class DocGenUIHandler {
 			throw new APIException(e);
 		}
 	}
-	private static WebUtility.HTTPResponse getPage(URL url) throws IOException{
+	private static HTTPResponse getPage(URL url) throws IOException{
 		return getPage(url, null);
 	}
-	private static WebUtility.HTTPResponse getPage(URL url, Map<String, String> params) throws IOException{
+	private static HTTPResponse getPage(URL url, Map<String, String> params) throws IOException{
 		return getPage(url, params, false);
 	}
 	/**
@@ -443,19 +448,22 @@ public class DocGenUIHandler {
 	 * @return
 	 * @throws IOException 
 	 */
-	private static WebUtility.HTTPResponse getPage(URL url, Map<String, String> params, boolean useURL) throws IOException{
-		Map<String, String> headers = new HashMap<String, String>(baseHeaders);
+	private static HTTPResponse getPage(URL url, Map<String, String> params, boolean useURL) throws IOException{
+		Map<String, List<String>> headers = new HashMap<String, List<String>>(baseHeaders);
 		if (params != null && !params.isEmpty() && useURL) {
             StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
             if (b.length() != 0) {
                 b.append("&");
             }
-            b.append(WebUtility.encodeParameters(params));
+			RequestSettings temp = new RequestSettings().setParameters(params);
+            b.append(WebUtility.encodeParameters(temp.getParameters()));
             String query = b.toString();
             url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
         }
-		headers.put("Host", url.getHost());
-		return WebUtility.GetPage(url, WebUtility.HTTPMethod.POST, headers, params, cookieStash, true);
+		headers.put("Host", Arrays.asList(new String[]{url.getHost()}));
+		RequestSettings settings = new RequestSettings().setMethod(HTTPMethod.POST).setHeaders(headers)
+				.setParameters(params).setCookieJar(cookieStash).setFollowRedirects(true);
+		return WebUtility.GetPage(url, settings);
 	}
 	
 	public static void testCompileExamples(){
