@@ -79,6 +79,11 @@ Headers are not usually needed for non-referencial purposes anyways.
 * int responseCode - The response code of the request, for instance 404 for pages that aren't found.
 * int responseText - The response text of the request, for instance "Not Found" for a 404
 * string httpVersion - The HTTP version the server is using, for instance "1.1"
+* boolean error - This bit is set to true if a 4xx or 5xx response code was received.
+
+Note that it is considered a success even if the request results in a non 200 response, the error
+handler is only called if the connection fails entirely. To check if the HTTP response is a valid
+response though, you can check the error bit, or check the responseCode yourself.
 |-
 | error
 | closure

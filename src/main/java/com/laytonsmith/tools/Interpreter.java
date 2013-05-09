@@ -109,7 +109,6 @@ public class Interpreter {
 			try {
 				execute(script.toString(), args);
 				System.out.print(TermColors.reset());
-				System.exit(0);
 			} catch (ConfigCompileException ex) {
 				ConfigRuntimeException.React(ex, null, null);
 				System.out.print(TermColors.reset());
@@ -174,6 +173,7 @@ public class Interpreter {
 		ParseTree tree = MethodScriptCompiler.compile(stream);
 		compile.stop();
 		Environment env = Environment.createEnvironment(Interpreter.env.getEnv(GlobalEnv.class));
+		env.getEnv(GlobalEnv.class).SetCustom("cmdline", true);
 		List<Variable> vars = null;
 		if (args != null) {
 			vars = new ArrayList<Variable>();
@@ -229,15 +229,24 @@ public class Interpreter {
 			}
 		} catch (ConfigRuntimeException e) {
 			ConfigRuntimeException.React(e, env);
-			//No need for the full stack trace        
+			//No need for the full stack trace
+			if(System.console() == null){
+				System.exit(1);
+			}
 		} catch (Exception e) {
 			pl(RED + e.toString());
 			e.printStackTrace();
+			if(System.console() == null){
+				System.exit(1);
+			}
 		} catch (NoClassDefFoundError e) {
 			System.err.println(RED + Main.getNoClassDefFoundErrorMessage(e) + reset());
 			System.err.println("Since you're running from standalone interpreter mode, this is not a fatal error, but one of the functions you just used required"
 				+ " an actual backing engine that isn't currently loaded. (It still might fail even if you load the engine though.) You simply won't be"
 				+ " able to use that function here.");
+			if(System.console() == null){
+				System.exit(1);
+			}
 		}
 	}
 

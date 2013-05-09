@@ -245,6 +245,7 @@ public class Web {
 						array.set("responseCode", new CInt(resp.getResponseCode(), t), t);
 						array.set("responseText", resp.getResponseText());
 						array.set("httpVersion", resp.getHttpVersion());
+						array.set("error", new CBoolean(resp.getResponseCode() >= 400 && resp.getResponseCode() < 600, t), t);
 						StaticLayer.GetConvertor().runOnMainThreadLater(new Runnable() {
 
 							public void run() {

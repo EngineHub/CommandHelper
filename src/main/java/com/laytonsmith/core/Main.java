@@ -146,7 +146,7 @@ public class Main {
 				System.exit(0);
 			} else if (mode == interpreterMode) {
 				Interpreter.start(parsedArgs.getStringListArgument());
-				System.exit(0);
+				//System.exit(0);
 			} else if (mode == installCmdlineMode) {
 				Interpreter.install();
 				System.exit(0);
