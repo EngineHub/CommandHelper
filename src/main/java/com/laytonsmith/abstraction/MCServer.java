@@ -23,6 +23,7 @@ public interface MCServer extends AbstractionObject{
 	public void broadcastMessage(String message, String permission);
 	public MCConsoleCommandSender getConsole();
 	public MCItemFactory getItemFactory();
+	public MCCommandMap getCommandMap();
 	public MCInventory createInventory(MCInventoryHolder owner, MCInventoryType type);
 	public MCInventory createInventory(MCInventoryHolder owner, int size, String title);
 	public MCInventory createInventory(MCInventoryHolder owner, int size);
@@ -55,4 +56,6 @@ public interface MCServer extends AbstractionObject{
 
     public void runasConsole(String cmd);
 	public MCMessenger getMessenger();
+	
+	public boolean unloadWorld(MCWorld world, boolean save);
 }
