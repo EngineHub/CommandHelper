@@ -29,6 +29,19 @@ public final class EventList {
         initEvents();
     }
     
+    public static List<String> GetEvents() {
+    	List<String> names = new ArrayList<String>();
+    	for(Driver type : event_list.keySet()){
+            SortedSet<Event> set = event_list.get(type);
+            Iterator<Event> i = set.iterator();
+            while(i.hasNext()){
+                Event e = i.next();
+                names.add(e.getName());
+            }
+        }
+    	return names;
+    }
+    
     /**
      * Gets all the events of the specified type.
      * @param type

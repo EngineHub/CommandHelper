@@ -58,7 +58,7 @@ public class Script {
         for (Token t : left) {
             b.append(t.val()).append(" ");
         }
-        b.append("compiled: ").append(hasBeenCompiled).append("; errors? ").append(compilerError);
+        b.append("; compiled: ").append(hasBeenCompiled).append("; errors? ").append(compilerError);
         return b.toString();
     }
 
@@ -72,6 +72,15 @@ public class Script {
     
     public String getLabel(){
         return label;
+    }
+    
+    public String getSignature() {
+    	StringBuilder b = new StringBuilder();
+    	b.append(getLabel()).append(":");
+        for (Token t : left) {
+            b.append(t.val()).append(" ");
+        }
+        return b.toString();
     }
     
     public Script(List<Token> left, List<Token> right) {
