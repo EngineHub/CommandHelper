@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.LinkedComparatorSet;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -1559,41 +1560,29 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			boolean compareTypes = true;
 			if(args.length == 2){
 				compareTypes = Static.getBoolean(args[1]);
-			}		
+			}
+			final boolean fCompareTypes = compareTypes;
 			if(array.inAssociativeMode()){
 				return array.clone();
 			} else {
+				List<Construct> asList = array.asList();
 				CArray newArray = new CArray(t);
-				//These are the values to skip in future iterations
-				Set<Integer> skip = new HashSet<Integer>();
-				for(int i = 0; i < array.size(); i++){
-					if(skip.contains(i)){
-						continue;
+				Set<Construct> set = new LinkedComparatorSet<Construct>(asList, new LinkedComparatorSet.EqualsComparator() {
+
+					public boolean checkIfEquals(Object val1, Object val2) {
+						Construct item1 = (Construct) val1;
+						Construct item2 = (Construct) val2;
+						return (fCompareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2)))
+								|| (!fCompareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)));
 					}
-					boolean foundMatch = false;
-					Construct item1 = array.get(i);
-					for(int j = i + 1; j < array.size(); j++){
-						if(skip.contains(j)){
-							continue;
-						}
-						Construct item2 = array.get(j);
-						if((compareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2)))
-								|| (!compareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)))){
-							skip.add(j);
-							if(!foundMatch){
-								newArray.push(item1);
-							}
-							foundMatch = true;
-						}
-					}
-					if(!foundMatch){
-						newArray.push(item1);
-					}
+				});
+				for(Construct c : set){
+					newArray.push(c);
 				}
 				return newArray;
 			}

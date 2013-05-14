@@ -60,6 +60,19 @@ public class CArray extends Construct implements ArrayAccess{
 	}
 	
 	/**
+	 * Returns a List based on the array. This is only applicable if this
+	 * is a normal array.
+	 * @return 
+	 */
+	public List<Construct> asList(){
+		if(inAssociativeMode()){
+			throw new RuntimeException("asList can only be called on a normal array");
+		} else {
+			return new ArrayList<Construct>(array);
+		}
+	}
+	
+	/**
 	 * Returns the backing associative array.
 	 * @return 
 	 */
