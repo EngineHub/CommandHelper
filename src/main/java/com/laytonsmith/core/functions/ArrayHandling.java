@@ -22,8 +22,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -1574,6 +1572,9 @@ public class ArrayHandling {
 				//These are the values to skip in future iterations
 				Set<Integer> skip = new HashSet<Integer>();
 				for(int i = 0; i < array.size(); i++){
+					if(skip.contains(i)){
+						continue;
+					}
 					boolean foundMatch = false;
 					Construct item1 = array.get(i);
 					for(int j = i + 1; j < array.size(); j++){
@@ -1589,6 +1590,9 @@ public class ArrayHandling {
 							}
 							foundMatch = true;
 						}
+					}
+					if(!foundMatch){
+						newArray.push(item1);
 					}
 				}
 				return newArray;
