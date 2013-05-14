@@ -1609,8 +1609,8 @@ public class PlayerEvents {
 						return false;
 					}
 				}
+				Prefilters.match(prefilter, prefilter.get("player").val(), event.getPlayer().getName(), PrefilterType.MACRO);
 				return true;
-
 			}
 			return false ;
 		}

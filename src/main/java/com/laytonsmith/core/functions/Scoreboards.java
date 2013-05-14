@@ -234,7 +234,7 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
-			p.setScoreboard(getBoard(args[1].val(), t));
+			p.setScoreboard(assignBoard(2, 1, t, args));
 			return new CVoid(t);
 		}
 
@@ -243,12 +243,12 @@ public class Scoreboards {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{1, 2};
 		}
 
 		public String docs() {
-			return "void {player, scoreboard} Sets the scoreboard to be used by a player."
-					+ " The scoreboard argument is the id of a registered scoreboard.";
+			return "void {player, [scoreboard]} Sets the scoreboard to be used by a player."
+					+ " The scoreboard argument is the id of a registered scoreboard. " + DEF_MSG;
 		}
 	}
 	
@@ -887,6 +887,28 @@ public class Scoreboards {
 					+ " Works for offline players, so the name must be exact. Alternatively,"
 					+ " you can set scores for fake players to create custom displays,"
 					+ " but the 16 character name limit still applies. " + DEF_MSG;
+		}
+	}
+	
+	@api
+	public static class reset_all_pscores extends SBFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			assignBoard(2, 1, t, args).resetScores(Static.getServer().getOfflinePlayer(args[0].val()));
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "reset_all_pscores";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {player, [scoreboard]} Resets all scores for a player tracked by the given scoreboard."
+					+ " This means they will not be show up on any displays. " + DEF_MSG;
 		}
 	}
 	

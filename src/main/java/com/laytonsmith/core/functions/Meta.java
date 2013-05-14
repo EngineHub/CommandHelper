@@ -158,7 +158,7 @@ public class Meta {
 	public static class sudo extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
