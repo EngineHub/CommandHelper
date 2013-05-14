@@ -1295,17 +1295,17 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
 			CArray ret = new CArray(t);
-			ret.set("maxstacksize", new CInt(i.getMaxStackSize(), t), t);
-			ret.set("maxdurability", new CInt(i.getMaxDurability(), t), t);
-			ret.set("hasgravity", new CBoolean(i.hasGravity(), t), t);
-			ret.set("isblock", new CBoolean(i.isBlock(), t), t);
-			ret.set("isburnable", new CBoolean(i.isBurnable(), t), t);
-			ret.set("isedible", new CBoolean(i.isEdible(), t), t);
-			ret.set("isflammable", new CBoolean(i.isFlammable(), t), t);
-			ret.set("isoccluding", new CBoolean(i.isOccluding(), t), t);
-			ret.set("isrecord", new CBoolean(i.isRecord(), t), t);
-			ret.set("issolid", new CBoolean(i.isSolid(), t), t);
-			ret.set("istransparent", new CBoolean(i.isTransparent(), t), t);
+			ret.set("maxStacksize", new CInt(i.getMaxStackSize(), t), t);
+			ret.set("maxDurability", new CInt(i.getMaxDurability(), t), t);
+			ret.set("hasGravity", new CBoolean(i.hasGravity(), t), t);
+			ret.set("isBlock", new CBoolean(i.isBlock(), t), t);
+			ret.set("isBurnable", new CBoolean(i.isBurnable(), t), t);
+			ret.set("isEdible", new CBoolean(i.isEdible(), t), t);
+			ret.set("isFlammable", new CBoolean(i.isFlammable(), t), t);
+			ret.set("isOccluding", new CBoolean(i.isOccluding(), t), t);
+			ret.set("isRecord", new CBoolean(i.isRecord(), t), t);
+			ret.set("isSolid", new CBoolean(i.isSolid(), t), t);
+			ret.set("isTransparent", new CBoolean(i.isTransparent(), t), t);
 			return ret;
 		}
 

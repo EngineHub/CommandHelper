@@ -29,6 +29,10 @@ public final class EventList {
         initEvents();
     }
     
+    /**
+     * 
+     * @return list of the names of all events, as returned by getName()
+     */
     public static List<String> GetEvents() {
     	List<String> names = new ArrayList<String>();
     	for(Driver type : event_list.keySet()){

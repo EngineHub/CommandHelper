@@ -74,6 +74,10 @@ public class Script {
         return label;
     }
     
+    /**
+     * Returns what would normally be on the left side on an alias ie. in config.msa
+     * @return label:/alias arg [ optionalArg ]
+     */
     public String getSignature() {
     	StringBuilder b = new StringBuilder();
     	b.append(getLabel()).append(":");
