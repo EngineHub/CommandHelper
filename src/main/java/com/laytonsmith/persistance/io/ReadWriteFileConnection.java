@@ -42,11 +42,20 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 	 * the reads and writes.
 	 */
 	public ReadWriteFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException{
-		String path = (uri.getHost() == null ? "" : uri.getHost()) + uri.getPath();
-		if(uri.getHost() == null){
-			throw new IOException("Could not read the URI: " + uri.toString() + ". Did you forget the \"//\"?");
+		{
+			//This bit is a little tricky. Since this is a file path, not a URL, we can't use most of the parts
+			//of the URI class. We need to get the scheme specific part directly, and parse it ourselves. Given
+			//"sqlite://../path/to/db.db" getSchemeSpecificPart() will return "//../path/to/db.db" so we need to
+			//check to see if it starts with "//" (either 2 or 3 slashes are acceptable) and remove those manually.
+			//then the rest of the path is the actual file path. If it is absolute, the File constructor will handle
+			//that for us.
+			String path = uri.getSchemeSpecificPart();
+			if(!path.startsWith("//")){
+				throw new IOException("Could not read the URI: " + uri.toString() + ". Did you forget the \"//\"?");
+			}
+			path = path.substring(2);
+			file = new File(workingDirectory, path);
 		}
-		file = new File(workingDirectory, path);
 		if(file.exists()){
 			encoding = FileUtility.getFileCharset(file);
 		}

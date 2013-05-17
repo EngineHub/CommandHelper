@@ -18,22 +18,23 @@ public class MainSandbox {
 
 	public static void main(String[] argv) throws Exception {
 		//URI information
-//		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
-//		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file"};
-//		for (String s : uris) {
-//			URI uri = new URI(s);
-//			System.out.println("For the URI " + uri.toString() + ", the following are set:");
-//			System.out.println("Scheme: " + uri.getScheme());
-//			System.out.println("Scheme specific part: " + uri.getSchemeSpecificPart());
-//			System.out.println("Authority: " + uri.getAuthority());
-//			System.out.println("User info: " + uri.getUserInfo());
-//			System.out.println("Host: " + uri.getHost());
-//			System.out.println("Port: " + uri.getPort());
-//			System.out.println("Path: " + uri.getPath());
-//			System.out.println("Query: " + uri.getQuery());
-//			System.out.println("Fragment: " + uri.getFragment());
-//			System.out.println("\n\n***********************************\n\n");
-//		}
+		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
+		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file",
+		"sqlite://../../file.db?query"};
+		for (String s : uris) {
+			java.net.URI uri = new java.net.URI(s);
+			System.out.println("For the URI " + uri.toString() + ", the following are set:");
+			System.out.println("Scheme: " + uri.getScheme());
+			System.out.println("Scheme specific part: " + uri.getSchemeSpecificPart());
+			System.out.println("Authority: " + uri.getAuthority());
+			System.out.println("User info: " + uri.getUserInfo());
+			System.out.println("Host: " + uri.getHost());
+			System.out.println("Port: " + uri.getPort());
+			System.out.println("Path: " + uri.getPath());
+			System.out.println("Query: " + uri.getQuery());
+			System.out.println("Fragment: " + uri.getFragment());
+			System.out.println("\n\n***********************************\n\n");
+		}
 		
 		//Execution queue usage
 //		final ExecutionQueue queue = new ExecutionQueue("Test", "default");
@@ -113,14 +114,14 @@ public class MainSandbox {
 //		System.out.println("i2.toString(): " + i2.toString());
 //		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
 		
-		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
-		DB db = new MySQL();
-		db.connect(conn);
-		Object o = db.query("SHOW TABLES;");
-		if(o instanceof ResultSet){
-			ResultSet rs = (ResultSet)o;
-		}
-		System.out.println(o);
+//		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
+//		DB db = new MySQL();
+//		db.connect(conn);
+//		Object o = db.query("SHOW TABLES;");
+//		if(o instanceof ResultSet){
+//			ResultSet rs = (ResultSet)o;
+//		}
+//		System.out.println(o);
 	}
 	
 	
