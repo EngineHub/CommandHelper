@@ -95,13 +95,7 @@ public class InventoryEvents {
 				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
 				MCInventory inv = e.getInventory();
 				for (int i = 0; i < inv.getSize(); i++) {
-					try {
-						items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN);
-					} catch (ArrayIndexOutOfBoundsException aioob) {
-						CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
-								+ " accessible, however the server implementation does not give access."
-								+ " This is the fault of the server and can't be helped by CH.", Target.UNKNOWN);
-					}
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), Target.UNKNOWN));
