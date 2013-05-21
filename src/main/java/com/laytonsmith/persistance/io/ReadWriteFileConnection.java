@@ -54,7 +54,12 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 				throw new IOException("Could not read the URI: " + uri.toString() + ". Did you forget the \"//\"?");
 			}
 			path = path.substring(2);
-			file = new File(workingDirectory, path);
+			File temp = new File(path);
+			if(temp.isAbsolute()){
+				file = temp;
+			} else {
+				file = new File(workingDirectory, path);
+			}
 		}
 		if(file.exists()){
 			encoding = FileUtility.getFileCharset(file);

@@ -146,10 +146,10 @@ public final class WebUtility {
 		}
 
 		InputStream is;
-		if (conn.getErrorStream() != null) {
-			is = conn.getErrorStream();
-		} else {
+		try{
 			is = conn.getInputStream();
+		} catch(Exception e){
+			is = conn.getErrorStream();
 		}
 		BufferedReader in = new BufferedReader(new InputStreamReader(is));
 		String line;
