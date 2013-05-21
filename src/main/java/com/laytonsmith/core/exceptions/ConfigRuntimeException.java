@@ -102,7 +102,9 @@ public class ConfigRuntimeException extends RuntimeException {
     
     /**
      * If a exception bubbles all the way up to the top, this should be called first,
-     * to see what reaction the plugin should take.
+     * to see what reaction the plugin should take. Generally speaking, you'll want to
+	 * use {@link #React} instead of this, though if you need to take custom action, you
+	 * can determine the user's preferred reaction with this method.
      * @param e
      * @return 
      */

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StackTraceUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.Web.Cookie;
@@ -11,7 +12,9 @@ import com.laytonsmith.PureUtilities.Web.WebUtility;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -25,6 +28,8 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.IOException;
@@ -249,7 +254,7 @@ public class Web {
 						StaticLayer.GetConvertor().runOnMainThreadLater(new Runnable() {
 
 							public void run() {
-								success.execute(new Construct[]{array});
+								executeFinish(success, array, t, environment);
 							}
 						});
 					} catch(IOException e){
@@ -258,7 +263,7 @@ public class Web {
 							StaticLayer.GetConvertor().runOnMainThreadLater(new Runnable() {
 
 								public void run() {
-									error.execute(new Construct[]{ObjectGenerator.GetGenerator().exception(ex, t)});
+									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, t), t, environment);
 								}
 							});
 						} else {
@@ -268,6 +273,28 @@ public class Web {
 				}
 			});
 			return new CVoid(t);
+		}
+		
+		private void executeFinish(CClosure closure, Construct arg, Target t, Environment environment){
+			try{
+				closure.execute(new Construct[]{arg});
+			} catch(FunctionReturnException e){
+				//Just ignore this if it's returning void. Otherwise, warn.
+				//TODO: Eventually, this should be taggable as a compile error
+				if(!(e.getReturn() instanceof CVoid)){
+					CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Returning a value from the closure. The value is"
+							+ " being ignored.", t);
+				}
+			} catch(ProgramFlowManipulationException e){
+				//This is an error
+				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Only return may be used inside the closure.", t);
+			} catch(ConfigRuntimeException e){
+				ConfigRuntimeException.React(e, environment);
+			} catch(Throwable e){
+				//Other throwables we just need to report
+				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "An unexpected exception has occurred. No extra"
+						+ " information is available, but please report this error:\n" + StackTraceUtils.GetStacktrace(e), t);
+			}
 		}
 
 		public String getName() {
