@@ -110,7 +110,21 @@ of web requests that can be running concurrently.
 | string
 | null
 | Sets the password to use in response to basic HTTP authentication challenges.
+|-
+| useDefaultHeaders
+| boolean
+| true
+| Automatically adds the default headers to this request, unless specifically overridden. Note that some headers
+simply cannot be overridden, for instance Host and User-Agent will ALWAYS be set. 
 |}
+<!-- TODO: This isn't working yet, so just leave it off |-
+| proxy
+| array
+| null
+| Sets proxy options. The array should have the following keys:
+* type - One of either DIRECT (to bypass default system proxies), HTTP (for an HTTP proxy), or SOCKS (for a socks v4 or v5 proxy)
+* url - The url of the proxy
+* port - The port of the proxy --> 
 
 The most basic usage is to get the html of the google homepage, not worrying about cookies
 or anything complicated. That code is very straightforward:

@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import java.net.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ public class RequestSettings {
 	private int timeout = 60000;
 	private String username = null;
 	private String password = null;
+	private Proxy proxy = null;
 	
 	/**
 	 * 
@@ -122,6 +124,16 @@ public class RequestSettings {
 	
 	/**
 	 * 
+	 * @param proxyAddress The proxy for this connection to use
+	 * @return 
+	 */
+	public RequestSettings setProxy(Proxy proxy){
+		this.proxy = proxy;
+		return this;
+	}
+	
+	/**
+	 * 
 	 * @return An instance of a cookie jar to use, or null if none
 	 * is needed. Cookies will automatically be added and used from this
 	 * instance.
@@ -185,4 +197,13 @@ public class RequestSettings {
 	public String getPassword(){
 		return password;
 	}
+	
+	/**
+	 * 
+	 * @return The proxy address for this connection to use
+	 */
+	public Proxy getProxy(){
+		return proxy;
+	}
+	
 }

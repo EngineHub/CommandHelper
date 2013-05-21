@@ -34,7 +34,10 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -279,6 +282,22 @@ public class Web {
 				}
 				if(csettings.containsKey("password")){
 					password = csettings.get("password").val(); 
+				}
+				if(csettings.containsKey("proxy")){
+					CArray proxySettings = Static.getArray(csettings.get("proxy"), t);
+					Proxy.Type type;
+					String proxyURL;
+					int port;
+					try{
+						type = Proxy.Type.valueOf(proxySettings.get("type", t).val());
+					} catch(IllegalArgumentException e){
+						throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
+					}
+					proxyURL = proxySettings.get("url").val();
+					port = Static.getInt32(proxySettings.get("port"), t);
+					SocketAddress addr = new InetSocketAddress(proxyURL, port);
+					Proxy proxy = new Proxy(type, addr);
+					settings.setProxy(proxy);
 				}
 				settings.setAuthenticationDetails(username, password);
 			}

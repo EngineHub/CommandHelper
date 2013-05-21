@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import com.laytonsmith.PureUtilities.MutableObject;
 import com.laytonsmith.PureUtilities.StringUtils;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -9,6 +10,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -19,6 +24,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -95,6 +102,42 @@ public final class WebUtility {
 	 * @throws IOException
 	 */
 	public static HTTPResponse GetPage(URL url, RequestSettings settings) throws SocketTimeoutException, IOException {
+		CookieJar cookieStash = settings.getCookieJar();
+		RawHTTPResponse response = getWebStream(url, settings);
+		BufferedReader in = new BufferedReader(new InputStreamReader(response.getStream()));
+		String line;
+		StringBuilder b = new StringBuilder();
+		while ((line = in.readLine()) != null) {
+			b.append(line).append("\n");
+		}
+		in.close();
+		//Assume 1.0 if something breaks
+		String httpVersion = "1.0";
+		Matcher m = Pattern.compile("HTTP/(\\d\\+.\\d+).*").matcher(response.getConnection().getHeaderField(0));
+		if(m.find()){
+			httpVersion = m.group(1);
+		}
+		HTTPResponse resp = new HTTPResponse(response.getConnection().getResponseMessage(), 
+				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b.toString(), httpVersion);
+		if (cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
+			//We need to add the cookie to the stash
+			for (String h : resp.getHeaders("Set-Cookie")) {
+				cookieStash.addCookie(new Cookie(h, url));
+			}
+		}
+		return resp;
+	}
+	
+	/**
+	 * Returns the raw web stream. Cookies are used to initiate the request, but
+	 * the cookie jar isn't updated with the received cookies.
+	 * @param url
+	 * @param settings
+	 * @return
+	 * @throws SocketTimeoutException
+	 * @throws IOException 
+	 */
+	public static RawHTTPResponse getWebStream(URL url, RequestSettings settings) throws SocketTimeoutException, IOException{
 		if(settings == null){
 			settings = new RequestSettings();
 		}
@@ -103,7 +146,7 @@ public final class WebUtility {
 		Map<String, List<String>> parameters = settings.getParameters();
 		CookieJar cookieStash = settings.getCookieJar();
 		boolean followRedirects = settings.getFollowRedirects();
-		int timeout = settings.getTimeout();
+		final int timeout = settings.getTimeout();
 		String username = settings.getUsername();
 		String password = settings.getPassword();
 		//First, let's check to see that the url is properly formatted. If there are parameters,
@@ -117,8 +160,21 @@ public final class WebUtility {
 			String query = b.toString();
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
 		}
-
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		
+		Proxy proxy;
+		if(settings.getProxy() == null){
+			proxy = Proxy.NO_PROXY;
+		} else {
+			proxy = settings.getProxy();
+		}
+		InetSocketAddress addr = (InetSocketAddress)proxy.address();
+		if(addr != null){
+			if(addr.isUnresolved()){
+				throw new IOException("Could not resolve the proxy address: " + addr.toString());
+			}
+		}
+		//FIXME: When given a bad proxy, this causes it to stall forever
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection(/*proxy*/);
 		conn.setConnectTimeout(timeout);
 		conn.setInstanceFollowRedirects(followRedirects);
 		if (cookieStash != null) {
@@ -161,27 +217,7 @@ public final class WebUtility {
 		} else if("identity".equals(conn.getContentEncoding())){
 			//This is the default, meaning no transformation is needed.
 		}
-		BufferedReader in = new BufferedReader(new InputStreamReader(is));
-		String line;
-		StringBuilder b = new StringBuilder();
-		while ((line = in.readLine()) != null) {
-			b.append(line).append("\n");
-		}
-		in.close();
-		//Assume 1.0 if something breaks
-		String httpVersion = "1.0";
-		Matcher m = Pattern.compile("HTTP/(\\d\\+.\\d+).*").matcher(conn.getHeaderField(0));
-		if(m.find()){
-			httpVersion = m.group(1);
-		}
-		HTTPResponse resp = new HTTPResponse(conn.getResponseMessage(), conn.getResponseCode(), conn.getHeaderFields(), b.toString(), httpVersion);
-		if (cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
-			//We need to add the cookie to the stash
-			for (String h : resp.getHeaders("Set-Cookie")) {
-				cookieStash.addCookie(new Cookie(h, url));
-			}
-		}
-		return resp;
+		return new RawHTTPResponse(conn, is);
 	}
 
 	/**
