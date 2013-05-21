@@ -38,14 +38,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -137,13 +136,22 @@ public class Web {
 		 */
 		private static final int MAX_HTTP_THREADS = 3;
 		private static int threadCount = 0;
-		private static final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
+		private static final ExecutorService threadPool = Executors.newFixedThreadPool(MAX_HTTP_THREADS, new ThreadFactory() {
 			
 			
 			public Thread newThread(Runnable r) {
 				return new Thread(r, Implementation.GetServerType().getBranding() + "-web-request-" + (threadCount++));
 			}
 		});
+		
+		private static final Map<String, String> DEFAULT_HEADERS = new HashMap<String, String>();
+		static{
+			DEFAULT_HEADERS.put("Accept", "text/*, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8");
+			DEFAULT_HEADERS.put("Accept-Encoding", "gzip, deflate, identity");
+			DEFAULT_HEADERS.put("User-Agent", "Java/" + System.getProperty("java.version") + "/" + Implementation.GetServerType().getBranding());
+			DEFAULT_HEADERS.put("DNT", "1");
+			DEFAULT_HEADERS.put("Connection", "close");
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
@@ -181,6 +189,10 @@ public class Web {
 						throw new Exceptions.FormatException(e.getMessage(), t);
 					}
 				}
+				boolean useDefaultHeaders = true;
+				if(csettings.containsKey("useDefaultHeaders")){
+					useDefaultHeaders = Static.getBoolean(csettings.get("useDefaultHeaders"));
+				}
 				if(csettings.containsKey("headers") && !(csettings.get("headers") instanceof CNull)){
 					CArray headers = Static.getArray(csettings.get("headers"), t);
 					Map<String, List<String>> mheaders = new HashMap<String, List<String>>();
@@ -197,6 +209,20 @@ public class Web {
 						mheaders.put(key, h);
 					}
 					settings.setHeaders(mheaders);
+				} else {
+					settings.setHeaders(new HashMap<String, List<String>>());
+				}
+				if(useDefaultHeaders){
+					outer: for(String key : DEFAULT_HEADERS.keySet()){
+						for(String k2 : settings.getHeaders().keySet()){
+							if(key.equalsIgnoreCase(k2)){
+								//They have already included this header, so let's not touch it.
+								continue outer;
+							}
+						}
+						//Not found, so add ours
+						settings.getHeaders().put(key, Arrays.asList(DEFAULT_HEADERS.get(key)));
+					}
 				}
 				if(csettings.containsKey("params") && !(csettings.get("params") instanceof CNull)){
 					CArray params = Static.getArray(csettings.get("params"), t);

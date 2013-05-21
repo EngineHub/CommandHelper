@@ -19,10 +19,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -153,6 +153,13 @@ public final class WebUtility {
 			throw e;
 		} catch(Exception e){
 			is = conn.getErrorStream();
+		}
+		if("x-gzip".equals(conn.getContentEncoding()) || "gzip".equals(conn.getContentEncoding())){
+			is = new GZIPInputStream(is);
+		} else if("deflate".equals(conn.getContentEncoding())){
+			is = new InflaterInputStream(is);
+		} else if("identity".equals(conn.getContentEncoding())){
+			//This is the default, meaning no transformation is needed.
 		}
 		BufferedReader in = new BufferedReader(new InputStreamReader(is));
 		String line;
