@@ -116,7 +116,7 @@ public final class Cookie implements Comparable<Cookie> {
 	}
 
 	public int compareTo(Cookie o) {
-		return (this.domain + this.name).compareTo(o.domain + o.name);
+		return (this.domain + this.name + this.path).compareTo(o.domain + o.name + o.path);
 	}
 
 	/**
@@ -193,6 +193,11 @@ public final class Cookie implements Comparable<Cookie> {
 	 */
 	public boolean isExpired(long time){
 		return expiration != 0 && expiration < time;
+	}
+
+	@Override
+	public String toString() {
+		return domain + path + ": " + name + "=" + value;
 	}
 
 }

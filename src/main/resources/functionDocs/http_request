@@ -3,6 +3,9 @@ If the second parameter is a closure, it works the same as giving the closure to
 the success parameter in the settings object. The settings object is an array
 with the following fields, all of which are optional aside from the complete member.
 
+{{Warning|text=There are a limited number of outgoing "slots" that can be used 
+at any given time. This method is meant for quick completing requests, not lengthy requests.}}
+
 {| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
 |-
 ! scope="col" width="6%" | Setting

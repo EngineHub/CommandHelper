@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
@@ -35,6 +36,7 @@ import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,10 +55,27 @@ public class Web {
 		return "Contains various methods to make HTTP requests.";
 	}
 
-	private static CArray getCookieJar(CookieJar cookieJar, Target t){
-		CArray ret = new CArray(t);
+	private static void getCookieJar(CArray arrayJar, CookieJar cookieJar, Target t){
+		CArray ret = arrayJar;
 		for(Cookie cookie : cookieJar.getAllCookies()){
-			CArray c = new CArray(t);
+			boolean update = false;
+			CArray aCookie = null;
+			for(Construct ac : arrayJar.asList()){
+				aCookie = Static.getArray(ac, t);
+				if(cookie.getName().equals(aCookie.get("name").val())
+						&& cookie.getDomain().equals(aCookie.get("domain").val())
+						&& cookie.getPath().equals(aCookie.get("path").val())){
+					//This is just an update, not a new cookie
+					update = true;
+					break;
+				}
+			}
+			CArray c;
+			if(!update){
+				c = new CArray(t);
+			} else {
+				c = aCookie;
+			}
 			c.set("name", cookie.getName());
 			c.set("value", cookie.getValue());
 			c.set("domain", cookie.getDomain());
@@ -67,9 +86,10 @@ public class Web {
 			} else {
 				c.set("httpOnly", new CBoolean(cookie.isHttpOnly(), t), t);
 			}
-			ret.push(c);
+			if(!update){
+				ret.push(c);
+			}
 		}
-		return ret;
 	}
 	
 	private static CookieJar getCookieJar(CArray cookieJar, Target t){
@@ -147,9 +167,11 @@ public class Web {
 			final RequestSettings settings = new RequestSettings();
 			final CClosure success;
 			final CClosure error;
+			final CArray arrayJar;
 			if(args[1] instanceof CClosure){
 				success = (CClosure) args[1];
 				error = null;
+				arrayJar = null;
 			} else {
 				CArray csettings = Static.getArray(args[1], t);
 				if(csettings.containsKey("method")){
@@ -194,7 +216,10 @@ public class Web {
 					settings.setComplexParameters(mparams);
 				}
 				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar") instanceof CNull)){
-					settings.setCookieJar(getCookieJar(Static.getArray(csettings.get("cookiejar"), t), t));
+					arrayJar = Static.getArray(csettings.get("cookiejar"), t);
+					settings.setCookieJar(getCookieJar(arrayJar, t));
+				} else {
+					arrayJar = null;
 				}
 				if(csettings.containsKey("followRedirects")){
 					settings.setFollowRedirects(Static.getBoolean(csettings.get("followRedirects")));
@@ -251,6 +276,9 @@ public class Web {
 						array.set("responseText", resp.getResponseText());
 						array.set("httpVersion", resp.getHttpVersion());
 						array.set("error", new CBoolean(resp.getResponseCode() >= 400 && resp.getResponseCode() < 600, t), t);
+						if(arrayJar != null){
+							getCookieJar(arrayJar, settings.getCookieJar(), t);
+						}
 						StaticLayer.GetConvertor().runOnMainThreadLater(new Runnable() {
 
 							public void run() {
@@ -258,7 +286,8 @@ public class Web {
 							}
 						});
 					} catch(IOException e){
-						final ConfigRuntimeException ex = new ConfigRuntimeException(e.getMessage(), ExceptionType.IOException, t);
+						final ConfigRuntimeException ex = new ConfigRuntimeException((e instanceof UnknownHostException?"Unknown host: ":"") 
+								+ e.getMessage(), ExceptionType.IOException, t);
 						if(error != null){
 							StaticLayer.GetConvertor().runOnMainThreadLater(new Runnable() {
 
@@ -267,7 +296,7 @@ public class Web {
 								}
 							});
 						} else {
-							ConfigRuntimeException.HandleUncaughtException(ex, environment);
+							ConfigRuntimeException.React(ex, environment);
 						}
 					}
 				}
@@ -322,6 +351,23 @@ public class Web {
 
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Getting headers from a website", "http_request('http://www.google.com', array(\n"
+					+ "\tsuccess: closure(@response,\n"
+					+ "\t\tmsg(@response['headers']['Server'][0])\n"
+					+ "\t)\n"
+					+ "))\n", "gws"),
+				new ExampleScript("Using a cookie jar", "@cookiejar = array()\n"
+					+ "http_request('http://www.google.com', array(\n"
+					+ "\tsuccess: closure(@resp,\n"
+					+ "\t\tmsg(@cookiejar)\n"
+					+ "\t)\n"
+					+ "))\n", "<cookie jar would now have cookies in it>")
+			};
 		}
 		
 	}

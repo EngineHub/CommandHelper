@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,6 +149,8 @@ public final class WebUtility {
 		InputStream is;
 		try{
 			is = conn.getInputStream();
+		} catch(UnknownHostException e){
+			throw e;
 		} catch(Exception e){
 			is = conn.getErrorStream();
 		}

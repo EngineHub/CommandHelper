@@ -124,12 +124,45 @@ public class LinkedComparatorSet<T> extends AbstractSet<T> implements Set<T> {
 			return false;
 		}
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * This implementation uses the custom comparator if provided to check
+	 * for equality, as opposed to the underlying object's equals methods.
+	 * @param o
+	 * @return 
+	 */
+	@Override
+	public boolean remove(Object o) {
+		if(comparator == null){
+			return super.remove(o);
+		} else {
+			Iterator<T> e = iterator();
+			if (o==null) {
+				while (e.hasNext()) {
+					if (e.next()==null) {
+						e.remove();
+						return true;
+					}
+				}
+			} else {
+				while (e.hasNext()) {
+					if (comparator.checkIfEquals(o, e.next())) {
+						e.remove();
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+    }
 
 	/**
 	 * This can be passed in to the constructor of {@link LinkedComparatorSet} to
 	 * "override" the equals contract of the sub elements, and that will be used instead.
 	 */
-	public static interface EqualsComparator {
+	public static interface EqualsComparator<T> {
 		/**
 		 * Should return true if val1 and val2 are "equals" according to your custom
 		 * contract.
@@ -137,6 +170,6 @@ public class LinkedComparatorSet<T> extends AbstractSet<T> implements Set<T> {
 		 * @param val2
 		 * @return 
 		 */
-		boolean checkIfEquals(Object val1, Object val2);
+		boolean checkIfEquals(T val1, T val2);
 	}
 }

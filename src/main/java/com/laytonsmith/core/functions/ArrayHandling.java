@@ -1572,11 +1572,9 @@ public class ArrayHandling {
 			} else {
 				List<Construct> asList = array.asList();
 				CArray newArray = new CArray(t);
-				Set<Construct> set = new LinkedComparatorSet<Construct>(asList, new LinkedComparatorSet.EqualsComparator() {
+				Set<Construct> set = new LinkedComparatorSet<Construct>(asList, new LinkedComparatorSet.EqualsComparator<Construct>() {
 
-					public boolean checkIfEquals(Object val1, Object val2) {
-						Construct item1 = (Construct) val1;
-						Construct item2 = (Construct) val2;
+					public boolean checkIfEquals(Construct item1, Construct item2) {
 						return (fCompareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2)))
 								|| (!fCompareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)));
 					}

@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import com.laytonsmith.PureUtilities.LinkedComparatorSet;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -31,7 +32,12 @@ public final class CookieJar {
 		}
 		return b.toString();
 	}
-	private final Set<Cookie> cookies = new TreeSet<Cookie>();
+	private final Set<Cookie> cookies = new LinkedComparatorSet<Cookie>(new LinkedComparatorSet.EqualsComparator<Cookie>() {
+
+		public boolean checkIfEquals(Cookie val1, Cookie val2) {
+			return val1.compareTo(val2) == 0;
+		}
+	});
 	
 	/**
 	 * Adds a new, pre-made cookie to this list. The constructors for Cookie
@@ -39,6 +45,10 @@ public final class CookieJar {
 	 * @param cookie 
 	 */
 	public void addCookie(Cookie cookie){
+		if(this.cookies.contains(cookie)){
+			//This is an update, so remove it first
+			this.cookies.remove(cookie);
+		}
 		this.cookies.add(cookie);
 	}
 
