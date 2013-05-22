@@ -947,7 +947,8 @@ public class PlayerEvents {
                     + "Fired when a player dies."
                     + "{player: The player that died | drops: An array of the dropped items"
                     + "| xp: The xp that will be dropped | cause: The cause of death | death_message: The"
-					+ " death message | keep_level | new_level: the player's level when they respawn}"
+					+ " death message | keep_level | new_level: the player's level when they respawn"
+					+ "| killer: Will only be set if the killer was a player, but will be their name}"
                     + "{xp|drops: An array of item objects, or null. The items to be dropped"
 					+ " are replaced with the given items, not added to|death_message: the death message,"
 					+ " or null to remove it entirely|keep_level: if true, the player will not lose"
@@ -991,6 +992,9 @@ public class PlayerEvents {
                 }
 				map.put("keep_level", new CBoolean(event.getKeepLevel(), Target.UNKNOWN));
 				map.put("new_level", new CInt(event.getNewLevel(), Target.UNKNOWN));
+				if(event.getKiller() instanceof MCPlayer){
+					map.put("killer", new CString(((MCPlayer)event.getKiller()).getName(), Target.UNKNOWN));
+				}
                 return map;
             } else {
                 throw new EventException("Cannot convert e to EntityDeathEvent");
