@@ -72,12 +72,12 @@ public class EntityEvents {
 					+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t) throws PrefilterNonMatchException {
 			if (event instanceof MCEntityExplodeEvent) {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if (prefilter.containsKey("type")) {
 					if (e.getEntity() == null){
-						if (prefilter.get("type") instanceof CNull || prefilter.get("type").val().equals("null")) {
+						if (prefilter.get("type").isNull() || prefilter.get("type").val().equals("null")) {
 							return true;
 						}
 						return false;
@@ -103,8 +103,8 @@ public class EntityEvents {
 					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()));
 				}
 				ret.put("blocks", blocks);
-				Construct entity = new CNull(t);
-				Construct entitytype = new CNull(t);
+				Construct entity = Construct.GetNullConstruct(t);
+				Construct entitytype = Construct.GetNullConstruct(t);
 				if (e.getEntity() != null) {
 					entity = new CInt(e.getEntity().getEntityId(), t);
 					entitytype = new CString(e.getEntity().getType().name(), t);
@@ -123,11 +123,11 @@ public class EntityEvents {
 			return Driver.ENTITY_EXPLODE;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Target t) {
 			if (event instanceof MCEntityExplodeEvent) {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if (key.equals("yield")) {
-					e.setYield(Static.getDouble32(value, Target.UNKNOWN));
+					e.setYield(value.primitive(t).castToDouble32(t));
 					return true;
 				}
 				if (key.equals("blocks")) {
