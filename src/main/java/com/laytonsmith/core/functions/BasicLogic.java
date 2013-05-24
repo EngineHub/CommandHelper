@@ -8,6 +8,7 @@ import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.compiler.Braceable;
 import com.laytonsmith.core.compiler.CodeBranch;
+import com.laytonsmith.core.compiler.CompilerFunctions;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
@@ -150,6 +151,12 @@ public class BasicLogic {
 						new ExampleScript("With braces, true condition", "if(true){\n\tmsg('This is true')\n}"),
 						new ExampleScript("With braces, false condition", "msg('Start')\nif(false){\n\tmsg('This will not show')\n}\nmsg('Finish')"),};
 		}
+		
+		private static final String __autoconcat__ = new CompilerFunctions.__autoconcat__().getName();
+		private static final String _if = new _if().getName();
+		private static final String _ifelse = new ifelse().getName();
+		private static final String _else = "else";
+		private static final String __cbrace__ = new CompilerFunctions.__cbrace__().getName();
 
 		@Override
 		public void handleBraces(List<ParseTree> allNodes, int startingWith) throws ConfigCompileException {
@@ -159,16 +166,18 @@ public class BasicLogic {
 			for (int i = startingWith; i < allNodes.size(); i++) {
 				//Only this configuration is expected:
 				// - if/brace/[else/if/brace]*[/else/brace]
-				//We will use a mini-lexer here for this process.
+				//We will use a mini-lexer here for this process. Note that we have the exceptional circumstance
+				//where an else if() is going to be in a __autoconcat__, so we'll need to detect and pull that up
+				//ourselves.
 				//Need a 2 lookahead
 				ParseTree n1 = allNodes.get(i);
 				ParseTree n2 = allNodes.size() > i + 1 ? allNodes.get(i + 1) : null;
 				ParseTree n3 = allNodes.size() > i + 2 ? allNodes.get(i + 2) : null;
 				if (!pastIf) {
-					if (n1.getData() instanceof CFunction && "if".equals(n1.getData().val())) {
+					if (n1.getData() instanceof CFunction && _if.equals(n1.getData().val())) {
 						pastIf = true;
 						hasIf = true;
-						ifelse = new ParseTree(new CFunction("ifelse", n1.getTarget()), n1.getFileOptions());
+						ifelse = new ParseTree(new CFunction(_ifelse, n1.getTarget()), n1.getFileOptions());
 						try {
 							//Check for weirdness, like if(1, 1){ ... }
 							if (n1.numberOfChildren() != 1) {
@@ -186,9 +195,23 @@ public class BasicLogic {
 						}
 					}
 				} else {
-					if (n1.getData() instanceof CString && "else".equals(n1.getData().val())) {
+					if(n1.getData() instanceof CFunction && __autoconcat__.equals(n1.getData().val()) && n1.getChildren().size() == 2){
+						//Check to see if this is an autoconcat we need to pull up.
+						ParseTree pn1 = n1.getChildAt(0);
+						ParseTree pn2 = n1.getChildAt(1);
+						if(pn1.getData() instanceof CKeyword && _else.equals(pn1.getData().val())
+								&& pn2.getData() instanceof CFunction && _if.equals(pn2.getData().val())){
+							//Yep. We need to pull them up, then continue.
+							allNodes.remove(i);
+							allNodes.add(i, pn2);
+							allNodes.add(i, pn1);
+							i--;
+							continue;
+						}
+					}
+					if (n1.getData() instanceof CKeyword && _else.equals(n1.getData().val())) {
 						//Yep, see if this is the end or just the middle.
-						if (n2.getData() instanceof CFunction && "if".equals(n2.getData().val())) {
+						if (n2.getData() instanceof CFunction && _if.equals(n2.getData().val())) {
 							//This is a middle
 							try {
 								//Check for weirdness, like if(1, 1){ ... }
@@ -206,7 +229,7 @@ public class BasicLogic {
 								//Note the lack of {}
 								throw new ConfigCompileException("Have else if() with no braces.", n2.getTarget());
 							}
-						} else if (n2.getData() instanceof CFunction && "__cbrace__".equals(n2.getData().val())) {
+						} else if (n2.getData() instanceof CFunction && __cbrace__.equals(n2.getData().val())) {
 							//This is the end
 							try {
 								//Check for weirdness, like if(1, 1){ ... }
@@ -542,6 +565,8 @@ public class BasicLogic {
 					ParseTree andTree = new ParseTree(and, statement.getFileOptions());
 					andTree.addChild(statement);
 					andTree.addChild(code.getChildAt(0));
+					children.set(i, andTree);
+					children.set(i + 1, code.getChildAt(1));
 					//TODO: Finish this. The optimized tree approach is wrong,
 					//and the reverse approach is not being used, so there is
 					//

@@ -22,7 +22,9 @@ import com.laytonsmith.core.functions.ArrayHandling;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -42,6 +44,8 @@ class CompilerObject {
 	ParseTree pointer;
 	ParseTree root;
 	CompilerEnvironment env;
+	Token lastToken1 = null;
+	Token lastToken2 = null;
 	
 	private static final String __autoconcat__ = new CompilerFunctions.__autoconcat__().getName();
 	private static final String array_get = new ArrayHandling.array_get().getName();
@@ -59,7 +63,16 @@ class CompilerObject {
 	}
 
 	Token consume() {
-		return stream.remove(0);
+		lastToken2 = lastToken1;
+		return (lastToken1 = stream.remove(0));
+	}
+	
+	Token getLastToken(){
+		if(lastToken2 == null){
+			return new Token(TType.UNKNOWN, "", Target.UNKNOWN);
+		} else {
+			return lastToken2;
+		}
 	}
 
 	void compile(ParseTree root, Environment compilerEnv) throws ConfigCompileException {
@@ -79,8 +92,6 @@ class CompilerObject {
 		if (!functionLines.isEmpty()) {
 			throw new ConfigCompileException("Unclosed left parenthesis. (Did you forget to close a function?)", functionLines.peek());
 		}
-		
-		//Go through and __autoconcat__ the cbrace children
 	}
 
 	void compile0() throws ConfigCompileException {
@@ -106,7 +117,8 @@ class CompilerObject {
 			//If the last child isn't an autoconcat, we need to go ahead and
 			//add that here. This will happen in the case of something like:
 			//func(func1(), func2() func2())
-			if(pointer.numberOfChildren() > 1 
+			if(getLastToken().type != TType.COMMA && getLastToken().type != TType.FUNC_END
+					&& pointer.numberOfChildren() > 1 
 					&& !(pointer.getLastChild().getData() instanceof CFunction 
 					&& ((CFunction) pointer.getLastChild().getData()).val().equals(__autoconcat__))){
 				ParseTree lastChild = pointer.getLastChild();
@@ -262,7 +274,12 @@ class CompilerObject {
 			throw new ConfigCompileException("Unmatched closing parenthesis. (Did you put too many right parenthesis?)", t);
 		}
 	}
-	private static List<String> keywords = Arrays.asList(new String[]{"else", "bind", "proc"});
+	private static Map<String, KeywordHandler> keywords = new HashMap<String, KeywordHandler>();
+	//= Arrays.asList(new String[]{"else", "bind", "proc"});
+	static {
+		//TODO: Make this dynamic, so that compiler extensions can be added.
+		keywords.put("else", new CompilerFunctions.elseKeywordHandler());
+	}
 
 	private Construct resolveIdentifier(Token t) throws ConfigCompileException {
 		switch (t.type) {
@@ -282,8 +299,8 @@ class CompilerObject {
 					return new CBoolean(false, t.getTarget());
 				} else if (t.val().equals("null")) {
 					return Construct.GetNullConstruct(t.getTarget());
-				} else if (keywords.contains(t.val())) {
-					return new CKeyword(t.val(), t.getTarget());
+				} else if (keywords.keySet().contains(t.val())) {
+					return new CKeyword(t.val(), t.getTarget(), keywords.get(t.val()));
 				} else {
 					if (stream.fileOptions.isStrict()) {
 						throw new ConfigCompileException("Bare strings not allowed in strict mode. (" + t.val() + ")", t.getTarget());

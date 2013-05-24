@@ -46,7 +46,7 @@ public class OptimizationTest {
         assertEquals("ifelse(dyn(),msg('hi'),msg('hi'))", optimize("if(dyn()){ msg('hi') } else { msg('hi') }"));
     }
 	
-	@Test(timeout=10000) public void testIfElse() throws ConfigCompileException {
+	@Test public void testIfElse() throws ConfigCompileException {
 		assertEquals("ifelse(dyn(1),msg(''),dyn(2),msg(''),msg(''))", optimize("if(dyn(1)){ msg('') } else if(dyn(2)){ msg('') } else { msg('') }"));
 	}
 	
@@ -55,7 +55,7 @@ public class OptimizationTest {
 				optimize("if(is_null($pl)) {\ndie('') } else if(!ponline(player($pl))){ die($pl.'') }"));
 	}
 	
-	@Test(timeout=10000) public void testNestedIfsWithRemoval() throws ConfigCompileException {
+	@Test public void testNestedIfsWithRemoval() throws ConfigCompileException {
 		assertEquals("", optimize("ifelse(1, if(0, msg('')), msg(''))"));
 	}
     
@@ -184,7 +184,7 @@ public class OptimizationTest {
 		assertEquals("ifelse(@a,sconcat(ifelse(@b,msg('')),msg('')))", optimize("if(@a){ if(@b){ msg('') } msg('') }"));
 	}
 	
-	@Test(timeout=10000) public void testInnerIfWithExistingAnd() throws Exception{
+	@Test public void testInnerIfWithExistingAnd() throws Exception{
 		assertEquals("ifelse(and(@a,@b,@c),msg(''))", optimize("if(@a && @b){ if(@c){ msg('') } }"));
 	}
 	

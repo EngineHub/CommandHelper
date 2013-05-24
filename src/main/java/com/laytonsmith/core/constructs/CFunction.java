@@ -57,7 +57,7 @@ public class CFunction extends Construct {
 	public boolean isProcedure() {
 		//For now, just see if it starts with _. Later, this
 		//will be made a bit more robust.
-		return val().startsWith("_");
+		return val().matches("^_[^_].*");
 	}
 
 	public String typeName() {

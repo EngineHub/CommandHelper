@@ -25,6 +25,7 @@ import java.util.List;
  */
 public class NewMethodScriptCompiler {
 
+	private static final String __autoconcat__ = new CompilerFunctions.__autoconcat__().getName();
 	/**
 	 * Takes a raw string input, and parses it into a TokenStream, which can be
 	 * passed to either the preprocessor, or the compiler.
@@ -169,7 +170,7 @@ public class NewMethodScriptCompiler {
 	 * @throws ConfigCompileException 
 	 */
 	public static ParseTree compile(TokenStream tokenStream, Environment compilerEnvironment) throws ConfigCompileException {
-		ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), tokenStream.getFileOptions());
+		ParseTree root = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), tokenStream.getFileOptions());
 		new CompilerObject(tokenStream).compile(root, compilerEnvironment);
 		return link(root, compilerEnvironment);
 	}
@@ -179,12 +180,12 @@ public class NewMethodScriptCompiler {
 		//currently just if. However, at this point, we also need to optimize __autoconcat__ and cc.
 		//so we know what the tree actually looks like. Also, we want to first group all our auto includes
 		//together, along with our actual tree.
-		ParseTree master = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), root.getFileOptions());
+		ParseTree master = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), root.getFileOptions());
 		for (ParseTree include : compilerEnvirontment.getEnv(CompilerEnvironment.class).getIncludes()) {
 			master.addChild(include);
 		}
 		master.addChild(root);
-		OptimizerObject optimizer = new OptimizerObject(root, compilerEnvirontment);
+		OptimizerObject optimizer = new OptimizerObject(master, compilerEnvirontment);
 		return optimizer.optimize();
 		//root is now optimized
 	}

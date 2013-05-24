@@ -11,9 +11,11 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.DummyFunction;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.StringHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -110,6 +112,17 @@ public class CompilerFunctions {
 	@api
 	@noprofile
 	public static class __autoconcat__ extends DummyFunction implements Optimizable {
+		
+		private static final String __autoconcat__ = new __autoconcat__().getName();
+		private static final String assign = new DataHandling.assign().getName();
+		private static final String postinc = new com.laytonsmith.core.functions.Math.postinc().getName();
+		private static final String postdec = new com.laytonsmith.core.functions.Math.postdec().getName();
+		private static final String neg = new com.laytonsmith.core.functions.Math.neg().getName();
+		private static final String p = new p().getName();
+		private static final String __cbrace__ = new __cbrace__().getName();
+		private static final String centry = new centry().getName();
+		private static final String sconcat = new StringHandling.sconcat().getName();
+		private static final String concat = new StringHandling.concat().getName();
 
 		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t) {
 			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
@@ -128,7 +141,7 @@ public class CompilerFunctions {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
+			throw new Error("Should not have gotten here, " + getName() + " was not removed before runtime.");
 		}
 
 		@Override
@@ -160,7 +173,7 @@ public class CompilerFunctions {
 		 * @param list
 		 * @return
 		 */
-		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
+		public static ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 			
@@ -203,16 +216,16 @@ public class CompilerFunctions {
 							ParseTree rhs;
 							if (i < list.size() - 3) {
 								//Need to autoconcat
-								ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), lhs.getFileOptions());
+								List<ParseTree> values = new ArrayList<ParseTree>();
 								int index = i + 2;
-								ac.addChild(list.get(index));
+								values.add(list.get(index));
 								list.remove(index);
 								while (true) {
 									if (list.size() > index && list.get(index).getData() instanceof CSymbol) {
 										//Add the next two children, (the symbol then the item)
 										//and continue.
-										ac.addChild(list.get(index));
-										ac.addChild(list.get(index + 1));
+										values.add(list.get(index));
+										values.add(list.get(index + 1));
 										list.remove(index);
 										list.remove(index);
 										continue;
@@ -222,6 +235,7 @@ public class CompilerFunctions {
 								}
 								//Set this subset into the correct slot, the rest of the
 								//code will grab it correctly that way.
+								ParseTree ac = optimizeSpecial(values, returnSConcat);
 								list.add(i + 2, ac);
 							}
 							rhs = list.get(i + 2);
@@ -233,20 +247,20 @@ public class CompilerFunctions {
 						}
 					}
 					//Simple assignment now
-					ParseTree assign = new ParseTree(new CFunction("assign", node.getTarget()), node.getFileOptions());
+					ParseTree assignTree = new ParseTree(new CFunction(assign, node.getTarget()), node.getFileOptions());
 					ParseTree rhs;
 					if (i < list.size() - 3) {
 						//Need to autoconcat
-						ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), lhs.getFileOptions());
+						List<ParseTree> values = new ArrayList<ParseTree>();
 						int index = i + 2;
-						ac.addChild(list.get(index));
+						values.add(list.get(index));
 						list.remove(index);
 						while (true) {
 							if (list.size() > index && list.get(index).getData() instanceof CSymbol) {
 								//Add the next two children, (the symbol then the item)
 								//and continue.
-								ac.addChild(list.get(index));
-								ac.addChild(list.get(index + 1));
+								values.add(list.get(index));
+								values.add(list.get(index + 1));
 								list.remove(index);
 								list.remove(index);
 								continue;
@@ -256,12 +270,13 @@ public class CompilerFunctions {
 						}
 						//Set this subset into the correct slot, the rest of the
 						//code will grab it correctly that way.
+						ParseTree ac = optimizeSpecial(values, returnSConcat);
 						list.add(i + 2, ac);
 					}
 					rhs = list.get(i + 2);
-					assign.addChild(lhs);
-					assign.addChild(rhs);
-					list.set(i, assign);
+					assignTree.addChild(lhs);
+					assignTree.addChild(rhs);
+					list.set(i, assignTree);
 					list.remove(i + 1);
 					list.remove(i + 1);
 				}
@@ -283,9 +298,9 @@ public class CompilerFunctions {
 						}
 						ParseTree conversion;
 						if (sy.val().equals("++")) {
-							conversion = new ParseTree(new CFunction("postinc", node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(new CFunction(postinc, node.getTarget()), node.getFileOptions());
 						} else {
-							conversion = new ParseTree(new CFunction("postdec", node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(new CFunction(postdec, node.getTarget()), node.getFileOptions());
 						}
 						conversion.addChild(list.get(i - 1));
 						list.set(i - 1, conversion);
@@ -308,9 +323,9 @@ public class CompilerFunctions {
 										&& !(list.get(i + 1).getData() instanceof CSymbol)) {
 									if (node.getData().val().equals("-")) {
 										//We have to negate it
-										conversion = new ParseTree(new CFunction("neg", node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(new CFunction(neg, node.getTarget()), node.getFileOptions());
 									} else {
-										conversion = new ParseTree(new CFunction("p", node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(new CFunction(p, node.getTarget()), node.getFileOptions());
 									}
 								} else {
 									continue;
@@ -435,11 +450,12 @@ public class CompilerFunctions {
 			if (list.size() >= 1) {
 				ParseTree node = list.get(0);
 				if (node.getData() instanceof CLabel) {
-					ParseTree value = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), node.getFileOptions());
+					List<ParseTree> values = new ArrayList<ParseTree>();
 					for (int i = 1; i < list.size(); i++) {
-						value.addChild(list.get(i));
+						values.add(list.get(i));
 					}
-					ParseTree ce = new ParseTree(new CFunction("centry", node.getTarget()), node.getFileOptions());
+					ParseTree value = optimizeSpecial(values, returnSConcat);
+					ParseTree ce = new ParseTree(new CFunction(centry, node.getTarget()), node.getFileOptions());
 					ce.addChild(node);
 					ce.addChild(value);
 					return ce;
@@ -453,7 +469,7 @@ public class CompilerFunctions {
 			for(int i = 0; i < list.size(); i++){
 				int currentSize = list.size();
 				ParseTree node = list.get(i);
-				if(node.getData() instanceof CFunction && ((CFunction)node.getData()).val().equals("__cbrace__")){
+				if(node.getData() instanceof CFunction && ((CFunction)node.getData()).val().equals(__cbrace__)){
 					if(i == 0){
 						//This is a compile error, they have a { at the beginning of a sibling chain.
 						throw new ConfigCompileException("Unexpected {", node.getTarget());
@@ -477,7 +493,27 @@ public class CompilerFunctions {
 					i--;
 				}
 			}
+			
+			// Look for any keywords. If there are any, we need to send this whole
+			// chain to that keyword handler. Continue until all keywords are gone.
+			for(int i = 0; i < list.size(); i++){
+				ParseTree node = list.get(i);
+				if(node.getData() instanceof CKeyword){
+					((CKeyword)node.getData()).getHandler().handle(list);
+					//reset now
+					i = 0;
+				}
+			}
 
+			for(int i = 0; i < list.size(); i++){
+				//Recurse down and optimize all instances of __autoconcat__ that are left
+				ParseTree element = list.get(i);
+				Construct data = element.getData();
+				if(data instanceof CFunction && __autoconcat__.equals(data.val())){
+					list.set(i, optimizeSpecial(element.getChildren(), returnSConcat));
+				}
+			}
+			
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
 			//left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
 			//be handled in MethodScriptCompiler's optimize function. Also, we must scan for CPreIdentifiers,
@@ -517,19 +553,21 @@ public class CompilerFunctions {
 					options = list.get(0).getFileOptions();
 				}
 				if (returnSConcat) {
-					tree = new ParseTree(new CFunction("sconcat", Target.UNKNOWN), options);
+					tree = new ParseTree(new CFunction(sconcat, Target.UNKNOWN), options);
 				} else {
-					tree = new ParseTree(new CFunction("concat", Target.UNKNOWN), options);
+					tree = new ParseTree(new CFunction(concat, Target.UNKNOWN), options);
 				}
 				tree.setChildren(list);
 				return tree;
 			}
 		}
 
+		@Override
 		public Argument returnType() {
 			return new Argument("", Mixed.class);
 		}
 
+		@Override
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(new Argument("", CArray.class, "var").setVarargs());
 		}
@@ -618,5 +656,19 @@ public class CompilerFunctions {
 			}
 			return new ParseTree(new CBrace(node), options);
 		}
+	}
+	
+	public static class elseKeywordHandler implements KeywordHandler {
+
+		public void handle(List<ParseTree> elements) {
+			for(ParseTree element : elements){
+				Construct data = element.getData();
+				if(data instanceof CKeyword && "else".equals(data.val())){
+					// We have 3 different situations to handle. We can glue
+					// together up to 3 
+				}
+			}
+		}
+		
 	}
 }
