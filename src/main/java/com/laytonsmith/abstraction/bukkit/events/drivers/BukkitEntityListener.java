@@ -17,6 +17,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -116,5 +117,12 @@ public class BukkitEntityListener implements Listener{
 		BukkitEntityEvents.BukkitMCEntityExplodeEvent ee = new BukkitEntityEvents.BukkitMCEntityExplodeEvent(event);
 		EventUtils.TriggerExternal(ee);
 		EventUtils.TriggerListener(Driver.ENTITY_EXPLODE, "entity_explode", ee);
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onItemSpawn(ItemSpawnEvent event) {
+		BukkitEntityEvents.BukkitMCItemSpawnEvent is = new BukkitEntityEvents.BukkitMCItemSpawnEvent(event);
+		EventUtils.TriggerExternal(is);
+		EventUtils.TriggerListener(Driver.ITEM_SPAWN, "item_spawn", is);
 	}
 }

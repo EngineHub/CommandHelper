@@ -984,12 +984,7 @@ public class PlayerEvents {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
 				Map<String, Construct> map = super.evaluate(e);
 				map.putAll(evaluate_helper(e));
-                map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
-                try{
-                    map.put("cause", new CString(event.getEntity().getLastDamageCause().getCause().name(), Target.UNKNOWN));
-                } catch(NullPointerException ex){
-                    map.put("cause", new CString(MCDamageCause.CUSTOM.name(), Target.UNKNOWN));
-                }
+				map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
 				map.put("keep_level", new CBoolean(event.getKeepLevel(), Target.UNKNOWN));
 				map.put("new_level", new CInt(event.getNewLevel(), Target.UNKNOWN));
 				if(event.getKiller() instanceof MCPlayer){

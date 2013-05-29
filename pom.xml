@@ -142,10 +142,10 @@
 			<id>maven-central</id>
 			<url>http://repo1.maven.org/maven2/</url>
 		</repository>
-		<repository>
+		<!--repository>
 			<id>zml2008</id>
 			<url>http://files.zachsthings.com/repo/</url>
-		</repository>
+		</repository-->
 
 		<!-- mcstats repo -->
 		<repository>
