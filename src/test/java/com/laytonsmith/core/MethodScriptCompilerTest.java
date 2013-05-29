@@ -979,23 +979,32 @@ public class MethodScriptCompilerTest {
 		SRun("(['not allowed'])", fakePlayer);
 	}
     
-    //TODO: Once the lexer is rewritten, this should work
-//    @Test
-//    public void testAssignmentWithEquals1() throws ConfigCompileException{
-//	    SRun("@var=yep nope msg(@var)", fakePlayer);
-//	    verify(fakePlayer).sendMessage("yep");
-//    }
-//    
-//    @Test
-//    public void testAssignmentWithEquals2() throws ConfigCompileException{
-//	    SRun("@var = yep nope msg(@var)", fakePlayer);
-//	    verify(fakePlayer).sendMessage("yep");	    
-//    }
-//    
-//    @Test
-//    public void testAssignmentWithEquals3() throws ConfigCompileException{
-//	    SRun("@var = 'yep yep' msg(@var)", fakePlayer);
-//	    verify(fakePlayer).sendMessage("yep yep");	    	    
-//    }
+    @Test
+    public void testAssignmentWithEquals1() throws ConfigCompileException{
+	    SRun("@var=yep nope msg(@var)", fakePlayer);
+	    verify(fakePlayer).sendMessage("yep");
+    }
+    
+    @Test
+    public void testAssignmentWithEquals2() throws ConfigCompileException{
+	    SRun("@var = yep nope msg(@var)", fakePlayer);
+	    verify(fakePlayer).sendMessage("yep");	    
+    }
+    
+    @Test
+    public void testAssignmentWithEquals3() throws ConfigCompileException{
+	    SRun("@var = 'yep yep' msg(@var)", fakePlayer);
+	    verify(fakePlayer).sendMessage("yep yep");	    	    
+    }
+	
+	@Test
+	public void test0xNotation() throws Exception {
+		assertEquals("15", SRun("0xF", fakePlayer));
+	}
+	
+	@Test
+	public void test0bNotation() throws Exception{
+		assertEquals("2", SRun("0b10", fakePlayer));
+	}
     
 }
