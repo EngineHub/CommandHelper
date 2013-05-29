@@ -21,6 +21,7 @@ import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
+import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
@@ -53,6 +54,67 @@ public class EntityEvents {
         return "Contains events related to an entity";
     }
     
+	@api
+	public static class item_spawn extends AbstractEvent {
+
+		public String getName() {
+			return "item_spawn";
+		}
+
+		public String docs() {
+			return "{item: <item match> the item id and data value to check}"
+					+ " Fires when an item entity comes into existance."
+					+ " {location: where the item spawns | id: the item's entityID | item}"
+					+ " {item: the itemstack of the entity}"
+					+ " {}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCItemSpawnEvent) {
+				Prefilters.match(prefilter, "item", Static.ParseItemNotation(
+						((MCItemSpawnEvent) e).getEntity().getItemStack()), PrefilterType.ITEM_MATCH);
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCItemSpawnEvent) {
+				Target t = Target.UNKNOWN;
+				MCItemSpawnEvent event = (MCItemSpawnEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation()));
+				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCItemSpawnEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.ITEM_SPAWN;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCItemSpawnEvent) {
+				if (key == "item") {
+					((MCItemSpawnEvent) event).getEntity().setItemStack(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
 	@api
 	public static class entity_explode extends AbstractEvent {
 

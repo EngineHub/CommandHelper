@@ -47,4 +47,9 @@ public class BukkitMCWorldCreator implements MCWorldCreator {
 		creator.generator(generator);
 		return this;
 	}
+	
+	public MCWorldCreator copy(MCWorld toCopy) {
+		creator.copy((World) toCopy.getHandle());
+		return this;
+	}
 }

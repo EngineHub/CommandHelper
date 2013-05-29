@@ -14,4 +14,5 @@ public interface MCWorldCreator {
 	MCWorldCreator environment(MCWorldEnvironment environment);
 	MCWorldCreator seed(long seed);
 	MCWorldCreator generator(String generator);
+	MCWorldCreator copy(MCWorld toCopy);
 }
