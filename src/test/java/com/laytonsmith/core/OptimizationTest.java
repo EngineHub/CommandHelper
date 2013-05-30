@@ -90,8 +90,8 @@ public class OptimizationTest {
         assertEquals("sconcat(proc('_nope',msg('Hi')),_nope())", optimize("proc(_nope, msg('Hi')) _nope()"));
     }
     
-    @Test(timeout=10000)
-    public void testProcOptimiztion4() throws ConfigCompileException{
+    @Test
+    public void testProcOptimization4() throws ConfigCompileException{
         //Test embedded procs
         assertEquals("sconcat(proc('_outer',sconcat(proc('_inner',@a,return(@a)),'blah')),_inner('huh'))", 
                 optimize("proc(_outer, proc(_inner, @a, return(@a)) _inner('blah')) _inner('huh')"));
@@ -194,10 +194,10 @@ public class OptimizationTest {
 	}
 	
 	@Test(timeout=10000) public void testIfelseWithInnerDynamic() throws Exception{
-		assertEquals("ifelse(dyn(),msg('success'))", optimize("ifelse(1, if(dyn(), msg('success')),msg('fail'))"));
+		assertEquals("if(dyn(),msg('success'))", optimize("ifelse(1, if(dyn(), msg('success')),msg('fail'))"));
 	}
 	
-	@Test(timeout=10000) public void testAndOrPullsUp() throws Exception{
+	@Test public void testAndOrPullsUp() throws Exception{
 		assertEquals("or(dyn(),dyn(),dyn())", optimize("dyn() || dyn() || dyn()"));
 		assertEquals("and(dyn(),dyn(),dyn())", optimize("dyn() && dyn() && dyn()"));
 	}
@@ -240,7 +240,7 @@ public class OptimizationTest {
 		assertEquals("array_set(array_get(@a,@zero),concat(@one,' '),'s')", optimize("@a[@zero][@one.' '] = 's'"));
 	}
 	
-	@Test(timeout=10000)
+	@Test
 	public void testComplicatedButConstIfCondition() throws Exception{
 		//Test to see if the complicated (but const) condition in an if
 		//doesn't prevent actual optimization
@@ -263,7 +263,10 @@ public class OptimizationTest {
 				optimize("concat(array('a'), array('a') array('a'))"));
 	}
 	
-	
+	@Test public void testUnicode() throws Exception {
+		assertEquals("'€'", optimize("'\\u20ac'"));
+		assertEquals("'7'", optimize("'\\u0037'"));
+	}
 	
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.

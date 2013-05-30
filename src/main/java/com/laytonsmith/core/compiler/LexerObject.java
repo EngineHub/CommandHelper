@@ -141,7 +141,7 @@ class LexerObject {
 	}
 
 	private void buffer(Object s) {
-		buffer.append(s);
+		buffer.append(s.toString());
 	}
 
 	private void parseBuffer() {
@@ -336,8 +336,9 @@ class LexerObject {
 							} catch (NumberFormatException e) {
 								error("Unrecognized unicode escape sequence");
 							}
-							buffer(Character.toChars(Integer.parseInt(unicode.toString(), 16)));
-							i += 4;
+							buffer(new String(Character.toChars(Integer.parseInt(unicode.toString(), 16))));
+							//Advance ahead uxxxx characters
+							i += 5;
 							break;
 						case '\'':
 							if (state_in_double_quote) {

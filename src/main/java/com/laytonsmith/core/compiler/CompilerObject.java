@@ -20,10 +20,8 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.ArrayHandling;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EmptyStackException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -117,10 +115,17 @@ class CompilerObject {
 			//If the last child isn't an autoconcat, we need to go ahead and
 			//add that here. This will happen in the case of something like:
 			//func(func1(), func2() func2())
-			if(getLastToken().type != TType.COMMA && getLastToken().type != TType.FUNC_END
+			//We also have to account for if the previous token was an operator, in which case
+			//we don't want to create a NEW autoconcat, but continue adding to the current
+			//one.
+			if(getLastToken().type != TType.COMMA 
+					&& getLastToken().type == TType.FUNC_END
 					&& pointer.numberOfChildren() > 1 
-					&& !(pointer.getLastChild().getData() instanceof CFunction 
-					&& ((CFunction) pointer.getLastChild().getData()).val().equals(__autoconcat__))){
+					&& !(
+						pointer.getLastChild().getData() instanceof CFunction 
+						&& ((CFunction) pointer.getLastChild().getData()).val().equals(__autoconcat__)
+					)
+					&& !getLastToken().type.isSymbol()){
 				ParseTree lastChild = pointer.getLastChild();
 				pointer.removeChildAt(pointer.numberOfChildren() - 1);
 				pushNode(new CFunction(__autoconcat__, Target.UNKNOWN));
@@ -230,11 +235,12 @@ class CompilerObject {
 			popNode(t.getTarget());
 			return;
 		}
-		//If the next token ISN'T a ) , } ] we need to autoconcat this
+		//If the next token ISN'T a ) , } ] OR this is a symbol, we need to autoconcat this
 		if (peek().type != TType.FUNC_END && peek().type != TType.COMMA 
 				&& peek().type != TType.RCURLY_BRACKET 
 				&& peek().type != TType.RSQUARE_BRACKET
-				&& peek().type != TType.LCURLY_BRACKET) {
+				&& peek().type != TType.LCURLY_BRACKET
+				|| t.type.isSymbol()) {
 			//... unless we're already in an autoconcat
 			if (!(pointer.getData() instanceof CFunction && ((CFunction) pointer.getData()).val().equals(__autoconcat__))) {
 				CFunction f = new CFunction(__autoconcat__, Target.UNKNOWN);

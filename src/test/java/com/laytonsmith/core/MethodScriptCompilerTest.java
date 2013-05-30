@@ -2,17 +2,13 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
@@ -611,13 +607,6 @@ public class MethodScriptCompilerTest {
         s.compile(env);
         assertFalse(s.match("/one"));
         assertTrue(s.match("/two"));
-    }
-    
-    @Test public void testUnicode() throws ConfigCompileException{
-        SRun("msg('\\u0037 is win!')", fakePlayer);
-        verify(fakePlayer).sendMessage("7 is win!");
-        SRun("msg('\\u20ac')", fakePlayer);
-        verify(fakePlayer).sendMessage("€");
     }
     
     @Test public void testInfixMath1() throws ConfigCompileException{
