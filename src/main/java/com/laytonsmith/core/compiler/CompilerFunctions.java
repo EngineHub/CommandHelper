@@ -14,7 +14,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.DummyFunction;
 import com.laytonsmith.core.functions.Function;
-import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.StringHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;

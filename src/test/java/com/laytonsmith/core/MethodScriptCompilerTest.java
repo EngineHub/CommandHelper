@@ -985,15 +985,5 @@ public class MethodScriptCompilerTest {
 	    SRun("@var = 'yep yep' msg(@var)", fakePlayer);
 	    verify(fakePlayer).sendMessage("yep yep");	    	    
     }
-	
-	@Test
-	public void test0xNotation() throws Exception {
-		assertEquals("15", SRun("0xF", fakePlayer));
-	}
-	
-	@Test
-	public void test0bNotation() throws Exception{
-		assertEquals("2", SRun("0b10", fakePlayer));
-	}
     
 }

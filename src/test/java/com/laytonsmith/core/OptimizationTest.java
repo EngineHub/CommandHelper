@@ -291,6 +291,43 @@ public class OptimizationTest {
 				optimize(script));
 	}
 	
+	@Test public void test0xNotationSuccess() throws Exception {
+		assertEquals("15", optimize("0xF"));
+	}
+	
+	@Test(expected = ConfigCompileException.class)
+	public void test0xNotationFailure() throws Exception {
+		optimize("0xG");
+	}
+	
+	@Test public void test0bNotationSuccess() throws Exception {
+		assertEquals("15", optimize("0b1111"));
+	}
+	
+	@Test(expected = ConfigCompileException.class)
+	public void test0bNotationFailure() throws Exception {
+		optimize("0b2");
+	}
+	
+	@Test
+	public void testUnderscoreNotationInInteger() throws Exception {
+		assertEquals("1234", optimize("1_234"));
+	}
+	
+	@Test
+	public void testUnderscoreNotationInDouble() throws Exception {
+		assertEquals("1234.56", optimize("1_234.56"));
+	}
+
+	@Test
+	public void testUnderscoreNotationInHex() throws Exception {
+		assertEquals("255", optimize("0xF_F"));
+	}
+	
+	@Test
+	public void testUnderscoreNotationInBinary() throws Exception {
+		assertEquals("255", optimize("0b1111_1111"));
+	}
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{

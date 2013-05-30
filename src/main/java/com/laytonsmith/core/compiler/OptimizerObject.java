@@ -1,7 +1,6 @@
 package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.compiler.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;

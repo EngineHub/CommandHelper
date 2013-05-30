@@ -305,20 +305,6 @@ class CompilerObject {
 					return new CBoolean(false, t.getTarget());
 				} else if (t.val().equals("null")) {
 					return Construct.GetNullConstruct(t.getTarget());
-				} else if (t.val().startsWith("0x")){
-					String num = t.val().substring(2).trim();
-					if(!num.matches("^[0-9a-fA-F]+$")){
-						throw new ConfigCompileException("Expected a hex formatted number, but found \"" + num + "\" instead."
-								+ " (Only 0-9 or A-F are allowed in hex notation)", t.getTarget());
-					}
-					return new CInt(Integer.parseInt(num, 16), t.getTarget());
-				} else if (t.val().startsWith("0b")){
-					String num = t.val().substring(2).trim();
-					if(!num.matches("^[0-1]+$")){
-						throw new ConfigCompileException("Expected a binary formatted number, but found \"" + num + "\" instead."
-								+ " (Only 0 or 1 is allowed in binary notation)", t.getTarget());
-					}
-					return new CInt(Integer.parseInt(num, 2), t.getTarget());
 				} else if (keywords.keySet().contains(t.val())) {
 					return new CKeyword(t.val(), t.getTarget(), keywords.get(t.val()));
 				} else {

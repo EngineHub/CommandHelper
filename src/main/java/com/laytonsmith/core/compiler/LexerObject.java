@@ -144,7 +144,7 @@ class LexerObject {
 		buffer.append(s.toString());
 	}
 
-	private void parseBuffer() {
+	private void parseBuffer() throws ConfigCompileException {
 		String last = clearBuffer().trim();
 		if (!last.isEmpty()) {
 			append(identifyToken(last));
@@ -160,7 +160,26 @@ class LexerObject {
 		return buf;
 	}
 
-	private Token identifyToken(String item) {
+	private Token identifyToken(String item) throws ConfigCompileException {
+		if(item.matches("[0-9_]+\\.?[0-9_]*|0x[0-9a-fA-F_]+|0b[01_]+")){
+			//integer or double with _ notation. Just remove the _
+			item = item.replaceAll("_", "");
+		}
+		if (item.startsWith("0x")){
+			String num = item.substring(2).trim();
+			if(!num.matches("^[0-9a-fA-F]+$")){
+				throw new ConfigCompileException("Expected a hex formatted number, but found \"" + num + "\" instead."
+						+ " (Only 0-9 or A-F are allowed in hex notation)", target);
+			}
+			item = Integer.toString(Integer.parseInt(num, 16));
+		} else if (item.startsWith("0b")){
+			String num = item.substring(2).trim();
+			if(!num.matches("^[0-1]+$")){
+				throw new ConfigCompileException("Expected a binary formatted number, but found \"" + num + "\" instead."
+						+ " (Only 0 or 1 is allowed in binary notation)", target);
+			}
+			item = Integer.toString(Integer.parseInt(num, 2));
+		}
 		try {
 			Long.parseLong(item.trim());
 			return new Token(Token.TType.INTEGER, item, target);
@@ -566,7 +585,7 @@ class LexerObject {
 	 * @param startAt
 	 * @return
 	 */
-	private int identifySymbol(int startAt) {
+	private int identifySymbol(int startAt) throws ConfigCompileException {
 		//We need as much of a lookahead as our largest token
 		char[] lookahead = new char[tokenMap.first().token.length()];
 		//Fill in our lookahead buffer
