@@ -304,10 +304,14 @@ public class Script {
 			} catch (ProgramFlowManipulationException e) {
 				throw e;
 			} catch (Exception e) {
+				//If running in unit test mode, don't do all this, just rethrow the exception
+				if(Implementation.GetServerType() == Implementation.Type.TEST && e instanceof RuntimeException){
+					throw (RuntimeException) e;
+				}
 				String version = "Unknown";
 				try {
 					version = Main.loadSelfVersion();
-				} catch (Exception ex) {
+				} catch (Throwable ex) {
 					//Ignored
 				}
 				String emsg = TermColors.RED + "Uh oh! You've found an error in " + Implementation.GetServerType().getBranding()

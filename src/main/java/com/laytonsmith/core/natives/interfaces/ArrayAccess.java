@@ -49,7 +49,7 @@ public interface ArrayAccess extends Mixed, Sizable {
 	 * @param index
 	 * @return 
 	 */
-	boolean contains(String index);
+	boolean containsKey(String index);
 	
 	/**
 	 * Returns the keys in this array.

@@ -330,7 +330,7 @@ public class MethodScriptCompilerTest {
     @Test
     public void testExecute14() throws ConfigCompileException {
         String script =
-                "proc(_hello, assign(@i, 'world'),"
+                "proc(_hello, @i = 'world',"
                 + "     return(@i)"
                 + ")"
                 + "msg(_hello('hello'))"

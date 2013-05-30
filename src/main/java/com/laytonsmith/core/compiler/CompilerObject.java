@@ -122,8 +122,8 @@ class CompilerObject {
 					&& getLastToken().type == TType.FUNC_END
 					&& pointer.numberOfChildren() > 1 
 					&& !(
-						pointer.getLastChild().getData() instanceof CFunction 
-						&& ((CFunction) pointer.getLastChild().getData()).val().equals(__autoconcat__)
+						pointer.getData() instanceof CFunction 
+						&& ((CFunction) pointer.getData()).val().equals(__autoconcat__)
 					)
 					&& !getLastToken().type.isSymbol()){
 				ParseTree lastChild = pointer.getLastChild();

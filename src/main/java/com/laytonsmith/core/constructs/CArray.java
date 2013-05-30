@@ -13,8 +13,6 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MEnum;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A class that represents a dynamic array.
@@ -340,21 +338,17 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
         return this.get(index, Target.UNKNOWN);
     }
     
+	@Override
     public boolean containsKey(String c){
-        Integer i;
-        try{
-            i = Integer.valueOf(c);
-        } catch(NumberFormatException e){
-            i = null;
-        }
         if(associative_mode){
             return associative_array.containsKey(c);
         } else {
-            if(i == null){
-                return false;
-            } else {
+			try{
+				Integer i = Integer.valueOf(c);
                 return array.size() > i;
-            }
+			} catch(NumberFormatException e){
+				return false;
+			}
         }
     }
     
@@ -362,11 +356,16 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
         return this.containsKey(Integer.toString(i));
     }
     
+	/**
+	 * Returns true if this array contains the specified value
+	 * @param c
+	 * @return 
+	 */
     public boolean contains(Construct c){
         if(associative_mode){
             return associative_array.containsValue(c);
         } else {
-            return array.contains(c);
+			return array.contains(c);
         }
     }
     

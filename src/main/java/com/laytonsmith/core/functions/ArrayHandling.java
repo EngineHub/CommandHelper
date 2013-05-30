@@ -30,8 +30,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -119,7 +117,7 @@ public class ArrayHandling {
 				CSlice slice = ((CSlice) index);
 				return array.slice(slice.getStart(), slice.getFinish(), t);
 			} else {
-				if (array.contains(index.val())) {
+				if (array.containsKey(index.val())) {
 					return array.get(index.val(), t);
 				} else {
 					return defaultConstruct;
@@ -687,7 +685,7 @@ public class ArrayHandling {
 			ArgList list = getBuilder().parse(args, this, t);
 			ArrayAccess array = list.get("array");
 			Mixed index = list.get("index");
-			return new CBoolean(array.contains(index.val()), t);
+			return new CBoolean(array.containsKey(index.val()), t);
 //			if (args[0] instanceof CArray) {
 //				if (!((CArray) args[0]).inAssociativeMode()) {
 //					try {

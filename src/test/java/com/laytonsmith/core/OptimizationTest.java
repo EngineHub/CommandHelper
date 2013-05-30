@@ -240,6 +240,20 @@ public class OptimizationTest {
 		assertEquals("array_set(array_get(@a,@zero),concat(@one,' '),'s')", optimize("@a[@zero][@one.' '] = 's'"));
 	}
 	
+	@Test public void testArrayWithinArray() throws Exception {
+		assertEquals("sconcat(assign(@a,array(1,0)),"
+				+ "array_set(@a,array_get(array_get(@a,1),0),2)"
+				+ ")", 
+				optimize(
+				"@a = array(1, 0)\n"
+				+ "@a[@a[1][0]] = 2"));
+	}
+	
+	@Test public void testArrayWithinFunction() throws Exception {
+		assertEquals("sconcat(assign(@a,array(0,1,2)),msg(array_get(@a,0)))", 
+				optimize("assign(@a, array(0, 1, 2)) msg(@a[0])"));
+	}
+	
 	@Test
 	public void testComplicatedButConstIfCondition() throws Exception{
 		//Test to see if the complicated (but const) condition in an if
@@ -266,6 +280,15 @@ public class OptimizationTest {
 	@Test public void testUnicode() throws Exception {
 		assertEquals("'€'", optimize("'\\u20ac'"));
 		assertEquals("'7'", optimize("'\\u0037'"));
+	}
+	
+	@Test public void testMultijoin() throws Exception {
+		String script =
+                "dyn(1, 2)\n"
+				+ "dyn(3, 4)\n"
+                + "dyn(5, 6)\n";
+		assertEquals("sconcat(dyn(1,2),dyn(3,4),dyn(5,6))", 
+				optimize(script));
 	}
 	
     
