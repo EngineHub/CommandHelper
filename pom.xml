@@ -154,6 +154,8 @@
 		</repository>
 	</repositories>
 	<dependencies>
+		<!-- Please update http://wiki.sk89q.com/wiki/CommandHelper/Compatibility whenever
+			these dependencies are updated, or important dependencies are added -->
 		<!-- Required component -->
 		<dependency>
 			<groupId>com.sk89q</groupId>
