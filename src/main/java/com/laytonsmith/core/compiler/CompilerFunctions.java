@@ -466,11 +466,20 @@ public class CompilerFunctions {
 			//There could be multiple things that need resolving, so we will continue resolving things until we get to the end,
 			//though we will make corrections for list size shrinkage.
 			for(int i = 0; i < list.size(); i++){
+				ParseTree tree = list.get(i);
+				if(tree.getData() instanceof CFunction && tree.getData().val().equals(__cbrace__)){
+					ParseTree tempNode = CompilerFunctions.__cbrace__.optimizeSpecial(tree.getChildren());
+					tree.setData(tempNode.getData());
+					tree.setChildren(tempNode.getChildren());
+				}
+			}
+			for(int i = 0; i < list.size(); i++){
 				int currentSize = list.size();
 				ParseTree node = list.get(i);
-				if(node.getData() instanceof CFunction && ((CFunction)node.getData()).val().equals(__cbrace__)){
+				if(node.getData() instanceof CBrace){
 					if(i == 0){
 						//This is a compile error, they have a { at the beginning of a sibling chain.
+						//TODO: I think this is eventually where object notation can be put
 						throw new ConfigCompileException("Unexpected {", node.getTarget());
 					}
 					ParseTree prev = list.get(i - 1);
@@ -635,6 +644,10 @@ public class CompilerFunctions {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+		
+		public static ParseTree optimizeSpecial(List<ParseTree> children) throws ConfigCompileException{
+			return new __cbrace__().optimizeDynamic(Target.UNKNOWN, null, children);
 		}
 
 		@Override

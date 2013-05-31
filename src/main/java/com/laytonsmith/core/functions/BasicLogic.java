@@ -156,9 +156,9 @@ public class BasicLogic {
 		private static final String _if = new _if().getName();
 		private static final String _ifelse = new ifelse().getName();
 		private static final String _else = "else";
-		private static final String __cbrace__ = new CompilerFunctions.__cbrace__().getName();
 
 		@Override
+		@SuppressWarnings({"null", "ConstantConditions"})
 		public void handleBraces(List<ParseTree> allNodes, int startingWith) throws ConfigCompileException {
 			boolean pastIf = false;
 			boolean hasIf = false;
@@ -184,7 +184,7 @@ public class BasicLogic {
 								throw new ConfigCompileException("Unexpected elements in if statement. (You have a comma in your if(<code>,<code>){...}).", n1.getTarget());
 							}
 							ifelse.addChild(n1.getChildAt(0)); //Grab the child of the if(...)
-							ifelse.addChild(n2.getChildAt(0)); //Grab the child of the braces { ... }
+							ifelse.addChild(((CBrace)n2.getData()).getNode()); //Grab the child of the braces { ... }
 							allNodes.remove(i);
 							allNodes.remove(i);
 							i--;
@@ -219,7 +219,7 @@ public class BasicLogic {
 									throw new ConfigCompileException("Unexpected elements in if statement. (You have a comma in your if(<code>,<code>){...}).", n1.getTarget());
 								}
 								ifelse.addChild(n2.getChildAt(0)); //Grab the child of the if(...)
-								ifelse.addChild(n3.getChildAt(0)); //Grab the child of the braces { ... }
+								ifelse.addChild(((CBrace)n3.getData()).getNode()); //Grab the child of the braces { ... }
 								allNodes.remove(i);
 								allNodes.remove(i);
 								allNodes.remove(i);
@@ -229,11 +229,11 @@ public class BasicLogic {
 								//Note the lack of {}
 								throw new ConfigCompileException("Have else if() with no braces.", n2.getTarget());
 							}
-						} else if (n2.getData() instanceof CFunction && __cbrace__.equals(n2.getData().val())) {
+						} else if (n2.getData() instanceof CBrace) {
 							//This is the end
 							try {
 								//Check for weirdness, like if(1, 1){ ... }
-								ifelse.addChild(n2.getChildAt(0)); //Grab the child of the {...}
+								ifelse.addChild(((CBrace)n2.getData()).getNode()); //Grab the child of the {...}
 								allNodes.remove(i);
 								allNodes.remove(i);
 								i--;

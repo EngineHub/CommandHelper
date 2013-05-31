@@ -594,12 +594,12 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
     }
 
 	public String typeName() {
-		return "array";
+		return this.getClass().getAnnotation(typename.class).value();
 	}
 
 	@Override
 	public CPrimitive primitive(Target t) {
-		throw new ConfigRuntimeException("Cannot cast this array to a primitive value.", ExceptionType.CastException, t);
+		throw new ConfigRuntimeException("Arrays cannot be cast to a primitive value.", ExceptionType.CastException, t);
 	}
 
 	public Iterator<Construct> iterator() {

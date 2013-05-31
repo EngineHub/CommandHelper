@@ -306,7 +306,7 @@ class LexerObject {
 				}
 			}
 			//Now we need to check for strings
-			if (!state_in_double_quote) {
+			if (!state_in_double_quote && !state_in_single_quote) {
 				if (c == '"') {
 					parseBuffer();
 					//Start of smart string
@@ -315,7 +315,7 @@ class LexerObject {
 					continue;
 				}
 			}
-			if (!state_in_single_quote) {
+			if (!state_in_single_quote && !state_in_single_quote) {
 				if (c == '\'') {
 					//Start of string
 					parseBuffer();
@@ -376,6 +376,10 @@ class LexerObject {
 								buffer('"');
 								i++;
 							}
+							break;
+						case '\\':
+							buffer('\\');
+							i++;
 							break;
 						default:
 							//It's invalid, so throw an exception

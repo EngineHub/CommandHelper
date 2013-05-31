@@ -377,7 +377,10 @@ public class DataHandling {
 		}
 
 		public void handleBraces(List<ParseTree> allNodes, int startingWith) throws ConfigCompileException {
-			throw new UnsupportedOperationException("Not supported yet.");
+			if(allNodes.get(startingWith + 1).getData() instanceof CBrace){
+				ParseTree child = allNodes.remove(startingWith + 1);
+				allNodes.get(startingWith).addChild(((CBrace)child.getData()).getNode());
+			}
 		}
 				
 	}

@@ -107,7 +107,8 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 		return val().isEmpty() ? false : true;
 	}
 
-	public boolean contains(String index) {
+	@Override
+	public boolean containsKey(String index) {
 		try{
 			int i = Integer.parseInt(index);
 			return i < size();

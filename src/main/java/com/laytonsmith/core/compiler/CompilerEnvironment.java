@@ -56,6 +56,7 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl, Runtime
 	private final api.Platforms platform;
 	private Map<String, Object> custom = new HashMap<String, Object>();
 	private SortedSet<String> flags = new TreeSet<String>();
+	private FileOptions fileOptions = null;
 	
 	/**
 	 * Since procedure names can't actually override other procs in the stack,
@@ -213,6 +214,22 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl, Runtime
 			}
 		}
 		throw new ConfigCompileException("Unknown procedure \"" + name + "\"", t);
+	}
+	
+	/**
+	 * Returns the file options for the current operating scope.
+	 * @return 
+	 */
+	public FileOptions getFileOptions(){
+		return fileOptions;
+	}
+	
+	/**
+	 * Sets the file options for the current operating scope.
+	 * @param fileOptions 
+	 */
+	public void setFileOptions(FileOptions fileOptions){
+		this.fileOptions = fileOptions;
 	}
 	
 }

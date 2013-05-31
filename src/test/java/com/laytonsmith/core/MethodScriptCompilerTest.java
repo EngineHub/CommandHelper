@@ -395,17 +395,15 @@ public class MethodScriptCompilerTest {
     }
     
     /**
-     * Variables are locked in when the procedure is defined
+     * Default values must be constant
      * @throws ConfigCompileException 
      */
-    @Test
+    @Test(expected=ConfigCompileException.class)
     public void testExecute19() throws ConfigCompileException {
         String script =
-                "assign(@j, 'world')\n"
-                + "proc(_hello, assign(@i, @j),"
+                "proc(_hello, assign(@i, 'world'),"
                 + "     return(@i)"
                 + ")\n"
-                + "assign(@j, 'goodbye')\n"
                 + "msg(_hello('hello'))"
                 + "msg(_hello())";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), env), env, null, null);
@@ -685,9 +683,9 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("yes");
     }
     
-    @Test public void testArrayBooleanType() throws ConfigCompileException{
-        assertEquals("true", SRun("boolean(array(1))", null));
-        assertEquals("false", SRun("boolean(array())", null));
+    @Test(expected=ConfigRuntimeException.class)
+	public void testArrayBooleanType() throws ConfigCompileException{
+        SRun("boolean(array(1))", null);
     }
     
     @Test public void testParenthesisAfterQuotedString() throws ConfigCompileException{
@@ -807,16 +805,16 @@ public class MethodScriptCompilerTest {
     public void testInnerElseInElseIf() throws ConfigCompileException{
         SRun("if(true){"
                 + "msg('fail')"
-                + "} else {"
+                + "} else {" //else
                 + "msg('fail')"
-                + "} else if(true){"
+                + "} else if(true){" //else if
                 + "msg('fail')"
                 + "}", fakePlayer);
     }
     
     @Test
     public void testBracketsOnFor() throws ConfigCompileException{
-        SRun("for(assign(@i, 0), @i < 5, @i++){\n"
+        SRun("for(@i = 0, @i < 5, @i++){\n"
                 + "msg('worked')\n"
                 + "}", fakePlayer);
         verify(fakePlayer, times(5)).sendMessage("worked");

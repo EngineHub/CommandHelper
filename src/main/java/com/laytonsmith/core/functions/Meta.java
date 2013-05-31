@@ -9,6 +9,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.constructs.*;
@@ -389,7 +390,7 @@ public class Meta {
 			CHLog.GetLogger().CompilerWarning(CompilerWarning.Deprecated, "g() is deprecated,"
 					+ " and will be removed in a future release. You do not need this function anymore."
 					+ " If your code were g(run('/cmd') run('/cmd')) you can simply remove the g(), and"
-					+ " it will function the same.", t, null);
+					+ " it will function the same.", t, env.getEnv(CompilerEnvironment.class).getFileOptions());
 			return null;
 		}
 		

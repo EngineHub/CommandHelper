@@ -22,5 +22,10 @@ public class CBrace extends CFunction{
 	public ParseTree getNode(){
 		return code;
 	}
+
+	@Override
+	public String toString() {
+		return "{" + super.toString() + "}";
+	}
 	
 }

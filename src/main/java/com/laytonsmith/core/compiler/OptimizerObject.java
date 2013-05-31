@@ -33,6 +33,7 @@ class OptimizerObject {
 	private Environment env;
 	
 	private final static String __autoconcat__ = new CompilerFunctions.__autoconcat__().getName();
+	private final static String __cbrace__ = new CompilerFunctions.__cbrace__().getName();
 	private final static String cc = new StringHandling.cc().getName();
 	private final static String assign = new DataHandling.assign().getName();
 	private final static String proc = new DataHandling.proc().getName();
@@ -43,33 +44,85 @@ class OptimizerObject {
 		env = compilerEnvironment;
 	}
 
+	/**
+	 * Optimizes the ParseTree. There are several stages to the optimization, some
+	 * of them aren't true optimizations, rather are part of the compilation process,
+	 * but generally act like optimizations, so are included here. The lexer and compiler
+	 * will have already run by the time this method is run, so we start with an unoptimized
+	 * parse tree, with __autoconcat__s in place. The general process is this:
+	 * <ul>
+	 * <li>__autoconcat__ reduction - Remove all the references to __autoconcat__ in the parse tree.
+	 * This will ensure that everything is functional at this point, and all operators will have been
+	 * removed.</li>
+	 * <li>Turing reduction - Optimize the branching turing methods, for instance if and for. This has the potential
+	 * of actually removing branches of code, so this can be used as a preprocessor, since only loose linking is
+	 * done during this stage (TODO). This means that if a function is only found in one platform, it can be fully
+	 * removed at this stage, before platform linking occurs. Loose linking simply means that all platforms are
+	 * considered valid at this point. Once this stage is complete, it is a compiler error to not have fully
+	 * removed all functions not for this platform. Turing functions are inherently platform independent for this
+	 * reason.</li>
+	 * <li>Pre-proc function optimization/tight linking - Functions are optimized now given their current arguments.
+	 * Some arguments will be dynamic due to procs though, so the optimization won't catch everything if the proc
+	 * turns out to be a constexpr later, so we have to rerun in a bit, but all the major optimizations should run
+	 * now, and it may reorganize some of the AST so that proc linking is easier later, and constexpr evaluation
+	 * is possible for more procs. Functions are also tightly
+	 * linked at this point to the target platform.</li>
+	 * <li>Strict mode checks - Check for violations of strict mode, as well as type safety where
+	 * applicable.</li>
+	 * <li>Proc optimization - constexpr procs can be identified and fulfilled at this point, and completely reduced
+	 * in the case that it is possible. Proc linking also takes place here, to verify that procs are properly scoped.</li>
+	 * <li>Post-proc function optimization - Functions can be re-optimized at this point, as constexpr procs may
+	 * have been fully reduced, which will cause some of the previously dynamic arguments to be constant.</li>
+	 * <li>Post-proc function optimization for function pullups - The last reduction may again have 
+	 * caused the previously dynamic functions to become constant, and caused certain pullups to be possible again,
+	 * though the functions themselves won't re-optimize at this point.</li>
+	 * <li>Turing reduction - Again, we turing reduce, since so many things that were dynamic before may now be
+	 * constant, and we can reduce the tree further.</li>
+	 * </ul>
+	 * 
+	 * In the future, the following optimizations would be added after this point:
+	 * <ul>
+	 * <li>Compiler Annotations - Build time annotations are processed at this point. They are given
+	 * a copy of the element they are tagged to, and they can do compile time processing, where applicable.</li>
+	 * </ul>
+	 * @return The optimized parse tree.
+	 * @throws ConfigCompileException 
+	 */
 	public ParseTree optimize() throws ConfigCompileException {
-		//If at any point we get a PullMeUpException, we just set root = to that node
+		//__autoconcat__ reduction
 		optimize01(root, env);
+		//turing reduction/TODO: loose linking
 		optimize02(root, env, false);
 		env.getEnv(CompilerEnvironment.class).pushProcedureScope();
 		try{
-			optimize03(root, env, false); // Once
+			//pre-proc function optimization/tight linking
+			optimize03(root, false); // Once
 		} catch(PullMeUpException e){
+			//If at any point we get a PullMeUpException, we just set root = to that node
 			root = e.getNode();
 		}
 		env.getEnv(CompilerEnvironment.class).popProcedureScope();
+		//strict mode checks
 		optimize04(root, env, new ArrayList<String>());
+		//proc optimization
 		optimize05(root, env);
 		env.getEnv(CompilerEnvironment.class).pushProcedureScope();
 		try{
-			optimize03(root, env, true); // Twice
+			//post-proc function optimization
+			optimize03(root, true); // Twice
 		} catch(PullMeUpException e){
 			root = e.getNode();
 		}
 		env.getEnv(CompilerEnvironment.class).popProcedureScope();
 		env.getEnv(CompilerEnvironment.class).pushProcedureScope();
 		try{
-			optimize03(root, env, true); // Thrice
+			//post-proc function optimization for function pull ups
+			optimize03(root, true); // Thrice
 		} catch(PullMeUpException e){
 			root = e.getNode();
 		}
 		env.getEnv(CompilerEnvironment.class).popProcedureScope();
+		//turing reduction again
 		optimize02(root, env, true); // Gotta do this one again too
 
 		return root;
@@ -84,12 +137,11 @@ class OptimizerObject {
 	 * @throws ConfigCompileException
 	 */
 	private void optimize01(ParseTree tree, Environment compilerEnvironment) throws ConfigCompileException {
-		com.laytonsmith.core.compiler.CompilerFunctions.__autoconcat__ autoconcat = (com.laytonsmith.core.compiler.CompilerFunctions.__autoconcat__) FunctionList.getFunction("__autoconcat__");
 		if (tree.getData() instanceof CFunction && tree.getData().val().equals(cc)) {
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				ParseTree node = tree.getChildAt(i);
 				if (node.getData().val().equals(__autoconcat__)) {
-					ParseTree tempNode = autoconcat.optimizeSpecial(node.getChildren(), false);
+					ParseTree tempNode = CompilerFunctions.__autoconcat__.optimizeSpecial(node.getChildren(), false);
 					tree.setData(tempNode.getData());
 					tree.setChildren(tempNode.getChildren());
 					optimize01(tree, compilerEnvironment);
@@ -98,7 +150,7 @@ class OptimizerObject {
 			}
 		} else {
 			if (tree.getData() instanceof CFunction && tree.getData().val().equals(__autoconcat__)) {
-				ParseTree tempNode = autoconcat.optimizeSpecial(tree.getChildren(), true);
+				ParseTree tempNode = CompilerFunctions.__autoconcat__.optimizeSpecial(tree.getChildren(), true);
 				tree.setData(tempNode.getData());
 				tree.setChildren(tempNode.getChildren());
 			}
@@ -202,13 +254,14 @@ class OptimizerObject {
 						if(!branches.contains(i)){
 							ParseTree child = tree.getChildAt(i);
 							try{
-								optimize03(child, compilerEnvironment, optimizeProcs);
+								optimize03(child, optimizeProcs);
 							} catch(PullMeUpException e){
 								tree.getChildren().set(i, e.getNode());
 							}
 						}
 					}
 					
+					env.getEnv(CompilerEnvironment.class).setFileOptions(tree.getFileOptions());
 					tempNode = cb.optimizeDynamic(tree.getTarget(), env, tree.getChildren());
 
 					if (tempNode == Optimizable.PULL_ME_UP) {
@@ -244,13 +297,13 @@ class OptimizerObject {
 	 * @param compilerEnvironment
 	 * @throws ConfigCompileException
 	 */
-	private void optimize03(ParseTree tree, Environment compilerEnvironment, boolean optimizeProcs) throws ConfigCompileException, PullMeUpException {
+	private void optimize03(ParseTree tree, boolean optimizeProcs) throws ConfigCompileException, PullMeUpException {
 		
 		if(!(tree.getData() instanceof CFunction)){
 			//Not a function, no optimization needed
 			return;
 		}
-		CompilerEnvironment env = compilerEnvironment.getEnv(CompilerEnvironment.class);
+		CompilerEnvironment cEnv = env.getEnv(CompilerEnvironment.class);
 		if(optimizeProcs && tree.getData() instanceof CFunction && proc.equals(tree.getData().val())){
 			//Different way to optimize these, but it won't happen the first go through
 			//It is a procedure, so we need to drop down into it (adding it first to the stack
@@ -277,17 +330,17 @@ class OptimizerObject {
 				}
 				ivars.add((IVariable) var);
 			}
-			env.addProcedure(new Procedure(name, ivars, tree.getChildAt(tree.getChildren().size() - 1), tree.getTarget()));
-			env.pushProcedureScope();
+			cEnv.addProcedure(new Procedure(name, ivars, tree.getChildAt(tree.getChildren().size() - 1), tree.getTarget()));
+			cEnv.pushProcedureScope();
 			//Now drop into the proc's actual code
-			optimize03(tree.getChildAt(tree.getChildren().size() - 1), compilerEnvironment, optimizeProcs);
-			env.popProcedureScope();
+			optimize03(tree.getChildAt(tree.getChildren().size() - 1), optimizeProcs);
+			cEnv.popProcedureScope();
 		} else {
 			//Depth first
 			for(int i = 0; i < tree.numberOfChildren(); i++){
 				ParseTree child = tree.getChildAt(i);
 				try{
-					optimize03(child, compilerEnvironment, optimizeProcs);
+					optimize03(child, optimizeProcs);
 				} catch(PullMeUpException e){
 					tree.getChildren().set(i, e.getNode());
 				}
@@ -297,7 +350,7 @@ class OptimizerObject {
 			if(tree.getData() instanceof CFunction && ((CFunction)tree.getData()).isProcedure()){
 				if(optimizeProcs){
 					//If this is not a valid procedure at this point, this will throw the exception for us.
-					env.getProcedure(tree.getData().val(), tree.getTarget());
+					cEnv.getProcedure(tree.getData().val(), tree.getTarget());
 				}
 				return;
 			}
@@ -308,7 +361,8 @@ class OptimizerObject {
 				if(options.contains(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC)){
 					ParseTree tempNode;
 					try{
-						tempNode = f.optimizeDynamic(tree.getTarget(), compilerEnvironment, tree.getChildren());
+						cEnv.setFileOptions(tree.getFileOptions());
+						tempNode = f.optimizeDynamic(tree.getTarget(), env, tree.getChildren());
 					} catch(ConfigRuntimeException e){
 						//Turn this into a compile exception, then rethrow
 						throw new ConfigCompileException(e);
@@ -344,9 +398,9 @@ class OptimizerObject {
 					try{
 						Construct result;
 						if(options.contains(OptimizationOption.CONSTANT_OFFLINE)){
-							result = f.exec(tree.getData().getTarget(), compilerEnvironment, constructs);
+							result = f.exec(tree.getData().getTarget(), env, constructs);
 						} else {
-							result = f.optimize(tree.getData().getTarget(), compilerEnvironment, constructs);
+							result = f.optimize(tree.getData().getTarget(), env, constructs);
 						}
 						//If the result is null, it was just a check, it can't optimize further
 						if(result != null){
