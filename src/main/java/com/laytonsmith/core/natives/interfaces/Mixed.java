@@ -63,4 +63,28 @@ public interface Mixed {
 	 * @return 
 	 */
 	boolean isImmutable();
+	
+	/**
+	 * Returns true if this is dynamic, that is to say, isn't a constant.
+	 * If the underlying value (or values) is mutable, it is dynamic.
+	 * @return 
+	 */
+	boolean isDynamic();
+	
+	/**
+	 * This is called upon destruction of the object.
+	 */
+	void destructor();
+	
+	/**
+	 * All mixed objects must be cloneable by default.
+	 * @return 
+	 */
+	public Mixed doClone();
+	
+	/**
+	 * Most things, other than constructs can return Target.UNKNOWN for this.
+	 * @return 
+	 */
+	public Target getTarget();
 }

@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -48,7 +49,7 @@ public class Marquee {
 			return null;
 		}
 
-		public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final String marqueeName;
 			final String text;
 			final int stringWidth;
@@ -156,7 +157,7 @@ public class Marquee {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String marqueeName = args[0].val();
 			if(marqeeMap.containsKey(marqueeName)){
 				marqeeMap.get(marqueeName).stop();

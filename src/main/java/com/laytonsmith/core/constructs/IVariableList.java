@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ import java.util.Stack;
  * @author Layton
  */
 public class IVariableList implements Cloneable {
-	private Stack<Map<IVariable, Construct>> varStack = new Stack<Map<IVariable, Construct>>();
+	private Stack<Map<IVariable, Mixed>> varStack = new Stack<Map<IVariable, Mixed>>();
 	
 	public IVariableList(){
 		pushScope();
@@ -24,17 +25,17 @@ public class IVariableList implements Cloneable {
 	/**
 	 * Pushes a new scope onto the stack. Variables that are defined in here
 	 * are only valid during this scope, and when the scope is popped, and variables
-	 * that were defined in this scope are desctructed as well.
+	 * that were defined in this scope are destructed as well.
 	 */
 	public void pushScope(){
-		varStack.push(new HashMap<IVariable, Construct>());
+		varStack.push(new HashMap<IVariable, Mixed>());
 	}
 	
 	public void popScope(){
 		try{
 			//Call the destructors on all Constructs
-			Map<IVariable, Construct> scope = varStack.pop();
-			for(Construct c : scope.values()){
+			Map<IVariable, Mixed> scope = varStack.pop();
+			for(Mixed c : scope.values()){
 				c.destructor();
 			}
 		} catch(EmptyStackException e){
@@ -51,7 +52,7 @@ public class IVariableList implements Cloneable {
 	 * @return true is returned if the construct already existed, and it is simply
 	 * being re-set, and false is returned if it is being set for the first time.
 	 */
-    public boolean set(IVariable v, Construct value){
+    public boolean set(IVariable v, Mixed value){
 		//Quick error check; if no scopes exist, this is not set up correctly
 		if(varStack.empty()){
 			throw new Error("varStack is empty, but set was called. Did you forget to call pushScope()?");
@@ -59,17 +60,17 @@ public class IVariableList implements Cloneable {
 		//If value is an IVariable itself, we're doing @a = @b, and we actually need to get the value of @b.
 		//This should only go 1 deep, because an IVariable should never actually get stored due to this check.
 		if(value instanceof IVariable){
-			value = get(((IVariable)value), value.getTarget());
+			value = get(((IVariable)value), (value instanceof Construct?((Construct)value).getTarget():Target.UNKNOWN));
 		}
-		Stack<Map<IVariable, Construct>> scopes = new Stack<Map<IVariable, Construct>>();
+		Stack<Map<IVariable, Mixed>> scopes = new Stack<Map<IVariable, Mixed>>();
 		//Manually clone the stack
-		for(Map<IVariable, Construct> m : varStack){
+		for(Map<IVariable, Mixed> m : varStack){
 			scopes.push(m);
 		}
 		//Now reverse it, because we want to start from the top scope
 		Collections.reverse(scopes);
 		while(!scopes.empty()){
-			Map<IVariable, Construct> scope = scopes.pop();
+			Map<IVariable, Mixed> scope = scopes.pop();
 			if(scope.containsKey(v)){
 				scope.put(v, value);
 				//Found and put in
@@ -88,14 +89,14 @@ public class IVariableList implements Cloneable {
 	 * @param inStrictMode
 	 * @return 
 	 */
-    public Construct get(IVariable name, Target t){
-		Stack<Map<IVariable, Construct>> scopes = new Stack<Map<IVariable, Construct>>();
+    public Mixed get(IVariable name, Target t){
+		Stack<Map<IVariable, Mixed>> scopes = new Stack<Map<IVariable, Mixed>>();
 		//Manually clone the stack
-		for(Map<IVariable, Construct> m : varStack){
+		for(Map<IVariable, Mixed> m : varStack){
 			scopes.push(m);
 		}
         while(!scopes.empty()){
-			Map<IVariable, Construct> scope = scopes.pop();
+			Map<IVariable, Mixed> scope = scopes.pop();
 			if(scope.containsKey(name)){
 				return scope.get(name);
 			}
@@ -119,13 +120,13 @@ public class IVariableList implements Cloneable {
 		try{
 			IVariableList clone = (IVariableList)super.clone();
 			//We actually want to do a deep clone here, so we're gonna manually clone the stack.
-			clone.varStack = new Stack<Map<IVariable, Construct>>();
-			for(Map<IVariable, Construct> scope : varStack){
+			clone.varStack = new Stack<Map<IVariable, Mixed>>();
+			for(Map<IVariable, Mixed> scope : varStack){
 				//Deep clone on these guys too. The IVariables are immutable, so no need to
 				//clone them, but the rest of the constructs need cloning.
-				Map<IVariable, Construct> cloneScope = new HashMap<IVariable, Construct>();
+				Map<IVariable, Mixed> cloneScope = new HashMap<IVariable, Mixed>();
 				for(IVariable key : scope.keySet()){
-					cloneScope.put(key, scope.get(key).clone());
+					cloneScope.put(key, scope.get(key).doClone());
 				}
 				clone.varStack.push(cloneScope);
 			}
@@ -139,7 +140,7 @@ public class IVariableList implements Cloneable {
     //only the reflection package should be accessing this
     public Set<String> keySet() {
         Set<String> names = new HashSet<String>();
-		for(Map<IVariable, Construct> scope : varStack){
+		for(Map<IVariable, Mixed> scope : varStack){
 			for(IVariable key : scope.keySet()){
 				names.add(key.getName());
 			}

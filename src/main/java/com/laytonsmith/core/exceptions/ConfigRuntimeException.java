@@ -19,6 +19,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,7 +116,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null){
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, Target.UNKNOWN);
-			Construct ret = Construct.GetNullConstruct(Target.UNKNOWN);
+			Mixed ret = Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
 			try{
 				c.execute(new Construct[]{ex});
 			} catch(FunctionReturnException retException){

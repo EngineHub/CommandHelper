@@ -18,6 +18,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.annotations.NonNull;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -45,7 +46,7 @@ public class ByteArrays {
 			return new ExceptionType[]{};
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CByteArray(t);
 		}
 
@@ -70,7 +71,7 @@ public class ByteArrays {
 	@api
 	public static class ba_as_array extends ba {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			return ba.asArray(t);
@@ -103,7 +104,7 @@ public class ByteArrays {
 	@api
 	public static class ba_rewind extends ba {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			ba.rewind();
@@ -133,7 +134,7 @@ public class ByteArrays {
 	@api
 	public static class ba_get_byte extends ba_get {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			Integer pos = list.getIntegerWithNull("pos", t);
@@ -161,7 +162,7 @@ public class ByteArrays {
 	@api
 	public static class ba_get_char extends ba_get {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			Integer pos = list.getIntegerWithNull("pos", t);
@@ -189,7 +190,7 @@ public class ByteArrays {
 	@api
 	public static class ba_get_short extends ba_get {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			Integer pos = list.getIntegerWithNull("pos", t);
@@ -217,7 +218,7 @@ public class ByteArrays {
 	@api
 	public static class ba_get_int extends ba_get {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			Integer pos = list.getIntegerWithNull("pos", t);
@@ -245,7 +246,7 @@ public class ByteArrays {
 	@api
 	public static class ba_get_long extends ba_get {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			Integer pos = list.getIntegerWithNull("pos", t);
@@ -273,7 +274,7 @@ public class ByteArrays {
 	@api
 	public static class ba_get_float extends ba_get {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			Integer pos = list.getIntegerWithNull("pos", t);
@@ -301,7 +302,7 @@ public class ByteArrays {
 	@api
 	public static class ba_get_double extends ba_get {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			Integer pos = list.getIntegerWithNull("pos", t);
@@ -334,7 +335,7 @@ public class ByteArrays {
 			return new Integer[]{2, 3};
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			int size = list.getInt("length", t);
@@ -364,7 +365,7 @@ public class ByteArrays {
 	@api
 	public static class ba_get_string extends ba_get {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			Integer pos = list.getIntegerWithNull("pos", t);
@@ -400,7 +401,7 @@ public class ByteArrays {
 	@api
 	public static class ba_put_byte extends ba_put {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			byte b = list.getByte("val", t);
@@ -431,7 +432,7 @@ public class ByteArrays {
 	@api
 	public static class ba_put_char extends ba_put {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			String b = list.getString("val", t);
@@ -466,7 +467,7 @@ public class ByteArrays {
 	@api
 	public static class ba_put_short extends ba_put {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			short b = list.getShort("val", t);
@@ -497,7 +498,7 @@ public class ByteArrays {
 	@api
 	public static class ba_put_int extends ba_put {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			int b = list.getInt("val", t);
@@ -528,7 +529,7 @@ public class ByteArrays {
 	@api
 	public static class ba_put_long extends ba_put {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			long b = list.getLong("val", t);
@@ -559,7 +560,7 @@ public class ByteArrays {
 	@api
 	public static class ba_put_float extends ba_put {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			float b = list.getFloat("val", t);
@@ -590,7 +591,7 @@ public class ByteArrays {
 	@api
 	public static class ba_put_double extends ba_put {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			double b = list.getDouble("val", t);
@@ -621,7 +622,7 @@ public class ByteArrays {
 	@api
 	public static class ba_put_bytes extends ba_put {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray dest = list.get("destination");
 			CByteArray src = list.get("source");
@@ -652,7 +653,7 @@ public class ByteArrays {
 	@api
 	public static class ba_put_string extends ba_put {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("ba");
 			String s = list.getString("val", t);

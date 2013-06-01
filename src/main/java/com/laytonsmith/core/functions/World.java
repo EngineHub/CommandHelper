@@ -30,6 +30,7 @@ import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
 import com.laytonsmith.core.natives.MVector3D;
 import com.laytonsmith.core.natives.interfaces.MObject;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -91,7 +92,7 @@ public class World {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String world;
 			if (args.length == 1) {
 				world = args[0].val();
@@ -122,7 +123,7 @@ public class World {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld() : null);
 			int x = 0;
 			int y = 0;
@@ -234,7 +235,7 @@ public class World {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
 			int x;
@@ -319,7 +320,7 @@ public class World {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
 			int x;
@@ -431,7 +432,7 @@ public class World {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
@@ -528,7 +529,7 @@ public class World {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
@@ -558,7 +559,7 @@ public class World {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCWorldCreator creator = StaticLayer.GetConvertor().getWorldCreator(args[0].val());
 			if(args.length >= 4){
 				MCWorldType type;
@@ -636,7 +637,7 @@ public class World {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray worlds = new CArray(t);
 			for(MCWorld w : Static.getServer().getWorlds()){
 				worlds.push(new CString(w.getName(), t));
@@ -681,7 +682,7 @@ public class World {
 			return new Integer[]{0, 1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer p = null;
 			MCWorld w = null;
@@ -764,7 +765,7 @@ public class World {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null , t);
 			MCItemStack item = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
@@ -859,7 +860,7 @@ public class World {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if (w == null) {
 				throw new ConfigRuntimeException("Unknown world: " + args[0],

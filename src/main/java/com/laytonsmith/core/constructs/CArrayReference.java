@@ -6,16 +6,17 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
  * @author Layton
  */
 public class CArrayReference extends Construct{
-    public Construct array;
-    public Construct index;
+    public Mixed array;
+    public Mixed index;
     public IVariable name = null;
-    public CArrayReference(Construct array, Construct index, Environment env){
+    public CArrayReference(Construct array, Mixed index, Environment env){
         super("", Target.UNKNOWN);
         this.array = array;
         if(array instanceof CArrayReference){
@@ -24,7 +25,7 @@ public class CArrayReference extends Construct{
         if(!(array instanceof CArray) && !(array instanceof CArrayReference)){
             if(array instanceof IVariable){
                 name = (IVariable)array;
-                Construct ival = env.getEnv(GlobalEnv.class).GetVarList().get(name, name.getTarget());
+                Mixed ival = env.getEnv(GlobalEnv.class).GetVarList().get(name, name.getTarget());
                 if(ival instanceof CArray){
                     this.array = ival;
                 } else {
@@ -42,15 +43,15 @@ public class CArrayReference extends Construct{
         return "(" + array + ") -> " + index;
     }
     
-    public Construct getInternalArray(){
-        Construct temp = array;
+    public Mixed getInternalArray(){
+        Mixed temp = array;
         while(temp instanceof CArrayReference){
             temp = ((CArrayReference)temp).array;
         }
         return temp;
     }
     
-    public Construct getInternalIndex(){
+    public Mixed getInternalIndex(){
         if(!(array instanceof CArrayReference)){
             return index;
         }

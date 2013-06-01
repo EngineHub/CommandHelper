@@ -89,7 +89,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
@@ -109,7 +109,7 @@ public class StringHandling {
 
 			StringBuilder b = new StringBuilder();
 			for (ParseTree node : list) {
-				Construct c = parent.seval(node, env);
+				Mixed c = parent.seval(node, env);
 				b.append(c.val());
 			}
 			return new CString(b.toString(), t);
@@ -146,7 +146,7 @@ public class StringHandling {
 			return new ExceptionType[]{};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for (int i = 0; i < args.length; i++) {
 				b.append(args[i].val());
@@ -214,7 +214,7 @@ public class StringHandling {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for (int i = 0; i < args.length; i++) {
 				if (i > 0) {
@@ -291,7 +291,7 @@ public class StringHandling {
 			return new Integer[]{3};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String thing = args[0].val();
 			String what = args[1].val();
 			String that = args[2].val();
@@ -356,7 +356,7 @@ public class StringHandling {
 			return new Integer[]{1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String[] sa = args[0].val().split(" ");
 			ArrayList<Construct> a = new ArrayList<Construct>();
 			for (String s : sa) {
@@ -456,7 +456,7 @@ public class StringHandling {
 			return CHVersion.V3_0_1;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(args[0].val().trim(), args[0].getTarget());
 		}
 
@@ -515,7 +515,7 @@ public class StringHandling {
 			return CHVersion.V3_3_1;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimRight(args[0].val()), args[0].getTarget());
 		}
 
@@ -574,7 +574,7 @@ public class StringHandling {
 			return CHVersion.V3_3_1;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimLeft(args[0].val()), t);
 		}
 
@@ -637,7 +637,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			Sizable item = list.get("item");
 			return new CInt(item.size(), t);
@@ -699,7 +699,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(args[0].val().toUpperCase(), t);
 		}
 
@@ -760,7 +760,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(args[0].val().toLowerCase(), t);
 		}
 
@@ -826,7 +826,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			try {
 				String s = list.getString("str", t);
@@ -903,9 +903,9 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			String haystack = args[0].nval();
-			String needle = args[1].nval();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			String haystack = args[0].val();
+			String needle = args[1].val();
 			Static.AssertNonCNull(t, args);
 			return new CInt(haystack.indexOf(needle), t);
 		}
@@ -970,7 +970,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			//http://stackoverflow.com/questions/2667015/is-regex-too-slow-real-life-examples-where-simple-non-regex-alternative-is-bett
 			//According to this, regex isn't necessarily slower, but we do want to escape the pattern either way, since the main advantage
 			//of this function is convenience (not speed) however, if we can eek out a little extra speed too, excellent.
@@ -1026,7 +1026,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
 				throw new ConfigRuntimeException(getName() + " expects 1 or more argument", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -1043,7 +1043,7 @@ public class StringHandling {
 						+ " expects " + requiredArgs(parsed) + " argument, but " + (args.length - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
 			}
 
-			List<Construct> flattenedArgs = new ArrayList<Construct>();
+			List<Mixed> flattenedArgs = new ArrayList<Mixed>();
 			if (args.length == 2 && args[1] instanceof CArray) {
 				if (((CArray) args[1]).inAssociativeMode()) {
 					throw new ConfigRuntimeException("If the second argument to " + getName() + " is an array, it may not be associative.", ExceptionType.CastException, t);
@@ -1059,7 +1059,7 @@ public class StringHandling {
 			}
 			//Now figure out how to cast things, now that we know our argument numbers will match up
 			for (int i = 0; i < requiredArgs(parsed); i++) {
-				Construct arg = flattenedArgs.get(i);
+				Mixed arg = flattenedArgs.get(i);
 				FormatString fs = parsed.get(i);
 				Character c = fs.getExpectedType();
 				params[i] = convertArgument(arg, c, i, t);
@@ -1068,7 +1068,7 @@ public class StringHandling {
 			return new CString(String.format(formatString, params), t);
 		}
 
-		private Object convertArgument(Construct arg, Character c, int i, Target t) {
+		private Object convertArgument(Mixed arg, Character c, int i, Target t) {
 			Object o;
 			if (Conversion.isValid(c)) {
 				if (c == 't' || c == 'T') {
@@ -1444,7 +1444,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			String string = list.getString("string", t);
 			String encoding = list.getString("encoding", t);
@@ -1501,7 +1501,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CByteArray ba = list.get("byte_array");
 			String encoding = list.getString("encoding", t);

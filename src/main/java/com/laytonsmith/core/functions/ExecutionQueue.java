@@ -18,6 +18,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -49,7 +50,7 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
@@ -57,7 +58,7 @@ public class ExecutionQueue {
 			}
 			c = ((CClosure)args[0]);
 			if(args.length == 2){
-				queue = args[1].nval();
+				queue = args[1].val();
 			}
 			
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(queue, new Runnable() {
@@ -119,7 +120,7 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
@@ -127,7 +128,7 @@ public class ExecutionQueue {
 			}
 			c = ((CClosure)args[0]);
 			if(args.length == 2){
-				queue = args[1].nval();
+				queue = args[1].val();
 			}
 			
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(queue, new Runnable() {
@@ -189,10 +190,10 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1){
-				queue = args[0].nval();
+				queue = args[0].val();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().remove(queue);
 			return new CVoid(t);
@@ -241,10 +242,10 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1){
-				queue = args[0].nval();
+				queue = args[0].val();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().removeFront(queue);
 			return new CVoid(t);
@@ -294,10 +295,10 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1){
-				queue = args[0].nval();
+				queue = args[0].val();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().clear(queue);
 			return new CVoid(t);
@@ -347,10 +348,10 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1){
-				queue = args[0].nval();
+				queue = args[0].val();
 			}
 			return new CBoolean(environment.getEnv(GlobalEnv.class).GetExecutionQueue().isRunning(queue), t);
 		}
@@ -398,10 +399,10 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2){
-				queue = args[1].nval();
+				queue = args[1].val();
 			}
 			final long delay = args[0].primitive(t).castToInt(t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(queue, new Runnable() {
@@ -462,10 +463,10 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2){
-				queue = args[1].nval();
+				queue = args[1].val();
 			}
 			final long delay = args[0].primitive(t).castToInt(t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(queue, new Runnable() {

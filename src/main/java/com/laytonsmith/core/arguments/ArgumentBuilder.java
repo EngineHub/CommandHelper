@@ -163,7 +163,7 @@ public class ArgumentBuilder {
 	 * @param t
 	 * @return 
 	 */
-	public ArgList parse(Construct [] args, Function f, Target t){
+	public ArgList parse(Mixed [] args, Function f, Target t){
 		signature: for(Signature s : signatures){
 			if(s.getArguments().size() == args.length 
 					|| (s.isVararg() && args.length >= s.getArguments().size())){
@@ -217,7 +217,7 @@ public class ArgumentBuilder {
 		}
 		//No matches were found. Throw an exception.
 		List<String> sent = new ArrayList<String>();
-		for(Construct arg : args){
+		for(Mixed arg : args){
 			sent.add(arg.typeName());
 		}
 		throw new ConfigRuntimeException("The arguments provided: " + StringUtils.Join(sent, ", ")

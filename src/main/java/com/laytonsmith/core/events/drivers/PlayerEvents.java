@@ -1098,7 +1098,7 @@ public class PlayerEvents {
         public BindableEvent convert(CArray manualObject) {
             //Get the parameters from the manualObject
             MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-            String message = manualObject.get("message").nval();
+            String message = manualObject.get("message").val();
 
             BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
                 player, message);
@@ -1192,8 +1192,8 @@ public class PlayerEvents {
         public BindableEvent convert(CArray manualObject) {
             //Get the parameters from the manualObject
             MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-            String message = manualObject.get("message").nval();
-			String format = manualObject.get("format").nval();
+            String message = manualObject.get("message").val();
+			String format = manualObject.get("format").val();
 
             BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class,
                 player, message, format);
@@ -1228,7 +1228,7 @@ public class PlayerEvents {
                     if(value instanceof CArray){
                         List<MCPlayer> list = new ArrayList<MCPlayer>();
                         for(String index : ((CArray)value).keySet()){
-                            Construct v = ((CArray)value).get(index);
+                            Mixed v = ((CArray)value).get(index);
                             try{
                                 list.add(Static.GetPlayer(v, t));
                             } catch(ConfigRuntimeException ex){
@@ -1305,7 +1305,7 @@ public class PlayerEvents {
 
         public BindableEvent convert(CArray manualObject) {
             MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-            String command = manualObject.get("command").nval();
+            String command = manualObject.get("command").val();
 
             BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
                 player, command);
@@ -1713,7 +1713,7 @@ public class PlayerEvents {
 				ret.put("state", new CString(event.getState().name(), t));
 				ret.put("hook", new CInt(event.getHook().getEntityId(), t));
 				ret.put("xp", new CInt(event.getExpToDrop(), t));
-				Construct caught = Construct.GetNullConstruct(t);
+				CInt caught = Construct.GetNullConstruct(CInt.class, t);
 				if (event.getCaught() instanceof MCEntity) {
 					caught = new CInt(event.getCaught().getEntityId(), t);
 				}

@@ -49,7 +49,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree node : nodes) {
 				if (node.getData() instanceof CIdentifier) {
 					return new ifelse().execs(t, env, parent, nodes);
@@ -72,7 +72,7 @@ public class BasicLogic {
 			}
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
@@ -314,18 +314,18 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return Construct.GetNullConstruct(t);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			Construct value = parent.seval(nodes[0], env);
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			Mixed value = parent.seval(nodes[0], env);
 			equals equals = new equals();
 			for (int i = 1; i <= nodes.length - 2; i += 2) {
 				ParseTree statement = nodes[i];
 				ParseTree code = nodes[i + 1];
-				Construct evalStatement = parent.seval(statement, env);
+				Mixed evalStatement = parent.seval(statement, env);
 				if (evalStatement instanceof CSlice) { //More specific subclass of array, we can do more optimal handling here
 					long rangeLeft = ((CSlice) evalStatement).getStart();
 					long rangeRight = ((CSlice) evalStatement).getFinish();
@@ -341,7 +341,7 @@ public class BasicLogic {
 					}
 				} else if (evalStatement instanceof CArray) {
 					for (String index : ((CArray) evalStatement).keySet()) {
-						Construct inner = ((CArray) evalStatement).get(index);
+						Mixed inner = ((CArray) evalStatement).get(index);
 						if (inner instanceof CSlice) {
 							long rangeLeft = ((CSlice) inner).getStart();
 							long rangeRight = ((CSlice) inner).getFinish();
@@ -479,29 +479,29 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return Construct.GetNullConstruct(t);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if (nodes.length < 2) {
 				throw new ConfigRuntimeException("ifelse expects at least 2 arguments", ExceptionType.InsufficientArgumentsException, t);
 			}
 			for (int i = 0; i <= nodes.length - 2; i += 2) {
 				ParseTree statement = nodes[i];
 				ParseTree code = nodes[i + 1];
-				Construct evalStatement = parent.seval(statement, env);
+				Mixed evalStatement = parent.seval(statement, env);
 				if (evalStatement instanceof CIdentifier) {
 					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
 				}
 				if (evalStatement.primitive(t).castToBoolean()) {
-					Construct ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
+					Mixed ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
 					return ret;
 				}
 			}
 			if (nodes.length % 2 == 1) {
-				Construct ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
+				Mixed ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
 				if (ret instanceof CIdentifier) {
 					return parent.seval(((CIdentifier) ret).contained(), env);
 				} else {
@@ -531,7 +531,7 @@ public class BasicLogic {
 			for (int i = 0; i <= children.size() - 2; i += 2) {
 				ParseTree statement = children.get(i);
 				ParseTree code = children.get(i + 1);
-				Construct evalStatement = statement.getData();
+				Mixed evalStatement = statement.getData();
 				if (evalStatement instanceof CIdentifier) {
 					//check for an else here, if so, it's a compile error
 					if (evalStatement.val().equals("else")) {
@@ -600,7 +600,7 @@ public class BasicLogic {
 			return null;
 		}
 //        @Override
-//        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+//        public Construct optimize(Target t, Mixed... args) throws ConfigCompileException {
 //            boolean inNewMode = false;
 //            for(int i = 0; i < args.length; i++){
 //                if(args[0] instanceof CIdentifier){
@@ -670,7 +670,7 @@ public class BasicLogic {
 		 * @param two
 		 * @return
 		 */
-		public static boolean doEquals(Construct one, Construct two) {
+		public static boolean doEquals(Mixed one, Mixed two) {
 			CBoolean ret = (CBoolean) self.exec(Target.UNKNOWN, null, one, two);
 			return ret.castToBoolean();
 		}
@@ -683,18 +683,18 @@ public class BasicLogic {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public CBoolean exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
-			List<Construct> argList = new ArrayList<Construct>();
+			List<Mixed> argList = new ArrayList<Mixed>();
 			argList.add((Construct)list.get("var1"));
 			argList.add((Construct)list.get("var2"));
-			for(Construct c : ((CArray)list.get("varX"))){
+			for(Mixed c : ((CArray)list.get("varX"))){
 				argList.add(c);
 			}
 			boolean equals = true;
 			for(int i = 0; i < argList.size() - 1; i++){
-				Construct lhs = argList.get(i);
-				Construct rhs = argList.get(i + 1);
+				Mixed lhs = argList.get(i);
+				Mixed rhs = argList.get(i + 1);
 				if(lhs instanceof Operators.Equality){
 					//Test first
 					Operators.Equality elhs = (Operators.Equality)lhs;
@@ -859,7 +859,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			equals equals = new equals();
 			if (args[1].getClass().equals(args[0].getClass())
 					&& equals.exec(t, environment, args).castToBoolean()) {
@@ -923,7 +923,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(!new sequals().exec(t, environment, args).castToBoolean(), t);
 		}
 
@@ -989,7 +989,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(!new equals().exec(t, env, args).castToBoolean(), t);
 		}
 
@@ -1052,49 +1052,16 @@ public class BasicLogic {
 			return null;
 		}
 
-		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args.length <= 1) {
-				throw new ConfigRuntimeException("At least two arguments must be passed to equals_ic", ExceptionType.InsufficientArgumentsException, t);
-			}
-			if (Static.anyBooleans(args)) {
-				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					boolean arg1 = args[i - 1].primitive(t).castToBoolean();
-					boolean arg2 = args[i].primitive(t).castToBoolean();
-					if (arg1 != arg2) {
-						equals = false;
-						break;
-					}
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			Mixed [] nargs = new Mixed[args.length];
+			for(int i = 0; i < args.length; i++){
+				Mixed m = args[i];
+				if(m instanceof CString){
+					m = new CString(((CString)m).castToString().toLowerCase(), t);
 				}
-				return new CBoolean(equals, t);
+				nargs[i] = m;
 			}
-
-			{
-				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					if (!args[i - 1].val().equalsIgnoreCase(args[i].val())) {
-						equals = false;
-						break;
-					}
-				}
-				if (equals) {
-					return new CBoolean(true, t);
-				}
-			}
-			try {
-				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					double arg1 = args[i - 1].primitive(t).castToDouble(t);
-					double arg2 = args[i].primitive(t).castToDouble(t);
-					if (arg1 != arg2) {
-						equals = false;
-						break;
-					}
-				}
-				return new CBoolean(equals, t);
-			} catch (ConfigRuntimeException e) {
-				return new CBoolean(false, t);
-			}
+			return new equals().exec(t, env, nargs);
 		}
 
 		@Override
@@ -1155,7 +1122,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(!new equals_ic().exec(t, environment, args).castToBoolean(), t);
 		}
 
@@ -1189,7 +1156,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray && args[1] instanceof CArray) {
 				return new CBoolean(args[0] == args[1], t);
 			} else {
@@ -1254,7 +1221,7 @@ public class BasicLogic {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = args[0].primitive(t).castToDouble(t);
 			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CBoolean(arg1 < arg2, t);
@@ -1318,7 +1285,7 @@ public class BasicLogic {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = args[0].primitive(t).castToDouble(t);
 			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CBoolean(arg1 > arg2, t);
@@ -1382,7 +1349,7 @@ public class BasicLogic {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = args[0].primitive(t).castToDouble(t);
 			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CBoolean(arg1 <= arg2, t);
@@ -1447,7 +1414,7 @@ public class BasicLogic {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = args[0].primitive(t).castToDouble(t);
 			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CBoolean(arg1 >= arg2, t);
@@ -1511,10 +1478,10 @@ public class BasicLogic {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public Mixed exec(Target t, Environment env, Mixed... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handleBraces it appropriately.
-			for (Construct c : args) {
+			for (Mixed c : args) {
 				if (!c.primitive(t).castToBoolean()) {
 					return new CBoolean(false, t);
 				}
@@ -1525,7 +1492,7 @@ public class BasicLogic {
 		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				boolean b = c.primitive(t).castToBoolean();
 				if (b == false) {
 					return new CBoolean(false, t);
@@ -1615,10 +1582,10 @@ public class BasicLogic {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public Mixed exec(Target t, Environment env, Mixed... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handleBraces it appropriately.
-			for (Construct c : args) {
+			for (Mixed c : args) {
 				if (c.primitive(t).castToBoolean()) {
 					return new CBoolean(true, t);
 				}
@@ -1629,7 +1596,7 @@ public class BasicLogic {
 		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().eval(tree, env);
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().eval(tree, env);
 				if (c.primitive(t).castToBoolean()) {
 					return new CBoolean(true, t);
 				}
@@ -1718,7 +1685,7 @@ public class BasicLogic {
 			return new Integer[]{1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CBoolean(!args[0].primitive(t).castToBoolean(), t);
 		}
 
@@ -1810,7 +1777,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean val1 = args[0].primitive(t).castToBoolean();
 			boolean val2 = args[1].primitive(t).castToBoolean();
 			return new CBoolean(val1 ^ val2, t);
@@ -1873,8 +1840,8 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) {
-			return Construct.GetNullConstruct(t);
+		public Mixed exec(Target t, Environment environment, Mixed... args) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -1939,8 +1906,8 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) {
-			return Construct.GetNullConstruct(t);
+		public Mixed exec(Target t, Environment environment, Mixed... args) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -2004,7 +1971,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			xor xor = new xor();
 			boolean val = xor.exec(t, environment, args).castToBoolean();
 			return new CBoolean(!val, t);
@@ -2067,7 +2034,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_and requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -2137,7 +2104,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_or requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -2207,7 +2174,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(~args[0].primitive(t).castToInt(t), t);
 		}
 
@@ -2267,7 +2234,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			long value = args[0].primitive(t).castToInt(t);
 			long toShift = args[1].primitive(t).castToInt(t);
 			return new CInt(value << toShift, t);
@@ -2329,7 +2296,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			long value = args[0].primitive(t).castToInt(t);
 			long toShift = args[1].primitive(t).castToInt(t);
 			return new CInt(value >> toShift, t);
@@ -2393,7 +2360,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			long value = args[0].primitive(t).castToInt(t);
 			long toShift = args[1].primitive(t).castToInt(t);
 			return new CInt(value >>> toShift, t);
@@ -2451,7 +2418,7 @@ public class BasicLogic {
 //			return true;
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			return new CNull(t);
 //		}
 //
@@ -2515,7 +2482,7 @@ public class BasicLogic {
 //			return new CIdentifier("else", nodes[0], t);
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			return new CNull(t);
 //		}
 //

@@ -28,6 +28,7 @@ import com.laytonsmith.core.natives.MPotion;
 import com.laytonsmith.core.natives.annotations.FormatString;
 import com.laytonsmith.core.natives.annotations.NonNull;
 import com.laytonsmith.core.natives.annotations.Ranged;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -84,8 +85,7 @@ public class EntityManagement {
 					ExceptionType.CastException};
 		}
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			if (args.length == 0) {
 				for (MCWorld w : Static.getServer().getWorlds()) {
@@ -184,8 +184,7 @@ public class EntityManagement {
 	@api
 	public static class entity_loc extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			return ObjectGenerator.GetGenerator().location(e.getLocation());
 		}
@@ -229,8 +228,7 @@ public class EntityManagement {
 					ExceptionType.CastException, ExceptionType.InvalidWorldException};
 		}
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			MCLocation l;
 			if (args[1] instanceof CArray) {
@@ -281,8 +279,7 @@ public class EntityManagement {
 	@api
 	public static class entity_velocity extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			
 			MCEntity e = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			CArray va = ObjectGenerator.GetGenerator().velocity(e.getVelocity(), t);
@@ -321,8 +318,7 @@ public class EntityManagement {
 	@api
 	public static class set_entity_velocity extends EntitySetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			
 			MCEntity e = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			e.setVelocity(ObjectGenerator.GetGenerator().velocity(args[1], t));
@@ -365,8 +361,7 @@ public class EntityManagement {
 	@api
 	public static class entity_remove extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			if (ent == null) {
 				return new CVoid(t);
@@ -409,14 +404,13 @@ public class EntityManagement {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent;
 			int id = args[0].primitive(t).castToInt32(t);
 			try {
 				ent = Static.getEntity(id, t);
 			} catch (ConfigRuntimeException cre) {
-				return Construct.GetNullConstruct(t);
+				return Construct.GetNullConstruct(CString.class, t);
 			}
 			return new CString(ent.getType().name(), t);
 		}
@@ -442,8 +436,7 @@ public class EntityManagement {
 
 	@api
 	public static class get_entity_age extends EntityGetterFunction {
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			MCEntity ent = Static.getEntity(list.getInt("entityID", t), t);
 			return new CInt(ent.getTicksLived(), t);
@@ -477,8 +470,7 @@ public class EntityManagement {
 					ExceptionType.RangeException};
 		}
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			MCEntity ent = Static.getEntity(list.getInt("entityID", t), t);
 			int age = list.getInt("age", t);
@@ -515,12 +507,12 @@ public class EntityManagement {
 					ExceptionType.BadEntityException};
 		}
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment,
+				Mixed... args) throws ConfigRuntimeException {
 			int id = args[0].primitive(t).castToInt32(t);
 			MCEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
-				return Construct.GetNullConstruct(t);
+				return Construct.GetNullConstruct(CInt.class, t);
 			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				return new CInt(mob.getAge(), t);
@@ -558,7 +550,7 @@ public class EntityManagement {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			int id = args[0].primitive(t).castToInt32(t);
 			int age = args[1].primitive(t).castToInt32(t);
 			boolean lock = false;
@@ -567,7 +559,7 @@ public class EntityManagement {
 			}
 			MCLivingEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
-				return Construct.GetNullConstruct(t);
+				throw new ConfigRuntimeException("No mob was found with id " + id, ExceptionType.BadEntityException, t);
 			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				mob.setAge(age);
@@ -608,7 +600,7 @@ public class EntityManagement {
 	public static class get_mob_effects extends EntityGetterFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t);
 		}
@@ -680,7 +672,7 @@ public class EntityManagement {
 					ExceptionType.BadEntityException, ExceptionType.RangeException};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			int id = args[0].primitive(t).castToInt32(t);
 			MCLivingEntity mob = Static.getLivingEntity(id, t);
 			int effect = args[1].primitive(t).castToInt32(t);
@@ -711,8 +703,7 @@ public class EntityManagement {
 					ExceptionType.PlayerOfflineException};
 		}
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender cmdsr = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCLivingEntity ent = null;
 			int id;
@@ -790,7 +781,7 @@ public class EntityManagement {
 			return new Integer[]{2, 3};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
 			MCLocation loc;
@@ -901,11 +892,10 @@ public class EntityManagement {
 	//@api
 	public static class get_mob_target extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			if (le.getTarget(t) == null) {
-				return Construct.GetNullConstruct(t);
+				return Construct.GetNullConstruct(CInt.class, t);
 			} else {
 				return new CInt(le.getTarget(t).getEntityId(), t);
 			}
@@ -939,8 +929,7 @@ public class EntityManagement {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
 		}
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			MCLivingEntity target = null;
 			if (!args[1].isNull()) {
@@ -974,8 +963,7 @@ public class EntityManagement {
 	@api
 	public static class get_mob_equipment extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			Map<MCEquipmentSlot, MCItemStack> eq = le.getEquipment().getAllEquipment();
 			CArray ret = CArray.GetAssociativeArray(t);
@@ -1016,8 +1004,7 @@ public class EntityManagement {
 	@api
 	public static class set_mob_equipment extends EntitySetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntityEquipment ee = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t).getEquipment();
 			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
 			if (args[1].isNull()) {
@@ -1070,8 +1057,7 @@ public class EntityManagement {
 	@api
 	public static class get_max_health extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			return new CInt(le.getMaxHealth(), t);
 		}
@@ -1099,8 +1085,7 @@ public class EntityManagement {
 	@api
 	public static class set_max_health extends EntitySetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			le.setMaxHealth(args[1].primitive(t).castToInt32(t));
 			return new CVoid(t);
@@ -1137,8 +1122,7 @@ public class EntityManagement {
 	@api
 	public static class entity_onfire extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			int id = list.getInt("entityID", t);
 			MCEntity ent = Static.getEntity(id, t);
@@ -1169,8 +1153,7 @@ public class EntityManagement {
 	@api
 	public static class set_entity_onfire extends EntitySetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			int id = list.getInt("entityID", t);
 			int seconds = list.getInt("seconds", t);
@@ -1205,8 +1188,7 @@ public class EntityManagement {
 	@api
 	public static class play_entity_effect extends EntitySetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			int id = list.getInt("entityID", t);
 			MCEntityEffect mee = list.getEnum("effect", MCEntityEffect.class);
@@ -1244,8 +1226,7 @@ public class EntityManagement {
 	@api
 	public static class get_mob_name extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			int entityID = list.getInt("entityID", t);
 			MCLivingEntity le = Static.getLivingEntity(entityID, t);
@@ -1274,8 +1255,7 @@ public class EntityManagement {
 	@api
 	public static class set_mob_name extends EntitySetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			int entityID = list.getInt("entityID", t);
 			String name = list.getString("name", t);
@@ -1314,8 +1294,7 @@ public class EntityManagement {
 					ExceptionType.PlayerOfflineException};
 		}
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			ArgList list = getBuilder().parse(args, this, t);
 			MCEntityType entType = list.getEnum("entityType", MCEntityType.class);
@@ -1398,7 +1377,7 @@ public class EntityManagement {
 	@api
 	public static class set_entity_rider extends EntitySetterFunction {
 	
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity horse, rider;
 			boolean success;
 			if (args[0].isNull()) {
@@ -1451,8 +1430,7 @@ public class EntityManagement {
 	@api
 	public static class get_entity_rider extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			if (ent.getPassenger() instanceof MCEntity) {
 				return new CInt(ent.getPassenger().getEntityId(), t);
@@ -1482,13 +1460,12 @@ public class EntityManagement {
 	@api
 	public static class get_entity_vehicle extends EntityGetterFunction {
 
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			if (ent.isInsideVehicle()) {
 				return new CInt(ent.getVehicle().getEntityId(), t);
 			}
-			return Construct.GetNullConstruct(t);
+			return Construct.GetNullConstruct(CInt.class, t);
 		}
 
 		public String getName() {

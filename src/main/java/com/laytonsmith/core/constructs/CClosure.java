@@ -8,6 +8,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -25,9 +26,9 @@ public class CClosure extends Construct {
     ParseTree node;
     Environment env;
     String[] names;
-    Construct[] defaults;
+    Mixed[] defaults;
 
-    public CClosure(ParseTree node, Environment env, String[] names, Construct[] defaults, Target t) {
+    public CClosure(ParseTree node, Environment env, String[] names, Mixed[] defaults, Target t) {
         super(node != null ? node.toString() : "", t);
         this.node = node;
         try {
@@ -72,11 +73,12 @@ public class CClosure extends Construct {
         return node;
     }
 
-    @Override
-    public CClosure clone() throws CloneNotSupportedException {
-        CClosure clone = (CClosure) super.clone();
+    
+	@Override
+    public CClosure doClone() {
+        CClosure clone = (CClosure) super.doClone();
         if (this.node != null) {
-            clone.node = this.node.clone();
+            clone.node = this.node.doClone();
         }
         return clone;
     }
@@ -104,7 +106,7 @@ public class CClosure extends Construct {
      *
      * @param values
      */
-    public void execute(Construct[] values) throws ConfigRuntimeException, ProgramFlowManipulationException {
+    public void execute(Mixed[] values) throws ConfigRuntimeException, ProgramFlowManipulationException {
         try {
             Environment environment;
             synchronized (this) {
@@ -113,19 +115,19 @@ public class CClosure extends Construct {
             if (values != null) {
                 for (int i = 0; i < names.length; i++) {
                     String name = names[i];
-                    Construct value;
+                    Mixed value;
                     try {
                         value = values[i];
                     }
                     catch (Exception e) {
-                        value = defaults[i].clone();
+                        value = defaults[i].doClone();
                     }
                     environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(name, getTarget()), value);
                 }
             }
             CArray arguments = new CArray(node.getData().getTarget());
             if (values != null) {
-                for (Construct value : values) {
+                for (Mixed value : values) {
                     arguments.push(value);
                 }
             }

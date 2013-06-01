@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.snapins.PackagePermission;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public abstract class AbstractFunction implements Function {
 	 * @param nodes
 	 * @return
 	 */
-	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 		return new CVoid(t);
 	}
 
@@ -95,10 +96,10 @@ public abstract class AbstractFunction implements Function {
 		return LogLevel.VERBOSE;
 	}
 
-	public String profileMessage(Construct... args) {
+	public String profileMessage(Mixed... args) {
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
-		for (Construct ccc : args) {
+		for (Mixed ccc : args) {
 			if (!first) {
 				b.append(", ");
 			}
@@ -181,7 +182,7 @@ public abstract class AbstractFunction implements Function {
 	 * @param args
 	 * @return
 	 */
-	public Construct optimize(Target t, Environment env, Construct... args) throws ConfigRuntimeException, ConfigCompileException{
+	public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigRuntimeException, ConfigCompileException{
 		return null;
 	}
 

@@ -48,6 +48,9 @@ public interface Operators {
 		
 		/**
 		 * Should return true if operatorLessThan will work with this class type.
+		 * If this returns true for this class type, then the actual operator must be
+		 * able to accept a parameter of that type, if it returns false, it can guarantee
+		 * that an instance of that type will never be sent to it.
 		 * @param clazz
 		 * @return 
 		 */
@@ -63,6 +66,9 @@ public interface Operators {
 		
 		/**
 		 * Should return true if operatorGreaterThan will work with this class type.
+		 * If this returns true for this class type, then the actual operator must be
+		 * able to accept a parameter of that type, if it returns false, it can guarantee
+		 * that an instance of that type will never be sent to it.
 		 * @param clazz
 		 * @return 
 		 */
@@ -87,6 +93,9 @@ public interface Operators {
 		
 		/**
 		 * Should return true if operatorEquals will work with this class type.
+		 * If this returns true for this class type, then the actual operator must be
+		 * able to accept a parameter of that type, if it returns false, it can guarantee
+		 * that an instance of that type will never be sent to it.
 		 * @param clazz
 		 * @return 
 		 */
@@ -104,6 +113,9 @@ public interface Operators {
 		
 		/**
 		 * Should return true if operatorConcatenation will work with this class type.
+		 * If this returns true for this class type, then the actual operator must be
+		 * able to accept a parameter of that type, if it returns false, it can guarantee
+		 * that an instance of that type will never be sent to it.
 		 * @param clazz
 		 * @return 
 		 */
@@ -132,6 +144,9 @@ public interface Operators {
 		
 		/**
 		 * Should return true if operatorAddition will work with this class type.
+		 * If this returns true for this class type, then the actual operator must be
+		 * able to accept a parameter of that type, if it returns false, it can guarantee
+		 * that an instance of that type will never be sent to it.
 		 * @param clazz
 		 * @return 
 		 */
@@ -147,6 +162,9 @@ public interface Operators {
 		
 		/**
 		 * Should return true if operatorSubtraction will work with this class type.
+		 * If this returns true for this class type, then the actual operator must be
+		 * able to accept a parameter of that type, if it returns false, it can guarantee
+		 * that an instance of that type will never be sent to it.
 		 * @param clazz
 		 * @return 
 		 */
@@ -162,6 +180,9 @@ public interface Operators {
 		
 		/**
 		 * Should return true if operatorMultiplication will work with this class type.
+		 * If this returns true for this class type, then the actual operator must be
+		 * able to accept a parameter of that type, if it returns false, it can guarantee
+		 * that an instance of that type will never be sent to it.
 		 * @param clazz
 		 * @return 
 		 */
@@ -177,6 +198,9 @@ public interface Operators {
 		
 		/**
 		 * Should return true if operatorTestDivision will work with this class type.
+		 * If this returns true for this class type, then the actual operator must be
+		 * able to accept a parameter of that type, if it returns false, it can guarantee
+		 * that an instance of that type will never be sent to it.
 		 * @param clazz
 		 * @return 
 		 */

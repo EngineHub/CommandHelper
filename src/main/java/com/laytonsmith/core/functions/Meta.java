@@ -54,8 +54,8 @@ public class Meta {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
+		public Mixed exec(Target t, final Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if (args[1].val() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
 				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
 						ExceptionType.FormatException, t);
 			}
@@ -63,14 +63,14 @@ public class Meta {
 			if (args[0] instanceof CArray) {
 				CArray u = (CArray) args[0];
 				for (int i = 0; i < u.size(); i++) {
-					exec(t, env, new Construct[]{new CString(u.get(i, t).val(), t), args[1]});
+					exec(t, env, new Mixed[]{new CString(u.get(i, t).val(), t), args[1]});
 				}
 				return new CVoid(t);
 			}
 			if (args[0].val().equals("~op")) {
 				//TODO: Remove this after next release (3.3.1)
-				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "Using runas(~op, " + args[1].asString().getQuote() 
-						+ ") is deprecated. Use sudo(" + args[1].asString().getQuote() + ") instead.", t);
+				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "Using runas(~op, " + CString.asString(args[1]).getQuote() 
+						+ ") is deprecated. Use sudo(" + CString.asString(args[1]).getQuote() + ") instead.", t);
 				new sudo().exec(t, env, args[1]);
 			} else if (args[0].val().equals("~console")) {
 				CHLog.GetLogger().Log(CHLog.Tags.META, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
@@ -154,7 +154,7 @@ public class Meta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String cmd = args[0].val().substring(1);
 			//Store their current op status
 			Boolean isOp = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().isOp();
@@ -281,8 +281,8 @@ public class Meta {
 			return new Integer[]{1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if (args[0].val() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
 						ExceptionType.FormatException, t);
 			}
@@ -343,7 +343,7 @@ public class Meta {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			for (int i = 0; i < args.length; i++) {
 				args[i].val();
 			}
@@ -442,12 +442,12 @@ public class Meta {
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			ParseTree node = nodes[0];
 			try {
-				Construct script = parent.seval(node, env);
+				Mixed script = parent.seval(node, env);
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true), env);
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for (ParseTree child : root.getChildren()) {
-					Construct s = parent.seval(child, env);
+					Mixed s = parent.seval(child, env);
 					if (!s.val().trim().isEmpty()) {
 						if (count > 0) {
 							b.append(" ");
@@ -462,7 +462,7 @@ public class Meta {
 			}
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
 		//Doesn't matter, run out of state anyways
@@ -492,7 +492,7 @@ public class Meta {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args)
+		public Mixed exec(Target t, Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			AliasCore ac = Static.getAliasCore();
 
@@ -594,7 +594,7 @@ public class Meta {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			boolean doRemoval = true;
 			if (!Static.getAliasCore().hasPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())) {
 				doRemoval = false;
@@ -661,7 +661,7 @@ public class Meta {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) {
 			return null;
 		}
 
@@ -729,9 +729,9 @@ public class Meta {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
-				return Construct.GetNullConstruct(t);
+				return Construct.GetNullConstruct(Construct.class, t);
 			} else {
 				return new CString(environment.getEnv(CommandHelperEnvironment.class).GetCommand(), t);
 			}
@@ -784,7 +784,7 @@ public class Meta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			System.out.println("---------------> Executing capture_runas(" + args[0].val() + ", " + args[1].val() + ")");
 			MCCommandSender oldCommandSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCCommandSender operator;
@@ -860,13 +860,13 @@ public class Meta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCBlockCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetBlockCommandSender();
 			if(cs != null){
 				MCLocation l = (cs.getBlock().getLocation());
 				return ObjectGenerator.GetGenerator().location(l);
 			}
-			return Construct.GetNullConstruct(t);
+			return Construct.GetNullConstruct(MLocation.class, t);
 		}
 
 		public String getName() {
@@ -910,7 +910,7 @@ public class Meta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Static.AssertPlayerNonNull(p, t);
 			boolean state = false;

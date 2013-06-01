@@ -15,6 +15,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -219,7 +220,7 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
 			if (args.length == 4) {
@@ -312,7 +313,7 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
 			if (args.length == 3) {
@@ -389,9 +390,9 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Construct slot;
+			Mixed slot;
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
 				slot = args[1];
@@ -463,7 +464,7 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				String name = Enchantments.ConvertName(args[0].val().toUpperCase());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
@@ -517,7 +518,7 @@ public class Enchantments {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String name = Enchantments.ConvertName(args[0].val().toUpperCase());
 			MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 			return new CInt(e.getMaxLevel(), t);
@@ -568,14 +569,14 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCItemStack is = Static.ParseItemNotation(this.getName(), args[0].val(), 1, t);
 			/**
 			 * Because enchantment types won't change from run to run, we can
 			 * cache here, and save time on duplicate lookups.
 			 */
 			if (cache.containsKey(args[0].val())) {
-				return cache.get(args[0].val()).clone();
+				return cache.get(args[0].val()).doClone();
 			}
 			CArray ca = new CArray(t);
 			for (MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
@@ -584,7 +585,7 @@ public class Enchantments {
 				}
 			}
 			cache.put(args[0].val(), ca);
-			return ca.clone();
+			return ca.doClone();
 		}
 	}
 
@@ -630,7 +631,7 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
 				return new CBoolean(true, t);
@@ -655,7 +656,7 @@ public class Enchantments {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t);
 			for(MCEnchantment e : enchantments){

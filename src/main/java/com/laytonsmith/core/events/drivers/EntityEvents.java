@@ -103,8 +103,8 @@ public class EntityEvents {
 					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()));
 				}
 				ret.put("blocks", blocks);
-				Construct entity = Construct.GetNullConstruct(t);
-				Construct entitytype = Construct.GetNullConstruct(t);
+				CInt entity = Construct.GetNullConstruct(CInt.class, t);
+				CString entitytype = Construct.GetNullConstruct(CString.class, t);
 				if (e.getEntity() != null) {
 					entity = new CInt(e.getEntity().getEntityId(), t);
 					entitytype = new CString(e.getEntity().getType().name(), t);
@@ -202,7 +202,7 @@ public class EntityEvents {
 				ret.put("location", loc);
 				MCLivingEntity shooter = pro.getShooter();
 				if (shooter == null) {
-					ret.put("shooter", Construct.GetNullConstruct(t));
+					ret.put("shooter", Construct.GetNullConstruct(CInt.class, t));
 				} else {
 					ret.put("shooter", new CInt(shooter.getEntityId(), t));
 				}

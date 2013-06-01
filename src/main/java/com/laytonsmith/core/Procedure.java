@@ -12,6 +12,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.sk89q.util.StringUtil;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -134,8 +135,8 @@ public class Procedure implements Cloneable {
      * @param env
      * @return
      */
-    public Construct cexecute(List<ParseTree> args, Environment env, Target t) {
-        List<Construct> list = new ArrayList<Construct>();
+    public Mixed cexecute(List<ParseTree> args, Environment env, Target t) {
+        List<Mixed> list = new ArrayList<Mixed>();
         for (ParseTree arg : args) {
             list.add(env.getEnv(GlobalEnv.class).GetScript().seval(arg, env));
         }
@@ -149,7 +150,7 @@ public class Procedure implements Cloneable {
      * @param env
      * @return
      */
-    public Construct execute(List<Construct> args, Environment env, Target t) {
+    public Construct execute(List<Mixed> args, Environment env, Target t) {
         env.getEnv(GlobalEnv.class).SetVarList(new IVariableList());
         CArray array = new CArray(Target.UNKNOWN);
         for (String key : originals.keySet()) {
@@ -159,11 +160,11 @@ public class Procedure implements Cloneable {
         }
         Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);        
         for (int i = 0; i < args.size(); i++) {
-            Construct c = args.get(i);
+            Mixed c = args.get(i);
             array.set(i, c, t);
             if (varIndex.size() > i) {
                 String varname = varIndex.get(i).getName();
-                env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varname, c.getTarget()), c);
+                env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varname, t), c);
             }
         }
         env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", Target.UNKNOWN), array);

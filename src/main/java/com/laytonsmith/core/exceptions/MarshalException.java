@@ -3,6 +3,7 @@
 package com.laytonsmith.core.exceptions;
 
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -29,7 +30,7 @@ public class MarshalException extends Exception {
      * @param msg
      * @param c 
      */
-    public MarshalException(String msg, Construct c){
+    public MarshalException(String msg, Mixed c){
         super(msg + ": " + c.toString());
     }
 }

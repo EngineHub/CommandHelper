@@ -19,6 +19,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.annotations.NonNull;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -56,7 +57,7 @@ public class DataTransformations {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[0], t);
 			try {
 				return new CString(Construct.json_encode(ca, t), t);
@@ -108,7 +109,7 @@ public class DataTransformations {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String s = args[0].val();
 			try {
 				return Construct.json_decode(s, t);
@@ -161,7 +162,7 @@ public class DataTransformations {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			CArray ca = list.get("array");
 			boolean prettyPrint = list.getBoolean("prettyPrint", t);
@@ -216,7 +217,7 @@ public class DataTransformations {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String data = args[0].val();
 			Yaml yaml = new Yaml();
 			Map<String, Object> map = (Map<String, Object>) yaml.load(data);
@@ -267,7 +268,7 @@ public class DataTransformations {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			CArray arr = Static.getArray(args[0], t);
 			String comment = null;
@@ -336,7 +337,7 @@ public class DataTransformations {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			Reader reader = new StringReader(args[0].val());
 			try {

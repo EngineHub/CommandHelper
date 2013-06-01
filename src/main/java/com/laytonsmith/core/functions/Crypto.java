@@ -19,6 +19,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.annotations.Ranged;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -75,7 +76,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             String s = args[0].val();
             StringBuilder b = new StringBuilder();
             for (int i = 0; i < s.length(); i++) {
@@ -155,7 +156,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
                 digest.update(args[0].val().getBytes());
@@ -224,7 +225,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
                 digest.update(args[0].val().getBytes());
@@ -292,7 +293,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
                 digest.update(args[0].val().getBytes());
@@ -335,7 +336,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			String val = list.get("val");
 			int workloadFactor = list.getInt("workloadFactor", t);
@@ -397,7 +398,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             boolean match = BCrypt.checkpw(args[0].val(), args[1].val());
             return new CBoolean(match, t);
         }

@@ -66,7 +66,7 @@ public class PlayerManagement {
 			return new Integer[]{0, 1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
 			if (args.length == 1) {
@@ -77,7 +77,7 @@ public class PlayerManagement {
 			// for player entities in CraftBukkit, this is the player's name, and
 			// for the console it's "CONSOLE".
 			if (p == null) {
-				return Construct.GetNullConstruct(t);
+				return Construct.GetNullConstruct(CString.class, t);
 			} else {
 				String name = p.getName();
 				return new CString(("CONSOLE".equals(name)) ? "~console" : name, t);
@@ -129,7 +129,7 @@ public class PlayerManagement {
 			return new Integer[]{0};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer[] pa = Static.getServer().getOnlinePlayers();
 			CString[] sa = new CString[pa.length];
 			for (int i = 0; i < pa.length; i++) {
@@ -203,7 +203,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer[] pa = Static.getServer().getOnlinePlayers();
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
@@ -278,7 +278,7 @@ public class PlayerManagement {
 			return new Integer[]{0, 1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (p instanceof MCPlayer) {
@@ -377,7 +377,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String MCPlayer = null;
 			double x;
@@ -481,7 +481,7 @@ public class PlayerManagement {
 			return CHVersion.V3_0_2;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			HashSet<Short> trans = null;
 			if (args.length == 1) {
@@ -554,7 +554,7 @@ public class PlayerManagement {
 			return new Integer[]{0, 1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (args.length == 1) {
@@ -611,7 +611,7 @@ public class PlayerManagement {
 			return new Integer[]{0, 1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (args.length == 0) {
@@ -794,7 +794,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender m = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String player = "";
 			int index = -1;
@@ -818,7 +818,7 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
 			}
-			ArrayList<Construct> retVals = new ArrayList<Construct>();
+			ArrayList<Mixed> retVals = new ArrayList<Mixed>();
 			if (index == 0 || index == -1) {
 				//MCPlayer name
 				retVals.add(new CString(p.getName(), t));
@@ -837,7 +837,7 @@ public class PlayerManagement {
 					b = null;
 				}
 				if (b == null) {
-					retVals.add(Construct.GetNullConstruct(t));
+					retVals.add(Construct.GetNullConstruct(Mixed.class, t));
 				} else {
 					retVals.add(new CArray(t, new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
 				}
@@ -936,7 +936,7 @@ public class PlayerManagement {
 				return retVals.get(0);
 			} else {
 				CArray ca = new CArray(t);
-				for (Construct c : retVals) {
+				for (Mixed c : retVals) {
 					ca.push(c);
 				}
 				return ca;
@@ -985,7 +985,7 @@ public class PlayerManagement {
 			return true;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (args.length == 0) {
@@ -1043,7 +1043,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String message = "You have been kicked";
 			MCPlayer m = null;
@@ -1110,7 +1110,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer MCPlayer = null;
 			String name;
@@ -1171,7 +1171,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer MCPlayer = null;
 			if (args.length == 0) {
@@ -1214,7 +1214,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(list.getStringWithNull("player", t) != null){
@@ -1293,7 +1293,7 @@ public class PlayerManagement {
 //			return false;
 //		}
 //
-//		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 //			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 //			//Getter
 //			if (args.length == 0 || args.length == 1) {
@@ -1421,7 +1421,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (p instanceof MCPlayer) {
@@ -1479,7 +1479,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			MCPlayer p = Static.GetPlayer(list.getStringWithNull("player", t), env, t);
 			MCGameMode mode = list.getEnum("mode", MCGameMode.class);
@@ -1530,7 +1530,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (p instanceof MCPlayer) {
@@ -1586,7 +1586,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			int xp = 0;
@@ -1647,7 +1647,7 @@ public class PlayerManagement {
 			return true;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			int xp = 0;
@@ -1708,7 +1708,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (p instanceof MCPlayer) {
@@ -1764,7 +1764,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			int level = 0;
@@ -1824,7 +1824,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (p instanceof MCPlayer) {
@@ -1880,7 +1880,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			int xp = 0;
@@ -1944,7 +1944,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (p instanceof MCPlayer) {
@@ -2000,7 +2000,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			int level = 0;
@@ -2071,7 +2071,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			MCPlayer player = Static.GetPlayer(list.getStringWithNull("player", t), env, t);
 			int potionID = list.getInt("potionID", t);
@@ -2115,7 +2115,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length > 0) {
 				p = Static.GetPlayer(args[0], t);
@@ -2193,7 +2193,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			MCPlayer player = Static.GetPlayer(list.getStringWithNull("player", t), env, t);
 			int health = list.getInt("health", t);
@@ -2245,7 +2245,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			//We have to use this method here, because we might be in the midst
 			//of an event, in which the player is offline, but not really. It will
 			//throw an exception if the player doesn't exist
@@ -2312,7 +2312,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			boolean ret;
 			if (pl == null) {
@@ -2367,7 +2367,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			boolean whitelist = args[1].primitive(t).castToBoolean();
 			pl.setWhitelisted(whitelist);
@@ -2420,7 +2420,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			return new CBoolean(pl.isBanned(), t);
 		}
@@ -2472,7 +2472,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			boolean ban = args[1].primitive(t).castToBoolean();
 			pl.setBanned(ban);
@@ -2522,7 +2522,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			double speed = 0;
@@ -2588,7 +2588,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			
@@ -2648,7 +2648,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			float speed = 0;
@@ -2714,7 +2714,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			
@@ -2774,7 +2774,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				m = Static.GetPlayer(args[0].val(), t);
@@ -2826,7 +2826,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if (args.length == 1) {
@@ -2886,7 +2886,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				m = Static.GetPlayer(args[0].val(), t);
@@ -2939,7 +2939,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -2993,9 +2993,9 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Construct ticks;
+			Mixed ticks;
 			if (args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				ticks = args[1];
@@ -3054,7 +3054,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3078,7 +3078,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return super.exec(t, environment, args);
 		}
 
@@ -3147,7 +3147,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
 			if (args.length == 1) {
@@ -3191,7 +3191,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return super.exec(t, environment, args);
 		}
 
@@ -3273,7 +3273,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -3368,7 +3368,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -3422,7 +3422,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -3451,14 +3451,14 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			String listName;
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
-				listName = args[1].nval();
+				listName = args[1].val();
 			} else {
-				listName = args[0].nval();
+				listName = args[0].val();
 			}
 
 			if (listName.length() > 16) {
@@ -3517,7 +3517,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				m = Static.GetPlayer(args[0], t);
@@ -3592,7 +3592,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3631,7 +3631,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			double x;
 			double y;
@@ -3736,7 +3736,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if (args.length == 3) {
@@ -3794,7 +3794,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3844,7 +3844,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int hunger, hungerIndex = 0;
 			if (args.length == 2) {
@@ -3899,7 +3899,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3950,7 +3950,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			float saturation;
 			int saturationIndex = 0;
@@ -4003,7 +4003,7 @@ public class PlayerManagement {
 			return new Integer[]{0, 1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				player = Static.getServer().getOfflinePlayer(args[0].val());
@@ -4013,7 +4013,7 @@ public class PlayerManagement {
 			try {
 				w = loc.getWorld();
 			} catch (Exception e) {
-				return Construct.GetNullConstruct(t);
+				return Construct.GetNullConstruct(MLocation.class, t);
 			}
 			MLocation l = new MLocation(loc);
 			return l.deconstruct(t);
@@ -4100,7 +4100,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String pname = null;
 			double x;
@@ -4203,7 +4203,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t);
@@ -4211,7 +4211,7 @@ public class PlayerManagement {
 
 			Static.AssertPlayerNonNull(p, t);
 			if (p.isInsideVehicle() == false) {
-				return Construct.GetNullConstruct(t);
+				return Construct.GetNullConstruct(CInt.class, t);
 			}
 
 			return new CInt(p.getVehicle().getEntityId(), t);
@@ -4260,7 +4260,7 @@ public class PlayerManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {;
 				p = Static.GetPlayer(args[0].val(), t);
@@ -4287,7 +4287,7 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCServer s = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
 			CArray ret = new CArray(t);
 			for (MCOfflinePlayer offp : s.getOfflinePlayers()) {
@@ -4345,7 +4345,7 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCServer s = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
 			MCOfflinePlayer offp = s.getOfflinePlayer(args[0].val());
 			return new CBoolean(offp.hasPlayedBefore(), t);
@@ -4404,7 +4404,7 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if (args.length == 1) {
@@ -4468,7 +4468,7 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if (args.length == 1) {

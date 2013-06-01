@@ -11,6 +11,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -108,10 +109,10 @@ public class FunctionList {
 	public static FunctionBase getFunction(String s, api.Platforms platform) throws ConfigCompileException{
 		return getFunction(new CFunction(s, Target.UNKNOWN), platform);
 	}
-    public static FunctionBase getFunction(Construct c) throws ConfigCompileException{
+    public static FunctionBase getFunction(Mixed c) throws ConfigCompileException{
         return getFunction(c, api.Platforms.INTERPRETER_JAVA);
     }
-    public static FunctionBase getFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
+    public static FunctionBase getFunction(Mixed c, api.Platforms platform) throws ConfigCompileException {
         if(platform == null){
             //Default to the Java interpreter
             platform = api.Platforms.INTERPRETER_JAVA;

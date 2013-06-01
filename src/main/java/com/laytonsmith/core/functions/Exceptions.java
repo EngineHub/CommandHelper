@@ -16,6 +16,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.MEnum;
 import com.laytonsmith.core.natives.annotations.NonNull;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -270,6 +271,22 @@ public class Exceptions {
 		public boolean isImmutable() {
 			return true;
 		}
+
+		public boolean isDynamic() {
+			return false;
+		}
+
+		public void destructor() {
+			
+		}
+
+		public Mixed doClone() {
+			return this;
+		}
+
+		public Target getTarget() {
+			return Target.UNKNOWN;
+		}
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
@@ -337,7 +354,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script that, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script that, ParseTree... nodes) {
 			ParseTree tryCode = nodes[0];
 			ParseTree varName = null;
 			ParseTree catchCode = null;
@@ -355,7 +372,7 @@ public class Exceptions {
 
 			IVariable ivar = null;
 			if (varName != null) {
-				Construct pivar = that.eval(varName, env);
+				Mixed pivar = that.eval(varName, env);
 				if (pivar instanceof IVariable) {
 					ivar = (IVariable) pivar;
 				} else {
@@ -364,7 +381,7 @@ public class Exceptions {
 			}
 			List<String> interest = new ArrayList<String>();
 			if (types != null) {
-				Construct ptypes = that.seval(types, env);
+				Mixed ptypes = that.seval(types, env);
 				if (ptypes instanceof CString) {
 					interest.add(ptypes.val());
 				} else if (ptypes instanceof CArray) {
@@ -409,7 +426,7 @@ public class Exceptions {
 			return new CVoid(t);
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
@@ -470,7 +487,7 @@ public class Exceptions {
 //			return true;
 //		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			ExceptionType exceptionType = list.getEnum("exceptionType", ExceptionType.class);
 			String msg = list.getString("msg", t);
@@ -493,7 +510,7 @@ public class Exceptions {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CClosure){
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
 				return new CVoid(t);

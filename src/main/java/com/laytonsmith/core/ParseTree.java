@@ -8,21 +8,25 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.NonScriptError;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A parse tree wraps a generic tree node, but provides functions that are commonly used to discover
  * things about a particular section of code.
  * @author Layton
  */
-public class ParseTree implements Cloneable{
+public class ParseTree {
 	
 
 	private enum CacheTypes{
@@ -74,7 +78,7 @@ public class ParseTree implements Cloneable{
 	}
 	
 	
-	private Construct data = null;
+	private Mixed data = null;
 	private boolean isOptimized = false;
 	private final FileOptions fileOptions;
 	private List<ParseTree> children = null;
@@ -92,7 +96,7 @@ public class ParseTree implements Cloneable{
 	 * Creates a new tree node, with this construct as the data
 	 * @param construct 
 	 */
-	public ParseTree(Construct construct, FileOptions options){
+	public ParseTree(Mixed construct, FileOptions options){
 		this(options);
 		setData(construct);
 	}
@@ -101,7 +105,7 @@ public class ParseTree implements Cloneable{
 		return fileOptions;
 	}
 	
-	public void setData(Construct data) {
+	public void setData(Mixed data) {
 		this.data = data;
 	}
 	
@@ -126,8 +130,8 @@ public class ParseTree implements Cloneable{
 	 * needs to be scoured for information, regardless of visitation order.
 	 * @return 
 	 */
-	public List<Construct> getAllData(){
-		List<Construct> list = new ArrayList<Construct>();
+	public List<Mixed> getAllData(){
+		List<Mixed> list = new ArrayList<Mixed>();
 		list.add(getData());
 		for(ParseTree node : getChildren()){
 			list.addAll(node.getAllData());
@@ -173,7 +177,7 @@ public class ParseTree implements Cloneable{
 	 * Returns the data in this node
 	 * @return 
 	 */
-	public Construct getData(){
+	public Mixed getData(){
 		return data;
 	}
 	
@@ -237,7 +241,10 @@ public class ParseTree implements Cloneable{
 	 * @return 
 	 */
 	public boolean isConst(){
-		return !data.isDynamic();
+		if(!(data instanceof Construct)){
+			throw new NonScriptError("Unhandled condition, please fix me!");
+		}
+		return !((Construct)data).isDynamic();
 	}
 	
 	/**
@@ -245,7 +252,7 @@ public class ParseTree implements Cloneable{
 	 * @return 
 	 */
 	public boolean isDynamic(){
-		return data.isDynamic();
+		return !isConst();
 	}
 	
 	//TODO: None of this will work until we deeply consider procs, which can't happen yet.
@@ -306,8 +313,8 @@ public class ParseTree implements Cloneable{
 			return new ArrayList<Function>((List<Function>)getCache(this, CacheTypes.FUNCTIONS));
 		} else {
 			List<Function> functions = new ArrayList<Function>();
-			List<Construct> allChildren = getAllData();
-			loop: for(Construct c : allChildren){
+			List<Mixed> allChildren = getAllData();
+			loop: for(Mixed c : allChildren){
 				if(c instanceof CFunction){
 					try {
 						FunctionBase f = FunctionList.getFunction(c);
@@ -326,14 +333,19 @@ public class ParseTree implements Cloneable{
 		}
 	}
 
-	@Override
-	public ParseTree clone() throws CloneNotSupportedException {
-		ParseTree clone = (ParseTree)super.clone();
-		clone.data = data.clone();
+	public ParseTree doClone() {
+		ParseTree clone;
+		try {
+			clone = (ParseTree)super.clone();
+		} catch (CloneNotSupportedException ex) {
+			throw new Error("Object apparently doesn't support cloning?");
+		}
+		clone.data = data.doClone();
 		clone.children = new ArrayList<ParseTree>(this.children);
 		return clone;
 	}
 	
+	@Override
 	public String toString(){
 		return data.toString();
 	}

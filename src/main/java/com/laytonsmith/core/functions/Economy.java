@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -192,7 +193,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             Account ma = GetAccount(this.getName(), t, args);
             return new CDouble(ma.balance(), t);
         }
@@ -240,7 +241,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetAccount(this.getName(), t, args).set(list.getDouble("value", t))){
                 return new CVoid(t);
@@ -292,7 +293,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetAccount(this.getName(), t, args).add(list.getDouble("to_add", t))){
                 return new CVoid(t);
@@ -344,7 +345,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetAccount(this.getName(), t, args).subtract(list.getDouble("to_subtract", t))){
                 return new CVoid(t);
@@ -396,7 +397,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetAccount(this.getName(), t, args).multiply(list.getDouble("to_multiply", t))){
                 return new CVoid(t);
@@ -448,7 +449,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetAccount(this.getName(), t, args).divide(list.getDouble("to_divide", t))){
                 return new CVoid(t);
@@ -500,7 +501,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             throw new ConfigRuntimeException("An error occured while trying to remove the player's account, due to"
                     + " this operation being unsupported in Vault. If you want to see this feature supported, "
                     + " contact the authors of Vault!", ExceptionType.PluginInternalException, t);
@@ -553,7 +554,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             return new CDouble(GetBankAccount(this.getName(), t, args).balance(), t);
         }
         
@@ -600,7 +601,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetBankAccount(this.getName(), t, args).set(list.getDouble("value", t))){
                 return new CVoid(t);
@@ -652,7 +653,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetBankAccount(this.getName(), t, args).add(list.getDouble("value", t))){
                 return new CVoid(t);
@@ -704,7 +705,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetBankAccount(this.getName(), t, args).subtract(list.getDouble("value", t))){
                 return new CVoid(t);
@@ -756,7 +757,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetBankAccount(this.getName(), t, args).multiply(list.getDouble("value", t))){
                 return new CVoid(t);
@@ -808,7 +809,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             if(GetBankAccount(this.getName(), t, args).divide(list.getDouble("value", t))){
                 return new CVoid(t);
@@ -859,7 +860,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).remove()){
                 return new CVoid(t);
             } else {
@@ -870,7 +871,7 @@ public class Economy {
     }
     
     
-    private static Account GetAccount(String fname, Target tile, Construct ... args){
+    private static Account GetAccount(String fname, Target tile, Mixed ... args){
         String name = args[0].val();
         Account m = new Account(name);
         if(m == null){
@@ -880,7 +881,7 @@ public class Economy {
         }
     }
     
-    private static BankAccount GetBankAccount(String fname, Target tile, Construct ... args){
+    private static BankAccount GetBankAccount(String fname, Target tile, Mixed ... args){
         String bank_name = args[0].val();
         BankAccount m = new BankAccount(bank_name);
         if(m == null){

@@ -82,7 +82,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
             Integer index = -1;
             boolean all = false;
@@ -169,7 +169,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer p;
 			
 			if (args.length == 1) {
@@ -226,7 +226,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer p;
 			
 			if (args.length == 1) {
@@ -283,7 +283,7 @@ public class InventoryManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			MCPlayer other;
 			
@@ -348,7 +348,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer p;
 			
 			if (args.length == 1) {
@@ -445,13 +445,13 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
                 m = (MCPlayer) p;
             }
-            Construct arg;
+            Mixed arg;
             if(args.length == 2){
                 m = Static.GetPlayer(args[0], t);
                 arg = args[1];
@@ -549,7 +549,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             String item;
             if(args.length == 1){
@@ -630,7 +630,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             String item;
             if(args.length == 1){
@@ -722,10 +722,10 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
-			Construct m = null;
+			Mixed m = null;
 			
             if(args.length == 2){
                 is = Static.ParseItemNotation(this.getName(), args[0].val(), args[1].primitive(t).castToInt32(t), t);
@@ -748,7 +748,7 @@ public class InventoryManagement {
 			if (m != null) {
 				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(Construct.GetNullConstruct(t), is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(Construct.GetNullConstruct(CArray.class, t), is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = p.getInventory().addItem(is);
@@ -807,7 +807,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
             if(args.length == 2){
@@ -903,7 +903,7 @@ public class InventoryManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			
 			MCPlayer m = null;
@@ -912,7 +912,7 @@ public class InventoryManagement {
 				m = (MCPlayer) p;
 			}
 			
-			Construct arg;
+			Mixed arg;
 			
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
@@ -1010,7 +1010,7 @@ public class InventoryManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			ArgList list = getBuilder().parse(args, this, t);
 			String player = list.getStringWithNull("player", t);
@@ -1058,7 +1058,7 @@ public class InventoryManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null){
@@ -1123,7 +1123,7 @@ public class InventoryManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null){
@@ -1187,7 +1187,7 @@ public class InventoryManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null){
@@ -1244,7 +1244,7 @@ public class InventoryManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
 				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
@@ -1282,7 +1282,7 @@ public class InventoryManagement {
 		
 	}
 	
-	private static MCInventory GetInventory(Construct specifier, MCWorld w, Target t){
+	private static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t){
 		MCInventory inv;
 		if(specifier instanceof CArray){
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
@@ -1313,7 +1313,7 @@ public class InventoryManagement {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p1 = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCPlayer p2;
 			if(args.length == 2){
@@ -1394,7 +1394,7 @@ public class InventoryManagement {
 //            return false;
 //        }
 //        
-//        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //            MCPlayer p = environment.GetPlayer();
 //            if(args.length == 1){
 //                p = Static.GetPlayer(args[0], t);

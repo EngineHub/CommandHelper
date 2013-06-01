@@ -254,7 +254,7 @@ public class MObject implements Mixed, Documentation {
 					throw new Error(ex);
 				}
 				if(val == null){
-					return Construct.GetNullConstruct(Target.UNKNOWN);
+					return Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
 				} else {
 					Class fType = val.getClass();
 					if(fType == byte.class){
@@ -304,7 +304,7 @@ public class MObject implements Mixed, Documentation {
 		if(fields.containsKey(field)){
 			return fields.get(field);
 		} else {
-			return Construct.GetNullConstruct(Target.UNKNOWN);
+			return Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
 		}
 	}
 
@@ -409,5 +409,23 @@ public class MObject implements Mixed, Documentation {
 	 */
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
+	}
+
+	public boolean isDynamic() {
+		return true;
+	}
+
+	public void destructor() {
+		
+	}
+
+	public MObject doClone() {
+		//TODO: This can be improved once we get first class objects
+		return Construct(this.getClass(), deconstruct(Target.UNKNOWN).doClone(), Target.UNKNOWN);
+	}
+
+	public Target getTarget() {
+		//TODO: Is there a better way to do this?
+		return Target.UNKNOWN;
 	}
 }

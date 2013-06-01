@@ -22,6 +22,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Math;
 import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class Math {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double tally = args[0].primitive(t).castToDouble(t);
 			for (int i = 1; i < args.length; i++) {
 				tally += args[i].primitive(t).castToDouble(t);
@@ -133,7 +134,7 @@ public class Math {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double tally = args[0].primitive(t).castToDouble(t);
 			for (int i = 1; i < args.length; i++) {
 				tally -= args[i].primitive(t).castToDouble(t);
@@ -210,7 +211,7 @@ public class Math {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double tally = args[0].primitive(t).castToDouble(t);
 			for (int i = 1; i < args.length; i++) {
 				tally *= args[i].primitive(t).castToDouble(t);
@@ -287,7 +288,7 @@ public class Math {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double tally = args[0].primitive(t).castToDouble(t);
 			for (int i = 1; i < args.length; i++) {
 				double next = args[i].primitive(t).castToDouble(t);
@@ -371,7 +372,7 @@ public class Math {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			long arg1 = args[0].primitive(t).castToInt(t);
 			long arg2 = args[1].primitive(t).castToInt(t);
 			return new CInt(arg1 % arg2, t);
@@ -435,7 +436,7 @@ public class Math {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = args[0].primitive(t).castToDouble(t);
 			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CDouble(java.lang.Math.pow(arg1, arg2), t);
@@ -494,7 +495,7 @@ public class Math {
 	 * consolidates the code to do so.
 	 * @return 
 	 */
-	private static Construct doIncrementDecrement(ParseTree[] nodes, 
+	private static Mixed doIncrementDecrement(ParseTree[] nodes, 
 			Script parent, Environment env, Target t, 
 			Function func, boolean pre, boolean inc){
 		if(nodes[0].getData() instanceof CFunction){
@@ -506,9 +507,9 @@ public class Math {
 					//First, pull out the current value. We're gonna do this manually though, and we will actually
 					//skip the whole array_get execution.
 					ParseTree eval = nodes[0];
-					Construct array = parent.seval(eval.getChildAt(0), env);
+					Mixed array = parent.seval(eval.getChildAt(0), env);
 					CString index = parent.seval(eval.getChildAt(1), env).primitive(t).castToCString();
-					Construct cdelta = new CInt(1, t);
+					Mixed cdelta = new CInt(1, t);
 					if(nodes.length == 2){
 						cdelta = parent.seval(nodes[1], env);
 					}
@@ -527,7 +528,7 @@ public class Math {
 					} else {
 						//Ok, we're good. Data types should all be correct.
 						CArray myArray = ((CArray)array);
-						Construct value = myArray.get(index, t);
+						Mixed value = myArray.get(index, t);
 						if(value instanceof CInt || value instanceof CDouble){
 							temp = value.primitive(t).castToInt(t);
 							//Alright, now let's actually perform the increment, and store that in the array.
@@ -551,7 +552,7 @@ public class Math {
 					return new CInt(valueToReturn, t);
 				}
 			}
-			Construct [] args = new Construct[nodes.length];
+			Mixed [] args = new Construct[nodes.length];
 			for(int i = 0; i < args.length; i++){
 				args[i] = parent.eval(nodes[i], env);
 			}
@@ -575,11 +576,11 @@ public class Math {
 		}
 		
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, true);
 		}
 		
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
@@ -590,8 +591,8 @@ public class Math {
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
-				Construct newVal;
+				Mixed v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
+				Mixed newVal;
 				if (Static.anyDoubles(v)) {
 					newVal = new CDouble(v.primitive(t).castToDouble(t) + value, t);
 				} else {
@@ -654,7 +655,7 @@ public class Math {
 		}
 
 		@Override
-		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable){
 				return null;
 			} else {
@@ -686,11 +687,11 @@ public class Math {
 			return true;
 		}
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, false, true);
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
@@ -701,19 +702,15 @@ public class Math {
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
-				Construct newVal;
+				Mixed v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
+				Mixed newVal;
 				if (Static.anyDoubles(v)) {
 					newVal = new CDouble(v.primitive(t).castToDouble(t) + value, t);
 				} else {
 					newVal = new CInt(v.primitive(t).castToInt(t) + value, t);
 				}
-				Construct oldVal = null;
-				try {
-					oldVal = v.clone();
-				} catch (CloneNotSupportedException ex) {
-					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
-				}
+				Mixed oldVal = null;
+				oldVal = v.doClone();
 				env.getEnv(GlobalEnv.class).GetVarList().set(cur, v);
 				return oldVal;
 			} else {
@@ -764,7 +761,7 @@ public class Math {
 		}
 
 		@Override
-		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable){
 				return null;
 			} else {
@@ -797,11 +794,11 @@ public class Math {
 		}
 		
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, false);
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
@@ -812,7 +809,7 @@ public class Math {
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
+				Mixed v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v)) {
 					newVal = new CDouble(v.primitive(t).castToDouble(t) - value, t);
@@ -868,7 +865,7 @@ public class Math {
 		}
 
 		@Override
-		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable){
 				return null;
 			} else {
@@ -901,11 +898,11 @@ public class Math {
 		}
 		
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, false, false);
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
@@ -916,16 +913,16 @@ public class Math {
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
-				Construct newVal;
+				Mixed v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
+				Mixed newVal;
 				if (Static.anyDoubles(v)) {
 					newVal = new CDouble(v.primitive(t).castToDouble(t) - value, t);
 				} else {
 					newVal = new CInt(v.primitive(t).castToInt(t) - value, t);
 				}
-				Construct oldVal = null;
+				Mixed oldVal = null;
 				try {
-					oldVal = v.clone();
+					oldVal = v.doClone();
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -978,7 +975,7 @@ public class Math {
 		}
 
 		@Override
-		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable){
 				return null;
 			} else {
@@ -1036,7 +1033,7 @@ public class Math {
 			return CHVersion.V3_0_1;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length == 0){
 				return new CDouble(java.lang.Math.random(), t);
 			} else {
@@ -1122,7 +1119,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			double d = getBuilder().parse(args, this, t).getDouble("arg", t);
 			return new CDouble(java.lang.Math.abs(d), t);
 		}
@@ -1185,7 +1182,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CInt((long) java.lang.Math.floor(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1239,7 +1236,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CInt((long) java.lang.Math.ceil(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1294,7 +1291,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			double d = list.getDouble("number", t);
 			double m = java.lang.Math.sqrt(d);
@@ -1357,15 +1354,15 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
 				throw new ConfigRuntimeException("You must send at least one parameter to min",
 						ExceptionType.InsufficientArgumentsException, t);
 			}
 			double lowest = Double.POSITIVE_INFINITY;
-			List<Construct> list = new ArrayList<Construct>();
+			List<Mixed> list = new ArrayList<Mixed>();
 			recList(list, args);
-			for (Construct c : list) {
+			for (Mixed c : list) {
 				double d = c.primitive(t).castToDouble(t);
 				if (d < lowest) {
 					lowest = d;
@@ -1378,8 +1375,8 @@ public class Math {
 			}
 		}
 
-		public List<Construct> recList(List<Construct> list, Construct... args) {
-			for (Construct c : args) {
+		public List<Mixed> recList(List<Mixed> list, Mixed... args) {
+			for (Mixed c : args) {
 				if (c instanceof CArray) {
 					for (int i = 0; i < ((CArray) c).size(); i++) {
 						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
@@ -1443,15 +1440,15 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
 				throw new ConfigRuntimeException("You must send at least one parameter to max",
 						ExceptionType.InsufficientArgumentsException, t);
 			}
 			double highest = Double.NEGATIVE_INFINITY;
-			List<Construct> list = new ArrayList<Construct>();
+			List<Mixed> list = new ArrayList<Mixed>();
 			recList(list, args);
-			for (Construct c : list) {
+			for (Mixed c : list) {
 				double d = c.primitive(t).castToDouble(t);
 				if (d > highest) {
 					highest = d;
@@ -1464,8 +1461,8 @@ public class Math {
 			}
 		}
 
-		public List<Construct> recList(List<Construct> list, Construct... args) {
-			for (Construct c : args) {
+		public List<Mixed> recList(List<Mixed> list, Mixed... args) {
+			for (Mixed c : args) {
 				if (c instanceof CArray) {
 					for (int i = 0; i < ((CArray) c).size(); i++) {
 						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
@@ -1527,7 +1524,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.sin(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1581,7 +1578,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.cos(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1635,7 +1632,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.tan(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1689,7 +1686,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.asin(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1743,7 +1740,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.acos(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1797,7 +1794,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.atan(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1851,7 +1848,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.toRadians(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1905,7 +1902,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.toDegrees(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
@@ -1964,7 +1961,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			double y = list.getDouble("y", t);
 			double x = list.getDouble("x", t);
@@ -2024,7 +2021,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			double number = list.getDouble("number", t);
 			int precision = list.getInt("precision", t);
@@ -2104,7 +2101,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String expr = args[0].val();
 			CArray vars = null;
 			if (args.length == 2 && args[1] instanceof CArray) {
@@ -2184,7 +2181,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CNumber number = getBuilder().parse(args, this, t).get("number");
 			if (number instanceof CInt) {
 				return new CInt(-(number.castToInt(t)), t);
@@ -2221,7 +2218,7 @@ public class Math {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			double val = list.getDouble("val", t);
 			double base = list.getDouble("base", t);

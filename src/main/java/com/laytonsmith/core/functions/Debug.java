@@ -20,6 +20,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
@@ -98,7 +99,7 @@ public class Debug {
 //            return false;
 //        }
 //
-//        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
 //            }
@@ -233,7 +234,7 @@ public class Debug {
             return true;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             if (Prefs.DebugMode()) {
                 try {
                     Static.LogDebug(environment.getEnv(GlobalEnv.class).GetRootFolder(), args[0].val());
@@ -260,11 +261,11 @@ public class Debug {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			IVariable ivar = list.get("variable");
 			if(Prefs.DebugMode()){
-				Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar, t);
+				Mixed val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar, t);
 				System.out.println(ivar.getName() + ": " + val.val());
 			}
 			return new CVoid(t);
@@ -346,7 +347,7 @@ public class Debug {
 //            return false;
 //        }
 //
-//        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
 //            }
@@ -400,7 +401,7 @@ public class Debug {
 //            return true;
 //        }
 //
-//        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
 //            }
@@ -477,7 +478,7 @@ public class Debug {
 //            return false;
 //        }
 //
-//        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
 //            }
@@ -510,7 +511,7 @@ public class Debug {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			CArray carray = new CArray(t);
 			for(Thread thread : threadSet){
@@ -562,7 +563,7 @@ public class Debug {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File file = new File("dump.bin");
 			try{
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);

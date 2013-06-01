@@ -3,6 +3,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,15 +15,15 @@ public final class Globals {
     
     private Globals(){}
     
-    public static Map<String, Construct> global_ivar = new HashMap<String, Construct>();
-    public static Map<String, Construct> global_construct = new HashMap<String, Construct>();
+    public static Map<String, Mixed> global_ivar = new HashMap<String, Mixed>();
+    public static Map<String, Mixed> global_construct = new HashMap<String, Mixed>();
     
-    public static synchronized void SetGlobal(IVariable ivar, Construct value){
-        Map<String, Construct> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
+    public static synchronized void SetGlobal(IVariable ivar, Mixed value){
+        Map<String, Mixed> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
         vars.put(ivar.getName(), value);
     }
-    public static synchronized Construct GetGlobalIVar(IVariable var){
-        Map<String, Construct> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
+    public static synchronized Mixed GetGlobalIVar(IVariable var){
+        Map<String, Mixed> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
         if(vars.containsKey(var.getName())){
             return vars.get(var.getName());
         } else {
@@ -32,16 +33,16 @@ public final class Globals {
         }
     }
 	
-    public static synchronized void SetGlobal(String name, Construct value){
-        Map<String, Construct> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
+    public static synchronized void SetGlobal(String name, Mixed value){
+        Map<String, Mixed> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
         vars.put(name, value);
     }
-    public static synchronized Construct GetGlobalConstruct(String name){
-        Map<String, Construct> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
+    public static synchronized Mixed GetGlobalConstruct(String name){
+        Map<String, Mixed> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
         if(vars.containsKey(name)){
             return vars.get(name);
         } else {
-            return Construct.GetNullConstruct(Target.UNKNOWN);
+            return Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
         }
     }
     

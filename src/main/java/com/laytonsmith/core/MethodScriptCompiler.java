@@ -17,6 +17,7 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.util.*;
 
@@ -181,7 +182,7 @@ public final class MethodScriptCompiler {
 	 * @param done
 	 * @param script
 	 */
-	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script) {
+	public static Mixed execute(ParseTree root, Environment env, MethodScriptComplete done, Script script) {
 		return execute(root, env, done, script, null);
 	}
 
@@ -197,7 +198,7 @@ public final class MethodScriptCompiler {
 	 * @param vars
 	 * @return
 	 */
-	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
+	public static Mixed execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
 		if (script == null) {
 			script = new Script(null, null, fileOptions);
 		}
@@ -214,10 +215,10 @@ public final class MethodScriptCompiler {
 			}
 		}
 		StringBuilder b = new StringBuilder();
-		Construct returnable = null;
+		Mixed returnable = null;
 		//for (ParseTree gg : root.getChildren()) {
 		script.setLabel(env.getEnv(GlobalEnv.class).GetLabel());
-		Construct retc = script.eval(root, env);
+		Mixed retc = script.eval(root, env);
 		if (root.numberOfChildren() == 1) {
 			returnable = retc;
 		}

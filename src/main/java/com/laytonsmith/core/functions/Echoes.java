@@ -24,6 +24,7 @@ import com.laytonsmith.core.environments.RuntimeEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class Echoes {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException {
 			if (args.length == 0) {
 				throw new CancelCommandException("", t);
 			}
@@ -117,7 +118,7 @@ public class Echoes {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(final Target t, Environment env, final Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(final Target t, Environment env, final Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for (int i = 0; i < args.length; i++) {
 				b.append(args[i].val());
@@ -173,7 +174,7 @@ public class Echoes {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args.length < 2) {
 				throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -251,9 +252,9 @@ public class Echoes {
 			return new Integer[]{1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String color = null;
-			String val = args[0].nval();
+			String val = args[0].val();
 			if (colors.containsKey(val)) {
 				return colors.get(val);
 			}
@@ -404,7 +405,7 @@ public class Echoes {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(MCChatColor.stripColor(args[0].val()), t);
 		}
 	}
@@ -420,7 +421,7 @@ public class Echoes {
 			return new Integer[]{1};
 		}
 
-		public Construct exec(final Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			env.getEnv(CommandHelperEnvironment.class).GetPlayer().chat(args[0].val());
 			return new CVoid(t);
 		}
@@ -493,7 +494,7 @@ public class Echoes {
 			return CHVersion.V3_0_2;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			final MCPlayer player = Static.GetPlayer(args[0], t);
 			Static.AssertPlayerNonNull(player, t);
 			player.chat(args[1].val());
@@ -541,7 +542,7 @@ public class Echoes {
 			return CHVersion.V3_0_1;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0].isNull()) {
 				throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, t);
 			}
@@ -594,7 +595,7 @@ public class Echoes {
 			return CHVersion.V3_0_2;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			String mes = list.get("message");
 			boolean prefix = list.getBoolean("prefix", t);
@@ -628,7 +629,7 @@ public class Echoes {
 		}
 		color color = new color();
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			String text = list.get("text");
 			String symbol = list.get("symbol");

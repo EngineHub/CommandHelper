@@ -8,7 +8,6 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -118,7 +117,7 @@ public interface Function extends FunctionBase, Documentation {
      * @return
      * @throws CancelCommandException 
      */
-    Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException;
+    Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException;
     
     /**
      * If a function needs a code tree instead of a resolved construct, it should return true here. Most
@@ -135,7 +134,7 @@ public interface Function extends FunctionBase, Documentation {
      * @param nodes
      * @return 
      */
-    Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
+    Mixed execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
 	
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.
@@ -162,7 +161,7 @@ public interface Function extends FunctionBase, Documentation {
 	 * useSpecialExec returns false.
 	 * @return 
 	 */
-	String profileMessage(Construct ... args);
+	String profileMessage(Mixed ... args);
 	
 	/**
 	 * Returns the message to use when this function gets profiled, if

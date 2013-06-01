@@ -6,9 +6,8 @@ import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
-import java.util.ArrayList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,8 +29,12 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
         this(value.toString(), t);
     }
     
+	public static CString asString(Mixed m){
+		return new CString(m.val(), m.getTarget());
+	}
+	
     @Override
-    public CString clone() throws CloneNotSupportedException{
+    public CString doClone(){
         return this;
     }
 

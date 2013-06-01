@@ -83,7 +83,7 @@ public class EventBinding {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
@@ -92,13 +92,13 @@ public class EventBinding {
 			if (nodes.length < 5) {
 				throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, t);
 			}
-			Construct name = parent.seval(nodes[0], env);
-			Construct options = parent.seval(nodes[1], env);
-			Construct prefilter = parent.seval(nodes[2], env);
-			Construct event_obj = parent.eval(nodes[3], env);
+			Mixed name = parent.seval(nodes[0], env);
+			Mixed options = parent.seval(nodes[1], env);
+			Mixed prefilter = parent.seval(nodes[2], env);
+			Mixed event_obj = parent.eval(nodes[3], env);
 			IVariableList custom_params = new IVariableList();
 			for (int a = 0; a < nodes.length - 5; a++) {
-				Construct var = parent.eval(nodes[4 + a], env);
+				Mixed var = parent.eval(nodes[4 + a], env);
 				if (!(var instanceof IVariable)) {
 					throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, t);
 				}
@@ -188,7 +188,7 @@ public class EventBinding {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return EventUtils.DumpEvents();
 		}
 	}
@@ -235,7 +235,7 @@ public class EventBinding {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String id = null;
 			if (args.length == 1) {
 				//We are cancelling an arbitrary event
@@ -295,7 +295,7 @@ public class EventBinding {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			boolean state = list.getBoolean("state", t);
 
@@ -350,7 +350,7 @@ public class EventBinding {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
 			if (original == null) {
 				throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
@@ -411,7 +411,7 @@ public class EventBinding {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			String eventName = list.getString("eventName", t);
 			CArray eventObject = list.getEmptyArrayIfNull("eventObject");
@@ -474,7 +474,7 @@ public class EventBinding {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			String parameter = list.getString("parameter", t);
 			Mixed value = list.get("value");
@@ -545,7 +545,7 @@ public class EventBinding {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("lock must be called from within an event handler", ExceptionType.BindException, t);
 			}
@@ -618,7 +618,7 @@ public class EventBinding {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("is_locked may only be called from inside an event handler", ExceptionType.BindException, t);
 			}
@@ -668,7 +668,7 @@ public class EventBinding {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("consume may only be called from an event handler!", ExceptionType.BindException, t);
 			}
@@ -719,7 +719,7 @@ public class EventBinding {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("is_consumed must be called from within an event handler", ExceptionType.BindException, t);
 			}
@@ -773,7 +773,7 @@ public class EventBinding {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("event_meta must be called from within an event handler!", ExceptionType.BindException, t);
 			}

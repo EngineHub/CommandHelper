@@ -82,7 +82,7 @@ public class Persistance {
 			return CHVersion.V3_0_2;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String key = GetNamespace(args, args.length - 1, getName(), t);
 			String value = null;
 			try {
@@ -169,7 +169,7 @@ public class Persistance {
 			return CHVersion.V3_0_2;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Object o;
 			String namespace = GetNamespace(args, null, getName(), t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, "Getting value: " + namespace, t);
@@ -183,7 +183,7 @@ public class Persistance {
 					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 				}
 				if (obj == null) {
-					return Construct.GetNullConstruct(t);
+					return Construct.GetNullConstruct(Mixed.class, t);
 				}
 				o = Construct.json_decode(obj.toString(), t);
 			} catch (MarshalException ex) {
@@ -192,7 +192,7 @@ public class Persistance {
 			try {
 				return (Construct) o;
 			} catch (ClassCastException e) {
-				return Construct.GetNullConstruct(t);
+				return Construct.GetNullConstruct(Mixed.class, t);
 			}
 		}
 
@@ -249,7 +249,7 @@ public class Persistance {
 			return true;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			PersistanceNetwork p = environment.getEnv(GlobalEnv.class).GetPersistanceNetwork();
 			List<String> keyChain = new ArrayList<String>();
 			keyChain.add("storage");
@@ -333,7 +333,7 @@ public class Persistance {
 			return true;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CBoolean(env.getEnv(GlobalEnv.class).GetPersistanceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")), t);
 			} catch (DataSourceException ex) {
@@ -394,7 +394,7 @@ public class Persistance {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String namespace = GetNamespace(args, null, getName(), t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
@@ -426,7 +426,7 @@ public class Persistance {
 	 * @param exclude
 	 * @return
 	 */
-	private static String GetNamespace(Construct[] args, Integer exclude, String name, Target t) {
+	private static String GetNamespace(Mixed[] args, Integer exclude, String name, Target t) {
 		if (exclude != null && args.length < 2 || exclude == null && args.length < 1) {
 			throw new ConfigRuntimeException(name + " was not provided with enough arguments. Check the documentation, and try again.", ExceptionType.InsufficientArgumentsException, t);
 		}

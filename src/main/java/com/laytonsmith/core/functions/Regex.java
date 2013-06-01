@@ -13,6 +13,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -82,7 +83,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             CArray ret = new CArray(t);
@@ -92,7 +93,7 @@ public class Regex {
 
                 for(int i = 1; i <= m.groupCount(); i++){
                     if(m.group(i) == null){
-                        ret.push(Construct.GetNullConstruct(t));
+                        ret.push(Construct.GetNullConstruct(CArray.class, t));
                     } else {
                         ret.push(Static.resolveConstruct(m.group(i), t));
                     }
@@ -164,7 +165,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             CArray fret = new CArray(t);
@@ -245,7 +246,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String replacement = args[1].val();
             String subject = args[2].val();
@@ -339,7 +340,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             String [] rsplit = pattern.split(subject);
@@ -420,7 +421,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             long ret = 0;
@@ -465,7 +466,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             return new CString(Pattern.quote(args[0].val()), t);
         }
 
@@ -507,7 +508,7 @@ public class Regex {
         
     }
     
-    private static Pattern getPattern(Construct c, Target t) throws ConfigRuntimeException{
+    private static Pattern getPattern(Mixed c, Target t) throws ConfigRuntimeException{
         String regex = "";
         int flags = 0;
         String sflags = "";

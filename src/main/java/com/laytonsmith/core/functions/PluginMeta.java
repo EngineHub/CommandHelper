@@ -22,6 +22,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Set;
 
 /**
@@ -48,7 +49,7 @@ public class PluginMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
@@ -110,7 +111,7 @@ public class PluginMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
@@ -172,7 +173,7 @@ public class PluginMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger msgr = Static.getServer().getMessenger();
 			String channel = args[0].toString();
 			
@@ -228,7 +229,7 @@ public class PluginMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCMessenger msgr = Static.getServer().getMessenger();
 			String channel = args[0].toString();
 			
@@ -283,7 +284,7 @@ public class PluginMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean bool = Static.getServer().getMessenger().isIncomingChannelRegistered(args[0].toString());
 			
 			return new CBoolean(bool, t);
@@ -332,7 +333,7 @@ public class PluginMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Set<String> chans = Static.getServer().getMessenger().getIncomingChannels();
 			CArray arr = new CArray(t);
 			

@@ -37,7 +37,7 @@ public class StringHandlingTest {
     public void tearDown() {
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void testConcat() {
         StringHandling.concat a = new StringHandling.concat();
         assertCEquals(C.onstruct("1234"), a.exec(Target.UNKNOWN, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(4)));
@@ -47,7 +47,7 @@ public class StringHandlingTest {
     @Test(timeout = 10000)
     public void testLength() {
         StringHandling.length a = new StringHandling.length();
-        assertCEquals(C.onstruct(5), a.exec(Target.UNKNOWN, null, C.onstruct("12345")));
+        assertCEquals(C.onstruct(5), a.exec(Target.UNKNOWN, null, C.String("12345")));
         assertCEquals(C.onstruct(2), a.exec(Target.UNKNOWN, null, C.Array(C.onstruct(0), C.onstruct(1))));
     }
 

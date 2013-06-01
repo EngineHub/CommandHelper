@@ -9,6 +9,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.List;
 import java.util.Set;
 
@@ -137,7 +138,7 @@ public interface Optimizable extends Function {
 	 * @param args
 	 * @return
 	 */
-	public Construct optimize(Target t, Environment env, Construct... args) throws ConfigRuntimeException, ConfigCompileException;
+	public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigRuntimeException, ConfigCompileException;
 
 	/**
 	 * If the function indicates it can optimize dynamic values, this method is

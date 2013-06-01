@@ -35,7 +35,7 @@ public class C {
         return new CInt(val, Target.UNKNOWN);
     }
     public static Construct Null(){
-        return Construct.GetNullConstruct(Target.UNKNOWN);
+        return Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
     }
     public static CString String(String s){
         return new CString(s, Target.UNKNOWN);

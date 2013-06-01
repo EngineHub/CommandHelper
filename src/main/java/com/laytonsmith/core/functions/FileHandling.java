@@ -26,6 +26,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -57,7 +58,7 @@ public class FileHandling {
 			return new Integer[]{1};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String location = args[0].val();
 			location = new File(t.file().getParentFile(), location).getAbsolutePath();
 			//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
@@ -134,7 +135,7 @@ public class FileHandling {
 			return null;
 		}
 
-		public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final String file = args[0].val();
 			final CClosure callback;
 			if(!(args[1] instanceof CClosure)){
@@ -165,15 +166,15 @@ public class FileHandling {
 							exception = new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 						}
 					}
-					final Construct cret;
+					final CString cret;
 					if(returnString == null){
-						cret = Construct.GetNullConstruct(t);
+						cret = Construct.GetNullConstruct(CString.class, t);
 					} else {
 						cret = new CString(returnString, t);
 					}
-					final Construct cex;
+					final CArray cex;
 					if(exception == null){
-						cex = Construct.GetNullConstruct(t);
+						cex = Construct.GetNullConstruct(CArray.class, t);
 					} else {
 						cex = ObjectGenerator.GetGenerator().exception(exception, t);
 					}
@@ -244,7 +245,7 @@ public class FileHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String location = args[0].val();
 			if(!Security.CheckSecurity(location)){
 				throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'", 

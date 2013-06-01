@@ -5,6 +5,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -84,8 +85,8 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public void set(CPrimitive index, Construct c, Target t) {
-		throw new ConfigRuntimeException("CSlices cannot set values", Exceptions.ExceptionType.CastException, t);
+	public void set(CPrimitive index, Mixed c, Target t) {
+		throw new ConfigRuntimeException("slices cannot set values", Exceptions.ExceptionType.CastException, t);
 	}
 
 	@Override

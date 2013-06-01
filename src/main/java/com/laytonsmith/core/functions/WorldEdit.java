@@ -21,6 +21,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MLocation;
 import com.laytonsmith.core.natives.MRegionInfo;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
@@ -88,7 +89,7 @@ public class WorldEdit {
 					);
 		}
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l = null;
             boolean setter = false;
@@ -120,7 +121,7 @@ public class WorldEdit {
             }
             if (setter) {
                 sel.selectPrimary(BukkitUtil.toVector(( (BukkitMCLocation) l )._Location()));
-                return Construct.GetNullConstruct(t);
+                return Construct.GetNullConstruct(MLocation.class, t);
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos1();
                 if (pt == null) {
@@ -166,7 +167,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l = null;
             boolean setter = false;
@@ -233,7 +234,7 @@ public class WorldEdit {
 //            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 //        }
 //
-//        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+//        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 //            Static.checkPlugin("WorldEdit", t);
 //            return new CVoid(t);
 //        }
@@ -269,7 +270,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             try {
                 String regionName = args[0].val();
                 String worldName = args[1].val();
@@ -380,7 +381,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             String region1 = args[1].val();
             List<ProtectedRegion> checkRegions = new ArrayList<ProtectedRegion>();
             Static.checkPlugin("WorldGuard", t);
@@ -452,7 +453,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             String region1 = args[1].val();
             List<ProtectedRegion> checkRegions = new ArrayList<ProtectedRegion>();
 			List<ProtectedRegion> getRegions = new ArrayList<ProtectedRegion>();
@@ -543,7 +544,7 @@ public class WorldEdit {
             return new ExceptionType[]{};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             List<World> checkWorlds = null;
             CArray arr = new CArray(t);
@@ -597,7 +598,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
 
@@ -680,7 +681,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException, ExceptionType.InsufficientArgumentsException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
 
@@ -766,7 +767,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
 
@@ -815,7 +816,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
@@ -953,7 +954,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
@@ -1097,7 +1098,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
@@ -1180,7 +1181,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
@@ -1256,7 +1257,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
@@ -1368,7 +1369,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
@@ -1480,7 +1481,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
@@ -1592,7 +1593,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
@@ -1710,7 +1711,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = Bukkit.getServer().getWorld(args[0].val());
@@ -1847,7 +1848,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
@@ -1941,7 +1942,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
 			String regionName;

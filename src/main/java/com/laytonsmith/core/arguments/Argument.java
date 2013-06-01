@@ -231,7 +231,11 @@ public class Argument implements Documentation {
 	 * @return 
 	 */
 	public Argument setVarargs(){
-		return setVarargs(true).setOptional(true);
+		setVarargs(true).setOptional(true);
+		if(def == null){
+			def = new CArray(Target.UNKNOWN);
+		}
+		return this;
 	}
 	
 	/**
@@ -328,7 +332,7 @@ public class Argument implements Documentation {
 	 * @return 
 	 */
 	public Argument setOptionalDefaultNull(){
-		return this.setOptionalDefault(Construct.GetNullConstruct(Target.UNKNOWN));
+		return this.setOptionalDefault(Construct.GetNullConstruct(Construct.class, Target.UNKNOWN));
 	}
 	
 	/**

@@ -12,6 +12,8 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MEnum;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Operators;
 import java.util.*;
 
 /**
@@ -24,22 +26,22 @@ import java.util.*;
  * @author layton
  */
 @typename("array")
-public class CArray extends Construct implements ArrayAccess, Iterable<Construct> {
+public class CArray extends Construct implements ArrayAccess, Iterable<Mixed>, Operators.Equality {
 
     private boolean associative_mode = false;
     private long next_index = 0;
-    private List<Construct> array;
-    private SortedMap<String, Construct> associative_array;
+    private List<Mixed> array;
+    private SortedMap<String, Mixed> associative_array;
     private String mutVal;
     CArray parent = null;
 	private boolean valueDirty = true;
     
     
     public CArray(Target t){
-        this(t, (Construct[])null);
+        this(t, (Mixed[])null);
     }
 	
-	public CArray(Target t, Collection<Construct> items){
+	public CArray(Target t, Collection<Mixed> items){
 		this(t, getArray(items));
 	}
 	
@@ -55,7 +57,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * Returns the backing array.
 	 * @return 
 	 */
-	protected List<Construct> getArray(){
+	protected List<Mixed> getArray(){
 		return array;
 	}
 	
@@ -63,23 +65,23 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * Returns the backing associative array.
 	 * @return 
 	 */
-	protected SortedMap<String, Construct> getAssociativeArray(){
+	protected SortedMap<String, Mixed> getAssociativeArray(){
 		return associative_array;
 	}
 	
-	private static Construct [] getArray(Collection<Construct> items){
-		Construct c [] = new Construct[items.size()];
+	private static Mixed [] getArray(Collection<Mixed> items){
+		Mixed c [] = new Mixed[items.size()];
 		int count = 0;
-		for(Construct cc : items){
+		for(Mixed cc : items){
 			c[count++] = cc;
 		}
 		return c;
 	}
 
-    public CArray(Target t,  Construct... items) {
+    public CArray(Target t,  Mixed... items) {
         super(null, t);
         if(items != null){
-            for(Construct item : items){
+            for(Mixed item : items){
                 if(item instanceof CEntry){
                     //it's an associative array
                     associative_mode = true;
@@ -87,11 +89,11 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
                 }
             }
         }
-        associative_array = new TreeMap<String, Construct>(comparator);
-        array = new ArrayList<Construct>();
+        associative_array = new TreeMap<String, Mixed>(comparator);
+        array = new ArrayList<Mixed>();
         if(associative_mode){
             if(items != null){
-                for(Construct item : items){
+                for(Mixed item : items){
                     if(item instanceof CEntry){
                         associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).construct);
                     } else {
@@ -114,7 +116,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
             }
         } else {
             if(items != null){
-                for(Construct item : items){
+                for(Mixed item : items){
                     array.add(item);
                     if(item instanceof CArray){
                         ((CArray)item).parent = this;
@@ -142,7 +144,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 		return new CArray(t).forceAssociativeMode();
 	}
 	
-	public static CArray GetAssociativeArray(Target t, Construct[] args){
+	public static CArray GetAssociativeArray(Target t, Mixed[] args){
 		return new CArray(t, args).forceAssociativeMode();
 	}
     
@@ -152,7 +154,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
      */
     private CArray forceAssociativeMode(){
         if(associative_array == null){
-            associative_array = new TreeMap<String, Construct>();
+            associative_array = new TreeMap<String, Mixed>();
         }
         associative_mode = true;
 		return this;
@@ -187,7 +189,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * Pushes a new Construct onto the end of the array.
 	 * @param c 
 	 */
-	public void push(Construct c){
+	public void push(Mixed c){
 		push(c, null);
 	}
     /**
@@ -201,7 +203,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * @throws IndexOutOfBoundsException If the index is not null, and the index specified is out of
 	 * range.
      */
-    public void push(Construct c, Integer index) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void push(Mixed c, Integer index) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (!associative_mode) {
 			if(index != null){
 				array.add(index, c);
@@ -255,7 +257,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
      * @param index
      * @param c 
      */
-    public void set(CPrimitive index, Construct c, Target t) {
+    public void set(CPrimitive index, Mixed c, Target t) {
         if (!associative_mode) {
             try {
                 int indx = index.castToInt32(t);
@@ -268,7 +270,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
                 }
             } catch (ConfigRuntimeException e) {
                 //Not a number. Convert to associative.
-                associative_array = new TreeMap<String, Construct>(comparator);
+                associative_array = new TreeMap<String, Mixed>(comparator);
                 for (int i = 0; i < array.size(); i++) {
                     associative_array.put(Integer.toString(i), array.get(i));
                 }
@@ -285,13 +287,13 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
         regenValue();
     }
     
-    public final void set(int index, Construct c, Target t){
+    public final void set(int index, Mixed c, Target t){
         this.set(new CInt(index, Target.UNKNOWN), c, t);
     }
     /* Shortcuts */
     
-    public final void set(String index, Construct c, Target t){
-        set(new CString(index, c.getTarget()), c, t);
+    public final void set(String index, Mixed c, Target t){
+        set(new CString(index, (c instanceof Construct?((Construct)c).getTarget():Target.UNKNOWN)), c, t);
     }
     
     public final void set(String index, String value, Target t){
@@ -302,7 +304,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
         set(index, value, Target.UNKNOWN);
     }
 
-    public Construct get(CPrimitive index, Target t) {
+    public Mixed get(CPrimitive index, Target t) {
         if(!associative_mode){
             try {
                 return array.get(index.castToInt32(t));
@@ -311,7 +313,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
             }
         } else {
             if(associative_array.containsKey(normalizeConstruct(index))){
-                Construct val = associative_array.get(normalizeConstruct(index));
+                Mixed val = associative_array.get(normalizeConstruct(index));
                 if(val instanceof CEntry){
                     return ((CEntry)val).construct();
                 }
@@ -322,19 +324,19 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
         }
     }
     
-    public final Construct get(long index, Target t){
+    public final Mixed get(long index, Target t){
         return this.get(new CInt(index, t), t);
     }
     
-    public final Construct get(String index, Target t){
+    public final Mixed get(String index, Target t){
         return this.get(new CString(index, t), t);
     }
     
-    public final Construct get(String index){
+    public final Mixed get(String index){
         return this.get(index, Target.UNKNOWN);
     }
     
-    public final Construct get(long index){
+    public final Mixed get(long index){
         return this.get(index, Target.UNKNOWN);
     }
     
@@ -383,7 +385,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * @param value
 	 * @return 
 	 */
-	public CArray indexesOf(Construct value){
+	public CArray indexesOf(Mixed value){
 		CArray ret = new CArray(Target.UNKNOWN);
 		if(associative_mode){
 			for(String key : associative_array.keySet()){
@@ -444,7 +446,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
     }
 
     @Override
-    public CArray clone() {
+    public CArray doClone() {
         CArray clone;
 		try {
 			clone = (CArray) super.clone();
@@ -454,11 +456,11 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
         clone.associative_mode = associative_mode;
         if(!associative_mode){
             if (array != null) {
-                clone.array = new ArrayList<Construct>(this.array);
+                clone.array = new ArrayList<Mixed>(this.array);
             }
         } else {
             if(associative_array != null){
-                clone.associative_array = new TreeMap<String, Construct>(this.associative_array);
+                clone.associative_array = new TreeMap<String, Mixed>(this.associative_array);
             }
         }
         clone.regenValue();
@@ -490,7 +492,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * @param key
 	 * @return The value removed
 	 */
-	public Construct remove(int key, Target t){
+	public Mixed remove(int key, Target t){
 		return remove(Integer.toString(key), t);
 	}
 	
@@ -499,9 +501,9 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * @param key
 	 * @return The value removed
 	 */
-    public Construct remove(String key, Target t) {
+    public Mixed remove(String key, Target t) {
         String c = key;
-        Construct ret;
+        Mixed ret;
         if(!associative_mode){
             try{
                 ret = array.remove(Integer.parseInt(c));
@@ -523,19 +525,19 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * from this array
 	 * @param construct 
 	 */
-	public void removeValues(Construct construct){
+	public void removeValues(Mixed construct){
 		if(associative_mode){
-			Iterator<Construct> it;
+			Iterator<Mixed> it;
 			it = associative_array.values().iterator();
 			while(it.hasNext()){
-				Construct c = it.next();
+				Mixed c = it.next();
 				if(BasicLogic.equals.doEquals(c, construct)){
 					it.remove();
 				}
 			}
 		} else {
 			for(int i = array.size() - 1; i >= 0; i--){
-				Construct c = array.get(i);
+				Mixed c = array.get(i);
 				if(BasicLogic.equals.doEquals(c, construct)){
 					array.remove(i);
 				}
@@ -589,7 +591,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
         return true;
     }
 
-    public Construct slice(int begin, int end, Target t) {
+    public Mixed slice(int begin, int end, Target t) {
         return new ArrayHandling.array_get().exec(t, null, new CSlice(begin, end, t));
     }
 
@@ -602,8 +604,8 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 		throw new ConfigRuntimeException("Arrays cannot be cast to a primitive value.", ExceptionType.CastException, t);
 	}
 
-	public Iterator<Construct> iterator() {
-		return new Iterator<Construct>() {
+	public Iterator<Mixed> iterator() {
+		return new Iterator<Mixed>() {
 			
 			//Freeze the iteration order now
 			private List<String> keySet = new ArrayList<String>(keySet());
@@ -613,7 +615,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 				return index < keySet.size() - 1;
 			}
 
-			public Construct next() {
+			public Mixed next() {
 				return get(keySet.get(++index));
 			}
 
@@ -621,6 +623,31 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 				CArray.this.remove(keySet.get(index), Target.UNKNOWN);
 			}
 		};
+	}
+
+	public boolean operatorEquals(Mixed m) {
+		if(this == m){
+			return true;
+		}
+		CArray other = (CArray)m;
+		if(other.size() != this.size()){
+			return false;
+		} else if(!other.keySet().equals(this.keySet())){
+			return false;
+		} else {
+			//Ok, the lengths are the same, the keys are the same, so now check
+			//all the values for equivalence
+			for(String key : other.keySet()){
+				if(!com.laytonsmith.core.functions.BasicLogic.equals.doEquals(other.get(key), this.get(key))){
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	public boolean operatorTestEquals(Class<? extends Mixed> clazz) {
+		return CArray.class.isAssignableFrom(clazz);
 	}
     
 	@typename("SortType")
@@ -655,6 +682,22 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 		public boolean isNull() {
 			return false;
 		}
+		
+		public Target getTarget(){
+			return Target.UNKNOWN;
+		}
+		
+		public SortType doClone(){
+			return this;
+		}
+		
+		public boolean isDynamic(){
+			return false;
+		}
+		
+		public void destructor(){
+			
+		}
 
 		public String typeName() {
 			return this.getClass().getAnnotation(typename.class).value();
@@ -669,7 +712,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 		}
 	}
     public void sort(final SortType sort, final Target t){
-        List<Construct> list = array;
+        List<Mixed> list = array;
         if(this.associative_mode){
             list = new ArrayList(associative_array.values());
             this.associative_array.clear();
@@ -677,13 +720,13 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
             this.associative_mode = false;
             CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Attempting to sort an associative array; key values will be lost.", this.getTarget());
         }
-        Collections.sort(array, new Comparator<Construct>() {
-            public int compare(Construct o1, Construct o2) {
+        Collections.sort(array, new Comparator<Mixed>() {
+            public int compare(Mixed o1, Mixed o2) {
                 //o1 < o2 -> -1
                 //o1 == o2 -> 0
                 //o1 > o2 -> 1
                 for(int i = 0; i < 2; i++){
-                    Construct c;
+                    Mixed c;
                     if(i == 0){
                         c = o1;
                     } else {
@@ -730,7 +773,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
                 }
                 throw new Error("Missing implementation for " + sort.name());
             }
-            public int compareRegular(Construct o1, Construct o2){
+            public int compareRegular(Mixed o1, Mixed o2){
                 if(new DataHandling.is_numeric().exec(t, null, o1).castToBoolean()
                         && new DataHandling.is_numeric().exec(t, null, o2).castToBoolean()){
                     return compareNumeric(o1, o2);
@@ -745,7 +788,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
                     return compareString(o1.val(), o2.val());
                 }
             }
-            public int compareNumeric(Construct o1, Construct o2){
+            public int compareNumeric(Mixed o1, Mixed o2){
                 double d1 = ((CPrimitive)o1).castToDouble(t);
                 double d2 = ((CPrimitive)o2).castToDouble(t);
                 return Double.compare(d1, d2);

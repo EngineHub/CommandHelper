@@ -17,6 +17,7 @@ import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import java.util.*;
 import java.util.logging.Level;
@@ -197,8 +198,8 @@ public class Script {
 	 * @param env
 	 * @return
 	 */
-	public Construct seval(ParseTree c, final Environment env) {
-		Construct ret = eval(c, env);
+	public Mixed seval(ParseTree c, final Environment env) {
+		Mixed ret = eval(c, env);
 		if (ret instanceof IVariable) {
 			IVariable cur = (IVariable) ret;
 			ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
@@ -206,7 +207,7 @@ public class Script {
 		return ret;
 	}
 
-	public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
+	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
 		final Construct m = c.getData();
 		CurrentEnv = env;
 		//TODO: Reevaluate if this line is needed. The script doesn't know the label inherently, the
@@ -245,7 +246,7 @@ public class Script {
 							ExceptionType.InsufficientPermissionException, m.getTarget());
 				}
 			}
-			ArrayList<Construct> args = new ArrayList<Construct>();
+			ArrayList<Mixed> args = new ArrayList<Mixed>();
 			try {
 				if (f.useSpecialExec()) {
 					ProfilePoint p = null;
@@ -291,7 +292,7 @@ public class Script {
 					if (f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())) {
 						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
 					}
-					Construct ret = f.exec(m.getTarget(), env, ca);
+					Mixed ret = f.exec(m.getTarget(), env, ca);
 					if (p != null) {
 						p.stop();
 					}
@@ -320,9 +321,9 @@ public class Script {
 						+ " itself. The line of code that caused the error was this:\n" + TermColors.WHITE + f.getName() + "(";
 				List<String> args2 = new ArrayList<String>();
 				Map<String, String> vars = new HashMap<String, String>();
-				for(Construct cc : args){
+				for(Mixed cc : args){
 					if(cc instanceof IVariable){
-						Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc), cc.getTarget());
+						Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc), (cc instanceof Construct?((Construct)cc).getTarget():Target.UNKNOWN));
 						String vval = ccc.val();
 						if(ccc instanceof CString){
 							vval = ccc.asString().getQuote();
@@ -332,7 +333,7 @@ public class Script {
 					if(cc == null){
 						args2.add("java-null");
 					} else if(cc instanceof CString){
-						args2.add(cc.asString().getQuote());
+						args2.add(((CString)cc).getQuote());
 					} else if(cc instanceof IVariable){
 						args2.add(((IVariable)cc).getName());
 					} else {

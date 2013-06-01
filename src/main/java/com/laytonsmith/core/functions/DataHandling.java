@@ -47,7 +47,7 @@ public class DataHandling {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CArray(t, args);
 		}
 
@@ -117,7 +117,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray array = CArray.GetAssociativeArray(t, args);
 			return array;
 		}
@@ -176,7 +176,7 @@ public class DataHandling {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof IVariable) {
 				env.getEnv(GlobalEnv.class).GetVarList().set((IVariable)args[0], args[1]);
 				return args[0];
@@ -272,7 +272,7 @@ public class DataHandling {
 			return new Integer[]{4};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public Mixed exec(Target t, Environment env, Mixed... args) {
 			return new CVoid(t);
 		}
 
@@ -413,7 +413,7 @@ public class DataHandling {
 			return true;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return null;
 		}				
 
@@ -429,7 +429,7 @@ public class DataHandling {
 			}
 			boolean hasRunOnce = false;
 
-			Construct counter = parent.eval(assign, env);
+			Mixed counter = parent.eval(assign, env);
 			if (!(counter instanceof IVariable)) {
 				throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, t);
 			}
@@ -513,7 +513,7 @@ public class DataHandling {
 			return new Integer[]{3, 4};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
@@ -529,15 +529,15 @@ public class DataHandling {
 			}
 			ParseTree value = nodes[1 + offset];
 			ParseTree code = nodes[2 + offset];
-			Construct arr = parent.seval(array, env);
-			Construct ik = null;
+			Mixed arr = parent.seval(array, env);
+			Mixed ik = null;
 			if(key != null){
 				ik = parent.eval(key, env);
 				if(!(ik instanceof IVariable)){
 					throw new ConfigRuntimeException("Parameter 2 of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
 				}
 			}
-			Construct iv = parent.eval(value, env);
+			Mixed iv = parent.eval(value, env);
 			if (arr instanceof CSlice) {
 				long start = ((CSlice) arr).getStart();
 				long finish = ((CSlice) arr).getFinish();
@@ -681,7 +681,7 @@ public class DataHandling {
 			//The last one
 			ParseTree elseCode = nodes[nodes.length - 1];
 
-			Construct data = parent.seval(array, env);
+			Mixed data = parent.seval(array, env);
 			
 			if(!(data instanceof CArray) && !(data instanceof CSlice)){
 				throw new Exceptions.CastException(getName() + " expects an array for parameter 1", t);
@@ -829,8 +829,8 @@ public class DataHandling {
 			return true;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return Construct.GetNullConstruct(t);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException();
 		}
 		
 		@Override
@@ -876,8 +876,8 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return Construct.GetNullConstruct(t);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException();
 		}
 
 		public String getName() {
@@ -999,7 +999,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
 				num = args[0].primitive(t).castToInt32(t);
@@ -1093,7 +1093,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
 				num = args[0].primitive(t).castToInt32(t);
@@ -1157,7 +1157,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CPrimitive, t);
 		}
 
@@ -1221,7 +1221,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean((args[0] instanceof CString), t);
 		}
 
@@ -1283,7 +1283,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CArray, t);
 		}
 
@@ -1348,7 +1348,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CDouble, t);
 		}
 
@@ -1412,7 +1412,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CInt, t);
 		}
 
@@ -1475,7 +1475,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CBoolean, t);
 		}
 
@@ -1538,7 +1538,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0].isNull(), t);
 		}
 
@@ -1597,7 +1597,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
 				args[0].primitive(t).castToDouble(t);
@@ -1672,7 +1672,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			double d;
 			try {
 				d = args[0].primitive(t).castToDouble(t);
@@ -1771,7 +1771,7 @@ public class DataHandling {
 				if (i == nodes.length - 1) {
 					tree = nodes[i];
 				} else {
-					Construct cons = parent.eval(nodes[i], env);
+					Mixed cons = parent.eval(nodes[i], env);
 					if (i == 0 && cons instanceof IVariable) {
 						throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, t);
 					} else {
@@ -1791,7 +1791,7 @@ public class DataHandling {
 			return myProc;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
@@ -1812,7 +1812,7 @@ public class DataHandling {
 		 * @throws ConfigCompileException
 		 * @throws ConfigRuntimeException
 		 */
-		public static Construct optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public static Mixed optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			if (myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
@@ -1824,7 +1824,7 @@ public class DataHandling {
 					Script fakeScript = Script.GenerateScript(root, PermissionsResolver.GLOBAL_PERMISSION);
 					Environment env = Static.GenerateStandaloneEnvironment();
 					env.getEnv(GlobalEnv.class).SetScript(fakeScript);
-					Construct c = myProc.cexecute(children, env, t);
+					Mixed c = myProc.cexecute(children, env, t);
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
@@ -1896,8 +1896,8 @@ public class DataHandling {
 			);
 		}				
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			Construct ret = (args.length == 1 ? args[0] : new CVoid(t));
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			Mixed ret = (args.length == 1 ? args[0] : new CVoid(t));
 			throw new FunctionReturnException(ret, t);
 		}
 	}
@@ -1943,14 +1943,14 @@ public class DataHandling {
 			return true;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			ParseTree tree = nodes[0];
-			Construct arg = parent.seval(tree, env);
+			Mixed arg = parent.seval(tree, env);
 			String location = arg.val();
 			ParseTree include = IncludeCache.get(new File(t.file().getParent(), location), t, env);
 			parent.eval(include.getChildAt(0), env);
@@ -1970,7 +1970,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
+		public Construct optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			//We can't optimize per se, but if the path is constant, and the code is uncompilable, we
 			//can give a warning, and go ahead and cache the tree.
 			String path = args[0].val();
@@ -2025,13 +2025,13 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
 			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
 			if (proc != null) {
-				List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
+				List<Mixed> vars = new ArrayList<Mixed>(Arrays.asList(args));
 				vars.remove(0);
 				Environment newEnv = null;
 				try {
@@ -2067,12 +2067,12 @@ public class DataHandling {
 	public static class call_proc_array extends call_proc {
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[1], t);
 			if(ca.inAssociativeMode()){
 				throw new Exceptions.CastException("Expected the array passed to " + getName() + " to be non-associative.", t);
 			}
-			Construct [] args2 = new Construct[(int)ca.size() + 1];
+			Mixed [] args2 = new Construct[(int)ca.size() + 1];
 			args2[0] = args[0];
 			for(int i = 1; i < args2.length; i++){
 				args2[i] = ca.get(i - 1);
@@ -2170,7 +2170,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public Mixed exec(Target t, Environment env, Mixed... args) {
 			return new CBoolean(env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val()) == null ? false : true, t);
 		}
 	}
@@ -2216,7 +2216,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				return new CBoolean(((CArray) args[0]).inAssociativeMode(), t);
 			} else {
@@ -2279,7 +2279,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CClosure, t);
 		}
 
@@ -2355,7 +2355,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args[0] instanceof IVariable) {
 				//Mode 1     
 				IVariable var = (IVariable) args[0];
@@ -2437,7 +2437,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args.length == 1) {
 				if (args[0] instanceof IVariable) {
 					IVariable cur = (IVariable) args[0];
@@ -2452,7 +2452,7 @@ public class DataHandling {
 				}
 			} else {
 				String key = GetNamespace(args, args.length - 1, getName(), t);
-				Construct c = args[args.length - 1];
+				Mixed c = args[args.length - 1];
 				//We want to store the value contained, not the ivar itself
 				while (c instanceof IVariable) {
 					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c), t);
@@ -2519,14 +2519,14 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			String[] names = new String[nodes.length - 1];
-			Construct[] defaults = new Construct[nodes.length - 1];
+			Mixed[] defaults = new Construct[nodes.length - 1];
 			for (int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
 				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
@@ -2534,7 +2534,7 @@ public class DataHandling {
 				children.add(node);
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, env.getEnv(GlobalEnv.class).GetLabel());
-				Construct ret = MethodScriptCompiler.execute(newNode, env, null, fakeScript);
+				Mixed ret = MethodScriptCompiler.execute(newNode, env, null, fakeScript);
 				if (!(ret instanceof IVariable)) {
 					throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, t);
 				}
@@ -2597,7 +2597,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args[args.length - 1] instanceof CClosure) {
 				Construct[] vals = new Construct[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
@@ -2653,7 +2653,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0].primitive(t).castToBoolean(), t);
 		}
 
@@ -2725,7 +2725,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].primitive(t).castToInt(t), t);
 		}
 
@@ -2790,7 +2790,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(args[0].primitive(t).castToDouble(t), t);
 		}
 
@@ -2855,7 +2855,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(args[0].val(), t);
 		}
 
@@ -2893,7 +2893,7 @@ public class DataHandling {
 	 * @param exclude
 	 * @return
 	 */
-	private static String GetNamespace(Construct[] args, Integer exclude, String name, Target t) {
+	private static String GetNamespace(Mixed[] args, Integer exclude, String name, Target t) {
 		if (exclude != null && args.length < 2 || exclude == null && args.length < 1) {
 			throw new ConfigRuntimeException(name + " was not provided with enough arguments. Check the documentation, and try again.", ExceptionType.InsufficientArgumentsException, t);
 		}

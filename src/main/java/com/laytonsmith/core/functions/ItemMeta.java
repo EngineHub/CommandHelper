@@ -24,6 +24,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MColor;
 import com.laytonsmith.core.natives.MItemMeta;
 import com.laytonsmith.core.natives.annotations.Ranged;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -59,7 +60,7 @@ public class ItemMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(list.getStringWithNull("player", t) != null){
@@ -147,9 +148,9 @@ public class ItemMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Construct slot, meta;
+			Mixed slot, meta;
 			MCItemStack is;
 			if(args.length == 3){
 				p = Static.GetPlayer(args[0], t);
@@ -245,7 +246,7 @@ public class ItemMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			if(args.length == 2){
@@ -313,7 +314,7 @@ public class ItemMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			CArray color;
@@ -396,7 +397,7 @@ public class ItemMeta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			if(args.length == 2){

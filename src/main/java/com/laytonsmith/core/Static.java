@@ -60,47 +60,6 @@ public final class Static {
 		}
 		throw new ConfigRuntimeException("Expecting an array, but " + c.typeName() + " found instead (" + c.toString() + ")", ExceptionType.CastException, t);
 	}
-    /**
-     * Returns true if any of the constructs are a CDouble, false otherwise.
-     * @param c
-     * @return 
-     */
-    public static boolean anyDoubles(Construct... c) {
-        for (int i = 0; i < c.length; i++) {
-            if (c[i] instanceof CDouble) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Return true if any of the constructs are CStrings, false otherwise.
-     * @param c
-     * @return 
-     */
-    public static boolean anyStrings(Construct... c) {
-        for (int i = 0; i < c.length; i++) {
-            if (c[i] instanceof CString) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns true if any of the constructs are CBooleans, false otherwise.
-     * @param c
-     * @return 
-     */
-    public static boolean anyBooleans(Construct... c) {
-        for (int i = 0; i < c.length; i++) {
-            if (c[i] instanceof CBoolean) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Returns the logger for the plugin
@@ -251,7 +210,7 @@ public final class Static {
             return new CString("", t);
         }
         if (val.equalsIgnoreCase("null")) {
-            return Construct.GetNullConstruct(t);
+            return Construct.GetNullConstruct(Construct.class, t);
         } else if (val.equalsIgnoreCase("true")) {
             return new CBoolean(true, t);
         } else if (val.equalsIgnoreCase("false")) {
@@ -279,7 +238,7 @@ public final class Static {
 
     public static Construct resolveDollarVar(Construct variable, List<Variable> vars) {
         if(variable == null){
-            return Construct.GetNullConstruct(Target.UNKNOWN);
+            return Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
         }
         if (variable instanceof Variable){//== Construct.ConstructType.VARIABLE) {
             for (Variable var : vars) {
@@ -439,7 +398,7 @@ public final class Static {
 	 * @return
 	 * @throws ConfigRuntimeException 
 	 */
-    public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
+    public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
         return GetPlayer(player.val(), t);
     }
 	
@@ -838,8 +797,8 @@ public final class Static {
 	 * @param args
 	 * @throws ConfigRuntimeException 
 	 */
-	public static void AssertNonCNull(Target t, Construct ... args) throws ConfigRuntimeException {
-		for(Construct arg : args){
+	public static void AssertNonCNull(Target t, Mixed ... args) throws ConfigRuntimeException {
+		for(Mixed arg : args){
 			if(arg.isNull()){
 				throw new ConfigRuntimeException("Argument was null, and nulls are not allowed.", ExceptionType.NullPointerException, t);
 			}

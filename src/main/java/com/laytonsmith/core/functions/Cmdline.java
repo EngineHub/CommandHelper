@@ -57,7 +57,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             System.out.print(args[0].val());
             if (args[0].val().matches("(?m).*\033.*")) {
                 //We have color codes in it, we need to reset them
@@ -122,7 +122,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             System.err.print(args[0].val());
             if (args[0].val().matches("(?m).*\033.*")) {
                 //We have color codes in it, we need to reset them
@@ -185,7 +185,7 @@ public class Cmdline {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
             int exit_code = list.getInt("exitCode", t);
             if (environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
@@ -253,7 +253,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			String propertyName = list.getStringWithNull("propertyName", t);
             if (propertyName != null) {
@@ -322,7 +322,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             if (args.length == 1) {
                 return new CString(System.getenv(args[0].val()), t);
             } else {
@@ -377,7 +377,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             //TODO: Make this more robust by having a local cache of the environment which we modify, and get_env returns from.
             Map<String, String> newenv = new HashMap<String, String>(System.getenv());
             newenv.put(args[0].val(), args[1].val());

@@ -2,14 +2,23 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.annotations.immutable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.exceptions.NonScriptError;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.natives.interfaces.MObject;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.sk89q.util.ReflectionUtil;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -18,16 +27,18 @@ import org.json.simple.JSONValue;
  *
  * @author layton
  */
-public abstract class Construct implements Cloneable, Comparable<Construct>, Mixed{
+public abstract class Construct implements Comparable<Construct>, Mixed{
 
     private final Object value;
     private final Target target;
+	private boolean isNull = false;
     
     public Target getTarget(){
         return target;
     }
-	
-    public Construct(Object value, Target t){
+
+	//TODO: @AbstractConstructor
+    protected Construct(Object value, Target t){
         this.value = value;
         this.target = t;
     }
@@ -36,8 +47,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * Returns true if the underlying value is null.
 	 * @return 
 	 */
-	public boolean isNull(){
-		return value == null;
+	public final boolean isNull(){
+		return isNull;
 	}
 
     /**
@@ -68,8 +79,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     }
 
     @Override
-    public Construct clone() throws CloneNotSupportedException {
-        return (Construct) super.clone();
+    public Construct doClone() {
+		try {
+			return (Construct) super.clone();
+		} catch (CloneNotSupportedException ex) {
+			throw new Error("Object doesn't support clone?");
+		}
     }
 	
 		
@@ -108,11 +123,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @param c
      * @return 
      */
-    public static String json_encode(Construct c, Target t) throws MarshalException{
+    public static String json_encode(Mixed c, Target t) throws MarshalException{
         return JSONValue.toJSONString(json_encode0(c, t));
     }
     
-    private static Object json_encode0(Construct c, Target t) throws MarshalException{
+    private static Object json_encode0(Mixed c, Target t) throws MarshalException{
         if (c instanceof CString) {
             return c.val();
         } else if (c instanceof CVoid) {
@@ -151,7 +166,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      */
     public static Construct json_decode(String s, Target t) throws MarshalException {
 		if(s == null){
-			return GetNullConstruct(t);
+			return GetNullConstruct(Construct.class, t);
 		}
         if (s.startsWith("{")) {
             //Object
@@ -181,7 +196,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             JSONArray array = (JSONArray) JSONValue.parse(s);
 			if(array == null){
 				//It's a null value
-				return GetNullConstruct(t);
+				return GetNullConstruct(Construct.class, t);
 			}
             Object o = array.get(0);
             return convertJSON(o, t);
@@ -210,7 +225,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             }
             return ca;
         } else if (o == null) {
-            return GetNullConstruct(t);
+            return GetNullConstruct(Construct.class, t);
         } else if(o instanceof java.util.Map){
             CArray ca = CArray.GetAssociativeArray(t);
             for(Object key : ((java.util.Map)o).keySet()){
@@ -245,26 +260,39 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @param t
 	 * @return 
 	 */
-	public static Construct GetNullConstruct(final Target t){
+	public static <T extends Mixed> T GetNullConstruct(Class<T> clazz, final Target t){
 		//TODO: Change this return type to Mixed once the exec function
 		//has been updated
-		return new Construct(null, t) {
+		if(clazz.isInterface()){
+			//Proxy it
+			return (T)Proxy.newProxyInstance(Construct.class.getClassLoader(), new Class[]{clazz}, new InvocationHandler() {
 
-			@Override
-			public boolean isDynamic() {
-				return false;
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+					if("isNull".equals(method.getName())){
+						return true;
+					} else {
+						return method.invoke(proxy, args);
+					}
+				}
+			});
+		} else {
+			//Create a new subclass for it, and then set the hidden property
+			if(Construct.class.isAssignableFrom(clazz)){
+				try{
+					T obj = ReflectionUtils.newInstance(clazz, new Class[]{Object.class, Target.class}, new Object[]{null, t});
+					((Construct)obj).isNull = true;
+					return obj;
+				} catch(ReflectionUtils.ReflectionException e){
+					throw new NonScriptError("Could not construct a subclass for " + clazz + " for a null reference, because there"
+							+ "was no constructor that matched Object, Target, or the class was final.", e);
+				}
+			} else if(MObject.class.isAssignableFrom(clazz)){
+				//TODO:
+				throw new UnsupportedOperationException("TODO");
+			} else {
+				throw new NonScriptError("Unsupported type was passed to GetNullConstruct: " + clazz);
 			}
-
-			public String typeName() {
-				return "null";
-			}
-
-			@Override
-			public boolean isImmutable() {
-				throw new ConfigRuntimeException("Cannot dereference a null object", Exceptions.ExceptionType.NullPointerException, t);
-			}
-			
-		};
+		}
 	}
 
 	public boolean isImmutable() {
@@ -306,7 +334,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      */
     private static Construct GetConstruct(Object o) throws ClassCastException{
         if(o == null){
-            return GetNullConstruct(Target.UNKNOWN);
+            return GetNullConstruct(Construct.class, Target.UNKNOWN);
         } else if(o instanceof CharSequence){
             return new CString((CharSequence)o, Target.UNKNOWN);
         } else if(o instanceof Number){
@@ -356,7 +384,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return
      * @throws ClassCastException 
      */
-    public static Object GetPOJO(Construct c) throws ClassCastException{
+    public static Object GetPOJO(Mixed c) throws ClassCastException{
         if(c.isNull()){
             return null;
         } else if(c instanceof CString){

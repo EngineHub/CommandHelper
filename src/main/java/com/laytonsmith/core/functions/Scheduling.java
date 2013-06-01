@@ -15,6 +15,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.text.SimpleDateFormat;
@@ -82,7 +83,7 @@ public class Scheduling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CInt(System.currentTimeMillis(), t);
 		}
 	}
@@ -127,7 +128,7 @@ public class Scheduling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CInt(System.nanoTime(), t);
 		}
 	}
@@ -170,7 +171,7 @@ public class Scheduling {
 			return CHVersion.V3_1_0;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 //            if (Thread.currentThread().getName().equals("Server thread")) {
 //                throw new ConfigRuntimeException("sleep() cannot be run in the main server thread", 
 //                        null, t);
@@ -240,7 +241,7 @@ public class Scheduling {
 			return false;
 		}
 
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			long time = list.getLong("timeInMS", t);
 			Long delay = list.getLongWithNull("initialDelayInMS", t);
@@ -315,7 +316,7 @@ public class Scheduling {
 			return false;
 		}
 
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			long time = list.getInt("timeInMS", t);
 			final CClosure c = list.get("closure");
@@ -386,7 +387,7 @@ public class Scheduling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			Integer id = list.getIntegerWithNull("id", t);
 			if(id == null){
@@ -469,7 +470,7 @@ public class Scheduling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public Mixed exec(Target t, Environment env, Mixed... args) {
 			ArgList list = getBuilder().parse(args, this, t);
 			Date now;
 			String format = list.getString("format", t);

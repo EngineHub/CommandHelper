@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -336,12 +337,12 @@ public class CByteArray extends Construct implements Sizable {
 		}
 
 		@Override
-		public void push(Construct c) {
+		public void push(Mixed c) {
 			throw new ROException();
 		}
 
 		@Override
-		public void set(CPrimitive index, Construct c, Target t) {
+		public void set(CPrimitive index, Mixed c, Target t) {
 			throw new ROException();
 		}
 
@@ -378,13 +379,13 @@ public class CByteArray extends Construct implements Sizable {
 		}
 
 		@Override
-		protected List<Construct> getArray() {
+		protected List<Mixed> getArray() {
 			//I'm not sure what cases this would happen in, but it should not happen normally.
 			throw new RuntimeException("This error should not happen. Please report this bug to the developers");
 		}
 
 		@Override
-		protected SortedMap<String, Construct> getAssociativeArray() {
+		protected SortedMap<String, Mixed> getAssociativeArray() {
 			//This is even more serious, because it shouldn't ever happen.
 			throw new Error("This error should not happen. Please report this bug to the developers");
 		}

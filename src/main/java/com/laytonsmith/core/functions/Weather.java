@@ -16,6 +16,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MLocation;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -42,7 +43,7 @@ public class Weather {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException, ExceptionType.FormatException};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			int x, y, z, ent;
 			MCWorld w = null;
 			boolean safe = false;
@@ -123,7 +124,7 @@ public class Weather {
 			return new Integer[]{1, 2, 3};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			boolean b = args[0].primitive(t).castToBoolean();
 			MCWorld w = null;
 			if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
@@ -193,7 +194,7 @@ public class Weather {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if (args.length == 1) {
 				if (environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
@@ -260,7 +261,7 @@ public class Weather {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if (args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
@@ -320,7 +321,7 @@ public class Weather {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if (args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());

@@ -26,6 +26,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.annotations.FormatString;
 import com.laytonsmith.core.natives.interfaces.MObject;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -153,7 +154,7 @@ public class Scoreboards {
 	 * @param args the array of arguments passed to the function
 	 * @return the scoreboard chosen, defaulting to main if numArgsToReadName was not matched
 	 */
-	public static MCScoreboard assignBoard(int numArgsToReadName, int indexOfName, Target t, Construct... args) {
+	public static MCScoreboard assignBoard(int numArgsToReadName, int indexOfName, Target t, Mixed... args) {
 		if (args.length == numArgsToReadName) {
 			return getBoard(args[indexOfName].val(), t);
 		}
@@ -214,7 +215,7 @@ public class Scoreboards {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			String ret;
 			try {
@@ -260,7 +261,7 @@ public class Scoreboards {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.setScoreboard(getBoard(args[1].val(), t));
 			return new CVoid(t);
@@ -300,7 +301,7 @@ public class Scoreboards {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (String id : boards.keySet()) {
 				ret.push(new CString(id, t));
@@ -335,7 +336,7 @@ public class Scoreboards {
 	public static class get_objectives extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s;
 			if (args.length == 0) {
 				s = getBoard(MAIN, t);
@@ -412,7 +413,7 @@ public class Scoreboards {
 	public static class get_teams extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s;
 			if (args.length == 0) {
 				s = getBoard(MAIN, t);
@@ -468,7 +469,7 @@ public class Scoreboards {
 	public static class create_scoreboard extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			addBoard(args[0].val(), Static.getServer().getNewScoreboard(), t);
 			return new CVoid(t);
 		}
@@ -506,7 +507,7 @@ public class Scoreboards {
 		}
 		
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
 			String name = args[0].val();
 			if (name.length() > 16) {
@@ -566,7 +567,7 @@ public class Scoreboards {
 		}
 		
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, 1, t, args);
 			String name = args[0].val();
 			if (name.length() > 16) {
@@ -622,7 +623,7 @@ public class Scoreboards {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if (o == null) {
@@ -694,7 +695,7 @@ public class Scoreboards {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
 			MCTeam o = s.getTeam(args[0].val());
 			if (o == null) {
@@ -778,7 +779,7 @@ public class Scoreboards {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
 			if (team == null) {
@@ -823,7 +824,7 @@ public class Scoreboards {
 	public static class team_remove_player extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
 			if (team == null) {
@@ -864,7 +865,7 @@ public class Scoreboards {
 	public static class remove_scoreboard extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			boolean nullify = true;
 			if (args.length == 2) {
@@ -921,7 +922,7 @@ public class Scoreboards {
 	public static class remove_objective extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, 1, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			try {
@@ -962,7 +963,7 @@ public class Scoreboards {
 	public static class remove_team extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, 1, t, args);
 			MCTeam team = s.getTeam(args[0].val());
 			try {
@@ -1003,7 +1004,7 @@ public class Scoreboards {
 	public static class get_pscore extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if (o == null) {
@@ -1048,7 +1049,7 @@ public class Scoreboards {
 		}
 		
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(4, 3, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if (o == null) {
@@ -1101,7 +1102,7 @@ public class Scoreboards {
 		}
 		
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
 			if (team == null) {

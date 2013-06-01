@@ -43,7 +43,7 @@ public class Reflection {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class reflect_pull extends AbstractFunction {
 
-		private static Set<Construct> protocols;
+		private static Set<Mixed> protocols;
 		public String getName() {
 			return "reflect_pull";
 		}
@@ -92,7 +92,7 @@ public class Reflection {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("Not enough parameters was sent to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -127,7 +127,7 @@ public class Reflection {
 				return new CInt(t.col(), t);
 			} else if("datasources".equalsIgnoreCase(param)){
 				if(protocols == null){
-					protocols = new HashSet<Construct>();
+					protocols = new HashSet<Mixed>();
 					for(String s : DataSourceFactory.GetSupportedProtocols()){
 						protocols.add(new CString(s, Target.UNKNOWN));
 					}
@@ -175,7 +175,7 @@ public class Reflection {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String element = args[0].val();
 			DocField docField;
 			try {
@@ -186,7 +186,7 @@ public class Reflection {
 			//For now, we have special handling, since functions are actually the only thing that will work,
 			//but eventually this will be a generic interface.
 			if (element.startsWith("@")) {
-				Construct var = environment.getEnv(GlobalEnv.class).GetVarList().get(new IVariable(element, t), t);
+				Mixed var = environment.getEnv(GlobalEnv.class).GetVarList().get(new IVariable(element, t), t);
 				if (var == null) {
 					throw new ConfigRuntimeException("Invalid variable provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
 				}
@@ -202,7 +202,7 @@ public class Reflection {
 					throw new ConfigRuntimeException("Unknown function: " + element, ExceptionType.FormatException, t);
 				}
 			}
-			return Construct.GetNullConstruct(t);
+			return Construct.GetNullConstruct(CString.class, t);
 		}
 
 		public String formatFunctionDoc(String docs, DocField field) {

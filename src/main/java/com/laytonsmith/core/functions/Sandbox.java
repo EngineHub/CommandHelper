@@ -14,6 +14,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MItemStack;
 import com.laytonsmith.core.natives.MLocation;
 import com.laytonsmith.core.natives.annotations.Ranged;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import org.bukkit.event.Cancellable;
 
 /**
@@ -64,7 +65,7 @@ public class Sandbox {
 //            return false;
 //        }
 //
-//        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+//        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 //            Object o = AliasCore.parent.getServer().getPluginManager();
 //            if (o instanceof SimplePluginManager) {
 //                SimplePluginManager spm = (SimplePluginManager) o;
@@ -131,7 +132,7 @@ public class Sandbox {
         }
 		
 		public Argument returnType() {
-			return Argument.VOID;
+			return new Argument("", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
@@ -157,7 +158,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 
             MCLocation l = null;
             int qty = 1;
@@ -227,7 +228,7 @@ public class Sandbox {
 			if(item != null){
 				return new CInt(item.getEntityId(), t);
 			}
-            return Construct.GetNullConstruct(t);
+            return Construct.GetNullConstruct(CInt.class, t);
         }
     }    
 
@@ -274,7 +275,7 @@ public class Sandbox {
             return null;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
             if (original == null) {
                 throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
@@ -335,7 +336,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             int offset = 1;
             if (args.length == 4) {
@@ -417,7 +418,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer me;
             boolean isVanished;
             MCPlayer other;
@@ -480,7 +481,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             MCPlayer me;
             MCPlayer other;
             if (args.length == 1) {
@@ -506,7 +507,7 @@ public class Sandbox {
 		}
 
 		
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String saying = args[0].val();
 			String divider = "";
 			for(int i = 0; i < saying.length() + 4; i++){
