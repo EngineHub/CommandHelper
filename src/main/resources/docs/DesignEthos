@@ -1,0 +1,82 @@
+Designing a language isn't straightforward. However, there are a few guiding principals
+that are used in the design of the language, though these are guidelines, not hard
+and fast principals. Whenever possible, when making design choices, these principals
+are followed, which hopefully make a better language. As more principals are codified
+and discovered, they will be added here later.
+
+== Fail fast ==
+
+Whenever possible, determine if a condition will cause errors later, and fail at
+that point, instead of waiting until later. Be proactive in detecting errors, not
+passive. For instance, if a condition can be checked at compile time, do the check
+then, instead of runtime. A good example is the regex functions. If you hardcode a
+regex, the compiler checks to see if the regex is invalid. If so, it produces a
+compile error at that point, instead of waiting until runtime (which is how most
+languages work).
+
+== Design for intention, not implementation ==
+
+Don't worry about the implementation, until the last minute. Program against intentions
+first and foremost. Eventually, you do have to worry about the implementation, but
+that should be the last thing on your mind, unless the implementation will cause
+practical problems for the design. This should be a last resort however, as most
+poor designs are poor because the designer catered to the implementation, instead
+of making an elegant design first. In the commercial world, there usually is a balance
+to be struck between design and practical implementation, but in language design,
+where the stakes are much higher, avoiding a good design due to a complicated
+implementation translates into exponentially greater complication for users of
+the language, and so is to be avoided at all costs.
+
+== Benchmark ==
+
+Don't assume something is efficient or not. Benchmark it! There are so many factors
+that can't be taken into account in the realm of theory, so the only way to get a real
+answer for "Is this efficient?" is to run actual code, and get real, concrete timings.
+
+== Optimize last ==
+
+Assuming the previous two principals are followed, then the places to optimize should 
+be clear. Places where the implementation was inefficiently coded, or overly complicated
+tend to happen in the case of expressing a very elegant design that isn't catered to
+the implementation. However, it may not be as important to optimize as you think, and
+there may be much bigger bottlenecks causing performance problems. For a much
+more in depth discussion of this, [http://c2.com/cgi/wiki?PrematureOptimization see here].
+
+''Premature optimization is the root of all evil'' -- Donald Knuth
+
+== Abstract ==
+
+Whenever relying on outside code that is subject to changing, abstract against it.
+This provides greater flexibility for you if it should change later. In general,
+you should program for ''your'' intentions, not the external libraries intentions.
+This is known as 
+[http://en.wikipedia.org/wiki/Aspect-oriented_software_development Aspect-oriented software development]
+and is a great way to reduce future maintenance. Barring bug fixes, the general idea
+is that already written code should never have to be changed, unless the core
+design changes. However, practically, implementations do change, and if your code
+relied on that, even if your code was designed perfectly, would still have to change.
+Therefore, we want to minimize the code that has to change, by restricting the code
+changes to a single module, that is, the interface between the bulk of your code,
+and the 3rd party code. In cases where this is too huge a burden, you should at least
+be aware of how tightly coupled your code is to the other code.
+
+== Help the programmer ==
+
+Don't use cryptic error messages. Use plain english error messages where possible,
+and provide as many hints and tips as reasonable to help the programmer fix the
+error. Distinguish between programmer errors and user input errors. Programmers
+make mistakes, but the language shouldn't make assumptions either, if something
+is unclear, report it, and ask the user to clarify before continuing.
+
+== Use reasonable defaults ==
+
+However, a programmer shouldn't have to specify every last little detail when telling
+a program what to do. Reasonable defaults should be used, though they should always
+be able to be overridden. A good example of this is in day to day speech. When
+speaking with another human, if we give them a task, we often times leave off
+details that don't really matter. For instance, if I told you to go water the lawn,
+and there are two hoses in the garage, you're not going to need to come back
+and ask me which host to use, you would just select one. However, if one were broken,
+I would have to go out of my way to tell you to use the one on the left, but this
+is an exceptional circumstance, and I shouldn't have to explicitely tell you every
+detail in the typical case.

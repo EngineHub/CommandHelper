@@ -2068,7 +2068,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class _import extends AbstractFunction {
+	public static class _import extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "import";
@@ -2079,9 +2079,10 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "mixed {ivar | key[, namespace, ...,]} This function imports a value from the global value"
+			return "mixed {ivar | key} This function imports a value from the global value"
 					+ " register. In the first mode, it looks for an ivariable with the specified"
-					+ " name, and stores the value in the variable, and returns void. In the"
+					+ " name, and stores the value in the variable, and returns void. The first"
+					+ " mode is deprecated, and should not be used. In the"
 					+ " second mode, it looks for a value stored with the specified key, and"
 					+ " returns that value. Items can be stored with the export function. If"
 					+ " the specified ivar doesn't exist, the ivar will be assigned an empty"
@@ -2123,10 +2124,34 @@ public class DataHandling {
 				return Globals.GetGlobalConstruct(key);
 			}
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new _export().examples();
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 2){
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
+							+ " Use import('my.namespace') instead of import('my', 'namespace')", t);
+			}
+			if(children.get(0).getData() instanceof IVariable){
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "import(@ivar) usage is deprecated. Please use the @ivar = import('custom.name') format,"
+							+ " as this feature WILL be removed in the future.", t);
+			}
+			//Just a compiler warning
+			return null;
+		}
+		
 	}
 
 	@api
-	public static class _export extends AbstractFunction {
+	public static class _export extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "export";
@@ -2137,12 +2162,15 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {ivar | key[, namespace, ...,], value} Stores a value in the global storage register."
+			return "void {ivar | key, value} Stores a value in the global storage register."
 					+ " When using the first mode, the ivariable is stored so it can be imported"
 					+ " later, and when using the second mode, an arbitrary value is stored with"
-					+ " the give key, and can be retreived using the secode mode of import. If"
-					+ " the value is already stored, it is overwritten. See import() and"
-					+ " [[CommandHelper/import-export|importing/exporting]]";
+					+ " the give key, and can be retreived using the secode mode of import. The first mode will"
+					+ " be deprecated in future versions, so should be avoided. If"
+					+ " the value is already stored, it is overwritten. See {{function|import}} and"
+					+ " [[CommandHelper/import-export|importing/exporting]]. The reference to the value"
+					+ " is stored, not a copy of the value, so in the case of arrays, manipulating the"
+					+ " contents of the array will manipulate the stored value.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -2185,6 +2213,46 @@ public class DataHandling {
 			}
 			return new CVoid(t);
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Deprecated usage", "@var = 2\n"
+					+ "export(@var)\n"
+					+ "@var = 0\n"
+					+ "# In other code, perhaps inside a proc, or another execution unit\n"
+					+ "import(@var)\n"
+					+ "msg(@var)"),
+				new ExampleScript("Preferred usage", "@var = 2\n"
+					+ "export('custom.name', @var)\n"
+					+ "@var2 = import('custom.name')\n"
+					+ "msg(@var2)"),
+				new ExampleScript("Storage of references", "@array = array(1, 2, 3)\n"
+					+ "export('array', @array)\n"
+					+ "@array[0] = 4\n"
+					+ "@array2 = import('array')\n"
+					+ "msg(@array2)")
+			};
+		}
+		
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 2){
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
+							+ " Use export('my.namespace', @var) instead of export('my', 'namespace', @var)", t);
+			}
+			if(children.get(0).getData() instanceof IVariable){
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "export(@ivar) usage is deprecated. Please use the export('custom.name', @ivar) format,"
+							+ " as this feature WILL be removed in the future.", t);
+			}
+			//Just a compiler warning
+			return null;
+		}
+		
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
