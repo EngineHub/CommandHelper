@@ -6,19 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.xpath.XPath;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -73,7 +68,8 @@ public class SAXDocument {
 			Stack<String> nodeNames = new Stack<String>();
 			Stack<Map<String, AtomicInteger>> nodeCount = new Stack<Map<String, AtomicInteger>>();
 			String lastElement = "";
-			int depth = 0;
+			Map<String, StringBuilder> contents = new HashMap<String, StringBuilder>();
+			Stack<Attributes> attributeStack = new Stack<Attributes>();
 
 			@Override
 			public void startDocument() throws SAXException {
@@ -82,7 +78,6 @@ public class SAXDocument {
 			
 			@Override
 			public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-				depth++;
 				nodeNames.push(qName);
 				Map<String, AtomicInteger> c = nodeCount.peek();
 				if(!c.containsKey(qName)){
@@ -92,32 +87,56 @@ public class SAXDocument {
 				}
 				Map<String, AtomicInteger> counts = new HashMap<String, AtomicInteger>();
 				nodeCount.push(counts);
+				if(!contents.isEmpty()){
+					StringBuilder b = new StringBuilder();
+					b.append("<").append(qName).append("");
+					for(int i = 0; i < attributes.getLength(); i++){
+						b.append(" ").append(attributes.getQName(i))
+								.append("=\"").append(attributes.getValue(i).replace("\"", "&quot;")).append("\"");
+					}
+					b.append(">");
+					appendAll(b.toString());
+				}
 				String path = pathFromMarkers(nodeNames, nodeCount);
-				
-			}
-
-			@Override
-			public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-				String s = fromChars(ch, start, length);
-				super.ignorableWhitespace(ch, start, length);
+				if(hasListener(path)){
+					contents.put(getListenerPath(path), new StringBuilder());
+					attributeStack.push(attributes);
+				}
 			}
 
 			@Override
 			public void characters(char[] ch, int start, int length) throws SAXException {
-				String s = fromChars(ch, start, length);
-				super.characters(ch, start, length);
+				if(!contents.isEmpty()){
+					String s = fromChars(ch, start, length);
+					appendAll(s);
+				}
 			}
 
 			@Override
 			public void endElement(String uri, String localName, String qName) throws SAXException {
 				String path = pathFromMarkers(nodeNames, nodeCount);
 				if(hasListener(path)){
-					notifyListeners(path, null, null, null);
+					String key = getListenerPath(path);
+					StringBuilder b = contents.remove(key);
+					Attributes attr = attributeStack.pop();
+					Map<String, String> attributes = new LinkedHashMap<String, String>();
+					for(int i = 0; i < attr.getLength(); i++){
+						attributes.put(attr.getQName(i), attr.getValue(i));
+					}
+					notifyListeners(path, qName, attributes, b.toString());
 				}
-				
-				depth--;
+				if(!contents.isEmpty()){
+					appendAll("</" + qName + ">");
+				}
+
 				nodeNames.pop();
 				nodeCount.pop();
+			}
+			
+			private void appendAll(String s){
+				for(StringBuilder b : contents.values()){
+					b.append(s);
+				}
 			}
 			
 		});
@@ -162,6 +181,15 @@ public class SAXDocument {
 			}
 		}
 		return false;
+	}
+	
+	private String getListenerPath(String xpath){
+		for(String key : callbacks.keySet()){
+			if(xpath.matches(key)){
+				return key;
+			}
+		}
+		return null;
 	}
 	
 	/**

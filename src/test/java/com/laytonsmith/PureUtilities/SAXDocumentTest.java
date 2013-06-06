@@ -10,20 +10,21 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- *
- * @author lsmith
+ * 
  */
 public class SAXDocumentTest {
 	
 	static String testDoc = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 			+ "<root>"
 				+ "<node1 attribute=\"value\">Text</node1>"
-					+ "<nodes>"
-						+ "<inode attribute=\"1\">value</inode>"
-						+ "<!-- This is 2 ^ 33 -->"
-						+ "<inode attribute=\"1.5\">8589934592</inode>"
-						+ "<inode>true</inode>"
-					+ "</nodes>"
+				+ "<nodes>"
+					+ "<inode attribute=\"1\">value</inode>"
+					+ "<!-- This is 2 ^ 33 -->"
+					+ "<inode attribute=\"1.5\">8589934592</inode>"
+					+ "<inode>true</inode>"
+				+ "</nodes>"
+				+ "<outer><inner attr=\"&quot;attr&quot;\">text</inner></outer>"
+				+ "<selfclosed attribute=\"val\" />"
 			+ "</root>";
 	SAXDocument doc;
 
@@ -71,5 +72,44 @@ public class SAXDocumentTest {
 		});
 		doc.parse();
 		assertEquals(1, i.get());
+	}
+	
+	@Test
+	public void testSimpleContents() throws Exception {
+		final MutableObject m = new MutableObject();
+		doc.addListener("/root/nodes/inode[1]", new SAXDocument.ElementCallback() {
+
+			public void handleElement(String xpath, String tag, Map<String, String> attr, String contents) {
+				m.setObject(contents);
+			}
+		});
+		doc.parse();
+		assertEquals("value", m.getObject());
+	}
+	
+	@Test
+	public void testComplexContents() throws Exception {
+		final MutableObject m = new MutableObject();
+		doc.addListener("/root/outer", new SAXDocument.ElementCallback() {
+
+			public void handleElement(String xpath, String tag, Map<String, String> attr, String contents) {
+				m.setObject(contents);
+			}
+		});
+		doc.parse();
+		assertEquals("<inner attr=\"&quot;attr&quot;\">text</inner>", m.getObject());
+	}
+	
+	@Test
+	public void testAttributes() throws Exception {
+		final MutableObject m = new MutableObject();
+		doc.addListener("/root/node1", new SAXDocument.ElementCallback() {
+
+			public void handleElement(String xpath, String tag, Map<String, String> attr, String contents) {
+				m.setObject(attr.get("attribute"));
+			}
+		});
+		doc.parse();
+		assertEquals("value", m.getObject());
 	}
 }
