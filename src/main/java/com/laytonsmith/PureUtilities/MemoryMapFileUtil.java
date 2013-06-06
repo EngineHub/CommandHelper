@@ -117,15 +117,25 @@ public class MemoryMapFileUtil {
 	 * Marks the data as dirty. This also triggers the writer to start if it isn't already
 	 * started. Multiple calls to mark do not necessarily cause the output to be written
 	 * multiple times, it simply sets the flag
+	 * @param dm The daemon manager. If null, ignored.
 	 */
-	public void mark(){
+	public void mark(final DaemonManager dm){
 		synchronized(this){
 			modelDirty = fileDirty = true;
 			if(!running){
+				if(dm != null){
+					dm.activateThread(null);
+				}
 				getService().submit(new Runnable() {
 
 					public void run() {
-						MemoryMapFileUtil.this.run();
+						try{
+							MemoryMapFileUtil.this.run();
+						} finally {
+							if(dm != null){
+								dm.deactivateThread(null);
+							}
+						}
 					}
 				});
 			}

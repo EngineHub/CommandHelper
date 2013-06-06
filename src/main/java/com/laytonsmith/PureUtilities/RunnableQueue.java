@@ -50,8 +50,22 @@ public class RunnableQueue {
 	 * immediately.
 	 * @param r 
 	 */
-	public void invokeLater(Runnable r){
-		service.submit(r);
+	public void invokeLater(final DaemonManager dm, final Runnable r){
+		if(dm != null){
+			dm.activateThread(null);
+		}
+		service.submit(new Runnable() {
+
+			public void run() {
+				try{
+					r.run();
+				} finally {
+					if(dm != null){
+						dm.deactivateThread(null);
+					}
+				}
+			}
+		});
 	}
 	
 	public <T> T invokeAndWait(Callable<T> callable) throws InterruptedException, ExecutionException{

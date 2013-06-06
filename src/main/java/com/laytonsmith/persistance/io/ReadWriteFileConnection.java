@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance.io;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
 import com.laytonsmith.PureUtilities.ZipReader;
@@ -89,7 +90,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		return new String(this.data, encoding);
 	}
 
-	public void writeData(final String data) throws  ReadOnlyException, IOException, UnsupportedOperationException {		
+	public void writeData(DaemonManager dm, final String data) throws  ReadOnlyException, IOException, UnsupportedOperationException {		
 		File outputFile = reader.getFile();
 		if(reader.isZipped()){
 			throw new ReadOnlyException("Cannot write to a zipped file.");
@@ -101,7 +102,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 			throw new FileNotFoundException(file.getAbsolutePath() + " does not exist!");
 		}
 		this.data = data.getBytes(encoding);
-		writer.mark();
+		writer.mark(dm);
 	}
 
 	public String getPath() throws IOException {

@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
@@ -106,9 +107,9 @@ public class SQLiteDataSource extends AbstractDataSource{
 		}
 	}
 
-	public boolean set0(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
+	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		if(value == null){
-			clearKey(key);
+			clearKey(dm, key);
 			return true;
 		}
 		try{
@@ -127,7 +128,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 	}
 
 	@Override
-	protected void clearKey0(String[] key) throws ReadOnlyException, DataSourceException, IOException {
+	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		if(hasKey(key)){
 			try{
 				try{

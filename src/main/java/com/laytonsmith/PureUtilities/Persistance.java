@@ -17,10 +17,11 @@ public interface Persistance {
     public void load() throws Exception;
     
     /**
-     * Causes the database to be saved to disk
+     * Causes the database to be saved to disk.
+	 * @param dm Optional, but if provided, activates a daemon thread.
      * @throws IOException
      */
-    public void save() throws Exception;
+    public void save(DaemonManager dm) throws Exception;
     
     /**
      * Adds or modifies the value of the key. Typically, this convention should be followed:
@@ -40,7 +41,7 @@ public interface Persistance {
      * @param value The value to store. If value is null, the key is simply removed.
      * @return The object that was in this key, or null if the value did not exist.
      */
-    public String setValue(String[] key, String value);
+    public String setValue(DaemonManager dm, String[] key, String value);
     
     /**
      * Returns the value of a particular key

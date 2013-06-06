@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Web.WebUtility;
 import com.laytonsmith.annotations.datasource;
@@ -64,7 +65,7 @@ public class RedisDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	protected boolean set0(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
+	protected boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		connect();
 		String ckey = StringUtils.Join(key, ".");
 		String status;
@@ -77,7 +78,7 @@ public class RedisDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	protected void clearKey0(String[] key) throws ReadOnlyException, DataSourceException, IOException {
+	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		connect();
 		String ckey = StringUtils.Join(key, ".");
 		try{

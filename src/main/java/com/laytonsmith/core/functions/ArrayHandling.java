@@ -1199,7 +1199,7 @@ public class ArrayHandling {
 		RunnableQueue queue = new RunnableQueue("MethodScript-arraySortAsync");
 		
 		public array_sort_async(){
-			queue.invokeLater(new Runnable() {
+			queue.invokeLater(null, new Runnable() {
 
 				public void run() {
 					//This warms up the queue. Apparently.
@@ -1229,7 +1229,7 @@ public class ArrayHandling {
 			final CArray array = Static.getArray(args[0], t);
 			final CString sortType = new CString(args.length > 2?args[1].val():CArray.SortType.REGULAR.name(), t);
 			final CClosure callback = Static.getObject((args.length==2?args[1]:args[2]), t, "closure", CClosure.class);
-			queue.invokeLater(new Runnable() {
+			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 				public void run() {
 					Construct c = new array_sort().exec(Target.UNKNOWN, null, array, sortType);

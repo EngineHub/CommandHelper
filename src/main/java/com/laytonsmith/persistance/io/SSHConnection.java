@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance.io;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.SSHWrapper;
 import com.laytonsmith.PureUtilities.StreamUtils;
 import java.io.IOException;
@@ -20,7 +21,7 @@ public class SSHConnection implements ConnectionMixin{
 		return StreamUtils.GetString(SSHWrapper.SCPRead(connection));
 	}
 
-	public void writeData(String data) throws IOException, UnsupportedOperationException {
+	public void writeData(DaemonManager dm, String data) throws IOException, UnsupportedOperationException {
 		SSHWrapper.SCPWrite(data, connection);
 	}
 

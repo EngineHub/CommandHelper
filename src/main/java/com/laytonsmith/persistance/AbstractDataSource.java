@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.persistance.io.ConnectionMixin;
@@ -73,9 +74,10 @@ public abstract class AbstractDataSource implements DataSource {
 		return get0(key, bypassTransient);
 	}
 
-	public final boolean set(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
+	@Override
+	public final boolean set(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		checkSet(key);
-		return set0(key, value);
+		return set0(dm, key, value);
 	}
 	
 	/**
@@ -88,7 +90,7 @@ public abstract class AbstractDataSource implements DataSource {
 	 * @throws DataSourceException
 	 * @throws IOException 
 	 */
-	protected abstract boolean set0(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException;
+	protected abstract boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException;
 	
 	/**
 	 * Subclasses should implement this, instead of get(), as our version of get() does
@@ -169,9 +171,10 @@ public abstract class AbstractDataSource implements DataSource {
 		return get(key, false) != null;
 	}
 	
-	public final void clearKey(String [] key) throws ReadOnlyException, DataSourceException, IOException{
+	@Override
+	public final void clearKey(DaemonManager dm, String [] key) throws ReadOnlyException, DataSourceException, IOException{
 		checkSet(key);
-		clearKey0(key);
+		clearKey0(dm, key);
 	}
 	
 	/**
@@ -182,8 +185,8 @@ public abstract class AbstractDataSource implements DataSource {
 	 * @throws DataSourceException
 	 * @throws IOException 
 	 */
-	protected void clearKey0(String [] key) throws ReadOnlyException, DataSourceException, IOException{
-		set(key, null);		
+	protected void clearKey0(DaemonManager dm, String [] key) throws ReadOnlyException, DataSourceException, IOException{
+		set(dm, key, null);		
 	}
 
 	/**

@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -301,6 +302,7 @@ public class Web {
 				}
 				settings.setAuthenticationDetails(username, password);
 			}
+			environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
 			threadPool.submit(new Runnable() {
 
 				public void run() {
@@ -343,6 +345,8 @@ public class Web {
 						} else {
 							ConfigRuntimeException.React(ex, environment);
 						}
+					} finally {
+						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 					}
 				}
 			});

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.environments;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.PermissionsResolver;
@@ -36,6 +37,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private Map<String, Procedure> procs = null;
 	private IVariableList iVariableList = null;
 	private String label = null;
+	private DaemonManager daemonManager = new DaemonManager();
 
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistanceNetwork network, PermissionsResolver resolver, File root) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
@@ -210,5 +212,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	public void SetLabel(String label) {
 		this.label = label;
+	}
+	
+	public DaemonManager GetDaemonManager(){
+		return daemonManager;
 	}
 }

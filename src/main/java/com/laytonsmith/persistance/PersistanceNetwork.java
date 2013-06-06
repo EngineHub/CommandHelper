@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.File;
@@ -110,9 +111,9 @@ public class PersistanceNetwork {
 	 * @throws IOException
 	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public synchronized boolean set(String[] key, String value) throws DataSourceException, ReadOnlyException, IOException, IllegalArgumentException {
+	public synchronized boolean set(DaemonManager dm, String[] key, String value) throws DataSourceException, ReadOnlyException, IOException, IllegalArgumentException {
 		DataSource ds = getDataSource(filter.getConnection(key));
-		return ds.set(key, value);
+		return ds.set(dm, key, value);
 	}
 
 	/**
@@ -137,9 +138,9 @@ public class PersistanceNetwork {
 	 * @throws DataSourceException
 	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public synchronized void clearKey(String[] key) throws DataSourceException, ReadOnlyException, IOException, IllegalArgumentException {
+	public synchronized void clearKey(DaemonManager dm, String[] key) throws DataSourceException, ReadOnlyException, IOException, IllegalArgumentException {
 		DataSource ds = getDataSource(filter.getConnection(key));
-		ds.clearKey(key);
+		ds.clearKey(dm, key);
 	}
 
 	/**

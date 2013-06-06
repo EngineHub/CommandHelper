@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
@@ -29,7 +30,8 @@ public class MySQLDataSource extends AbstractDataSource{
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public boolean set0(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
+	@Override
+	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 

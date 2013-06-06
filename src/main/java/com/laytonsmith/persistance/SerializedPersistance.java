@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.RunnableQueue;
@@ -138,11 +139,12 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	 *
 	 * @throws IOException
 	 */
-	public void save() throws IOException{
+	@Override
+	public void save(final DaemonManager dm) throws IOException{
 		if(writer == null){
 			writer = MemoryMapFileUtil.getInstance(storageLocation, grabber);
 		}
-		queue.invokeLater(new Runnable() {
+		queue.invokeLater(dm, new Runnable() {
 			public void run() {
 				ObjectOutputStream out = null;
 				ByteArrayOutputStream baos = null;
@@ -158,7 +160,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 					out = new ObjectOutputStream(baos);
 					out.writeObject(new HashMap(data));
 					byteData = baos.toByteArray();
-					writer.mark();
+					writer.mark(dm);
 				} catch (IOException ex) {
 					Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
@@ -185,7 +187,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	 * You should not usually use this method. Please see
 	 * <code>setValue(String[] key, Serializable value)</code>
 	 */
-	private String setValue(String key, String value) {
+	private String setValue(DaemonManager dm, String key, String value) {
 		//defer loading until we actually try and use the data structure
 		if (isLoaded == false) {
 			try {
@@ -201,7 +203,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 			data.put(key, value);
 		}
 		try {
-			save();
+			save(dm);
 		} catch (Exception ex) {
 			Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -245,8 +247,9 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	 * @return The object that was in this key, or null if the value did not
 	 * exist.
 	 */
-	public String setValue(String[] key, String value) {
-		return setValue(getNamespace0(key), (String) value);
+	@Override
+	public String setValue(DaemonManager dm, String[] key, String value) {
+		return setValue(dm, getNamespace0(key), (String) value);
 	}
 
 	/**
@@ -397,9 +400,9 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 		return getValue(StringUtils.Join(key, "."), bypassTransient);
 	}
 
-	public boolean set0(String[] key, String value) throws ReadOnlyException, IOException {
-		setValue(key, value);
-		save();
+	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, IOException {
+		setValue(dm, key, value);
+		save(dm);
 		return true;
 	}
 

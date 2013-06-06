@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import java.io.IOException;
@@ -73,7 +74,7 @@ public interface DataSource extends Documentation {
 	 * only, it will throw a read only exception if this method is called.
 	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public boolean set(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException, IllegalArgumentException;
+	public boolean set(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException, IllegalArgumentException;
 
 	/**
 	 * Instructs this data source to repopulate its internal structure based
@@ -138,7 +139,7 @@ public interface DataSource extends Documentation {
 	 * @param key
 	 * @throws DataSourceException 
 	 */
-	public void clearKey(String [] key) throws DataSourceException, ReadOnlyException, IOException;
+	public void clearKey(DaemonManager dm, String [] key) throws DataSourceException, ReadOnlyException, IOException;
 
 
 	/**

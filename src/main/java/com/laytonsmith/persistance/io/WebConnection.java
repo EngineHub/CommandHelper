@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance.io;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Web.WebUtility;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,7 +31,7 @@ public class WebConnection implements ConnectionMixin{
 		return WebUtility.GetPageContents(source);
 	}
 
-	public void writeData(String data) throws IOException, UnsupportedOperationException {
+	public void writeData(DaemonManager dm, String data) throws IOException, UnsupportedOperationException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
