@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Regex;
@@ -17,6 +18,7 @@ import java.sql.ResultSet;
 public class MainSandbox {
 
 	public static void main(String[] argv) throws Exception {
+		System.exit(0);
 		//URI information
 		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
 		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file",

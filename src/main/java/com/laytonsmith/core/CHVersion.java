@@ -46,5 +46,21 @@ public enum CHVersion implements Version {
 	public int getSupplemental() {
 		return this.version.getSupplemental();
 	}
+
+	public boolean lt(Version other) {
+		return this.version.lt(other);
+	}
+
+	public boolean lte(Version other) {
+		return this.version.lte(other);
+	}
+
+	public boolean gt(Version other) {
+		return this.version.gt(other);
+	}
+
+	public boolean gte(Version other) {
+		return this.version.gte(other);
+	}
 	
 }

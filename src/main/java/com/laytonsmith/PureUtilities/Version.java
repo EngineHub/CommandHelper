@@ -42,4 +42,32 @@ public interface Version {
 	@Override
 	String toString();
 	
+	/**
+	 * Returns true if this version is less than the other version.
+	 * @param other
+	 * @return 
+	 */
+	boolean lt(Version other);
+	
+	/**
+	 * Returns true if this version is less than or equal to the other version.
+	 * @param other
+	 * @return 
+	 */
+	boolean lte(Version other);
+	
+	/**
+	 * Returns true if this version is greater than the other version.
+	 * @param other
+	 * @return 
+	 */
+	boolean gt(Version other);
+	
+	/**
+	 * Returns true if this version is greater than or equal to the other version.
+	 * @param other
+	 * @return 
+	 */
+	boolean gte(Version other);
+	
 }

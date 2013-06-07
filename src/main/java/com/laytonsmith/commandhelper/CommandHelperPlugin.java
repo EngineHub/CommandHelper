@@ -27,6 +27,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
@@ -102,6 +103,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void onLoad() {
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 		Installer.Install(chDirectory);
+		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.7"))){
+			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 7. You should have plans"
+					+ " to upgrade at some point, as " + Implementation.GetServerType().getBranding() + " may require it at some point.", Target.UNKNOWN);
+		}
 	}
 
 	/**
