@@ -261,13 +261,13 @@
 		</dependency>
 		
 		<!-- MySQL -->
-		<!--<dependency>
+		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.24</version>
 			<type>jar</type>
 			<scope>compile</scope>
-		</dependency>-->
+		</dependency>
         
 		<!-- Yaml parsing -->
 		<dependency>
@@ -455,6 +455,13 @@
 						<configuration>
 							<shadedArtifactAttached>false</shadedArtifactAttached>
 							<shadedClassifierName>Bundle</shadedClassifierName>
+							<!-- To add a new shaded dependency, there are three steps.
+								1. Add a reference to the artifact set
+								2. Add a relocation tag (usually recommended, though not always)
+								3. Add it to the filter list
+								
+								You can copy existing structures over, and change the parameters on them.
+							-->
 							<artifactSet>
 								<includes>
 									<include>com.sk89q:worldedit:jar:*</include>
@@ -472,6 +479,60 @@
 									<include>mysql:mysql-connector-java:jar:*</include>
 								</includes>
 							</artifactSet>
+							<relocations>
+								<relocation>
+									<pattern>org.perf4j</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.perf4j</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.log4j</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.log4j</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.yaml.snakeyaml</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.yaml.snakeyaml</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.json.simple</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.json.simple</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.mindrot.jbcrypt</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.mindrot.jbcrypt</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.jcraft.jsch</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.jcraft.jsch</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.io</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.commons.io</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.sqlite</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.sqlite</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.mcstats</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.mcstats</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.mozilla.intl.chardet</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.mozilla.intl.chardet</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>redis.clients</pattern>
+									<shadedPattern>com.laytonsmith.libs.redis.clients</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.mysql.jdbc</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.mysql.jdbc</shadedPattern>
+								</relocation>
+								<relocation> <!-- part of the mysql lib -->
+									<pattern>org.gjt.mm.mysql</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.gjt.mm.mysql</shadedPattern>
+								</relocation>
+							</relocations>
 							<filters>
 								<filter>
 									<artifact>org.xerial:sqlite-jdbc:jar:*</artifact>

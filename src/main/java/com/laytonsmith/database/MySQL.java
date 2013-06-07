@@ -21,7 +21,7 @@ public class MySQL extends DB {
 	@Override
 	protected Object do_query(CConnection c, String query, Object[] params) throws SQLException {
 		try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName(com.mysql.jdbc.Driver.class.getName());
         }
         catch (ClassNotFoundException ex) {
             throw new SQLException("Cannot load MySQL. Check your installation and try again");
