@@ -11,6 +11,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +40,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * can be done here. By default, an UnsupportedOperationException is thrown,
      * but is caught and ignored.
      */
-    public void bind(Map<String, Construct> prefilters, Target t) {
+    public void bind(Map<String, Mixed> prefilters, Target t) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -113,14 +114,14 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * @return 
      */
     public static Object DoConvert(CArray manualObject){
-        Map<String, Construct> map = new HashMap<String, Construct>();
+        Map<String, Mixed> map = new HashMap<String, Mixed>();
         for(String key : manualObject.keySet()){
             map.put(key, manualObject.get(key, Target.UNKNOWN));
         }
         return map;        
     }
     
-    public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException{
+    public Map<String, Mixed> evaluate_helper(BindableEvent e) throws EventException{
         return mixin.evaluate_helper(e);
     }
     

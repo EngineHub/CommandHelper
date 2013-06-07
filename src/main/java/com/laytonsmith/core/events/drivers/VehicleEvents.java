@@ -51,7 +51,7 @@ public class VehicleEvents {
 					+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Target t) throws PrefilterNonMatchException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -65,11 +65,11 @@ public class VehicleEvents {
 			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(e);
+				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CInt(e.getVehicle().getEntityId(), t));
@@ -108,7 +108,7 @@ public class VehicleEvents {
 					+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Target t) throws PrefilterNonMatchException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -122,11 +122,11 @@ public class VehicleEvents {
 			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(e);
+				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CInt(e.getVehicle().getEntityId(), t));
@@ -172,7 +172,7 @@ public class VehicleEvents {
 					+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent event = (MCVehicleCollideEvent) e;
 				Prefilters.match(prefilter, "type", event.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -198,11 +198,11 @@ public class VehicleEvents {
 			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent e = (MCVehicleCollideEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(e);
+				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("type", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CInt(e.getVehicle().getEntityId(), t));
 				ret.put("collisiontype", new CString(e.getCollisionType().name(), t));

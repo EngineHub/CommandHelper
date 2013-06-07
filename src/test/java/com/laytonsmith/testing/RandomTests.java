@@ -153,12 +153,12 @@ public class RandomTests {
 
 	@Test
 	public void testClone() throws CloneNotSupportedException {
-		CArray c1 = C.Array(C.Void(), C.Void()).clone();
+		CArray c1 = C.Array(C.Void(), C.Void()).doClone();
 		CBoolean c2 = C.Boolean(true).clone();
 		CDouble c4 = C.Double(1).clone();
 		CFunction c5 = new CFunction("", Target.UNKNOWN).clone();
 		CInt c6 = C.Int(1).clone();
-		CString c8 = C.String("").clone();
+		CString c8 = C.String("").doClone();
 		CVoid c9 = C.Void().clone();
 		IVariable c12 = new IVariable("@name", Target.UNKNOWN).clone();
 		Variable c13 = new Variable("$name", "", false, false, Target.UNKNOWN);

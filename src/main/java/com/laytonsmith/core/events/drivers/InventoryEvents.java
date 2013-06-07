@@ -51,7 +51,7 @@ public class InventoryEvents {
 					+ "{} ";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
@@ -68,11 +68,11 @@ public class InventoryEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event)
+		public Map<String, Mixed> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
-				Map<String, Construct> map = evaluate_helper(event);
+				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getWhoClicked().getName(), Target.UNKNOWN));
 //				CArray viewers = new CArray(Target.UNKNOWN);
@@ -157,7 +157,7 @@ public class InventoryEvents {
 					+ "{} ";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			return true;
 		}
@@ -166,11 +166,11 @@ public class InventoryEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event)
+		public Map<String, Mixed> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCInventoryOpenEvent) {
 				MCInventoryOpenEvent e = (MCInventoryOpenEvent) event;
-				Map<String, Construct> map = evaluate_helper(event);
+				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
 
@@ -224,7 +224,7 @@ public class InventoryEvents {
 					+ "{} ";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			return true;
 		}
@@ -233,11 +233,11 @@ public class InventoryEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event)
+		public Map<String, Mixed> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCInventoryCloseEvent) {
 				MCInventoryCloseEvent e = (MCInventoryCloseEvent) event;
-				Map<String, Construct> map = evaluate_helper(event);
+				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
 

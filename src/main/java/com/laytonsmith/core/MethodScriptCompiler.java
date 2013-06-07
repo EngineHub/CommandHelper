@@ -207,7 +207,7 @@ public final class MethodScriptCompiler {
 			for (Variable v : vars) {
 				varMap.put(v.getName(), v);
 			}
-			for (Construct tempNode : root.getAllData()) {
+			for (Mixed tempNode : root.getAllData()) {
 				if (tempNode instanceof Variable) {
 					((Variable) tempNode).setVal(
 							varMap.get(((Variable) tempNode).getName()).getDefault());

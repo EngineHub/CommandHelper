@@ -18,6 +18,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSource;
 import com.laytonsmith.persistance.DataSourceException;
@@ -388,7 +389,7 @@ public class Manager {
 	public static boolean doAddEdit(String key, String valueScript) {
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment(), ceEnv);
-			Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null, true), env), env, null, null);
+			Mixed c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null, true), env), env, null, null);
 			String value = Construct.json_encode(c, Target.UNKNOWN);
 			pl(CYAN + "Adding: " + WHITE + value);
 			String [] k = key.split("\\.");

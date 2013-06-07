@@ -33,24 +33,6 @@ public class TestStatic {
     }
 
     @Test
-    public void testAnyDoubles() {
-        assertTrue(Static.anyDoubles(C.Int(0), C.Int(1), C.Double(1)));
-        assertFalse(Static.anyDoubles(C.Int(1)));
-    }
-
-    @Test
-    public void testAnyStrings() {
-        assertTrue(Static.anyStrings(C.Int(0), C.Int(1), C.String("")));
-        assertFalse(Static.anyStrings(C.Int(1)));
-    }
-
-    @Test
-    public void testAnyBooleans() {
-        assertTrue(Static.anyBooleans(C.Int(0), C.Int(1), C.Boolean(true)));
-        assertFalse(Static.anyBooleans(C.Int(1)));
-    }
-
-    @Test
     public void testGetLogger() {
         assertNotNull(Static.getLogger());
     }

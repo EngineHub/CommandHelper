@@ -68,7 +68,7 @@ public class PlayerEvents {
 					+ " {player|item}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent event = (MCPlayerItemConsumeEvent) e;
 				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), PrefilterType.ITEM_MATCH);
@@ -83,12 +83,12 @@ public class PlayerEvents {
 			return EventBuilder.instantiate(MCPlayerItemConsumeEvent.class, p, i);
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event)
+		public Map<String, Mixed> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent e = (MCPlayerItemConsumeEvent) event;
-				Map<String, Construct> ret = evaluate_helper(e);
-				Construct item = ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN);
+				Map<String, Mixed> ret = evaluate_helper(e);
+				Mixed item = ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN);
 				ret.put("item", item);
 				return ret;
 			} else {
@@ -133,7 +133,7 @@ public class PlayerEvents {
                     + "{player|message|reason}";
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t)
                 throws PrefilterNonMatchException {
             if (e instanceof MCPlayerKickEvent) {
                 //I gather we do not what to intercept anything from players in interpreter mode
@@ -153,11 +153,11 @@ public class PlayerEvents {
             return null;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e)
+        public Map<String, Mixed> evaluate(BindableEvent e)
                 throws EventException {
             if (e instanceof MCPlayerKickEvent) {
                 MCPlayerKickEvent event = (MCPlayerKickEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 //Fill in the event parameters
                 map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
                 map.put("reason", new CString(event.getReason(), Target.UNKNOWN));
@@ -212,7 +212,7 @@ public class PlayerEvents {
 				+ "{}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerTeleportEvent){
 				MCPlayerTeleportEvent event = (MCPlayerTeleportEvent)e;
 
@@ -260,10 +260,10 @@ public class PlayerEvents {
 			return EventBuilder.instantiate(MCPlayerTeleportEvent.class, p, from, to);
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCPlayerTeleportEvent) {
                 MCPlayerTeleportEvent event = (MCPlayerTeleportEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
 
                 //Fill in the event parameters
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
@@ -286,7 +286,7 @@ public class PlayerEvents {
 				MCPlayerTeleportEvent e = (MCPlayerTeleportEvent)event;
 
 				if (key.equalsIgnoreCase("to")) {
-					MCLocation loc = ObjectGenerator.GetGenerator().location((Construct)value, null, t);
+					MCLocation loc = ObjectGenerator.GetGenerator().location((Mixed)value, null, t);
 					e.setTo(loc);
 
 					return true;
@@ -322,7 +322,7 @@ public class PlayerEvents {
                     + "{player|kickmsg|ip|result}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerPreLoginEvent){
                 MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent)e;
@@ -340,11 +340,11 @@ public class PlayerEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent e)
+		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if(e instanceof MCPlayerPreLoginEvent){
                 MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
 
                 map.put("player", new CString(event.getName(), Target.UNKNOWN));
                 map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
@@ -404,7 +404,7 @@ public class PlayerEvents {
                     + "{player|kickmsg|ip|result}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerPreLoginEvent){
                 MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent)e;
@@ -422,11 +422,11 @@ public class PlayerEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent e)
+		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if(e instanceof MCPlayerLoginEvent){
                 MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
 
                 map.put("player", new CString(event.getName(), Target.UNKNOWN));
                 map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
@@ -513,7 +513,7 @@ public class PlayerEvents {
             return Driver.PLAYER_JOIN;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if(e instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
                 if(prefilter.containsKey("player")){
@@ -527,10 +527,10 @@ public class PlayerEvents {
             return false;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if(e instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 //map.put("player", new CString(ple.getPlayer().getName(), Target.UNKNOWN));
                 map.put("join_message", new CString(ple.getJoinMessage(), Target.UNKNOWN));
                 map.put("first_login", new CBoolean(ple.getPlayer().isNewPlayer(), Target.UNKNOWN));
@@ -595,7 +595,7 @@ public class PlayerEvents {
             return Driver.PLAYER_INTERACT;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
                 if(((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
@@ -623,10 +623,10 @@ public class PlayerEvents {
             return false;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 //map.put("player", new CString(pie.getPlayer().getName(), Target.UNKNOWN));
                 MCAction a = pie.getAction();
                 map.put("action", new CString(a.name().toLowerCase(), Target.UNKNOWN));
@@ -672,7 +672,7 @@ public class PlayerEvents {
 	
     public abstract static class player_bed_event extends AbstractEvent {
 		
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerBedEvent){
                 MCPlayerBedEvent be = (MCPlayerBedEvent)e;
 				
@@ -699,10 +699,10 @@ public class PlayerEvents {
 			return e;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerBedEvent){
                 MCPlayerBedEvent bee = (MCPlayerBedEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
 				
                 map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation()));
 				map.put("player", new CString(bee.getPlayer().getName(), Target.UNKNOWN));
@@ -780,7 +780,7 @@ public class PlayerEvents {
                     + "{}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
                 if(!((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
@@ -807,10 +807,10 @@ public class PlayerEvents {
             return e;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation()));
 				//TODO: Once activation is supported, set that appropriately here.
 				map.put("activated", new CBoolean(true, Target.UNKNOWN));
@@ -863,7 +863,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_0;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerRespawnEvent) {
                 MCPlayerRespawnEvent event = (MCPlayerRespawnEvent) e;
                 Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
@@ -876,10 +876,10 @@ public class PlayerEvents {
             return false;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerRespawnEvent) {
                 MCPlayerRespawnEvent event = (MCPlayerRespawnEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 //the helper puts the player in for us
                 CArray location = ObjectGenerator.GetGenerator().location(event.getRespawnLocation());
                 map.put("location", location);
@@ -904,7 +904,7 @@ public class PlayerEvents {
                 MCPlayerRespawnEvent e = (MCPlayerRespawnEvent) event;
                 if (key.equals("location")) {
                     //Change this parameter in e to value
-                    e.setRespawnLocation(ObjectGenerator.GetGenerator().location((Construct)value, e.getPlayer().getWorld(), t));
+                    e.setRespawnLocation(ObjectGenerator.GetGenerator().location((Mixed)value, e.getPlayer().getWorld(), t));
                     return true;
                 }
             }
@@ -964,7 +964,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_0;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
                 Prefilters.match(prefilter, "player", ((MCPlayer)event.getEntity()).getName(), PrefilterType.MACRO);
@@ -976,10 +976,10 @@ public class PlayerEvents {
         //We have an actual event now, change it into a Map
         //that will end up being the @event object
 		@Override
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
-				Map<String, Construct> map = super.evaluate(e);
+				Map<String, Mixed> map = super.evaluate(e);
 				map.putAll(evaluate_helper(e));
                 map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
                 try{
@@ -1081,7 +1081,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_1;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerQuitEvent) {
                 //As a very special case, if this player is currently in interpreter mode, we do not want to
                 //intercept their chat event
@@ -1105,10 +1105,10 @@ public class PlayerEvents {
             return e;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerQuitEvent) {
                 MCPlayerQuitEvent event = (MCPlayerQuitEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 //Fill in the event parameters
                 map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
                 return map;
@@ -1176,7 +1176,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_0;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerChatEvent) {
                 //As a very special case, if this player is currently in interpreter mode, we do not want to
                 //intercept their chat event
@@ -1200,10 +1200,10 @@ public class PlayerEvents {
             return e;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerChatEvent) {
                 MCPlayerChatEvent event = (MCPlayerChatEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 //Fill in the event parameters
                 map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
                 CArray ca = new CArray(Target.UNKNOWN);
@@ -1279,7 +1279,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_1;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerCommandEvent) {
                 MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
                 String command = event.getCommand();
@@ -1312,10 +1312,10 @@ public class PlayerEvents {
             return e;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerCommandEvent) {
                 MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 //Fill in the event parameters
                 map.put("command", new CString(event.getCommand(), Target.UNKNOWN));
 
@@ -1373,7 +1373,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_1;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCWorldChangedEvent) {
                 MCWorldChangedEvent event = (MCWorldChangedEvent) e;
                 Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
@@ -1393,10 +1393,10 @@ public class PlayerEvents {
             return e;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCWorldChangedEvent) {
                 MCWorldChangedEvent event = (MCWorldChangedEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 //Fill in the event parameters
                 map.put("from", new CString(event.getFrom().getName(), Target.UNKNOWN));
                 map.put("to", new CString(event.getTo().getName(), Target.UNKNOWN));
@@ -1437,7 +1437,7 @@ public class PlayerEvents {
 		private Map<Integer, Map<String, MCLocation>> thresholds = new HashMap<Integer, Map<String, MCLocation>>();
 
 		@Override
-		public void bind(Map<String, Construct> prefilters, Target t) {
+		public void bind(Map<String, Mixed> prefilters, Target t) {
 			if(prefilters.containsKey("threshold")){
 				int i = prefilters.get("threshold").primitive(t).castToInt32(t);
 				thresholdList.add(i);
@@ -1600,7 +1600,7 @@ public class PlayerEvents {
 
 
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerMoveEvent){
 				MCPlayerMoveEvent event = (MCPlayerMoveEvent)e;
 				if(!event.getFrom().getWorld().getName().equals(event.getTo().getWorld().getName())){
@@ -1643,10 +1643,10 @@ public class PlayerEvents {
 		}
 
 
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCPlayerMoveEvent) {
                 MCPlayerMoveEvent event = (MCPlayerMoveEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 //Fill in the event parameters
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
                 map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
@@ -1689,7 +1689,7 @@ public class PlayerEvents {
 					+ " {}";
 		}
 	
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if (e instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
@@ -1704,12 +1704,12 @@ public class PlayerEvents {
 			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
 		}
 	
-		public Map<String, Construct> evaluate(BindableEvent e)
+		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if (e instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(event);
+				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("state", new CString(event.getState().name(), t));
 				ret.put("hook", new CInt(event.getHook().getEntityId(), t));
 				ret.put("xp", new CInt(event.getExpToDrop(), t));

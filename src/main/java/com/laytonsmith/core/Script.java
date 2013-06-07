@@ -140,7 +140,7 @@ public class Script {
 
 		try {
 			for (ParseTree rootNode : cright) {
-				for (Construct tempNode : rootNode.getAllData()) {
+				for (Mixed tempNode : rootNode.getAllData()) {
 					if (tempNode instanceof Variable) {
 						if (left_vars == null) {
 							throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.getTarget());
@@ -208,7 +208,7 @@ public class Script {
 	}
 
 	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
-		final Construct m = c.getData();
+		final Mixed m = c.getData();
 		CurrentEnv = env;
 		//TODO: Reevaluate if this line is needed. The script doesn't know the label inherently, the
 		//environment does, and setting it this way taints the environment.
@@ -227,7 +227,7 @@ public class Script {
 				} catch (Exception e) {
 				}
 				ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
-				Construct ret = p.cexecute(c.getChildren(), newEnv, m.getTarget());
+				Mixed ret = p.cexecute(c.getChildren(), newEnv, m.getTarget());
 				pp.stop();
 				return ret;
 			}
@@ -253,7 +253,7 @@ public class Script {
 					if (f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())) {
 						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
 					}
-					Construct ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
+					Mixed ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
 					if (p != null) {
 						p.stop();
 					}
@@ -263,7 +263,7 @@ public class Script {
 					args.add(eval(c2, env));
 				}
 				Object[] a = args.toArray();
-				Construct[] ca = new Construct[a.length];
+				Mixed[] ca = new Mixed[a.length];
 				for (int i = 0; i < a.length; i++) {
 					ca[i] = (Construct) a[i];
 					//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
@@ -323,10 +323,10 @@ public class Script {
 				Map<String, String> vars = new HashMap<String, String>();
 				for(Mixed cc : args){
 					if(cc instanceof IVariable){
-						Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc), (cc instanceof Construct?((Construct)cc).getTarget():Target.UNKNOWN));
+						Mixed ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc), (cc instanceof Construct?((Construct)cc).getTarget():Target.UNKNOWN));
 						String vval = ccc.val();
 						if(ccc instanceof CString){
-							vval = ccc.asString().getQuote();
+							vval = ((CString)ccc).getQuote();
 						}
 						vars.put(((IVariable)cc).getName(), vval);
 					}

@@ -16,6 +16,7 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.StringHandling;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -313,7 +314,7 @@ class OptimizerObject {
 			for(int i = 1; i < tree.getChildren().size() - 1; i++){
 				ParseTree v = tree.getChildAt(i);
 				//(const) assignments and ivars are allowed here only
-				Construct var;
+				Mixed var;
 				if(v.getData() instanceof CFunction && assign.equals(((CFunction)v.getData()).getFunction().getName())){
 					//It's an assign, so grab the second element from it, and check if it's const
 					//If so, just toss the value, we don't need it right now. If not, throw a compile error
@@ -387,7 +388,7 @@ class OptimizerObject {
 				//let's see if we are constant, and then optimize const stuff
 				if(options.contains(OptimizationOption.OPTIMIZE_CONSTANT)
 						|| options.contains(OptimizationOption.CONSTANT_OFFLINE)){
-					Construct [] constructs = new Construct[tree.getChildren().size()];
+					Mixed [] constructs = new Mixed[tree.getChildren().size()];
 					for(int i = 0; i < tree.getChildren().size(); i++){
 						constructs[i] = tree.getChildAt(i).getData();
 						if(constructs[i].isDynamic()){
@@ -396,7 +397,7 @@ class OptimizerObject {
 						}
 					}
 					try{
-						Construct result;
+						Mixed result;
 						if(options.contains(OptimizationOption.CONSTANT_OFFLINE)){
 							result = f.exec(tree.getData().getTarget(), env, constructs);
 						} else {

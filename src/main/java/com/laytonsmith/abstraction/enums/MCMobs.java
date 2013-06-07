@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.NonScriptError;
 import com.laytonsmith.core.natives.MEnum;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  * These don't directly map to entity types, because this is mostly used for
@@ -39,5 +40,21 @@ public enum MCMobs implements MEnum {
 
 	public boolean isImmutable() {
 		return true;
+	}
+	
+	public boolean isDynamic() {
+		return false;
+	}
+
+	public void destructor() {
+		
+	}
+
+	public Mixed doClone() {
+		return this;
+	}
+
+	public Target getTarget() {
+		return Target.UNKNOWN;
 	}
 }

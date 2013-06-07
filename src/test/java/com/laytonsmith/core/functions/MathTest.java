@@ -14,6 +14,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Math;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
@@ -83,8 +84,8 @@ public class MathTest {
     @Test(timeout = 10000)
     public void testDec() throws ConfigCompileException {
         Math.dec a = new Math.dec();
-        Construct v = a.exec(Target.UNKNOWN, env, new IVariable("var", Target.UNKNOWN), C.onstruct(1));
-        Construct v2 = a.exec(Target.UNKNOWN, env, new IVariable("var2", Target.UNKNOWN), C.onstruct(2.5));
+        Mixed v = a.exec(Target.UNKNOWN, env, new IVariable("var", Target.UNKNOWN), C.onstruct(1));
+        Mixed v2 = a.exec(Target.UNKNOWN, env, new IVariable("var2", Target.UNKNOWN), C.onstruct(2.5));
         assertCEquals(C.onstruct(0), v);
         assertCEquals(C.onstruct(1.5), v2);
         StaticTest.SRun("assign(@var, 0) dec(@var, 2) msg(@var)", fakePlayer);
@@ -102,8 +103,8 @@ public class MathTest {
     @Test(timeout = 10000)
     public void testInc() throws ConfigCompileException {
         Math.inc a = new Math.inc();
-        Construct v = a.exec(Target.UNKNOWN, env, new IVariable("var", Target.UNKNOWN), C.onstruct(1));
-        Construct v2 = a.exec(Target.UNKNOWN, env, new IVariable("var2", Target.UNKNOWN), C.onstruct(2.5));
+        Mixed v = a.exec(Target.UNKNOWN, env, new IVariable("var", Target.UNKNOWN), C.onstruct(1));
+        Mixed v2 = a.exec(Target.UNKNOWN, env, new IVariable("var2", Target.UNKNOWN), C.onstruct(2.5));
         assertCEquals(C.onstruct(2), v);
         assertCEquals(C.onstruct(3.5), v2);
         StaticTest.SRun("assign(@var, 0) inc(@var, 2) msg(@var)", fakePlayer);

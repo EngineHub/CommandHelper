@@ -23,6 +23,7 @@ import com.laytonsmith.core.functions.Math;
 import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Operators;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.ArrayList;
@@ -54,16 +55,20 @@ public class Math {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = args[0].primitive(t).castToDouble(t);
-			for (int i = 1; i < args.length; i++) {
-				tally += args[i].primitive(t).castToDouble(t);
+		public Operators.Mathematical exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			List<Operators.Mathematical> numbers = new ArrayList<Operators.Mathematical>();
+			numbers.add((Operators.Mathematical)list.get("var1"));
+			numbers.add((Operators.Mathematical)list.get("var2"));
+			for(Mixed m : (CArray)list.get("varN")){
+				numbers.add((Operators.Mathematical)m);
 			}
-			if (Static.anyDoubles(args)) {
-				return new CDouble(tally, t);
-			} else {
-				return new CInt((long) tally, t);
+			Operators.Mathematical lhs = numbers.get(0);
+			for(int i = 1; i < numbers.size(); i++){
+				Operators.Mathematical rhs = numbers.get(i);
+				lhs = lhs.operatorAddition(rhs);
 			}
+			return lhs;
 		}
 
 		public ExceptionType[] thrown() {
@@ -80,9 +85,9 @@ public class Math {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-					new Argument("", CNumber.class, "var1"),
-					new Argument("", CNumber.class, "var2"),
-					new Argument("", CArray.class, "varN").setGenerics(new Generic(CNumber.class)).setVarargs()
+					new Argument("", Operators.Mathematical.class, "var1"),
+					new Argument("", Operators.Mathematical.class, "var2"),
+					new Argument("", CArray.class, "varN").setGenerics(new Generic(Operators.Mathematical.class)).setVarargs()
 					);
 		}
 
@@ -134,16 +139,20 @@ public class Math {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = args[0].primitive(t).castToDouble(t);
-			for (int i = 1; i < args.length; i++) {
-				tally -= args[i].primitive(t).castToDouble(t);
+		public Operators.Mathematical exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			List<Operators.Mathematical> numbers = new ArrayList<Operators.Mathematical>();
+			numbers.add((Operators.Mathematical)list.get("var1"));
+			numbers.add((Operators.Mathematical)list.get("var2"));
+			for(Mixed m : (CArray)list.get("varN")){
+				numbers.add((Operators.Mathematical)m);
 			}
-			if (Static.anyDoubles(args)) {
-				return new CDouble(tally, t);
-			} else {
-				return new CInt((long) tally, t);
+			Operators.Mathematical lhs = numbers.get(0);
+			for(int i = 1; i < numbers.size(); i++){
+				Operators.Mathematical rhs = numbers.get(i);
+				lhs = lhs.operatorSubtraction(rhs);
 			}
+			return lhs;
 		}
 
 		public ExceptionType[] thrown() {
@@ -160,9 +169,9 @@ public class Math {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-					new Argument("", CNumber.class, "var1"),
-					new Argument("", CNumber.class, "var2"),
-					new Argument("", CArray.class, "varN").setGenerics(new Generic(CNumber.class)).setVarargs()
+					new Argument("", Operators.Mathematical.class, "var1"),
+					new Argument("", Operators.Mathematical.class, "var2"),
+					new Argument("", CArray.class, "varN").setGenerics(new Generic(Operators.Mathematical.class)).setVarargs()
 					);
 		}
 
@@ -211,16 +220,20 @@ public class Math {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = args[0].primitive(t).castToDouble(t);
-			for (int i = 1; i < args.length; i++) {
-				tally *= args[i].primitive(t).castToDouble(t);
+		public Operators.Mathematical exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			List<Operators.Mathematical> numbers = new ArrayList<Operators.Mathematical>();
+			numbers.add((Operators.Mathematical)list.get("var1"));
+			numbers.add((Operators.Mathematical)list.get("var2"));
+			for(Mixed m : (CArray)list.get("varN")){
+				numbers.add((Operators.Mathematical)m);
 			}
-			if (Static.anyDoubles(args)) {
-				return new CDouble(tally, t);
-			} else {
-				return new CInt((long) tally, t);
+			Operators.Mathematical lhs = numbers.get(0);
+			for(int i = 1; i < numbers.size(); i++){
+				Operators.Mathematical rhs = numbers.get(i);
+				lhs = lhs.operatorMultiplication(rhs);
 			}
+			return lhs;
 		}
 
 		public ExceptionType[] thrown() {
@@ -237,9 +250,9 @@ public class Math {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-					new Argument("", CNumber.class, "var1"),
-					new Argument("", CNumber.class, "var2"),
-					new Argument("", CArray.class, "varN").setGenerics(new Generic(CNumber.class)).setVarargs()
+					new Argument("", Operators.Mathematical.class, "var1"),
+					new Argument("", Operators.Mathematical.class, "var2"),
+					new Argument("", CArray.class, "varN").setGenerics(new Generic(Operators.Mathematical.class)).setVarargs()
 					);
 		}
 
@@ -288,20 +301,24 @@ public class Math {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = args[0].primitive(t).castToDouble(t);
-			for (int i = 1; i < args.length; i++) {
-				double next = args[i].primitive(t).castToDouble(t);
-				if (next == 0) {
-					throw new ConfigRuntimeException("Division by 0!", ExceptionType.RangeException, t);
+		public Operators.Mathematical exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			List<Operators.Mathematical> numbers = new ArrayList<Operators.Mathematical>();
+			numbers.add((Operators.Mathematical)list.get("var1"));
+			numbers.add((Operators.Mathematical)list.get("var2"));
+			for(Mixed m : (CArray)list.get("varN")){
+				numbers.add((Operators.Mathematical)m);
+			}
+			Operators.Mathematical lhs = numbers.get(0);
+			for(int i = 1; i < numbers.size(); i++){
+				Operators.Mathematical rhs = numbers.get(i);
+				try{
+					lhs = lhs.operatorDivision(rhs);
+				} catch(ArithmeticException e){
+					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.RangeException, t);
 				}
-				tally /= next;
 			}
-			if (tally == (int) tally) {
-				return new CInt((long) tally, t);
-			} else {
-				return new CDouble(tally, t);
-			}
+			return lhs;
 		}
 
 		public ExceptionType[] thrown() {

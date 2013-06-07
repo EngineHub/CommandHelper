@@ -5,6 +5,7 @@ package com.laytonsmith.core.events;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.C;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class PrefiltersTest {
      */
     @Test
     public void testRegexMatch() {
-        Map<String, Construct> map = new HashMap<String, Construct>();
+        Map<String, Mixed> map = new HashMap<String, Mixed>();
         map.put("x", C.String("/1|2|3/"));
         try {
             Prefilters.match(map, "x", C.Int(2), PrefilterType.REGEX);
@@ -57,7 +58,7 @@ public class PrefiltersTest {
 
     @Test
     public void testItemMatch() {
-        Map<String, Construct> map = new HashMap<String, Construct>();
+        Map<String, Mixed> map = new HashMap<String, Mixed>();
         map.put("x", C.String("35:2"));
         try {
             Prefilters.match(map, "x", "35:4", PrefilterType.ITEM_MATCH);
@@ -79,7 +80,7 @@ public class PrefiltersTest {
 
     @Test
     public void testStringMatch() {
-        Map<String, Construct> map = new HashMap<String, Construct>();
+        Map<String, Mixed> map = new HashMap<String, Mixed>();
         map.put("x", C.String("test"));
         try {
             Prefilters.match(map, "x", "test", PrefilterType.STRING_MATCH);
@@ -94,7 +95,7 @@ public class PrefiltersTest {
     }
     
     @Test public void testMathMatch(){
-        Map<String, Construct> map = new HashMap<String, Construct>();
+        Map<String, Mixed> map = new HashMap<String, Mixed>();
         map.put("x", C.String("2"));
         try {
             Prefilters.match(map, "x", "2.0", PrefilterType.MATH_MATCH);
@@ -109,7 +110,7 @@ public class PrefiltersTest {
     }
     
     @Test public void testExpressionMatch(){
-        Map<String, Construct> map = new HashMap<String, Construct>();
+        Map<String, Mixed> map = new HashMap<String, Mixed>();
         map.put("x", C.String("(x > 4)"));
         try {
             Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);

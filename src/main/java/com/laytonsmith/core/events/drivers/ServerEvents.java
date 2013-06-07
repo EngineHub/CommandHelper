@@ -46,7 +46,7 @@ public class ServerEvents {
 					+ " {}";
 		}
 	
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Prefilters.match(prefilter, "players", event.getNumPlayers(), PrefilterType.MATH_MATCH);
@@ -60,12 +60,12 @@ public class ServerEvents {
 			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
 		}
 	
-		public Map<String, Construct> evaluate(BindableEvent e)
+		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if (e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(event);
+				Map<String, Mixed> ret = evaluate_helper(event);
 				String ip;
 				try {
 					ip = event.getAddress().getHostAddress();

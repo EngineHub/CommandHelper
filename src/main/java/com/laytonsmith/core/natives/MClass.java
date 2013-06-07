@@ -35,5 +35,21 @@ public class MClass implements Mixed {
 	public boolean isImmutable() {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
+
+	public boolean isDynamic() {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
+	}
+
+	public void destructor() {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
+	}
+
+	public Mixed doClone() {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
+	}
+
+	public Target getTarget() {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
+	}
 	
 }

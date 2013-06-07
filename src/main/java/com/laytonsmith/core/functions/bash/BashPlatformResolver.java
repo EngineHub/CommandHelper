@@ -4,6 +4,7 @@ import com.laytonsmith.core.PlatformResolver;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -11,7 +12,7 @@ import com.laytonsmith.core.constructs.Construct;
  */
 public class BashPlatformResolver implements PlatformResolver{
 
-    public String outputConstant(Construct c) {
+    public String outputConstant(Mixed c) {
         if(c instanceof CString){
             return "\"" + c.val() + "\"";
         } else if(c instanceof CArray){

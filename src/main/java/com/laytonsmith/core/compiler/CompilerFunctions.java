@@ -60,7 +60,7 @@ public class CompilerFunctions {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			switch (nodes.length) {
 				case 0:
 					return VOID;
@@ -71,7 +71,7 @@ public class CompilerFunctions {
 			}
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
@@ -94,7 +94,7 @@ public class CompilerFunctions {
 					+ "compiler.";
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ArgList list = this.getBuilder().parse(args, this, t);
 			return new CEntry((Construct)list.get("label"), (Construct)list.get("content"), t);
 		}
@@ -139,7 +139,7 @@ public class CompilerFunctions {
 			return tree;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			throw new Error("Should not have gotten here, " + getName() + " was not removed before runtime.");
 		}
 
@@ -483,7 +483,7 @@ public class CompilerFunctions {
 						throw new ConfigCompileException("Unexpected {", node.getTarget());
 					}
 					ParseTree prev = list.get(i - 1);
-					Construct data = prev.getData();
+					Mixed data = prev.getData();
 					if(data instanceof CFunction){
 						Function f = ((CFunction)prev.getData()).getFunction();
 						if(f instanceof Braceable){
@@ -516,7 +516,7 @@ public class CompilerFunctions {
 			for(int i = 0; i < list.size(); i++){
 				//Recurse down and optimize all instances of __autoconcat__ that are left
 				ParseTree element = list.get(i);
-				Construct data = element.getData();
+				Mixed data = element.getData();
 				if(data instanceof CFunction && __autoconcat__.equals(data.val())){
 					list.set(i, optimizeSpecial(element.getChildren(), returnSConcat));
 				}
@@ -594,7 +594,7 @@ public class CompilerFunctions {
 			return true;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Object o = null;
 			o.toString();
 			return new CVoid(t);
@@ -620,7 +620,7 @@ public class CompilerFunctions {
 					+ " It simply returns the argument provided, or void if none.";
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
 				return new CVoid(t);
 			}
@@ -636,7 +636,7 @@ public class CompilerFunctions {
 	@api
 	public static class __cbrace__ extends DummyFunction implements Optimizable {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -674,7 +674,7 @@ public class CompilerFunctions {
 
 		public void handle(List<ParseTree> elements) {
 			for(ParseTree element : elements){
-				Construct data = element.getData();
+				Mixed data = element.getData();
 				if(data instanceof CKeyword && "else".equals(data.val())){
 					// We have 3 different situations to handle. We can glue
 					// together up to 3 

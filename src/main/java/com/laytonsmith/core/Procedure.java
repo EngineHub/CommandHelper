@@ -150,7 +150,7 @@ public class Procedure implements Cloneable {
      * @param env
      * @return
      */
-    public Construct execute(List<Mixed> args, Environment env, Target t) {
+    public Mixed execute(List<Mixed> args, Environment env, Target t) {
         env.getEnv(GlobalEnv.class).SetVarList(new IVariableList());
         CArray array = new CArray(Target.UNKNOWN);
         for (String key : originals.keySet()) {
@@ -191,7 +191,7 @@ public class Procedure implements Cloneable {
             clone.varList = new HashMap<String, IVariable>(this.varList);
         }
         if (this.tree != null) {
-            clone.tree = this.tree.clone();
+            clone.tree = this.tree.doClone();
         }
         return clone;
     }

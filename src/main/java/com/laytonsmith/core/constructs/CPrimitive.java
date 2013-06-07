@@ -161,7 +161,8 @@ public abstract class CPrimitive extends Construct implements Mixed,
 		return this;
 	}
 
-	public Mixed operatorAddition(Mixed m) {
+	@Override
+	public CPrimitive operatorAddition(Mixed m) {
 		double lhs = this.castToDouble(getTarget());
 		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
 		double result = lhs + rhs;
@@ -176,7 +177,9 @@ public abstract class CPrimitive extends Construct implements Mixed,
 		return CPrimitive.class.isAssignableFrom(clazz);
 	}
 
-	public Mixed operatorConcatenation(Mixed m) {
+	@Override
+	public CPrimitive operatorConcatenation(Mixed m) {
+		//TODO:
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
@@ -184,9 +187,13 @@ public abstract class CPrimitive extends Construct implements Mixed,
 		return CPrimitive.class.isAssignableFrom(clazz);
 	}
 
-	public Mixed operatorDivision(Mixed m) {
+	@Override
+	public CPrimitive operatorDivision(Mixed m) {
 		double lhs = this.castToDouble(getTarget());
 		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
+		if(rhs == 0){
+			throw new ArithmeticException("Divide by zero error");
+		}
 		double result = lhs / rhs;
 		if((long)result == result){
 			return new CInt((long)result, getTarget());
@@ -227,7 +234,8 @@ public abstract class CPrimitive extends Construct implements Mixed,
 		return CPrimitive.class.isAssignableFrom(clazz);
 	}
 
-	public Mixed operatorMultiplication(Mixed m) {
+	@Override
+	public CPrimitive operatorMultiplication(Mixed m) {
 		double lhs = this.castToDouble(getTarget());
 		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
 		double result = lhs * rhs;
@@ -242,7 +250,8 @@ public abstract class CPrimitive extends Construct implements Mixed,
 		return CPrimitive.class.isAssignableFrom(clazz);
 	}
 
-	public Mixed operatorSubtraction(Mixed m) {
+	@Override
+	public CPrimitive operatorSubtraction(Mixed m) {
 		double lhs = this.castToDouble(getTarget());
 		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
 		double result = lhs - rhs;

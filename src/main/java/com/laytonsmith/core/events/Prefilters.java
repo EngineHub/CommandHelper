@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.Map;
@@ -54,17 +55,17 @@ public final class Prefilters {
         MACRO
     }
     
-    public static void match(Map<String, Construct> map, String key,
+    public static void match(Map<String, Mixed> map, String key,
             String actualValue, PrefilterType type) throws PrefilterNonMatchException{
         match(map, key, new CString(actualValue, Target.UNKNOWN), type);
     }
     
-    public static void match(Map<String, Construct> map, String key,
+    public static void match(Map<String, Mixed> map, String key,
             int actualValue, PrefilterType type) throws PrefilterNonMatchException{
         match(map, key, new CInt(actualValue, Target.UNKNOWN), type);
     }
     
-    public static void match(Map<String, Construct> map, String key,
+    public static void match(Map<String, Mixed> map, String key,
             double actualValue, PrefilterType type) throws PrefilterNonMatchException{
         match(map, key, new CDouble(actualValue, Target.UNKNOWN), type);
     }
@@ -74,8 +75,8 @@ public final class Prefilters {
      * If it doesn't, it throws an exception. If the value is not provided, or it does
      * match, it returns void, which means that the test passed, and the event matches.
      */
-    public static void match(Map<String, Construct> map, String key,
-            Construct actualValue, PrefilterType type) throws PrefilterNonMatchException{
+    public static void match(Map<String, Mixed> map, String key,
+            Mixed actualValue, PrefilterType type) throws PrefilterNonMatchException{
 		Target t = actualValue.getTarget();
         if(map.containsKey(key)){
             switch(type){
@@ -100,7 +101,7 @@ public final class Prefilters {
         }
     }
     
-    private static void ItemMatch(Construct item1, Construct item2) throws PrefilterNonMatchException{
+    private static void ItemMatch(Mixed item1, Mixed item2) throws PrefilterNonMatchException{
         String i1 = item1.val();
         String i2 = item2.val();
         if(item1.val().contains(":")){
@@ -134,7 +135,7 @@ public final class Prefilters {
         }
     }
     
-    private static void ExpressionMatch(Construct expression, double dvalue) throws PrefilterNonMatchException{
+    private static void ExpressionMatch(Mixed expression, double dvalue) throws PrefilterNonMatchException{
         if(expression.val().matches("\\(.*\\)")){
             String exp = expression.val().substring(1, expression.val().length() - 1);
             boolean inequalityMode = false;
@@ -164,7 +165,7 @@ public final class Prefilters {
         }
     }
     
-    private static void RegexMatch(Construct expression, Construct value) throws PrefilterNonMatchException{
+    private static void RegexMatch(Mixed expression, Mixed value) throws PrefilterNonMatchException{
         if(expression.val().matches("/.*/")){
             String exp = expression.val().substring(1, expression.val().length() - 1);
             if(!value.val().matches(exp)){
@@ -176,7 +177,7 @@ public final class Prefilters {
         }
     }
     
-    private static void MacroMatch(String key, Construct expression, CPrimitive value, Target t) throws PrefilterNonMatchException{
+    private static void MacroMatch(String key, Mixed expression, CPrimitive value, Target t) throws PrefilterNonMatchException{
         if(expression.val().matches("\\(.*\\)")){
             ExpressionMatch(MathReplace(key, expression, value), value.castToDouble(t));
         } else if(expression.val().matches("/.*/")){
@@ -186,7 +187,7 @@ public final class Prefilters {
         }
     }
     
-    private static Construct MathReplace(String key, Construct expression, Construct value){
+    private static Construct MathReplace(String key, Mixed expression, Mixed value){
         return new CString(expression.val().replaceAll(key, value.val()), expression.getTarget());
     }
 }

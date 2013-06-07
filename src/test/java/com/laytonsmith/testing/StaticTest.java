@@ -24,6 +24,7 @@ import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -257,7 +258,7 @@ public class StaticTest {
      * @param expected
      * @param actual 
      */
-    public static void assertCEquals(Construct expected, Construct actual) throws CancelCommandException {
+    public static void assertCEquals(Mixed expected, Mixed actual) throws CancelCommandException {
         equals e = new equals();
         CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
         if (ret.primitive(Target.UNKNOWN).castToBoolean() == false) {
@@ -271,7 +272,7 @@ public class StaticTest {
      * @param actual
      * @throws CancelCommandException 
      */
-    public static void assertCNotEquals(Construct expected, Construct actual) throws CancelCommandException {
+    public static void assertCNotEquals(Mixed expected, Mixed actual) throws CancelCommandException {
         equals e = new equals();
         CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
         if (ret.castToBoolean() == true) {
@@ -284,7 +285,7 @@ public class StaticTest {
      * do the resolution.
      * @param actual 
      */
-    public static void assertCTrue(Construct actual) {
+    public static void assertCTrue(Mixed actual) {
         if (!actual.primitive(Target.UNKNOWN).castToBoolean()) {
             fail("Expected '" + actual.val() + "' to resolve to true, but it did not");
         }
@@ -295,7 +296,7 @@ public class StaticTest {
      * do the resolution.
      * @param actual 
      */
-    public static void assertCFalse(Construct actual) {
+    public static void assertCFalse(Mixed actual) {
         if (actual.primitive(Target.UNKNOWN).castToBoolean()) {
             fail("Expected '" + actual.val() + "' to resolve to false, but it did not");
         }
@@ -306,7 +307,7 @@ public class StaticTest {
      * @param test
      * @param retTypes 
      */
-    public static void assertReturn(Construct test, Class... retTypes) {
+    public static void assertReturn(Mixed test, Class... retTypes) {
         if (!Arrays.asList(retTypes).contains(test.getClass())) {
             StringBuilder b = new StringBuilder();
             if (retTypes.length == 1) {
@@ -717,8 +718,8 @@ public class StaticTest {
             return true;
         }
 
-        public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException {
-            Map<String, Construct> map = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate_helper(BindableEvent e) throws EventException {
+            Map<String, Mixed> map = new HashMap<String, Mixed>();
             if(fakePlayer != null){
                 map.put("player", new CString(fakePlayer.getName(), Target.UNKNOWN));
             }

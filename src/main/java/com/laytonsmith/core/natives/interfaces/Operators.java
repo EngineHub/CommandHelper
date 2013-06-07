@@ -83,7 +83,7 @@ public interface Operators {
 	 * be done first, and if they are not the same type, the function will immediately return
 	 * false, and not call the == operator.
 	 */
-	public static interface Equality {
+	public static interface Equality extends Mixed {
 		/**
 		 * Returns true if this object is logically equal to the right hand side (m).
 		 * @param m
@@ -102,14 +102,14 @@ public interface Operators {
 		boolean operatorTestEquals(Class<? extends Mixed> clazz);
 	}
 	
-	public static interface Concatenation {
+	public static interface Concatenation extends Mixed {
 		//TODO
 		/**
 		 * Returns the new, concatenated object.
 		 * @param m
 		 * @return 
 		 */
-		Mixed operatorConcatenation(Mixed m);
+		Operators.Concatenation operatorConcatenation(Mixed m);
 		
 		/**
 		 * Should return true if operatorConcatenation will work with this class type.
@@ -133,14 +133,14 @@ public interface Operators {
 	 * simply be a function of that and the Mathematical interface.
 	 * </p>
 	 */
-	public static interface Mathematical {
+	public static interface Mathematical extends Mixed {
 		//TODO
 		/**
 		 * Returns the new left hand plus right hand value.
 		 * @param m
 		 * @return 
 		 */
-		Mixed operatorAddition(Mixed m);
+		Operators.Mathematical operatorAddition(Mixed m);
 		
 		/**
 		 * Should return true if operatorAddition will work with this class type.
@@ -158,7 +158,7 @@ public interface Operators {
 		 * @param m
 		 * @return 
 		 */
-		Mixed operatorSubtraction(Mixed m);
+		Operators.Mathematical operatorSubtraction(Mixed m);
 		
 		/**
 		 * Should return true if operatorSubtraction will work with this class type.
@@ -176,7 +176,7 @@ public interface Operators {
 		 * @param m
 		 * @return 
 		 */
-		Mixed operatorMultiplication(Mixed m);
+		Operators.Mathematical operatorMultiplication(Mixed m);
 		
 		/**
 		 * Should return true if operatorMultiplication will work with this class type.
@@ -194,7 +194,7 @@ public interface Operators {
 		 * @param m
 		 * @return 
 		 */
-		Mixed operatorDivision(Mixed m);
+		Operators.Mathematical operatorDivision(Mixed m);
 		
 		/**
 		 * Should return true if operatorTestDivision will work with this class type.

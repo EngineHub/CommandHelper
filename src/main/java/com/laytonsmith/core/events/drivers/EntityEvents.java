@@ -72,7 +72,7 @@ public class EntityEvents {
 					+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Target t) throws PrefilterNonMatchException {
 			if (event instanceof MCEntityExplodeEvent) {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if (prefilter.containsKey("type")) {
@@ -93,11 +93,11 @@ public class EntityEvents {
 			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCEntityExplodeEvent) {
 				Target t = Target.UNKNOWN;
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
-				Map<String, Construct> ret = evaluate_helper(e);
+				Map<String, Mixed> ret = evaluate_helper(e);
 				CArray blocks = new CArray(t);
 				for (MCBlock b : e.getBlocks()) {
 					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()));
@@ -169,7 +169,7 @@ public class EntityEvents {
 					+ " {id}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, 
+		public boolean matches(Map<String, Mixed> prefilter, 
 				BindableEvent event, Target t) throws PrefilterNonMatchException {
 			if (event instanceof MCProjectileHitEvent) {
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
@@ -189,12 +189,12 @@ public class EntityEvents {
 			return EventBuilder.instantiate(MCProjectileHitEvent.class, p);
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event)
+		public Map<String, Mixed> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCProjectileHitEvent) {
 				Target t = Target.UNKNOWN;
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
-				Map<String, Construct> ret = evaluate_helper(e);
+				Map<String, Mixed> ret = evaluate_helper(e);
 				MCProjectile pro = e.getEntity();
 				ret.put("id", new CInt(pro.getEntityId(), t));
 				ret.put("type", new CString(pro.getType().name(), t));
@@ -257,7 +257,7 @@ public class EntityEvents {
 					+ " {id|drops|xp}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if (e instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent event = (MCEntityDeathEvent) e;
@@ -271,13 +271,13 @@ public class EntityEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event)
+		public Map<String, Mixed> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
 				Target t = Target.UNKNOWN;
 				MCLivingEntity dead = e.getEntity();
-				Map<String, Construct> map = evaluate_helper(event);
+				Map<String, Mixed> map = evaluate_helper(event);
 				CArray drops = new CArray(t);
 				for(MCItemStack is : e.getDrops()){
 					drops.push(ObjectGenerator.GetGenerator().item(is, t));
@@ -287,9 +287,9 @@ public class EntityEvents {
 				map.put("drops", drops);
 				map.put("xp", new CInt(e.getDroppedExp(), t));
 				CArray cod = CArray.GetAssociativeArray(t);
-				Map<String, Construct> ldc = 
+				Map<String, Mixed> ldc = 
 						parseEntityDamageEvent(dead.getLastDamageCause(), 
-								new HashMap<String, Construct>());
+								new HashMap<String, Mixed>());
 				for (String key : ldc.keySet()) {
 					cod.set(key, ldc.get(key), t);
 				}
@@ -353,7 +353,7 @@ public class EntityEvents {
 				+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			if (event instanceof MCCreatureSpawnEvent) {
 				MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
@@ -368,11 +368,11 @@ public class EntityEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event)
+		public Map<String, Mixed> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCCreatureSpawnEvent) {
 				MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
-				Map<String, Construct> map = evaluate_helper(e);
+				Map<String, Mixed> map = evaluate_helper(e);
 				
 				map.put("type", new CString(e.getEntity().getType().name(), Target.UNKNOWN));
 				map.put("id", new CInt(e.getEntity().getEntityId(), Target.UNKNOWN));
@@ -430,7 +430,7 @@ public class EntityEvents {
 				+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			if(event instanceof MCEntityDamageEvent){
 				MCEntityDamageEvent e = (MCEntityDamageEvent) event;
@@ -446,11 +446,11 @@ public class EntityEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent e)
+		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if (e instanceof MCEntityDamageEvent) {
 				MCEntityDamageEvent event = (MCEntityDamageEvent) e;
-				Map<String, Construct> map = evaluate_helper(e);
+				Map<String, Mixed> map = evaluate_helper(e);
 				
 				map = parseEntityDamageEvent(event, map);
 				
@@ -498,7 +498,7 @@ public class EntityEvents {
 				+ " {player|clicked|id|data}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			if(event instanceof MCPlayerInteractEntityEvent){
 				MCPlayerInteractEntityEvent e = (MCPlayerInteractEntityEvent) event;
@@ -512,11 +512,11 @@ public class EntityEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent e)
+		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if (e instanceof MCPlayerInteractEntityEvent) {
 				MCPlayerInteractEntityEvent event = (MCPlayerInteractEntityEvent) e;
-				Map<String, Construct> map = evaluate_helper(e);
+				Map<String, Mixed> map = evaluate_helper(e);
 				
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
@@ -577,7 +577,7 @@ public class EntityEvents {
             return Driver.ITEM_DROP;
         }
         
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerDropItemEvent) {
                 MCPlayerDropItemEvent event = (MCPlayerDropItemEvent)e;
                 
@@ -589,10 +589,10 @@ public class EntityEvents {
             return false;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerDropItemEvent) {
                 MCPlayerDropItemEvent event = (MCPlayerDropItemEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 
                 map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
                 map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), Target.UNKNOWN));
@@ -609,7 +609,7 @@ public class EntityEvents {
                 MCPlayerDropItemEvent e = (MCPlayerDropItemEvent)event;
                 
                 if (key.equalsIgnoreCase("item")) {
-                    MCItemStack stack = ObjectGenerator.GetGenerator().item((Construct)value, Target.UNKNOWN);
+                    MCItemStack stack = ObjectGenerator.GetGenerator().item((Mixed)value, Target.UNKNOWN);
                     
                     e.setItemStack(stack);
                     
@@ -637,7 +637,7 @@ public class EntityEvents {
 				+ "{player|item|remaining}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent)e;
 				
@@ -654,10 +654,10 @@ public class EntityEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCPlayerPickupItemEvent) {
                 MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
 				
                 //Fill in the event parameters
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
@@ -680,7 +680,7 @@ public class EntityEvents {
 				MCPlayerPickupItemEvent e = (MCPlayerPickupItemEvent)event;
 				
 				if (key.equalsIgnoreCase("item")) {
-					MCItemStack stack = ObjectGenerator.GetGenerator().item((Construct)value, Target.UNKNOWN);
+					MCItemStack stack = ObjectGenerator.GetGenerator().item((Mixed)value, Target.UNKNOWN);
 					
 					e.setItemStack(stack);
 					
@@ -716,7 +716,7 @@ public class EntityEvents {
                     + "{player|amount|damager|cause|data|id}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if(e instanceof MCEntityDamageByEntityEvent){
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
@@ -729,11 +729,11 @@ public class EntityEvents {
 			return null;
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent e)
+		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if(e instanceof MCEntityDamageByEntityEvent){
                 MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 
                 // Guaranteed to be a player via matches
                 String name = ((MCPlayer)event.getEntity()).getName();
@@ -811,7 +811,7 @@ public class EntityEvents {
             return Driver.TARGET_ENTITY;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
         	if(e instanceof MCEntityTargetEvent){
         		MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
         		
@@ -832,10 +832,10 @@ public class EntityEvents {
         	return false;
         }
         
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if(e instanceof MCEntityTargetEvent){
                 MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
                 
                 String name = "";
                 MCEntity target = ete.getTarget();
@@ -899,7 +899,7 @@ public class EntityEvents {
 					+ " {}";
 		}
 	
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCEntityEnterPortalEvent) {
 				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
@@ -913,12 +913,12 @@ public class EntityEvents {
 			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
 		}
 	
-		public Map<String, Construct> evaluate(BindableEvent e)
+		public Map<String, Mixed> evaluate(BindableEvent e)
 				throws EventException {
 			if (e instanceof MCEntityEnterPortalEvent) {
 				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(event);
+				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
 				ret.put("type", new CString(event.getEntity().getType().name(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation()));
@@ -942,8 +942,8 @@ public class EntityEvents {
 		}
 	}
 
-	public static Map<String, Construct> parseEntityDamageEvent(MCEntityDamageEvent event,
-			Map<String, Construct> map) {
+	public static Map<String, Mixed> parseEntityDamageEvent(MCEntityDamageEvent event,
+			Map<String, Mixed> map) {
 		if (event != null) {
 			MCEntity victim = event.getEntity();
 			map.put("type", new CString(victim.getType().name(), Target.UNKNOWN));

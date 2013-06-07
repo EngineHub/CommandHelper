@@ -42,7 +42,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * This function should return true if the event code should be run, based
      * on this prefilter and triggering event's parameters.
      */
-    public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException;
+    public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException;
     
     /**
      * If an event is manually triggered, then it may be required for an event
@@ -60,7 +60,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * @param e
      * @return 
      */
-    public Map<String, Construct> evaluate(BindableEvent e) throws EventException;
+    public Map<String, Mixed> evaluate(BindableEvent e) throws EventException;
     
     /**
      * This is called to determine if an event is cancellable in the first place
@@ -93,7 +93,7 @@ public interface Event extends Comparable<Event>, Documentation{
 	 * The prefilters are also sent, in case the event can do some further optimization
 	 * based on them.
      */
-    public void bind(Map<String, Construct> prefilters, Target t);
+    public void bind(Map<String, Mixed> prefilters, Target t);
     
     /**
      * This function is called once when the plugin starts up, to give this

@@ -13,6 +13,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import java.io.File;
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     private final String eventName;
     private final String id;
     private final Priority priority;
-    private final Map<String, Construct> prefilter;
+    private final Map<String, Mixed> prefilter;
     private final String eventObjName;
     private Environment originalEnv;
     private final ParseTree tree; //The code closure for this event
@@ -147,7 +148,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             this.priority = Priority.NORMAL;
         }
 
-        this.prefilter = new HashMap<String, Construct>();
+        this.prefilter = new HashMap<String, Mixed>();
         if (prefilter != null) {
             for (String key : prefilter.keySet()) {
                 this.prefilter.put(key, prefilter.get(key, Target.UNKNOWN));
@@ -199,7 +200,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         return id;
     }
 
-    public Map<String, Construct> getPrefilter() {
+    public Map<String, Mixed> getPrefilter() {
         return prefilter;
     }
 
@@ -280,7 +281,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         try {
             Environment env = originalEnv.clone();
             env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(eventObjName, Target.UNKNOWN), event);
-            Map<String, Construct> map = new HashMap<String, Construct>();
+            Map<String, Mixed> map = new HashMap<String, Mixed>();
             for(String key : event.keySet()){
                 map.put(key, event.get(key, Target.UNKNOWN));
             }
@@ -341,7 +342,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
      */
     public static class ActiveEvent{
         private final BindableEvent underlyingEvent;
-        private Map<String, Construct> parsedEvent;
+        private Map<String, Mixed> parsedEvent;
         private BoundEvent boundEvent;
         private Boolean cancelled;
         private BoundEvent consumedAt;
@@ -370,7 +371,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             return history;
         }
 
-        public Map<String, Construct> getParsedEvent() {
+        public Map<String, Mixed> getParsedEvent() {
             return parsedEvent;
         }
 
@@ -386,7 +387,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             this.boundEvent = boundEvent;
         }
         
-        public void setParsedEvent(Map<String, Construct> parsedEvent){
+        public void setParsedEvent(Map<String, Mixed> parsedEvent){
             this.parsedEvent = parsedEvent;
         }
 

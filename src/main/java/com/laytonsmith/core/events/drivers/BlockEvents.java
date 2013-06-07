@@ -59,7 +59,7 @@ public class BlockEvents {
             return Driver.BLOCK_BREAK;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t)
                 throws PrefilterNonMatchException {
             if (e instanceof MCBlockBreakEvent) {
                 MCBlockBreakEvent event = (MCBlockBreakEvent) e;
@@ -71,7 +71,7 @@ public class BlockEvents {
                 }
 
                 if (prefilter.containsKey("type")) {
-                    Construct v = prefilter.get("type");
+                    Mixed v = prefilter.get("type");
 
                     if (v instanceof CInt) {
                         int val = Integer.parseInt(v.val());
@@ -85,7 +85,7 @@ public class BlockEvents {
                 }
 
                 if (prefilter.containsKey("data")) {
-                    Construct v = prefilter.get("data");
+                    Mixed v = prefilter.get("data");
 
                     if (v instanceof CInt) {
                         int val = Integer.parseInt(v.val());
@@ -106,11 +106,11 @@ public class BlockEvents {
             return null;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e)
+        public Map<String, Mixed> evaluate(BindableEvent e)
                 throws EventException {
 
             MCBlockBreakEvent event = (MCBlockBreakEvent) e;
-            Map<String, Construct> map = evaluate_helper(event);
+            Map<String, Mixed> map = evaluate_helper(event);
 
             map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 
@@ -220,7 +220,7 @@ public class BlockEvents {
             return Driver.BLOCK_PLACE;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t)
                 throws PrefilterNonMatchException {
             if (e instanceof MCBlockPlaceEvent) {
                 MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
@@ -232,7 +232,7 @@ public class BlockEvents {
                 }
 
                 if (prefilter.containsKey("type")) {
-                    Construct v = prefilter.get("type");
+                    Mixed v = prefilter.get("type");
 
                     if (v instanceof CInt) {
                         int val = Integer.parseInt(v.val());
@@ -246,7 +246,7 @@ public class BlockEvents {
                 }
 
                 if (prefilter.containsKey("data")) {
-                    Construct v = prefilter.get("data");
+                    Mixed v = prefilter.get("data");
 
                     if (v instanceof CInt) {
                         int val = Integer.parseInt(v.val());
@@ -267,10 +267,10 @@ public class BlockEvents {
             return null;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e)
+        public Map<String, Mixed> evaluate(BindableEvent e)
                 throws EventException {
             MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
-            Map<String, Construct> map = evaluate_helper(e);
+            Map<String, Mixed> map = evaluate_helper(e);
             MCBlock blk = event.getBlock();
 
             map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
@@ -371,7 +371,7 @@ public class BlockEvents {
             return Driver.SIGN_CHANGED;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCSignChangeEvent) {
                 MCSignChangeEvent sce = (MCSignChangeEvent) e;
 
@@ -391,10 +391,10 @@ public class BlockEvents {
             return false;
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCSignChangeEvent) {
                 MCSignChangeEvent sce = (MCSignChangeEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+                Map<String, Mixed> map = evaluate_helper(e);
 
                 map.put("player", new CString(sce.getPlayer().getName(), Target.UNKNOWN));
 

@@ -1,11 +1,10 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
- *
- * @author layton
+ * 
  */
 public interface PlatformResolver {
-    public String outputConstant(Construct c);
+    public String outputConstant(Mixed c);
 }

@@ -4,6 +4,7 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Map;
 
 /**
@@ -31,7 +32,7 @@ public interface EventMixinInterface {
      * @return
      * @throws EventException 
      */
-    public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException;
+    public Map<String, Mixed> evaluate_helper(BindableEvent e) throws EventException;
     /**
      * Manually trigger this implementation specific event
      * @param e 
