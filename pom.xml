@@ -508,10 +508,12 @@
 									<pattern>org.apache.commons.io</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.apache.commons.io</shadedPattern>
 								</relocation>
+								<!-- This doesn't work due to native libs or something. Will revist later.
 								<relocation>
 									<pattern>org.sqlite</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.sqlite</shadedPattern>
 								</relocation>
+								-->
 								<relocation>
 									<pattern>org.mcstats</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.mcstats</shadedPattern>
