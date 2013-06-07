@@ -40,7 +40,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 		mixin = getConnectionMixin();		
 		try {
 			try{
-				Class.forName("org.sqlite.JDBC");
+				Class.forName(org.sqlite.JDBC.class.getName());
 				path = mixin.getPath();
 				connect();
 				Statement statement = connection.createStatement();
