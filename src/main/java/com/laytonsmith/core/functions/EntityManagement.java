@@ -674,7 +674,7 @@ public class EntityManagement {
 			for (int chX = 0 - chunkRadius; chX <= chunkRadius; chX++) {
 				for (int chZ = 0 - chunkRadius; chZ <= chunkRadius; chZ++) {
 					for (MCEntity e : loc.getChunk().getEntities()) {
-						if (e.getWorld() != loc.getWorld()) {
+						if (!e.getWorld().equals(loc.getWorld())) {
 							continue;
 						}
 						if (e.getLocation().distance(loc) <= dist && e.getLocation().getBlock() != loc.getBlock()) {
