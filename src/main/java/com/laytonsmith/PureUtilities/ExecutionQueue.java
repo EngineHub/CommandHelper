@@ -227,7 +227,9 @@ public class ExecutionQueue {
 			if(!isRunning(queue)){
 				//We need to create a new thread
 				runningQueues.put(queue, true);
-				dm.activateThread(null);
+				if(dm != null){
+					dm.activateThread(null);
+				}
 				service.submit(new Runnable() {
 
 					public void run() {
@@ -241,7 +243,9 @@ public class ExecutionQueue {
 								t.printStackTrace(System.err);
 							}
 						} finally {
-							dm.deactivateThread(null);
+							if(dm != null){
+								dm.deactivateThread(null);
+							}
 						}
 					}
 				});

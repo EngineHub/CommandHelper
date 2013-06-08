@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
 import static com.laytonsmith.PureUtilities.TermColors.*;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -48,6 +49,7 @@ public class Manager {
 	private static PersistanceNetwork persistanceNetwork;
 
 	public static void start() throws IOException, DataSourceException, URISyntaxException {
+		Implementation.setServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(chDirectory);
 		persistanceNetwork = new PersistanceNetwork(new File(chDirectory, "persistance.config"), 

@@ -84,7 +84,7 @@ public class BukkitPlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled=true)
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
 		if(CommandHelperPlugin.self.interpreterListener
-                .isInInterpreterMode(new BukkitMCPlayer(event.getPlayer()))){
+                .isInInterpreterMode(event.getPlayer().getName())){
             //They are in interpreter mode, so we want it to handle this, not everything else.
             return;
         }

@@ -35,8 +35,8 @@ public class CommandHelperInterpreterListener implements Listener {
 	private CommandHelperPlugin plugin;
     Map<String, String> multilineMode = new HashMap<String, String>();
     
-    public boolean isInInterpreterMode(MCPlayer p){
-        return (interpreterMode.contains(p.getName()));
+    public boolean isInInterpreterMode(String player){
+        return (interpreterMode.contains(player));
     }
 	
 	public CommandHelperInterpreterListener(CommandHelperPlugin plugin){
