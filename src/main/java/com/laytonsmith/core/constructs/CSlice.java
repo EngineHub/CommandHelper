@@ -40,7 +40,7 @@ public class CSlice extends CArray {
             start = Long.parseLong(sstart.trim());
             finish = Long.parseLong(sfinish.trim());
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Expecting integer in a slice, but was given " + sstart + " and " + sfinish, t);
+            throw new ConfigRuntimeException("Expecting integer in a slice, but was given " + sstart + " and " + sfinish, Exceptions.ExceptionType.CastException,  t);
         }
 		calculateCaches();
     }

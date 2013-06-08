@@ -243,7 +243,7 @@ public class Script {
                     f = (Function)FunctionList.getFunction(m);
                 } catch(ConfigCompileException e){
                     //Turn it into a config runtime exception. This shouldn't ever happen though.
-                    throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getTarget());
+                    throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
                 }
                 //We have special handling for loop and other control flow functions
                 if(f instanceof assign){

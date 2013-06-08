@@ -353,12 +353,19 @@ public class ConfigRuntimeException extends RuntimeException {
     
     public ConfigRuntimeException(String msg, ExceptionType ex, Target t, Throwable cause){
         super(msg, cause);
+		if(ex == null){
+			throw new NullPointerException();
+		}
+        createException(ex, t);
+    }
+	
+	private void createException(ExceptionType ex, Target t){
         this.ex = ex;
         this.line_num = t.line();
         this.file = t.file();
         this.column = t.col();
         this.target = t;
-    }
+	}
     
 //    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
 //        this(msg, ex, line_num, null);
@@ -367,14 +374,29 @@ public class ConfigRuntimeException extends RuntimeException {
 //        this(msg, null, line_num, null);
 //    }
     
-    /**
-     * Creates an uncatchable exception (by user level code)
-     * @param msg
-     * @param line_num
-     * @param file 
-     */
-    public ConfigRuntimeException(String msg, Target t){
-        this(msg, null, t);
+	
+	/**
+	 * Creates an uncatchable exception. This should rarely be used.
+	 * @param msg
+	 * @param t 
+	 */
+	public static ConfigRuntimeException CreateUncatchableException(String msg, Target t){
+		return new ConfigRuntimeException(msg, t, null);
+	}
+	
+	/**
+	 * Creates an uncatchable exception with a cause. This should rarely be used.
+	 * @param msg
+	 * @param t 
+	 * @param cause
+	 */
+	public static ConfigRuntimeException CreateUncatchableException(String msg, Target t, Throwable cause){
+		return new ConfigRuntimeException(msg, t, cause);
+	}
+    
+    private ConfigRuntimeException(String msg, Target t, Throwable cause){
+		super(msg, cause);
+        createException(null, t);
     }
     
     public ExceptionType getExceptionType(){

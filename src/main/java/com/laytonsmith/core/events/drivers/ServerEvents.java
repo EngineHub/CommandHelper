@@ -57,7 +57,7 @@ public class ServerEvents {
 		}
 	
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 	
 		public Map<String, Construct> evaluate(BindableEvent e)

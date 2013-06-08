@@ -220,7 +220,7 @@ public class ArrayHandling {
 					}
 				}
 			} else if (args[0] instanceof ArrayAccess) {
-				throw new ConfigRuntimeException("Wat. How'd you get here? This isn't supposed to be implemented yet.", t);
+				throw ConfigRuntimeException.CreateUncatchableException("Wat. How'd you get here? This isn't supposed to be implemented yet.", t);
 			} else {
 				throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
 			}

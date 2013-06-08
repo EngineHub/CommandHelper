@@ -273,7 +273,7 @@ public class CArray extends Construct implements ArrayAccess{
             try {
                 int indx = Static.getInt32(index, t);
                 if (indx > next_index || indx < 0) {
-                    throw new ConfigRuntimeException("", Target.UNKNOWN);
+                    throw new ConfigRuntimeException("", ExceptionType.IndexOverflowException, Target.UNKNOWN);
                 } else if(indx == next_index){
                     this.push(c);
                 } else {
@@ -642,7 +642,7 @@ public class CArray extends Construct implements ArrayAccess{
                     }
                     if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt || 
                             c instanceof CDouble || c instanceof CNull)){
-                        throw new ConfigRuntimeException("Unsupported type being sorted: " + c.getCType(), CArray.this.getTarget());
+                        throw new ConfigRuntimeException("Unsupported type being sorted: " + c.getCType(), ExceptionType.FormatException, CArray.this.getTarget());
                     }
                 }
                 if(o1 instanceof CNull || o2 instanceof CNull){
@@ -674,7 +674,7 @@ public class CArray extends Construct implements ArrayAccess{
                     case STRING_IC:
                         return compareString(o1.val().toLowerCase(), o2.val().toLowerCase());  
                 }
-                throw new ConfigRuntimeException("Missing implementation for " + sort.name(), Target.UNKNOWN);
+                throw ConfigRuntimeException.CreateUncatchableException("Missing implementation for " + sort.name(), Target.UNKNOWN);
             }
             public int compareRegular(Construct o1, Construct o2){
                 if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1))

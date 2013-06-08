@@ -124,7 +124,7 @@ public class FileHandling {
 			final String file = args[0].val();
 			final CClosure callback;
 			if(!(args[1] instanceof CClosure)){
-				throw new ConfigRuntimeException("Expected paramter 2 of " + getName() + " to be a closure!", t);
+				throw new ConfigRuntimeException("Expected paramter 2 of " + getName() + " to be a closure!", ExceptionType.CastException, t);
 			} else {
 				callback = ((CClosure)args[1]);
 			}

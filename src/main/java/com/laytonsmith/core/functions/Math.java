@@ -443,7 +443,7 @@ public class Math {
 						//Let's just evaluate this like normal with array_get, so it will
 						//throw the appropriate exception.
 						new ArrayHandling.array_get().exec(t, env, array, index);
-						throw new ConfigRuntimeException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
+						throw ConfigRuntimeException.CreateUncatchableException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
 					} else if(!(array instanceof CArray)){
 						//It's an ArrayAccess type, but we can't use that here, so, throw our
 						//own exception.

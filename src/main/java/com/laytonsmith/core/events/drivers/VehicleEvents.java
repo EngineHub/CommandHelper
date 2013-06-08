@@ -61,7 +61,7 @@ public class VehicleEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
@@ -118,7 +118,7 @@ public class VehicleEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
@@ -186,9 +186,9 @@ public class VehicleEvents {
 								.getEntity().getType().name(), PrefilterType.MACRO);
 						break;
 						default:
-							throw new ConfigRuntimeException("Greetings from the future! If you are seeing this message,"
+							throw ConfigRuntimeException.CreateUncatchableException("Greetings from the future! If you are seeing this message,"
 									+ " Minecraft has reached the point where vehicles can hit things that are neither"
-									+ " a block nor an entity.", Target.UNKNOWN);
+									+ " a block nor an entity. Please report this error to developers.", Target.UNKNOWN);
 				}
 				return true;
 			}
@@ -196,7 +196,7 @@ public class VehicleEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
@@ -223,9 +223,9 @@ public class VehicleEvents {
 						pickup = !vec.isPickupCancelled();
 						break;
 						default:
-							throw new ConfigRuntimeException("Greetings from the future! If you are seeing this message,"
+							throw ConfigRuntimeException.CreateUncatchableException("Greetings from the future! If you are seeing this message,"
 									+ " Minecraft has reached the point where vehicles can hit things that are neither"
-									+ " a block nor an entity.", t);
+									+ " a block nor an entity. Please report this error to developers.", t);
 				}
 				ret.put("block", block);
 				ret.put("entity", entity);

@@ -108,7 +108,7 @@ public class WorldEdit {
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos1();
                 if (pt == null) {
-                    throw new ConfigRuntimeException("Point in " + this.getName() + "undefined", t);
+                    throw new ConfigRuntimeException("Point in " + this.getName() + "undefined", ExceptionType.PluginInternalException, t);
                 }
                 return new CArray(t,
                         new CInt(pt.getBlockX(), t),
@@ -175,7 +175,7 @@ public class WorldEdit {
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos2();
                 if (pt == null) {
-                    throw new ConfigRuntimeException("Point in " + this.getName() + "undefined", t);
+                    throw new ConfigRuntimeException("Point in " + this.getName() + "undefined", ExceptionType.PluginInternalException, t);
                 }
                 return new CArray(t,
                         new CInt(pt.getBlockX(), t),

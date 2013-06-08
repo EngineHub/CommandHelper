@@ -79,7 +79,7 @@ public class EntityEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
@@ -151,7 +151,7 @@ public class EntityEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
@@ -973,7 +973,7 @@ public class EntityEvents {
 		}
 	
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 	
 		public Map<String, Construct> evaluate(BindableEvent e)
