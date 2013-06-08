@@ -51,6 +51,10 @@ public class BukkitMCBlock implements MCBlock{
         b.setData(imeta);
     }
 
+	public void setTypeAndData(int type, byte data, boolean physics) {
+		b.setTypeIdAndData(type, data, physics);
+	}
+
     public MCBlockState getState() {
         if(b.getState() == null){
             return null;
@@ -150,7 +154,12 @@ public class BukkitMCBlock implements MCBlock{
 	}
 
 	public int getBlockPower() {
+		// this is not useful
 		return b.getBlockPower();
+	}
+	
+	public boolean isBlockPowered() {
+		return b.isBlockPowered();
 	}
 
 	public MCBlock getRelative(MCBlockFace face) {

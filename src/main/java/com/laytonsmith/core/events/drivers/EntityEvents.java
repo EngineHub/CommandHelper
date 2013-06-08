@@ -102,7 +102,7 @@ public class EntityEvents {
 
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCItemSpawnEvent) {
-				if (key == "item") {
+				if ("item".equals(key)) {
 					((MCItemSpawnEvent) event).getEntity().setItemStack(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
 					return true;
 				}
