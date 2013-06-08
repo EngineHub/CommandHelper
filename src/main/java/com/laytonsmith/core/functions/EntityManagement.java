@@ -23,6 +23,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -669,8 +670,7 @@ public class EntityManagement {
 			// http://forums.bukkit.org/threads/getnearbyentities-of-a-location.101499/#post-1341141
 			int chunkRadius = dist < 16 ? 1 : (dist - (dist % 16)) / 16;
 
-			CArray entities = new CArray(t);
-
+			Set<Integer> eSet = new HashSet<Integer>();
 			for (int chX = 0 - chunkRadius; chX <= chunkRadius; chX++) {
 				for (int chZ = 0 - chunkRadius; chZ <= chunkRadius; chZ++) {
 					for (MCEntity e : loc.getChunk().getEntities()) {
@@ -679,11 +679,15 @@ public class EntityManagement {
 						}
 						if (e.getLocation().distance(loc) <= dist && e.getLocation().getBlock() != loc.getBlock()) {
 							if (types.isEmpty() || types.contains(e.getType().name())) {
-								entities.push(new CInt(e.getEntityId(), t));
+								eSet.add(e.getEntityId());
 							}
 						}
 					}
 				}
+			}
+			CArray entities = new CArray(t);
+			for(int e : eSet){
+				entities.push(new CInt(e, t));
 			}
 
 			return entities;
