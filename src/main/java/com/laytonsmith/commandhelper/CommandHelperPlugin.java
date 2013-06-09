@@ -102,6 +102,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public void onLoad() {
 		Implementation.setServerType(Implementation.Type.BUKKIT);
+		CHLog.initialize(chDirectory);
 		Installer.Install(chDirectory);
 		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.7"))){
 			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 7. You should have plans"
@@ -135,7 +136,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		CHLog.initialize(chDirectory);
 		try {
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(chDirectory);
