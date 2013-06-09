@@ -102,6 +102,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public void onLoad() {
 		Implementation.setServerType(Implementation.Type.BUKKIT);
+		try {
+			Prefs.init(new File(chDirectory, "preferences.txt"));
+		} catch (IOException ex) {
+			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+		}
 		CHLog.initialize(chDirectory);
 		Installer.Install(chDirectory);
 		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.7"))){
@@ -136,6 +141,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		CHLog.initialize(chDirectory);
 		try {
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(chDirectory);
