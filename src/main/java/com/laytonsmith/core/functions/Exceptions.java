@@ -215,7 +215,11 @@ public class Exceptions {
 		 */
 		PluginChannelException("Thrown if trying to register a plugin channel that is"
 				+ " already registered, or unregister one that isn't registered.", 
-				CHVersion.V3_3_1);
+				CHVersion.V3_3_1),
+		/**
+		 * Thrown if data was not found, but expected.
+		 */
+		NotFoundException("Thrown if data was not found, but expected.", CHVersion.V3_3_1);
 
 		;
 		
