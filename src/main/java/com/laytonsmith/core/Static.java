@@ -230,7 +230,7 @@ public final class Static {
             return new CString("", t);
         }
         if (val.equalsIgnoreCase("null")) {
-            return Construct.GetNullConstruct(Construct.class, t);
+            return null;
         } else if (val.equalsIgnoreCase("true")) {
             return new CBoolean(true, t);
         } else if (val.equalsIgnoreCase("false")) {
@@ -258,7 +258,7 @@ public final class Static {
 
     public static Construct resolveDollarVar(Construct variable, List<Variable> vars) {
         if(variable == null){
-            return Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
+            return null;
         }
         if (variable instanceof Variable){//== Construct.ConstructType.VARIABLE) {
             for (Variable var : vars) {
@@ -461,15 +461,6 @@ public final class Static {
 			return Static.GetPlayer(player, t);
 		}
 	}
-
-	/**
-	 * @deprecated Use Construct.isNull directly.
-	 * @param construct
-	 * @return 
-	 */
-    public static boolean isNull(Construct construct) {
-        return construct.isNull();
-    }
 
     public static int Normalize(int i, int min, int max) {
         return java.lang.Math.min(max, java.lang.Math.max(min, i));
@@ -836,7 +827,7 @@ public final class Static {
 	 */
 	public static void AssertNonCNull(Target t, Mixed ... args) throws ConfigRuntimeException {
 		for(Mixed arg : args){
-			if(arg.isNull()){
+			if(arg == null){
 				throw new ConfigRuntimeException("Argument was null, and nulls are not allowed.", ExceptionType.NullPointerException, t);
 			}
 		}

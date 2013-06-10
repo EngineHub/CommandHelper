@@ -98,11 +98,11 @@ public class WorldEdit {
             if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
                 m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
             }
-            if (args.length == 2 && !args[1].isNull()) {
+            if (args.length == 2 && args[1] != null) {
                 m = Static.GetPlayer(args[0].val(), t);
                 l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), t);
                 setter = true;
-            } else if (args.length == 1 && !args[0].isNull()) {
+            } else if (args.length == 1 && args[0] != null) {
                 if (args[0] instanceof CArray) {
                     l = ObjectGenerator.GetGenerator().location(args[0], ( m == null ? null : m.getWorld() ), t);
                     setter = true;
@@ -121,7 +121,7 @@ public class WorldEdit {
             }
             if (setter) {
                 sel.selectPrimary(BukkitUtil.toVector(( (BukkitMCLocation) l )._Location()));
-                return Construct.GetNullConstruct(MLocation.class, t);
+                return null;
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos1();
                 if (pt == null) {
@@ -176,11 +176,11 @@ public class WorldEdit {
             if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
                 m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
             }
-            if (args.length == 2 && !args[1].isNull()) {
+            if (args.length == 2 && args[1] != null) {
                 m = Static.GetPlayer(args[0].val(), t);
                 l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), t);
                 setter = true;
-            } else if (args.length == 1 && !args[0].isNull()) {
+            } else if (args.length == 1 && args[0] != null) {
                 if (args[0] instanceof CArray) {
                     l = ObjectGenerator.GetGenerator().location(args[0], ( m == null ? null : m.getWorld() ), t);
                     setter = true;
@@ -1725,7 +1725,7 @@ public class WorldEdit {
 			String flagValue = null;
 			RegionGroup groupValue = null;
 
-			if (args.length >= 4 && !(args[3].isNull()) && !"".equals(args[3].val())) {
+			if (args.length >= 4 && !(args[3] == null) && !"".equals(args[3].val())) {
 				flagValue = args[3].val();
 			}
 

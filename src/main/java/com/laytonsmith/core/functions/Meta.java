@@ -774,7 +774,7 @@ public class Meta {
 
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
-				return Construct.GetNullConstruct(Construct.class, t);
+				return null;
 			} else {
 				return new CString(environment.getEnv(CommandHelperEnvironment.class).GetCommand(), t);
 			}
@@ -909,7 +909,7 @@ public class Meta {
 				MCLocation l = (cs.getBlock().getLocation());
 				return ObjectGenerator.GetGenerator().location(l);
 			}
-			return Construct.GetNullConstruct(MLocation.class, t);
+			return null;
 		}
 
 		public String getName() {

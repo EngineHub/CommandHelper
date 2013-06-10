@@ -304,7 +304,7 @@ class CompilerObject {
 				} else if (t.val().equals("false")) {
 					return new CBoolean(false, t.getTarget());
 				} else if (t.val().equals("null")) {
-					return Construct.GetNullConstruct(Construct.class, t.getTarget());
+					return null;
 				} else if (keywords.keySet().contains(t.val())) {
 					return new CKeyword(t.val(), t.getTarget(), keywords.get(t.val()));
 				} else {

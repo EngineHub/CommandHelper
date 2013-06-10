@@ -162,7 +162,7 @@ public class MObject implements Mixed, Documentation {
 				//This is it, so let's set it, (converting if necessary) then break
 				Object val;
 				Class fType = f.getType();
-				if(value.isNull()){
+				if(value == null){
 					//Easy case
 					val = null;
 				} else {
@@ -254,7 +254,7 @@ public class MObject implements Mixed, Documentation {
 					throw new Error(ex);
 				}
 				if(val == null){
-					return Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
+					return null;
 				} else {
 					Class fType = val.getClass();
 					if(fType == byte.class){
@@ -304,7 +304,7 @@ public class MObject implements Mixed, Documentation {
 		if(fields.containsKey(field)){
 			return fields.get(field);
 		} else {
-			return Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
+			return null;
 		}
 	}
 

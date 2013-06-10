@@ -42,7 +42,7 @@ public final class Globals {
         if(vars.containsKey(name)){
             return vars.get(name);
         } else {
-            return Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
+            return null;
         }
     }
     

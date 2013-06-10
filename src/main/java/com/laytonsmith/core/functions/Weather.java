@@ -138,7 +138,7 @@ public class Weather {
 			} else {
 				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
-			if (args.length == 3 && !args[2].isNull()) {
+			if (args.length == 3 && args[2] != null) {
 				w.setWeatherDuration(args[2].primitive(t).castToInt32(t));
 			}
 			return new CVoid(t);
@@ -208,7 +208,7 @@ public class Weather {
 			} else {
 				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
 			}
-			if (args.length == 3 && !args[2].isNull()) {
+			if (args.length == 3 && args[2] != null) {
 				w.setThunderDuration(args[2].primitive(t).castToInt32(t));
 			}
 			return new CVoid(t);

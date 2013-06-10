@@ -228,7 +228,7 @@ public class Sandbox {
 			if(item != null){
 				return new CInt(item.getEntityId(), t);
 			}
-            return Construct.GetNullConstruct(CInt.class, t);
+            return null;
         }
     }    
 
@@ -344,7 +344,7 @@ public class Sandbox {
                 offset = 0;
             }
             MCItemStack is = null;
-            if (args[1 - offset].isNull()) {
+            if (args[1 - offset] == null) {
                 is = m.getItemInHand();
             } else {
                 int slot = args[1 - offset].primitive(t).castToInt32(t);

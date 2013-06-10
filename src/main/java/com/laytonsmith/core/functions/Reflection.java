@@ -211,7 +211,7 @@ public class Reflection {
 					throw new ConfigRuntimeException("Unknown function: " + element, ExceptionType.FormatException, t);
 				}
 			}
-			return Construct.GetNullConstruct(CString.class, t);
+			return null;
 		}
 
 		public String formatFunctionDoc(String docs, DocField field) {

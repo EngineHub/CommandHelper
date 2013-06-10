@@ -88,7 +88,7 @@ public class Web {
 			c.set("path", cookie.getPath());
 			c.set("expiration", new CInt(cookie.getExpiration(), t), t);
 			if(!cookie.isHttpOnly() && !cookie.isSecureOnly()){
-				c.set("httpOnly", Construct.GetNullConstruct(CBoolean.class, t), t);
+				c.set("httpOnly", (Mixed)null, t);
 			} else {
 				c.set("httpOnly", new CBoolean(cookie.isHttpOnly(), t), t);
 			}
@@ -122,7 +122,7 @@ public class Web {
 				expiration = cookie.get("expiration").primitive(t).castToInt(t);
 			}
 			if(cookie.containsKey("httpOnly")){
-				if(cookie.get("expiration").isNull()){
+				if(cookie.get("expiration") == null){
 					httpOnly = null;
 				} else {
 					httpOnly = cookie.get("expiration").primitive(t).castToBoolean();
@@ -200,7 +200,7 @@ public class Web {
 				if(csettings.containsKey("useDefaultHeaders")){
 					useDefaultHeaders = csettings.get("useDefaultHeaders").primitive(t).castToBoolean();
 				}
-				if(csettings.containsKey("headers") && !(csettings.get("headers").isNull())){
+				if(csettings.containsKey("headers") && !(csettings.get("headers") == null)){
 					CArray headers = Static.getArray(csettings.get("headers"), t);
 					Map<String, List<String>> mheaders = new HashMap<String, List<String>>();
 					for(String key : headers.keySet()){
@@ -231,7 +231,7 @@ public class Web {
 						settings.getHeaders().put(key, Arrays.asList(DEFAULT_HEADERS.get(key)));
 					}
 				}
-				if(csettings.containsKey("params") && !(csettings.get("params").isNull())){
+				if(csettings.containsKey("params") && !(csettings.get("params") == null)){
 					CArray params = Static.getArray(csettings.get("params"), t);
 					Map<String, List<String>> mparams = new HashMap<String, List<String>>();
 					for(String key : params.keySet()){
@@ -248,7 +248,7 @@ public class Web {
 					}
 					settings.setComplexParameters(mparams);
 				}
-				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar").isNull())){
+				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar") == null)){
 					arrayJar = Static.getArray(csettings.get("cookiejar"), t);
 					settings.setCookieJar(getCookieJar(arrayJar, t));
 				} else {

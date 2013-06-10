@@ -36,12 +36,6 @@ public interface Mixed {
 	String val();
 	
 	/**
-	 * Returns true if the underlying object is null.
-	 * @return 
-	 */
-	boolean isNull();
-	
-	/**
 	 * Returns the type name of this object, for use in error messages
 	 * and things. For now, "fully qualified" doesn't matter, though this
 	 * will change in the future.

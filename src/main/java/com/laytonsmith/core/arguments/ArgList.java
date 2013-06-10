@@ -113,7 +113,7 @@ public class ArgList {
 	 */
 	public Long getLongWithNull(String varName, Target t){
 		CPrimitive p = getConstruct(varName).primitive(t);
-		if(p.isNull()){
+		if(p == null){
 			return null;
 		} else {
 			return p.castToInt(t);
@@ -128,7 +128,7 @@ public class ArgList {
 	 */
 	public Integer getIntegerWithNull(String varName, Target t){
 		CPrimitive p = getConstruct(varName).primitive(t);
-		if(p.isNull()){
+		if(p == null){
 			return null;
 		} else {
 			return p.castToInt32(t);
@@ -143,7 +143,7 @@ public class ArgList {
 	 */
 	public Double getDoubleWithNull(String varName, Target t){
 		CPrimitive p = getConstruct(varName).primitive(t);
-		if(p.isNull()){
+		if(p == null){
 			return null;
 		} else {
 			return p.castToDouble(t);
@@ -158,7 +158,7 @@ public class ArgList {
 	 */
 	public Float getFloatWithNull(String varName, Target t){
 		CPrimitive p = getConstruct(varName).primitive(t);
-		if(p.isNull()){
+		if(p == null){
 			return null;
 		} else {
 			return p.castToDouble32(t);
@@ -241,7 +241,7 @@ public class ArgList {
 	 */
 	public String getString(String varName, Target t){
 		CPrimitive p = getConstruct(varName).primitive(t);
-		if(p.isNull()){
+		if(p == null){
 			throw new ConfigRuntimeException("Unexpected null value for " + varName, Exceptions.ExceptionType.NullPointerException, t);
 		} else {
 			return p.castToString();
@@ -256,7 +256,7 @@ public class ArgList {
 	 */
 	public String getStringWithNull(String varName, Target t){
 		CPrimitive p = getConstruct(varName).primitive(t);
-		if(p.isNull()){
+		if(p == null){
 			return null;
 		} else {
 			return p.castToString();

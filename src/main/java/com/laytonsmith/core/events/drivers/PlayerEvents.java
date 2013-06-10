@@ -176,11 +176,11 @@ public class PlayerEvents {
             if(event instanceof MCPlayerKickEvent){
                 MCPlayerKickEvent e = (MCPlayerKickEvent) event;
                 if(key.equalsIgnoreCase("message")){
-                    e.setMessage(value.isNull()?null:value.val());
+                    e.setMessage(value == null?null:value.val());
                     return true;
                 }
                 if(key.equalsIgnoreCase("reason")){
-                    e.setReason(value.isNull()?null:value.val());
+                    e.setReason(value == null?null:value.val());
                     return true;
                 }
             }
@@ -544,7 +544,7 @@ public class PlayerEvents {
             if(event instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent pje = (MCPlayerJoinEvent)event;
                 if(key.equals("join_message") || key.equals("message")){
-                    if(value.isNull()){
+                    if(value == null){
                         pje.setJoinMessage(null);
                         return pje.getJoinMessage() == null;
                     } else {
@@ -988,7 +988,7 @@ public class PlayerEvents {
 				if(event.getKiller() instanceof MCPlayer){
 					map.put("killer", new CString(((MCPlayer)event.getKiller()).getName(), Target.UNKNOWN));
 				} else {
-					map.put("killer", Construct.GetNullConstruct(CString.class, Target.UNKNOWN));
+					map.put("killer", null);
 				}
                 return map;
             } else {
@@ -1025,11 +1025,11 @@ public class PlayerEvents {
 					return true;
 				}
                 if(key.equals("death_message")){
-                    e.setDeathMessage(value.isNull()?null:value.val());
+                    e.setDeathMessage(value == null?null:value.val());
                     return true;
                 }
                 if(key.equals("drops")){
-                    if(value.isNull()){
+                    if(value == null){
                         value = new CArray(t);
                     }
                     if(!(value instanceof CArray)){
@@ -1043,7 +1043,7 @@ public class PlayerEvents {
                     return true;
                 }
                 if(event instanceof MCPlayerDeathEvent && key.equals("death_message")){
-                    ((MCPlayerDeathEvent)event).setDeathMessage(value.isNull()?null:value.val());
+                    ((MCPlayerDeathEvent)event).setDeathMessage(value == null?null:value.val());
                     return true;
                 }
 				if (key.equals("keep_level")) {
@@ -1122,7 +1122,7 @@ public class PlayerEvents {
             if (event instanceof MCPlayerQuitEvent) {
                 MCPlayerQuitEvent e = (MCPlayerQuitEvent)event;
                 if("message".equals(key)){
-                    e.setMessage(value.isNull()?null:value.val());
+                    e.setMessage(value == null?null:value.val());
                 }
                 return true;
             }
@@ -1223,7 +1223,7 @@ public class PlayerEvents {
             if (event instanceof MCPlayerChatEvent) {
                 MCPlayerChatEvent e = (MCPlayerChatEvent)event;
                 if("message".equals(key)){
-                    e.setMessage(value.isNull()?null:value.val());
+                    e.setMessage(value == null?null:value.val());
                 }
                 if("recipients".equals(key)){
                     if(value instanceof CArray){
@@ -1715,7 +1715,7 @@ public class PlayerEvents {
 				ret.put("state", new CString(event.getState().name(), t));
 				ret.put("hook", new CInt(event.getHook().getEntityId(), t));
 				ret.put("xp", new CInt(event.getExpToDrop(), t));
-				CInt caught = Construct.GetNullConstruct(CInt.class, t);
+				CInt caught = null;
 				if (event.getCaught() instanceof MCEntity) {
 					caught = new CInt(event.getCaught().getEntityId(), t);
 				}

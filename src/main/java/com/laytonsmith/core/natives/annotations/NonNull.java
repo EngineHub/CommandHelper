@@ -24,7 +24,7 @@ public class NonNull extends MAnnotation implements CompilerAwareAnnotation {
 	}
 
 	public void validateParameter(Mixed parameter, Target t) throws ConfigRuntimeException {
-		if(parameter.isNull()){
+		if(parameter == null){
 			throw new ConfigRuntimeException("NullPointerException: The parameter cannot be null", Exceptions.ExceptionType.NullPointerException, t);
 		}
 	}

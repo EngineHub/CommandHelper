@@ -183,7 +183,7 @@ public class Persistance {
 					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 				}
 				if (obj == null) {
-					return Construct.GetNullConstruct(Mixed.class, t);
+					return null;
 				}
 				o = Construct.json_decode(obj.toString(), t);
 			} catch (MarshalException ex) {
@@ -192,7 +192,7 @@ public class Persistance {
 			try {
 				return (Construct) o;
 			} catch (ClassCastException e) {
-				return Construct.GetNullConstruct(Mixed.class, t);
+				return null;
 			}
 		}
 

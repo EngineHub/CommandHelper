@@ -1539,7 +1539,7 @@ public class DataHandling {
 		}
 
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return new CBoolean(args[0].isNull(), t);
+			return new CBoolean(args[0] == null, t);
 		}
 
 		@Override

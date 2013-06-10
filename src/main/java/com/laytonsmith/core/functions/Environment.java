@@ -856,7 +856,7 @@ public class Environment {
 				safe = args[2].primitive(t).castToBoolean();
 			}
 			if (args.length >= 2) {
-				if (!(args[1].isNull())) {
+				if (!(args[1] == null)) {
 					size = args[1].primitive(t).castToInt32(t);
 				}
 			}

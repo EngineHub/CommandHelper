@@ -451,7 +451,7 @@ public class BlockEvents {
                     return false;
                 }
 
-                if (value.isNull()) {
+                if (value == null) {
                     sce.setLine(index, "");
                     return "".equals(sce.getLine(index).toString());
                 } else {

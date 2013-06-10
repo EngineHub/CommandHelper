@@ -412,7 +412,7 @@ public class EntityManagement {
 			try {
 				ent = Static.getEntity(id, t);
 			} catch (ConfigRuntimeException cre) {
-				return Construct.GetNullConstruct(CString.class, t);
+				return null;
 			}
 			return new CString(ent.getType().name(), t);
 		}
@@ -514,7 +514,7 @@ public class EntityManagement {
 			int id = args[0].primitive(t).castToInt32(t);
 			MCEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
-				return Construct.GetNullConstruct(CInt.class, t);
+				return null;
 			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				return new CInt(mob.getAge(), t);
@@ -889,7 +889,7 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			if (le.getTarget(t) == null) {
-				return Construct.GetNullConstruct(CInt.class, t);
+				return null;
 			} else {
 				return new CInt(le.getTarget(t).getEntityId(), t);
 			}
@@ -926,7 +926,7 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t);
 			MCLivingEntity target = null;
-			if (!args[1].isNull()) {
+			if (args[1] != null) {
 				target = Static.getLivingEntity(args[1].primitive(t).castToInt32(t), t);
 			}
 			le.setTarget(target, t);
@@ -1001,7 +1001,7 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntityEquipment ee = Static.getLivingEntity(args[0].primitive(t).castToInt32(t), t).getEquipment();
 			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
-			if (args[1].isNull()) {
+			if (args[1] == null) {
 				ee.clearEquipment();
 				return new CVoid(t);
 			} else if (args[1] instanceof CArray) {
@@ -1374,12 +1374,12 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity horse, rider;
 			boolean success;
-			if (args[0].isNull()) {
+			if (args[0] == null) {
 				horse = null;
 			} else {
 				horse = Static.getEntity(args[0].primitive(t).castToInt32(t), t);
 			}
-			if (args[1].isNull()) {
+			if (args[1] == null) {
 				rider = null;
 			} else {
 				rider = Static.getEntity(args[1].primitive(t).castToInt32(t), t);
@@ -1459,7 +1459,7 @@ public class EntityManagement {
 			if (ent.isInsideVehicle()) {
 				return new CInt(ent.getVehicle().getEntityId(), t);
 			}
-			return Construct.GetNullConstruct(CInt.class, t);
+			return null;
 		}
 
 		public String getName() {

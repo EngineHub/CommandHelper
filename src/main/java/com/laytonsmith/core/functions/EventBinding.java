@@ -114,20 +114,20 @@ public class EventBinding {
 			ParseTree tree = nodes[nodes.length - 1];
 
 			//Check to see if our arguments are correct
-			if (!(options.isNull() || options instanceof CArray)) {
+			if (!(options == null || options instanceof CArray)) {
 				throw new ConfigRuntimeException("The options must be an array or null", ExceptionType.CastException, t);
 			}
-			if (!(prefilter.isNull() || prefilter instanceof CArray)) {
+			if (!(prefilter == null || prefilter instanceof CArray)) {
 				throw new ConfigRuntimeException("The prefilters must be an array or null", ExceptionType.CastException, t);
 			}
 			if (!(event_obj instanceof IVariable)) {
 				throw new ConfigRuntimeException("The event object must be an IVariable", ExceptionType.CastException, t);
 			}
 			CString id;
-			if (options.isNull()) {
+			if (options == null) {
 				options = null;
 			}
-			if (prefilter.isNull()) {
+			if (prefilter == null) {
 				prefilter = null;
 			}
 			try {

@@ -140,7 +140,7 @@ public class ObjectGenerator {
      */
     public Construct item(MCItemStack is, Target t) {
         if (is == null || is.getAmount() == 0) {
-            return Construct.GetNullConstruct(Construct.class, t);
+            return null;
         }
         int type = is.getTypeId();
         
@@ -180,7 +180,7 @@ public class ObjectGenerator {
      * @return
      */
     public MCItemStack item(Mixed i, Target t) {
-        if (i.isNull()) {
+        if (i == null) {
             return EmptyItem();
         }
         if (!(i instanceof CArray)) {
@@ -297,14 +297,14 @@ public class ObjectGenerator {
 		Construct ret, display, lore, color, title, author, pages, owner, stored;
 		CArray enchants, effects;
 		if (!is.hasItemMeta()) {
-			ret = Construct.GetNullConstruct(Construct.class, t);
+			ret = null;
 		} else {
 			CArray ma = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
 			if (meta.hasDisplayName()) {
 				display = new CString(meta.getDisplayName(), t);
 			} else {
-				display = Construct.GetNullConstruct(Construct.class, t);
+				display = null;
 			}
 			if (meta.hasLore()) {
 				lore = new CArray(t);
@@ -312,7 +312,7 @@ public class ObjectGenerator {
 					((CArray) lore).push(new CString(l, t));
 				}
 			} else {
-				lore = Construct.GetNullConstruct(Construct.class, t);
+				lore = null;
 			}
 			enchants = enchants(meta.getEnchants(), t);
 			ma.set("display", display, t);
@@ -326,12 +326,12 @@ public class ObjectGenerator {
 				if (((MCBookMeta) meta).hasTitle()) {
 					title = new CString(((MCBookMeta) meta).getTitle(), t);
 				} else {
-					title = Construct.GetNullConstruct(Construct.class, t);
+					title = null;
 				}
 				if (((MCBookMeta) meta).hasAuthor()) {
 					author = new CString(((MCBookMeta) meta).getAuthor(), t);
 				} else {
-					author = Construct.GetNullConstruct(Construct.class, t);
+					author = null;
 				}
 				if (((MCBookMeta) meta).hasPages()) {
 					pages = new CArray(t);
@@ -339,7 +339,7 @@ public class ObjectGenerator {
 						((CArray) pages).push(new CString(p, t));
 					}
 				} else {
-					pages = Construct.GetNullConstruct(Construct.class, t);
+					pages = null;
 				}
 				ma.set("title", title, t);
 				ma.set("author", author, t);
@@ -349,7 +349,7 @@ public class ObjectGenerator {
 				if (((MCSkullMeta) meta).hasOwner()) {
 					owner = new CString(((MCSkullMeta) meta).getOwner(), t);
 				} else {
-					owner = Construct.GetNullConstruct(Construct.class, t);
+					owner = null;
 				}
 				ma.set("owner", owner, t);
 			}
@@ -357,7 +357,7 @@ public class ObjectGenerator {
 				if (((MCEnchantmentStorageMeta) meta).hasStoredEnchants()) {
 					stored = enchants(((MCEnchantmentStorageMeta) meta).getStoredEnchants(), t);
 				} else {
-					stored = Construct.GetNullConstruct(Construct.class, t);
+					stored = null;
 				}
 				ma.set("stored", stored, t);
 			}
@@ -374,7 +374,7 @@ public class ObjectGenerator {
 	}
 	
 	public MCItemMeta itemMeta(Mixed c, int i, Target t) {
-		if (c == null || c.isNull()) {
+		if (c == null) {
 			return null;
 		}
 		MCItemMeta meta = Static.getServer().getItemFactory().getItemMeta(StaticLayer.GetConvertor().getMaterial(i));
@@ -384,13 +384,13 @@ public class ObjectGenerator {
 			try {
 				if (ma.containsKey("display")) {
 					Mixed dni = ma.get("display");
-					if (!dni.isNull()) {
+					if (dni != null) {
 						meta.setDisplayName(dni.val());
 					}
 				}
 				if (ma.containsKey("lore")) {
 					Mixed li = ma.get("lore");
-					if (li.isNull()) {
+					if (li == null) {
 						//do nothing
 					} else if (li instanceof CArray) {
 						CArray la = (CArray) li;
@@ -416,7 +416,7 @@ public class ObjectGenerator {
 				if (meta instanceof MCLeatherArmorMeta) {
 					if (ma.containsKey("color")) {
 						Mixed ci = ma.get("color");
-						if (ci.isNull()) {
+						if (ci == null) {
 							//nothing
 						} else if (ci instanceof CArray) {
 							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t));
@@ -428,19 +428,19 @@ public class ObjectGenerator {
 				if (meta instanceof MCBookMeta) {
 					if (ma.containsKey("title")) {
 						Mixed title = ma.get("title");
-						if (!title.isNull()) {
+						if (title != null) {
 							((MCBookMeta) meta).setTitle(title.val());
 						}
 					}
 					if (ma.containsKey("author")) {
 						Mixed author = ma.get("author");
-						if (!author.isNull()) {
+						if (author != null) {
 							((MCBookMeta) meta).setAuthor(author.val());
 						}
 					}
 					if (ma.containsKey("pages")) {
 						Mixed pages = ma.get("pages");
-						if (pages.isNull()) {
+						if (pages == null) {
 							//nothing
 						} else if (pages instanceof CArray) {
 							CArray pa = (CArray) pages;
@@ -457,7 +457,7 @@ public class ObjectGenerator {
 				if (meta instanceof MCSkullMeta) {
 					if (ma.containsKey("owner")) {
 						Mixed owner = ma.get("owner");
-						if (!owner.isNull()) {
+						if (owner != null) {
 							((MCSkullMeta) meta).setOwner(owner.val());
 						}
 					}
@@ -465,7 +465,7 @@ public class ObjectGenerator {
 				if (meta instanceof MCEnchantmentStorageMeta) {
 					if (ma.containsKey("stored")) {
 						Mixed stored = ma.get("stored");
-						if (stored == null || stored.isNull()) {
+						if (stored == null) {
 							//Still doing nothing
 						} else if (stored instanceof CArray) {
 							for (Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) stored, t).entrySet()) {

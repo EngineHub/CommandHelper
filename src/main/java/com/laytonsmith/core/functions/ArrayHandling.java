@@ -1569,7 +1569,7 @@ public class ArrayHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = (CArray) new array_indexes().exec(t, environment, args);
 			if (ca.isEmpty()) {
-				return Construct.GetNullConstruct(Construct.class, t);
+				return null;
 			} else {
 				return ca.get(0);
 			}
@@ -1775,16 +1775,16 @@ public class ArrayHandling {
 			if(array.inAssociativeMode()){
 				return array.doClone();
 			} else {
-				List<Construct> asList = array.asList();
+				List<Mixed> asList = array.asList();
 				CArray newArray = new CArray(t);
-				Set<Construct> set = new LinkedComparatorSet<Construct>(asList, new LinkedComparatorSet.EqualsComparator<Construct>() {
+				Set<Mixed> set = new LinkedComparatorSet<Mixed>(asList, new LinkedComparatorSet.EqualsComparator<Mixed>() {
 
-					public boolean checkIfEquals(Construct item1, Construct item2) {
+					public boolean checkIfEquals(Mixed item1, Mixed item2) {
 						return (fCompareTypes && sequals.exec(t, environment, item1, item2).castToBoolean())
 								|| (!fCompareTypes && equals.exec(t, environment, item1, item2).castToBoolean());
 					}
 				});
-				for(Construct c : set){
+				for(Mixed c : set){
 					newArray.push(c);
 				}
 				return newArray;

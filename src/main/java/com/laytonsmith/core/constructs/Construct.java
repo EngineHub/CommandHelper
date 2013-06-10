@@ -24,14 +24,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 /**
- *
- * @author layton
+ * 
  */
 public abstract class Construct implements Comparable<Construct>, Mixed{
 
     private final Object value;
     private final Target target;
-	private boolean isNull = false;
     
     public Target getTarget(){
         return target;
@@ -42,14 +40,6 @@ public abstract class Construct implements Comparable<Construct>, Mixed{
         this.value = value;
         this.target = t;
     }
-	
-	/**
-	 * Returns true if the underlying value is null.
-	 * @return 
-	 */
-	public final boolean isNull(){
-		return isNull;
-	}
 
     /**
      * Returns the standard string representation of this Construct.
@@ -138,7 +128,7 @@ public abstract class Construct implements Comparable<Construct>, Mixed{
             return ((CDouble) c).castToCDouble(t);
         } else if (c instanceof CBoolean) {
             return ((CBoolean) c).castToBoolean();
-        } else if (c.isNull()) {
+        } else if (c == null) {
             return null;
         } else if (c instanceof CArray) {
             CArray ca = (CArray) c;
@@ -166,7 +156,7 @@ public abstract class Construct implements Comparable<Construct>, Mixed{
      */
     public static Construct json_decode(String s, Target t) throws MarshalException {
 		if(s == null){
-			return GetNullConstruct(Construct.class, t);
+			return null;
 		}
         if (s.startsWith("{")) {
             //Object
@@ -196,7 +186,7 @@ public abstract class Construct implements Comparable<Construct>, Mixed{
             JSONArray array = (JSONArray) JSONValue.parse(s);
 			if(array == null){
 				//It's a null value
-				return GetNullConstruct(Construct.class, t);
+				return null;
 			}
             Object o = array.get(0);
             return convertJSON(o, t);
@@ -225,7 +215,7 @@ public abstract class Construct implements Comparable<Construct>, Mixed{
             }
             return ca;
         } else if (o == null) {
-            return GetNullConstruct(Construct.class, t);
+            return null;
         } else if(o instanceof java.util.Map){
             CArray ca = CArray.GetAssociativeArray(t);
             for(Object key : ((java.util.Map)o).keySet()){
@@ -260,40 +250,40 @@ public abstract class Construct implements Comparable<Construct>, Mixed{
 	 * @param t
 	 * @return 
 	 */
-	public static <T extends Mixed> T GetNullConstruct(Class<T> clazz, final Target t){
-		//TODO: Change this return type to Mixed once the exec function
-		//has been updated
-		if(clazz.isInterface()){
-			//Proxy it
-			return (T)Proxy.newProxyInstance(Construct.class.getClassLoader(), new Class[]{clazz}, new InvocationHandler() {
-
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					if("isNull".equals(method.getName())){
-						return true;
-					} else {
-						return method.invoke(proxy, args);
-					}
-				}
-			});
-		} else {
-			//Create a new subclass for it, and then set the hidden property
-			if(Construct.class.isAssignableFrom(clazz)){
-				try{
-					T obj = ReflectionUtils.newInstance(clazz, new Class[]{Object.class, Target.class}, new Object[]{null, t});
-					((Construct)obj).isNull = true;
-					return obj;
-				} catch(ReflectionUtils.ReflectionException e){
-					throw new NonScriptError("Could not construct a subclass for " + clazz + " for a null reference, because there"
-							+ "was no constructor that matched Object, Target, or the class was final.", e);
-				}
-			} else if(MObject.class.isAssignableFrom(clazz)){
-				//TODO:
-				throw new UnsupportedOperationException("TODO");
-			} else {
-				throw new NonScriptError("Unsupported type was passed to GetNullConstruct: " + clazz);
-			}
-		}
-	}
+//	public static <T extends Mixed> T null{
+//		//TODO: Change this return type to Mixed once the exec function
+//		//has been updated
+//		if(clazz.isInterface()){
+//			//Proxy it
+//			return (T)Proxy.newProxyInstance(Construct.class.getClassLoader(), new Class[]{clazz}, new InvocationHandler() {
+//
+//				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+//					if("isNull".equals(method.getName())){
+//						return true;
+//					} else {
+//						return method.invoke(proxy, args);
+//					}
+//				}
+//			});
+//		} else {
+//			//Create a new subclass for it, and then set the hidden property
+//			if(Construct.class.isAssignableFrom(clazz)){
+//				try{
+//					T obj = ReflectionUtils.newInstance(clazz, new Class[]{Object.class, Target.class}, new Object[]{null, t});
+//					((Construct)obj).isNull = true;
+//					return obj;
+//				} catch(ReflectionUtils.ReflectionException e){
+//					throw new NonScriptError("Could not construct a subclass for " + clazz + " for a null reference, because there"
+//							+ "was no constructor that matched Object, Target, or the class was final.", e);
+//				}
+//			} else if(MObject.class.isAssignableFrom(clazz)){
+//				//TODO:
+//				throw new UnsupportedOperationException("TODO");
+//			} else {
+//				throw new NonScriptError("Unsupported type was passed to GetNullConstruct: " + clazz);
+//			}
+//		}
+//	}
 
 	public boolean isImmutable() {
 		Class<?> c = this.getClass();
@@ -334,7 +324,7 @@ public abstract class Construct implements Comparable<Construct>, Mixed{
      */
     private static Construct GetConstruct(Object o) throws ClassCastException{
         if(o == null){
-            return GetNullConstruct(Construct.class, Target.UNKNOWN);
+            return null;
         } else if(o instanceof CharSequence){
             return new CString((CharSequence)o, Target.UNKNOWN);
         } else if(o instanceof Number){
@@ -385,7 +375,7 @@ public abstract class Construct implements Comparable<Construct>, Mixed{
      * @throws ClassCastException 
      */
     public static Object GetPOJO(Mixed c) throws ClassCastException{
-        if(c.isNull()){
+        if(c == null){
             return null;
         } else if(c instanceof CString){
             return c.val();

@@ -543,7 +543,7 @@ public class Echoes {
 		}
 
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0].isNull()) {
+			if (args[0] == null) {
 				throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, t);
 			}
 			final MCServer server = Static.getServer();

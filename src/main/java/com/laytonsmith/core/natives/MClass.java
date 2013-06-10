@@ -29,7 +29,7 @@ public class MClass implements Mixed {
 	}
 
 	public CPrimitive primitive(Target t) throws ConfigRuntimeException {
-		throw new ConfigRuntimeException("Cannot cast " + typeName() + " to a primitive", t);
+		throw ConfigRuntimeException.CreateUncatchableException("Cannot cast " + typeName() + " to a primitive", t);
 	}
 
 	public boolean isImmutable() {

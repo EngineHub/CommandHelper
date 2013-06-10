@@ -695,7 +695,7 @@ public class World {
 				w = l.getWorld();
 			}
 			
-			if (args.length == 1 && !args[0].isNull()) {
+			if (args.length == 1 && args[0] != null) {
 				if (args[0] instanceof CArray) {
 					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				} else {

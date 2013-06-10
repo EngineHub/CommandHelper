@@ -332,7 +332,7 @@ public class Argument implements Documentation {
 	 * @return 
 	 */
 	public Argument setOptionalDefaultNull(){
-		return this.setOptionalDefault(Construct.GetNullConstruct(Construct.class, Target.UNKNOWN));
+		return this.setOptionalDefault((Mixed)null);
 	}
 	
 	/**

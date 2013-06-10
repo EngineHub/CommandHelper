@@ -31,7 +31,13 @@ import java.util.List;
  */
 public class ConfigRuntimeException extends RuntimeException {
 
-    List<StackTraceElement> stackTraceTrail = new ArrayList<StackTraceElement>();
+    private List<StackTraceElement> stackTraceTrail = new ArrayList<StackTraceElement>();
+	private ExceptionType ex;
+    private int line_num = -1;
+    private File file;
+    private int column = -1;
+    private Environment env;
+    private Target target;
 
     /**
      * Creates a new instance of <code>ConfigRuntimeException</code> without detail message.
@@ -118,13 +124,13 @@ public class ConfigRuntimeException extends RuntimeException {
 		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null){
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, Target.UNKNOWN);
-			Mixed ret = Construct.GetNullConstruct(Construct.class, Target.UNKNOWN);
+			Mixed ret = null;
 			try{
 				c.execute(new Construct[]{ex});
 			} catch(FunctionReturnException retException){
 				ret = retException.getReturn();
 			}
-			if(ret.isNull()){
+			if(ret == null){
 				reaction = Reaction.REPORT;
 			} else {
 				if(ret.primitive(Target.UNKNOWN).castToBoolean()){
@@ -332,13 +338,6 @@ public class ConfigRuntimeException extends RuntimeException {
         }
     }
     
-    
-    private ExceptionType ex;
-    private int line_num = -1;
-    private File file;
-    private int column = -1;
-    private Environment env;
-    private Target target;
     /**
      * Creates a new ConfigRuntimeException. If ex is not null, this exception can be caught
      * by user level code. Otherwise, it will be ignored by the try() function.

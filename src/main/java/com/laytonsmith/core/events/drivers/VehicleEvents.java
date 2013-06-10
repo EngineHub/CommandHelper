@@ -206,8 +206,8 @@ public class VehicleEvents {
 				ret.put("type", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CInt(e.getVehicle().getEntityId(), t));
 				ret.put("collisiontype", new CString(e.getCollisionType().name(), t));
-				CArray block = Construct.GetNullConstruct(CArray.class, t);
-				CInt entity = Construct.GetNullConstruct(CInt.class, t);
+				CArray block = null;
+				CInt entity = null;
 				boolean collide = true;
 				boolean pickup = false;
 				switch (e.getCollisionType()) {

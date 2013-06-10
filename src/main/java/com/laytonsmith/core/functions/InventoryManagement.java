@@ -96,7 +96,7 @@ public class InventoryManagement {
                 all = true;
                 m = Static.GetPlayer(args[0], t);
             } else if (args.length == 2) {
-                if (args[1].isNull()) {
+                if (args[1] == null) {
                     index = null;
                 } else {
                     index = args[1].primitive(t).castToInt32(t);
@@ -748,7 +748,7 @@ public class InventoryManagement {
 			if (m != null) {
 				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(Construct.GetNullConstruct(CArray.class, t), is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(null, is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = p.getInventory().addItem(is);

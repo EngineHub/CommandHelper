@@ -40,7 +40,7 @@ public class FormatString extends MAnnotation implements CompilerAwareAnnotation
 	}
 
 	public void validateParameter(Mixed parameter, Target t) throws ConfigRuntimeException {
-		if(parameter.isNull()){
+		if(parameter == null){
 			return;
 		}
 		String s = parameter.val();

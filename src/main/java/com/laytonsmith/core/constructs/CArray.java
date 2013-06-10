@@ -487,7 +487,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed>, O
             throw new ConfigRuntimeException("Arrays cannot be used as the key in an associative array", ExceptionType.CastException, c.getTarget());
         } else if(c instanceof CString || c instanceof CInt){
             return c.val();
-        } else if(c.isNull()){
+        } else if(c == null){
             return "";
         } else if(c instanceof CBoolean){
             if(((CBoolean)c).castToBoolean()){
@@ -751,14 +751,14 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed>, O
                         throw new ConfigRuntimeException("Cannot sort an array of arrays.", ExceptionType.CastException, CArray.this.getTarget());
                     }
                     if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt || 
-                            c instanceof CDouble || c.isNull())){
+                            c instanceof CDouble || c == null)){
                         throw ConfigRuntimeException.CreateUncatchableException("Unsupported type being sorted: " + c.getClass().getSimpleName(), CArray.this.getTarget());
                     }
                 }
-                if(o1.isNull() || o2.isNull()){
-                    if(o1.isNull() && o2.isNull()){
+                if(o1 == null || o2 == null){
+                    if(o1 == null && o2 == null){
                         return 0;
-                    } else if(o1.isNull()){
+                    } else if(o1 == null){
                         return "".compareTo(o2.val());
                     } else {
                         return o1.val().compareTo("");

@@ -77,7 +77,7 @@ public class PlayerManagement {
 			// for player entities in CraftBukkit, this is the player's name, and
 			// for the console it's "CONSOLE". For CommandBlocks it's "@" unless it has been renamed.
 			if (p == null) {
-				return Construct.GetNullConstruct(CString.class, t);
+				return null;
 			} else {
 				String name = p.getName();
 				if (p instanceof MCConsoleCommandSender || "CONSOLE".equals(name)) {
@@ -502,7 +502,7 @@ public class PlayerManagement {
 				}
 			} else if (args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				if(args[1] instanceof CArray && !args[1].isNull()) {
+				if(args[1] instanceof CArray && args[1] != null) {
 					CArray ta = (CArray) args[1];
 					trans = new HashSet<Short>();
 					for (int i=0; i < ta.size(); i++) {
@@ -843,7 +843,7 @@ public class PlayerManagement {
 					b = null;
 				}
 				if (b == null) {
-					retVals.add(Construct.GetNullConstruct(Mixed.class, t));
+					retVals.add(null);
 				} else {
 					retVals.add(new CArray(t, new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
 				}
@@ -4019,7 +4019,7 @@ public class PlayerManagement {
 			try {
 				w = loc.getWorld();
 			} catch (Exception e) {
-				return Construct.GetNullConstruct(MLocation.class, t);
+				return null;
 			}
 			MLocation l = new MLocation(loc);
 			return l.deconstruct(t);
@@ -4217,7 +4217,7 @@ public class PlayerManagement {
 
 			Static.AssertPlayerNonNull(p, t);
 			if (p.isInsideVehicle() == false) {
-				return Construct.GetNullConstruct(CInt.class, t);
+				return null;
 			}
 
 			return new CInt(p.getVehicle().getEntityId(), t);

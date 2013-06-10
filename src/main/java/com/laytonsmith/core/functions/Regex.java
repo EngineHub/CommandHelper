@@ -93,7 +93,7 @@ public class Regex {
 
                 for(int i = 1; i <= m.groupCount(); i++){
                     if(m.group(i) == null){
-                        ret.push(Construct.GetNullConstruct(CArray.class, t));
+                        ret.push(null);
                     } else {
                         ret.push(Static.resolveConstruct(m.group(i), t));
                     }

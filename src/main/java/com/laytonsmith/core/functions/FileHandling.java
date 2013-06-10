@@ -168,13 +168,13 @@ public class FileHandling {
 					}
 					final CString cret;
 					if(returnString == null){
-						cret = Construct.GetNullConstruct(CString.class, t);
+						cret = null;
 					} else {
 						cret = new CString(returnString, t);
 					}
 					final CArray cex;
 					if(exception == null){
-						cex = Construct.GetNullConstruct(CArray.class, t);
+						cex = null;
 					} else {
 						cex = ObjectGenerator.GetGenerator().exception(exception, t);
 					}

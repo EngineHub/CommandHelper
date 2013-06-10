@@ -161,7 +161,7 @@ public class ItemMeta {
 				meta = args[1];
 			}
 			Static.AssertPlayerNonNull(p, t);
-			if (slot.isNull()) {
+			if (slot == null) {
 				is = p.getItemInHand();
 			} else {
 				is = p.getItemAt(slot.primitive(t).castToInt32(t));

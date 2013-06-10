@@ -222,7 +222,7 @@ public final class MethodScriptCompiler {
 		if (root.numberOfChildren() == 1) {
 			returnable = retc;
 		}
-		String ret = retc.isNull() ? "null" : retc.val();
+		String ret = retc == null ? "null" : retc.val();
 		if (ret != null && !ret.trim().isEmpty()) {
 			b.append(ret).append(" ");
 		}

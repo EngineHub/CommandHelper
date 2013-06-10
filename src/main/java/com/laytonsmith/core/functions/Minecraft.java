@@ -117,7 +117,7 @@ public class Minecraft {
 					}
 					return new CString(split[0] + ":" + split[1], t);
 				}
-				return Construct.GetNullConstruct(CInt.class, t);
+				return null;
 			}
 		}
 
@@ -233,7 +233,7 @@ public class Minecraft {
 				try {
 					return new CString(StaticLayer.LookupMaterialName(i), t);
 				} catch (NullPointerException e) {
-					return Construct.GetNullConstruct(CString.class, t);
+					return null;
 				}
 			}
 		}
@@ -451,7 +451,7 @@ public class Minecraft {
 			String player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getName();
 			Mixed entityID = null;
 			if (args.length == 2) {
-				if (args[0].isNull()) {
+				if (args[0] == null) {
 					player = null;
 				} else {
 					player = args[0].val();
@@ -524,13 +524,13 @@ public class Minecraft {
 			int id = args[0].primitive(t).castToInt32(t);
 			MCLivingEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
-				return Construct.GetNullConstruct(CString.class, t);
+				return null;
 			} else if (e instanceof MCTameable) {
 				MCAnimalTamer at = ((MCTameable) e).getOwner();
 				if (null != at) {
 					return new CString(at.getName(), t);
 				} else {
-					return Construct.GetNullConstruct(CString.class, t);
+					return null;
 				}
 			} else {
 				throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);
