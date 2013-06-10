@@ -192,6 +192,56 @@ public class CHLog {
     public void Log(Tags module, String message, Target t){
         Log(module, LogLevel.ERROR, message, t);
     }
+	
+	/**
+	 * Logs the given message at the ERROR level.
+	 * @param modules
+	 * @param message
+	 * @param t 
+	 */
+	public void e(Tags modules, String message, Target t){
+		Log(modules, LogLevel.ERROR, message, t);
+	}
+	
+	/**
+	 * Logs the given message at the WARNING level.
+	 * @param modules
+	 * @param message
+	 * @param t 
+	 */
+	public void w(Tags modules, String message, Target t){
+		Log(modules, LogLevel.WARNING, message, t);
+	}
+	
+	/**
+	 * Logs the given message at the INFO level.
+	 * @param modules
+	 * @param message
+	 * @param t 
+	 */
+	public void i(Tags modules, String message, Target t){
+		Log(modules, LogLevel.INFO, message, t);
+	}
+	
+	/**
+	 * Logs the given message at the DEBUG level.
+	 * @param modules
+	 * @param message
+	 * @param t 
+	 */
+	public void d(Tags modules, String message, Target t){
+		Log(modules, LogLevel.DEBUG, message, t);
+	}
+	
+	/**
+	 * Logs the given message at the VERBOSE level.
+	 * @param modules
+	 * @param message
+	 * @param t 
+	 */
+	public void v(Tags modules, String message, Target t){
+		Log(modules, LogLevel.VERBOSE, message, t);
+	}
     
     /**
      * Logs the given message at the specified level.

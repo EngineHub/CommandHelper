@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.LinkedComparatorSet;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -1355,7 +1356,7 @@ public class ArrayHandling {
 		public array_sort_async() {
 			if (!initialized) {
 				queue = new RunnableQueue("MethodScript-arraySortAsync");
-				queue.invokeLater(new Runnable() {
+				queue.invokeLater(null, new Runnable() {
 					public void run() {
 						//This warms up the queue. Apparently.
 					}
@@ -1764,35 +1765,27 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			boolean compareTypes = true;
 			if(args.length == 2){
-				compareTypes = args[1].primitive(t).castToBoolean();
-			}		
+				compareTypes = Static.getBoolean(args[1]);
+			}
+			final boolean fCompareTypes = compareTypes;
 			if(array.inAssociativeMode()){
-				return array.doClone();
+				return array.clone();
 			} else {
+				List<Construct> asList = array.asList();
 				CArray newArray = new CArray(t);
-				//These are the values to skip in future iterations
-				Set<Integer> skip = new HashSet<Integer>();
-				for(int i = 0; i < array.size(); i++){
-					boolean foundMatch = false;
-					Mixed item1 = array.get(i);
-					for(int j = i + 1; j < array.size(); j++){
-						if(skip.contains(j)){
-							continue;
-						}
-						Mixed item2 = array.get(j);
-						if((compareTypes && sequals.exec(t, environment, item1, item2).castToBoolean())
-								|| (!compareTypes && equals.exec(t, environment, item1, item2).castToBoolean())){
-							skip.add(j);
-							if(!foundMatch){
-								newArray.push(item1);
-							}
-							foundMatch = true;
-						}
+				Set<Construct> set = new LinkedComparatorSet<Construct>(asList, new LinkedComparatorSet.EqualsComparator<Construct>() {
+
+					public boolean checkIfEquals(Construct item1, Construct item2) {
+						return (fCompareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2)))
+								|| (!fCompareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)));
 					}
+				});
+				for(Construct c : set){
+					newArray.push(c);
 				}
 				return newArray;
 			}

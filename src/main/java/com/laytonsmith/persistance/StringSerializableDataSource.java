@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
@@ -33,17 +34,17 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	 *
 	 * @throws IOException
 	 */
-	protected void writeData(String data) throws IOException, ReadOnlyException, DataSourceException {
+	protected void writeData(DaemonManager dm, String data) throws IOException, ReadOnlyException, DataSourceException {
 		if (modifiers.contains(DataSourceModifier.READONLY)) {
 			throw new ReadOnlyException();
 		}
-		getConnectionMixin().writeData(data);
+		getConnectionMixin().writeData(dm, data);
 	}
 
 	@Override
-	protected void clearKey0(String[] key) throws DataSourceException, ReadOnlyException, IOException {
+	protected void clearKey0(DaemonManager dm, String[] key) throws DataSourceException, ReadOnlyException, IOException {
 		model.clearKey(key);
-		writeData(serializeModel());
+		writeData(dm, serializeModel());
 	}
 
 	public void populate() throws DataSourceException {
@@ -64,14 +65,15 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 		return model.get(key);
 	}
 
-	protected final boolean set0(String[] key, String value) throws ReadOnlyException, IOException, DataSourceException {
+	@Override
+	protected final boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, IOException, DataSourceException {
 		String old = get(key, false);
 		if ((old == null && value == null) || (old != null && old.equals(value))) {
 			return false;
 		}
 		model.set(key, value);
 		//We need to output the model now
-		writeData(serializeModel());
+		writeData(dm, serializeModel());
 		return true;
 	}
 

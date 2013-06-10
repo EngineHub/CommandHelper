@@ -324,6 +324,8 @@
 383_61=Blaze Spawn Egg
 383_62=Magma Cube Spawn Egg
 383_63=Enderdragon Spawn Egg
+383_65=Bat Spawn Egg
+383_66=Witch Spawn Egg
 383_90=Pig Spawn Egg
 383_91=Sheep Spawn Egg
 383_92=Cow Spawn Egg

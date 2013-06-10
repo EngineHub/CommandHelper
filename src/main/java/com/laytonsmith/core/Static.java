@@ -54,6 +54,26 @@ public final class Static {
     
     private static Map<String, String> hostCache = new HashMap<String, String>();
 
+	private static final String consoleName = "~console";
+	
+	private static final String blockPrefix = "#"; // Chosen over @ because that does special things when used by the block
+	
+	public static CArray getArray(Construct construct, Target t) {
+		if(construct instanceof CArray){
+			return ((CArray)construct);
+		} else {
+			throw new ConfigRuntimeException("Expecting array, but received " + construct.val(), ExceptionType.CastException, t);
+		}
+	}
+	
+	public static <T extends Construct> T getObject(Construct construct, Target t, String expectedClassName, Class<T> clazz){
+		if(clazz.isAssignableFrom(construct.getClass())){
+			return (T)construct;
+		} else {
+			throw new ConfigRuntimeException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", ExceptionType.CastException, t);
+		}
+	}
+
 	public static CArray getArray(Mixed c, Target t){
 		if(c instanceof CArray){
 			return (CArray)c;
@@ -259,13 +279,15 @@ public final class Static {
 	 * @param msg
 	 */
 	public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
-		String line = msg;
-		if (m instanceof MCPlayer) {
-			MCPlayer p = (MCPlayer) m;
-			if (p == null) {
-				throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, t);
+		if (m != null) {
+			if (m instanceof MCPlayer) {
+				MCPlayer p = (MCPlayer) m;
+				if (!p.isOnline()) {
+					throw new ConfigRuntimeException("The player " + p.getName() + " is not online",
+							ExceptionType.PlayerOfflineException, t);
+				}
 			}
-			p.sendMessage(line);
+			m.sendMessage(msg);
 		} else {
 			msg = Static.MCToANSIColors(msg);
 			if (msg.matches("(?sm).*\033.*")) {
@@ -290,7 +312,22 @@ public final class Static {
 		}
 	}
 
-    
+	/**
+	 * Returns the name set aside to identify console via string<br>
+	 * This is done here so that if it ever changes, it will update in all functions/docs
+	 * @return
+	 */
+	public static String getConsoleName() {
+		return consoleName;
+	}
+
+	/**
+	 * Returns the string set aside to prefix block names to distinguish them from players
+	 * @return
+	 */
+	public static String getBlockPrefix() {
+		return blockPrefix;
+	}
 
     /**
      * Returns whether or not this location appears to be a url.

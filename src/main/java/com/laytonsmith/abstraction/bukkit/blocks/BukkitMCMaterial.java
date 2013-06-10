@@ -27,5 +27,40 @@ public class BukkitMCMaterial implements MCMaterial {
     public int getMaxStackSize() {
         return m.getMaxStackSize();
     }
-    
+
+	public boolean hasGravity() {
+		return m.hasGravity();
+	}
+
+	public boolean isBlock() {
+		return m.isBlock();
+	}
+
+	public boolean isBurnable() {
+		return m.isBurnable();
+	}
+
+	public boolean isEdible() {
+		return m.isEdible();
+	}
+
+	public boolean isFlammable() {
+		return m.isFlammable();
+	}
+
+	public boolean isOccluding() {
+		return m.isOccluding();
+	}
+
+	public boolean isRecord() {
+		return m.isRecord();
+	}
+
+	public boolean isSolid() {
+		return m.isSolid();
+	}
+
+	public boolean isTransparent() {
+		return m.isTransparent();
+	}
 }

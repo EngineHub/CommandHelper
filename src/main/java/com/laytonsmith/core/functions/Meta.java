@@ -42,7 +42,44 @@ public class Meta {
 	public static String docs() {
 		return "These functions provide a way to run other commands";
 	}
+/*
+	@api
+	public static class first_load extends AbstractFunction {
 
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CBoolean(CommandHelperPlugin.isFirstLoad(), t);
+		}
+
+		public String getName() {
+			return "first_load";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "boolean {} Returns true if the scripts have not been reloaded since the plugin was enabled."
+					+ " In otherwords, using this in main.ms will return false when you do /reloadaliases.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+*/
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class runas extends AbstractFunction {
 
@@ -72,7 +109,7 @@ public class Meta {
 				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "Using runas(~op, " + CString.asString(args[1]).getQuote() 
 						+ ") is deprecated. Use sudo(" + CString.asString(args[1]).getQuote() + ") instead.", t);
 				new sudo().exec(t, env, args[1]);
-			} else if (args[0].val().equals("~console")) {
+			} else if (args[0].val().equals(Static.getConsoleName())) {
 				CHLog.GetLogger().Log(CHLog.Tags.META, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
 				if (Prefs.DebugMode()) {
 					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
@@ -143,7 +180,7 @@ public class Meta {
 	public static class sudo extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -156,6 +193,12 @@ public class Meta {
 
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String cmd = args[0].val().substring(1);
+			//If the command sender is null, then just try to run() this. It's unclear to me what
+			//would cause this for sure, but just in case. Regardless, this allows us to consolidate the error checking
+			//into the run function
+			if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() == null){
+				return new run().exec(t, env, args);
+			}
 			//Store their current op status
 			Boolean isOp = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().isOp();
 

@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
  * A version is formatted as such: 1.2.10 beta-1 where 1 is the major version,
  * 2 is the minor version, 10 is the supplemental version, and beta-1 is the tag.
  * When comparing two versions, the tag is not considered.
- * @author Layton
  */
 public class SimpleVersion implements Version {
     
@@ -24,7 +23,7 @@ public class SimpleVersion implements Version {
      * part is set to 0.
      * @param version The version, as a string
      */
-    Pattern p = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\s+(.*))?");
+    Pattern p = Pattern.compile("(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?(?:\\s+(.*))?");
     public SimpleVersion(String version){
         Matcher m = p.matcher(version);
         if(m.find()){
@@ -146,6 +145,80 @@ public class SimpleVersion implements Version {
         hash = 97 * hash + this.supplemental;
         return hash;
     }
+
+	public boolean lt(Version other) {
+		return checkLT(this, other);
+	}
+
+	public boolean lte(Version other) {
+		return checkLTE(this, other);
+	}
+
+	public boolean gt(Version other) {
+		return checkGT(this, other);
+	}
+
+	public boolean gte(Version other) {
+		return checkGTE(this, other);
+	}
     
-    
+    public static boolean checkLT(Version lhs, Version rhs){
+		if(lhs == null || rhs == null){
+			throw new NullPointerException();
+		}
+		if(lhs.getMajor() == rhs.getMajor()){
+			if(lhs.getMinor() == rhs.getMinor()){
+				if(lhs.getSupplemental() == rhs.getSupplemental()){
+					return false;
+				} else if(lhs.getSupplemental() < rhs.getSupplemental()){
+					return true;
+				}
+			} else if(lhs.getMinor() < rhs.getMinor()){
+				return true;
+			}
+		} else if(lhs.getMajor() < rhs.getMajor()){
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean checkLTE(Version lhs, Version rhs){
+		if(lhs == null || rhs == null){
+			throw new NullPointerException();
+		}
+		if(lhs.equals(rhs)){
+			return true;
+		}
+		return checkLT(lhs, rhs);
+	}
+	
+	public static boolean checkGT(Version lhs, Version rhs){
+		if(lhs == null || rhs == null){
+			throw new NullPointerException();
+		}
+		if(lhs.getMajor() == rhs.getMajor()){
+			if(lhs.getMinor() == rhs.getMinor()){
+				if(lhs.getSupplemental() == rhs.getSupplemental()){
+					return false;
+				} else if(lhs.getSupplemental() > rhs.getSupplemental()){
+					return true;
+				}
+			} else if(lhs.getMinor() > rhs.getMinor()){
+				return true;
+			}
+		} else if(lhs.getMajor() > rhs.getMajor()){
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean checkGTE(Version lhs, Version rhs){
+		if(lhs == null || rhs == null){
+			throw new NullPointerException();
+		}
+		if(lhs.equals(rhs)){
+			return true;
+		}
+		return checkGT(lhs, rhs);
+	}
 }

@@ -100,6 +100,14 @@ public class BukkitMCServer implements MCServer {
         s.broadcastMessage(message);
     }
 
+	public void broadcastMessage(String message, String permission) {
+		s.broadcast(message, permission);
+	}
+	
+	public MCConsoleCommandSender getConsole() {
+		return new BukkitMCConsoleCommandSender(s.getConsoleSender());
+	}
+
 	public MCItemFactory getItemFactory() {
 		return new BukkitMCItemFactory(s.getItemFactory());
 	}

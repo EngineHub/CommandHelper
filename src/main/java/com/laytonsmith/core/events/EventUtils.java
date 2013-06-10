@@ -149,7 +149,7 @@ public final class EventUtils {
                 }
             } else {
                 //They have fired a non existant event
-                ConfigRuntimeException.DoWarning(new ConfigRuntimeException("Non existant event is being triggered: " + eventName, object.getTarget()));
+                ConfigRuntimeException.DoWarning(ConfigRuntimeException.CreateUncatchableException("Non existant event is being triggered: " + eventName, object.getTarget()));
             }
         }
     }

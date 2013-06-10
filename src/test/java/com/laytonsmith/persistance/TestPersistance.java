@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Util;
@@ -38,6 +39,7 @@ public class TestPersistance {
 	public Map<String[], String> testData = new HashMap<String[], String>();
 	List<File> toDelete = new ArrayList<File>();
 	ConnectionMixinFactory.ConnectionMixinOptions options;
+	DaemonManager dm;
 
 	@Before
 	public void setUp() throws Exception {
@@ -46,6 +48,7 @@ public class TestPersistance {
 		testData.put(new String[]{"a", "b", "c2"}, "value3");
 		options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(new File("."));
+		dm = new DaemonManager();
 	}
 
 	@After
@@ -140,7 +143,8 @@ public class TestPersistance {
 	@Test
 	public void testHasValue() throws Exception {
 		PersistanceNetwork network = new PersistanceNetwork("**=json://folder/default.json", new URI("default"), options);
-		network.set(new String[]{"key"}, "value");
+		network.set(dm, new String[]{"key"}, "value");
+		dm.waitForThreads();
 		assertTrue(network.hasKey(new String[]{"key"}));
 		deleteFiles("folder/");
 	}
@@ -148,11 +152,11 @@ public class TestPersistance {
 	@Test
 	public void testClearValue1() throws Exception {
 		PersistanceNetwork network = new PersistanceNetwork("**=json://folder/default.json", new URI("default"), options);
-		network.set(new String[]{"key"}, "value");
-		network.set(new String[]{"key2"}, "value");
+		network.set(dm, new String[]{"key"}, "value");
+		network.set(dm, new String[]{"key2"}, "value");
 		assertTrue(network.get(new String[]{"key"}).equals("value"));
-		network.clearKey(new String[]{"key"});
-		Thread.sleep(1000); //TODO:
+		network.clearKey(dm, new String[]{"key"});
+		dm.waitForThreads();
 		assertFalse(network.hasKey(new String[]{"key"}));
 		assertEquals("{\"key2\":\"value\"}", FileUtility.read(new File("folder/default.json")));
 		deleteFiles("folder/");
@@ -161,7 +165,8 @@ public class TestPersistance {
 	@Test
 	public void testNotTransient() throws Exception{
 		PersistanceNetwork network = new PersistanceNetwork("**=json://folder/default.json", new URI("default"), options);
-		network.set(new String[]{"key"}, "value");
+		network.set(dm, new String[]{"key"}, "value");
+		dm.waitForThreads();
 		assertEquals("value", network.get(new String[]{"key"}));
 		FileUtility.write("{\"key\":\"nope\"}", new File("folder/default.json"));
 		//This should be cached in memory
@@ -172,12 +177,11 @@ public class TestPersistance {
 	@Test
 	public void testTransient() throws Exception{
 		PersistanceNetwork network = new PersistanceNetwork("**=transient:json://folder/default.json", new URI("default"), options);
-		network.set(new String[]{"key"}, "value1");
-		Thread.sleep(100);
+		network.set(dm, new String[]{"key"}, "value1");
+		dm.waitForThreads();
 		assertEquals("value1", network.get(new String[]{"key"}));
 		FileUtility.write("{\"key\":\"value2\"}", new File("folder/default.json"));
 		//This should not be cached in memory
-		Thread.sleep(100);
 		assertEquals("value2", network.get(new String[]{"key"}));
 		deleteFiles("folder/");
 	}
@@ -187,8 +191,8 @@ public class TestPersistance {
 		//This is hard to test, since it's binary data. Instead, we just check for the file's existance, and to see if 
 		//contains the key and value somewhere in the data
 		PersistanceNetwork network = new PersistanceNetwork("**=ser://folder/default.ser", new URI("default"), options);
-		network.set(new String[]{"key"}, "value");
-		Thread.sleep(100);
+		network.set(dm, new String[]{"key"}, "value");
+		dm.waitForThreads();
 		String contents = FileUtility.read(new File("folder/default.ser"));
 		assertTrue(contents.contains("value") && contents.contains("key") && contents.contains("java.util.HashMap"));
 		deleteFiles("folder/");
@@ -207,7 +211,8 @@ public class TestPersistance {
 	@Test
 	public void testSQLiteBasic() throws Exception{
 		PersistanceNetwork network = new PersistanceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
-		network.set(new String[]{"key", "key"}, "value");
+		network.set(dm, new String[]{"key", "key"}, "value");
+		dm.waitForThreads();
 		assertEquals("value", network.get(new String[]{"key", "key"}));
 		deleteFiles("folder/");
 	}
@@ -216,7 +221,8 @@ public class TestPersistance {
 	public void testNamespaceWithUnderscore() throws Exception {
 		PersistanceNetwork network = new PersistanceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
 		try{
-			network.set(new String[]{"Bad", "_", "Key"}, "value");
+			network.set(dm, new String[]{"Bad", "_", "Key"}, "value");
+			dm.waitForThreads();
 		} finally {
 			deleteFiles("folder/");
 		}
@@ -226,14 +232,17 @@ public class TestPersistance {
 	public void testMemoryDataSource() throws Exception{
 		PersistanceNetwork network = new PersistanceNetwork("**=mem:default", new URI("default"), options);
 		String[] key = new String[]{"a", "b"};
-		network.set(key, "value");
+		network.set(dm, key, "value");
+		dm.waitForThreads();
 		assertEquals("value", network.get(key));
 		assertFalse(network.hasKey(new String[]{"a"}));
 		assertTrue(network.hasKey(key));
-		network.clearKey(key);
+		network.clearKey(dm, key);
+		dm.waitForThreads();
 		assertFalse(network.hasKey(key));
 		
-		network.set(key, "value");
+		network.set(dm, key, "value");
+		dm.waitForThreads();
 		assertEquals("value", network.get(key));
 		MemoryDataSource.ClearDatabases();
 		assertFalse(network.hasKey(key));
@@ -243,9 +252,10 @@ public class TestPersistance {
 	public void testGetValues() throws Exception {
 		PersistanceNetwork network = new PersistanceNetwork("**=json://folder/persistance.json", new URI("default"), options);
 		try{
-			network.set(new String[]{"t", "test1"}, "test");
-			network.set(new String[]{"t", "test2"}, "test");
-			network.set(new String[]{"t", "test3", "third"}, "test");
+			network.set(dm, new String[]{"t", "test1"}, "test");
+			network.set(dm, new String[]{"t", "test2"}, "test");
+			network.set(dm, new String[]{"t", "test3", "third"}, "test");
+			dm.waitForThreads();
 			Map<String[], String> list = network.getNamespace(new String[]{"t"});
 			List<String> output = new ArrayList<String>();
 			for(String[] key : list.keySet()){
@@ -268,13 +278,9 @@ public class TestPersistance {
 
 					//It is a file based URI, so we can test this.
 					for (String[] key : data.keySet()) {
-						ds.set(key, data.get(key));
+						ds.set(dm, key, data.get(key));
 					}
-					Thread.sleep(3000); //TODO: This is hacky, but it should work atm.
-								//Since the file io is async, we need to wait for
-								//it to finish before we get the data.
-								//Ideally, we grab a read thread from
-								//the executor, and use that to read the file.
+					dm.waitForThreads();
 					File output = GetPrivate(sdc.getConnectionMixin(), "file", File.class);
 					String out = FileUtility.read(output);
 					output.delete();
@@ -303,25 +309,6 @@ public class TestPersistance {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Value should be in the form key.namespace=value, and src is the URI
-	 * to put the data in
-	 *
-	 * @param src
-	 * @param value
-	 */
-	private void fakeNetwork(String src, String... values) throws Exception {
-		DataSource ds = DataSourceFactory.GetDataSource(src, options);
-		File output = getFileFromDataSource(ds);
-		if (output != null) {
-			toDelete.add(output);
-		}
-		for (String value : values) {
-			String[] split = value.split("=");
-			ds.set(split[0].split("\\."), split[1]);
-		}
 	}
 
 	public static void deleteFiles(String... files) {

@@ -1,5 +1,6 @@
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
 import static com.laytonsmith.PureUtilities.TermColors.*;
@@ -52,6 +53,7 @@ public class Manager {
 	private static PersistanceNetwork persistanceNetwork;
 
 	public static void start() throws IOException, DataSourceException, URISyntaxException {
+		Implementation.setServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(chDirectory);
 		persistanceNetwork = new PersistanceNetwork(new File(chDirectory, "persistance.config"), 
@@ -153,6 +155,7 @@ public class Manager {
 				//exact same as the source's value
 				boolean acceptAllDestination = false;
 				boolean acceptAllSource = false;
+				DaemonManager dm = new DaemonManager();
 				for (String[] key : source.keySet()) {
 					if (destination.hasKey(key)) {
 						if (!source.get(key).equals(destination.get(key))) {
@@ -222,12 +225,17 @@ public class Manager {
 								//Otherwise, just use the data in the source
 								data = source.get(key);
 							}
-							destination.set(key, data);
+							destination.set(dm, key, data);
 						}
 					} else {
 						//Else there is no conflict, it's not in the destination.
-						destination.set(key, source.get(key));
+						destination.set(dm, key, source.get(key));
 					}
+				}
+				try {
+					dm.waitForThreads();
+				} catch (InterruptedException ex) {
+					//
 				}
 				break;
 			} catch (DataSourceException ex) {
@@ -252,12 +260,18 @@ public class Manager {
 				if (prompt().equals("YES")) {
 					p("Ok, here we go... ");
 					Set<String[]> keySet = persistanceNetwork.getNamespace(new String[]{}).keySet();
+					DaemonManager dm = new DaemonManager();
 					for(String [] key : keySet){
 						try {
-							persistanceNetwork.clearKey(key);
+							persistanceNetwork.clearKey(dm, key);
 						} catch (ReadOnlyException ex) {
 							pl(RED + "Read only data source found: " + ex.getMessage());
 						}
+					}
+					try{
+						dm.waitForThreads();
+					} catch(InterruptedException e){
+						//
 					}
 					pl("Done!");
 				}
@@ -393,7 +407,13 @@ public class Manager {
 			String value = Construct.json_encode(c, Target.UNKNOWN);
 			pl(CYAN + "Adding: " + WHITE + value);
 			String [] k = key.split("\\.");
-			persistanceNetwork.set(k, value);
+			DaemonManager dm = new DaemonManager();
+			persistanceNetwork.set(dm, k, value);
+			try{
+				dm.waitForThreads();
+			} catch(InterruptedException e){
+				//
+			}
 			return true;
 		} catch (Exception ex) {
 			pl(RED + ex.getMessage());
@@ -405,7 +425,13 @@ public class Manager {
 		try {
 			String [] k = key.split("\\.");
 			if (persistanceNetwork.hasKey(k)) {
-				persistanceNetwork.clearKey(k);
+				DaemonManager dm = new DaemonManager();
+				persistanceNetwork.clearKey(dm, k);
+				try{
+					dm.waitForThreads();
+				} catch(InterruptedException e){
+					//
+				}
 				return true;
 			} else {
 				return false;
@@ -471,6 +497,7 @@ public class Manager {
 						int counter = 0;
 						int changes = 0;
 						Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA};
+						DaemonManager dm = new DaemonManager();
 						for (String key : data.keySet()) {
 							counter++;
 							int c = counter / 20;
@@ -504,9 +531,14 @@ public class Manager {
 							}
 						}
 						try {
-							sp.save();
+							sp.save(dm);
 						} catch (Exception ex) {
 							pl(RED + ex.getMessage());
+						}
+						try {
+							dm.waitForThreads();
+						} catch (InterruptedException ex) {
+							//
 						}
 						pl();
 						pl(GREEN + "Assuming there are no error messages above, it should be upgraded now! (Use print to verify)");

@@ -104,7 +104,7 @@ public class AliasCore {
 		}
 
 		if (scripts == null) {
-			throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Cannot run alias commands, no config file is loaded", Target.UNKNOWN);
 		}
 
 		boolean match = false;
@@ -545,7 +545,7 @@ public class AliasCore {
 					}
 				} catch(ProgramFlowManipulationException e){
 					exception = true;
-					ConfigRuntimeException.React(new ConfigRuntimeException("Cannot break program flow in main files.", e.getTarget()), env);
+					ConfigRuntimeException.React(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in main files.", e.getTarget()), env);
 				}
 				if (exception) {
 					if (Prefs.HaltOnFailure()) {

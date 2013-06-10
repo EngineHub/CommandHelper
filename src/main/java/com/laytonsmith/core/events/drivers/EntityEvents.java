@@ -21,6 +21,7 @@ import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
+import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
@@ -128,6 +129,140 @@ public class EntityEvents {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if (key.equals("yield")) {
 					e.setYield(value.primitive(t).castToDouble32(t));
+
+	public static class item_spawn extends AbstractEvent {
+			return "item_spawn";
+		}
+
+		public String docs() {
+			return "{item: <item match> the item id and data value to check}"
+					+ " Fires when an item entity comes into existance."
+					+ " {location: where the item spawns | id: the item's entityID | item}"
+					+ " {item: the itemstack of the entity}"
+					+ " {}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCItemSpawnEvent) {
+				Prefilters.match(prefilter, "item", Static.ParseItemNotation(
+						((MCItemSpawnEvent) e).getEntity().getItemStack()), PrefilterType.ITEM_MATCH);
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCItemSpawnEvent) {
+				Target t = Target.UNKNOWN;
+				MCItemSpawnEvent event = (MCItemSpawnEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation()));
+				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCItemSpawnEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.ITEM_SPAWN;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCItemSpawnEvent) {
+				if (key == "item") {
+					((MCItemSpawnEvent) event).getEntity().setItemStack(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class entity_explode extends AbstractEvent {
+
+		public String getName() {
+			return "entity_explode";
+		}
+
+		public String docs() {
+			return "{type: <macro> The type of entity exploding. If null is used here, it will match events that"
+					+ " lack a specific entity, such as using the explosion function} Fires when an explosion occurs."
+					+ " The entity itself may not exist if triggered by a plugin. Cancelling this event only protects blocks,"
+					+ " entities are handled in damage events. {id: entityID, or null if no entity"
+					+ " | type: entitytype, or null if no entity | location: where the explosion occurs | blocks | yield}"
+					+ " {blocks: An array of blocks destroyed by the explosion. | yield: Percent of the blocks destroyed"
+					+ " that should drop items. A value greater than 100 will cause more drops than the original blocks.}"
+					+ " {}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCEntityExplodeEvent) {
+				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
+				if (prefilter.containsKey("type")) {
+					if (e.getEntity() == null){
+						if (prefilter.get("type") instanceof CNull || prefilter.get("type").val().equals("null")) {
+							return true;
+						}
+						return false;
+					}
+					Prefilters.match(prefilter, "type", e.getEntity().getType().name(), PrefilterType.MACRO);
+				}
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCEntityExplodeEvent) {
+				Target t = Target.UNKNOWN;
+				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				CArray blocks = new CArray(t);
+				for (MCBlock b : e.getBlocks()) {
+					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()));
+				}
+				ret.put("blocks", blocks);
+				Construct entity = new CNull(t);
+				Construct entitytype = new CNull(t);
+				if (e.getEntity() != null) {
+					entity = new CInt(e.getEntity().getEntityId(), t);
+					entitytype = new CString(e.getEntity().getType().name(), t);
+				}
+				ret.put("id", entity);
+				ret.put("type", entitytype);
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLocation()));
+				ret.put("yield", new CDouble(e.getYield(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityExplodeEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.ENTITY_EXPLODE;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCEntityExplodeEvent) {
+				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
+				if (key.equals("yield")) {
+					e.setYield(Static.getDouble32(value, Target.UNKNOWN));
+
 					return true;
 				}
 				if (key.equals("blocks")) {
@@ -910,7 +1045,7 @@ public class EntityEvents {
 		}
 	
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 	
 		public Map<String, Mixed> evaluate(BindableEvent e)

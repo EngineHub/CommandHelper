@@ -35,7 +35,7 @@ public class CClosure extends Construct {
             this.env = env.clone();
         }
         catch (CloneNotSupportedException ex) {
-            throw new ConfigRuntimeException("A failure occured while trying to clone the environment. " + ex.getMessage(), t);
+            throw ConfigRuntimeException.CreateUncatchableException("A failure occured while trying to clone the environment. " + ex.getMessage(), t);
         }
         this.names = names;
         this.defaults = defaults;
@@ -142,7 +142,7 @@ public class CClosure extends Construct {
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException)e);
 				Target t = lme.getTarget();
-				ConfigRuntimeException.React(new ConfigRuntimeException("A " + lme.getName() + "() bubbled up to the top of"
+				ConfigRuntimeException.React(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
 			}
         }

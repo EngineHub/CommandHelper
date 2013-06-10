@@ -15,13 +15,16 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.SerializedPersistance;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.*;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -199,7 +202,15 @@ public class Main {
 				System.exit(0);
 			} else if (mode == printDBMode) {
 				//FIXME: This is using the wrong thing.
-				new SerializedPersistance(new File("CommandHelper/persistance.ser")).printValues(System.out);
+				File chFolder = new File(jarFolder.getParentFile(), "CommandHelper");
+				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
+				options.setWorkingDirectory(chFolder);
+				PersistanceNetwork pn = new PersistanceNetwork(new File(chFolder, "persistance.config"), new URI("sqlite://" + new File(chFolder, "persistance.db").getCanonicalPath()), options);
+				Map<String[], String> values = pn.getNamespace(new String[]{});
+				for(String [] s : values.keySet()){
+					System.out.println(Arrays.toString(s));
+				}
+				//new SerializedPersistance(new File("CommandHelper/persistance.ser")).printValues(System.out);
 				System.exit(0);
 			} else if (mode == docsMode) {
 				String docs = parsedArgs.getStringArgument();

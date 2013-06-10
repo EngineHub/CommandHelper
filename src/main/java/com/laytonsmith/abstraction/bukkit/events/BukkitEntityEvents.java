@@ -36,6 +36,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -48,6 +49,26 @@ import org.bukkit.inventory.ItemStack;
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
+	
+	public static class BukkitMCItemSpawnEvent implements MCItemSpawnEvent {
+
+		ItemSpawnEvent ise;
+		public BukkitMCItemSpawnEvent(ItemSpawnEvent event) {
+			ise = event;
+		}
+		
+		public Object _GetObject() {
+			return ise;
+		}
+
+		public MCItem getEntity() {
+			return new BukkitMCItem(ise.getEntity());
+		}
+
+		public MCLocation getLocation() {
+			return new BukkitMCLocation(ise.getLocation());
+		}
+	}
 	
 	public static class BukkitMCEntityExplodeEvent implements MCEntityExplodeEvent {
 

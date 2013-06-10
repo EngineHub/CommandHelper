@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance.io;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.ReadOnlyException;
 import java.io.IOException;
@@ -23,7 +24,7 @@ public interface ConnectionMixin {
 	 * @throws IOException
 	 * @throws UnsupportedOperationException 
 	 */
-	public void writeData(String data) throws ReadOnlyException, IOException, UnsupportedOperationException;
+	public void writeData(DaemonManager dm, String data) throws ReadOnlyException, IOException, UnsupportedOperationException;
 	
 	/**
 	 * Some connections just need to get the path information, but don't want the mixin to

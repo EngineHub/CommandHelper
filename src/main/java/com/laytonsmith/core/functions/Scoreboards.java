@@ -195,7 +195,6 @@ public class Scoreboards {
 		 */
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.ScoreboardException};
-	
 		}
 	}
 	public static class Objective extends MObject {
@@ -1091,7 +1090,28 @@ public class Scoreboards {
 					);
 		}
 	}
+	
+	@api
+	public static class reset_all_pscores extends SBFunction {
 
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			assignBoard(2, 1, t, args).resetScores(Static.getServer().getOfflinePlayer(args[0].val()));
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "reset_all_pscores";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {player, [scoreboard]} Resets all scores for a player tracked by the given scoreboard."
+					+ " This means they will not be show up on any displays. " + DEF_MSG;
+		}
+	}
 	
 	@api
 	public static class set_team_options extends SBFunction {

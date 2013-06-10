@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
@@ -67,7 +68,13 @@ public class UserManager {
             Integer thisX = Integer.parseInt(x[x.length - 1]);
             nextValue = Math.max(thisX + 1, nextValue + 1);
         }
-        persist.set(new String[]{"user", name, "aliases", nextValue.toString()}, alias);
+		DaemonManager dm = new DaemonManager();
+        persist.set(dm, new String[]{"user", name, "aliases", nextValue.toString()}, alias);
+		try{
+			dm.waitForThreads();
+		} catch(InterruptedException e){
+			//
+		}
         return nextValue;
     }
     
@@ -91,7 +98,13 @@ public class UserManager {
     }
     
     public void delAlias(int id, PersistanceNetwork persist) throws DataSourceException, ReadOnlyException, IOException{
-        persist.set(new String[]{"user", name, "aliases", Integer.toString(id)}, null);
+		DaemonManager dm = new DaemonManager();
+        persist.set(dm, new String[]{"user", name, "aliases", Integer.toString(id)}, null);
+		try{
+			dm.waitForThreads();
+		} catch(InterruptedException e){
+			//
+		}
     }
     
     public String getAllAliases(int page, PersistanceNetwork persist) throws DataSourceException{

@@ -214,7 +214,7 @@ public final class Profiler {
 	 * @param message
 	 */
 	public void doLog(final String message) {
-		outputQueue.push(null, new Runnable() {
+		outputQueue.push(null, null, new Runnable() {
 			public void run() {
 				if (writeToScreen) {
 					System.out.println(message);

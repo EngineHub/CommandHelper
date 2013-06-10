@@ -364,7 +364,7 @@ public class Echoes {
 					OptimizationOption.CACHE_RETURN);
 		}
 	}
-
+	
 	@api
 	public static class strip_colors extends AbstractFunction {
 

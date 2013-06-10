@@ -1101,7 +1101,7 @@ public class StringHandling {
 				}
 			} else {
 				//Hmm, shouldn't have been able to get here, but whatever.
-				throw new ConfigRuntimeException("Conversion is invalid: " + c, t);
+				throw ConfigRuntimeException.CreateUncatchableException("Conversion is invalid: " + c, t);
 			}
 			return o;
 		}
@@ -1338,7 +1338,7 @@ public class StringHandling {
 					throw new ConfigRuntimeException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), ExceptionType.FormatException, t);
 				} else {
 					//This is unexpected
-					throw new ConfigRuntimeException(e.getMessage(), t);
+					throw ConfigRuntimeException.CreateUncatchableException(e.getMessage(), t);
 				}
 			}
 			int length = Array.getLength(parse);

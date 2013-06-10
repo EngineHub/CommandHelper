@@ -458,7 +458,7 @@ public class InventoryManagement {
             } else if(args.length == 1){
                 arg = args[0];
             } else {
-                throw new ConfigRuntimeException("The old format for set_pinv has been deprecated. Please update your script.", t);
+                throw ConfigRuntimeException.CreateUncatchableException("The old format for set_pinv has been deprecated. Please update your script.", t);
             }
             if(!(arg instanceof CArray)){
                 throw new ConfigRuntimeException("Expecting an array as argument " + (args.length==1?"1":"2"), Exceptions.ExceptionType.CastException, t);

@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.PropertiesManager;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
@@ -28,6 +29,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.xpath.XPathExpressionException;
+import org.xml.sax.SAXException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -380,6 +383,90 @@ public class DataTransformations {
 
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class xml_read extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			XMLDocument doc;
+			try {
+				doc = new XMLDocument(args[0].val());
+			} catch (SAXException ex) {
+				throw new Exceptions.FormatException("Malformed XML.", t, ex);
+			}
+			try {
+				return Static.resolveConstruct(doc.getNode(args[1].val()), t);
+			} catch (XPathExpressionException ex) {
+				throw new Exceptions.FormatException(ex.getMessage(), t, ex);
+			}
+		}
+
+		public String getName() {
+			return "xml_read";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "mixed {xml, xpath} Reads a field from some xml using an XPath address. The XPath address is assumed"
+					+ " to be absolute, even if it doesn't start with a '/'.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	//@api
+	public static class xml_write extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public boolean isRestricted() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public Boolean runAsync() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public String getName() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public Integer[] numArgs() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public String docs() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public Version since() {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 		
 	}

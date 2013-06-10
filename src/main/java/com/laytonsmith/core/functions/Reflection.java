@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.compiler.Optimizable;
@@ -11,14 +12,19 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistance.DataSourceFactory;
+
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -287,6 +293,149 @@ public class Reflection {
 		}
 
 		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class get_functions extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		private static Map<String,List<String>> funcs = new HashMap<String,List<String>>();
+		
+		private void initf() {
+			for (FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+				String[] pack = f.getClass().getEnclosingClass().getName().split("\\.");
+				String clazz = pack[pack.length - 1];
+				if (!funcs.containsKey(clazz)) {
+					funcs.put(clazz, new ArrayList<String>());
+				}
+				funcs.get(clazz).add(f.getName());
+			}
+		}
+		
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray ret = CArray.GetAssociativeArray(t);
+			if (funcs.keySet().size() < 10) {
+				initf();
+			}
+			for (String cname : funcs.keySet()) {
+				CArray fnames = new CArray(t);
+				for (String fname : funcs.get(cname)) {
+					fnames.push(new CString(fname, t));
+				}
+				ret.set(new CString(cname, t), fnames, t);
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "get_functions";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "array {} Returns an associative array of all loaded functions. The keys of this array are the"
+					+ " names of the classes containing the functions (which you know as the sections of the API page),"
+					+ " and the values are arrays of the names of the functions within those classes.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class get_events extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for (String name : EventList.GetEvents()) {
+				ret.push(new CString(name, t));
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "get_events";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "array {} Returns an array of all registered event names.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class get_aliases extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for (Script s : Static.getAliasCore().getScripts()) {
+				ret.push(new CString(s.getSignature(), t));
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "get_aliases";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "array {} Returns an array of the defined alias signatures (The part left of the = sign).";
+		}
+
+		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 	}

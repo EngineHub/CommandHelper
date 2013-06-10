@@ -94,7 +94,7 @@ public class CommandHelperListener implements Listener {
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
         if(CommandHelperPlugin.self.interpreterListener
-                .isInInterpreterMode(new BukkitMCPlayer(event.getPlayer()))){
+                .isInInterpreterMode(event.getPlayer().getName())){
             //They are in interpreter mode, so we want it to handle this, not everything else.
             return;
         }

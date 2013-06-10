@@ -88,7 +88,7 @@ public class Persistance {
 			try {
 				value = Construct.json_encode(args[args.length - 1], t);
 			} catch (MarshalException e) {
-				throw new ConfigRuntimeException(e.getMessage(), t);
+				throw ConfigRuntimeException.CreateUncatchableException(e.getMessage(), t);
 			}
 			char pc = '.';
 			for (int i = 0; i < key.length(); i++) {
@@ -106,7 +106,7 @@ public class Persistance {
 			}
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, "Storing: " + key + " -> " + value, t);
 			try {
-				env.getEnv(GlobalEnv.class).GetPersistanceNetwork().set(("storage." + key).split("\\."), value);
+				env.getEnv(GlobalEnv.class).GetPersistanceNetwork().set(env.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + key).split("\\."), value);
 			} catch(IllegalArgumentException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			} catch (Exception ex) {
@@ -187,7 +187,7 @@ public class Persistance {
 				}
 				o = Construct.json_decode(obj.toString(), t);
 			} catch (MarshalException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), t);
+				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 			}
 			try {
 				return (Construct) o;
@@ -398,7 +398,7 @@ public class Persistance {
 			String namespace = GetNamespace(args, null, getName(), t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
-				environment.getEnv(GlobalEnv.class).GetPersistanceNetwork().clearKey(("storage." + namespace).split("\\."));
+				environment.getEnv(GlobalEnv.class).GetPersistanceNetwork().clearKey(environment.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + namespace).split("\\."));
 			} catch (DataSourceException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch (ReadOnlyException ex) {

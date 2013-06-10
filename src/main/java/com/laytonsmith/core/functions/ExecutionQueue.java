@@ -61,7 +61,7 @@ public class ExecutionQueue {
 				queue = args[1].val();
 			}
 			
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				public void run() {
 					StaticLayer.SetFutureRunnable(0, new Runnable() {
@@ -131,7 +131,7 @@ public class ExecutionQueue {
 				queue = args[1].val();
 			}
 			
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				public void run() {
 					StaticLayer.SetFutureRunnable(0, new Runnable() {
@@ -404,8 +404,8 @@ public class ExecutionQueue {
 			if(args.length == 2){
 				queue = args[1].val();
 			}
-			final long delay = args[0].primitive(t).castToInt(t);
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(queue, new Runnable() {
+			final long delay = Static.getInt(args[0], t);
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				public void run() {
 					try {
@@ -468,8 +468,8 @@ public class ExecutionQueue {
 			if(args.length == 2){
 				queue = args[1].val();
 			}
-			final long delay = args[0].primitive(t).castToInt(t);
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(queue, new Runnable() {
+			final long delay = Static.getInt(args[0], t);
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				public void run() {
 					try {

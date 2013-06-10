@@ -154,11 +154,13 @@
 		</repository>
 	</repositories>
 	<dependencies>
+		<!-- Please update http://wiki.sk89q.com/wiki/CommandHelper/Compatibility whenever
+			these dependencies are updated, or important dependencies are added -->
 		<!-- Required component -->
 		<dependency>
 			<groupId>com.sk89q</groupId>
 			<artifactId>worldedit</artifactId>
-			<version>5.4.5</version>
+			<version>5.5.6</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.spout</groupId>
@@ -171,7 +173,7 @@
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.5.1-R0.2-SNAPSHOT</version>
+			<version>1.5.2-R0.2-SNAPSHOT</version>
 		</dependency>
         
 		<!-- CraftBukkit Dependency for experimental features
@@ -185,7 +187,7 @@
 		<dependency>
 			<groupId>com.sk89q</groupId>
 			<artifactId>worldguard</artifactId>
-			<version>5.6.3</version>
+			<version>5.7.3</version>
 		</dependency>
     
 		<!-- Used for economy stuff -->
@@ -199,7 +201,7 @@
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
-			<version>1.1</version>
+			<version>1.1.1</version>
 		</dependency>
         
 		<!-- BCrypt -->
@@ -236,7 +238,7 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
+			<version>1.2.17</version>
 			<scope>compile</scope>
 		</dependency>
         
@@ -254,6 +256,15 @@
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
 			<version>2.1.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		
+		<!-- MySQL -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.24</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -299,7 +310,7 @@
 		<dependency>
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
-			<version>0.1.48</version>
+			<version>0.1.50</version>
 		</dependency>
 
 		<!-- Charset detection library -->
@@ -313,31 +324,31 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>  
-			<version>1.8.5</version> 
+			<version>1.9.5</version> 
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.avaje</groupId>
 			<artifactId>ebean</artifactId>
-			<version>2.7.3</version>
+			<version>2.8.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-junit4</artifactId>
-			<version>1.4.10</version>
+			<version>1.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-mockito</artifactId>
-			<version>1.4.10</version>
+			<version>1.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -453,6 +464,13 @@
 						<configuration>
 							<shadedArtifactAttached>false</shadedArtifactAttached>
 							<shadedClassifierName>Bundle</shadedClassifierName>
+							<!-- To add a new shaded dependency, there are three steps.
+								1. Add a reference to the artifact set
+								2. Add a relocation tag (usually recommended, though not always)
+								3. Add it to the filter list
+								
+								You can copy existing structures over, and change the parameters on them.
+							-->
 							<artifactSet>
 								<includes>
 									<include>com.sk89q:worldedit:jar:*</include>
@@ -470,6 +488,62 @@
 									<include>mysql:mysql-connector-java:jar:*</include>
 								</includes>
 							</artifactSet>
+							<relocations>
+								<relocation>
+									<pattern>org.perf4j</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.perf4j</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.log4j</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.log4j</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.yaml.snakeyaml</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.yaml.snakeyaml</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.json.simple</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.json.simple</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.mindrot.jbcrypt</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.mindrot.jbcrypt</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.jcraft.jsch</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.jcraft.jsch</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.io</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.commons.io</shadedPattern>
+								</relocation>
+								<!-- This doesn't work due to native libs or something. Will revist later.
+								<relocation>
+									<pattern>org.sqlite</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.sqlite</shadedPattern>
+								</relocation>
+								-->
+								<relocation>
+									<pattern>org.mcstats</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.mcstats</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.mozilla.intl.chardet</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.mozilla.intl.chardet</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>redis.clients</pattern>
+									<shadedPattern>com.laytonsmith.libs.redis.clients</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.mysql.jdbc</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.mysql.jdbc</shadedPattern>
+								</relocation>
+								<relocation> <!-- part of the mysql lib -->
+									<pattern>org.gjt.mm.mysql</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.gjt.mm.mysql</shadedPattern>
+								</relocation>
+							</relocations>
 							<filters>
 								<filter>
 									<artifact>org.xerial:sqlite-jdbc:jar:*</artifact>

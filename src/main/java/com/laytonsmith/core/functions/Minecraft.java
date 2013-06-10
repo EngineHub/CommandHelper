@@ -1,7 +1,9 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEffect;
@@ -1161,6 +1163,9 @@ public class Minecraft {
 			
 			if(options.containsKey("strength")){
 				strength = options.get("strength").primitive(t).castToInt32(t);
+				if (strength < 0 || strength > 128) {
+					throw new ConfigRuntimeException("Strength must be between 0 and 128", ExceptionType.RangeException, t);
+				}
 			}
 			if(options.containsKey("flicker")){
 				flicker = options.get("flicker").primitive(t).castToBoolean();
@@ -1461,6 +1466,55 @@ public class Minecraft {
 		}
 
 		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class material_info extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
+			CArray ret = new CArray(t);
+			ret.set("maxStacksize", new CInt(i.getMaxStackSize(), t), t);
+			ret.set("maxDurability", new CInt(i.getMaxDurability(), t), t);
+			ret.set("hasGravity", new CBoolean(i.hasGravity(), t), t);
+			ret.set("isBlock", new CBoolean(i.isBlock(), t), t);
+			ret.set("isBurnable", new CBoolean(i.isBurnable(), t), t);
+			ret.set("isEdible", new CBoolean(i.isEdible(), t), t);
+			ret.set("isFlammable", new CBoolean(i.isFlammable(), t), t);
+			ret.set("isOccluding", new CBoolean(i.isOccluding(), t), t);
+			ret.set("isRecord", new CBoolean(i.isRecord(), t), t);
+			ret.set("isSolid", new CBoolean(i.isSolid(), t), t);
+			ret.set("isTransparent", new CBoolean(i.isTransparent(), t), t);
+			return ret;
+		}
+
+		public String getName() {
+			return "material_info";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "array {int} Returns an array of info about the material.";
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 	}

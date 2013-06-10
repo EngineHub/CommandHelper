@@ -1,5 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -73,12 +75,12 @@ public class ExecutionQueue {
 	 * @param queue The named queue
 	 * @param r 
 	 */
-	public final void push(String queue, Runnable r){
+	public final void push(DaemonManager dm, String queue, Runnable r){
 		queue = prepareLock(queue);
 		synchronized(locks.get(queue)){
 			Deque<Runnable> q = prepareQueue(queue);
 			q.addLast(r);
-			startQueue(queue);
+			startQueue(dm, queue);
 		}		
 	}
 	
@@ -88,12 +90,12 @@ public class ExecutionQueue {
 	 * @param queue
 	 * @param r 
 	 */
-	public final void pushFront(String queue, Runnable r){
+	public final void pushFront(DaemonManager dm, String queue, Runnable r){
 		queue = prepareLock(queue);
 		synchronized(locks.get(queue)){
 			Deque<Runnable> q = prepareQueue(queue);
 			q.addFirst(r);
-			startQueue(queue);
+			startQueue(dm, queue);
 		}
 	}
 	
@@ -220,11 +222,14 @@ public class ExecutionQueue {
 		}
 	}
 	
-	private void startQueue(final String queue){
+	private void startQueue(final DaemonManager dm, final String queue){
 		synchronized(locks.get(queue)){
 			if(!isRunning(queue)){
 				//We need to create a new thread
 				runningQueues.put(queue, true);
+				if(dm != null){
+					dm.activateThread(null);
+				}
 				service.submit(new Runnable() {
 
 					public void run() {
@@ -236,6 +241,10 @@ public class ExecutionQueue {
 							} else {
 								System.err.println("The queue \"" + queue + "\" threw an exception, and it was not handled.");
 								t.printStackTrace(System.err);
+							}
+						} finally {
+							if(dm != null){
+								dm.deactivateThread(null);
 							}
 						}
 					}

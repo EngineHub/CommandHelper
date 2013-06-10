@@ -54,27 +54,61 @@ public class Script {
 	private Environment CurrentEnv;
 	private FileOptions fileOptions;
 
-	@Override
-	public String toString() {
-		StringBuilder b = new StringBuilder();
-		for (Token t : left) {
-			b.append(t.val()).append(" ");
-		}
-		b.append("compiled: ").append(hasBeenCompiled).append("; errors? ").append(compilerError);
-		return b.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        for (Token t : left) {
+            b.append(t.val()).append(" ");
+        }
+        b.append("; compiled: ").append(hasBeenCompiled).append("; errors? ").append(compilerError);
+        return b.toString();
+    }
 
-	private Procedure getProc(String name) {
-		return CurrentEnv.getEnv(GlobalEnv.class).GetProcs().get(name);
-	}
-
-	public Environment getCurrentEnv() {
-		return CurrentEnv;
-	}
-
-	public String getLabel() {
-		return label;
-	}
+    private Procedure getProc(String name) {
+        return CurrentEnv.getEnv(GlobalEnv.class).GetProcs().get(name);
+    }
+    
+    public Environment getCurrentEnv(){
+        return CurrentEnv;
+    }
+    
+    public String getLabel(){
+        return label;
+    }
+    
+    /**
+     * Returns what would normally be on the left side on an alias ie. in config.msa
+     * @return label:/alias arg [ optionalArg ]
+     */
+    public String getSignature() {
+    	StringBuilder b = new StringBuilder();
+    	b.append(getLabel()).append(":");
+        for (Token t : left) {
+            b.append(t.val()).append(" ");
+        }
+        return b.toString();
+    }
+    
+    public Script(List<Token> left, List<Token> right) {
+        this.left = left;
+        this.fullRight = right;
+        this.left_vars = new HashMap<String, Variable>();        
+        //this.OriginalEnv = env;
+    }
+    
+    private Script(){}
+    
+    public static Script GenerateScript(ParseTree tree, String label){
+        Script s = new Script();
+        
+        s.hasBeenCompiled = true;
+        s.compilerError = false;
+        s.cright = new ArrayList<ParseTree>();
+        s.cright.add(tree);
+        s.label = label;
+        
+        return s;
+    }
 
 	public Script(List<Token> left, List<Token> right, FileOptions fileOptions) {
 		this.left = left;
@@ -82,21 +116,6 @@ public class Script {
 		this.left_vars = new HashMap<String, Variable>();
 		this.fileOptions = fileOptions;
 		//this.OriginalEnv = env;
-	}
-
-	private Script() {
-	}
-
-	public static Script GenerateScript(ParseTree tree, String label) {
-		Script s = new Script();
-
-		s.hasBeenCompiled = true;
-		s.compilerError = false;
-		s.cright = new ArrayList<ParseTree>();
-		s.cright.add(tree);
-		s.label = label;
-
-		return s;
 	}
 
 	public boolean uncompilable() {

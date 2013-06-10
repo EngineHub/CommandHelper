@@ -138,7 +138,7 @@ public class PlayerEvents {
             if (e instanceof MCPlayerKickEvent) {
                 //I gather we do not what to intercept anything from players in interpreter mode
                 //because there would be no one to recieve the information
-                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerKickEvent)e).getPlayer())){
+                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerKickEvent)e).getPlayer().getName())){
                     throw new PrefilterNonMatchException();
                 }
 
@@ -946,7 +946,8 @@ public class PlayerEvents {
                     + "Fired when a player dies."
                     + "{player: The player that died | drops: An array of the dropped items"
                     + "| xp: The xp that will be dropped | cause: The cause of death | death_message: The"
-					+ " death message | keep_level | new_level: the player's level when they respawn}"
+					+ " death message | keep_level | new_level: the player's level when they respawn"
+					+ "| killer: The name of the killer, if a player killed them, otherwise, null}"
                     + "{xp|drops: An array of item objects, or null. The items to be dropped"
 					+ " are replaced with the given items, not added to|death_message: the death message,"
 					+ " or null to remove it entirely|keep_level: if true, the player will not lose"
@@ -981,14 +982,14 @@ public class PlayerEvents {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
 				Map<String, Mixed> map = super.evaluate(e);
 				map.putAll(evaluate_helper(e));
-                map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
-                try{
-                    map.put("cause", new CString(event.getEntity().getLastDamageCause().getCause().name(), Target.UNKNOWN));
-                } catch(NullPointerException ex){
-                    map.put("cause", new CString(MCDamageCause.CUSTOM.name(), Target.UNKNOWN));
-                }
+				map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
 				map.put("keep_level", new CBoolean(event.getKeepLevel(), Target.UNKNOWN));
 				map.put("new_level", new CInt(event.getNewLevel(), Target.UNKNOWN));
+				if(event.getKiller() instanceof MCPlayer){
+					map.put("killer", new CString(((MCPlayer)event.getKiller()).getName(), Target.UNKNOWN));
+				} else {
+					map.put("killer", new CNull());
+				}
                 return map;
             } else {
                 throw new EventException("Cannot convert e to EntityDeathEvent");
@@ -1085,7 +1086,7 @@ public class PlayerEvents {
             if (e instanceof MCPlayerQuitEvent) {
                 //As a very special case, if this player is currently in interpreter mode, we do not want to
                 //intercept their chat event
-                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerQuitEvent)e).getPlayer())){
+                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerQuitEvent)e).getPlayer().getName())){
                     throw new PrefilterNonMatchException();
                 }
 
@@ -1180,7 +1181,7 @@ public class PlayerEvents {
             if (e instanceof MCPlayerChatEvent) {
                 //As a very special case, if this player is currently in interpreter mode, we do not want to
                 //intercept their chat event
-                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerChatEvent)e).getPlayer())){
+                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerChatEvent)e).getPlayer().getName())){
                     throw new PrefilterNonMatchException();
                 }
                 Prefilters.match(prefilter, "player", ((MCPlayerChatEvent)e).getPlayer().getName(), PrefilterType.MACRO);
@@ -1359,7 +1360,8 @@ public class PlayerEvents {
             return "{player: <macro> The player that switched worlds "
                     + "| from: <string match> The world the player is coming from "
                     + "| to: <string match> The world the player is now in}"
-                    + "This event is fired off when a player changes worlds"
+					+ " This event is fired off when a player changes worlds. This event is not cancellable,"
+					+ " so to prevent it, the player_teleport event must be checked."
                     + "{player | from: The world the player is coming from | to: The world the player is now in}"
                     + "{}"
                     + "{player, from}";
@@ -1629,8 +1631,8 @@ public class PlayerEvents {
 						return false;
 					}
 				}
+				Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
 				return true;
-
 			}
 			return false ;
 		}
@@ -1701,7 +1703,7 @@ public class PlayerEvents {
 		}
 	
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 	
 		public Map<String, Mixed> evaluate(BindableEvent e)

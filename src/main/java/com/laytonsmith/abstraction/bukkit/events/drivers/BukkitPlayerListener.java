@@ -84,7 +84,7 @@ public class BukkitPlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled=true)
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
 		if(CommandHelperPlugin.self.interpreterListener
-                .isInInterpreterMode(new BukkitMCPlayer(event.getPlayer()))){
+                .isInInterpreterMode(event.getPlayer().getName())){
             //They are in interpreter mode, so we want it to handle this, not everything else.
             return;
         }
@@ -205,12 +205,6 @@ public class BukkitPlayerListener implements Listener {
 		BukkitPlayerEvents.BukkitMCPlayerTeleportEvent pte = new BukkitPlayerEvents.BukkitMCPlayerTeleportEvent(event);
 		EventUtils.TriggerExternal(pte);
 		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", pte);
-	
-		if (!event.getFrom().getWorld().equals(event.getTo().getWorld()) && !event.isCancelled()) {
-			BukkitPlayerEvents.BukkitMCWorldChangedEvent wce = new BukkitPlayerEvents.BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent(event.getPlayer(), event.getFrom().getWorld()));
-			EventUtils.TriggerExternal(wce);
-			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce);
-		}
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST)

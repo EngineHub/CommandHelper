@@ -15,6 +15,8 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Operators;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A class that represents a dynamic array.
@@ -59,6 +61,19 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed>, O
 	 */
 	protected List<Mixed> getArray(){
 		return array;
+	}
+	
+	/**
+	 * Returns a List based on the array. This is only applicable if this
+	 * is a normal array.
+	 * @return 
+	 */
+	public List<Construct> asList(){
+		if(inAssociativeMode()){
+			throw new RuntimeException("asList can only be called on a normal array");
+		} else {
+			return new ArrayList<Construct>(array);
+		}
 	}
 	
 	/**
@@ -262,7 +277,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed>, O
             try {
                 int indx = index.castToInt32(t);
                 if (indx > next_index || indx < 0) {
-                    throw new ConfigRuntimeException("", Target.UNKNOWN);
+                    throw new ConfigRuntimeException("", ExceptionType.IndexOverflowException, Target.UNKNOWN);
                 } else if(indx == next_index){
                     this.push(c);
                 } else {
