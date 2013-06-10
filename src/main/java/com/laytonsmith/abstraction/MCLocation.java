@@ -13,6 +13,7 @@ public interface MCLocation extends AbstractionObject{
     public double getY();
     public double getZ();
 	public double distance(MCLocation o);
+	public double distanceSquared(MCLocation o);
     public MCWorld getWorld();
     public float getYaw();
     public float getPitch();
