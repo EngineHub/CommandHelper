@@ -610,7 +610,7 @@ public class Math {
 				IVariable cur = (IVariable) args[0];
 				Mixed v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Mixed newVal;
-				if (Static.anyDoubles(v)) {
+				if (v instanceof CDouble) {
 					newVal = new CDouble(v.primitive(t).castToDouble(t) + value, t);
 				} else {
 					newVal = new CInt(v.primitive(t).castToInt(t) + value, t);
@@ -618,7 +618,7 @@ public class Math {
 				env.getEnv(GlobalEnv.class).GetVarList().set(cur, newVal);
 				return newVal;
 			} else {
-				if (Static.anyDoubles(args[0])) {
+				if (args[0] instanceof CDouble) {
 					return new CDouble(args[0].primitive(t).castToDouble(t) + value, t);
 				} else {
 					return new CInt(args[0].primitive(t).castToInt(t) + value, t);
@@ -721,7 +721,7 @@ public class Math {
 				IVariable cur = (IVariable) args[0];
 				Mixed v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Mixed newVal;
-				if (Static.anyDoubles(v)) {
+				if (v instanceof CDouble) {
 					newVal = new CDouble(v.primitive(t).castToDouble(t) + value, t);
 				} else {
 					newVal = new CInt(v.primitive(t).castToInt(t) + value, t);
@@ -731,7 +731,7 @@ public class Math {
 				env.getEnv(GlobalEnv.class).GetVarList().set(cur, v);
 				return oldVal;
 			} else {
-				if (Static.anyDoubles(args[0])) {
+				if (args[0] instanceof CDouble) {
 					return new CDouble(args[0].primitive(t).castToDouble(t) + value, t);
 				} else {
 					return new CInt(args[0].primitive(t).castToInt(t) + value, t);
@@ -828,7 +828,7 @@ public class Math {
 				IVariable cur = (IVariable) args[0];
 				Mixed v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
-				if (Static.anyDoubles(v)) {
+				if (v instanceof CDouble) {
 					newVal = new CDouble(v.primitive(t).castToDouble(t) - value, t);
 				} else {
 					newVal = new CInt(v.primitive(t).castToInt(t) - value, t);
@@ -836,7 +836,7 @@ public class Math {
 				env.getEnv(GlobalEnv.class).GetVarList().set(cur, v);
 				return v;
 			} else {
-				if (Static.anyDoubles(args[0])) {
+				if (args[0] instanceof CDouble) {
 					return new CDouble(args[0].primitive(t).castToDouble(t) + value, t);
 				} else {
 					return new CInt(args[0].primitive(t).castToInt(t) + value, t);
@@ -932,21 +932,17 @@ public class Math {
 				IVariable cur = (IVariable) args[0];
 				Mixed v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Mixed newVal;
-				if (Static.anyDoubles(v)) {
+				if (v instanceof CDouble) {
 					newVal = new CDouble(v.primitive(t).castToDouble(t) - value, t);
 				} else {
 					newVal = new CInt(v.primitive(t).castToInt(t) - value, t);
 				}
 				Mixed oldVal = null;
-				try {
-					oldVal = v.doClone();
-				} catch (CloneNotSupportedException ex) {
-					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
-				}
+				oldVal = v.doClone();
 				env.getEnv(GlobalEnv.class).GetVarList().set(cur, v);
 				return oldVal;
 			} else {
-				if (Static.anyDoubles(args[0])) {
+				if (args[0] instanceof CDouble) {
 					return new CDouble(args[0].primitive(t).castToDouble(t) + value, t);
 				} else {
 					return new CInt(args[0].primitive(t).castToInt(t) + value, t);
