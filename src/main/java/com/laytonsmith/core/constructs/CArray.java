@@ -68,11 +68,11 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed>, O
 	 * is a normal array.
 	 * @return 
 	 */
-	public List<Construct> asList(){
+	public List<Mixed> asList(){
 		if(inAssociativeMode()){
 			throw new RuntimeException("asList can only be called on a normal array");
 		} else {
-			return new ArrayList<Construct>(array);
+			return new ArrayList<Mixed>(array);
 		}
 	}
 	
@@ -752,7 +752,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed>, O
                     }
                     if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt || 
                             c instanceof CDouble || c.isNull())){
-                        throw new ConfigRuntimeException("Unsupported type being sorted: " + c.getClass().getSimpleName(), CArray.this.getTarget());
+                        throw ConfigRuntimeException.CreateUncatchableException("Unsupported type being sorted: " + c.getClass().getSimpleName(), CArray.this.getTarget());
                     }
                 }
                 if(o1.isNull() || o2.isNull()){

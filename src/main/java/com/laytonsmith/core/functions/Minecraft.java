@@ -1477,8 +1477,8 @@ public class Minecraft {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCMaterial i = StaticLayer.GetConvertor().getMaterial(args[0].primitive(t).castToInt32(t));
 			CArray ret = new CArray(t);
 			ret.set("maxStacksize", new CInt(i.getMaxStackSize(), t), t);
 			ret.set("maxDurability", new CInt(i.getMaxDurability(), t), t);
@@ -1503,7 +1503,7 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "array {int} Returns an array of info about the material.";
+			return "Returns an array of info about the material.";
 		}
 
 		public boolean isRestricted() {
@@ -1516,6 +1516,14 @@ public class Minecraft {
 
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		public Argument returnType() {
+			return new Argument("", CArray.class); //TODO: Change to an object
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(new Argument("", CInt.class, "materialID"));
 		}
 	}
 }

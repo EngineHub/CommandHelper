@@ -255,7 +255,7 @@ public class Script {
 				f = (Function) FunctionList.getFunction(m);
 			} catch (ConfigCompileException e) {
 				//Turn it into a config runtime exception. This shouldn't ever happen though.
-				throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getTarget());
+				throw new NonScriptError("Unable to find function " + m.val());
 			}
 
 			if (f.isRestricted()) {

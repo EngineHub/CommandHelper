@@ -1094,7 +1094,7 @@ public class Scoreboards {
 	@api
 	public static class reset_all_pscores extends SBFunction {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			assignBoard(2, 1, t, args).resetScores(Static.getServer().getOfflinePlayer(args[0].val()));
 			return new CVoid(t);
 		}
@@ -1108,9 +1108,21 @@ public class Scoreboards {
 		}
 
 		public String docs() {
-			return "void {player, [scoreboard]} Resets all scores for a player tracked by the given scoreboard."
+			return "Resets all scores for a player tracked by the given scoreboard."
 					+ " This means they will not be show up on any displays. " + DEF_MSG;
 		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					PlayerManagement.PLAYER_ARG,
+					new Argument("", CString.class, "scoreboard").setOptionalDefaultNull()
+				);
+		}
+
 	}
 	
 	@api

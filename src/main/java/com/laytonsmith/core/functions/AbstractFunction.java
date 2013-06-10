@@ -18,8 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- * @author layton
+ * 
  */
 public abstract class AbstractFunction implements Function {
 

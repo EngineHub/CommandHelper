@@ -401,7 +401,7 @@ public class DataTransformations {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			XMLDocument doc;
 			try {
 				doc = new XMLDocument(args[0].val());
@@ -431,6 +431,17 @@ public class DataTransformations {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
+
+		public Argument returnType() {
+			return Argument.AUTO;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("", CString.class, "xml"),
+					new Argument("", CString.class, "xpath")
+				);
+		}
 		
 	}
 	
@@ -449,7 +460,7 @@ public class DataTransformations {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -467,6 +478,14 @@ public class DataTransformations {
 
 		public Version since() {
 			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public Argument returnType() {
+			throw new UnsupportedOperationException("TODO: Not supported yet.");
+		}
+
+		public ArgumentBuilder arguments() {
+			throw new UnsupportedOperationException("TODO: Not supported yet.");
 		}
 		
 	}

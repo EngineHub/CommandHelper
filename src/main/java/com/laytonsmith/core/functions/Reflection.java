@@ -5,8 +5,11 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -325,7 +328,7 @@ public class Reflection {
 			}
 		}
 		
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
 			if (funcs.keySet().size() < 10) {
 				initf();
@@ -349,13 +352,21 @@ public class Reflection {
 		}
 
 		public String docs() {
-			return "array {} Returns an associative array of all loaded functions. The keys of this array are the"
+			return "Returns an associative array of all loaded functions. The keys of this array are the"
 					+ " names of the classes containing the functions (which you know as the sections of the API page),"
 					+ " and the values are arrays of the names of the functions within those classes.";
 		}
 
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(CArray.class).addSubtype(new Generic(CString.class)));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 	}
 	
@@ -375,7 +386,7 @@ public class Reflection {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (String name : EventList.GetEvents()) {
 				ret.push(new CString(name, t));
@@ -392,11 +403,19 @@ public class Reflection {
 		}
 
 		public String docs() {
-			return "array {} Returns an array of all registered event names.";
+			return "Returns an array of all registered event names.";
 		}
 
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 	}
 	
@@ -415,7 +434,7 @@ public class Reflection {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (Script s : Static.getAliasCore().getScripts()) {
 				ret.push(new CString(s.getSignature(), t));
@@ -432,11 +451,19 @@ public class Reflection {
 		}
 
 		public String docs() {
-			return "array {} Returns an array of the defined alias signatures (The part left of the = sign).";
+			return "Returns an array of the defined alias signatures (The part left of the = sign).";
 		}
 
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		public Argument returnType() {
+			return new Argument("", CArray.class).setGenerics(new Generic(CString.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 	}
 }

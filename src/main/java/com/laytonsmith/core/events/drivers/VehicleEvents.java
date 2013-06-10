@@ -62,7 +62,7 @@ public class VehicleEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
@@ -119,7 +119,7 @@ public class VehicleEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
@@ -195,7 +195,7 @@ public class VehicleEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			throw new ConfigRuntimeException("Unsupported Operation", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
@@ -222,7 +222,7 @@ public class VehicleEvents {
 						pickup = !vec.isPickupCancelled();
 						break;
 						default:
-							throw new ConfigRuntimeException("Greetings from the future! If you are seeing this message,"
+							throw ConfigRuntimeException.CreateUncatchableException("Greetings from the future! If you are seeing this message,"
 									+ " Minecraft has reached the point where vehicles can hit things that are neither"
 									+ " a block nor an entity.", t);
 				}

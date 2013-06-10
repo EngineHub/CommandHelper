@@ -2385,7 +2385,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2){
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
 							+ " Use import('my.namespace') instead of import('my', 'namespace')", t);
@@ -2516,7 +2516,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2){
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
 							+ " Use export('my.namespace', @var) instead of export('my', 'namespace', @var)", t);

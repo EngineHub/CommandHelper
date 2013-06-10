@@ -17,11 +17,13 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -33,6 +35,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -63,7 +66,7 @@ public class Web {
 		for(Cookie cookie : cookieJar.getAllCookies()){
 			boolean update = false;
 			CArray aCookie = null;
-			for(Construct ac : arrayJar.asList()){
+			for(Mixed ac : arrayJar.asList()){
 				aCookie = Static.getArray(ac, t);
 				if(cookie.getName().equals(aCookie.get("name").val())
 						&& cookie.getDomain().equals(aCookie.get("domain").val())
@@ -85,7 +88,7 @@ public class Web {
 			c.set("path", cookie.getPath());
 			c.set("expiration", new CInt(cookie.getExpiration(), t), t);
 			if(!cookie.isHttpOnly() && !cookie.isSecureOnly()){
-				c.set("httpOnly", new CNull(t), t);
+				c.set("httpOnly", Construct.GetNullConstruct(CBoolean.class, t), t);
 			} else {
 				c.set("httpOnly", new CBoolean(cookie.isHttpOnly(), t), t);
 			}
@@ -116,13 +119,13 @@ public class Web {
 						+ " in all cookies.", ExceptionType.FormatException, t);
 			}
 			if(cookie.containsKey("expiration")){
-				expiration = Static.getInt(cookie.get("expiration"), t);
+				expiration = cookie.get("expiration").primitive(t).castToInt(t);
 			}
 			if(cookie.containsKey("httpOnly")){
-				if(cookie.get("expiration") instanceof CNull){
+				if(cookie.get("expiration").isNull()){
 					httpOnly = null;
 				} else {
-					httpOnly = Static.getBoolean(cookie.get("expiration"));
+					httpOnly = cookie.get("expiration").primitive(t).castToBoolean();
 				}
 			}
 			Cookie c = new Cookie(name, value, domain, path, expiration, httpOnly);
@@ -169,7 +172,7 @@ public class Web {
 			return null;
 		}
 
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final URL url;
 			try {
 				url = new URL(args[0].val());
@@ -195,14 +198,14 @@ public class Web {
 				}
 				boolean useDefaultHeaders = true;
 				if(csettings.containsKey("useDefaultHeaders")){
-					useDefaultHeaders = Static.getBoolean(csettings.get("useDefaultHeaders"));
+					useDefaultHeaders = csettings.get("useDefaultHeaders").primitive(t).castToBoolean();
 				}
-				if(csettings.containsKey("headers") && !(csettings.get("headers") instanceof CNull)){
+				if(csettings.containsKey("headers") && !(csettings.get("headers").isNull())){
 					CArray headers = Static.getArray(csettings.get("headers"), t);
 					Map<String, List<String>> mheaders = new HashMap<String, List<String>>();
 					for(String key : headers.keySet()){
 						List<String> h = new ArrayList<String>();
-						Construct c = headers.get(key);
+						Mixed c = headers.get(key);
 						if(c instanceof CArray){
 							for(String kkey : ((CArray)c).keySet()){
 								h.add(((CArray)c).get(kkey).val());
@@ -228,11 +231,11 @@ public class Web {
 						settings.getHeaders().put(key, Arrays.asList(DEFAULT_HEADERS.get(key)));
 					}
 				}
-				if(csettings.containsKey("params") && !(csettings.get("params") instanceof CNull)){
+				if(csettings.containsKey("params") && !(csettings.get("params").isNull())){
 					CArray params = Static.getArray(csettings.get("params"), t);
 					Map<String, List<String>> mparams = new HashMap<String, List<String>>();
 					for(String key : params.keySet()){
-						Construct c = params.get(key);
+						Mixed c = params.get(key);
 						List<String> l = new ArrayList<String>();
 						if(c instanceof CArray){
 							for(String kkey : ((CArray)c).keySet()){
@@ -245,14 +248,14 @@ public class Web {
 					}
 					settings.setComplexParameters(mparams);
 				}
-				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar") instanceof CNull)){
+				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar").isNull())){
 					arrayJar = Static.getArray(csettings.get("cookiejar"), t);
 					settings.setCookieJar(getCookieJar(arrayJar, t));
 				} else {
 					arrayJar = null;
 				}
 				if(csettings.containsKey("followRedirects")){
-					settings.setFollowRedirects(Static.getBoolean(csettings.get("followRedirects")));
+					settings.setFollowRedirects(csettings.get("followRedirects").primitive(t).castToBoolean());
 				}
 				//Only required parameter
 				if(csettings.containsKey("success")){
@@ -274,7 +277,7 @@ public class Web {
 					error = null;
 				}
 				if(csettings.containsKey("timeout")){
-					settings.setTimeout(Static.getInt32(csettings.get("timeout"), t));
+					settings.setTimeout(csettings.get("timeout").primitive(t).castToInt32(t));
 				}
 				String username = null;
 				String password = null;
@@ -295,7 +298,7 @@ public class Web {
 						throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 					}
 					proxyURL = proxySettings.get("url").val();
-					port = Static.getInt32(proxySettings.get("port"), t);
+					port = proxySettings.get("port").primitive(t).castToInt32(t);
 					SocketAddress addr = new InetSocketAddress(proxyURL, port);
 					Proxy proxy = new Proxy(type, addr);
 					settings.setProxy(proxy);
@@ -418,6 +421,17 @@ public class Web {
 					+ "))\n", "<cookie jar would now have cookies in it>")
 			};
 		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("", CString.class, "url"),
+					new Argument("", CClosure.class, CArray.class, "callbackOrSettings")
+				);
+		}
 		
 	}
 	
@@ -436,7 +450,7 @@ public class Web {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			CookieJar jar = getCookieJar(array, t);
 			jar.clearSessionCookies();
@@ -458,6 +472,14 @@ public class Web {
 
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(new Argument("", CArray.class, "cookieJar"));
 		}
 		
 	}

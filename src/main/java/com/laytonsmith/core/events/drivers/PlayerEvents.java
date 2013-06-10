@@ -988,7 +988,7 @@ public class PlayerEvents {
 				if(event.getKiller() instanceof MCPlayer){
 					map.put("killer", new CString(((MCPlayer)event.getKiller()).getName(), Target.UNKNOWN));
 				} else {
-					map.put("killer", new CNull());
+					map.put("killer", Construct.GetNullConstruct(CString.class, Target.UNKNOWN));
 				}
                 return map;
             } else {

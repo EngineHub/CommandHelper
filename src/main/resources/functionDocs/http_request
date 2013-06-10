@@ -1,4 +1,4 @@
-void {url, callback | url, settings} Makes an HTTP request to the given url. ----
+Makes an HTTP request to the given url. ----
 If the second parameter is a closure, it works the same as giving the closure to
 the success parameter in the settings object. The settings object is an array
 with the following fields, all of which are optional aside from the complete member.

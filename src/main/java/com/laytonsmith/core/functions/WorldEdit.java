@@ -2013,7 +2013,7 @@ public class WorldEdit {
 		}
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 			Static.checkPlugin("WorldGuard", t);
 			MCPlayer p;
 			MCLocation loc;
@@ -2041,8 +2041,19 @@ public class WorldEdit {
 		}
 
 		public String docs() {
-			return "boolean {[player,] locationArray} Returns whether or not player can build at the location,"
+			return "Returns whether or not player can build at the location,"
 					+ " according to WorldGuard. If player is not given, the current player is used.";
+		}
+
+		public Argument returnType() {
+			return new Argument("", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					PlayerManagement.PLAYER_ARG,
+					new Argument("", MLocation.class)
+				);
 		}
 	}
 

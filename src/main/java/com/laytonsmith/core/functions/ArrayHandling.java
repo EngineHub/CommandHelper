@@ -1394,7 +1394,7 @@ public class ArrayHandling {
 			final CArray array = list.get("array");
 			final CArray.SortType sortType = list.getEnum("sortType", CArray.SortType.class);
 			final CClosure callback = list.get("closure");
-			queue.invokeLater(new Runnable() {
+			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 				public void run() {
 					Mixed c = new array_sort().exec(Target.UNKNOWN, null, array, new CString(sortType.name(), Target.UNKNOWN));
 					callback.execute(new Mixed[]{c});
@@ -1765,23 +1765,23 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			boolean compareTypes = true;
 			if(args.length == 2){
-				compareTypes = Static.getBoolean(args[1]);
+				compareTypes = args[1].primitive(t).castToBoolean();
 			}
 			final boolean fCompareTypes = compareTypes;
 			if(array.inAssociativeMode()){
-				return array.clone();
+				return array.doClone();
 			} else {
 				List<Construct> asList = array.asList();
 				CArray newArray = new CArray(t);
 				Set<Construct> set = new LinkedComparatorSet<Construct>(asList, new LinkedComparatorSet.EqualsComparator<Construct>() {
 
 					public boolean checkIfEquals(Construct item1, Construct item2) {
-						return (fCompareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2)))
-								|| (!fCompareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)));
+						return (fCompareTypes && sequals.exec(t, environment, item1, item2).castToBoolean())
+								|| (!fCompareTypes && equals.exec(t, environment, item1, item2).castToBoolean());
 					}
 				});
 				for(Construct c : set){
