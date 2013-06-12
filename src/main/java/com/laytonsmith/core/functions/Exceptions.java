@@ -419,7 +419,11 @@ public class Exceptions {
 				if (!(args[0] instanceof CNull)) {
 					c = ExceptionType.valueOf(args[0].val());
 				}
-				throw new ConfigRuntimeException(args[1].val(), c, t);
+				if(c == null){
+					throw ConfigRuntimeException.CreateUncatchableException(args[1].val(), t);
+				} else {
+					throw new ConfigRuntimeException(args[1].val(), c, t);
+				}
 			} catch (IllegalArgumentException e) {
 				throw new ConfigRuntimeException("Expected a valid exception type", ExceptionType.FormatException, t);
 			}
