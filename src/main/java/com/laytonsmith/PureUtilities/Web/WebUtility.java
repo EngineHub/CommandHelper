@@ -190,7 +190,7 @@ public final class WebUtility {
 		if (method == HTTPMethod.POST) {
 			conn.setDoOutput(true);
 			String params = "";
-			if(!parameters.isEmpty()){
+			if(parameters != null && !parameters.isEmpty()){
 				params = encodeParameters(parameters);
 				conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			} else if(settings.getRawParameter() != null){

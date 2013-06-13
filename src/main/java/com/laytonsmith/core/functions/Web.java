@@ -357,6 +357,8 @@ public class Web {
 						} else {
 							ConfigRuntimeException.React(ex, environment);
 						}
+					} catch(Exception e){
+						e.printStackTrace();
 					} finally {
 						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 					}
