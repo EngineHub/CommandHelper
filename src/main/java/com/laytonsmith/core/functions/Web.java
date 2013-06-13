@@ -35,11 +35,14 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.SocketAddress;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +52,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -454,6 +459,89 @@ public class Web {
 		public String docs() {
 			return "void {cookieJar} Clears out \"session\" cookies, that is cookies that weren't set with an expiration"
 					+ " (which translates to 0 in an individual cookie).";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class url_encode extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			try {
+				return new CString(URLEncoder.encode(args[0].val(), "UTF-8"), t);
+			} catch (UnsupportedEncodingException ex) {
+				throw new Error();
+			}
+		}
+
+		public String getName() {
+			return "url_encode";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "string {param} URL Encodes the parameter given. This escapes all special characters per the"
+					+ " x-www-form-urlencoded format.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class url_decode extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			try {
+				return new CString(URLDecoder.decode(args[0].val(), "UTF-8"), t);
+			} catch (UnsupportedEncodingException ex) {
+				throw new Error();
+			}
+		}
+
+		public String getName() {
+			return "url_decode";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "string {param} Decodes a previously url encoded string.";
 		}
 
 		public Version since() {

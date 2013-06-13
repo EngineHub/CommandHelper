@@ -1,6 +1,5 @@
 package com.laytonsmith.PureUtilities.Web;
 
-import com.laytonsmith.PureUtilities.MutableObject;
 import com.laytonsmith.PureUtilities.StringUtils;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -10,9 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -24,8 +21,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
