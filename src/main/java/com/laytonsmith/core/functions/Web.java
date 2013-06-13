@@ -515,6 +515,13 @@ public class Web {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "url_encode('A string with special characters: !@#$%^&*()-+')")
+			};
+		}
 		
 	}
 	
@@ -555,6 +562,13 @@ public class Web {
 
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "url_decode('A+string+with+special+characters%3A+%21%40%23%24%25%5E%26*%28%29-%2B')")
+			};
 		}
 		
 	}
