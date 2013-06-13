@@ -353,6 +353,12 @@
 			<artifactId>metrics</artifactId>
 			<version>1.2-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<type>jar</type>
+			<version>1.3</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<site>
@@ -477,6 +483,7 @@
 									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
 									<include>redis.clients:jedis:jar:*</include>
 									<include>mysql:mysql-connector-java:jar:*</include>
+									<include>commons-codec:commons-codec:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -533,6 +540,10 @@
 								<relocation> <!-- part of the mysql lib -->
 									<pattern>org.gjt.mm.mysql</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.gjt.mm.mysql</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.codec</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.commons.codec</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -599,6 +610,12 @@
 								</filter>
 								<filter>
 									<artifact>mysql:mysql-connector-java:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>commons-codec:commons-codec:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
