@@ -234,21 +234,28 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("params") && !(csettings.get("params") instanceof CNull)){
-					CArray params = Static.getArray(csettings.get("params"), t);
-					Map<String, List<String>> mparams = new HashMap<String, List<String>>();
-					for(String key : params.keySet()){
-						Construct c = params.get(key);
-						List<String> l = new ArrayList<String>();
-						if(c instanceof CArray){
-							for(String kkey : ((CArray)c).keySet()){
-								l.add(((CArray)c).get(kkey).val());
+					if(csettings.get("params") instanceof CArray){
+						CArray params = Static.getArray(csettings.get("params"), t);
+						Map<String, List<String>> mparams = new HashMap<String, List<String>>();
+						for(String key : params.keySet()){
+							Construct c = params.get(key);
+							List<String> l = new ArrayList<String>();
+							if(c instanceof CArray){
+								for(String kkey : ((CArray)c).keySet()){
+									l.add(((CArray)c).get(kkey).val());
+								}
+							} else {
+								l.add(c.val());
 							}
-						} else {
-							l.add(c.val());
+							mparams.put(key, l);
 						}
-						mparams.put(key, l);
+						settings.setComplexParameters(mparams);
+					} else {
+						settings.setRawParameter(csettings.get("params").val());
+						if(settings.getMethod() != HTTPMethod.POST){
+							throw new Exceptions.FormatException("You must set the method to POST to use raw params.", t);
+						}
 					}
-					settings.setComplexParameters(mparams);
 				}
 				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar") instanceof CNull)){
 					arrayJar = Static.getArray(csettings.get("cookiejar"), t);

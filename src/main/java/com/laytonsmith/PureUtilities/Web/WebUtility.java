@@ -189,8 +189,13 @@ public final class WebUtility {
 		conn.setRequestMethod(method.name());
 		if (method == HTTPMethod.POST) {
 			conn.setDoOutput(true);
-			String params = encodeParameters(parameters);
-			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			String params = "";
+			if(!parameters.isEmpty()){
+				params = encodeParameters(parameters);
+				conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			} else if(settings.getRawParameter() != null){
+				params = settings.getRawParameter();
+			}
 			conn.setRequestProperty("Content-Length", Integer.toString(params.length()));
 			OutputStream os = new BufferedOutputStream(conn.getOutputStream());
 			WriteStringToOutputStream(params, os);
