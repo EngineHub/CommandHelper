@@ -84,9 +84,11 @@ public class DocGen {
 					String style = "";
 					if(es.isAutomatic()){
 						style = " style=\"background-color: #BDC7E9\"";
+						exampleBuilder.append("\n\nThe output would be:\n<pre");
+					} else {
+						exampleBuilder.append("\n\nThe output might be:\n<pre");
 					}
-					exampleBuilder.append("\n\nThe output would be:\n<pre")
-							.append(style).append(">").append(es.getOutput()).append("</pre>\n\n");
+					exampleBuilder.append(style).append(">").append(es.getOutput()).append("</pre>\n\n");
 					count++;
 				}
 			} else {

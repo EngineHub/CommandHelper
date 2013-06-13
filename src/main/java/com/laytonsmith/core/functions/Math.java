@@ -947,9 +947,9 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage, with one paramter", "rand(10)"),
-				new ExampleScript("Basic usage, with a range", "rand(50, 100)"),
-				new ExampleScript("Usage with no parameters", "rand()")
+				new ExampleScript("Basic usage, with one paramter", "rand(10)", ":5"),
+				new ExampleScript("Basic usage, with a range", "rand(50, 100)", ":95"),
+				new ExampleScript("Usage with no parameters", "rand()", ":0.720543709668052")
 			};
 		}
 				

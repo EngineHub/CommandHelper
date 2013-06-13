@@ -324,8 +324,8 @@ public class Crypto {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "bcrypt('string')"),
-				new ExampleScript("Basic usage", "bcrypt('String')"),
+				new ExampleScript("Basic usage", "bcrypt('string')", ":$2a$05$aBMYDJAu6C3O.142N/n7yO6Dl3KC0L/zHUEZnOXQuaX13XUKec8Gy"),
+				new ExampleScript("Basic usage", "bcrypt('String')", ":$2a$05$jYm.4yath40V2DqjipWSje3Ed0ZNLO8IcDjIF50PJoPvWSmF1J7L2"),
 			};
 		}
         

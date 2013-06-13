@@ -1292,7 +1292,7 @@ public class StringHandling {
 				new ExampleScript("Compile error, missing parameters", "sprintf('%d')", true),
 				new ExampleScript("Other formatting: float with precision (using integer)", "sprintf('%07.3f', 4)"),
 				new ExampleScript("Other formatting: float with precision (with rounding)", "sprintf('%07.3f', 3.4567)"),
-				new ExampleScript("Other formatting: time", "sprintf('%1$tm %1$te,%1$tY', time())"),
+				new ExampleScript("Other formatting: time", "sprintf('%1$tm %1$te,%1$tY', time())", ":06 13,2013"),
 				new ExampleScript("Literal percent sign", "sprintf('%%')"),
 				new ExampleScript("Hexidecimal formatting", "sprintf('%x', 15)"),
 				new ExampleScript("Other formatting: character", "sprintf('%c', 's')"),

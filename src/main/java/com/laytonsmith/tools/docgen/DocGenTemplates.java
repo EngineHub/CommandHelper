@@ -21,8 +21,11 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -169,9 +172,9 @@ public class DocGenTemplates {
 	public static Generator persistance_connections = new Generator(){
 
 		public String generate(String ... args) {
-			StringBuilder b = new StringBuilder();
 			Class [] classes = ClassDiscovery.GetClassesWithAnnotation(datasource.class);
 			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*?)\\s*$");
+			SortedSet<String> set = new TreeSet<String>();
 			for(Class c : classes){
 				if(DataSource.class.isAssignableFrom(c)){
 					try{
@@ -197,8 +200,10 @@ public class DocGenTemplates {
 						if(name == null || example == null || description == null){
 							throw new Error("Invalid documentation for " + c.getSimpleName());
 						}
+						StringBuilder b = new StringBuilder();
 						b.append("|-\n| ").append(name).append(" || ").append(description)
 							.append(" || ").append(example).append(" || ").append(ds.since().toString()).append("\n");
+						set.add(b.toString());
 					} catch(Exception e){
 						throw new Error(e);
 					}
@@ -206,7 +211,7 @@ public class DocGenTemplates {
 					throw new Error("@datasource implementations must implement DataSource.");
 				}
 			}
-			return b.toString();
+			return StringUtils.Join(set, "");
 		}
 		
 	};
