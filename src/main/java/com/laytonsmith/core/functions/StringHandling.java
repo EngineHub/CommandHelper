@@ -193,7 +193,7 @@ public class StringHandling {
 				if (i > 0) {
 					b.append(" ");
 				}
-				b.append(args[i].val());
+				b.append(args[i] == null?"":args[i].val());
 			}
 			return new CString(b.toString(), t);
 		}
@@ -270,7 +270,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Functional usage", "sconcat('1', '2', '3', '4')"),
-						new ExampleScript("Implied usage, do to no operators", "'1' '2' '3' '4'"),};
+						new ExampleScript("Implied usage, due to no operators", "'1' '2' '3' '4'"),};
 		}
 
 		@Override
