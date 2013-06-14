@@ -1472,7 +1472,7 @@ public class StringHandling {
 					+ "\t@str .= @i . '.'\n"
 					+ ")\n"
 					+ "@t4 = time()\n"
-					+ "msg('Task 1 took '.(@t2 - @t1).'ms under '.@to.' iterations')"
+					+ "msg('Task 1 took '.(@t2 - @t1).'ms under '.@to.' iterations')\n"
 					+ "msg('Task 2 took '.(@t4 - @t3).'ms under '.@to.' iterations')")
 			};
 		}
