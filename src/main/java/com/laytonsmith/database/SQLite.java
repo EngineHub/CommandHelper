@@ -8,7 +8,6 @@ import java.util.Set;
 
 /**
  *
- * @author layton
  */
 public class SQLite extends DB{
 

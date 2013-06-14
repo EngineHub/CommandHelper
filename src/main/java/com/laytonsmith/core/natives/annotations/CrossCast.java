@@ -7,7 +7,6 @@ import com.laytonsmith.core.natives.MClass;
 
 /**
  *
- * @author lsmith
  */
 @typename("CrossCast")
 public class CrossCast extends MAnnotation {

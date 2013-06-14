@@ -7,7 +7,6 @@ import com.laytonsmith.core.Documentation;
  * This should be implemented by permission enums. This provides a standard way
  * to get permission information, without tying them down to a single enum class,
  * so extensions can later provide different permissions, while 
- * @author Layton
  */
 public interface PackagePermission extends Documentation {
 	

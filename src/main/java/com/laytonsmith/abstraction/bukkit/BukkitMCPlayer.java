@@ -29,7 +29,6 @@ import org.bukkit.potion.PotionEffectType;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCCommandSender, MCOfflinePlayer {
 

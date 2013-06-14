@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 /**
  * Contains utilities to execute an external process and retrieve various
  * results from it.
- * @author lsmith
  */
 public class CommandExecutor {
 	

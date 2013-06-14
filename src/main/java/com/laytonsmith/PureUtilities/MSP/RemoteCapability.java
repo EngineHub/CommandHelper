@@ -12,7 +12,6 @@ import java.lang.annotation.Target;
  * of the field (if annotating a field). The value may optionally be hardcoded as a string
  * provided in the value, which defaults to the NULL constant defined here.
  *
- * @author lsmith
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.FIELD})

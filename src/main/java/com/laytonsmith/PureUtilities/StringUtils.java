@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author lsmith
  */
 public final class StringUtils {
 

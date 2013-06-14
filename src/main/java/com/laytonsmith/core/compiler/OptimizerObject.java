@@ -6,13 +6,13 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.functions.EventBinding;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.StringHandling;
@@ -25,7 +25,6 @@ import java.util.Set;
 
 /**
  *
- * @author lsmith
  */
 class OptimizerObject {
 
@@ -34,10 +33,10 @@ class OptimizerObject {
 	private Environment env;
 	
 	private final static String __autoconcat__ = new CompilerFunctions.__autoconcat__().getName();
-	private final static String __cbrace__ = new CompilerFunctions.__cbrace__().getName();
 	private final static String cc = new StringHandling.cc().getName();
 	private final static String assign = new DataHandling.assign().getName();
 	private final static String proc = new DataHandling.proc().getName();
+	private final static String bind = new EventBinding.bind().getName();
 	
 
 	public OptimizerObject(ParseTree root, Environment compilerEnvironment) {
@@ -125,7 +124,7 @@ class OptimizerObject {
 		env.getEnv(CompilerEnvironment.class).popProcedureScope();
 		//turing reduction again
 		optimize02(root, env, true); // Gotta do this one again too
-
+		
 		return root;
 	}
 
@@ -427,7 +426,7 @@ class OptimizerObject {
 		//of the tree may be in strict mode, in which case we will simply skip throwing the exception
 		//if we aren't in strict mode.
 		if(tree.getFileOptions().isStrict()){
-
+			
 		}
 	}
 

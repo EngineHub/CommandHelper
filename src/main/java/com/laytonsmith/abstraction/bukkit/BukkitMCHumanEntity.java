@@ -12,7 +12,6 @@ import org.bukkit.inventory.Inventory;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
     

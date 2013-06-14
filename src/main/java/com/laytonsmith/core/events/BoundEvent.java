@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 /**
  * This class represents an actually bound event. When the script runs bind(), a
  * new BoundEvent is created as a closure. 
- * @author layton
  */
 public class BoundEvent implements Comparable<BoundEvent> {
 

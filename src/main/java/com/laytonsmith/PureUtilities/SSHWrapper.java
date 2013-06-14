@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 /**
  * This class wraps the JSch library, to make atomic operations easier to do.
  *
- * @author lsmith
  */
 public class SSHWrapper {
 

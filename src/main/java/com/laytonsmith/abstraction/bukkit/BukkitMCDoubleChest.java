@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  *
- * @author Layton
  */
 public class BukkitMCDoubleChest extends BukkitMCInventory {
 	

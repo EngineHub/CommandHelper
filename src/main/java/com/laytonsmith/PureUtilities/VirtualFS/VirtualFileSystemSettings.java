@@ -23,7 +23,6 @@ import org.yaml.snakeyaml.Yaml;
  * or folders that exist (or are attempted to be created) and match the glob
  * are first checked against these settings, upon which the request will either
  * be allowed, or be denied.
- * @author lsmith
  */
 public class VirtualFileSystemSettings {
 	/**

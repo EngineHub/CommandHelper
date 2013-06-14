@@ -4,7 +4,6 @@ package com.laytonsmith.PureUtilities;
  * This class simply provides a method to getting the size of java primitives,
  * without having magic numbers everywhere.
  *
- * @author lsmith
  */
 public final class Sizes {
 

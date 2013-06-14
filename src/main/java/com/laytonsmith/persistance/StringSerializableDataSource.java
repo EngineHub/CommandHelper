@@ -12,7 +12,6 @@ import java.util.Set;
  * be written to file, but it is for sure going to be stored (or at least retrievable)
  * from a UTF-8 encoded string.
  *
- * @author lsmith
  */
 public abstract class StringSerializableDataSource extends AbstractDataSource {
 	/**

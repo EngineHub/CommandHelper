@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author lsmith
  */
 public abstract class AbstractDataSource implements DataSource {
 

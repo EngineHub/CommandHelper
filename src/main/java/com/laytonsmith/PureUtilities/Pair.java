@@ -5,7 +5,6 @@ import java.util.Map;
 
 /**
  *
- * @author layton
  */
 public class Pair<A, B> implements Map.Entry<A, B> {
 

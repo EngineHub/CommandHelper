@@ -8,13 +8,14 @@ import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
  *
- * @author Layton
  */
 class LexerObject {
 	StringBuilder buffer;
@@ -49,6 +50,7 @@ class LexerObject {
 	int lastColumn = 0;
 	Target target = Target.UNKNOWN;
 	final boolean usingNonPure;
+	
 	private static SortedSet<TokenMap> tokenMap = new TreeSet<TokenMap>();
 
 	private static class TokenMap implements Comparable<TokenMap> {
@@ -546,16 +548,6 @@ class LexerObject {
 			buffer(c);
 		}
 		parseBuffer();
-		int left = 0;
-		int right = 0;
-		for(Token t : token_list){
-			if(t.val().equals("(")){
-				left++;
-			}
-			if(t.val().equals(")")){
-				right++;
-			}
-		}
 		//Check for unclosed things
 		if(state_in_multiline){
 			throw new ConfigCompileException("Unclosed multiline construct (You have a >>> without a matching <<<). The last multiline construct"
@@ -574,9 +566,22 @@ class LexerObject {
 					+ " was started on line " + start_double_quote, target);
 		}
 		TokenStream ts = new TokenStream(new ArrayList<Token>(token_list), fileopts.toString(), fileoptsTarget);
-		//Check for lack of strict mode, and trigger the warning here
+		//Check for warnings, and trigger them here
 		if(!ts.getFileOptions().isStrict()){
 			CHLog.GetLogger().CompilerWarning(CompilerWarning.StrictModeOff, "Strict mode is turned off in this file. Strict mode is HIGHLY recommended.", fileoptsTarget, ts.getFileOptions());
+		}
+		if(!ts.getFileOptions().isWarningSuppressed(CompilerWarning.SupressedWarnings)){
+			boolean hasSuppressed = false;
+			for(CompilerWarning w : CompilerWarning.values()){
+				if(ts.getFileOptions().isWarningSuppressed(w)){
+					hasSuppressed = true;
+					break;
+				}
+			}
+			if(hasSuppressed){
+				CHLog.GetLogger().CompilerWarning(CompilerWarning.SupressedWarnings, "One or more warnings are being"
+						+ " universally supressed in this file.", fileoptsTarget, ts.getFileOptions());
+			}
 		}
 		return ts;
 	}

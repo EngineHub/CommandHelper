@@ -28,7 +28,6 @@ import java.util.Set;
 import org.mindrot.jbcrypt.BCrypt;
 
 /**
- * @author Layton
  */
 public class Crypto {
 

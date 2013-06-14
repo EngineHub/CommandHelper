@@ -13,7 +13,6 @@ import java.util.zip.ZipOutputStream;
 
 /**
  *
- * @author layton
  */
 public final class ZipMaker {
 

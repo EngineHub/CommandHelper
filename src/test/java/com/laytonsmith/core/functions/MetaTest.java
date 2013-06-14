@@ -15,7 +15,6 @@ import static org.mockito.Mockito.*;
 
 /**
  *
- * @author layton
  */
 public class MetaTest {
 

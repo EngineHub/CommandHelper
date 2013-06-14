@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
  * embedded annotation { @ code myCode } can be configured to return "&lt;code&gt;myCode&lt;/code&gt;"
  * Newlines and spaces are preserved in the body of the comment, but newlines are not stored with annotation
  * parameters.
- * @author lsmith
  */
 public class SmartComment {
 	

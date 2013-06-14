@@ -29,7 +29,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
- * @author layton
  */
 
 @RunWith(PowerMockRunner.class)

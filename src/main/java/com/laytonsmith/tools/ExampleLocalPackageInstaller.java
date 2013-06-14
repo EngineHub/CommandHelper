@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author lsmith
  */
 public class ExampleLocalPackageInstaller {
 	private static File jarFolder;

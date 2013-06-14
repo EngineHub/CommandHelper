@@ -24,7 +24,6 @@ import java.util.Map;
 
 /**
  *
- * @author lsmith
  */
 public class Argument implements Documentation {
 	/**

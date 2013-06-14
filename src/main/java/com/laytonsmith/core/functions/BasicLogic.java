@@ -9,6 +9,7 @@ import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.compiler.Braceable;
 import com.laytonsmith.core.compiler.CodeBranch;
 import com.laytonsmith.core.compiler.CompilerFunctions;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
@@ -29,13 +30,14 @@ import java.util.Set;
 
 /**
  *
- * @author Layton
  */
 public class BasicLogic {
 
 	public static String docs() {
 		return "These functions provide basic logical operations.";
 	}
+	
+	private static final String assign = new DataHandling.assign().getName();
 
 	@api
 	public static class _if extends AbstractFunction implements Optimizable, Braceable, CodeBranch {
@@ -158,7 +160,7 @@ public class BasicLogic {
 		private static final String _else = "else";
 
 		@Override
-		@SuppressWarnings({"null", "ConstantConditions"})
+		@SuppressWarnings({"null"})
 		public void handleBraces(List<ParseTree> allNodes, int startingWith) throws ConfigCompileException {
 			boolean pastIf = false;
 			boolean hasIf = false;
@@ -537,6 +539,12 @@ public class BasicLogic {
 					if (evalStatement.val().equals("else")) {
 						throw new ConfigCompileException("Unexpected else", t);
 					}
+				}
+				if(evalStatement instanceof CFunction && assign.equals(evalStatement.val())){
+					//Assignment in if, do a warning.
+					CHLog.GetLogger().CompilerWarning(CompilerWarning.AssignmentInIf, "You are doing an assignment"
+							+ " in an if. It is very likely you meant to do == instead of =. If this is correct,"
+							+ " consider moving the assignment outside of the condition in the if instead.", t, children.get(i).getFileOptions());
 				}
 				if (!statement.getData().isDynamic()) {
 					if (evalStatement instanceof CIdentifier) {

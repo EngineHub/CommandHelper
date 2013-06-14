@@ -57,7 +57,6 @@ import org.apache.commons.io.FileUtils;
  * transparent to the file system. This allows for non-continuous file systems
  * to appear continuous internally. Additionally, remote file systems can be mounted
  * via ssh, and they will appear continuous.
- * @author lsmith
  */
 public class VirtualFileSystem {
 	private static final String META_DIRECTORY_PATH = ".vfsmeta";

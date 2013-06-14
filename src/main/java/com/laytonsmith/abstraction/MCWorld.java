@@ -17,7 +17,6 @@ import java.util.List;
 
 /**
  *
- * @author layton
  */
 public interface MCWorld extends AbstractionObject{
 	public List<MCEntity> getEntities();

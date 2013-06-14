@@ -40,7 +40,6 @@ import static org.mockito.Mockito.*;
 
 /**
  *
- * @author Layton
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(Static.class)

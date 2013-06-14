@@ -6,7 +6,6 @@ import java.io.Writer;
 
 /**
  * Completely standalone generic functions live here.
- * @author lsmith
  */
 public final class Util {
     

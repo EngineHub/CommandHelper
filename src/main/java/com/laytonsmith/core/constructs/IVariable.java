@@ -4,7 +4,6 @@ import com.laytonsmith.annotations.typename;
 
 /**
  *
- * @author lsmith
  */
 @typename("ivar")
 public class IVariable extends Construct implements Cloneable {

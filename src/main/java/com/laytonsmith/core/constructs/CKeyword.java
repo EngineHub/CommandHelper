@@ -4,7 +4,6 @@ import com.laytonsmith.core.compiler.KeywordHandler;
 
 /**
  *
- * @author lsmith
  */
 public class CKeyword extends CBareString{
 	private final KeywordHandler handler;

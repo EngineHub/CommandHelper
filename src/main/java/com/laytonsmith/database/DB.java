@@ -11,7 +11,6 @@ import java.util.Set;
  * POJOs, but they are all Construct compatible, and can easily be converted
  * with the static methods in Construct.
  *
- * @author layton
  */
 public abstract class DB {
 

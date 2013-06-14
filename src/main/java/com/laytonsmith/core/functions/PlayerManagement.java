@@ -41,7 +41,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author Layton
  */
 public class PlayerManagement {
 	

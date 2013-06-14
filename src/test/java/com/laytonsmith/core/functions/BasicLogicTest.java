@@ -22,7 +22,6 @@ import static org.mockito.Mockito.*;
 
 /**
  *
- * @author Layton
  */
 public class BasicLogicTest {
 

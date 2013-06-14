@@ -24,7 +24,6 @@ import java.util.Map;
 
 /**
  *
- * @author layton
  */
 public class InventoryManagement {
     public static String docs(){

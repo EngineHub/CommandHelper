@@ -20,7 +20,6 @@ import java.util.logging.Logger;
  * In general, the most common methods used are getValue and setValue. Note that
  * getValue, setValue, save, and load are synchronized.
  *
- * @author layton
  */
 @datasource("ser")
 public class SerializedPersistance extends AbstractDataSource implements Persistance {

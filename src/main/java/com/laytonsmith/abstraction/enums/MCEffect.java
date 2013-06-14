@@ -10,7 +10,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author layton
  */
 @typename("Effect")
 public enum MCEffect implements MEnum {

@@ -8,7 +8,6 @@ import java.lang.annotation.Target;
 
 /**
  * Used to tag functions that should not be profile-able.
- * @author Layton
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

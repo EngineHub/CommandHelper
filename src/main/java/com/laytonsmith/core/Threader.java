@@ -10,7 +10,6 @@ import java.util.concurrent.ThreadFactory;
  * The Threader class maintains a pool of threads that are required by the
  * userland code, so that it can be throttled if necessary.
  *
- * @author lsmith
  */
 public class Threader {
 

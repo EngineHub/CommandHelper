@@ -10,7 +10,6 @@ import org.mozilla.intl.chardet.nsPSMDetector;
 
 /**
  *
- * @author layton
  */
 public class FileUtility {
 

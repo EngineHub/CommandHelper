@@ -9,7 +9,6 @@ import org.bukkit.inventory.InventoryView;
 
 /**
  *
- * @author Layton
  */
 public class BukkitMCInventoryView implements MCInventoryView {
 	

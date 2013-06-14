@@ -22,7 +22,6 @@ import java.util.TreeSet;
  * A global environment is always available, and contains the objects that the
  * core functionality uses.
  *
- * @author lsmith
  */
 public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable, CustomEnvironment {
 

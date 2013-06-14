@@ -5,7 +5,6 @@ import com.laytonsmith.core.natives.interfaces.MObject;
 
 /**
  *
- * @author lsmith
  */
 @typename("Enchantment")
 public class MEnchantment extends MObject {

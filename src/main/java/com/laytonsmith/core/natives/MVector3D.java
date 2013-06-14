@@ -5,7 +5,6 @@ import com.laytonsmith.core.natives.interfaces.MObject;
 
 /**
  *
- * @author lsmith
  */
 @typename("Vector3D")
 public class MVector3D extends MObject {

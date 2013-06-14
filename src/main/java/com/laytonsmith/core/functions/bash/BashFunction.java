@@ -7,7 +7,6 @@ import com.laytonsmith.core.snapins.PackagePermission;
 
 /**
  * This is a marker interface to make Bash functions separate.
- * @author layton
  */
 public abstract class BashFunction implements FunctionBase, CompiledFunction, Documentation {
 

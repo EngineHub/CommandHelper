@@ -12,7 +12,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 /**
  * These don't directly map to entity types, because this is mostly used for
  * spawining mobs.
- * @author Layton
  */
 @typename("Mobs")
 public enum MCMobs implements MEnum {

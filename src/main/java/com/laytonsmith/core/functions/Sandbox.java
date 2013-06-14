@@ -18,7 +18,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import org.bukkit.event.Cancellable;
 
 /**
- * @author Layton
  */
 public class Sandbox {
 

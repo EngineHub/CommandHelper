@@ -23,7 +23,6 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  *
- * @author Layton
  */
 public class Regex {
     

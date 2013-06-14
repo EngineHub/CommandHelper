@@ -7,7 +7,6 @@ import com.laytonsmith.core.constructs.Target;
  * extend this, so if an exception passes all the way up to a top level handler, it
  * can address it in a standard way if it doesn't know what to do with these types
  * of exceptions. Things like break, continue, etc are considered Program Flow Manipulations.
- * @author layton
  */
 public abstract class ProgramFlowManipulationException extends RuntimeException {
 

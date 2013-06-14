@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author lsmith
  */
 public class Marquee {
 	public static String docs(){

@@ -12,7 +12,6 @@ import java.util.Set;
  * A ConnectionMixin class dictates how a data source connects to its data.
  * This can vary depending on the URI, and so this class grabs the appropriate
  * mixin based on the original URI.
- * @author lsmith
  */
 public class ConnectionMixinFactory {
 	private ConnectionMixinFactory(){}

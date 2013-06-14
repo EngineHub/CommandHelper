@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  *
- * @author layton
  */
 public interface MCLivingEntity extends MCEntity {
 

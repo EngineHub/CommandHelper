@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 /**
  * A closure is just an anonymous procedure.
  *
- * @author Layton
  */
 @typename("closure")
 public class CClosure extends Construct {

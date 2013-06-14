@@ -23,7 +23,6 @@ import java.util.TreeMap;
  * match. All other aspects of how the data is stored and retrieved are
  * abstracted, so you needn't worry about any of those details.
  *
- * @author lsmith
  */
 public class PersistanceNetwork {
 

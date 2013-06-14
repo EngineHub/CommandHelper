@@ -11,7 +11,6 @@ import java.util.Set;
  * data about a data source, gather data from the data source, and (possibly)
  * write to the data source.
  *
- * @author lsmith
  */
 public interface DataSource extends Documentation {
 

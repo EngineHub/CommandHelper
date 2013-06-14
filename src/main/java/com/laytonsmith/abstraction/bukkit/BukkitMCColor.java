@@ -9,7 +9,6 @@ import org.bukkit.Color;
 
 /**
  *
- * @author Layton
  */
 public class BukkitMCColor implements MCColor {
 	

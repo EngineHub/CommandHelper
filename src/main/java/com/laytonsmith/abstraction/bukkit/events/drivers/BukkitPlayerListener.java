@@ -20,7 +20,6 @@ import org.bukkit.event.player.*;
 
 /**
  *
- * @author Layton
  */
 public class BukkitPlayerListener implements Listener {
 

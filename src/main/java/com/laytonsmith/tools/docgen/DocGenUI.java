@@ -22,7 +22,6 @@ import org.pushingpixels.substance.api.skin.SubstanceGraphiteGlassLookAndFeel;
 
 /**
  *
- * @author lsmith
  */
 public class DocGenUI extends javax.swing.JFrame {
 

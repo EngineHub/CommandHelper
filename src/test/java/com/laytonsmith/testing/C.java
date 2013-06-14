@@ -7,7 +7,6 @@ import com.laytonsmith.core.constructs.*;
 
 /**
  * This class provides methods for more easily creating different Constructs for testing purposes.
- * @author Layton
  */
 public class C {
     

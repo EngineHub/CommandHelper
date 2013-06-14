@@ -9,7 +9,6 @@ import com.laytonsmith.core.functions.FunctionList;
 
 /**
  *
- * @author layton
  */
 public class CFunction extends Construct {
     

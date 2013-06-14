@@ -6,7 +6,6 @@ import java.util.List;
 
 /**
  *
- * @author lsmith
  */
 @typename("ItemStack")
 public class MItemStack extends MObject {

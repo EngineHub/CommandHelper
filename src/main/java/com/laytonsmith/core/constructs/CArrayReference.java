@@ -10,7 +10,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author Layton
  */
 public class CArrayReference extends Construct{
     public Mixed array;

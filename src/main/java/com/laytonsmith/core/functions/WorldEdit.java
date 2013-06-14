@@ -50,7 +50,6 @@ import org.bukkit.command.CommandSender;
 
 /**
  *
- * @author Layton
  */
 public class WorldEdit {
 

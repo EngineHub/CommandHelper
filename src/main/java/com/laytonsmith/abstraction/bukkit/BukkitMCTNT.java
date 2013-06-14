@@ -6,7 +6,6 @@ import org.bukkit.entity.TNTPrimed;
 
 /**
  *
- * @author Layton
  */
 public class BukkitMCTNT extends BukkitMCEntity implements MCTNT{
 	TNTPrimed tnt;

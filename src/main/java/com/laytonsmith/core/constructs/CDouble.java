@@ -4,7 +4,6 @@ import com.laytonsmith.annotations.typename;
 
 /**
  *
- * @author layton
  */
 @typename("double")
 public class CDouble extends CNumber implements Cloneable {

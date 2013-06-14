@@ -8,7 +8,6 @@ import java.util.Set;
 
 /**
  * Things that implement this can be accessed like an array, with array_get, or [].
- * @author Layton
  */
 public interface ArrayAccess extends Mixed, Sizable {
     /**

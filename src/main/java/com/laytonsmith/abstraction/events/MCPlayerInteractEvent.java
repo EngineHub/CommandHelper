@@ -7,7 +7,6 @@ import com.laytonsmith.abstraction.enums.MCAction;
 
 /**
  *
- * @author layton
  */
 public interface MCPlayerInteractEvent extends MCPlayerEvent{
 

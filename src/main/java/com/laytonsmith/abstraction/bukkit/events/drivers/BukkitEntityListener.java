@@ -26,7 +26,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 
 /**
  *
- * @author Layton
  */
 public class BukkitEntityListener implements Listener{
 

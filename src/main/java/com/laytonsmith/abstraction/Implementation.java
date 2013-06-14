@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
  * This class dynamically detects the server version being run, using various
  * checks as needed.
  *
- * @author layton
  */
 public final class Implementation {
 

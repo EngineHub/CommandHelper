@@ -8,7 +8,6 @@ import java.util.Set;
 
 /**
  *
- * @author lsmith
  */
 public class FileOptions {
 
@@ -63,7 +62,7 @@ public class FileOptions {
 		return strict;
 	}
 	
-	public boolean isWarningSupressed(CompilerWarning warning){
+	public boolean isWarningSuppressed(CompilerWarning warning){
 		return supressWarnings.contains(warning);
 	}
 	

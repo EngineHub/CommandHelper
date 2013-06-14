@@ -12,7 +12,6 @@ import java.lang.annotation.Target;
  * At startup, a check is done to see if there are more (or less) enums in the runtime's real layer
  * vs the number that is defined for it. If so, a warning is issued, which should assist
  * in detecting a missing implementation mapping.
- * @author Layton
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

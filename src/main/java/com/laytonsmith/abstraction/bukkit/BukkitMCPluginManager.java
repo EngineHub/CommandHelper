@@ -12,7 +12,6 @@ import org.bukkit.plugin.PluginManager;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCPluginManager implements MCPluginManager {
 

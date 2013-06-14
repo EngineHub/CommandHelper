@@ -9,7 +9,6 @@ import org.bukkit.ChatColor;
 
 /**
  *
- * @author Layton
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

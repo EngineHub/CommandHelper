@@ -11,7 +11,6 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author lsmith
  */
 public class LinkedComparatorSetTest {
 	

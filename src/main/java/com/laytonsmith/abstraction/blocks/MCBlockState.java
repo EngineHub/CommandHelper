@@ -6,7 +6,6 @@ import com.laytonsmith.abstraction.MCMaterialData;
 
 /**
  *
- * @author layton
  */
 public interface MCBlockState {
 

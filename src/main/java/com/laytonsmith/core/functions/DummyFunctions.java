@@ -3,7 +3,6 @@ package com.laytonsmith.core.functions;
 
 /**
  *
- * @author Layton
  */
 public class DummyFunctions {
 

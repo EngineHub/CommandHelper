@@ -14,7 +14,6 @@ import static org.junit.Assert.fail;
 
 /**
  *
- * @author layton
  */
 public class PrefiltersTest {
 

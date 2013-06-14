@@ -38,7 +38,6 @@ import java.util.List;
 
 /**
  *
- * @author Layton
  */
 public class Environment {
 

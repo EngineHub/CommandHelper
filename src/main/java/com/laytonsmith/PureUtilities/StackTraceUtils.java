@@ -6,7 +6,6 @@ import java.io.Writer;
 
 /**
  *
- * @author lsmith
  */
 public class StackTraceUtils {
 	

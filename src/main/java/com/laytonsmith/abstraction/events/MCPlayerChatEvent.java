@@ -5,7 +5,6 @@ import java.util.List;
 
 /**
  *
- * @author layton
  */
 public interface MCPlayerChatEvent extends MCPlayerEvent{
     public String getMessage();

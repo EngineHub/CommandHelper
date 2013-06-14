@@ -17,7 +17,6 @@ import org.bukkit.plugin.RegisteredListener;
 
 /**
  *
- * @author Layton
  */
 public class BukkitDirtyRegisteredListener extends RegisteredListener {
 

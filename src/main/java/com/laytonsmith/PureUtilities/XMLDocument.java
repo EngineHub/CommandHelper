@@ -27,7 +27,6 @@ import org.xml.sax.SAXException;
  * This class abstracts up and simplifies XML document parsing. You give it an XML
  * string, and it gives you the ability to manipulate and query the document. This works
  * via a DOM implementation.
- * @author lsmith
  */
 public class XMLDocument {
 	

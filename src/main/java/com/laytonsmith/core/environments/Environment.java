@@ -6,7 +6,6 @@ import java.util.List;
 
 /**
  *
- * @author lsmith
  */
 public final class Environment implements Cloneable {
 	

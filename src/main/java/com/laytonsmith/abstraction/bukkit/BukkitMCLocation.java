@@ -13,7 +13,6 @@ import org.bukkit.Location;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCLocation implements MCLocation {
     Location l;

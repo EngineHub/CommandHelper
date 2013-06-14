@@ -9,7 +9,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  *
- * @author Layton
  */
 public class CryptoTest {
 

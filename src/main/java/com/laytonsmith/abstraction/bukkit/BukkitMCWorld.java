@@ -48,7 +48,6 @@ import org.bukkit.material.MaterialData;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCWorld implements MCWorld {
 

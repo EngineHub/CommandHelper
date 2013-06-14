@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
  * of the type name associated with this class type. Only things that extend Mixed
  * should tag with this. If the value is an empty string, it is assumed that it can only be determined
  * dynamically, and thus typeName() will be called on it, if applicable.
- * @author lsmith
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

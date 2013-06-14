@@ -14,8 +14,7 @@ import java.util.logging.Logger;
  * while not interfering with changes the user has made, meaning that you are free
  * to add new preferences, or change default values, without fear of changing
  * values that the user has specifically set. For sample usage, see
- * https://gist.github.com/1042094
- * @author Layton Smith
+ * https://gist.github.com/1042094 Smith
  */
 public class Preferences {
     private final Map<String, Preference> prefs = new HashMap<String, Preference>();

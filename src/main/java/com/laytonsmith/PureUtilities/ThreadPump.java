@@ -12,7 +12,6 @@ import java.util.concurrent.Callable;
  * the main operations for code that implements this class are the abstract methods,
  * and the configuration methods.
  * 
- * @author lsmith
  */
 public abstract class ThreadPump {
 	

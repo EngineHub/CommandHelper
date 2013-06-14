@@ -1,6 +1,7 @@
 
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -19,15 +20,17 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.ArrayHandling;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 /**
  *
- * @author Layton
  */
 class CompilerObject {
 	TokenStream stream;
@@ -280,7 +283,7 @@ class CompilerObject {
 			throw new ConfigCompileException("Unmatched closing parenthesis. (Did you put too many right parenthesis?)", t);
 		}
 	}
-	private static Map<String, KeywordHandler> keywords = new HashMap<String, KeywordHandler>();
+	private static final Map<String, KeywordHandler> keywords = new HashMap<String, KeywordHandler>();
 	//= Arrays.asList(new String[]{"else", "bind", "proc"});
 	static {
 		//TODO: Make this dynamic, so that compiler extensions can be added.
@@ -311,6 +314,11 @@ class CompilerObject {
 					if (stream.fileOptions.isStrict()) {
 						throw new ConfigCompileException("Bare strings not allowed in strict mode. (" + t.val() + ")", t.getTarget());
 					} else {
+						if(t.val().matches(".*[^a-zA-Z0-9_].*")){
+							CHLog.GetLogger().CompilerWarning(CompilerWarning.UnquotedSymbols, "Unquoted symbols are not recommended, as they may be"
+									+ " added as operators in the future. If you want a literal symbol, quote it.", t.getTarget(), pointer.getFileOptions());
+						}
+						CHLog.GetLogger().CompilerWarning(CompilerWarning.BareStrings, "Use of bare strings is not recommended. Quote all strings.", t.getTarget(), pointer.getFileOptions());
 						return new CString(t.val(), t.getTarget());
 					}
 				}

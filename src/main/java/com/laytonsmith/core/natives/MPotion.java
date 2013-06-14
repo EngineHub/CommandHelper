@@ -6,7 +6,6 @@ import com.laytonsmith.core.natives.interfaces.MObject;
 
 /**
  *
- * @author lsmith
  */
 @typename("Potion")
 public class MPotion extends MObject {

@@ -9,7 +9,6 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 /**
  *
- * @author lsmith
  */
 public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageListener {
 

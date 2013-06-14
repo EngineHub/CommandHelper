@@ -21,7 +21,6 @@ import java.util.Set;
  * that case, to make namespace.value's actual value, it should be stored as
  * namespace.value.~
  *
- * @author lsmith
  */
 public final class DataSourceModel {
 

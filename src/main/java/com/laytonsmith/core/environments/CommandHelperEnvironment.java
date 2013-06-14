@@ -7,7 +7,6 @@ import com.laytonsmith.core.events.BoundEvent;
 
 /**
  *
- * @author lsmith
  */
 public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cloneable {
 	  

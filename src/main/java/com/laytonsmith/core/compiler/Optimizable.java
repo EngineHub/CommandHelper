@@ -15,7 +15,6 @@ import java.util.Set;
 
 /**
  *
- * @author lsmith
  */
 public interface Optimizable extends Function {
 

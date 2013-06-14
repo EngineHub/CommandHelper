@@ -15,7 +15,6 @@ import static org.mockito.Mockito.*;
 
 /**
  *
- * @author Layton
  */
 public class ArrayTest {
     MCPlayer fakePlayer;

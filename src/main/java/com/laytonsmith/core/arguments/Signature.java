@@ -13,7 +13,6 @@ import java.util.List;
  * For the purposes of comparison, two signatures are considered as if
  * ALL arguments are non-optional, and will only return equals, or not
  * equals.
- * @author lsmith
  */
 public class Signature implements Comparable<Signature> {
 	private List<Argument> args;

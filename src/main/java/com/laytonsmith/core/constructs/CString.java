@@ -12,7 +12,6 @@ import java.util.Set;
 
 /**
  *
- * @author Layton
  */
 @typename("string")
 public class CString extends CPrimitive implements Cloneable, ArrayAccess {

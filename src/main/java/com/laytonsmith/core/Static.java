@@ -44,7 +44,6 @@ import java.util.logging.Logger;
  * in the event they aren't, each function will throw a NotInitializedYetException, which is a RuntimeException,
  * so you don't have to check for exceptions whenever you use them. The Exception is caught on a higher
  * level though, so it shouldn't bubble up too far.
- * @author Layton
  */
 public final class Static {
 

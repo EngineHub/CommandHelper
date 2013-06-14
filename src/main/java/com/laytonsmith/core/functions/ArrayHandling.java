@@ -34,7 +34,6 @@ import java.util.Set;
 
 /**
  *
- * @author Layton
  */
 public class ArrayHandling {
 

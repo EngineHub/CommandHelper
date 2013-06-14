@@ -12,7 +12,6 @@ package com.laytonsmith.core;
  *		<li>DEBUG</li>
  *		<li>VERBOSE</li>
  * </ul>
- * @author lsmith
  */
 public enum LogLevel {
 

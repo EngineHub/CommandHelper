@@ -9,7 +9,6 @@ import java.util.Set;
 
 /**
  *
- * @author lsmith
  */
 //@datasource("mysql")
 public class MySQLDataSource extends AbstractDataSource{

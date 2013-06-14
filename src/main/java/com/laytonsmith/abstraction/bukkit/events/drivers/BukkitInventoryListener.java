@@ -15,7 +15,6 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 
 /**
  *
- * @author Layton
  */
 public class BukkitInventoryListener implements Listener{
     

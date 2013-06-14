@@ -9,7 +9,6 @@ import org.bukkit.block.Biome;
 
 /**
  *
- * @author Layton
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

@@ -22,7 +22,6 @@ import org.perf4j.StopWatch;
 
 /**
  *
- * @author Layton
  */
 public class Performance {
     public static boolean PERFORMANCE_LOGGING = false;

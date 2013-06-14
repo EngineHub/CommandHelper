@@ -7,7 +7,6 @@ import java.util.Map;
 
 /**
  *
- * @author Layton
  */
 public interface Persistance {
     /**

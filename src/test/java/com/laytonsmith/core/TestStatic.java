@@ -13,7 +13,6 @@ import org.junit.Test;
 
 /**
  *
- * @author Layton
  */
 public class TestStatic {
     Target t = Target.UNKNOWN;

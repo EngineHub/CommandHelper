@@ -14,7 +14,6 @@ import java.util.Properties;
 
 /**
  * 
- * @author lsmith
  */
 @datasource("ini")
 public class INIDataSource extends StringSerializableDataSource {

@@ -29,7 +29,6 @@ import java.util.Map;
  * <p>Pass the arguments to the parse method, and it will parse the arguments for you,
  * into an ArgList, from which you can pull them based on argument name.</p>
  *
- * @author lsmith
  */
 public class ArgumentBuilder {
 

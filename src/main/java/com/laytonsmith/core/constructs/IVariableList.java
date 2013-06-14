@@ -13,7 +13,6 @@ import java.util.Stack;
 
 /**
  * 
- * @author Layton
  */
 public class IVariableList implements Cloneable {
 	private Stack<Map<IVariable, Mixed>> varStack = new Stack<Map<IVariable, Mixed>>();

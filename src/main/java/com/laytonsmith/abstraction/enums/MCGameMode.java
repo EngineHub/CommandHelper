@@ -10,7 +10,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author layton
  */
 @typename("GameMode")
 public enum MCGameMode implements MEnum {

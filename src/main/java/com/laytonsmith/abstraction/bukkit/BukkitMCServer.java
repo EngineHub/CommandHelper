@@ -19,7 +19,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCServer implements MCServer {
     

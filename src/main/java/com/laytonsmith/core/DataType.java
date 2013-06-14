@@ -16,7 +16,6 @@ import java.util.Map;
  * deferred to runtime, however, in cases where a type is requested, and the
  * type returned is not that, nor can it be cast to that, a compile error can
  * be given.
- * @author Layton
  */
 public class DataType {
     private static enum DataTypes{

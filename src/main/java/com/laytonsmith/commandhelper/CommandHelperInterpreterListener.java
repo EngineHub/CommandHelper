@@ -31,7 +31,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  *
- * @author Layton
  */
 public class CommandHelperInterpreterListener implements Listener {
 

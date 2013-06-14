@@ -2,7 +2,6 @@ package com.laytonsmith.PureUtilities;
 
 /**
  * Provides various functions for making some logic statements easier to read.
- * @author lsmith
  */
 public class LogicUtils {
 	

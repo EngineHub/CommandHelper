@@ -8,7 +8,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author layton
  */
 public class BashPlatformResolver implements PlatformResolver{
 

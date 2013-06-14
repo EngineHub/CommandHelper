@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 
 /**
  * Used to tag data store implementations.
- * @author lsmith
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

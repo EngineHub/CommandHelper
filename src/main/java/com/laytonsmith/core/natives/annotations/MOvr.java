@@ -5,7 +5,6 @@ import com.laytonsmith.core.CHVersion;
 
 /**
  *
- * @author lsmith
  */
 @typename("Ovr")
 public class MOvr extends MAnnotation {

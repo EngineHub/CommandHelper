@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * 
- * @author lsmith
  */
 public class ByteArrays {
 	public static String docs(){

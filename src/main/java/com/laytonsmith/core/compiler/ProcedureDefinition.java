@@ -15,7 +15,6 @@ import java.util.List;
 
 /**
  *
- * @author Layton
  */
 @typename("procedure")
 public class ProcedureDefinition extends Construct{

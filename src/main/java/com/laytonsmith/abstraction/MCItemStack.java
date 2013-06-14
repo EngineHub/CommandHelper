@@ -6,7 +6,6 @@ import java.util.Map;
 
 /**
  *
- * @author layton
  */
 public interface MCItemStack extends AbstractionObject{
     public MCMaterialData getData();

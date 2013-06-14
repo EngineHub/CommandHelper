@@ -9,7 +9,6 @@ import org.bukkit.GameMode;
 
 /**
  *
- * @author Layton
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

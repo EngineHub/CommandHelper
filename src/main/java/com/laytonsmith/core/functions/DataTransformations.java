@@ -36,7 +36,6 @@ import org.yaml.snakeyaml.Yaml;
 
 /**
  *
- * @author lsmith
  */
 public class DataTransformations {
 

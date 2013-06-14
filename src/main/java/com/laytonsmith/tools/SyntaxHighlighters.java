@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author layton
  */
 public class SyntaxHighlighters {
 

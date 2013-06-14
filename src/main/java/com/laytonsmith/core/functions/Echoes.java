@@ -35,7 +35,6 @@ import java.util.logging.Level;
 
 /**
  *
- * @author layton
  */
 public class Echoes {
 

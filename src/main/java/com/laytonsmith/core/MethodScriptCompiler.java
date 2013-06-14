@@ -23,7 +23,6 @@ import java.util.*;
 
 /**
  *
- * @author Layton
  */
 public final class MethodScriptCompiler {
 

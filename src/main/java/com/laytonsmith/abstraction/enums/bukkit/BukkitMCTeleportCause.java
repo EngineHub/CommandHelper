@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 /**
  *
- * @author Layton
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

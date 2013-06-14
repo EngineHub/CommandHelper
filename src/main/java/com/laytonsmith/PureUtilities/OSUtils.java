@@ -2,7 +2,6 @@ package com.laytonsmith.PureUtilities;
 
 /**
  * This class contains utilities that help with OS specific tasks.
- * @author lsmith
  */
 public class OSUtils {
 	public static enum OS{

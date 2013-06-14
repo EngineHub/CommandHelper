@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author Layton
  */
 public class DocGen {
 

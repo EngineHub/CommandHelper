@@ -15,7 +15,6 @@ import com.laytonsmith.core.functions.Echoes;
 /**
  * A subclass of ExecutionQueue, which knows how to handle uncaught exceptions
  * in a MethodScript specific way.
- * @author Layton
  */
 public class MethodScriptExecutionQueue extends ExecutionQueue {
 	

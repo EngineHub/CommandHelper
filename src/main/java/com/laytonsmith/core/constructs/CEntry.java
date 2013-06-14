@@ -4,7 +4,6 @@ package com.laytonsmith.core.constructs;
 
 /**
  *
- * @author Layton
  */
 public class CEntry extends Construct{
     Construct ckey;

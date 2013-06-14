@@ -18,7 +18,6 @@ import java.util.Map;
  * This interface should be implemented to allow the bind() function to bind to
  * a particular event type. To be recognized as an event type, it should also tag
  * itself with @api, and it will be included in the EventList.
- * @author layton
  */
 public interface Event extends Comparable<Event>, Documentation{
     /**

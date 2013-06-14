@@ -11,7 +11,6 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * @author lsmith
  */
 public class XMLDocumentTest {
 	

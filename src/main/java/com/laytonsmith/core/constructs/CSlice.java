@@ -9,7 +9,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author layton
  */
 @typename("slice")
 public class CSlice extends CArray {

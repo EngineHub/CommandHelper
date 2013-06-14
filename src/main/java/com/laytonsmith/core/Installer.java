@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Layton
  */
 public final class Installer {
     

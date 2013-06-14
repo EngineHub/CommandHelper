@@ -9,7 +9,6 @@ import java.util.Set;
 
 /**
  *
- * @author layton
  */
 public class Token {
 

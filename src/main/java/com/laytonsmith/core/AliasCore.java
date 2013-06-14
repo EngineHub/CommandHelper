@@ -42,7 +42,6 @@ import org.bukkit.Server;
  * Objects, so that if the Minecraft API Hook changes, porting the code will
  * only require changing the API specific portions, not this core file.
  *
- * @author Layton
  */
 public class AliasCore {
 

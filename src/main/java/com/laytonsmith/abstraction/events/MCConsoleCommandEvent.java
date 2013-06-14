@@ -8,7 +8,6 @@ import com.laytonsmith.core.events.BindableEvent;
 
 /**
  *
- * @author Layton
  */
 public interface MCConsoleCommandEvent extends BindableEvent {
 	

@@ -54,7 +54,6 @@ import java.util.Map;
  * types may be used as well. The supported POJO types are only the following,
  * and conversions are automatic: All 8 primitives' object wrappers, String, MList,
  * MObject (and subclasses) and MMap.
- * @author lsmith
  */
 @typename("Object")
 public class MObject implements Mixed, Documentation {

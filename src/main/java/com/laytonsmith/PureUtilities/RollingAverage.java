@@ -7,7 +7,6 @@ import java.util.Arrays;
  * keep a rolling average across them. If at any point a number is not set, it is not
  * used in the average, so initial results may be statistically skewed in favor of the
  * earlier results.
- * @author lsmith
  */
 public class RollingAverage {
 	private Double[] data;

@@ -11,7 +11,6 @@ import com.laytonsmith.PureUtilities.Version;
  * In general, classes that implement this should also tag themselves with the
  * <code>@docs</code> tag, so the ClassDiscovery method can more easily find them,
  * if the class intends on being parsed by DocGen.
- * @author layton
  */
 public interface Documentation {
     /**

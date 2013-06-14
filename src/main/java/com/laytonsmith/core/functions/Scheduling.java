@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
- * @author Layton
  */
 public class Scheduling {
 

@@ -7,7 +7,6 @@ package com.laytonsmith.core.functions;
  * must first be added to the classpath with <code>loadJars</code>. The classes are then
  * loaded into the classloader, and then when they need to be instantiated, the URLCLassLoader
  * that is static in this class is used to instatiate them. (Over in frame.java)
- * @author Layton
  */
 class PluginLoader {
 //    private static URLClassLoader loader;

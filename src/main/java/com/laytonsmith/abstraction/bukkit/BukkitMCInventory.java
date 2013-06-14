@@ -23,7 +23,6 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  *
- * @author Layton
  */
 public class BukkitMCInventory implements MCInventory {
 	private Inventory i;

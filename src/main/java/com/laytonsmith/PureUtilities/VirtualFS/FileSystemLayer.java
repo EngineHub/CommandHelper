@@ -16,7 +16,6 @@ import java.lang.annotation.Target;
  * All functions may throw an IOException, which is not something real File objects
  * normally do (for instance, delete() will simply return false) but to give the user
  * more information, this class throws exceptions instead.
- * @author lsmith
  */
 public abstract class FileSystemLayer {
 	

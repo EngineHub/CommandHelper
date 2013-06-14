@@ -8,7 +8,6 @@ import java.net.URI;
 
 /**
  *
- * @author lsmith
  */
 public class SSHConnection implements ConnectionMixin{
 	

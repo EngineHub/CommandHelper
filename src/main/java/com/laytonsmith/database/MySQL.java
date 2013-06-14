@@ -9,7 +9,6 @@ import java.util.Set;
 
 /**
  *
- * @author lsmith
  */
 public class MySQL extends DB {
 

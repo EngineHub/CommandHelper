@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author layton
  */
 public class FunctionList {
 

@@ -7,7 +7,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author lsmith
  */
 public class MClass implements Mixed {
 

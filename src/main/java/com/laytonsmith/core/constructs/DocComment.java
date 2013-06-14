@@ -6,7 +6,6 @@ import java.util.Map;
 
 /**
  *
- * @author Layton
  */
 public class DocComment {
 	

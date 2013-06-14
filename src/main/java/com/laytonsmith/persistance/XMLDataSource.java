@@ -7,7 +7,6 @@ import java.net.URI;
 
 /**
  *
- * @author Layton
  */
 //@datasource("xml")
 public class XMLDataSource extends StringSerializableDataSource{

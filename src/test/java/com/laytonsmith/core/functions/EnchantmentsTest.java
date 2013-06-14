@@ -16,7 +16,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 /**
  *
- * @author Layton
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Static.class)

@@ -20,7 +20,6 @@ import com.laytonsmith.core.events.EventUtils;
 
 /**
  *
- * @author Layton
  */
 public class BukkitVehicleListener implements Listener{
     

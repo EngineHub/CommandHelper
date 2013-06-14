@@ -25,7 +25,6 @@ import java.util.logging.Logger;
  * overridden methods. There are several overloaded methods in this
  * class, you need only to override the non-final ones for the
  * same effect.
- * @author layton
  */
 @typename("array")
 public class CArray extends Construct implements ArrayAccess, Iterable<Mixed>, Operators.Equality {

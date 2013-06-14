@@ -9,7 +9,6 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * Creates a new queue
- * @author Layton
  */
 public class RunnableQueue {
 	private ExecutorService service;

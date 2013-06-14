@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 /**
  *
- * @author Layton
  */
 public class EchoesTest {
 

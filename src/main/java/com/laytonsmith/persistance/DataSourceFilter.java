@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 /**
  * Given a File, creates a data source filter, which can be
  *
- * @author layton
  */
 public class DataSourceFilter {
 

@@ -5,7 +5,6 @@ import com.laytonsmith.annotations.api;
 
 /**
  *
- * @author lsmith
  */
 public interface RuntimeEnvironment extends Environment.EnvironmentImpl {
 	

@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  *
- * @author lsmith
  */
 public class Generic {
 	

@@ -2,7 +2,6 @@ package com.laytonsmith.core.constructs;
 
 /**
  *
- * @author layton
  */
 public class CSymbol extends Construct {
 

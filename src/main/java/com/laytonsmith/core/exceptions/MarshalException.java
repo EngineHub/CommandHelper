@@ -7,7 +7,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author Layton
  */
 public class MarshalException extends Exception {
 

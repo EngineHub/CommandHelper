@@ -3,7 +3,6 @@ package com.laytonsmith.PureUtilities;
 /**
  * A generic class for creating a text marquee.
  *
- * @author lsmith
  */
 public final class Marquee {
 

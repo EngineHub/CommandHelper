@@ -6,7 +6,6 @@ import com.laytonsmith.core.constructs.Target;
 
 /**
  *
- * @author layton
  */
 public class BasicLogic {
     public static String docs(){

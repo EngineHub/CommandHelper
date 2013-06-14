@@ -13,7 +13,6 @@ import java.lang.annotation.Target;
  * or other undesired behavior. This only prevents the function execution, the rest
  * of the tests (documentation, etc) will be run, and this will not prevent specific
  * tests from being run.
- * @author Layton
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

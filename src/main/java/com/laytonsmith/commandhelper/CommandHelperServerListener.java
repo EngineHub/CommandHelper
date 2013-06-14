@@ -22,7 +22,6 @@ import org.bukkit.event.server.ServerCommandEvent;
 
 /**
  *
- * @author Layton
  */
 public class CommandHelperServerListener implements Listener{
     

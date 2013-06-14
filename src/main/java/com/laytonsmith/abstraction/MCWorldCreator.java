@@ -6,7 +6,6 @@ import com.laytonsmith.abstraction.enums.MCWorldType;
 
 /**
  *
- * @author Layton
  */
 public interface MCWorldCreator {
 	MCWorld createWorld();

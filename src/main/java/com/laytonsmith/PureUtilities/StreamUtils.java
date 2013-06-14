@@ -14,7 +14,6 @@ import java.util.List;
  * Streams are hard sometimes. This class abstracts most of the functionality
  * that is commonly used.
  *
- * @author lsmith
  */
 public class StreamUtils {
 

@@ -33,7 +33,6 @@ import org.yaml.snakeyaml.Yaml;
 
 /**
  *
- * @author Layton
  */
 public class Main {
 

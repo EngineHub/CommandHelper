@@ -10,7 +10,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author Layton
  */
 @typename("Instrument")
 public enum MCInstrument implements MEnum {

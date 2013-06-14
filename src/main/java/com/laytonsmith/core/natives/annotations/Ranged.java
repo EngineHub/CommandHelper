@@ -11,7 +11,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author lsmith
  */
 @typename("Ranged")
 public class Ranged extends MAnnotation implements CompilerAwareAnnotation {

@@ -11,7 +11,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 /**
  *
- * @author Layton
  */
 public class BukkitMCLeatherArmorMeta extends BukkitMCItemMeta implements MCLeatherArmorMeta {
 	LeatherArmorMeta lam;

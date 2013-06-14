@@ -3,7 +3,6 @@ package com.laytonsmith.abstraction;
 
 /**
  *
- * @author Layton
  */
 public interface MCProjectile extends MCEntity, MCMetadatable {
 	public boolean doesBounce();

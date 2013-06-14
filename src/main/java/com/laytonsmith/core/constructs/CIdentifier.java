@@ -4,7 +4,6 @@ import com.laytonsmith.core.ParseTree;
 
 /**
  *
- * @author layton
  */
 public class CIdentifier extends CFunction {
 

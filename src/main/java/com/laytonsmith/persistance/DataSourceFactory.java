@@ -18,7 +18,6 @@ import java.util.Set;
 /**
  * This utility class provides the means to interact with given data sources.
  *
- * @author lsmith
  */
 public class DataSourceFactory {
 

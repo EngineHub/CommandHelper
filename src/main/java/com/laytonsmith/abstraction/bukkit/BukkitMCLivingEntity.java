@@ -31,7 +31,6 @@ import org.bukkit.util.BlockIterator;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEntity {
 

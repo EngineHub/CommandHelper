@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.enums.MCFireworkType;
 
 /**
  *
- * @author Layton
  */
 public interface MCFireworkBuilder {
 	

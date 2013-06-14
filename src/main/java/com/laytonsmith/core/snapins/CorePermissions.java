@@ -5,7 +5,6 @@ import com.laytonsmith.core.CHVersion;
 
 /**
  *
- * @author lsmith
  */
 public enum CorePermissions implements PackagePermission {
 	FILE_READ("CORE.FILE.READ", ThreatLevel.CAUTIOUS, "This permission grants read access to the filesystem, via the VFS only,"

@@ -6,7 +6,6 @@ package com.laytonsmith.abstraction.enums;
 
 /**
  *
- * @author Layton
  */
 public enum MCFireworkType {
 	BALL,

@@ -19,7 +19,6 @@ import java.util.Set;
 
 /**
  *
- * @author lsmith
  */
 @datasource("sqlite")
 public class SQLiteDataSource extends AbstractDataSource{

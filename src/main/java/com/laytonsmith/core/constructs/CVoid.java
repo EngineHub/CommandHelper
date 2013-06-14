@@ -6,7 +6,6 @@ import com.laytonsmith.annotations.typename;
 
 /**
  *
- * @author Layton
  */
 @typename("void")
 public class CVoid extends Construct implements Cloneable{

@@ -17,7 +17,6 @@ import java.util.List;
  * The static compiler uses the dynamic compiler, but using a platform specific framework,
  * ends up with output that can be written to out to disk, and run natively, or compiles
  * to another language entirely.
- * @author layton
  */
 public final class MethodScriptStaticCompiler {
     

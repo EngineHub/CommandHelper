@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Layton
  */
 public class ExtensionManager {
 

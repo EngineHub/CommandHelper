@@ -12,7 +12,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  * Only should be used for test functions, or other typically unreleased or
  * temporary functions.
  *
- * @author Layton
  */
 public abstract class DummyFunction extends AbstractFunction {
 

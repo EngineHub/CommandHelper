@@ -7,7 +7,6 @@ import java.io.IOException;
 
 /**
  *
- * @author lsmith
  */
 public interface ConnectionMixin {
 	/**

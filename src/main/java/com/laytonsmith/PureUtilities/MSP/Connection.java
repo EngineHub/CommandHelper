@@ -7,7 +7,6 @@ import com.laytonsmith.PureUtilities.MSP.CapabilityList.CapabilityValue;
  * A Connection object represents some sort of connection to a remote. The
  * basic defined behavior is simply to do a connection, and then gather initial permission
  * and capability lists.
- * @author lsmith
  */
 public interface Connection {
 	

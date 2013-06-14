@@ -27,7 +27,6 @@ import java.util.List;
 
 /**
  *
- * @author layton
  */
 public class ConfigRuntimeException extends RuntimeException {
 

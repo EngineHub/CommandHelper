@@ -6,7 +6,6 @@ import com.laytonsmith.core.constructs.Target;
 /**
  * This is thrown by constructs like break and continue to indicate that
  * a loop specific ProgramFlowManipulationException is being thrown.
- * @author Layton
  */
 public abstract class LoopManipulationException extends ProgramFlowManipulationException {
 	private int times;

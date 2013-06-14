@@ -27,7 +27,6 @@ import java.util.Set;
 
 /**
  *
- * @author lsmith
  */
 public class PluginMeta {
 	public static String docs(){

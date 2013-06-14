@@ -4,7 +4,6 @@ import com.laytonsmith.abstraction.MCLocation;
 
 /**
  *
- * @author layton
  */
 public interface MCPlayerTeleportEvent extends MCPlayerEvent{
     public MCLocation getFrom();

@@ -36,7 +36,6 @@ import java.util.logging.Level;
  * Secondly, the default values of any variables, and thirdly, the unparsed tree
  * for the right side of the script.
  *
- * @author Layton
  */
 public class Script {
 

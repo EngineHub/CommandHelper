@@ -13,7 +13,6 @@ import java.sql.ResultSet;
 /**
  * This class is for testing concepts
  *
- * @author Layton
  */
 public class MainSandbox {
 

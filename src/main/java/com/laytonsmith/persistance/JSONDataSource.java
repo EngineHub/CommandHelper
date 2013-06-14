@@ -13,7 +13,6 @@ import org.json.simple.JSONValue;
 
 /**
  *
- * @author lsmith
  */
 @datasource("json")
 public class JSONDataSource extends StringSerializableDataSource {

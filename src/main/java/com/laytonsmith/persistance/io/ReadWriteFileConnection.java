@@ -13,7 +13,6 @@ import org.apache.log4j.lf5.util.StreamUtils;
 
 /**
  *
- * @author lsmith
  */
 public class ReadWriteFileConnection implements ConnectionMixin{
 	//Do not change the name of this. It is read reflectively during testing

@@ -15,7 +15,6 @@ import java.util.Map;
  * be used to parse the remaining arguments. This allows for finer control over
  * mutually exclusive parameters in both the documentation and the validation, as
  * well as wider support for traditional use cases.
- * @author lsmith
  */
 public class ArgumentSuite {
 	

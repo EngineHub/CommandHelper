@@ -11,15 +11,22 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.junit.*;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.eq;
+import static org.junit.Assert.*;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
 /**
  * This class ensures that all code scenarios that should trigger a compiler warning do.
- * @author lsmith
  */
 public class CompilerWarningTest {
 	@BeforeClass
@@ -28,9 +35,27 @@ public class CompilerWarningTest {
 	}
 	
 	CHLog fakeLogger;
+	Map<CompilerWarning, AtomicInteger> times;
 	@Before
-	public void installFakeLog(){
+	public void installFakeLog() throws Exception {
+		times = new EnumMap<CompilerWarning, AtomicInteger>(CompilerWarning.class);
 		fakeLogger = mock(CHLog.class);
+		Mockito.doAnswer(new Answer() {
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				CompilerWarning w = (CompilerWarning)invocation.getArguments()[0];
+				FileOptions fo = (FileOptions)invocation.getArguments()[3];
+				if(!fo.isWarningSuppressed(w)){
+					if(!times.containsKey(w)){
+						times.put(w, new AtomicInteger(1));
+					} else {
+						times.get(w).incrementAndGet();
+					}
+					return invocation.callRealMethod();
+				}
+				return null;
+			}
+		}).when(fakeLogger).CompilerWarning(Mockito.any(CompilerWarning.class), 
+			Mockito.anyString(), Mockito.any(Target.class), Mockito.any(FileOptions.class));
 		ReflectionUtils.set(CHLog.class, "instance", fakeLogger);
 	}
 	
@@ -43,12 +68,17 @@ public class CompilerWarningTest {
 		}
 	}
 	
-	public void doVerify(CompilerWarning warning){
-		try {
-			verify(fakeLogger, Mockito.atLeastOnce()).CompilerWarning(eq(warning), Mockito.anyString(), Mockito.any(Target.class), Mockito.any(FileOptions.class));
-		} catch (ConfigCompileException ex) {
-			throw new RuntimeException(ex);
-		}
+	public void doVerify(final CompilerWarning warning){
+		verify(fakeLogger, Mockito.atLeastOnce()).Log(eq(CHLog.Tags.COMPILER), eq(LogLevel.WARNING), Mockito.argThat(new BaseMatcher<String>() {
+
+			public boolean matches(Object item) {
+				return (times.containsKey(warning) && times.get(warning).get() > 0);
+			}
+
+			public void describeTo(Description description) {
+				description.appendText("<message about " + warning.toString() + ">");
+			}
+		}), Mockito.any(Target.class));
 	}
 	//Unfortunately, testing the deprecated warning is not desirable, because by definition, it's a transient error message
 	
@@ -74,8 +104,13 @@ public class CompilerWarningTest {
 		doVerify(CompilerWarning.VariableBreak);
 	}
 	
-	@Test public void testAssigmentInIf(){
+	@Test public void testAssigmentInIf1(){
 		compile("<! strict > if(@a = 5){ msg('') }");
+		doVerify(CompilerWarning.AssignmentInIf);
+	}
+	
+	@Test public void testAssigmentInIf2(){
+		compile("<! strict > if(dyn(1)){ msg('') } else if(@a = 4){ msg('') }");
 		doVerify(CompilerWarning.AssignmentInIf);
 	}
 	
@@ -104,20 +139,6 @@ public class CompilerWarningTest {
 		verify(fakeLogger, Mockito.times(0)).CompilerWarning(eq(CompilerWarning.AmbiguousUnaryOperators), Mockito.anyString(), Mockito.any(Target.class), Mockito.any(FileOptions.class));
 	}
 	
-	@Test public void testMagicNumbers1(){
-		//3 is not allowed as a magic number...
-		compile("<! strict > @a = 1 if(@a < 3){ msg('') }");
-		doVerify(CompilerWarning.MagicNumber);
-	}
-	
-	@Test public void testMagicNumbers2() throws Exception {
-		//...but 1, 0, and -1 are
-		compile("<! strict > @a = 1 if(@a < 1 || @a < 0 || @a < -1){ msg('') }");
-		verify(fakeLogger, Mockito.never())
-				.CompilerWarning(Mockito.any(CompilerWarning.class), Mockito.anyString(), 
-				Mockito.any(Target.class), Mockito.any(FileOptions.class));
-	}
-	
 	@Test public void testBareStrings(){
 		compile("this is bare");
 		doVerify(CompilerWarning.BareStrings);
@@ -131,11 +152,11 @@ public class CompilerWarningTest {
 	@Test public void testSuppressedWarnings1() throws ConfigCompileException{
 		compile("<! suppresswarnings: BareStrings; > msg(hi)");
 		doVerify(CompilerWarning.SupressedWarnings);
-		verify(fakeLogger, Mockito.times(0)).CompilerWarning(eq(CompilerWarning.BareStrings), Mockito.anyString(), Mockito.any(Target.class), Mockito.any(FileOptions.class));
+		assertTrue(!times.containsKey(CompilerWarning.BareStrings) || times.get(CompilerWarning.BareStrings).get() == 0);
 	}
 	
 	@Test public void testSuppressedWarnings2(){
-		compile("<! suppresswarnings: MagicNumber; > msg(hi)");
+		compile("<! suppresswarnings: UnquotedSymbols, StrictModeOff; > msg(hi)");
 		doVerify(CompilerWarning.SupressedWarnings);
 		doVerify(CompilerWarning.BareStrings);
 	}

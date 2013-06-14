@@ -10,7 +10,6 @@ import java.util.List;
  * which will be automatically parsed and validated. Additionally,
  * automatically generated help text can be retrieved and displayed, perhaps
  * if a --help argument is present.
- * @author lsmith
  */
 public class ArgumentParser {
 

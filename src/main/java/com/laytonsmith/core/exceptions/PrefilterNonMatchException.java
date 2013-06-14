@@ -5,7 +5,6 @@ package com.laytonsmith.core.exceptions;
 /**
  * Thrown if a prefilter is set, and doesn't match. A missing prefilter
  * is a match, and a matching prefilter is a match.
- * @author layton
  */
 public class PrefilterNonMatchException extends Exception {
 

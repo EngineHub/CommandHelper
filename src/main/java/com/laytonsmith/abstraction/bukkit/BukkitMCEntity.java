@@ -25,7 +25,6 @@ import org.bukkit.util.Vector;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 

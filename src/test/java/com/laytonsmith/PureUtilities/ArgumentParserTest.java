@@ -11,7 +11,6 @@ import org.junit.Test;
 
 /**
  *
- * @author lsmith
  */
 public class ArgumentParserTest {
 	

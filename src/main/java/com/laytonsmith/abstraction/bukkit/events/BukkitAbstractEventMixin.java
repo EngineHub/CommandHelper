@@ -30,7 +30,6 @@ import org.bukkit.event.world.WorldEvent;
 
 /**
  *
- * @author layton
  */
 public class BukkitAbstractEventMixin implements EventMixinInterface{
     

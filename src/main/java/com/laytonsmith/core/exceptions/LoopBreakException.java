@@ -6,7 +6,6 @@ import com.laytonsmith.core.constructs.Target;
 
 /**
  *
- * @author Layton
  */
 public class LoopBreakException extends LoopManipulationException{
     public LoopBreakException(int times, Target t){

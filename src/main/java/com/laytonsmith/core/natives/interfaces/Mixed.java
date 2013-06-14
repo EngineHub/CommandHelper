@@ -9,7 +9,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 /**
  *
- * @author Layton
  */
 @typename("mixed")
 public interface Mixed {

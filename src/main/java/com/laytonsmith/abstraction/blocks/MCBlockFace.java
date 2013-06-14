@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.blocks;
 
 /**
  *
- * @author layton
  */
 public enum MCBlockFace {
     NORTH(0, 0, -1),

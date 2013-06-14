@@ -13,7 +13,6 @@ import static org.junit.Assert.*;
 /**
  * This class tests optimizations by looking at the tree after optimization occurs to see
  * if it matches expectation.
- * @author layton
  */
 public class OptimizationTest {
 	

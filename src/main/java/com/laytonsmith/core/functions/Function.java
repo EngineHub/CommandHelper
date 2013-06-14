@@ -20,7 +20,6 @@ import java.util.List;
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation
  * to it.
- * @author layton
  */
 public interface Function extends FunctionBase, Documentation {
 	

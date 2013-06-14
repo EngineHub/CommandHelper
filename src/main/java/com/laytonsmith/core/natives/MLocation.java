@@ -10,7 +10,6 @@ import com.laytonsmith.core.natives.interfaces.MObject;
 
 /**
  *
- * @author lsmith
  */
 @typename("Location")
 public class MLocation extends MObject implements Documentation {

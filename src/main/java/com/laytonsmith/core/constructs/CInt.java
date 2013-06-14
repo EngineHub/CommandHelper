@@ -6,7 +6,6 @@ import com.laytonsmith.annotations.typename;
 
 /**
  *
- * @author layton
  */
 @typename("int")
 public class CInt extends CNumber implements Cloneable {

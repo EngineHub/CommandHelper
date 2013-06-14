@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 
 /**
  *
- * @author Layton
  */
 public class MathTest {
 

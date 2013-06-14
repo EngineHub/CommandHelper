@@ -3,7 +3,6 @@ package com.laytonsmith.abstraction;
 
 /**
  *
- * @author layton
  */
 public interface MCPlayerInventory extends MCInventory {
     public void setHelmet(MCItemStack stack);

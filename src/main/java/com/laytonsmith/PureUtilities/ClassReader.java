@@ -11,7 +11,6 @@ import java.util.Map;
 
 /**
  * A class that reads in a class file, and provides class info for it.
- * @author lsmith
  */
 public class ClassReader {
     public static void main(String[] args) throws IOException {

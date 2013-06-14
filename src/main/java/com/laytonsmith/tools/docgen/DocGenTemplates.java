@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author lsmith
  */
 public class DocGenTemplates {
 	public static interface Generator{

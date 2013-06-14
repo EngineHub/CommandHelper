@@ -15,7 +15,6 @@ import static org.junit.Assert.fail;
 
 /**
  *
- * @author Layton
  */
 public class RegexTest {
 

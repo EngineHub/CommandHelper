@@ -32,7 +32,6 @@ import java.util.Set;
 
 /**
  *
- * @author lsmith
  */
 public class Cmdline {
 

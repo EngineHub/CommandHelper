@@ -28,7 +28,6 @@ import java.util.Set;
  * be removed at some point in the future. (The paradigm doesn't seem very stable).
  * For now, functions like __autoconcat__ are a necessary evil to simplify other parts
  * of the code, but at the price of complicating other things.
- * @author layton
  */
 public class CompilerFunctions {
 

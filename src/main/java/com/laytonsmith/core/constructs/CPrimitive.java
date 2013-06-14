@@ -12,7 +12,6 @@ import com.laytonsmith.core.natives.interfaces.Operators;
  * support implicit conversion from the three basic types, string, double, and 
  * integer, though they may throw exceptions if that conversion is not possible
  * at runtime. 
- * @author lsmith
  */
 @typename("primitive")
 @immutable

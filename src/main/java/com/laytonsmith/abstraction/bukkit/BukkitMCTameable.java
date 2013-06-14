@@ -9,7 +9,6 @@ import org.bukkit.entity.Tameable;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable{
 

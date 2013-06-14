@@ -17,7 +17,6 @@ import java.util.Map;
  * This file is responsible for converting CH objects into server objects, and
  * vice versa
  *
- * @author layton
  */
 public class ObjectGenerator {
 

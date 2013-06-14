@@ -9,7 +9,6 @@ import java.util.Map;
 
 /**
  *
- * @author layton
  */
 public final class Globals {
     

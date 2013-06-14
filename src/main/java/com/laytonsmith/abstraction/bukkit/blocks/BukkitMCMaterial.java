@@ -7,7 +7,6 @@ import org.bukkit.Material;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCMaterial implements MCMaterial {
     Material m;

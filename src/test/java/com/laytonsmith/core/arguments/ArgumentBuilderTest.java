@@ -17,7 +17,6 @@ import org.mockito.Mockito;
 
 /**
  *
- * @author lsmith
  */
 public class ArgumentBuilderTest {
 	

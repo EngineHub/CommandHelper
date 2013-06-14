@@ -24,7 +24,6 @@ import java.util.TreeMap;
  */
 /**
  *
- * @author lsmith
  */
 public final class Profiler {
 	

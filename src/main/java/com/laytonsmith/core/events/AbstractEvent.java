@@ -19,7 +19,6 @@ import java.util.Map;
 /**
  * This helper class implements a few of the common functions in event, and
  * most (all?) Events should extend this class.
- * @author layton
  */
 public abstract class AbstractEvent implements Event, Comparable<Event> {
     

@@ -7,7 +7,6 @@ import com.laytonsmith.core.Documentation;
  * This class enumerates all the possible compiler warnings, and
  * are used to during compilation to trigger or not trigger
  * certain types of warnings, based on the file options set.
- * @author lsmith
  */
 public enum CompilerWarning implements Documentation {
 	Deprecated("Features that are deprecated are going to be removed at some point in future releases,"
@@ -56,14 +55,6 @@ public enum CompilerWarning implements Documentation {
 			+ " for(@i = 0, @i < @x, @i++, ...). This is not ambiguous at all, since it is the only"
 			+ " operation in that statement. Using the functional notation will not trigger this warning ever,"
 			+ " because there is implicit parenthesis usage when not using operators.", CHVersion.V3_3_1),
-	MagicNumber("Other than when doing a variable assignments, and a few other occasions,"
-			+ " raw numbers can often times be confusing. For"
-			+ " instance, in code, if you see @i < 5, what is 5? Without knowing more about the surrounding"
-			+ " code, it could be confusing. Instead, consider assigning 5 to a variable. This gives it a"
-			+ " name/description, which is useful when you or another programmer look back on the code. This also"
-			+ " makes it easier to change, in the event that it is used in multiple places. The only"
-			+ " exception to this is 0 and 1 (and -1), since usually when those numbers are used, it is very clear what"
-			+ " is intended, for instance, grabbing the last or first element in an array.", CHVersion.V3_3_1),
 	ExecutableCodeInInclude("Other than include() and proc(), nothing else should be contained in an include, as"
 			+ " this will be removed later. It is a sign of bad programming, because there is no particular"
 			+ " guarantee that the code will be run once or multiple times. Only having procs and includes inside"

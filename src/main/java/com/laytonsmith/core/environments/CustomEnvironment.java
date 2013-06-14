@@ -4,7 +4,6 @@ package com.laytonsmith.core.environments;
  * This abstracts environments that allow for custom environment values to be set.
  * There may be multiple environment implementations that have this, but a single subtype
  * will be chosen by {@link Environment#getCustomEnvironment} consistently.
- * @author lsmith
  */
 public interface CustomEnvironment extends Environment.EnvironmentImpl {
 	

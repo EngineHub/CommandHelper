@@ -3,7 +3,6 @@ package com.laytonsmith.abstraction;
 
 /**
  *
- * @author layton
  */
 public interface MCOfflinePlayer extends MCAnimalTamer{
     public long getFirstPlayed();

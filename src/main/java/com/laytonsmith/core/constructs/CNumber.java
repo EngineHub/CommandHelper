@@ -5,7 +5,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  * The superclass of Numeric types.
- * @author lsmith
  */
 @typename("number")
 public abstract class CNumber extends CPrimitive {

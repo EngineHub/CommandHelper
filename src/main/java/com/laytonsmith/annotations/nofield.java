@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 
 /**
  * Used to mark a public field as a non-object field in the CObject chain.
- * @author lsmith
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

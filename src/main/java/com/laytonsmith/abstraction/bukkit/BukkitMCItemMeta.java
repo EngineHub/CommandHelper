@@ -16,7 +16,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
- * @author Layton
  */
 public class BukkitMCItemMeta implements MCItemMeta {
 

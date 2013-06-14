@@ -17,7 +17,6 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  *
- * @author lsmith
  */
 @datasource("redis")
 public class RedisDataSource extends AbstractDataSource {

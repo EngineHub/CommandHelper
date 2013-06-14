@@ -17,7 +17,6 @@ import org.bukkit.material.MaterialData;
 
 /**
  *
- * @author layton
  */
 public class BukkitMCItemStack implements MCItemStack {
     ItemStack is;

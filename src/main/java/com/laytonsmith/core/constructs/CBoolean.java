@@ -10,7 +10,6 @@ import com.laytonsmith.core.natives.interfaces.Operators;
 
 /**
  *
- * @author layton
  */
 @typename("boolean")
 public class CBoolean extends CPrimitive implements Cloneable {

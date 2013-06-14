@@ -18,8 +18,7 @@ import java.util.zip.ZipInputStream;
  * Operations on a ZipReader with a path in an actual zip are expensive, so it's
  * good to keep in mind this when using the reader, you'll have to balance
  * between memory usage (caching) or CPU use (re-reading as needed).
- *
- * @author Layton Smith
+ * Smith
  */
 public class ZipReader {
 

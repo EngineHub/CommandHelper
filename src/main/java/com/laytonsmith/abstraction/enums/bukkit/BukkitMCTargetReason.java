@@ -9,7 +9,6 @@ import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 /**
  *
- * @author Layton
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

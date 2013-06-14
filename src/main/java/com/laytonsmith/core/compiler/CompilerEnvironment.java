@@ -32,7 +32,6 @@ import java.util.TreeSet;
  * environment as well, but contains values that the compiler (or function optimizations)
  * might need, and are usually considered "static". The settings are all passed in to the constructor,
  * but you can use the various factory methods to create an environment from other sources.
- * @author lsmith
  */
 public class CompilerEnvironment implements Environment.EnvironmentImpl, RuntimeEnvironment {	
 	/**

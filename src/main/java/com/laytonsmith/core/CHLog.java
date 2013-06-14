@@ -18,7 +18,6 @@ import java.util.List;
  * and the user configures each separately, allowing for more granular log control. Eventually, if other
  * clients are able to connect to the system, they may each specify logging granularity, but the default
  * is to use the preferences file and output to the debug log file.
- * @author layton
  */
 public class CHLog {
     
@@ -269,8 +268,18 @@ public class CHLog {
         }
     }
     
+	/**
+	 * Handles a compiler warning. This method checks to see if a particular warning
+	 * type is suppressed, and if so, ignores it. Additionally, it checks to see if failOnWarning
+	 * is true, and if so, instead throws a ConfigCompileException.
+	 * @param type The type of the compiler warning
+	 * @param message The message to display
+	 * @param t Current target
+	 * @param fileOptions The file options
+	 * @throws ConfigCompileException If not suppressed, and failOnWarning is true.
+	 */
     public void CompilerWarning(CompilerWarning type, String message, Target t, FileOptions fileOptions) throws ConfigCompileException{
-		if(!fileOptions.isWarningSupressed(type)){
+		if(!fileOptions.isWarningSuppressed(type)){
 			//Since this isn't supressed, we will throw a compile exception instead if that option is set.
 			if(fileOptions.failOnWarning()){
 				throw new ConfigCompileException("Failure on warning: " + type + ": " + message, t);

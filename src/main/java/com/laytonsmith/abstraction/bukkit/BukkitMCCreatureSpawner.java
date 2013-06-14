@@ -9,7 +9,6 @@ import org.bukkit.entity.EntityType;
 
 /**
  *
- * @author Layton
  */
 public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCreatureSpawner{
 	

@@ -6,7 +6,6 @@ package com.laytonsmith.core;
  * An internal exception is thrown when an unexpected error occurs
  * in the actual plugin itself, not the user scripts. If this exception
  * is thrown, the plugin is effectively disabled.
- * @author Layton
  */
 public class InternalException extends RuntimeException {
 

@@ -11,7 +11,6 @@ import java.util.UUID;
 
 /**
  * 
- * @author layton
  */
 public interface MCEntity extends MCMetadatable {
 	public static class Velocity {

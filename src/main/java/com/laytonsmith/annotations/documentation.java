@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
 /**
  * Some elements are best suited for using an annotation instead of a runtime function
  * for providing the information provided by the Documentation interface.
- * @author lsmith
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})

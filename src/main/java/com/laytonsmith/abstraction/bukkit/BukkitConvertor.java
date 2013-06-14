@@ -35,7 +35,6 @@ import org.bukkit.material.MaterialData;
 
 /**
  *
- * @author layton
  */
 @convert(type=Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {

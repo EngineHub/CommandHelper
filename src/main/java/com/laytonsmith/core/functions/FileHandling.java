@@ -33,7 +33,6 @@ import java.util.logging.Level;
 
 /**
  *
- * @author lsmith
  */
 public class FileHandling {
 

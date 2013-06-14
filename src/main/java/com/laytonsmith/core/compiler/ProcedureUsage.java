@@ -8,7 +8,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 /**
  *
- * @author Layton
  */
 public class ProcedureUsage extends Construct{
 	ProcedureDefinition definition;

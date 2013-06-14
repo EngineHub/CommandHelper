@@ -35,7 +35,6 @@ import java.util.logging.Level;
 /**
  * I'm So Meta, Even This Acronym
  *
- * @author Layton
  */
 public class Meta {
 
@@ -440,7 +439,7 @@ public class Meta {
 	}
 
 	@api
-	public static class eval extends AbstractFunction {
+	public static class eval extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "eval";
@@ -518,6 +517,24 @@ public class Meta {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.get(0).isConst()){
+				CHLog.GetLogger().Log(CHLog.Tags.META, LogLevel.WARNING, "Hardcoded string in eval. This is inefficient."
+						+ " You should instead simply run the code.", t);
+			}
+			CHLog.GetLogger().CompilerWarning(CompilerWarning.UseOfEval, "Use of eval is strongly discouraged,"
+					+ " and only meant for extremely experimental or temporary features. If you truly do need"
+					+ " eval, consider filing a feature request for support for what you're actually doing, instead"
+					+ " of continuing to rely on eval in the future.", t, children.get(0).getFileOptions());
+			return null;
+		}
+		
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})

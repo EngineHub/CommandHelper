@@ -15,7 +15,6 @@ import java.util.TreeSet;
 
 /**
  *
- * @author lsmith
  */
 @datasource("mem")
 public final class MemoryDataSource extends AbstractDataSource {

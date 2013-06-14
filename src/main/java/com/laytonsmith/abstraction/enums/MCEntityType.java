@@ -10,7 +10,6 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
- * @author Layton
  */
 @typename("EntityType")
 public enum MCEntityType implements MEnum {

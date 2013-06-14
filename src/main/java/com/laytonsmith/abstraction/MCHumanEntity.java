@@ -4,7 +4,6 @@ import com.laytonsmith.abstraction.enums.MCGameMode;
 
 /**
  *
- * @author layton
  */
 public interface MCHumanEntity extends MCInventoryHolder, MCLivingEntity, MCAnimalTamer{
 	public void closeInventory();

@@ -5,7 +5,6 @@ import com.laytonsmith.core.natives.interfaces.MObject;
 
 /**
  *
- * @author lsmith
  */
 @typename("Color")
 public class MColor extends MObject {
