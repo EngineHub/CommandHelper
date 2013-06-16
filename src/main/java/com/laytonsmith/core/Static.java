@@ -557,14 +557,14 @@ public final class Static {
      */
     public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
         int type = 0;
-        byte data = 0;
+        short data = 0;
         MCItemStack is = null;
         if (notation.matches("\\d*:\\d*")) {
             String[] sData = notation.split(":");
             try {
                 type = (int) Integer.parseInt(sData[0]);
                 if (sData.length > 1) {
-                    data = (byte) Integer.parseInt(sData[1]);
+                    data = (short) Integer.parseInt(sData[1]);
                 }
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Item value passed to " + functionName + " is invalid: " + notation, ExceptionType.FormatException, t);
