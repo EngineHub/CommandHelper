@@ -103,10 +103,6 @@ public class ArrayHandling {
 				defaultConstruct = args[2];
 			}
 
-			if (env.getEnv(GlobalEnv.class).GetFlag("array_get_alt_mode") == Boolean.TRUE) {
-				return new CArrayReference(args[0], args[1], env);
-			}
-
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				if (index instanceof CSlice) {

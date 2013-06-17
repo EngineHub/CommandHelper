@@ -15,6 +15,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.*;
+import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.DataHandling.assign;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
@@ -245,18 +246,7 @@ public class Script {
                     //Turn it into a config runtime exception. This shouldn't ever happen though.
                     throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
                 }
-                //We have special handling for loop and other control flow functions
-                if(f instanceof assign){
-                    if(c.getChildAt(0).getData() instanceof CFunction){
-                        CFunction test = (CFunction)c.getChildAt(0).getData();
-                        if(test.val().equals("array_get")){
-                            env.getEnv(GlobalEnv.class).SetFlag("array_get_alt_mode", true);
-                            Construct arrayAndIndex = eval(c.getChildAt(0), env);
-                            env.getEnv(GlobalEnv.class).ClearFlag("array_get_alt_mode");
-                            return ((assign)f).array_assign(m.getTarget(), env, arrayAndIndex, eval(c.getChildAt(1), env));
-                        }
-                    }
-                }
+				
 				ArrayList<Construct> args = new ArrayList<Construct>();
                 try{
 					if(f.useSpecialExec()){
@@ -294,9 +284,6 @@ public class Script {
 							throw new ConfigRuntimeException("Invalid Construct (" 
 									+ ca[i].getClass() + ") being passed as an argument to a function (" 
 									+ f.getName() + ")", null, m.getTarget());
-						}
-						if(env.getEnv(GlobalEnv.class).GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
-							continue;
 						}
 						while(f.preResolveVariables() && ca[i] instanceof IVariable){
 							IVariable cur = (IVariable)ca[i];

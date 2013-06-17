@@ -25,6 +25,10 @@ import java.util.logging.Logger;
  * @author Layton
  */
 public class DataHandling {
+	
+	private static final String array_get = new ArrayHandling.array_get().getName();
+	private static final String array_set = new ArrayHandling.array_set().getName();
+	private static final String array_push = new ArrayHandling.array_push().getName();
 
 	public static String docs() {
 		return "This class provides various methods to control script data and program flow.";
@@ -162,57 +166,6 @@ public class DataHandling {
 			throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
 		}
 
-		private static class Chain {
-
-			ArrayList<Construct> indexChain = new ArrayList<Construct>();
-		}
-
-		private void prepare(CArrayReference container, Chain c) {
-			if (container.array instanceof CArrayReference) {
-				prepare((CArrayReference) container.array, c);
-				c.indexChain.add(container.index);
-			} else {
-				c.indexChain.add(container.index);
-			}
-		}
-
-		public Construct array_assign(Target t, Environment env, Construct arrayAndIndex, Construct toSet) {
-			Construct ival = toSet;
-			while (ival instanceof IVariable) {
-				IVariable cur = (IVariable) ival;
-				ival = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
-			}
-			Chain c = new Chain();
-			prepare((CArrayReference) arrayAndIndex, c);
-			CArray inner = (CArray) ((CArrayReference) arrayAndIndex).getInternalArray();
-			for (int i = 0; i < c.indexChain.size(); i++) {
-				if (i == c.indexChain.size() - 1) {
-					//Last one, set it
-					inner.set(c.indexChain.get(i), ival, t);
-				} else {
-					boolean makeIt = false;
-					Construct ct = null;
-					if (!inner.containsKey(c.indexChain.get(i).val())) {
-						makeIt = true;
-					} else {
-						ct = inner.get(c.indexChain.get(i), t);
-						if (!(ct instanceof CArray)) {
-							makeIt = true;
-						}
-					}
-					if (makeIt) {
-						Construct newArray = new CArray(t);
-						inner.set(c.indexChain.get(i), newArray, t);
-						ct = newArray;
-					}
-					inner = (CArray) ct;
-				}
-			}
-			String name = ((CArrayReference) arrayAndIndex).name.getName();
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(name, (CArray) ((CArrayReference) arrayAndIndex).getInternalArray(), t));
-			return new IVariable("=anon", ival, t);
-		}
-
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
@@ -263,6 +216,27 @@ public class DataHandling {
 				if(((IVariable)children.get(0).getData()).getName().equals(
 						((IVariable)children.get(1).getData()).getName())){
 					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
+				}
+			}
+			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())){
+				if(children.get(0).getChildAt(1).getData() instanceof CSlice){
+					CSlice cs = (CSlice) children.get(0).getChildAt(1).getData();
+					if(cs.getStart() == 0 && cs.getFinish() == -1){
+						//Turn this into an array_push
+						ParseTree tree = new ParseTree(new CFunction(array_push, t), children.get(0).getFileOptions());
+						tree.addChild(children.get(0).getChildAt(0));
+						tree.addChild(children.get(1));
+						return tree;
+					} 
+					//else, not really sure what's going on, so we'll just carry on, and probably there
+					//will be an error generated elsewhere
+				} else {
+					//Turn this into an array set instead
+					ParseTree tree = new ParseTree(new CFunction(array_set, t), children.get(0).getFileOptions());
+					tree.addChild(children.get(0).getChildAt(0));
+					tree.addChild(children.get(0).getChildAt(1));
+					tree.addChild(children.get(1));
+					return tree;
 				}
 			}
 			return null;
