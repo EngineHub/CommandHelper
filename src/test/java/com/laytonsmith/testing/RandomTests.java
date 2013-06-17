@@ -2,6 +2,7 @@ package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
@@ -133,7 +134,7 @@ public class RandomTests {
 			}
 		}
 		if (!StaticTest.brokenJunk.isEmpty()) {
-			System.err.println("There is/are " + StaticTest.brokenJunk.size() + " test(s) that has a failure in extreme circumstances.");
+			System.err.println("There " + StringUtils.PluralTemplateHelper(StaticTest.brokenJunk.size(), "is %d test that has", "are %d tests that have") + " a failure in extreme circumstances.");
 		}
 		if (!uhohs.isEmpty()) {
 			StringBuilder b = new StringBuilder();
