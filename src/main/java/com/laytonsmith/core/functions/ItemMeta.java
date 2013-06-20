@@ -35,8 +35,8 @@ public class ItemMeta {
 	}
 	
 	private static final String applicableItemMeta = "<ul>"
-			+ "<li>All items - display (string), lore (array of strings), enchants (array of enchantment arrays)</li>"
-			+ "<li>Books - title (string), author (string), pages (array of strings)</li>"
+			+ "<li>All items - display (string), lore (array of strings), enchants (array of enchantment arrays),"
+			+ " repair (int, repair cost)</li><li>Books - title (string), author (string), pages (array of strings)</li>"
 			+ "<li>EnchantedBooks - stored (array of enchantment arrays (see Example))</li>"
 			+ "<li>Leather Armor - color (color array (see Example))</li>"
 			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"

@@ -19,6 +19,7 @@ public class RequestSettings {
 	private String username = null;
 	private String password = null;
 	private Proxy proxy = null;
+	private String rawParameter;
 	
 	/**
 	 * 
@@ -204,6 +205,24 @@ public class RequestSettings {
 	 */
 	public Proxy getProxy(){
 		return proxy;
+	}
+
+	/**
+	 *
+	 * @return The raw parameter to send in a post request
+	 */
+	public String getRawParameter() {
+		return rawParameter;
+	}
+	
+	/**
+	 * 
+	 * @param rawParamter The raw parameter to send in a post request
+	 * @return 
+	 */
+	public RequestSettings setRawParameter(String rawParamter) {
+		this.rawParameter = rawParamter;
+		return this;
 	}
 	
 }

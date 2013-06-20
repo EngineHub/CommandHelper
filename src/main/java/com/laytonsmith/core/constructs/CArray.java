@@ -785,7 +785,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed>, O
                     case STRING_IC:
                         return compareString(o1.val().toLowerCase(), o2.val().toLowerCase());  
                 }
-                throw new Error("Missing implementation for " + sort.name());
+                throw ConfigRuntimeException.CreateUncatchableException("Missing implementation for " + sort.name(), Target.UNKNOWN);
             }
             public int compareRegular(Mixed o1, Mixed o2){
                 if(new DataHandling.is_numeric().exec(t, null, o1).castToBoolean()

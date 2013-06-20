@@ -20,6 +20,8 @@ public interface MCBlock {
 
     public void setData(byte imeta);
 
+	public void setTypeAndData(int type, byte data, boolean physics);
+
     public MCBlockState getState();
 
     public MCMaterial getType();
@@ -57,6 +59,8 @@ public interface MCBlock {
 	public int getLightLevel();
 
 	public int getBlockPower();
+	
+	public boolean isBlockPowered();
 
 	public MCBlock getRelative(MCBlockFace face);
 }

@@ -190,14 +190,16 @@ public class Interpreter {
 				}
 				Variable v = new Variable("$" + Integer.toString(i), "", Target.UNKNOWN);
 				v.setVal(new CString(arg, Target.UNKNOWN));
+				v.setDefault(arg);
 				vars.add(v);
 				if (i != 0) {
 					finalArgument.append(arg);
-					arguments.push(Static.resolveConstruct(arg, Target.UNKNOWN));
+					arguments.push(new CString(arg, Target.UNKNOWN));
 				}
 			}
 			Variable v = new Variable("$", "", false, true, Target.UNKNOWN);
 			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));
+			v.setDefault(finalArgument.toString());
 			vars.add(v);
 			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", Target.UNKNOWN), arguments);
 		}

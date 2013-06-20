@@ -2738,6 +2738,216 @@ public class PlayerManagement {
 	}
 	
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pwalkspeed extends AbstractFunction {
+
+		public String getName() {
+			return "set_pwalkspeed";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {[player], speed} Sets players speed. The speed must be between -1 or 1";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCPlayer m = null;
+			double speed = 0;
+			
+			if (p instanceof MCPlayer) {
+				m = (MCPlayer) p;
+			}
+			if (args.length == 2) {
+				m = Static.GetPlayer(args[0], t);
+				speed = Static.getDouble(args[1], t);
+			} else {
+				speed = Static.getDouble(args[0], t);
+			}
+
+			if(speed < -1 || speed > 1) {
+				throw new ConfigRuntimeException("Speed must be between -1 and 1", ExceptionType.RangeException, t);
+			}
+			Static.AssertPlayerNonNull(m, t);
+			
+			m.setWalkSpeed((float) speed);
+			return new CVoid(t);
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_pwalkspeed extends AbstractFunction {
+
+		public String getName() {
+			return "get_pwalkspeed";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "void {[player]} Gets the players speed. The speed must be between -1 or 1";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCPlayer m = null;
+			
+			if (p instanceof MCPlayer) {
+				m = (MCPlayer) p;
+			}
+			
+			if (args.length == 1) {
+				m = Static.GetPlayer(args[0], t);
+			}
+			
+			Static.AssertPlayerNonNull(m, t);
+
+			return new CDouble(((double) m.getWalkSpeed()), t);
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pflyspeed extends AbstractFunction {
+
+		public String getName() {
+			return "set_pflyspeed";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {[player], speed} Sets players fly speed. The speed must be between -1 or 1";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCPlayer m = null;
+			double speed = 0;
+			
+			if (p instanceof MCPlayer) {
+				m = (MCPlayer) p;
+			}
+			if (args.length == 2) {
+				m = Static.GetPlayer(args[0], t);
+				speed = Static.getDouble(args[1], t);
+			} else {
+				speed = Static.getDouble(args[0], t);
+			}
+
+			if(speed < -1 || speed > 1) {
+				throw new ConfigRuntimeException("Speed must be between -1 and 1", ExceptionType.RangeException, t);
+			}
+			Static.AssertPlayerNonNull(m, t);
+			
+			m.setFlySpeed((float) speed);
+			return new CVoid(t);
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_pflyspeed extends AbstractFunction {
+
+		public String getName() {
+			return "get_pflyspeed";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "void {[player]} Gets the players speed. The speed must be between -1 or 1";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCPlayer m = null;
+			
+			if (p instanceof MCPlayer) {
+				m = (MCPlayer) p;
+			}
+			
+			if (args.length == 1) {
+				m = Static.GetPlayer(args[0], t);
+			}
+			
+			Static.AssertPlayerNonNull(m, t);
+
+			return new CDouble(((double) m.getFlySpeed()), t);
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pisop extends AbstractFunction {
 
 		public String getName() {

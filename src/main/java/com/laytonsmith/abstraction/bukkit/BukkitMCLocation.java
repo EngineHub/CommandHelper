@@ -48,6 +48,10 @@ public class BukkitMCLocation implements MCLocation {
 	public double distance(MCLocation o) {
 		return l.distance(((BukkitMCLocation)o)._Location());
 	}
+	
+	public double distanceSquared(MCLocation o) {
+		return l.distanceSquared(((BukkitMCLocation)o)._Location());
+	}
 
     public MCWorld getWorld() {
         if (l.getWorld() == null) {

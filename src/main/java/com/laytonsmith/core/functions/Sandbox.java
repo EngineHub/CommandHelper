@@ -513,7 +513,7 @@ public class Sandbox {
 				divider += "-";
 			}
 			return new CString(divider + "\n"
-				+ "/ " + saying + " /\n" 
+				+ "| " + saying + " |\n" 
 				+ divider + "\n"
 				+ " \\   ^__^\n"
 				+ "  \\  (oo)\\_______\n"

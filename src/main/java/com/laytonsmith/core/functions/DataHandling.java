@@ -30,6 +30,10 @@ import java.util.Set;
  *
  */
 public class DataHandling {
+	
+	private static final String array_get = new ArrayHandling.array_get().getName();
+	private static final String array_set = new ArrayHandling.array_set().getName();
+	private static final String array_push = new ArrayHandling.array_push().getName();
 
 	public static String docs() {
 		return "This class provides various methods to control script data and program flow.";

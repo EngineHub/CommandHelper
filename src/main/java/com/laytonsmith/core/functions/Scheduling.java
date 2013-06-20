@@ -492,18 +492,18 @@ public class Scheduling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Basic usage", "simple_date('h:mm a')"),
-						new ExampleScript("Usage with quoted letters", "simple_date('yyyy.MM.dd G \\'at\\' HH:mm:ss z')"),
-						new ExampleScript("Adding a single quote", "simple_date('EEE, MMM d, \\'\\'yy')"),
-						new ExampleScript("Specifying alternate time", "simple_date('EEE, MMM d, \\'\\'yy', 0)"),
-						new ExampleScript("With timezone", "simple_date('hh \\'o\\'\\'clock\\' a, zzzz')"),
-						new ExampleScript("With simple timezone", "simple_date('hh \\'o\\'\\'clock\\' a, zzzz')"),
-						new ExampleScript("With timezone", "simple_date('K:mm a, z')"),
-						new ExampleScript("With alternate timezone", "simple_date('K:mm a, z', time(), 'GMT')"),
-						new ExampleScript("With 5 digit year", "simple_date('yyyyy.MMMMM.dd GGG hh:mm aaa')"),
-						new ExampleScript("Long format", "simple_date('EEE, d MMM yyyy HH:mm:ss Z')"),
-						new ExampleScript("Computer readable format", "simple_date('yyMMddHHmmssZ')"),
-						new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')"),
+						/* 1 */ new ExampleScript("Basic usage", "simple_date('h:mm a')", ":11:36 AM"),
+						/* 2 */ new ExampleScript("Usage with quoted letters", "simple_date('yyyy.MM.dd G \\'at\\' HH:mm:ss z')", ":2013.06.13 AD at 11:36:46 CDT"),
+						/* 3 */ new ExampleScript("Adding a single quote", "simple_date('EEE, MMM d, \\'\\'yy')", ":Wed, Jun 5, '13"),
+						/* 4 */ new ExampleScript("Specifying alternate time", "simple_date('EEE, MMM d, \\'\\'yy', 0)"),
+						/* 5 */ new ExampleScript("With timezone", "simple_date('hh \\'o\\'\\'clock\\' a, zzzz')", ":11 o'clock AM, Central Daylight Time"),
+						/* 6 */ new ExampleScript("With timezone", "simple_date('hh \\'o\\'\\'clock\\' a, zzzz')", ":11 o'clock AM, Central Daylight Time"),
+						/* 7 */ new ExampleScript("With simple timezone", "simple_date('K:mm a, z')", ":11:42 AM, CDT"),
+						/* 8 */ new ExampleScript("With alternate timezone", "simple_date('K:mm a, z', time(), 'GMT')", ":4:42 PM, GMT"),
+						/* 9 */ new ExampleScript("With 5 digit year", "simple_date('yyyyy.MMMMM.dd GGG hh:mm aaa')", ":02013.June.05 AD 11:42 AM"),
+						/* 10 */ new ExampleScript("Long format", "simple_date('EEE, d MMM yyyy HH:mm:ss Z')", ":Wed, 5 Jun 2013 11:42:56 -0500"),
+						/* 11 */ new ExampleScript("Computer readable format", "simple_date('yyMMddHHmmssZ')", ":130605114256-0500"),
+						/* 12 */ new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')", ":2013-06-05T11:42:56.799-0500"),
 			};
 		}
 	}

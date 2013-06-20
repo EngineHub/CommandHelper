@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.compiler.Optimizable;
@@ -10,7 +11,7 @@ import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -25,6 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.EnumSet;
 import java.util.Set;
+import org.apache.commons.codec.binary.Base64;
 import org.mindrot.jbcrypt.BCrypt;
 
 /**
@@ -376,8 +378,8 @@ public class Crypto {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "bcrypt('string')"),
-				new ExampleScript("Basic usage", "bcrypt('String')"),
+				new ExampleScript("Basic usage", "bcrypt('string')", ":$2a$05$aBMYDJAu6C3O.142N/n7yO6Dl3KC0L/zHUEZnOXQuaX13XUKec8Gy"),
+				new ExampleScript("Basic usage", "bcrypt('String')", ":$2a$05$jYm.4yath40V2DqjipWSje3Ed0ZNLO8IcDjIF50PJoPvWSmF1J7L2"),
 			};
 		}
         
@@ -440,6 +442,100 @@ public class Crypto {
 		}
         
     }
+	
+	@api
+	public static class base64_encode extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = Static.getByteArray(args[0], t);
+			byte[] data = ba.asByteArrayCopy();
+			data = Base64.encodeBase64(data);
+			return CByteArray.wrap(data, t);
+		}
+
+		public String getName() {
+			return "base64_encode";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "byte_array {byteData} Encodes the given byte_array data into a base 64 byte_array.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "string_from_bytes(base64_encode(string_get_bytes('A string')))")
+			};
+		}
+		
+	}
+	
+	@api
+	public static class base64_decode extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = Static.getByteArray(args[0], t);
+			byte[] data = ba.asByteArrayCopy();
+			data = Base64.decodeBase64(data);
+			return CByteArray.wrap(data, t);
+		}
+
+		public String getName() {
+			return "base64_decode";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "byte_array {base64data} Decodes the base 64 encoded byte_array data back into the original byte_array data.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "string_from_bytes(base64_decode(string_get_bytes('QSBzdHJpbmc=')))")
+			};
+		}
+		
+	}
 
     public static String toHex(byte[] bytes) {
         BigInteger bi = new BigInteger(1, bytes);

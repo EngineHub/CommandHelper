@@ -613,4 +613,82 @@ public final class StringUtils {
 		String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
 		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
+	
+	/**
+	 * Returns a properly agreeing subject verb clause given a count, and singular
+	 * subject. This version assumes that the plural subject can be made simply by appending
+	 * <code>s</code> to the singular subject, which is not always true. 
+	 * This is useful in cases where forming a sentence
+	 * requires different wording depending on the count. Usually, you might use a fairly
+	 * complex tertiary statement, for instance: <code>String message = "There " + (count==1?"is":"are") +
+	 * " " + count + " test failure" + (count==1?"":"s");</code> This is time consuming, and easy to mess up
+	 * or accidentally reverse. Instead, you can use this function. Note that this will add <code>is</code>
+	 * or </code>are</code> for you. You need only to provide the count, singular subject, and plural subject.
+	 * If the subject cannot be made plural with just an <code>s</code>, use {@link #PluralHelper(int, java.lang.String, java.lang.String)}
+	 * instead. Usage example:
+	 * 
+	 * <pre>
+	 * String message = "There " + PluralHelper(count, "test failure");
+	 * //If count is 1: There is 1 test failure
+	 * //If count is not 1: There are 2 test failures
+	 * </pre>
+	 * 
+	 * @param count The count of items
+	 * @param singular The subject of the sentence, as a singular
+	 * @return The properly formatted clause.
+	 */
+	public static String PluralHelper(int count, String singular){
+		return PluralHelper(count, singular, singular + "s");
+	}
+	
+	/**
+	 * Returns a properly agreeing subject verb clause given a count, singular
+	 * subject, and plural subject. This is useful in cases where forming a sentence
+	 * requires different wording depending on the count. Usually, you might use a fairly
+	 * complex tertiary statement, for instance: <code>String message = "There " + (count==1?"is":"are") +
+	 * " " + count + " test failure" + (count==1?"":"s");</code> This is time consuming, and easy to mess up
+	 * or accidentally reverse. Instead, you can use this function. Note that this will add <code>is</code>
+	 * or </code>are</code> for you. You need only to provide the count, singular subject, and plural subject.
+	 * If the subject can be made plural with just an <code>s</code>, use {@link #PluralHelper(int, java.lang.String)}
+	 * instead. Usage example:
+	 * 
+	 * <pre>
+	 * String message = "There " + PluralHelper(count, "fish", "fish");
+	 * //If count is 1: There is 1 fish
+	 * //If count is not 1: There are 2 fish
+	 * </pre>
+	 * 
+	 * @param count The count of items
+	 * @param singular The subject of the sentence, as a singular
+	 * @param plural The subject of the sentence, as a plural
+	 * @return The properly formatted clause.
+	 */
+	public static String PluralHelper(int count, String singular, String plural){
+		return (count==1?"is":"are") + " " + count + " " + (count==1?singular:plural);
+	}
+	
+	/**
+	 * For even more complex sentences, it may just be easiest to provide a template,
+	 * which will be replaced, if the count is singular or plural. Both singularTemplate
+	 * and pluralTemplate are expected to be String.format templates with a %d in them, which will
+	 * be replaced with the actual count number. If the count == 1, then the singularTemplate will
+	 * be used, else the pluralTemplate will be used.
+	 * Usage example:
+	 * 
+	 * <pre>
+	 * String message = PluralTemplateHelper(count, "I will buy %d car if it has a good price",
+	 * "I will buy %d cars if they have a good price");
+	 * </pre>
+	 * @param count The count of items
+	 * @param singularTemplate The singular template
+	 * @param pluralTemplate The plural template
+	 * @return 
+	 */
+	public static String PluralTemplateHelper(int count, String singularTemplate, String pluralTemplate){
+		if(count == 1){
+			return String.format(singularTemplate, count);
+		} else {
+			return String.format(pluralTemplate, count);
+		}
+	}
 }

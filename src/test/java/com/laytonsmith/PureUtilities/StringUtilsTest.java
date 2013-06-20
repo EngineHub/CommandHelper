@@ -176,5 +176,25 @@ public class StringUtilsTest {
 	public void testReplaceLast() {
 		assertEquals("123456", StringUtils.replaceLast("123123", "123", "456"));
 	}
+	
+	@Test
+	public void testPluralHelper1(){
+		assertEquals("There is 1 car", "There " + StringUtils.PluralHelper(1, "car"));
+		assertEquals("There are 2 cars", "There " + StringUtils.PluralHelper(2, "car"));
+	}
+	
+	@Test
+	public void testPluralHelper2(){
+		assertEquals("There is 1 fish", "There " + StringUtils.PluralHelper(1, "fish", "fish"));
+		assertEquals("There are 2 fish", "There " + StringUtils.PluralHelper(2, "fish", "fish"));
+	}
+	
+	@Test
+	public void testPluralTemplateHelper(){
+		assertEquals("There is 1 fish, and it is red.", 
+				StringUtils.PluralTemplateHelper(1, "There is %d fish, and it is red.", "There are %d fish, and they are red."));
+		assertEquals("There are 4 fish, and they are red.", 
+				StringUtils.PluralTemplateHelper(4, "There is %d fish, and it is red.", "There are %d fish, and they are red."));
+	}
 
 }

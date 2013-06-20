@@ -26,7 +26,7 @@ import org.pushingpixels.substance.api.skin.SubstanceGraphiteGlassLookAndFeel;
 public class DocGenUI extends javax.swing.JFrame {
 
 	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-	private static final File chDirectory = new File(jarLocation, "CommandHelper/");
+	static final File chDirectory = new File(jarLocation, "CommandHelper/");
 	DocGenUIHandler handler;
 	DocGenUIHandler.ProgressManager manager = new DocGenUIHandler.ProgressManager() {
 

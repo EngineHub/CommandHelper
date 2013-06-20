@@ -3,11 +3,17 @@
 package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Documentation;
-import com.laytonsmith.core.compiler.Optimizable;
+import com.laytonsmith.core.Installer;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Event;
@@ -17,6 +23,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,11 +38,24 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void main(String[] args) throws Exception {
-        //System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
-		//System.out.println(examples("simple_date", true));
-		//System.exit(0);
-        events("wiki");
-	    //System.out.println(Template("persistance_network"));
+		try{
+			//Boilerplate startup stuff
+			Implementation.setServerType(Implementation.Type.BUKKIT);
+			Installer.Install(DocGenUI.chDirectory);
+			Prefs.init(new File(DocGenUI.chDirectory, "preferences.txt"));
+			CHLog.initialize(DocGenUI.chDirectory);
+			
+			//System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
+			System.out.println(examples("string_append", true));
+			//System.exit(0);
+			//events("wiki");
+			//System.out.println(Template("persistance_network"));
+		} catch(Throwable t){
+			t.printStackTrace();
+			System.exit(1);
+		} finally {
+			System.exit(0);
+		}
     }
 	
 	public static String examples(String function, boolean staged) throws Exception {
@@ -83,9 +103,11 @@ public class DocGen {
 					String style = "";
 					if(es.isAutomatic()){
 						style = " style=\"background-color: #BDC7E9\"";
+						exampleBuilder.append("\n\nThe output would be:\n<pre");
+					} else {
+						exampleBuilder.append("\n\nThe output might be:\n<pre");
 					}
-					exampleBuilder.append("\n\nThe output would be:\n<pre")
-							.append(style).append(">").append(es.getOutput()).append("</pre>\n\n");
+					exampleBuilder.append(style).append(">").append(es.getOutput()).append("</pre>\n\n");
 					count++;
 				}
 			} else {

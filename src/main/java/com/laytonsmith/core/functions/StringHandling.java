@@ -4,6 +4,7 @@ import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException;
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
@@ -219,7 +220,7 @@ public class StringHandling {
 				if (i > 0) {
 					b.append(" ");
 				}
-				b.append(args[i].val());
+				b.append(args[i] == null?"":args[i].val());
 			}
 			return new CString(b.toString(), t);
 		}
@@ -267,7 +268,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Functional usage", "sconcat('1', '2', '3', '4')"),
-						new ExampleScript("Implied usage, do to no operators", "'1' '2' '3' '4'"),};
+						new ExampleScript("Implied usage, due to no operators", "'1' '2' '3' '4'"),};
 		}
 
 		@Override
@@ -1413,7 +1414,7 @@ public class StringHandling {
 				new ExampleScript("Compile error, missing parameters", "sprintf('%d')", true),
 				new ExampleScript("Other formatting: float with precision (using integer)", "sprintf('%07.3f', 4)"),
 				new ExampleScript("Other formatting: float with precision (with rounding)", "sprintf('%07.3f', 3.4567)"),
-				new ExampleScript("Other formatting: time", "sprintf('%1$tm %1$te,%1$tY', time())"),
+				new ExampleScript("Other formatting: time", "sprintf('%1$tm %1$te,%1$tY', time())", ":06 13,2013"),
 				new ExampleScript("Literal percent sign", "sprintf('%%')"),
 				new ExampleScript("Hexidecimal formatting", "sprintf('%x', 15)"),
 				new ExampleScript("Other formatting: character", "sprintf('%c', 's')"),
@@ -1537,6 +1538,82 @@ public class StringHandling {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class string_append extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CResource m = (CResource) args[0];
+			StringBuffer buf = ResourceManager.GetResource(m, StringBuffer.class, t);
+			for(int i = 1; i < args.length; i++){
+				buf.append(args[i].val());
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "string_append";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		public String docs() {
+			return "void {resource, toAppend...} Appends any number of values to the underlying"
+					+ " string builder. This is much more efficient than doing normal concatenation"
+					+ " with a string when building a string in a loop. The underlying resource may"
+					+ " be converted to a string via a cast, string(@res).";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "@res = res_create_resource('STRING_BUILDER')\n"
+					+ "foreach(1..100, @i,\n"
+					+ "\tstring_append(@res, @i, '.')\n"
+					+ ")\n"
+					+ "@string = string(@res)\n"
+					+ "res_free_resource(@res) #This line is super important!\n"
+					+ "msg(@string)"
+					+ ""),
+				new ExampleScript("Basic usage, showing performance benefits", 
+					"@to = 100000\n"
+					+ "@t1 = time()\n"
+					+ "@res = res_create_resource('STRING_BUILDER')\n"
+					+ "foreach(range(0, @to), @i,\n"
+					+ "\tstring_append(@res, @i, '.')\n"
+					+ ")\n"
+					+ "res_free_resource(@res)\n"
+					+ "@t2 = time()\n"
+					+ "@t3 = time()\n"
+					+ "@str = ''\n"
+					+ "foreach(range(0, @to), @i,\n"
+					+ "\t@str .= @i . '.'\n"
+					+ ")\n"
+					+ "@t4 = time()\n"
+					+ "msg('Task 1 took '.(@t2 - @t1).'ms under '.@to.' iterations')\n"
+					+ "msg('Task 2 took '.(@t4 - @t3).'ms under '.@to.' iterations')")
+			};
 		}
 		
 	}

@@ -107,6 +107,9 @@ public class ExampleScript {
 				if(method.getName().equals("sendMessage")){
 					playerOutput.append(args[0].toString()).append("\n");
 				}
+				if(method.getName().equals("isOnline")){
+					return true;
+				}
 				return genericReturn(method.getReturnType());
 			}
 		});

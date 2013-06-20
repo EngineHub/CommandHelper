@@ -247,6 +247,11 @@ public class Web {
 						mparams.put(key, l);
 					}
 					settings.setComplexParameters(mparams);
+				} else {
+					settings.setRawParameter(csettings.get("params").val());
+					if(settings.getMethod() != HTTPMethod.POST){
+						throw new Exceptions.FormatException("You must set the method to POST to use raw params.", t);
+					}
 				}
 				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar") == null)){
 					arrayJar = Static.getArray(csettings.get("cookiejar"), t);

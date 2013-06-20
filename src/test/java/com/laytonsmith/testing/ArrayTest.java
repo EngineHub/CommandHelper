@@ -371,5 +371,28 @@ public class ArrayTest {
 				+ "array_remove(@arr,0)\n"
 				+ "array_set(@arr,0,array())", fakePlayer);
 	}
+	
+	@Test public void testArraySetWithInternalVariable() throws Exception {
+		SRun("@array = associative_array()\n"
+				+ "@value = 'herp'\n"
+				+ "@md5 = md5(@value)\n"
+				+ "@array[md5(@value)] = 'derp'\n"
+				+ "msg(string(@array) == '{'.@md5.': derp}')", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+	
+	@Test public void testArrayPushOperator() throws Exception {
+		SRun("@array = array()\n"
+				+ "@array[] = 'value'\n"
+				+ "msg(string(@array) == '{value}')", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+	
+	@Test(expected = ConfigCompileException.class)
+	public void testArrayPushOperatorFailure() throws Exception {
+		SRun("@array = array()\n"
+				+ "@array[] = array()\n"
+				+ "@array[][] = 5\n", fakePlayer);
+	}
 
 }

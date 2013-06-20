@@ -8,8 +8,12 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
@@ -30,6 +34,7 @@ import com.laytonsmith.core.natives.annotations.NonNull;
 import com.laytonsmith.core.natives.annotations.Ranged;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1480,5 +1485,88 @@ public class EntityManagement {
 					);
 		}
 		
+	}
+
+	@api
+	public static class set_entity_rider extends EntitySetterFunction {
+	
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity horse, rider;
+			boolean success;
+			if (args[0] instanceof CNull) {
+				horse = null;
+			} else {
+				horse = Static.getEntity(Static.getInt32(args[0], t), t);
+			}
+			if (args[1] instanceof CNull) {
+				rider = null;
+			} else {
+				rider = Static.getEntity(Static.getInt32(args[1], t), t);
+			}
+			if ((horse == null && rider == null) || horse == rider) {
+				throw new Exceptions.FormatException("Horse and rider cannot be the same entity", t);
+			} else if (horse == null) {
+				success = rider.leaveVehicle();
+			} else if (rider == null) {
+				success = horse.eject();
+			} else {
+				success = horse.setPassenger(rider);
+			}
+			return new CBoolean(success, t);
+		}
+	
+		public String getName() {
+			return "set_entity_rider";
+		}
+	
+		public String docs() {
+			return "boolean {horse, rider} Sets the way two entities are stacked. Horse and rider are entity ids."
+					+ " If rider is null, horse will eject its current rider, if it has one. If horse is null,"
+					+ " rider will leave whatever it is riding. If horse and rider are both valid entities,"
+					+ " rider will ride horse. The function returns the success of whatever operation is done."
+					+ " If horse and rider are both null, or otherwise the same, a FormatException is thrown.";
+		}
+	}
+	
+	@api
+	public static class get_entity_rider extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			if (ent.getPassenger() instanceof MCEntity) {
+				return new CInt(ent.getPassenger().getEntityId(), t);
+			}
+			return null;
+		}
+
+		public String getName() {
+			return "get_entity_rider";
+		}
+
+		public String docs() {
+			return "mixed {entityID} Returns the ID of the given entity's rider, or null if it doesn't have one.";
+		}
+	}
+	
+	@api
+	public static class get_entity_vehicle extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			if (ent.isInsideVehicle()) {
+				return new CInt(ent.getVehicle().getEntityId(), t);
+			}
+			return new CNull(t);
+		}
+
+		public String getName() {
+			return "get_entity_vehicle";
+		}
+
+		public String docs() {
+			return "mixed {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
+		}
 	}
 }

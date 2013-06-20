@@ -317,6 +317,7 @@ public class ObjectGenerator {
 			ma.set("display", display, t);
 			ma.set("lore", lore, t);
 			ma.set("enchants", enchants, t);
+			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
 			if (meta instanceof MCLeatherArmorMeta) {
 				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
@@ -411,6 +412,9 @@ public class ObjectGenerator {
 					} else {
 						throw new Exceptions.FormatException("Enchants field was expected to be an array of Enchantment arrays", t);
 					}
+				}
+				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
+					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
 				}
 				if (meta instanceof MCLeatherArmorMeta) {
 					if (ma.containsKey("color")) {

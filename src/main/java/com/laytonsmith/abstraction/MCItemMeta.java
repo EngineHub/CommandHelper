@@ -84,4 +84,10 @@ public interface MCItemMeta extends AbstractionObject {
      * @return whether the enchantment was removed successfully
      */
     boolean removeEnchant(MCEnchantment ench);
+    
+    boolean hasRepairCost();
+    
+    int getRepairCost();
+    
+    void setRepairCost(int cost);
 }

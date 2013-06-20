@@ -173,7 +173,7 @@
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.5.2-R0.2-SNAPSHOT</version>
+			<version>1.5.2-R1.1-SNAPSHOT</version>
 		</dependency>
         
 		<!-- CraftBukkit Dependency for experimental features
@@ -256,6 +256,15 @@
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
 			<version>2.1.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		
+		<!-- MySQL -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.24</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -361,6 +370,12 @@
 			<groupId>org.mcstats</groupId>
 			<artifactId>metrics</artifactId>
 			<version>1.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<type>jar</type>
+			<version>1.3</version>
 		</dependency>
 	</dependencies>
 	<distributionManagement>
@@ -486,6 +501,7 @@
 									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
 									<include>redis.clients:jedis:jar:*</include>
 									<include>mysql:mysql-connector-java:jar:*</include>
+									<include>commons-codec:commons-codec:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -542,6 +558,10 @@
 								<relocation> <!-- part of the mysql lib -->
 									<pattern>org.gjt.mm.mysql</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.gjt.mm.mysql</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.codec</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.commons.codec</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -608,6 +628,12 @@
 								</filter>
 								<filter>
 									<artifact>mysql:mysql-connector-java:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>commons-codec:commons-codec:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>

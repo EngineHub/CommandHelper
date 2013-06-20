@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
@@ -152,7 +153,7 @@ public class Environment {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2, 4, 5};
+			return new Integer[]{2, 3, 4, 5, 6};
 		}
 
 		public String docs() {
@@ -198,6 +199,7 @@ public class Environment {
 			double x = 0;
 			double y = 0;
 			double z = 0;
+			boolean physics = true;
 			String id = null;
 			String world = null;
 			MCWorld w = null;
@@ -205,7 +207,7 @@ public class Environment {
 			if (sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			if (args.length == 2) {
+			if (args.length < 4) {
 				if (!(args[0] instanceof CArray)) {
 					throw new ConfigRuntimeException("set_block_at expects param 1 to be an array", ExceptionType.CastException, t);
 				}
@@ -215,14 +217,20 @@ public class Environment {
 				z = l.getBlockZ();
 				world = l.getWorld().getName();
 				id = args[1].val();
+				if (args.length == 3) {
+					physics = Static.getBoolean(args[2]);
+				}
 
 			} else {
 				x = args[0].primitive(t).castToDouble(t);
 				y = args[1].primitive(t).castToDouble(t);
 				z = args[2].primitive(t).castToDouble(t);
 				id = args[3].val();
-				if (args.length == 5) {
+				if (args.length >= 5) {
 					world = args[4].val();
+				}
+				if (args.length == 6) {
+					physics = Static.getBoolean(args[2]);
 				}
 			}
 			if (world != null) {
@@ -263,8 +271,11 @@ public class Environment {
 
 			int idata = Integer.parseInt(data.toString());
 			byte imeta = Byte.parseByte(meta.toString());
-			b.setTypeId(idata);
-			b.setData(imeta);
+			if (idata > StaticLayer.GetConvertor().getMaxBlockID()) {
+				throw new ConfigRuntimeException("Maximum blockID exceeded: " + idata +
+						". Attempting to set a block to an item id can corrupt chunks!", ExceptionType.CastException, t);
+			}
+			b.setTypeAndData(idata, imeta, physics);
 
 			return new CVoid(t);
 		}
@@ -1133,6 +1144,96 @@ public class Environment {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_light_at extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException,
+					ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String getName() {
+			return "get_light_at";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "int {locationArray} Returns the combined light level at a block, taking into account all sources.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+				throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (pl instanceof MCPlayer) {
+				w = pl.getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			return new CInt(loc.getBlock().getLightLevel(), t);
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class is_block_powered extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException,
+					ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String getName() {
+			return "is_block_powered";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "boolean {locationArray} Returns whether or not a block is being supplied with power."
+					+ " Be aware that this interprets 'powered' differently than a human would. For example,"
+					+ " using this on a piston next to a redstone block will return false.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+				throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (pl instanceof MCPlayer) {
+				w = pl.getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			return new CBoolean(loc.getBlock().isBlockPowered(), t);
 		}
 	}
 }

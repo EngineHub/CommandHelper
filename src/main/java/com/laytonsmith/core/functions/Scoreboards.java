@@ -332,7 +332,7 @@ public class Scoreboards {
 	}
 	
 	@api
-	public static class get_objectives extends SBFunction {
+	public static class get_pscoreboard extends SBFunction {
 
 		public Construct exec(Target t, Environment environment,
 				Mixed... args) throws ConfigRuntimeException {

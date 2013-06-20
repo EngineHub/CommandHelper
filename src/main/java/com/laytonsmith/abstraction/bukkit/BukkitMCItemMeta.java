@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.Repairable;
 
 /**
  *
@@ -95,5 +96,15 @@ public class BukkitMCItemMeta implements MCItemMeta {
 		return im.toString();
 	}
 	
+	public boolean hasRepairCost() {
+		return ((Repairable) im).hasRepairCost();
+	}
 	
+	public int getRepairCost() {
+		return ((Repairable) im).getRepairCost();
+	}
+	
+	public void setRepairCost(int cost) {
+		((Repairable) im).setRepairCost(cost);
+	}
 }
