@@ -1,6 +1,7 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typename;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -10,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * complicated. Therefore, this is a stopgap measure that WILL be removed at some point,
  * once Objects are created.
  */
+@typename("resource")
 public class CResource<T> extends Construct {
 	private static final AtomicLong resourcePool = new AtomicLong(0);
 	
@@ -27,7 +29,7 @@ public class CResource<T> extends Construct {
 	}
 	
 	public CResource(T resource, ResourceToString toString, Target t){
-		super("", ConstructType.RESOURCE, t);
+		super("", t);
 		this.resource = resource;
 		if(toString == null){
 			throw new NullPointerException();
@@ -45,18 +47,17 @@ public class CResource<T> extends Construct {
 	}
 
 	@Override
-	public String val() {
-		return toString.getString(this);
-	}
-
-	@Override
 	public String toString() {
-		return val();
+		return toString.getString(this);
 	}
 
 	@Override
 	public boolean isDynamic() {
 		return true;
+	}
+
+	public String typeName() {
+		return this.getClass().getAnnotation(typename.class).value();
 	}
 	
 	public static interface ResourceToString {

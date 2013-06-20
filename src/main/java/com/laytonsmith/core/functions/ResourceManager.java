@@ -6,7 +6,11 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -14,6 +18,8 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.MEnum;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
 import org.xml.sax.SAXException;
@@ -27,11 +33,12 @@ public class ResourceManager {
 				+ " be deprecated at some point in the future, so don't rely too heavily on it.";
 	}
 	
-	public static enum ResourceTypes {
+	@typename("ResourceType")
+	public static enum ResourceType implements MEnum {
 		XML_DOCUMENT(XMLDocument.class),
 		STRING_BUILDER(StringBuffer.class);
 		private final Class<?> type;
-		private ResourceTypes(Class<?> type){
+		private ResourceType(Class<?> type){
 			this.type = type;
 		}
 		
@@ -39,13 +46,49 @@ public class ResourceManager {
 			return type;
 		}
 		
-		public static ResourceTypes getResourceByType(Class<?> type){
-			for(ResourceTypes c : values()){
+		public static ResourceType getResourceByType(Class<?> type){
+			for(ResourceType c : values()){
 				if(c.getType() == type){
 					return c;
 				}
 			}
 			throw new IllegalArgumentException();
+		}
+
+		public Object value() {
+			return this;
+		}
+
+		public String val() {
+			return this.name();
+		}
+
+		public String typeName() {
+			return this.getClass().getAnnotation(typename.class).value();
+		}
+
+		public CPrimitive primitive(Target t) throws ConfigRuntimeException {
+			throw new Error();
+		}
+
+		public boolean isImmutable() {
+			return true;
+		}
+
+		public boolean isDynamic() {
+			return false;
+		}
+
+		public void destructor() {
+			
+		}
+
+		public Mixed doClone() {
+			return this;
+		}
+
+		public Target getTarget() {
+			return Target.UNKNOWN;
 		}
 	}
 	
@@ -73,8 +116,8 @@ public class ResourceManager {
 			return (T) resource.getResource();
 		} else {
 			throw new Exceptions.CastException("Unexpected resource type. Expected resource of type "
-					+ ResourceTypes.getResourceByType(type).name() + " but found "
-					+ ResourceTypes.getResourceByType(resource.getResource().getClass()).name() + " instead.", t);
+					+ ResourceType.getResourceByType(type).name() + " but found "
+					+ ResourceType.getResourceByType(resource.getResource().getClass()).name() + " instead.", t);
 		}
 	}
 	
@@ -93,11 +136,11 @@ public class ResourceManager {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			ResourceTypes type;
-			Construct data = null;
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			ResourceType type;
+			Mixed data = null;
 			try{
-				type = ResourceTypes.valueOf(args[0].val());
+				type = ResourceType.valueOf(args[0].val());
 			} catch(IllegalArgumentException e){
 				throw new Exceptions.FormatException(e.getMessage(), t);
 			}
@@ -140,13 +183,24 @@ public class ResourceManager {
 		}
 
 		public String docs() {
-			return "resource {type, [data]} Creates a new resource, which is stored in memory. Various"
+			return "Creates a new resource, which is stored in memory. Various"
 					+ " functions require resources of certain types, which are created with this function."
 					+ " Barring resources that you intend on keeping around indefinitely, each call"
 					+ " to res_create_resource should be paired with a res_free_resource, being careful"
 					+ " to catch any exceptions and still calling res_free_resource anyways. Each resource"
 					+ " has its own data to create the resource. Type may be one of: " 
-					+ StringUtils.Join(ResourceTypes.values(), ", ", ", or ");
+					+ StringUtils.Join(ResourceType.values(), ", ", ", or ");
+		}
+
+		public Argument returnType() {
+			return new Argument("", CResource.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", ResourceType.class, "type"),
+						new Argument("", Mixed.class, "data").setVarargs().setOptionalDefaultNull()
+					);
 		}
 
 		public Version since() {
@@ -169,7 +223,7 @@ public class ResourceManager {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CResource){
 				CResource<?> resource = (CResource<?>) args[0];
 				if(resources.containsKey(resource.getId())){
@@ -192,8 +246,18 @@ public class ResourceManager {
 		}
 
 		public String docs() {
-			return "void {resource} Frees the given resource. This should ALWAYS be called at some point after creating a resource"
+			return "Frees the given resource. This should ALWAYS be called at some point after creating a resource"
 					+ " with res_create_resource, once you are done with the resource.";
+		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CResource.class, "resource")
+					);
 		}
 
 		public Version since() {

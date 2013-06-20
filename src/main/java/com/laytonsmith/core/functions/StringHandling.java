@@ -1557,7 +1557,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CResource m = (CResource) args[0];
 			StringBuffer buf = ResourceManager.GetResource(m, StringBuffer.class, t);
 			for(int i = 1; i < args.length; i++){
@@ -1575,10 +1575,21 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "void {resource, toAppend...} Appends any number of values to the underlying"
+			return "Appends any number of values to the underlying"
 					+ " string builder. This is much more efficient than doing normal concatenation"
 					+ " with a string when building a string in a loop. The underlying resource may"
 					+ " be converted to a string via a cast, string(@res).";
+		}
+
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CResource.class, "resource"),
+						new Argument("", Mixed.class, "toAppend").setVarargs()
+					);
 		}
 
 		public Version since() {

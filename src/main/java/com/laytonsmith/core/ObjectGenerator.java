@@ -413,8 +413,8 @@ public class ObjectGenerator {
 						throw new Exceptions.FormatException("Enchants field was expected to be an array of Enchantment arrays", t);
 					}
 				}
-				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
-					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
+				if (ma.containsKey("repair") && (ma.get("repair", t) != null)) {
+					meta.setRepairCost(ma.get("repair", t).primitive(t).castToInt32(t));
 				}
 				if (meta instanceof MCLeatherArmorMeta) {
 					if (ma.containsKey("color")) {

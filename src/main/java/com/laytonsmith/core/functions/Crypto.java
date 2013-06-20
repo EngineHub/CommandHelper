@@ -12,6 +12,7 @@ import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -458,8 +459,9 @@ public class Crypto {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = Static.getByteArray(args[0], t);
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("data");
 			byte[] data = ba.asByteArrayCopy();
 			data = Base64.encodeBase64(data);
 			return CByteArray.wrap(data, t);
@@ -474,7 +476,17 @@ public class Crypto {
 		}
 
 		public String docs() {
-			return "byte_array {byteData} Encodes the given byte_array data into a base 64 byte_array.";
+			return "Encodes the given byte_array data into a base 64 byte_array.";
+		}
+
+		public Argument returnType() {
+			return new Argument("", CByteArray.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CByteArray.class, "data")
+					);
 		}
 
 		public Version since() {
@@ -505,8 +517,9 @@ public class Crypto {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = Static.getByteArray(args[0], t);
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("data");
 			byte[] data = ba.asByteArrayCopy();
 			data = Base64.decodeBase64(data);
 			return CByteArray.wrap(data, t);
@@ -521,7 +534,17 @@ public class Crypto {
 		}
 
 		public String docs() {
-			return "byte_array {base64data} Decodes the base 64 encoded byte_array data back into the original byte_array data.";
+			return "Decodes the base 64 encoded byte_array data back into the original byte_array data.";
+		}
+
+		public Argument returnType() {
+			return new Argument("", CByteArray.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", CByteArray.class, "data")
+					);
 		}
 
 		public Version since() {

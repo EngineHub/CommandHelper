@@ -218,7 +218,7 @@ public class Environment {
 				world = l.getWorld().getName();
 				id = args[1].val();
 				if (args.length == 3) {
-					physics = Static.getBoolean(args[2]);
+					physics = args[2].primitive(t).castToBoolean();
 				}
 
 			} else {
@@ -230,7 +230,7 @@ public class Environment {
 					world = args[4].val();
 				}
 				if (args.length == 6) {
-					physics = Static.getBoolean(args[2]);
+					physics = args[2].primitive(t).castToBoolean();
 				}
 			}
 			if (world != null) {
@@ -1172,14 +1172,24 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "int {locationArray} Returns the combined light level at a block, taking into account all sources.";
+			return "Returns the combined light level at a block, taking into account all sources.";
+		}
+
+		public Argument returnType() {
+			return new Argument("", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", MLocation.class, "location")
+					);
 		}
 
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1216,16 +1226,26 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "boolean {locationArray} Returns whether or not a block is being supplied with power."
+			return "Returns whether or not a block is being supplied with power."
 					+ " Be aware that this interprets 'powered' differently than a human would. For example,"
 					+ " using this on a piston next to a redstone block will return false.";
+		}
+
+		public Argument returnType() {
+			return new Argument("", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", MLocation.class, "location")
+					);
 		}
 
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();

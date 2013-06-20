@@ -346,7 +346,7 @@ public class CByteArray extends Construct implements Sizable {
 	 * capacity.
 	 * @return 
 	 */
-	public long size(){
+	public int size(){
 		return maxValue;
 	}
 	

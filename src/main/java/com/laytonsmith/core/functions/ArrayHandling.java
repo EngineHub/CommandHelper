@@ -109,10 +109,6 @@ public class ArrayHandling {
 			Construct index = list.get("index");
 			Construct defaultConstruct = list.get("default");
 
-			if (env.getEnv(GlobalEnv.class).HasFlag("array_get_alt_mode")) {
-				return new CArrayReference((Construct) array, index, env);
-			}
-
 			if (index instanceof CSlice) {
 				CSlice slice = ((CSlice) index);
 				return array.slice(slice.getStart(), slice.getFinish(), t);

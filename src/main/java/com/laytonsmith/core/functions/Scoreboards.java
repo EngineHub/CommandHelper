@@ -331,68 +331,6 @@ public class Scoreboards {
 		}
 	}
 	
-	@api
-	public static class get_pscoreboard extends SBFunction {
-
-		public Construct exec(Target t, Environment environment,
-				Mixed... args) throws ConfigRuntimeException {
-			MCScoreboard s;
-			if (args.length == 0) {
-				s = getBoard(MAIN, t);
-			} else {
-				s = getBoard(args[0].val(), t);
-			}
-			Set<MCObjective> os;
-			if (args.length == 2) {
-				MCCriteria crit;
-				try {
-					crit = MCCriteria.valueOf(args[1].val());
-				} catch (IllegalArgumentException iae) {
-					crit = MCCriteria.DUMMY;
-				}
-				os = s.getObjectivesByCriteria(crit.getCriteria());
-			} else {
-				os = s.getObjectives();
-			}
-			CArray ret = new CArray(t);
-			for (MCObjective o : os) {
-				Objective obj = new Objective();
-				obj.name = o.getName();
-				obj.displayname = o.getDisplayName();
-				obj.slot = o.getDisplaySlot();
-				obj.modifiable = o.isModifiable();
-				obj.criteria = o.getCriteria();
-				ret.push(obj.deconstruct(t));
-			}
-			return ret;
-		}
-
-		public String getName() {
-			return "get_objectives";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{0, 1, 2};
-		}
-
-		public String docs() {
-			return "Returns an array of arrays about the objectives"
-					+ " on the given scoreboard, which defaults to '" + MAIN + "' if not given."
-					+ " If criteria is given, only objectives with that criteria will be returned."
-					+ " The arrays contain the keys name, displayname, slot, modifiable, and criteria.";
-		}
-
-		public Argument returnType() {
-			return new Argument("", CArray.class).setGenerics(new Generic(Objective.class));
-		}
-
-		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", MCCriteria.class, "criteria").setOptionalDefault(MCCriteria.DUMMY)
-					);
-		}
-	}
-	
 	public static class Team extends MObject {
 		public String name;
 		public String displayname;
