@@ -98,10 +98,12 @@ public class CompilerFunctions {
 			return new CEntry((Construct)list.get("label"), (Construct)list.get("content"), t);
 		}
 
+		@Override
 		public Argument returnType() {
 			return new Argument("", CEntry.class);
 		}
 
+		@Override
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(new Argument("", CString.class, "label"), new Argument("", CString.class, "content"));
 		}

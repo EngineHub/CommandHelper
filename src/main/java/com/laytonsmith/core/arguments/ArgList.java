@@ -126,7 +126,11 @@ public class ArgList {
 	 * @return 
 	 */
 	public Integer getIntegerWithNull(String varName, Target t){
-		CPrimitive p = getConstruct(varName).primitive(t);
+		Construct c = getConstruct(varName);
+		if(c == null){
+			return null;
+		}
+		CPrimitive p = c.primitive(t);
 		if(p == null){
 			return null;
 		} else {
