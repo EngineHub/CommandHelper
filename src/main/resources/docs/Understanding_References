@@ -16,7 +16,7 @@ can only reassign a new value to the existing variable, and that assignment does
 other variables.
 
 This code demonstrates assignment by value of primitives.
-<pre>
+%%CODE|
 	assign(@a, 1)
 	assign(@b, @a) # Note we are assigning @b to @a
 	msg(@a) # Msg's 1
@@ -24,13 +24,13 @@ This code demonstrates assignment by value of primitives.
 	assign(@a, 5) # Now we are assigning something different to @a
 	msg(@a) # Msg's 5
 	msg(@b) # Msg's 1 still
-</pre>
+%%
 
 As you can see, even though @b is assigned to @a, since it is actually assigned by
 value, changing the value of @a does not affect @b. This mechanism works in all cases for arrays
 as well.
 
-<pre>
+%%CODE|
 	assign(@a, array(1, 2, 3))
 	assign(@b, @a)
 	msg(array_implode(@a, ', ')) # Msg's 1, 2, 3
@@ -38,14 +38,14 @@ as well.
 	assign(@a, array(4, 5, 6))
 	msg(array_implode(@a, ', ')) # Msg's 4, 5, 6
 	msg(array_implode(@b, ', ')) # Still msg's 1, 2, 3
-</pre>
+%%
 
 When we do the second assignment to @a, we aren't changing the ''value'' of what's
 being pointed to, we are simply changing what we are pointing to.
 
 Now, let's look at changing the underlying value of an array.
 
-<pre>
+%%CODE|
 	assign(@a, array(1, 2, 3))
 	assign(@b, @a)
 	msg(array_implode(@a, ', ')) # Msg's 1, 2, 3
@@ -55,13 +55,13 @@ Now, let's look at changing the underlying value of an array.
 	array_set(@a, 2, 6)
 	msg(array_implode(@a, ', ')) # Msg's 4, 5, 6
 	msg(array_implode(@b, ', ')) # Now msg's 4, 5, 6
-</pre>
+%%
 
 As you can see, we are now changing the underlying value, instead of completely changing what
 value as a whole @a references. What might be confusing is that assign() provides a convenience method
 for setting values in arrays, so this code performs the same way:
 
-<pre>
+%%CODE|
 	assign(@a, array(1, 2, 3))
 	assign(@b, @a)
 	msg(array_implode(@a, ', ')) # Msg's 1, 2, 3
@@ -71,7 +71,7 @@ for setting values in arrays, so this code performs the same way:
 	assign(@a[2], 6)
 	msg(array_implode(@a, ', ')) # Msg's 4, 5, 6
 	msg(array_implode(@b, ', ')) # Now msg's 4, 5, 6
-</pre>
+%%
 
 Keep in mind that it's not ''really'' an assign, however, it's simply an array_set() wrapped
 up in a more aesthetic syntax.
@@ -79,7 +79,7 @@ up in a more aesthetic syntax.
 When you think of sending parameters to a procedure as assign()'s, it becomes easier to see
 how the same concept applies to a proc as well.
 
-<pre>
+%%CODE|
 
 proc(_myProc, @a, @b,
 	assign(@a, array('a', 'b', 'c'))    # This call might actually get optimized out 
@@ -100,7 +100,7 @@ _myProc(@myA, @myB)
 msg(array_implode(@myA, ', ')) # msg's 4, 5, 6
 msg(array_implode(@myB, ', ')) # msg's 4, 5, 6
 
-</pre>
+%%
 
 As you can see here, though @a was re-assigned in the procedure, it did not affect
 @myA, as you can essentially think of the procedure call as working by doing several
@@ -111,7 +111,7 @@ the value @b, that does affect @myB (and by extension @myA, since @myA points to
 If we seemingly "''inline''" (we actually aren't inlining it, see below) 
 the procedure, we get different results though:
 
-<pre>
+%%CODE|
 assign(@myA, array(1, 2, 3))
 assign(@myB, @myA)
 
@@ -126,13 +126,13 @@ assign(@myB[2], 6)
 msg(array_implode(@myA, ', ')) # msg's a, b, c <- Note the difference here
 msg(array_implode(@myB, ', ')) # msg's 4, 5, 6
 
-</pre>
+%%
 
 This works differently, because we have forgotten that a procedure call introduces
 an extra "assignment" before it runs. To truly inline a procedure, we must do an
 assignment beforehand, so something like this:
 
-<pre>
+%%CODE|
 assign(@myA, array(1, 2, 3))
 assign(@myB, @myA)
 
@@ -153,6 +153,6 @@ assign(@b[2], 6)
 msg(array_implode(@myA, ', ')) # msg's 4, 5, 6 <- Now it's back to what it was with an actual procedure
 msg(array_implode(@myB, ', ')) # msg's 4, 5, 6
 
-</pre>
+%%
 
 {{LearningTrail}}

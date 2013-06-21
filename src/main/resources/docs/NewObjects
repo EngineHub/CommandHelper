@@ -14,7 +14,7 @@ things are different, like, the paint color.
 === Example ===
 Before getting into the details about objects, lets look at an example:
 
-<pre>
+%%CODE|
 class A {
 
     members {
@@ -38,7 +38,7 @@ class A {
         return(@c)
     }
 }
-</pre>
+%%
 
 This example will be used in the explanation below.
 
@@ -75,16 +75,16 @@ In order to use an object, the first thing that must happen is that it is
 instantiated. To instantiate our object that we defined above, we would use 
 the following code:
 
-<pre>
+%%CODE|
 @A = new A()
-</pre>
+%%
 
 Now, we can use the '''dereference operator''' to access members or methods in 
 the object, for instance,
 
-<pre>
+%%CODE|
 msg(@A->method2(2))
-</pre>
+%%
 
 would output 2, since we called the method that returns our input plus @b, 
 which in this case is 0.
@@ -100,7 +100,7 @@ class, and no return type.
 An object can '''inherit''' from, or ''extend'' another object. Let's define the 
 object B, which extends A.
 
-<pre>
+%%CODE|
 class B extends A {
     public B(){
         super()
@@ -109,7 +109,7 @@ class B extends A {
         return(@b + 3)
     }
 }
-</pre>
+%%
 
 In this case, we are extending A, and '''overriding''' method2. In order to 
 override a method, you simply name it the same as the method in the parent 
@@ -129,7 +129,7 @@ implied to have been called at the top of the child's constructor. If
 parent's members, even transiently, otherwise it is a compiler error. For 
 instance, consider the following:
 
-<pre>
+%%CODE|
 class A{
     members{
         private @a
@@ -155,7 +155,7 @@ class B{
         super()
     }
 }
-</pre>
+%%
 
 In this example, we have a compile error, because the call to getA() could 
 potentially call initA(), which manipulates @a, which is a member variable. 
@@ -176,7 +176,7 @@ A destructor is automatically called when an object goes out of scope, and can
 be used to do various things. It is never required to implement, however. It is 
 implemented in a '''destructor block''', much like member blocks.
 
-<pre>
+%%CODE|
 class A{
     members{
         private static int @instances = 0
@@ -194,7 +194,7 @@ class A{
         @instances--
     }
 }
-</pre>
+%%
 
 
 === Static members and methods ===
@@ -203,7 +203,7 @@ A ''static'' variable is one that is usable outside of any instances, often time
 utility methods, singletons, and factory methods are defined this way. A static
 method can be accessed as such:
 
-<pre>
+%%CODE|
 class A {
 	public static void init(){
 		return()
@@ -212,7 +212,7 @@ class A {
 
 #Usage:
 A::init()
-</pre>
+%%
 
 You do not need to instantiate a class before using a static method. Since a static
 method is essentially a convenient way to namespace a method, or otherwise
@@ -236,7 +236,7 @@ methods. If we are in a static context, it will be a compiler error to reference
 instance methods in this manner, but static references are always valid. For 
 instance, assume class B had been defined this way:
 
-<pre>
+%%CODE|
 class B extends A {
     public B(){
         A::super()
@@ -245,7 +245,7 @@ class B extends A {
         return(A::super->method2(@b))
     }
 }
-</pre>
+%%
 
 Note that we are explicitely calling A's constructor with the call to super, 
 and A's method2. If there had been several parents, this could be used to 
@@ -269,17 +269,17 @@ checks obviously won't apply, so things that normally would be a compile error
 will be runtime errors, so code that uses reflection must be very careful. 
 Consider our class A, defined above, and instantiated as such:
 
-<pre>
+%%CODE|
 @a = new A()
-</pre>
+%%
 
 We can access both the protected and private static variables in the class by 
 using the following code:
 
-<pre>
+%%CODE|
 msg(@a['A::b'])
 msg(@a['c'])
-</pre>
+%%
 
 If you do not fully qualify a variable name, it is automatically qualified with
 that instance's actual runtime type. So unless you want to actually get a type's
@@ -288,11 +288,11 @@ qualifying the variable name. (@a['A::b'] vs @a['b'])
 
 We can change existing variables (or add new ones) with:
 
-<pre>
+%%CODE|
 @a['A::b'] = 5
 @a['A::c'] = 10
 @a['A::d'] = proc(@a, @b){ return(@a + @b) } #Add a new method
-</pre>
+%%
 
 If a variable is added with reflection, it will obviously only be 
 accessible through reflection, and it only becomes part of that instance. 
@@ -329,7 +329,7 @@ it may be useful to inherit the method's behavior from the non-primary inherited
 class. One way to do this would be to override the method yourself, and simply
 delegate behavior to the correct super class's method, for instance:
 
-<pre>
+%%CODE|
 class A {
 	public mixed method(){
 		return(1)
@@ -346,18 +346,18 @@ class C extends A, B {
 		return(B::method())
 	}
 }
-</pre>
+%%
 
 However, since this could occur fairly often, you may simply indicate that you
 would like to ''inherit'' functionality from the specified parent. So instead
 of defining the class C as above, we can get the exact same functionality by
 defining it as such:
 
-<pre>
+%%CODE|
 class C extends A, B {
 	inherit B::method()
 }
-</pre>
+%%
 
 By default, methods with multiple overrides in parent classes inherit from the
 primary parent, in this case, A, though you can also be explicit and inherit a
@@ -368,12 +368,12 @@ method individually.
 A type union can be used any time disjoint types are required. Assume the following
 hierarchy:
 
-<pre>
+%%CODE|
 class A { }
 class B extends A { }
 class C extends A { }
 class D extends B { }
-</pre>
+%%
 
 Now, assume that we want to accept an instance of either type D or type C, but not
 type B or A. In this case, the nearest parent is type A, so we could accept type A and
@@ -383,9 +383,9 @@ two types. In that case, we can use a '''type union''' to signal to the compiler
 the various types we will accept. To specify a type union, use the 
 '''<nowiki>|</nowiki>''' character.
 
-<pre>
+%%CODE|
 D | C @var
-</pre>
+%%
 
 As many types as required can be chained this way. As far as the inferred type of
 that object, it will be whatever the nearest '''type intersection''' is. So, in this

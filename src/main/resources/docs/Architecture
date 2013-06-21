@@ -45,9 +45,9 @@ string, but from this point on, it's much easier to gather meaning from the toke
 The compiler takes the tokens and turns them into a parse tree. So, given the following code, 
 it will be converted to this parse tree:
 
-<pre>
+%%CODE|
 msg(if(@variable, 'True text', 'False text'))
-</pre>
+%%
 
 [[File:ParseTree.png]]
 
@@ -89,21 +89,21 @@ You can also think of this as a ''code transformation'', which is the base funct
 of optimization. We want to transform all code into more efficient versions, without the 
 user having to know or care about these optimizations.  For instance, take the following code:
 
-<pre>
+%%CODE|
 if(@var1){
     if(@var2){
         msg('Both var1 and var2 are true')
     }
 }
-</pre>
+%%
 
 This is exactly equivalent to:
 
-<pre>
+%%CODE|
 if(@var1 && @var2){
     msg('Both var1 and var2 are true')
 }
-</pre>
+%%
 
 The question at this point is "which is more efficient?" Only through profiling can 
 we actually determine this, but constructs like this can be objectively measured and 
@@ -123,21 +123,21 @@ there are no variables. Variable tracking is not yet implemented, but once it is
 will allow for automatic detection of variables that are guaranteed to be a certain 
 value at certain points in the code. For instance, 
 
-<pre>
+%%CODE|
 @var = 1
 if(@var == 1){
     msg('Var is 1')
 }
-</pre>
+%%
 
 currently is not optimized, because it is usually unknown what the value of @var 
 would be, but as you can see, at least at the point that the if statement is 
 checked, it will in fact always be 1, so we could optimize this to
 
-<pre>
+%%CODE|
 @var = 1
 msg('Var is 1')
-</pre>
+%%
 
 ===Abstraction Layer===
 The abstraction layer handles all communication between CommandHelper and Bukkit. 

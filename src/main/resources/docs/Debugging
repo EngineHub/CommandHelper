@@ -18,22 +18,20 @@ The most important thing for you to know is how the code is supposed to work. Gr
 may be a problem with how it is actually working, but if you don't know what the code
 is supposed to do, you can't know what is wrong with it. This includes usages of the
 builtin API, as well as your own code. Stack traces are important to understand as well.
-Lets examine the components of a stack trace, given the following source code (line numbers
-have been added):
+Lets examine the components of a stack trace, given the following source code:
 
-<pre>
-1  #!/usr/local/bin/mscript
-2
-3  proc(_proc1, @a,
-4          return(_proc2(@a))
-5  )
-6  
-7  proc(_proc2, @b,
-8          return(1 / @b)
-9  )
-10 
-11 msg(_proc1(0))
-</pre>
+%%CODE|
+#!/usr/local/bin/mscript
+proc(_proc1, @a,
+        return(_proc2(@a))
+)
+
+proc(_proc2, @b,
+        return(1 / @b)
+)
+
+msg(_proc1(0))
+%%
 
 When we run this script, we get the following error:
 
@@ -88,16 +86,16 @@ runtime checks to gather the value of variables. The simplest way to do this is 
 {{function|msg}} or {{function|console}} to output the value of the variable at that moment
 in time. Say you have a value that is brought in from storage:
 
-<pre>
+%%CODE|
 @value = get_value('my.value')
-</pre>
+%%
 
 We don't know offhand what @value is, so it may be useful to output the value before we use
 it, especially if it's involved in part of the stack trace chain.
 
-<pre>
+%%CODE|
 msg(@value)
-</pre>
+%%
 
 You can also use {{function|trace}} for a more detailed output, which includes the
 variable name. So, assuming @value contained 'string', then <code>trace(@value)</code>
@@ -108,7 +106,7 @@ would output: <code>@value: string</code>.
 As you look at the problem code, it is likely that you won't test all your assumptions. Sometimes,
 it's obvious what a particular value is, for instance, given this code:
 
-<pre>
+%%CODE|
 @value1 = $value
 @value2 = 1
 if(@value1 == 'test1'){
@@ -116,7 +114,7 @@ if(@value1 == 'test1'){
 }
 trace(@value1)
 _problem_code(@value2)
-</pre>
+%%
 
 If when we trace(@value1), we see that it is "test1", then we can safely assume that
 @value2 is 0. However, if we did not have that trace() present, (allowing us to know
@@ -131,11 +129,11 @@ compiler errors and runtime errors. Syntax errors do not require testing values 
 because they are a problem with your syntax, not your logic. For instance, in the following
 code, we are missing a parenthesis.
 
-<pre>
+%%CODE|
 if(@a == 2{
 	msg('a is 2')
 }
-</pre>
+%%
 
 These types of errors are usually more straightforward to fix, since the compiler can usually
 point us right at the code in question. Regardless, the code isn't actually running

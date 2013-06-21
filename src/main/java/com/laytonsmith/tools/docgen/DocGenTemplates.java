@@ -2,6 +2,7 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.HTMLUtils;
 import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.PureUtilities.StreamUtils;
@@ -42,7 +43,7 @@ public class DocGenTemplates {
 	
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		System.out.println(Generate("CommandLineTools"));
+		System.out.println(Generate("Arrays"));
 	}
 	
 	public static String Generate(String forPage){
@@ -322,5 +323,150 @@ public class DocGenTemplates {
 			}
 			return b.toString();
 		}
+	};
+	
+	private static final Map<String, String> classes = new HashMap<String, String>();
+	static{
+		classes.put("comment", "color: #888888;");
+		classes.put("single-string", "color: #FF9900;");
+		classes.put("double-string", "color: #CC9900;");
+		classes.put("var", "color: #009933;");
+		classes.put("dvar", "color: #00CCFF;");
+	}
+	public static Generator CODE = new Generator(){
+		
+
+		public String generate(String... args) {
+			String code = StringUtils.Join(args, "|");
+			String [] lines = code.split("\r\n|\n\r|\n");
+			StringBuilder out = new StringBuilder();
+			boolean blankLine = false;
+			//We're gonna write a mini parser here, so here's our state variables.
+			boolean inDoubleString = false;
+			boolean inSingleString = false;
+			boolean inLineComment = false;
+			boolean inBlockComment = false;
+			boolean inDollarVar = false;
+			boolean inVar = false;
+			for(int i = 0; i < lines.length; i++){
+				if(i == 0 && "".equals(lines[0].trim())){
+					blankLine = true;
+					continue;
+				}
+				StringBuilder lout = new StringBuilder();
+				if(inBlockComment){
+					lout.append("<span style=\"").append(classes.get("comment")).append("\">");
+				}
+				if(inDoubleString){
+					lout.append("<span style=\"").append(classes.get("double-string")).append("\">");
+				}
+				if(inSingleString){
+					lout.append("<span style=\"").append(classes.get("single-string")).append("\">");
+				}
+				String buffer = "";
+				for(int j = 0; j < lines[i].length(); j++){
+					char c = lines[i].charAt(j);
+					char c2 = (j + 1 < lines[i].length()?lines[i].charAt(j + 1):'\0');
+					if(inSingleString){
+						if(c == '\\' && c2 == '\''){
+							buffer += "\\&apos;";
+							j++;
+							continue;
+						} else if(c == '\''){
+							inSingleString = false;
+							lout.append("<span style=\"").append(classes.get("single-string")).append("\">").append(buffer).append("&apos;</span>");
+							buffer = "";
+							continue;
+						}
+					}
+					if(inDoubleString){
+						if(c == '\\' && c2 == '"'){
+							buffer += "\\&quot;";
+							j++;
+							continue;
+						} else if(c == '"'){
+							inDoubleString = false;
+							lout.append("<span style=\"").append(classes.get("double-string")).append("\">").append(buffer).append("&quot;</span>");
+							buffer = "";
+							continue;
+						}
+					}
+					if(inVar){
+						if(!Character.toString(c).matches("[a-zA-Z0-9_]")){
+							lout.append(buffer).append("</span>");
+							buffer = "";
+							inVar = false;
+						}
+					}
+					if(inDollarVar){
+						if(!Character.toString(c).matches("[a-zA-Z0-9_]")){
+							lout.append(buffer).append("</span>");
+							buffer = "";
+							inDollarVar = false;
+						}
+					}
+					if(!inDoubleString && !inSingleString && !inBlockComment && c == '#'){
+						lout.append(buffer).append("<span style=\"").append(classes.get("comment")).append("\">#");
+						buffer = "";
+						inLineComment = true;
+						continue;
+					}
+					if(!inDoubleString && !inSingleString && !inLineComment && c == '/' && c2 == '*'){
+						lout.append(buffer);
+						buffer = "";
+						lout.append("<span style=\"").append(classes.get("comment")).append("\">/*");
+						j++;
+						inBlockComment = true;
+						continue;
+					}
+					if(c == '\'' && !inDoubleString && !inLineComment && !inBlockComment){
+						lout.append(buffer);
+						buffer = "";
+						inSingleString = true;
+					}
+					if(c == '"' && !inSingleString && !inLineComment && !inBlockComment){
+						lout.append(buffer);
+						buffer = "";
+						inDoubleString = true;
+					}
+					if(c == '*' && c2 == '/'){
+						lout.append(buffer).append("*/</span>");
+						buffer = "";
+						j++;
+						inBlockComment = false;
+						continue;
+					}
+					if(!inDoubleString && !inSingleString && !inLineComment && !inBlockComment && c == '@'){
+						lout.append(buffer).append("<span style=\"").append(classes.get("var")).append("\">");
+						buffer = "";
+						inVar = true;
+					}
+					if(!inDoubleString && !inSingleString && !inLineComment && !inBlockComment && c == '$'){
+						lout.append(buffer).append("<span style=\"").append(classes.get("dvar")).append("\">$");
+						buffer = "";
+						if(!Character.toString(c2).matches("[a-zA-Z0-9_]")){
+							//Done, it's final var
+							lout.append("</span>");
+						} else {
+							inDollarVar = true;
+						}
+						continue;
+					}
+					buffer += HTMLUtils.escapeHTML(Character.toString(c)).replace(" ", "&nbsp;");
+				}
+				lout.append(buffer);
+				if(inBlockComment || inVar || inLineComment || inDollarVar || inSingleString || inDoubleString){
+					inVar = false;
+					inLineComment = false;
+					inDollarVar = false;
+					lout.append("</span>");
+				}
+				out.append(blankLine?i:i + 1).append("&nbsp;&nbsp;&nbsp;").append(lout.toString()).append("<br />\n");
+			}
+			return "<div style=\"font-family: 'Consolas','DejaVu Sans','Lucida Console',monospace; background-color: #F9F9F9;"
+					+ " border-color: #A7D7F9; border-style: solid; border-width: 1px 0px 1px 0px; margin: 1em 2em;"
+					+ " padding: 0 0 0 1em;\">\n" + out.toString().replace("\t", "&nbsp;&nbsp;&nbsp;") + "</div>\n";
+		}
+		
 	};
 }

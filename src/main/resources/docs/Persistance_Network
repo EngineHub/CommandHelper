@@ -167,7 +167,7 @@ storage.server_info.**=$remote
 
 So, now, let's go over what would happen when we run our code.
 
-<pre>
+%%CODE|
 #First call
 store_value('server_info.start_time', time())
 ...
@@ -176,7 +176,7 @@ store_value('players.' . player() . 'info', pinfo())
 ...
 #Third call
 store_value('other.data', 12345)
-</pre>
+%%
 
 The first call would fail, because we are trying to write to a readonly connection.
 
@@ -192,7 +192,7 @@ it is a transparent routing layer on top of the global key=>value storage system
 
 This table of data was generated based on the information obtained from the following script:
 
-<pre>
+%%CODE|
 @names = array('ini', 'mem', 'sqlite', 'json', 'ser', 'yml')
 @iterations = array(10, 100, 1000, 5000)
 foreach(@iterations, @iteration){
@@ -209,7 +209,7 @@ foreach(@iterations, @iteration){
                 sys_out(@name.' took '.(@stop - @start).'ms to complete with '.@iteration.' values')
         }
 }
-</pre>
+%%
 
 using the following persistance.config:
 
