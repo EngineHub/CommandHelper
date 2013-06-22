@@ -5,11 +5,11 @@ package com.laytonsmith.abstraction.bukkit.events;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
-import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
@@ -17,8 +17,10 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEnti
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCFishingState;
+import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
@@ -27,12 +29,14 @@ import java.util.HashSet;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.TravelAgent;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerPreLoginEvent.Result;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -141,6 +145,7 @@ public class BukkitPlayerEvents {
 
     }
 
+	@abstraction(type=Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerTeleportEvent implements MCPlayerTeleportEvent {
 		PlayerTeleportEvent e;
 
@@ -160,8 +165,12 @@ public class BukkitPlayerEvents {
 			return new BukkitMCLocation(e.getTo());
 		}
 
-		public String getCause() {
-			return e.getCause().name();
+		public MCTeleportCause getCause() {
+			return BukkitMCTeleportCause.getConvertor().getAbstractedEnum(e.getCause());
+		}
+
+		public void setFrom(MCLocation oldloc) {
+			e.setFrom(((BukkitMCLocation) oldloc)._Location());
 		}
 
 		public void setTo(MCLocation newloc) {
@@ -188,6 +197,33 @@ public class BukkitPlayerEvents {
 
 		public boolean isCancelled() {
 			return e.isCancelled();
+		}
+	}
+
+	@abstraction(type=Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerPortalEvent extends BukkitMCPlayerTeleportEvent
+			implements MCPlayerPortalEvent {
+
+		PlayerPortalEvent p;
+		public BukkitMCPlayerPortalEvent(PlayerPortalEvent event) {
+			super(event);
+			p = event;
+		}
+
+		public void useTravelAgent(boolean useTravelAgent) {
+			p.useTravelAgent(useTravelAgent);
+		}
+
+		public boolean useTravelAgent() {
+			return p.useTravelAgent();
+		}
+
+		public MCTravelAgent getPortalTravelAgent() {
+			return new BukkitMCTravelAgent(p.getPortalTravelAgent());
+		}
+
+		public void setPortalTravelAgent(MCTravelAgent travelAgent) {
+			p.setPortalTravelAgent((TravelAgent) travelAgent.getHandle());
 		}
 	}
 

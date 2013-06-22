@@ -3,6 +3,8 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.entities.MCBoat;
+import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -27,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.Material;
 
 /**
  *
@@ -1182,6 +1185,75 @@ public class EntityManagement {
 
 		public String docs() {
 			return "mixed {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
+		}
+	}
+
+	@api
+	public static class get_entity_max_speed extends EntityGetterFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+
+			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+
+			if (e instanceof MCBoat) {
+				return new CDouble(((MCBoat) e).getMaxSpeed(), t);
+			} else if(e instanceof MCMinecart) {
+				return new CDouble(((MCMinecart) e).getMaxSpeed(), t);
+			}
+
+			throw new ConfigRuntimeException("Given entity must be a boat or minecart.",
+					ExceptionType.BadEntityTypeException, t);
+		}
+
+		public String getName() {
+			return "get_entity_max_speed";
+		}
+
+		public String docs() {
+			return "double {entityID} Returns a max speed for given entity. Make sure that the entity is a boat"
+					+ " or minecart.";
+		}
+	}
+
+	@api
+	public static class set_entity_max_speed extends EntitySetterFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException};
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+
+			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			CDouble speed = new CDouble(args[1].val(), t);
+
+			if (e instanceof MCBoat) {
+				((MCBoat) e).setMaxSpeed(speed.getDouble());
+			} else if(e instanceof MCMinecart) {
+				((MCMinecart) e).setMaxSpeed(speed.getDouble());
+			} else {
+				throw new ConfigRuntimeException("Given entity must be a boat or minecart.",
+						ExceptionType.BadEntityTypeException, t);
+			}
+
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_entity_max_speed";
+		}
+
+		public String docs() {
+			return "void {entityID} Sets a max speed for given entity. Make sure that the entity is a boat"
+					+ " or minecart.";
 		}
 	}
 }
