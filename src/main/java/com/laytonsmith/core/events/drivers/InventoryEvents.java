@@ -2,16 +2,16 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCSlotType;
 import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
+import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHLog.Tags;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
@@ -91,7 +91,7 @@ public class InventoryEvents {
 				map.put("rawslot", new CInt(e.getRawSlot(), Target.UNKNOWN));
 				map.put("slottype", new CString(e.getSlotType().name(), Target.UNKNOWN));
 				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), Target.UNKNOWN));
-				
+
 				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
 				MCInventory inv = e.getInventory();
 				for (int i = 0; i < inv.getSize(); i++) {
@@ -133,6 +133,119 @@ public class InventoryEvents {
 			MCInventoryClickEvent ic = ((MCInventoryClickEvent)o);
             ic.setCancelled(state);
 			StaticLayer.GetServer().getPlayer(ic.getWhoClicked().getName()).updateInventory();
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	public static class inventory_drag extends AbstractEvent {
+
+		public String getName() {
+			return "inventory_drag";
+		}
+
+		public String docs() {
+			return "{world: <string match> World name | type: <macro> Can be " + StringUtils.Join(MCDragType.values(), ", ", ", or ") + " } "
+					+ " | cursoritem: <item match> item in hand, before event starts"
+					+ "Fired when a player clicks (by left or right mouse button) a slot in inventory and drag mouse across slots. "
+					+ "{player: The player who clicked | newcursoritem: item on cursro, after event | oldcursoritem: item on cursor,"
+					+ " before event | slots: used slots | rawslots: used slots, as the numbers of the slots in whole inventory window"
+					+ " | newitems: array of items which are dropped in selected slots | inventorytype | inventorysize: number of slots in"
+					+ " opened inventory} {cursoritem: the item on the cursor, after event} "
+					+ "{} ";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+				throws PrefilterNonMatchException {
+			if (event instanceof MCInventoryDragEvent) {
+				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
+
+				Prefilters.match(prefilter, "world", e.getWhoClicked().getWorld().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "type", e.getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "cursoritem", Static.ParseItemNotation(e.getOldCursor()), PrefilterType.ITEM_MATCH);
+
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event)
+				throws EventException {
+			if (event instanceof MCInventoryDragEvent) {
+				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
+				Map<String, Construct> map = evaluate_helper(event);
+
+				map.put("player", new CString(e.getWhoClicked().getName(), Target.UNKNOWN));
+				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN));
+				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN));
+
+				CArray slots = new CArray(Target.UNKNOWN);
+				for (Integer slot : e.getInventorySlots()) {
+					slots.push(new CInt(slot.intValue(), Target.UNKNOWN));
+				}
+				map.put("slots", slots);
+
+				CArray rawSlots = new CArray(Target.UNKNOWN);
+				for (Integer slot : e.getRawSlots()) {
+					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN));
+				}
+				map.put("rawslots", rawSlots);
+
+				CArray newItems = CArray.GetAssociativeArray(Target.UNKNOWN);
+				for (Map.Entry<Integer, MCItemStack> ni : e.getNewItems().entrySet()) {
+					Integer key = ni.getKey();
+					MCItemStack value = ni.getValue();
+					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN), Target.UNKNOWN);
+				}
+				map.put("newitems", newItems);
+
+				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
+				MCInventory inv = e.getInventory();
+				for (int i = 0; i < inv.getSize(); i++) {
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN);
+				}
+				map.put("inventory", items);
+				map.put("inventorytype", new CString(inv.getType().name(), Target.UNKNOWN));
+				map.put("inventorysize", new CInt(inv.getSize(), Target.UNKNOWN));
+
+				map.put("type", new CString(e.getType().name(), Target.UNKNOWN));
+
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to MCInventoryDragEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.INVENTORY_DRAG;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			if (event instanceof MCInventoryDragEvent) {
+				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
+
+				if (key.equalsIgnoreCase("cursoritem")) {
+					e.setCursor(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public void cancel(BindableEvent o, boolean state) {
+			MCInventoryDragEvent id = ((MCInventoryDragEvent)o);
+            id.setCancelled(state);
+			StaticLayer.GetServer().getPlayer(id.getWhoClicked().getName()).updateInventory();
 		}
 
 		public CHVersion since() {

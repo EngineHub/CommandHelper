@@ -224,7 +224,7 @@ public class PlayerEvents {
 				}
 
 				if (prefilter.containsKey("type")) {
-					if (!(prefilter.get("type").toString().equalsIgnoreCase(event.getCause()))) {
+					if (!(prefilter.get("type").toString().equalsIgnoreCase(event.getCause().toString()))) {
 						return false;
 					}
 				}
@@ -270,11 +270,11 @@ public class PlayerEvents {
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
                 map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
                 map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
-				map.put("type", new CString(event.getCause(), Target.UNKNOWN));
+				map.put("type", new CString(event.getCause().toString(), Target.UNKNOWN));
 
                 return map;
             } else {
-                throw new EventException("Cannot convert e to MCPlayerMovedEvent");
+                throw new EventException("Cannot convert e to MCPlayerTeleportEvent");
             }
 		}
 
@@ -297,6 +297,122 @@ public class PlayerEvents {
 			return false;
 		}
 
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class player_portal_travel extends player_teleport {
+
+		@Override
+		public String getName() {
+			return "player_portal_travel";
+		}
+
+		@Override
+		public String docs() {
+			return "{player: <macro> | from: <custom> This should be a location array (x, y, z, world)."
+					+ " The location is matched via block matching, so if the array's x parameter were 1, if the player"
+					+ "moved from 1.3, that parameter would match."
+                    + "| to: <custom> The location the player is coming to. This should be a location array as well."
+					+ "type: the type of portal occuring, one of: " +  StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
+					+ "Fired when a player collides with portal."
+					+ "{player: The player that teleport | from: The location the player is coming from"
+					+ "| to: The location the player is coming to. Returns null when using Nether portal and \"allow-nether\""
+					+ " in server.properties is set to false or when using Ender portal and \"allow-end\" in bukkit.yml"
+					+ " is set to false. | type: the type of portal occuring}"
+					+ "{to}"
+					+ "{}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+
+			if(e instanceof MCPlayerPortalEvent) {
+				MCPlayerPortalEvent event = (MCPlayerPortalEvent)e;
+
+				Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "type", event.getCause().toString(), PrefilterType.MACRO);
+
+				if (prefilter.containsKey("from")) {
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getPlayer().getWorld(), Target.UNKNOWN);
+					MCLocation loc = event.getFrom();
+
+					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
+						return false;
+					}
+				}
+
+				if(prefilter.containsKey("to")) {
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getPlayer().getWorld(), Target.UNKNOWN);
+					MCLocation loc = event.getTo();
+
+					if(loc == null || loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
+						return false;
+					}
+				}
+
+				return true;
+
+			}
+
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject) {
+			MCPlayer p = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), p.getWorld(), manualObject.getTarget());
+			return EventBuilder.instantiate(MCPlayerPortalEvent.class, p, from, to);
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCPlayerPortalEvent) {
+				MCPlayerPortalEvent event = (MCPlayerPortalEvent) e;
+				Map<String, Construct> map = evaluate_helper(e);
+
+                //Fill in the event parameters
+				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+				map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
+				if (event.getTo() == null) {
+					map.put("to", new CNull(Target.UNKNOWN));
+				} else {
+					map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
+				}
+				map.put("type", new CString(event.getCause().toString(), Target.UNKNOWN));
+
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to MCPlayerPortalEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_PORTAL_TRAVEL;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCPlayerPortalEvent) {
+				MCPlayerPortalEvent e = (MCPlayerPortalEvent)event;
+
+				if (key.equalsIgnoreCase("to")) {
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
+					e.setTo(loc);
+					e.useTravelAgent(true);
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

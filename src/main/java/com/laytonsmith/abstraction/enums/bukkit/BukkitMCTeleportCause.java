@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.Implementation;

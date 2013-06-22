@@ -1012,9 +1012,8 @@ public class PlayerManagement {
 					}
 				} else if (args.length == 1) {
 					//if it's a number, we are setting F. Otherwise, it's a getter for the MCPlayer specified.
-					try {
-						Integer.parseInt(args[0].val());
-					} catch (NumberFormatException e) {
+
+					if (!(args[0] instanceof CInt)) {
 						MCPlayer p2 = Static.GetPlayer(args[0], t);
 						l = p2.getLocation();
 					}
@@ -3429,7 +3428,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "mixed {[player]} Returns name of vehicle which player is in or null if player is outside the vehicle";
+			return "mixed {[player]} Returns ID of vehicle which player is in or null if player is outside the vehicle";
 			}
 
 		public ExceptionType[] thrown() {

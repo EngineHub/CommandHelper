@@ -708,11 +708,12 @@ public class WorldEdit {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2, 3};
+            return new Integer[]{1, 2, 3};
         }
 
         public String docs() {
-            return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])} Create region of the given name in the given world.";
+            return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])|[world], '__global__'}"
+					+ " Create region of the given name in the given world. You can omit list of points if you want to create a __global__ region.";
         }
 
         public ExceptionType[] thrown() {
@@ -725,7 +726,24 @@ public class WorldEdit {
             World world = null;
             String region;
 
-            if (args.length == 2) {
+			if (args.length == 1) {
+                region = args[0].val();
+
+                MCPlayer m = null;
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                }
+			}
+            if (args.length == 2 && "__global__".equalsIgnoreCase(args[1].val())) {
+                region = args[1].val();
+                world = Bukkit.getServer().getWorld(args[0].val());
+			}
+			else if (args.length == 2) {
 
                 region = args[0].val();
 
@@ -756,57 +774,62 @@ public class WorldEdit {
 						+ " and cannot be created again.", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
-            if (!(args[args.length - 1] instanceof CArray)) {
-                throw new ConfigRuntimeException("Pass an array of points for a new region", ExceptionType.PluginInternalException, t);
-            }
+			ProtectedRegion newRegion = null;
 
-            List<BlockVector> points = new ArrayList<BlockVector>();
-            List<BlockVector2D> points2D = new ArrayList<BlockVector2D>();
+			if ("__global__".equalsIgnoreCase(region)) {
+				newRegion = new GlobalProtectedRegion(region);
+			} else {
 
-            int x = 0;
-            int y = 0;
-            int z = 0;
+				if (args.length == 1 || !(args[args.length - 1] instanceof CArray)) {
+					throw new ConfigRuntimeException("Pass an array of points for a new region", ExceptionType.PluginInternalException, t);
+				}
 
-            int minY = 0;
-            int maxY = 0;
+				List<BlockVector> points = new ArrayList<BlockVector>();
+				List<BlockVector2D> points2D = new ArrayList<BlockVector2D>();
 
-            ProtectedRegion newRegion = null;
+				int x = 0;
+				int y = 0;
+				int z = 0;
 
-            CArray arg = (CArray) args[args.length - 1];
+				int minY = 0;
+				int maxY = 0;
 
-            for (int i = 0; i < arg.size(); i++) {
-                CArray point = (CArray)arg.get(i, t);
+				CArray arg = (CArray) args[args.length - 1];
 
-                x = Static.getInt32(point.get(0), t);
-                y = Static.getInt32(point.get(1), t);
-                z = Static.getInt32(point.get(2), t);
+				for (int i = 0; i < arg.size(); i++) {
+					CArray point = (CArray)arg.get(i, t);
 
-                if (arg.size() == 2) {
-                    points.add(new BlockVector(x, y, z));
-                } else {
-                    points2D.add(new BlockVector2D(x, z));
+					x = Static.getInt32(point.get(0), t);
+					y = Static.getInt32(point.get(1), t);
+					z = Static.getInt32(point.get(2), t);
 
-                    if (i == 0) {
-                        minY = maxY = y;
-                    } else {
-                        if (y < minY) {
-                            minY = y;
-                        } else if (y > maxY) {
-                            maxY = y;
-                        }
-                    }
-                }
-            }
+					if (arg.size() == 2) {
+						points.add(new BlockVector(x, y, z));
+					} else {
+						points2D.add(new BlockVector2D(x, z));
 
-            if (arg.size() == 2) {
-                newRegion = new ProtectedCuboidRegion(region, points.get(0), points.get(1));
-            } else {
-                newRegion = new ProtectedPolygonalRegion(region, points2D, minY, maxY);
-            }
+						if (i == 0) {
+							minY = maxY = y;
+						} else {
+							if (y < minY) {
+								minY = y;
+							} else if (y > maxY) {
+								maxY = y;
+							}
+						}
+					}
+				}
 
-            if (newRegion == null) {
-                throw new ConfigRuntimeException("Error while creating protected region", ExceptionType.PluginInternalException, t);
-            }
+				if (arg.size() == 2) {
+					newRegion = new ProtectedCuboidRegion(region, points.get(0), points.get(1));
+				} else {
+					newRegion = new ProtectedPolygonalRegion(region, points2D, minY, maxY);
+				}
+
+				if (newRegion == null) {
+					throw new ConfigRuntimeException("Error while creating protected region", ExceptionType.PluginInternalException, t);
+				}
+			}
 
 			mgr.addRegion(newRegion);
 
@@ -871,6 +894,10 @@ public class WorldEdit {
             if (world == null) {
                 throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
             }
+
+			if ("__global__".equalsIgnoreCase(region)) {
+				throw new ConfigRuntimeException("You cannot change position of __global__ region.", ExceptionType.PluginInternalException, t);
+			}
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
 
@@ -947,6 +974,112 @@ public class WorldEdit {
 				mgr.save();
 			} catch (Exception e) {
 				throw new ConfigRuntimeException("Error while redefining protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
+            return new CVoid(t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+
+    @api
+    public static class sk_region_rename extends SKFunction {
+
+        public String getName() {
+            return "sk_region_rename";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public String docs() {
+            return "void {[world], oldName, newName} Rename the existing region. Other properties of the region, like owners, members, priority, etc are unaffected.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+            String oldRegionName;
+			String newRegionName;
+
+            if (args.length == 2) {
+
+                oldRegionName = args[0].val();
+				newRegionName = args[1].val();
+
+                MCPlayer m = null;
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                }
+            } else {
+                oldRegionName = args[1].val();
+				newRegionName = args[2].val();
+                world = Bukkit.getServer().getWorld(args[0].val());
+            }
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+			if ("__global__".equalsIgnoreCase(oldRegionName)) {
+				throw new ConfigRuntimeException("You cannot change name of __global__ region.", ExceptionType.PluginInternalException, t);
+			}
+
+			if ("__global__".equalsIgnoreCase(newRegionName)) {
+				throw new ConfigRuntimeException("You cannot change name of any region to __global__.", ExceptionType.PluginInternalException, t);
+			}
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion oldRegion = mgr.getRegion(oldRegionName);
+
+            if (oldRegion == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", oldRegionName, world.getName()), ExceptionType.PluginInternalException, t);
+            }
+
+			ProtectedRegion newRegion = null;
+
+			if (oldRegion instanceof ProtectedCuboidRegion) {
+				newRegion = new ProtectedCuboidRegion(newRegionName, oldRegion.getMinimumPoint(), oldRegion.getMaximumPoint());
+            } else {
+                newRegion = new ProtectedPolygonalRegion(newRegionName, oldRegion.getPoints(), oldRegion.getMinimumPoint().getBlockY(), oldRegion.getMaximumPoint().getBlockY());
+            }
+
+            if (newRegion == null) {
+                throw new ConfigRuntimeException("Error while redefining protected region", ExceptionType.PluginInternalException, t);
+            }
+
+			mgr.addRegion(newRegion);
+
+			newRegion.setMembers(oldRegion.getMembers());
+			newRegion.setOwners(oldRegion.getOwners());
+			newRegion.setFlags(oldRegion.getFlags());
+			newRegion.setPriority(oldRegion.getPriority());
+			try {
+				newRegion.setParent(oldRegion.getParent());
+			} catch (Exception ignore) {
+			}
+
+			mgr.removeRegion(oldRegionName);
+
+			try {
+				mgr.save();
+			} catch (Exception e) {
+				throw new ConfigRuntimeException("Error while renaming protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
             return new CVoid(t);
@@ -1173,9 +1306,14 @@ public class WorldEdit {
 
             ProtectedRegion regionExists = mgr.getRegion(region);
 
-            if (regionExists == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
-            }
+			if (regionExists == null) {
+				if ("__global__".equalsIgnoreCase(region)) {
+					regionExists = new GlobalProtectedRegion(region);
+					mgr.addRegion(regionExists);
+				} else {
+					throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+				}
+			}
 
 			RegionDBUtil.addToDomain(regionExists.getOwners(), owners, 0);
 
@@ -1353,9 +1491,9 @@ public class WorldEdit {
                 if (args[2] instanceof CArray) {
 
                     CArray arg = (CArray) args[2];
+					members = new String[(int)arg.size()];
 
                     for (int i = 0; i < arg.size(); i++) {
-						members = new String[(int)arg.size()];
 						members[i] = arg.get(i, t).val();
                     }
                 } else {
@@ -1373,9 +1511,14 @@ public class WorldEdit {
 
             ProtectedRegion regionExists = mgr.getRegion(region);
 
-            if (regionExists == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
-            }
+			if (regionExists == null) {
+				if ("__global__".equalsIgnoreCase(region)) {
+					regionExists = new GlobalProtectedRegion(region);
+					mgr.addRegion(regionExists);
+				} else {
+					throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+				}
+			}
 
 			RegionDBUtil.addToDomain(regionExists.getMembers(), members, 0);
 

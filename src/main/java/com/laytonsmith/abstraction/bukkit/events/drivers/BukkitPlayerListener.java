@@ -207,6 +207,14 @@ public class BukkitPlayerListener implements Listener {
 		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", pte);
 	}
 	
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPortalEnter(PlayerPortalEvent event) {
+		BukkitPlayerEvents.BukkitMCPlayerPortalEvent pe = new BukkitPlayerEvents.BukkitMCPlayerPortalEvent(event);
+		EventUtils.TriggerExternal(pe);
+		EventUtils.TriggerListener(Driver.PLAYER_PORTAL_TRAVEL, "player_portal_travel", pe);
+	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onConsume(PlayerItemConsumeEvent event) {
 		BukkitPlayerEvents.BukkitMCPlayerItemConsumeEvent pic = 

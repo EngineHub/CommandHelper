@@ -244,6 +244,14 @@ public class BukkitConvertor extends AbstractConvertor {
     		return new BukkitMCAgeable(be);
     	}
     	
+    	if(be instanceof Boat) {
+			return new BukkitMCBoat((Boat)be);
+    	}
+
+    	if(be instanceof Minecart) {
+    		return new BukkitMCMinecart((Minecart)be);
+    	}
+
     	if(be instanceof Vehicle){
     		return new BukkitMCVehicle(be);
     	}
