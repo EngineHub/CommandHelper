@@ -167,4 +167,8 @@ public class StringHandlingTest {
 		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("sprintf('%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
 		
 	}
+	
+	@Test public void testCharFromUnicode() throws Exception {
+		assertEquals("\u2665", SRun("char_from_unicode(2665)", null));
+	}
 }

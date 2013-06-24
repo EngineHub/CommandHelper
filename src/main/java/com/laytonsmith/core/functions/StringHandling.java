@@ -1478,4 +1478,57 @@ public class StringHandling {
 		}
 		
 	}
+	
+	@api public static class char_from_unicode extends AbstractFunction implements Optimizable {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Integer i = Static.getInt32(args[0], t);
+			return new CString(new String(Character.toChars(Integer.parseInt(i.toString(), 16))), t);
+		}
+
+		public String getName() {
+			return "char_from_unicode";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "string {unicode} Returns the unicode character for a given unicode value. This is meant"
+					+ " for dynamic input that needs converting to a unicode character, if you're hardcoding"
+					+ " it, you should just use '\\u1234' syntax instead, however, this is the dynamic equivalent"
+					+ " of the \\u string escape, so '\\u1234' == char_from_unicode(1234). Despite the name,"
+					+ " certain unicode escapes may return multiple characters, so there is no guarantee that"
+					+ " length(char_from_unicode(@val)) will equal 1.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "char_from_unicode(2665)")
+			};
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
+		}
+		
+	}
 }
