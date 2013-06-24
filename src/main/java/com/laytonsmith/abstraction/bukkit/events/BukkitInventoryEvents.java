@@ -8,18 +8,30 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import com.laytonsmith.abstraction.enums.MCDragType;
+import com.laytonsmith.abstraction.enums.MCResult;
 import com.laytonsmith.abstraction.enums.MCSlotType;
 import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
+import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryEvent;
+import com.laytonsmith.abstraction.events.MCInventoryInteractEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -56,6 +68,36 @@ public class BukkitInventoryEvents {
 		}
 	}
 
+	public static class BukkitMCInventoryInteractEvent extends BukkitMCInventoryEvent
+	implements MCInventoryInteractEvent {
+		InventoryInteractEvent iie;
+
+		public BukkitMCInventoryInteractEvent(InventoryInteractEvent e) {
+			super(e);
+			iie = e;
+		}
+
+		public MCHumanEntity getWhoClicked() {
+			return new BukkitMCHumanEntity(iie.getWhoClicked());
+		}
+
+		public void setResult(MCResult newResult) {
+			iie.setResult(Result.valueOf(newResult.name()));
+		}
+
+		public MCResult getResult() {
+			return MCResult.valueOf(iie.getResult().name());
+		}
+
+		public boolean isCanceled() {
+			return iie.isCancelled();
+		}
+
+        public void setCancelled(boolean cancelled) {
+            iie.setCancelled(cancelled);
+        }
+	}
+
 	public static class BukkitMCInventoryOpenEvent extends BukkitMCInventoryEvent
 	implements MCInventoryOpenEvent {
 		InventoryOpenEvent ioe;
@@ -84,7 +126,7 @@ public class BukkitInventoryEvents {
 		}
 	}
 
-	public static class BukkitMCInventoryClickEvent extends BukkitMCInventoryEvent
+	public static class BukkitMCInventoryClickEvent extends BukkitMCInventoryInteractEvent
 	implements MCInventoryClickEvent {
 
 		InventoryClickEvent ic;
@@ -113,10 +155,6 @@ public class BukkitInventoryEvents {
 			return MCSlotType.valueOf(ic.getSlotType().name());
 		}
 
-		public MCHumanEntity getWhoClicked() {
-			return new BukkitMCHumanEntity(ic.getWhoClicked());
-		}
-
 		public boolean isLeftClick() {
 			return ic.isLeftClick();
 		}
@@ -140,9 +178,63 @@ public class BukkitInventoryEvents {
 		public void setCursor(MCItemStack cursor) {
 			ic.setCursor(((BukkitMCItemStack) cursor).asItemStack());
 		}
+	}
 
-        public void setCancelled(boolean cancelled) {
-            ic.setCancelled(cancelled);
-        }
+	public static class BukkitMCInventoryDragEvent extends BukkitMCInventoryInteractEvent
+	implements MCInventoryDragEvent {
+
+		InventoryDragEvent id;
+		public BukkitMCInventoryDragEvent(InventoryDragEvent e) {
+			super(e);
+			this.id = e;
+		}
+
+		public Map<Integer, MCItemStack> getNewItems() {
+			Map<Integer, MCItemStack> ret = new HashMap<Integer, MCItemStack>();
+
+			for (Map.Entry<Integer, ItemStack> ni : id.getNewItems().entrySet()) {
+				Integer key = ni.getKey();
+				ItemStack value = ni.getValue();
+				ret.put(key, new BukkitMCItemStack(value));
+			}
+			
+			return ret;
+		}
+
+		public Set<Integer> getRawSlots() {
+			Set<Integer> ret = new HashSet<Integer>();
+
+			for (Integer rs : id.getRawSlots()) {
+				ret.add(rs);
+			}
+			
+			return ret;
+		}
+
+		public Set<Integer> getInventorySlots() {
+			Set<Integer> ret = new HashSet<Integer>();
+
+			for (Integer is : id.getInventorySlots()) {
+				ret.add(is);
+			}
+
+			return ret;
+		}
+
+		public MCItemStack getCursor() {
+			return new BukkitMCItemStack(id.getCursor());
+		}
+
+		public void setCursor(MCItemStack newCursor) {
+			id.setCursor(((BukkitMCItemStack) newCursor).asItemStack());
+		}
+
+		public MCItemStack getOldCursor() {
+			return new BukkitMCItemStack(id.getOldCursor());
+		}
+
+		public MCDragType getType() {
+			return MCDragType.valueOf(id.getType().name());
+		}
 	}
 }

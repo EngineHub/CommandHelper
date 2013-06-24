@@ -37,6 +37,7 @@ public enum Driver {
 	ITEM_DROP,
 	ITEM_SPAWN,
 	INVENTORY_CLICK,
+	INVENTORY_DRAG,
 	INVENTORY_OPEN,
 	INVENTORY_CLOSE,
 	PLAYER_CONSUME,
@@ -49,6 +50,7 @@ public enum Driver {
 	VEHICLE_ENTER,
 	VEHICLE_LEAVE,
 	VEHICLE_COLLIDE,
+	PLAYER_PORTAL_TRAVEL,
 	/**
 	 * Used by events fired from the extension system.
 	 */
