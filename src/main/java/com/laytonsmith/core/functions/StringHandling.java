@@ -1482,7 +1482,7 @@ public class StringHandling {
 	@api public static class char_from_unicode extends AbstractFunction implements Optimizable {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {

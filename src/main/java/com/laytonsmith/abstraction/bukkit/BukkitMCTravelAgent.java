@@ -20,6 +20,22 @@ public class BukkitMCTravelAgent implements MCTravelAgent {
 		a = (TravelAgent)o;
 	}
 
+	@Override
+	public String toString() {
+		return a.toString();
+	}
+
+	@Override
+	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+	public boolean equals(Object obj) {
+		return a.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return a.hashCode();
+	}
+
 	public boolean createPortal(MCLocation location) {
 		return a.createPortal(((BukkitMCLocation)location).asLocation());
 	}
