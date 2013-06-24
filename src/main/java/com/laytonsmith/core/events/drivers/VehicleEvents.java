@@ -4,7 +4,9 @@ import java.util.Map;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCCollisionType;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnitityCollideEvent;
@@ -45,7 +47,8 @@ public class VehicleEvents {
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
 					+ " the enitytype of the passenger} Fires when an entity enters a vehicle."
-					+ " {vehicletype | passengertype | vehicle: entityID | passenger: entityID}"
+					+ " {vehicletype | passengertype | vehicle: entityID | passenger: entityID"
+					+ " | player: player name if passenger is a player, null otherwise}"
 					+ " {}"
 					+ " {}";
 		}
@@ -73,6 +76,11 @@ public class VehicleEvents {
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CInt(e.getVehicle().getEntityId(), t));
 				ret.put("passenger", new CInt(e.getEntity().getEntityId(), t));
+				if (e.getEntity().getType() == MCEntityType.PLAYER) {
+					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
+				} else {
+					ret.put("player", new CNull(t));
+				}
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCVehicleEnterExitEvent");
@@ -102,7 +110,8 @@ public class VehicleEvents {
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
 					+ " the enitytype of the passenger} Fires when an entity leaves a vehicle."
-					+ " {vehicletype | passengertype | vehicle: entityID | passenger: entityID}"
+					+ " {vehicletype | passengertype | vehicle: entityID | passenger: entityID"
+					+ " | player: player name if passenger is a player, null otherwise}"
 					+ " {}"
 					+ " {}";
 		}
@@ -130,6 +139,11 @@ public class VehicleEvents {
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CInt(e.getVehicle().getEntityId(), t));
 				ret.put("passenger", new CInt(e.getEntity().getEntityId(), t));
+				if (e.getEntity().getType() == MCEntityType.PLAYER) {
+					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
+				} else {
+					ret.put("player", new CNull(t));
+				}
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCVehicleEnterExitEvent");
