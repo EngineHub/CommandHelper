@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import org.junit.*;
 import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -467,4 +468,16 @@ public class DataHandlingTest {
         SRun("assign(@i, 2) dowhile(@i-- msg('hi'), @i > 0)", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("hi");        
     }
+	
+	@Test
+	public void testToRadix() throws Exception {
+		assertEquals("f", SRun("to_radix(15, 16)", null));
+		assertEquals("1111", SRun("to_radix(15, 2)", null));
+	}
+	
+	@Test
+	public void testParseInt() throws Exception {
+		assertEquals("15", SRun("parse_int('F', 16)", null));
+		assertEquals("15", SRun("parse_int('1111', 2)", null));
+	}
 }

@@ -1494,8 +1494,7 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Integer i = Static.getInt32(args[0], t);
-			return new CString(new String(Character.toChars(Integer.parseInt(i.toString(), 16))), t);
+			return new CString(new String(Character.toChars(Integer.parseInt(args[0].val().toString(), 16))), t);
 		}
 
 		public String getName() {
@@ -1528,6 +1527,51 @@ public class StringHandling {
 
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
+		}
+		
+	}
+	
+	@api public static class unicode_from_char extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int i = Character.codePointAt(args[0].val().toCharArray(), 0);
+			return new CInt(i, t);
+		}
+
+		public String getName() {
+			return "unicode_from_char";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "int {character} Returns the unicode code point for a given character. The character is a string, but it should"
+					+ " only be 1 code point character (which may be length(@character) == 2).";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "to_radix(unicode_from_char('\\u2665'), 16)")
+			};
 		}
 		
 	}

@@ -171,4 +171,8 @@ public class StringHandlingTest {
 	@Test public void testCharFromUnicode() throws Exception {
 		assertEquals("\u2665", SRun("char_from_unicode(2665)", null));
 	}
+	
+	@Test public void testUnicodeFromChar() throws Exception {
+		assertEquals("2665", SRun("to_radix(unicode_from_char('\\u2665'), 16)", null));
+	}
 }

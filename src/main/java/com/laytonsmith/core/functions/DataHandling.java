@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
@@ -2587,6 +2588,103 @@ public class DataHandling {
 			};
 		}
 	}
+	
+	@api public static class to_radix extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CString(Long.toString(Static.getInt(args[0], t), Static.getInt32(args[1], t)), t);
+		}
+
+		public String getName() {
+			return "to_radix";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "string {value, radix} Given an int and a radix, returns a string representation of the integer value"
+					+ " in the given base. A common use would be to output a hex or binary representation of a number, for"
+					+ " instance. ---- It is useful to note that all integers are stored internally by the computer as binary,"
+					+ " but since we usually represent numbers in text as base 10 numbers, we often times forget that both"
+					+ " base 16 'F' and base 10 '15' and base 2 '1111' are actually the same number, just represented differently"
+					+ " in different bases. This doesn't change how the program behaves, since the base is just a way to represent"
+					+ " the number on paper. The 'radix' is the base. So, given to_radix(10, 10), that would return '10', because"
+					+ " in code, we wrote out our value '10' in base 10, and we convert it to base 10, so nothing changes. However,"
+					+ " if we write to_radix(15, 16) we are saying \"convert the base 10 value 15 to base 16\", so it returns 'F'."
+					+ " See {{function|parse_int}} for the opposite operation.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("To a hex string", "to_radix(15, 16)"),
+				new ExampleScript("To a binary string", "to_radix(15, 2)")
+			};
+		}
+	}
+	
+	@api public static class parse_int extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CInt(Long.parseLong(args[0].val(), Static.getInt32(args[1], t)), t);
+		}
+
+		public String getName() {
+			return "parse_int";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "int {value, radix} Converts a string representation of an integer to a real integer, given the value's"
+					+ " radix (base). See {{function|to_radix}} for a more detailed explanation of number theory.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("From hex string", "parse_int('F', 16)"),
+				new ExampleScript("From binary string", "parse_int('1111', 2)")
+			};
+		}
+		
+	}
 
 	/**
 	 * Generates the namespace for this value, given an array of constructs. If
@@ -2616,3 +2714,5 @@ public class DataHandling {
 		return b.toString();
 	}
 }
+
+
