@@ -14,6 +14,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.UnsupportedEncodingException;
+import java.nio.BufferUnderflowException;
 
 /**
  * 
@@ -101,7 +102,13 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			return new CInt(ba.getByte(pos), t);
+			try {
+				return new CInt(ba.getByte(pos), t);
+			} catch(IndexOutOfBoundsException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(BufferUnderflowException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
@@ -117,7 +124,13 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			return new CString(ba.getChar(pos), t);
+			try{
+				return new CString(ba.getChar(pos), t);
+			} catch(IndexOutOfBoundsException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(BufferUnderflowException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
@@ -133,7 +146,13 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			return new CInt(ba.getShort(pos), t);
+			try{
+				return new CInt(ba.getShort(pos), t);
+			} catch(IndexOutOfBoundsException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(BufferUnderflowException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
@@ -149,7 +168,13 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			return new CInt(ba.getInt(pos), t);
+			try{
+				return new CInt(ba.getInt(pos), t);
+			} catch(IndexOutOfBoundsException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(BufferUnderflowException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
@@ -165,7 +190,13 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			return new CInt(ba.getLong(pos), t);
+			try {
+				return new CInt(ba.getLong(pos), t);
+			} catch (IndexOutOfBoundsException e) {
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch (BufferUnderflowException e) {
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
@@ -181,7 +212,13 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			return new CDouble(ba.getFloat(pos), t);
+			try {
+				return new CDouble(ba.getFloat(pos), t);
+			} catch (IndexOutOfBoundsException e) {
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch (BufferUnderflowException e) {
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
@@ -197,7 +234,13 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			return new CDouble(ba.getDouble(pos), t);
+			try {
+				return new CDouble(ba.getDouble(pos), t);
+			} catch(IndexOutOfBoundsException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(BufferUnderflowException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
@@ -222,7 +265,13 @@ public class ByteArrays {
 			if(args.length == 3){
 				pos = Static.getInt32(args[2], t);
 			}
-			return ba.getBytes(size, pos);
+			try {
+				return ba.getBytes(size, pos);
+			} catch(IndexOutOfBoundsException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(BufferUnderflowException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			}
 		}
 
 		public String docs() {
@@ -246,6 +295,10 @@ public class ByteArrays {
 				return new CString(ba.readUTF8String(pos, encoding), t);
 			} catch(UnsupportedEncodingException e){
 				throw new Exceptions.FormatException(e.getMessage(), t);
+			} catch(IndexOutOfBoundsException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(BufferUnderflowException e){
+				throw new Exceptions.RangeException(e.getMessage(), t);
 			}
 		}
 
