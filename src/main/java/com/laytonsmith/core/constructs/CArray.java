@@ -434,7 +434,7 @@ public class CArray extends Construct implements ArrayAccess{
 						b.append(", ");
 					}
 					first = false;
-					b.append(key).append(": ").append(associative_array.get(key).val());
+					b.append(key).append(": ").append(associative_array.get(key)==null?"null":associative_array.get(key).val());
 				}
 			}
 			b.append("}");
