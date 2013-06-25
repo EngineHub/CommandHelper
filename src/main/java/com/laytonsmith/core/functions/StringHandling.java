@@ -1531,4 +1531,51 @@ public class StringHandling {
 		}
 		
 	}
+	
+	@api public static class levenshtein extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CInt(StringUtils.LevenshteinDistance(args[0].val(), args[1].val()), t);
+		}
+
+		public String getName() {
+			return "levenshtein";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "int {string1, string2} Returns the levenshtein distance of two character sequences. For"
+				+ " instance, \"123\" and \"133\" would have a string distance of 1, while \"123\""
+				+ " and \"123\" would be 0, since they are the same string.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("", "levenshtein('123', '123')"),
+				new ExampleScript("", "levenshtein('test', 'testing')"),
+				new ExampleScript("", "levenshtein('133', '123')")
+			};
+		}
+		
+	}
 }
