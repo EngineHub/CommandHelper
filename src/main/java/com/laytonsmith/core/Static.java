@@ -877,7 +877,7 @@ public final class Static {
 		//background and non-foreground color characters are also reset at that point.
 		//Hence the RESETs everywhere.
         return mes
-                .replaceAll("§0", TermColors.RESET + TermColors.BLACK + TermColors.BG_WHITE)
+                .replaceAll("§0", TermColors.RESET + TermColors.BLACK)
                 .replaceAll("§1", TermColors.RESET + TermColors.BLUE)
                 .replaceAll("§2", TermColors.RESET + TermColors.GREEN)
                 .replaceAll("§3", TermColors.RESET + TermColors.CYAN)
@@ -885,7 +885,7 @@ public final class Static {
                 .replaceAll("§5", TermColors.RESET + TermColors.MAGENTA)
                 .replaceAll("§6", TermColors.RESET + TermColors.YELLOW)
                 .replaceAll("§7", TermColors.RESET + TermColors.WHITE)
-                .replaceAll("§8", TermColors.RESET + TermColors.BRIGHT_BLACK + TermColors.BG_BRIGHT_WHITE)
+                .replaceAll("§8", TermColors.RESET + TermColors.BRIGHT_BLACK)
                 .replaceAll("§9", TermColors.RESET + TermColors.BRIGHT_BLUE)
                 .replaceAll("§a", TermColors.RESET + TermColors.BRIGHT_GREEN)
                 .replaceAll("§b", TermColors.RESET + TermColors.BRIGHT_CYAN)
