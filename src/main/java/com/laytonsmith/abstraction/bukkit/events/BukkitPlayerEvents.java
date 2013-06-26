@@ -17,14 +17,17 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEnti
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCFishingState;
+import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import org.bukkit.Bukkit;
@@ -36,7 +39,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerPreLoginEvent.Result;
-import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -720,6 +722,54 @@ public class BukkitPlayerEvents {
 		
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(e.getPlayer());
+		}
+	}
+	
+	public static class BukkitMCGamemodeChangeEvent implements MCGamemodeChangeEvent {
+
+		PlayerGameModeChangeEvent gmc;
+		public BukkitMCGamemodeChangeEvent(PlayerGameModeChangeEvent event) {
+			gmc = event;
+		}
+		
+		public MCGameMode getNewGameMode() {
+			return BukkitMCGameMode.getConvertor().getAbstractedEnum(gmc.getNewGameMode());
+		}
+		
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(gmc.getPlayer());
+		}
+
+		public Object _GetObject() {
+			return gmc;
+		}
+	}
+
+	public static class BukkitMCChatTabCompleteEvent implements MCChatTabCompleteEvent {
+	
+		PlayerChatTabCompleteEvent tc;
+		public BukkitMCChatTabCompleteEvent(PlayerChatTabCompleteEvent event) {
+			this.tc = event;
+		}
+	
+		public Object _GetObject() {
+			return tc;
+		}
+	
+		public String getChatMessage() {
+			return tc.getChatMessage();
+		}
+	
+		public String getLastToken() {
+			return tc.getLastToken();
+		}
+	
+		public Collection<String> getTabCompletions() {
+			return tc.getTabCompletions();
+		}
+
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(tc.getPlayer());
 		}
 	}
 }
