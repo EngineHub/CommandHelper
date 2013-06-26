@@ -229,4 +229,18 @@ public class BukkitPlayerListener implements Listener {
 		EventUtils.TriggerExternal(fish);
 		EventUtils.TriggerListener(Driver.PLAYER_FISH, "player_fish", fish);
 	}
+	
+	@EventHandler(priority= EventPriority.LOWEST)
+	public void onGamemodeChange(PlayerGameModeChangeEvent event) {
+		BukkitPlayerEvents.BukkitMCGamemodeChangeEvent e = new BukkitPlayerEvents.BukkitMCGamemodeChangeEvent(event);
+		EventUtils.TriggerExternal(e);
+		EventUtils.TriggerListener(Driver.GAMEMODE_CHANGE, "gamemode_change", e);
+	}
+	
+	@EventHandler(priority= EventPriority.LOWEST)
+	public void onChatTab(PlayerChatTabCompleteEvent event) {
+		BukkitPlayerEvents.BukkitMCChatTabCompleteEvent e = new BukkitPlayerEvents.BukkitMCChatTabCompleteEvent(event);
+		EventUtils.TriggerExternal(e);
+		EventUtils.TriggerListener(Driver.TAB_COMPLETE, "tab_complete_chat", e);
+	}
 }

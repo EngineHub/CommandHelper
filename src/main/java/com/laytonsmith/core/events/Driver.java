@@ -51,6 +51,8 @@ public enum Driver {
 	VEHICLE_LEAVE,
 	VEHICLE_COLLIDE,
 	PLAYER_PORTAL_TRAVEL,
+	GAMEMODE_CHANGE,
+	TAB_COMPLETE,
 	/**
 	 * Used by events fired from the extension system.
 	 */
