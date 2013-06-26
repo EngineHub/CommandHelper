@@ -868,6 +868,13 @@ public class StringHandling {
 			String split = args[0].val();
 			String string = args[1].val();
 			int sp = 0;
+			if(split.length() == 0){
+				//Empty string, so special case.
+				for(int i = 0; i < string.length(); i++){
+					array.push(new CString(string.charAt(i), t));
+				}
+				return array;
+			}
 			for (int i = 0; i < string.length() - split.length(); i++) {
 				if (string.substring(i, i + split.length()).equals(split)) {
 					//Split point found
@@ -889,7 +896,9 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Simple split on one character. Note that unlike reg_split, no escaping is needed on the period.", "split('.', '1.2.3.4.5')"),
-						new ExampleScript("Split with multiple characters", "split('ab', 'aaabaaabaaabaa')"),};
+						new ExampleScript("Split with multiple characters", "split('ab', 'aaabaaabaaabaa')"),
+						new ExampleScript("Split all characters", "split('', 'abcdefg')"),
+			};
 		}
 
 		@Override
