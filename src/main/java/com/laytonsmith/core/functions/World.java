@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -740,6 +741,48 @@ public class World {
 		}
 
 		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class unload_world extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			boolean save = true;
+			if (args.length == 2) {
+				save = Static.getBoolean(args[1]);
+			}
+			MCWorld world = Static.getServer().getWorld(args[0].val());
+			return new CBoolean(Static.getServer().unloadWorld(world, save), t);
+		}
+
+		public String getName() {
+			return "unload_world";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "boolean {world, [save]} Unloads a world, and saves it if save is true (defaults true),"
+					+ " and returns whether or not the operation was successful.";
+		}
+
+		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 	}

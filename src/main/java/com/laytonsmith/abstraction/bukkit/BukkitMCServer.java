@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
@@ -12,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
@@ -110,6 +112,10 @@ public class BukkitMCServer implements MCServer {
 
 	public MCItemFactory getItemFactory() {
 		return new BukkitMCItemFactory(s.getItemFactory());
+	}
+	
+	public MCCommandMap getCommandMap() {
+		return new BukkitMCCommandMap((SimpleCommandMap) ReflectionUtils.invokeMethod(s.getClass(), s, "getCommandMap"));
 	}
 
     public MCOfflinePlayer getOfflinePlayer(String player) {
@@ -295,5 +301,9 @@ public class BukkitMCServer implements MCServer {
 
 	public MCScoreboard getNewScoreboard() {
 		return new BukkitMCScoreboard(s.getScoreboardManager().getNewScoreboard());
+	}
+	
+	public boolean unloadWorld(MCWorld world, boolean save) {
+		return s.unloadWorld(((BukkitMCWorld) world).__World(), save);
 	}
 }
