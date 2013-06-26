@@ -708,7 +708,25 @@ public final class Static {
     public static void LogDebug(File root, String message) throws IOException {
 		LogDebug(root, message, LogLevel.OFF);
 	}
+	
+	/**
+	 * Equivalent to LogDebug(root, message, level, true);
+	 */
     public static synchronized void LogDebug(File root, String message, LogLevel level) throws IOException {
+		LogDebug(root, message, level, true);
+	}
+	
+	/**
+	 * Logs an error message, depending on the log level of the message and the user's
+	 * preferences.
+	 * @param root
+	 * @param message
+	 * @param level
+	 * @param printScreen If true, the message (if otherwise shown) will be printed to the screen. If
+	 * false, it never will be, though it will still be logged to the log file.
+	 * @throws IOException 
+	 */
+    public static synchronized void LogDebug(File root, String message, LogLevel level, boolean printScreen) throws IOException {
 		//If debug mode is on in the prefs, we want to log this to the screen too
         if (Prefs.DebugMode() || Prefs.ShowWarnings() || level == LogLevel.ERROR) {
 			String color = "";
@@ -749,7 +767,7 @@ public final class Static {
 					}
 					break;
 			}
-			if(show){
+			if(show && printScreen){
 				Static.getLogger().log(lev, color + message + TermColors.reset());
 			}
         }

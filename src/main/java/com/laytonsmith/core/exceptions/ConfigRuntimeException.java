@@ -252,7 +252,9 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 		
 		//Log
-		CHLog.GetLogger().Log(exceptionType.equals("COMPILE ERROR")?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, LogLevel.ERROR, log.toString(), top);
+		//Don't log to screen though, since we're ALWAYS going to do that ourselves.
+		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType)?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, 
+				LogLevel.ERROR, log.toString(), top, false);
 		//Console
 		System.out.println(console.toString() + TermColors.reset());
 		//Player

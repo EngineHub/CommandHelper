@@ -237,13 +237,20 @@ public final class CHLog {
 		Log(modules, LogLevel.VERBOSE, message, t);
 	}
     
+	/**
+	 * Equivalent to Log(modules, level, message, t, true);
+	 */
+    public void Log(Tags modules, LogLevel level, String message, Target t){
+		Log(modules, level, message, t, true);
+	}
+	
     /**
      * Logs the given message at the specified level.
      * @param modules
      * @param level
      * @param message 
      */
-    public void Log(Tags modules, LogLevel level, String message, Target t){
+    public void Log(Tags modules, LogLevel level, String message, Target t, boolean printScreen){
         LogLevel moduleLevel = GetLevel(modules);
         if(moduleLevel == LogLevel.OFF){
             return; //Bail as quick as we can!
@@ -251,7 +258,8 @@ public final class CHLog {
         if(moduleLevel.level >= level.level){
             //We want to do the log
             try{
-                Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t!=Target.UNKNOWN?" "+t.toString():""), level);
+                Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t!=Target.UNKNOWN?" "+t.toString():""), 
+						level, printScreen);
             } catch(IOException e){
                 //Well, shoot.
                 if(level.level <= 1){
