@@ -11,6 +11,7 @@ import com.laytonsmith.core.functions.BasicLogic;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.*;
 
 /**
@@ -135,7 +136,7 @@ public class CArray extends Construct implements ArrayAccess{
             }
             this.next_index = array.size();
         }
-        regenValue();
+        regenValue(new HashSet<CArray>());
     }
 
     /**
@@ -175,34 +176,14 @@ public class CArray extends Construct implements ArrayAccess{
 	 * sets the toString value to dirty, which means that the value will be regenerated
 	 * next time it is requested.
 	 */
-    private void regenValue() {
-		if(!loadedExterns){
-			try {
-				//Since we are potentially recovering from a StackOverflowError below,
-				//we have to do some weird things here. Since ExceptionType and 
-				//ConfigRuntimeException may not have been loaded yet when the SOE
-				//happens, we must ensure that they have been loaded prior, because
-				//our stack will be overflown, and we can't then do additional loads
-				//later in the process. Doing this load now will ensure that all the
-				//classes will have already been loaded into memory though, and we
-				//won't have to worry about them causing any NoClassDefFoundErrors,
-				//which is what happens normally if we try to recover from a
-				//StackOverflowError.
-				Class.forName(ExceptionType.class.getName());
-				Class.forName(ConfigRuntimeException.class.getName());
-			} catch (ClassNotFoundException ex) {
-				throw new Error(ex);
-			}
-			loadedExterns = true;
+    private void regenValue(Set<CArray> arrays) {
+		if(arrays.contains(this)){
+			return; //Recursive, so don't continue.
 		}
+		arrays.add(this);
         valueDirty = true;
 		if(parent != null){
-			try{
-				parent.regenValue();
-			} catch(StackOverflowError e){
-				throw new ConfigRuntimeException("StackOverflow. (Does this array have recursive references?)", 
-						ExceptionType.StackOverflowError, getTarget());
-			}
+			parent.regenValue(arrays);
 		}
     }
 	
@@ -213,7 +194,7 @@ public class CArray extends Construct implements ArrayAccess{
 	public void reverse(){
 		if(!associative_mode){
 			Collections.reverse(array);
-			regenValue();
+			regenValue(new HashSet<CArray>());
 		} else {
 			throw new ConfigRuntimeException("Cannot reverse an associative array.", ExceptionType.CastException, getTarget());
 		}
@@ -265,7 +246,7 @@ public class CArray extends Construct implements ArrayAccess{
         if(c instanceof CArray){
             ((CArray)c).parent = this;
         }
-        regenValue();
+        regenValue(new HashSet<CArray>());
     }
     
     /**
@@ -318,7 +299,7 @@ public class CArray extends Construct implements ArrayAccess{
         if(c instanceof CArray){
             ((CArray)c).parent = this;
         }
-        regenValue();
+        regenValue(new HashSet<CArray>());
     }
     
     public final void set(int index, Construct c, Target t){
@@ -439,32 +420,7 @@ public class CArray extends Construct implements ArrayAccess{
     @Override
     public String val() {
 		if(valueDirty){
-			StringBuilder b = new StringBuilder();
-			b.append("{");
-			if (!associative_mode) {
-				for (int i = 0; i < array.size(); i++) {
-					if (i > 0) {
-						b.append(", ");
-						b.append(array.get(i).val());
-					} else {
-						b.append(array.get(i).val());
-					}
-				}
-			} else {
-				boolean first = true;
-				for(String key : associative_array.keySet()){
-					if(!first){
-						b.append(", ");
-					}
-					first = false;
-					b.append(key).append(": ").append(associative_array.get(key)==null?"null":associative_array.get(key).val());
-				}
-			}
-			b.append("}");
-			mutVal = b.toString();
-			if(parent != null){
-				parent.regenValue();
-			}
+			mutVal = getString(new HashSet<CArray>());
 			valueDirty = false;
 		}
         return mutVal;
@@ -474,6 +430,60 @@ public class CArray extends Construct implements ArrayAccess{
     public String toString() {
         return val();
     }
+	
+	private String getString(Set<CArray> arrays){
+		StringBuilder b = new StringBuilder();
+		b.append("{");
+		if (!associative_mode) {
+			for (int i = 0; i < array.size(); i++) {
+				Mixed value = array.get(i);
+				String v;
+				if(value instanceof CArray){
+					if(arrays.contains((CArray)value)){
+						//Check for recursion
+						v = "*recursion*";
+					} else {
+						arrays.add(((CArray)value));
+						v = ((CArray)value).getString(arrays);
+					}
+				} else {
+					v = value.val();
+				}
+				if (i > 0) {
+					b.append(", ");
+				}
+				b.append(v);
+			}
+		} else {
+			boolean first = true;
+			for(String key : associative_array.keySet()){
+				if(!first){
+					b.append(", ");
+				}
+				first = false;
+				String v;
+				if(associative_array.get(key) == null){
+					v = "null";
+				} else {
+					Mixed value = associative_array.get(key);
+					if(value instanceof CArray){
+						if(arrays.contains(((CArray)value))){
+							v = "*recursion*";
+						} else {
+							arrays.add(((CArray)value));
+							v = ((CArray)value).getString(arrays);
+						}
+					} else {
+						v = value.val();
+					}
+				}
+				b.append(key).append(": ").append(v);
+			}
+		}
+		b.append("}");
+		String ret = b.toString();
+		return ret;
+	}
 
     public long size() {
         if(associative_mode){
@@ -501,7 +511,7 @@ public class CArray extends Construct implements ArrayAccess{
                 clone.associative_array = new TreeMap<String, Construct>(this.associative_array);
             }
         }
-        clone.regenValue();
+        clone.regenValue(new HashSet<CArray>());
         return clone;
     }
     
@@ -540,7 +550,7 @@ public class CArray extends Construct implements ArrayAccess{
         } else {
             ret = associative_array.remove(c);
         }
-        regenValue();
+        regenValue(new HashSet<CArray>());
         return ret;
     }
 	
@@ -567,7 +577,7 @@ public class CArray extends Construct implements ArrayAccess{
 				}
 			}
 		}
-		regenValue();
+		regenValue(new HashSet<CArray>());
 	}
     
     private Comparator<String> comparator = new Comparator<String>(){
@@ -724,7 +734,7 @@ public class CArray extends Construct implements ArrayAccess{
             }
         });
         this.array = list;  
-        this.regenValue();
+        this.regenValue(new HashSet<CArray>());
     }
 	
 	public boolean isEmpty(){
