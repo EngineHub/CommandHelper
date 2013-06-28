@@ -12,8 +12,6 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A class that represents a dynamic array.
@@ -33,6 +31,7 @@ public class CArray extends Construct implements ArrayAccess{
     private String mutVal;
     CArray parent = null;
 	private boolean valueDirty = true;
+	private boolean loadedExterns = false;
     
     
     public CArray(Target t){
@@ -176,10 +175,34 @@ public class CArray extends Construct implements ArrayAccess{
 	 * sets the toString value to dirty, which means that the value will be regenerated
 	 * next time it is requested.
 	 */
-    private void regenValue() {		
+    private void regenValue() {
+		if(!loadedExterns){
+			try {
+				//Since we are potentially recovering from a StackOverflowError below,
+				//we have to do some weird things here. Since ExceptionType and 
+				//ConfigRuntimeException may not have been loaded yet when the SOE
+				//happens, we must ensure that they have been loaded prior, because
+				//our stack will be overflown, and we can't then do additional loads
+				//later in the process. Doing this load now will ensure that all the
+				//classes will have already been loaded into memory though, and we
+				//won't have to worry about them causing any NoClassDefFoundErrors,
+				//which is what happens normally if we try to recover from a
+				//StackOverflowError.
+				Class.forName(ExceptionType.class.getName());
+				Class.forName(ConfigRuntimeException.class.getName());
+			} catch (ClassNotFoundException ex) {
+				throw new Error(ex);
+			}
+			loadedExterns = true;
+		}
         valueDirty = true;
 		if(parent != null){
-			parent.regenValue();
+			try{
+				parent.regenValue();
+			} catch(StackOverflowError e){
+				throw new ConfigRuntimeException("StackOverflow. (Does this array have recursive references?)", 
+						ExceptionType.StackOverflowError, getTarget());
+			}
 		}
     }
 	

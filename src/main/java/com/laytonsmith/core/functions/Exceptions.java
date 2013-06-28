@@ -222,7 +222,14 @@ public class Exceptions {
 		/**
 		 * Thrown if data was not found, but expected.
 		 */
-		NotFoundException("Thrown if data was not found, but expected.", CHVersion.V3_3_1);
+		NotFoundException("Thrown if data was not found, but expected.", CHVersion.V3_3_1),
+		
+		/**
+		 * Thrown if a stack overflow error happens. This can occur if a 
+		 * function recurses too deeply.
+		 */
+		StackOverflowError("Thrown if a stack overflow error happens. This can occur if a"
+				+ " function recurses too deeply.", CHVersion.V3_3_1)
 
 		;
 		
