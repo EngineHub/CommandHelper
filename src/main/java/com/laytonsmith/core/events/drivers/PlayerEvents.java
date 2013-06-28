@@ -4,6 +4,7 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Geometry.Point3D;
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
@@ -26,7 +27,10 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.StringHandling;
+
+import java.net.BindException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1847,6 +1851,132 @@ public class PlayerEvents {
 		}
 	
 		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class gamemode_change extends AbstractEvent {
+
+		public String getName() {
+			return "gamemode_change";
+		}
+
+		public String docs() {
+			return "{newmode: <macro> gamemode being changed to | player: <macro>}"
+					+ " Fires when something causes a player's gamemode to change. Cancelling the event will"
+					+ " cancel the change. The mode itself cannot be modified."
+					+ " {player: player whose mode is changing | newmode}"
+					+ " {}"
+					+ " {}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCGamemodeChangeEvent) {
+				MCGamemodeChangeEvent e = (MCGamemodeChangeEvent) event;
+				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "newmode", e.getNewGameMode().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCGamemodeChangeEvent) {
+				MCGamemodeChangeEvent e = (MCGamemodeChangeEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				ret.put("newmode", new CString(e.getNewGameMode().name(), Target.UNKNOWN));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCGamemodeChangeEvent.");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.GAMEMODE_CHANGE;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class tab_complete_chat extends AbstractEvent {
+	
+		public String getName() {
+			return "tab_complete_chat";
+		}
+	
+		public String docs() {
+			return "{player: <macro>}"
+					+ " Fires when a player asks for a list of completions to the current word in their chat message."
+					+ " Setting the completions to an empty array is this event's equivalent of cancel()."
+					+ " {player: the player asking for completion | message: the full message they have typed"
+					+ " | last: the partial word completion is asked for | completions}"
+					+ " {completions: the list of completions to send, default is player names containing the last text}"
+					+ " {}";
+		}
+	
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCChatTabCompleteEvent) {
+				Prefilters.match(prefilter, "player", ((MCChatTabCompleteEvent) e).getPlayer().getName(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+	
+		public BindableEvent convert(CArray manualObject) {
+			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+		}
+	
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCChatTabCompleteEvent) {
+				MCChatTabCompleteEvent event = (MCChatTabCompleteEvent) e;
+				Target t = Target.UNKNOWN;
+				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("message", new CString(event.getChatMessage(), t));
+				ret.put("last", new CString(event.getLastToken(), t));
+				CArray completions = new CArray(t);
+				for (String c : event.getTabCompletions()) {
+					completions.push(new CString(c, t));
+				}
+				ret.put("completions", completions);
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCChatTabCompleteEvent.");
+			}
+		}
+	
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCChatTabCompleteEvent) {
+				MCChatTabCompleteEvent e = (MCChatTabCompleteEvent) event;
+				if ("completions".equals(key)) {
+					if (value instanceof CArray) {
+						e.getTabCompletions().clear();
+						for (Construct val : ((CArray) value).asList()) {
+							e.getTabCompletions().add(val.val());
+						}
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		public Driver driver() {
+			return Driver.TAB_COMPLETE;
+		}
+
+		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 	}
