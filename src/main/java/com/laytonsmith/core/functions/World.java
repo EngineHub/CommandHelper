@@ -766,6 +766,9 @@ public class World {
 				save = Static.getBoolean(args[1]);
 			}
 			MCWorld world = Static.getServer().getWorld(args[0].val());
+			if (world == null) {
+				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+			}
 			return new CBoolean(Static.getServer().unloadWorld(world, save), t);
 		}
 

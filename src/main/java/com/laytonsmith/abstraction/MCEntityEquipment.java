@@ -11,9 +11,13 @@ public interface MCEntityEquipment {
 
 	public void clearEquipment();
 	public int getSize();
+	public MCEntity getHolder();
 	
 	public Map<MCEquipmentSlot, MCItemStack> getAllEquipment();
 	public void setAllEquipment(Map<MCEquipmentSlot, MCItemStack> stackmap);
+	
+	public Map<MCEquipmentSlot, Float> getAllDropChances();
+	public void setAllDropChances(Map<MCEquipmentSlot, Float> slots);
 	
 	public MCItemStack getWeapon();
 	public MCItemStack getHelmet();
