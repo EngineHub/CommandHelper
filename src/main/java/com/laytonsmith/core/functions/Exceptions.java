@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -354,7 +355,9 @@ public class Exceptions {
 				that.eval(tryCode, env);
 			} catch (ConfigRuntimeException e) {
 				if (Prefs.DebugMode()) {
-					System.out.println("[CommandHelper]: Exception thrown -> " + e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
+					System.out.println("[" + Implementation.GetServerType().getBranding() + "]:"
+							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + e.getExceptionType() + ":" 
+							+ e.getFile() + ":" + e.getLineNum());
 				}
 				if (e.getExceptionType() != null && (interest.isEmpty() || interest.contains(e.getExceptionType().toString()))) {
 					if (catchCode != null) {
