@@ -173,6 +173,8 @@ public final class ClassDiscovery {
 						//It can't be loaded? O.o Oh well.
 					} catch (NoClassDefFoundError ex) {
 						//Must have been an external library
+					} catch (VerifyError ex){
+						//Internal class error, ignore
 					}
 				}
 			}
