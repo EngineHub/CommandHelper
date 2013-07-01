@@ -480,4 +480,9 @@ public class DataHandlingTest {
 		assertEquals("15", SRun("parse_int('F', 16)", null));
 		assertEquals("15", SRun("parse_int('1111', 2)", null));
 	}
+	
+	@Test
+	public void testClosureReturnsFromExecute() throws Exception {
+		assertEquals("3", SRun("execute(closure(return(3)))", fakePlayer));
+	}
 }

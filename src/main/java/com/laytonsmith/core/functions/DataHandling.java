@@ -2325,9 +2325,10 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {[values...,] closure} Executes the given closure. You can also send arguments"
+			return "mixed {[values...,] closure} Executes the given closure. You can also send arguments"
 					+ " to the closure, which it may or may not use, depending on the particular closure's"
-					+ " definition.";
+					+ " definition. If the closure returns a value with return(), then that value will"
+					+ " be returned with execute. Otherwise, void is returned.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -2347,7 +2348,11 @@ public class DataHandling {
 				Construct[] vals = new Construct[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
 				CClosure closure = (CClosure) args[args.length - 1];
-				closure.execute(vals);
+				try{
+					closure.execute(vals);
+				} catch(FunctionReturnException e){
+					return e.getReturn();
+				}
 			} else {
 				throw new ConfigRuntimeException("Only a closure (created from the closure function) can be sent to execute()", ExceptionType.CastException, t);
 			}
