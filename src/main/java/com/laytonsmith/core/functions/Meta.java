@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
@@ -437,7 +438,7 @@ public class Meta {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args)
+		public CBoolean exec(Target t, Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			AliasCore ac = Static.getAliasCore();
 
@@ -825,5 +826,59 @@ public class Meta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+	
+	@api(environments = CommandHelperEnvironment.class)
+	public static class run_cmd extends AbstractFunction {
+		
+		private final static run run = new run();
+		private final static call_alias call_alias = new call_alias();
+		private final static is_alias is_alias = new is_alias();
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CString s;
+			if(args[0] instanceof CString){
+				s = (CString)args[0];
+			} else {
+				s = new CString(args[0].val(), t);
+			}
+			if(is_alias.exec(t, environment, s).getBoolean()){
+				call_alias.exec(t, environment, s);
+			} else {
+				run.exec(t, environment, s);
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "run_cmd";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {cmd} Runs a command regardless of whether or not it is an alias or a builtin command. Essentially,"
+					+ " this works like checking if(is_alias(@cmd)){ call_alias(@cmd) } else { run(@cmd) }. Be careful with"
+					+ " this command, as like call_alias(), you could accidentally create infinite loops.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }
