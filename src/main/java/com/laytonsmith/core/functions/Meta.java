@@ -836,7 +836,7 @@ public class Meta {
 		private final static is_alias is_alias = new is_alias();
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -873,7 +873,8 @@ public class Meta {
 		public String docs() {
 			return "void {cmd} Runs a command regardless of whether or not it is an alias or a builtin command. Essentially,"
 					+ " this works like checking if(is_alias(@cmd)){ call_alias(@cmd) } else { run(@cmd) }. Be careful with"
-					+ " this command, as like call_alias(), you could accidentally create infinite loops.";
+					+ " this command, as like call_alias(), you could accidentally create infinite loops. The command must"
+					+ " start with a / or this will throw a FormatException.";
 		}
 
 		public Version since() {

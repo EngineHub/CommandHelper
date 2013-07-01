@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
@@ -3709,5 +3710,49 @@ public class PlayerManagement {
 			};
 		}
 
+	}
+	
+	@api
+	public static class get_player_from_entity_id extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			for(MCPlayer p : StaticLayer.GetConvertor().GetServer().getOnlinePlayers()){
+				if(p.getEntityId() == id){
+					return new CString(p.getName(), t);
+				}
+			}
+			return new CNull();
+		}
+
+		public String getName() {
+			return "get_player_from_entity_id";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "string {entityID} Given an entity ID that represents a player, returns that player's name, or"
+					+ " null if the entity ID isn't a player's entity ID.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }
