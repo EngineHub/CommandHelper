@@ -1250,4 +1250,139 @@ public class EntityManagement {
 					+ " or minecart.";
 		}
 	}
+	
+	@api
+	public static class get_equipment_droprates extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntityEquipment eq = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
+			if (eq.getHolder() instanceof MCPlayer) {
+				throw new ConfigRuntimeException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
+			}
+			CArray ret = new CArray(t);
+			for (Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
+				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t);
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "get_equipment_droprates";
+		}
+
+		public String docs() {
+			return "array {entityID} Returns an associative array of the drop rate for each equipment slot."
+					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
+		}
+	}
+	
+	@api
+	public static class set_equipment_droprates extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntityEquipment ee = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
+			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
+			if (ee.getHolder() instanceof MCPlayer) {
+				throw new ConfigRuntimeException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
+			}
+			if (args[1] instanceof CNull) {
+				for (Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
+					eq.put(ent.getKey(), 0F);
+				}
+			} else if (args[1] instanceof CArray) {
+				CArray ea = (CArray) args[1];
+				for (String key : ea.keySet()) {
+					try {
+						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), Static.getDouble32(ea.get(key, t), t));
+					} catch (IllegalArgumentException iae) {
+						throw new Exceptions.FormatException("Not an equipment slot: " + key, t);
+					}
+				}
+			} else {
+				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
+			}
+			ee.setAllDropChances(eq);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_equipment_droprates";
+		}
+
+		public String docs() {
+			return "void {entityID, array} Sets the drop chances for each equipment slot on a mob,"
+					+ " but does not work on players. Passing null instead of an array will automatically"
+					+ " set all rates to 0, which will cause nothing to drop. A rate of 1 will guarantee a drop.";
+		}
+	}
+	
+	@api
+	public static class get_name_visible extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).isCustomNameVisible(), t);
+		}
+
+		public String getName() {
+			return "get_name_visible";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns whether or not a mob's custom name is always visible."
+					+ " If this is true it will be as visible as player names, otherwise it will only be"
+					+ " visible when near the mob.";
+		}
+	}
+	
+	@api
+	public static class set_name_visible extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.getLivingEntity(Static.getInt32(args[0], t), t).setCustomNameVisible(Static.getBoolean(args[1]));
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_name_visible";
+		}
+
+		public String docs() {
+			return "void {entityID, boolean} Sets the visibility of a mob's custom name."
+					+ " True means it will be visible from a distance, like a playername."
+					+ " False means it will only be visible when near the mob.";
+		}
+	}
+	
+	@api
+	public static class can_pickup_items extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).getCanPickupItems(), t);
+		}
+
+		public String getName() {
+			return "can_pickup_items";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns whether the specified living entity can pick up items.";
+		}
+	}
+	
+	@api
+	public static class set_can_pickup_items extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.getLivingEntity(Static.getInt32(args[0], t), t).setCanPickupItems(Static.getBoolean(args[1]));
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_can_pickup_items";
+		}
+
+		public String docs() {
+			return "void {entityID, boolean} Sets a living entity's ability to pick up items.";
+		}
+	}
 }

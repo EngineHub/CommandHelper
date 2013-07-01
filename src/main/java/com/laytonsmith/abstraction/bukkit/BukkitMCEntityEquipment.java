@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -25,6 +26,10 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	public int getSize() {
 		return MCEquipmentSlot.values().length;
+	}
+	
+	public MCEntity getHolder() {
+		return BukkitConvertor.BukkitGetCorrectEntity(ee.getHolder());
 	}
 
 	public Map<MCEquipmentSlot, MCItemStack> getAllEquipment() {
