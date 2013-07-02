@@ -166,6 +166,17 @@ public class ArrayHandling {
 								return defaultConstruct;
 							}
 						}
+						if(env.getEnv(GlobalEnv.class).GetFlag("array-special-get") != null){
+							//They are asking for an array that doesn't exist yet, so let's create it now.
+							CArray c;
+							if(ca.inAssociativeMode()){
+								c = CArray.GetAssociativeArray(t);
+							} else {
+								c = new CArray(t);
+							}
+							ca.set(args[1], c, t);
+							return c;
+						}
 						throw e;
 					}
 				}
@@ -293,16 +304,40 @@ public class ArrayHandling {
 			return new Integer[]{3};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				try {
-					((CArray) args[0]).set(args[1], args[2], t);
-				} catch (IndexOutOfBoundsException e) {
-					throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
-				}
-				return new CVoid(t);
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			env.getEnv(GlobalEnv.class).SetFlag("array-special-get", true);
+			Construct array = parent.seval(nodes[0], env);
+			env.getEnv(GlobalEnv.class).ClearFlag("array-special-get");
+			Construct index = parent.seval(nodes[1], env);
+			Construct value = parent.seval(nodes[2], env);
+			if(!(array instanceof CArray)){
+				throw new ConfigRuntimeException("Argument 1 of array_set must be an array", ExceptionType.CastException, t);
 			}
-			throw new ConfigRuntimeException("Argument 1 of array_set must be an array, and argument 2 must be an integer", ExceptionType.CastException, t);
+			try {
+				((CArray)array).set(index, value, t);
+			} catch (IndexOutOfBoundsException e) {
+				throw new ConfigRuntimeException("The index " + index.asString().getQuote() + " is out of bounds", ExceptionType.IndexOverflowException, t);
+			}
+			return new CVoid(t);
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			throw new Error();
+//			if (args[0] instanceof CArray) {
+//				try {
+//					((CArray) args[0]).set(args[1], args[2], t);
+//				} catch (IndexOutOfBoundsException e) {
+//					throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
+//				}
+//				return new CVoid(t);
+//			}
+//			throw new ConfigRuntimeException("Argument 1 of array_set must be an array", ExceptionType.CastException, t);
 		}
 
 		public ExceptionType[] thrown() {

@@ -363,4 +363,18 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return 
      */
     public abstract boolean isDynamic();
+	
+	/**
+	 * Returns the underlying value, as a value that can be directly
+	 * inserted into code. So, if the value were
+	 * {@code This is 'the value'}, then {@code 'This is \'the value\''} would
+	 * be returned. (That is, characters needing escapes will be escaped.) It includes
+	 * the outer quotes as well. Numbers and other primitives may be able to override
+	 * this to return a valid value as well. By default, this assumes a string, and
+	 * returns appropriately.
+	 * @return 
+	 */
+	protected String getQuote(){
+		return "'" + val().replace("\\", "\\\\").replace("'", "\\'") + "'";
+	}
 }
