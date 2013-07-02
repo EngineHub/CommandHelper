@@ -802,7 +802,7 @@ public class EntityEvents {
                 String dtype = event.getDamager().getType().name();
                 map.put("damager",  new CString(dtype, Target.UNKNOWN));
                 map.put("cause",  new CString(event.getCause().name(), Target.UNKNOWN));
-                map.put("amount",  new CInt(event.getDamage(), Target.UNKNOWN));
+                map.put("amount",  new CDouble(event.getDamage(), Target.UNKNOWN));
                 map.put("id", new CInt(event.getDamager().getEntityId(), Target.UNKNOWN));
                 
                 String data = "";
@@ -1013,7 +1013,7 @@ public class EntityEvents {
 			map.put("type", new CString(victim.getType().name(), Target.UNKNOWN));
 			map.put("id", new CInt(victim.getEntityId(), Target.UNKNOWN));
 			map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
-			map.put("amount", new CInt(event.getDamage(), Target.UNKNOWN));
+			map.put("amount", new CDouble(event.getDamage(), Target.UNKNOWN));
 
 			if (event instanceof MCEntityDamageByEntityEvent) {
 				MCEntity damager = ((MCEntityDamageByEntityEvent) event).getDamager();

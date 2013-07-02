@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCResult;
 import com.laytonsmith.abstraction.enums.MCSlotType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCResult;
 import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
 import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
@@ -86,7 +87,7 @@ public class BukkitInventoryEvents {
 		}
 
 		public MCResult getResult() {
-			return MCResult.valueOf(iie.getResult().name());
+			return BukkitMCResult.getConvertor().getAbstractedEnum(iie.getResult());
 		}
 
 		public boolean isCanceled() {
