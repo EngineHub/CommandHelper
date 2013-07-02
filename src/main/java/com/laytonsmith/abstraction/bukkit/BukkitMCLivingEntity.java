@@ -42,19 +42,19 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		this.le = le;
 	}
 
-	public int getHealth() {
+	public double getHealth() {
 		return le.getHealth();
 	}
 
-	public void setHealth(int i) {
+	public void setHealth(double i) {
 		le.setHealth(i);
 	}
 
-	public int getMaxHealth() {
+	public double getMaxHealth() {
 		return le.getMaxHealth();
 	}
 	
-	public void setMaxHealth(int health) {
+	public void setMaxHealth(double health) {
 		le.setMaxHealth(health);
 	}
 	
@@ -62,11 +62,11 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		le.resetMaxHealth();
 	}
 
-	public void damage(int i) {
+	public void damage(double i) {
 		le.damage(i);
 	}
 
-	public void damage(int amount, MCEntity source) {
+	public void damage(double amount, MCEntity source) {
 		le.damage(amount, ((BukkitMCEntity) source).asEntity());
 	}
 
@@ -86,7 +86,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		return new BukkitMCPlayer(le.getKiller());
 	}
 
-	public int getLastDamage() {
+	public double getLastDamage() {
 		return le.getLastDamage();
 	}
 
@@ -259,7 +259,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		}
 	}
 
-	public void setLastDamage(int damage) {
+	public void setLastDamage(double damage) {
 		le.setLastDamage(damage);
 	}
 

@@ -857,7 +857,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			return new CInt(le.getMaxHealth(), t);
+			return new CDouble(le.getMaxHealth(), t);
 		}
 
 		public String getName() {

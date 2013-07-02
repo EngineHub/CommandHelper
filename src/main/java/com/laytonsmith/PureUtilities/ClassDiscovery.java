@@ -175,6 +175,8 @@ public final class ClassDiscovery {
 						//Must have been an external library
 					} catch (VerifyError ex){
 						//Internal class error, ignore
+					} catch (SecurityException ex){
+						//Again, ignore
 					}
 				}
 			}

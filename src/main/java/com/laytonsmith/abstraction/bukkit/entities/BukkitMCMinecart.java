@@ -13,11 +13,11 @@ public class BukkitMCMinecart extends BukkitMCVehicle
 		this.m = e;
 	}
 
-	public void setDamage(int damage) {
+	public void setDamage(double damage) {
 		m.setDamage(damage);
 	}
 
-	public int getDamage() {
+	public double getDamage() {
 		return m.getDamage();
 	}
 

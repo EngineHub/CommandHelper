@@ -14,7 +14,7 @@ public interface MCEntityDamageEvent extends BindableEvent {
 
     public MCEntity getEntity();
 
-    public int getDamage();
+    public double getDamage();
 
-    public void setDamage(int damage);
+    public void setDamage(double damage);
 }
