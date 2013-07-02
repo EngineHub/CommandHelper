@@ -662,11 +662,13 @@ public class DataHandling {
 			return new Integer[]{4, 5};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array, ivar, code, else} Works like a foreach, except if the array is empty, the else code runs instead. That is, if the code"
 					+ " would not run at all, the else condition would.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2279,6 +2281,10 @@ public class DataHandling {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			if(nodes.length == 0){
+				//Empty closure, do nothing.
+				return new CClosure(null, env, new String[]{}, new Construct[]{}, t);
+			}
 			String[] names = new String[nodes.length - 1];
 			Construct[] defaults = new Construct[nodes.length - 1];
 			for (int i = 0; i < nodes.length - 1; i++) {
@@ -2311,6 +2317,11 @@ public class DataHandling {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		@Override
+		public boolean allowBraces() {
+			return true;
+		}		
 	}
 
 	@api

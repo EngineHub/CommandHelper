@@ -24,7 +24,7 @@ public class CClosure extends Construct {
     Environment env;
     String[] names;
     Construct[] defaults;
-
+	
     public CClosure(ParseTree node, Environment env, String[] names, Construct[] defaults, Target t) {
         super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
         this.node = node;
@@ -46,6 +46,9 @@ public class CClosure extends Construct {
     }
 
     private void condense(ParseTree node, StringBuilder b) {
+		if(node == null){
+			return;
+		}
         if (node.getData() instanceof CFunction) {
             b.append(( (CFunction) node.getData() ).val()).append("(");
             for (int i = 0; i < node.numberOfChildren(); i++) {
@@ -103,6 +106,9 @@ public class CClosure extends Construct {
      * @param values
      */
     public void execute(Construct[] values) throws ConfigRuntimeException, ProgramFlowManipulationException {
+		if(node == null){
+			return;
+		}
         try {
             Environment environment;
             synchronized (this) {
