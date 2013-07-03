@@ -1228,21 +1228,27 @@ public class ArrayHandling {
 	@api public static class array_sort_async extends AbstractFunction{
 		
 		RunnableQueue queue = new RunnableQueue("MethodScript-arraySortAsync");
+		boolean started = false;
 		
-		public array_sort_async(){
-			queue.invokeLater(null, new Runnable() {
+		private void startup(){
+			if(!started){
+				queue.invokeLater(null, new Runnable() {
 
-				public void run() {
-					//This warms up the queue. Apparently.
-				}
-			});
-			StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+					public void run() {
+						//This warms up the queue. Apparently.
+					}
+				});
+				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
-				public void run() {
-					queue.shutdown();
-				}
-			});
+					public void run() {
+						queue.shutdown();
+						started = false;
+					}
+				});
+				started = true;
+			}
 		}
+		
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -1257,6 +1263,7 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			startup();
 			final CArray array = Static.getArray(args[0], t);
 			final CString sortType = new CString(args.length > 2?args[1].val():CArray.SortType.REGULAR.name(), t);
 			final CClosure callback = Static.getObject((args.length==2?args[1]:args[2]), t, "closure", CClosure.class);

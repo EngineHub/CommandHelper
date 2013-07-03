@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
@@ -132,13 +133,13 @@ public class BukkitConvertor extends AbstractConvertor {
      */
     private static Set<Integer> validIDs = new TreeSet<Integer>();
 
-    public synchronized int SetFutureRunnable(long ms, Runnable r) {
+    public synchronized int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
         int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));
         validIDs.add(id);
         return id;
     }
     
-    public synchronized int SetFutureRepeater(long ms, long initialDelay, Runnable r){
+    public synchronized int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
         int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
         validIDs.add(id);
         return id;        
@@ -347,7 +348,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public void runOnMainThreadLater(final Runnable r) {
+	public void runOnMainThreadLater(DaemonManager dm, final Runnable r) {
 		Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable<Object>() {
 
 			public Object call() throws Exception {

@@ -3,6 +3,8 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
@@ -568,6 +570,7 @@ public class StaticTest {
     public static class TestConvertor extends AbstractConvertor{
         
         private static MCServer fakeServer;
+		private RunnableQueue queue = new RunnableQueue("TestConvertorRunnableQueue");
 
         public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
              return StaticTest.GetFakeLocation(w, x, y + 1, z);
@@ -613,10 +616,10 @@ public class StaticTest {
             return c.GetItemStack(type, data, qty);
         }
 
-        public int SetFutureRunnable(long ms, Runnable r) {
-		//This needs fixing later
-		Threader.GetThreader().submit(r);
-		return 0;
+        public int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
+			//This needs fixing later
+			queue.invokeLater(dm, r);
+			return 0;
         }
 
         public void ClearAllRunnables() {
@@ -627,7 +630,7 @@ public class StaticTest {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        public int SetFutureRepeater(long ms, long initialDelay, Runnable r) {
+        public int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 

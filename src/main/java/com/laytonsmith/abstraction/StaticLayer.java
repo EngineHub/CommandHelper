@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 
@@ -107,12 +108,12 @@ public final class StaticLayer {
      * @param r
      * @return 
      */
-    public static int SetFutureRunnable(long ms, Runnable r){
-        return convertor.SetFutureRunnable(ms, r);
+    public static int SetFutureRunnable(DaemonManager dm, long ms, Runnable r){
+        return convertor.SetFutureRunnable(dm, ms, r);
     }
     
-    public static int SetFutureRepeater(long ms, long initialDelay, Runnable r){
-        return convertor.SetFutureRepeater(ms, initialDelay, r);
+    public static int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
+        return convertor.SetFutureRepeater(dm, ms, initialDelay, r);
     }
 
     public static void ClearAllRunnables() {

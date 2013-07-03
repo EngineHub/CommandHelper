@@ -1,6 +1,8 @@
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.abstraction.AbstractConvertor;
@@ -30,7 +32,6 @@ import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.Threader;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
@@ -303,6 +304,8 @@ public class Interpreter {
 	
 	@convert(type=Implementation.Type.SHELL)
 	public static class ShellConvertor extends AbstractConvertor{
+		
+		RunnableQueue queue = new RunnableQueue("ShellInterpreter-userland");
 
 		public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
@@ -347,7 +350,7 @@ public class Interpreter {
 		private static int runnableID = 0;
 		private static List<Integer> runnableList = new ArrayList<Integer>();
 
-		public int SetFutureRunnable(final long ms, final Runnable r) {
+		public int SetFutureRunnable(DaemonManager dm, final long ms, final Runnable r) {
 			final int id = ++runnableID;
 			Runnable m = new Runnable() {
 
@@ -363,7 +366,7 @@ public class Interpreter {
 				}
 			};
 			runnableList.add(id);
-			Threader.GetThreader().submit(m);
+			queue.invokeLater(dm, m);
 			return id;
 		}
 
@@ -375,8 +378,8 @@ public class Interpreter {
 			runnableList.remove(id);
 		}
 
-		public int SetFutureRepeater(final long ms, final long initialDelay, final Runnable r) {
-			final int id = ++runnableID;
+		public int SetFutureRepeater(DaemonManager dm, final long ms, final long initialDelay, final Runnable r) {
+			final int id = runnableID++;
 			Runnable m = new Runnable() {
 
 				public void run() {
@@ -397,7 +400,7 @@ public class Interpreter {
 			};
 			
 			runnableList.add(id);
-			Threader.GetThreader().submit(m);
+			queue.invokeLater(dm, m);
 			return id;
 		}
 

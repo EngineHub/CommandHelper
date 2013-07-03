@@ -30,6 +30,21 @@ public class ExecutionQueue {
 			+ " for more information.";
 	}
 	
+	private static boolean queueSetup = false;
+	private static void setup(Environment env){
+		if(!queueSetup){
+			final com.laytonsmith.PureUtilities.ExecutionQueue ex = env.getEnv(GlobalEnv.class).GetExecutionQueue();
+			StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+
+				public void run() {
+					ex.stopAllNow();
+					queueSetup = false;
+				}
+			});
+			queueSetup = true;
+		}
+	}
+	
 	@api(environments={GlobalEnv.class})
 	public static class queue_push extends AbstractFunction{
 
@@ -45,7 +60,8 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+			setup(environment);
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
@@ -59,7 +75,7 @@ public class ExecutionQueue {
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				public void run() {
-					StaticLayer.SetFutureRunnable(0, new Runnable() {
+					StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), 0, new Runnable() {
 
 						public void run() {							
 							c.execute(null);
@@ -104,7 +120,8 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+			setup(environment);
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
@@ -118,7 +135,7 @@ public class ExecutionQueue {
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				public void run() {
-					StaticLayer.SetFutureRunnable(0, new Runnable() {
+					StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), 0, new Runnable() {
 
 						public void run() {							
 							c.execute(null);
@@ -333,6 +350,7 @@ public class ExecutionQueue {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			setup(environment);
 			String queue = null;
 			if(args.length == 2){
 				queue = args[1].nval();
@@ -386,6 +404,7 @@ public class ExecutionQueue {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			setup(environment);
 			String queue = null;
 			if(args.length == 2){
 				queue = args[1].nval();

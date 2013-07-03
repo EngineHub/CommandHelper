@@ -213,7 +213,7 @@ public class Scheduling {
 			final CClosure c = (CClosure) args[1 + offset];
 			final AtomicInteger ret = new AtomicInteger(-1);
 
-			ret.set(StaticLayer.SetFutureRepeater(time, delay, new Runnable() {
+			ret.set(StaticLayer.SetFutureRepeater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, delay, new Runnable() {
 				public void run() {
 					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 					try {
@@ -274,7 +274,7 @@ public class Scheduling {
 			}
 			final CClosure c = (CClosure) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
-			ret.set(StaticLayer.SetFutureRunnable(time, new Runnable() {
+			ret.set(StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, new Runnable() {
 				public void run() {
 					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 					try {

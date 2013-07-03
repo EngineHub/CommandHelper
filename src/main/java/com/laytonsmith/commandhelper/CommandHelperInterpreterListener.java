@@ -48,7 +48,7 @@ public class CommandHelperInterpreterListener implements Listener {
         if (interpreterMode.contains(event.getPlayer().getName())) {
             final MCPlayer p = new BukkitMCPlayer(event.getPlayer());
             event.setCancelled(true);                    
-            StaticLayer.SetFutureRunnable(0, new Runnable() {
+            StaticLayer.SetFutureRunnable(null, 0, new Runnable() {
 
                 public void run() {
                     textLine(p, event.getMessage());

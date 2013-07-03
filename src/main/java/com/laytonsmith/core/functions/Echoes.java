@@ -110,6 +110,7 @@ public class Echoes {
 				Static.SendMessage(p, b.toString(), t);
 			} else {
 				System.out.println(Static.MCToANSIColors(b.toString()));
+				System.out.flush();
 			}
             return new CVoid(t);
         }

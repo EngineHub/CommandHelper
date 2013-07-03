@@ -1,8 +1,10 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.SSHWrapper;
 import com.laytonsmith.PureUtilities.ZipReader;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
@@ -11,7 +13,6 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.Threader;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -20,6 +21,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -107,6 +109,28 @@ public class FileHandling {
 	@api
 	@noboilerplate
 	public static class async_read extends AbstractFunction{
+		
+		RunnableQueue queue = new RunnableQueue("MethodScript-asyncRead");
+		boolean started = false;
+		
+		private void startup(){
+			if(!started){
+				queue.invokeLater(null, new Runnable() {
+
+					public void run() {
+						//This warms up the queue. Apparently.
+					}
+				});
+				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+
+					public void run() {
+						queue.shutdown();
+						started = false;
+					}
+				});
+				started = true;
+			}
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.SecurityException};
@@ -120,7 +144,8 @@ public class FileHandling {
 			return null;
 		}
 
-		public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+			startup();
 			final String file = args[0].val();
 			final CClosure callback;
 			if(!(args[1] instanceof CClosure)){
@@ -131,7 +156,7 @@ public class FileHandling {
 			if(!Security.CheckSecurity(file)){
 				throw new ConfigRuntimeException("You do not have permission to access the file '" + file + "'", ExceptionType.SecurityException, t);
 			}
-			Threader.GetThreader().submit(new Runnable() {
+			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 				public void run() {
 					String returnString = null;					
@@ -163,7 +188,7 @@ public class FileHandling {
 					} else {
 						cex = ObjectGenerator.GetGenerator().exception(exception, t);
 					}
-					StaticLayer.SetFutureRunnable(0, new Runnable() {
+					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 						public void run() {
 							callback.execute(new Construct[]{cret, cex});

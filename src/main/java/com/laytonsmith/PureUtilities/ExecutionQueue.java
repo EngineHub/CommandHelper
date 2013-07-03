@@ -161,7 +161,7 @@ public class ExecutionQueue {
 		List<String> q = new ArrayList<String>();
 		for(String queue : queues.keySet()){
 			synchronized(locks.get(queue)){
-				if(queues.containsKey(queue) && queues.get(queue).equals(true)){
+				if(queues.containsKey(queue) && !queues.get(queue).isEmpty()){
 					q.add(queue);
 				}
 			}
@@ -259,6 +259,20 @@ public class ExecutionQueue {
 			Deque<Runnable> q = queues.get(queue);
 			return q.removeFirst();
 		}
+	}
+	
+	/**
+	 * Stops all executing tasks on a best effort basis.
+	 */
+	public void stopAllNow(){
+		service.shutdownNow();
+	}
+	
+	/**
+	 * Attempts an orderly shutdown of all existing tasks.
+	 */
+	public void stopAll(){
+		service.shutdown();
 	}
 	
 	

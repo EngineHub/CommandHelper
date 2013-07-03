@@ -77,7 +77,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public static ConcurrentHashMap<String, String> hostnameLookupCache;
 	private static int hostnameThreadPoolID = 0;
 	public Profiler profiler;
-	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelper", "default");
+	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PermissionsResolver permissionsResolver;
 	public PersistanceNetwork persistanceNetwork;
 	public File chDirectory = new File("plugins/CommandHelper");

@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -50,13 +51,13 @@ public interface Convertor {
      * @param r
      * @return 
      */
-    public int SetFutureRunnable(long ms, Runnable r);
+    public int SetFutureRunnable(DaemonManager dm, long ms, Runnable r);
 
     public void ClearAllRunnables();
 
     public void ClearFutureRunnable(int id);
 
-    public int SetFutureRepeater(long ms, long initialDelay, Runnable r);
+    public int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r);
 
     public MCEntity GetCorrectEntity(MCEntity e);
 
@@ -100,7 +101,7 @@ public interface Convertor {
 	 * will occur here.
 	 * @param r 
 	 */
-	public void runOnMainThreadLater(Runnable r);
+	public void runOnMainThreadLater(DaemonManager dm, Runnable r);
 	
 	/**
 	 * Works like runOnMainThreadLater, but waits for the task to finish.

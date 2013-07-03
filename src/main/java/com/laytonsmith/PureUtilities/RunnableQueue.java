@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadFactory;
 public class RunnableQueue {
 	private ExecutorService service;
 	private static int threadCount = 0;
+	private ThreadFactory threadFactory;
 	
 	public RunnableQueue(String threadPrefix){
 		this(threadPrefix, null);
@@ -23,7 +24,7 @@ public class RunnableQueue {
 		if(threadPrefix == null){
 			throw new NullPointerException();
 		}
-		ThreadFactory threadFactory = new ThreadFactory() {
+		threadFactory = new ThreadFactory() {
 
 			public Thread newThread(Runnable r) {
 				Thread t = new Thread(r, threadPrefix + "-" + (++threadCount));
@@ -42,7 +43,12 @@ public class RunnableQueue {
 				return t;
 			}
 		};
-		service = Executors.newSingleThreadExecutor(threadFactory);
+	}
+	
+	private void activate(){
+		if(service == null){
+			service = Executors.newSingleThreadExecutor(threadFactory);
+		}
 	}
 	
 	/**
@@ -54,6 +60,7 @@ public class RunnableQueue {
 		if(dm != null){
 			dm.activateThread(null);
 		}
+		activate();
 		service.submit(new Runnable() {
 
 			public void run() {
@@ -69,10 +76,12 @@ public class RunnableQueue {
 	}
 	
 	public <T> T invokeAndWait(Callable<T> callable) throws InterruptedException, ExecutionException{
+		activate();
 		return service.submit(callable).get();
 	}
 
 	public void shutdown() {
+		activate();
 		service.shutdownNow();
 	}
 

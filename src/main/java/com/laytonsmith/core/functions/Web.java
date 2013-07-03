@@ -338,7 +338,7 @@ public class Web {
 						if(arrayJar != null){
 							getCookieJar(arrayJar, settings.getCookieJar(), t);
 						}
-						StaticLayer.GetConvertor().runOnMainThreadLater(new Runnable() {
+						StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 							public void run() {
 								executeFinish(success, array, t, environment);
@@ -348,7 +348,7 @@ public class Web {
 						final ConfigRuntimeException ex = new ConfigRuntimeException((e instanceof UnknownHostException?"Unknown host: ":"") 
 								+ e.getMessage(), ExceptionType.IOException, t);
 						if(error != null){
-							StaticLayer.GetConvertor().runOnMainThreadLater(new Runnable() {
+							StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 								public void run() {
 									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, t), t, environment);

@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.PureUtilities.DaemonManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,8 +26,13 @@ public abstract class AbstractConvertor implements Convertor{
 		}
 	}
 	
-	//By default, we can just run on a new thread
-	public void runOnMainThreadLater(Runnable r) {
+	/**
+	 * Runs the task either now or later. In the case of a default Convertor,
+	 * it just runs the task now.
+	 * @param dm
+	 * @param r 
+	 */
+	public void runOnMainThreadLater(DaemonManager dm, Runnable r) {
 		r.run();
 	}
 
