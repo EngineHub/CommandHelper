@@ -865,9 +865,8 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "int {entityID} Returns the maximum health of this living entity.";
+			return "double {entityID} Returns the maximum health of this living entity.";
 		}
-
 	}
 
 	@api
@@ -876,7 +875,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			le.setMaxHealth(Static.getInt32(args[1], t));
+			le.setMaxHealth(Static.getDouble(args[1], t));
 			return new CVoid(t);
 		}
 
@@ -885,9 +884,8 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, int} Sets the max health of this living entity."
-					+ " this is persistent for players, and will not reset even"
-					+ " after server restarts.";
+			return "void {entityID, double} Sets the max health of a living entity, players included."
+					+ " This value is persistent, and will not reset even after server restarts.";
 		}
 
 		@Override

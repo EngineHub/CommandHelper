@@ -1,10 +1,13 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
+import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.abstraction.enums.MCSlotType;
 import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
@@ -20,8 +23,11 @@ import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.Map;
 
 /**
@@ -43,14 +49,19 @@ public class InventoryEvents {
 		public String docs() {
 			return "{slottype: <macro> The type of slot being clicked, can be "
 					+ StringUtils.Join(MCSlotType.values(), ", ", ", or ")
-					+ " | slotitem: <item match> } "
-					+ "Fired when a player clicks a slot in any inventory. "
-					+ "{player: The player who clicked | " /*"{player: The player who clicked | viewers: everyone looking in this inventory | "*/
-					+ "rightclick: true/false if this was a right click | shiftclick: true/false if shift was being held | "
-					+ "slot: the number of the slot | rawslot: the number of the slot in whole inventory window | slottype |"
-					+ " slotitem | inventorytype | inventorysize: number of slots in opened inventory | cursoritem} "
-					+ "{slotitem: the item currently in the clicked slot | cursoritem: the item on the cursor} "
-					+ "{} ";
+					+ " | clicktype: <macro> One of " + StringUtils.Join(MCClickType.values(), ", ", ", or ")
+					+ " | action: <macro> One of " + StringUtils.Join(MCInventoryAction.values(), ", ", ", or ")
+					+ " | slotitem: <item match> }"
+					+ " Fired when a player clicks a slot in any inventory. "
+					+ " {player: The player who clicked | viewers: everyone looking in this inventory"
+					+ " | leftclick: true/false if this was a left click | keyboardclick: true/false if a key was pressed"
+					+ " | rightclick: true/false if this was a right click | shiftclick: true/false if shift was being held"
+					+ " | creativeclick: true/false if this action could only be performed in creative mode"
+					+ " | slot: the number of the slot | rawslot: the number of the slot in whole inventory window | slottype"
+					+ " | slotitem | inventorytype | inventorysize: number of slots in opened inventory | cursoritem"
+					+ " | inventory: all the items in the (top) inventory | clicktype | action}"
+					+ " {slotitem: the item currently in the clicked slot | cursoritem: the item on the cursor}"
+					+ " {}";
 		}
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
@@ -58,6 +69,8 @@ public class InventoryEvents {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
+				Prefilters.match(prefilter, "player", e.getWhoClicked().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "clicktype", e.getClickType().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "slottype", e.getSlotType().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "slotitem", Static.ParseItemNotation(e.getCurrentItem()), PrefilterType.ITEM_MATCH);
 
@@ -67,24 +80,29 @@ public class InventoryEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			return null;
+			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
 
-		public Map<String, Construct> evaluate(BindableEvent event)
-				throws EventException {
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getWhoClicked().getName(), Target.UNKNOWN));
-//				CArray viewers = new CArray(Target.UNKNOWN);
-//				for (MCHumanEntity viewer : e.getViewers()) {
-//					viewers.push(new CString(viewer.getName(), Target.UNKNOWN));
-//				}
-//				map.put("viewers", viewers);
+				CArray viewers = new CArray(Target.UNKNOWN);
+				for (MCHumanEntity viewer : e.getViewers()) {
+					viewers.push(new CString(viewer.getName(), Target.UNKNOWN));
+				}
+				map.put("viewers", viewers);
+				
+				map.put("action", new CString(e.getAction().name(), Target.UNKNOWN));
+				map.put("clicktype", new CString(e.getClickType().name(), Target.UNKNOWN));
 
+				map.put("leftclick", new CBoolean(e.isLeftClick(), Target.UNKNOWN));
 				map.put("rightclick", new CBoolean(e.isRightClick(), Target.UNKNOWN));
 				map.put("shiftclick", new CBoolean(e.isShiftClick(), Target.UNKNOWN));
+				map.put("creativeclick", new CBoolean(e.isCreativeClick(), Target.UNKNOWN));
+				map.put("keyboardclick", new CBoolean(e.isKeyboardClick(), Target.UNKNOWN));
 				map.put("cursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN));
 
 				map.put("slot", new CInt(e.getSlot(), Target.UNKNOWN));
@@ -111,8 +129,7 @@ public class InventoryEvents {
 			return Driver.INVENTORY_CLICK;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
