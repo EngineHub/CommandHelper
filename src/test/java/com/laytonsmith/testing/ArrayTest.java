@@ -397,5 +397,40 @@ public class ArrayTest {
 //				+ "@array[] = array()\n"
 //				+ "@array[][] = 5\n", fakePlayer);
 //	}
+	
+	@Test public void testArrayMultiDimension() throws Exception {
+		SRun("@a = array()\n"
+				+ "@a[1][2] = 5\n"
+				+ "msg(@a[1][2])", fakePlayer);
+		verify(fakePlayer).sendMessage("5");
+	}
+	
+	@Test public void testArrayPostIncrement() throws Exception {
+		SRun("@a = array(1)\n"
+				+ "(@a[0]++)\n"
+				+ "msg(@a[0])", fakePlayer);
+		verify(fakePlayer).sendMessage("2");
+	}
+	
+	@Test public void testArrayPreIncrement() throws Exception {
+		SRun("@a = array(1)\n"
+				+ "(++@a[0])\n"
+				+ "msg(@a[0])", fakePlayer);
+		verify(fakePlayer).sendMessage("2");
+	}
+
+	@Test public void testArrayPostDecrement() throws Exception {
+		SRun("@a = array(1)\n"
+				+ "(@a[0]--)\n"
+				+ "msg(@a[0])", fakePlayer);
+		verify(fakePlayer).sendMessage("0");
+	}
+
+	@Test public void testArrayPreDecrement() throws Exception {
+		SRun("@a = array(1)\n"
+				+ "(--@a[0])\n"
+				+ "msg(@a[0])", fakePlayer);
+		verify(fakePlayer).sendMessage("0");
+	}
 
 }
