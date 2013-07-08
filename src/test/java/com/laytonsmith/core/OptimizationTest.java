@@ -19,7 +19,7 @@ public class OptimizationTest {
 	}
     
     public String optimize(String script) throws ConfigCompileException{
-        return OptimizationUtilities.optimize(script);
+        return OptimizationUtilities.optimize(script, null);
     }
     
     @Test public void testTestFramework() throws ConfigCompileException{
