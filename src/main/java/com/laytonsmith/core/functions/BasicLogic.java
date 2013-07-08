@@ -401,6 +401,9 @@ public class BasicLogic {
 				OptimizationOption.OPTIMIZE_DYNAMIC
 			);
 		}
+		
+		private static final String and = new and().getName();
+		private static final String g = new Meta.g().getName();
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
@@ -447,8 +450,8 @@ public class BasicLogic {
 				// optimization to be impossible. An inner ifelse cannot be optimized, unless it only has 2 arguments
 				// (in which case, it's a normal if())
 				if(code.getChildren().size() == 2 && code.getData() instanceof CFunction && code.getData().val().equals("ifelse")){
-					CFunction and = new CFunction("and", t);
-					ParseTree andTree = new ParseTree(and, statement.getFileOptions());
+					CFunction andNode = new CFunction(and, t);
+					ParseTree andTree = new ParseTree(andNode, statement.getFileOptions());
 					andTree.addChild(statement);
 					andTree.addChild(code.getChildAt(0));
 					if(optimizedTree.size() < 1){
@@ -479,8 +482,21 @@ public class BasicLogic {
 					optimizedTree.add(ret);
 				}
 				if (optimizedTree.size() == 1) {
-					//Oh. Well, we can just return this node then.
-					return optimizedTree.get(0);
+					//Oh. Well, we can just return this node then, though we have
+					//to surround it with g() so there are no side effects. However,
+					//if the function itself has no side effects, we can simply remove
+					//it altogether.
+					if(optimizedTree.get(0).getData() instanceof CFunction){
+						Function f = ((CFunction)optimizedTree.get(0).getData()).getFunction();
+						if(f instanceof Optimizable){
+							if(((Optimizable)f).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
+								return Optimizable.REMOVE_ME;
+							}
+						}
+					}
+					ParseTree gNode = new ParseTree(new CFunction(g, t), options);
+					gNode.addChild(optimizedTree.get(0));
+					return gNode;
 				}
 			}
 			if (optimizedTree.size() == 1) {

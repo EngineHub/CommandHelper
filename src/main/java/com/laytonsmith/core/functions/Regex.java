@@ -96,7 +96,8 @@ public class Regex {
 			return EnumSet.of(
 						OptimizationOption.CONSTANT_OFFLINE,
 						OptimizationOption.CACHE_RETURN,
-						OptimizationOption.OPTIMIZE_DYNAMIC
+						OptimizationOption.OPTIMIZE_DYNAMIC,
+						OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
         
@@ -164,7 +165,8 @@ public class Regex {
 			return EnumSet.of(
 						OptimizationOption.CONSTANT_OFFLINE,
 						OptimizationOption.CACHE_RETURN,
-						OptimizationOption.OPTIMIZE_DYNAMIC
+						OptimizationOption.OPTIMIZE_DYNAMIC,
+						OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
         
@@ -247,7 +249,8 @@ public class Regex {
 			return EnumSet.of(
 						OptimizationOption.CONSTANT_OFFLINE,
 						OptimizationOption.CACHE_RETURN,
-						OptimizationOption.OPTIMIZE_DYNAMIC
+						OptimizationOption.OPTIMIZE_DYNAMIC,
+						OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
         
@@ -318,7 +321,8 @@ public class Regex {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 						OptimizationOption.CACHE_RETURN,
-						OptimizationOption.OPTIMIZE_DYNAMIC
+						OptimizationOption.OPTIMIZE_DYNAMIC,
+						OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
         
@@ -379,7 +383,8 @@ public class Regex {
 			return EnumSet.of(
 						OptimizationOption.CONSTANT_OFFLINE,
 						OptimizationOption.CACHE_RETURN,
-						OptimizationOption.OPTIMIZE_DYNAMIC
+						OptimizationOption.OPTIMIZE_DYNAMIC,
+						OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
         
@@ -426,7 +431,8 @@ public class Regex {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+						OptimizationOption.CACHE_RETURN,
+						OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
         

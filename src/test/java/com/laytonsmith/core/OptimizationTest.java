@@ -198,6 +198,19 @@ public class OptimizationTest {
 		assertEquals("false", optimize("or(false, false, false)"));
 	}
 	
+	@Test public void testNoOperationIf() throws Exception {
+		assertEquals("g(dyn(1))", optimize("if(dyn(1)){ }"));
+	}
+	
+	//This won't work as easily, because the reg_count has already been evaluated
+//	@Test public void testNoSideEffectsRemovesUnusedBranches1() throws Exception {
+//		assertEquals("msg('hi')", optimize("if(reg_count('hi', 'hi')){ } msg('hi')"));
+//	}
+	
+	@Test public void testNoSideEffectsRemovesUnusedBranches2() throws Exception {
+		assertEquals("msg('hi')", optimize("if(reg_count('hi', dyn('hi'))){ } msg('hi')"));
+	}
+	
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{
