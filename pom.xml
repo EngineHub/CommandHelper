@@ -152,6 +152,14 @@
 			<id>Plugin Metrics</id>
 			<url>http://repo.mcstats.org/content/repositories/public</url>
 		</repository>
+		
+		<repository>
+            <id>Sonatype Snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
 	</repositories>
 	<dependencies>
 		<!-- Please update http://wiki.sk89q.com/wiki/CommandHelper/Compatibility whenever
@@ -367,6 +375,11 @@
 			<artifactId>named-regexp</artifactId>
 			<version>0.1.9</version>
 		</dependency>
+		<dependency>
+            <groupId>org.jeromq</groupId>
+            <artifactId>jeromq</artifactId>
+            <version>0.3.0-SNAPSHOT</version>
+        </dependency>
 	</dependencies>
 	<distributionManagement>
 		<site>
@@ -493,6 +506,7 @@
 									<include>mysql:mysql-connector-java:jar:*</include>
 									<include>commons-codec:commons-codec:jar:*</include>
 									<include>com.github.tony19:named-regexp:jar:*</include>
+									<include>org.jeromq:jeromq:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
