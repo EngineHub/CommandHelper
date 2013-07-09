@@ -12,8 +12,8 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.code.regexp.Matcher;
+import com.google.code.regexp.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -27,7 +27,8 @@ public class Regex {
                 + "[[CommandHelper/Regex|regular expressions]]. Note that all the functions are just passthroughs"
                 + " to the Java regex mechanism. If you need to set a flag on the regex, where the api calls"
                 + " for a pattern, instead send array('pattern', 'flags') where flags is any of i, m, or s."
-                + " Alternatively, using the embedded flag system that Java provides is also valid.";
+                + " Alternatively, using the embedded flag system that Java provides is also valid. Named captures are"
+				+ " also supported, using Java 7 syntax.";
     }
     
     @api public static class reg_match extends AbstractFunction implements Optimizable {
@@ -67,18 +68,20 @@ public class Regex {
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
-            CArray ret = new CArray(t);
+            CArray ret = CArray.GetAssociativeArray(t);
             Matcher m = pattern.matcher(subject);
             if(m.find()){
-                ret.push(new CString(m.group(0), t));
-
+                ret.set(0, new CString(m.group(0), t), t);
                 for(int i = 1; i <= m.groupCount(); i++){
                     if(m.group(i) == null){
-                        ret.push(new CNull(t));
+                        ret.set(i, new CNull(t), t);
                     } else {
-                        ret.push(Static.resolveConstruct(m.group(i), t));
+                        ret.set(i, Static.resolveConstruct(m.group(i), t), t);
                     }
                 }
+				for(String key : m.namedGroups().keySet()){
+					ret.set(key, m.group(key), t);
+				}
             }
             return ret;
         }             
@@ -99,6 +102,15 @@ public class Regex {
 						OptimizationOption.OPTIMIZE_DYNAMIC,
 						OptimizationOption.NO_SIDE_EFFECTS
 			);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "reg_match('(\\\\d)(\\\\d)(\\\\d)', 'abc123')"),
+				new ExampleScript("Named captures", "reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')"),
+				new ExampleScript("Named captures with backreferences", "reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']")
+			};
 		}
         
     }
@@ -141,12 +153,15 @@ public class Regex {
             CArray fret = new CArray(t);
             Matcher m = pattern.matcher(subject);
             while(m.find()){
-                CArray ret = new CArray(t);
-                ret.push(new CString(m.group(0), t));
+                CArray ret = CArray.GetAssociativeArray(t);
+                ret.set(0, new CString(m.group(0), t), t);
 
                 for(int i = 1; i <= m.groupCount(); i++){
-                    ret.push(new CString(m.group(i), t));
+                    ret.set(i, new CString(m.group(i), t), t);
                 }
+				for(String key : m.namedGroups().keySet()){
+					ret.set(key, m.group(key), t);
+				}
                 fret.push(ret);
             }
             return fret;
@@ -168,6 +183,15 @@ public class Regex {
 						OptimizationOption.OPTIMIZE_DYNAMIC,
 						OptimizationOption.NO_SIDE_EFFECTS
 			);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "reg_match_all('(\\\\d{3})', 'abc123456')"),
+				new ExampleScript("Named captures", "reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')[0]['foo']"),
+				new ExampleScript("Named captures with backreferences", "reg_match_all('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')[0]['foo']")
+			};
 		}
         
     }
@@ -253,6 +277,15 @@ public class Regex {
 						OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "reg_replace('\\\\d', 'Z', '123abc')"),
+				new ExampleScript("Using backreferences", "reg_replace('abc(\\\\d+)', '$1', 'abc123'"),
+				new ExampleScript("Using backreferences with named captures", "reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')")
+			};
+		}
         
     }
     
@@ -325,6 +358,13 @@ public class Regex {
 						OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "reg_split('\\\\d', 'a1b2c3')")
+			};
+		}
         
     }  
     
@@ -388,6 +428,12 @@ public class Regex {
 			);
 		}
         
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "reg_count('\\\\d', '123abc')")
+			};
+		}
     }
     
     @api
@@ -406,7 +452,7 @@ public class Regex {
         }
 
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            return new CString(Pattern.quote(args[0].val()), t);
+            return new CString(java.util.regex.Pattern.quote(args[0].val()), t);
         }
 
         public String getName() {
@@ -435,6 +481,13 @@ public class Regex {
 						OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "reg_escape('\\\\d+')")
+			};
+		}
         
     }
     
@@ -448,11 +501,11 @@ public class Regex {
             sflags = ca.get(1, t).val();
             for(int i = 0; i < sflags.length(); i++){
                 if(sflags.toLowerCase().charAt(i) == 'i'){
-                    flags |= Pattern.CASE_INSENSITIVE;
+                    flags |= java.util.regex.Pattern.CASE_INSENSITIVE;
                 } else if(sflags.toLowerCase().charAt(i) == 'm'){
-                    flags |= Pattern.MULTILINE;
+                    flags |= java.util.regex.Pattern.MULTILINE;
                 } else if(sflags.toLowerCase().charAt(i) == 's'){
-                    flags |= Pattern.DOTALL;
+                    flags |= java.util.regex.Pattern.DOTALL;
                 } else {
                     throw new ConfigRuntimeException("Unrecognized flag: " + sflags.toLowerCase().charAt(i), ExceptionType.FormatException, t);
                 }
