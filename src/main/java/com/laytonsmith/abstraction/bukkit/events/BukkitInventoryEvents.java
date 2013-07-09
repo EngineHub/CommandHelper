@@ -22,7 +22,8 @@ import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryEvent;
 import com.laytonsmith.abstraction.events.MCInventoryInteractEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
-import java.util.Collections;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +52,7 @@ public class BukkitInventoryEvents {
 		}
 
 		public List<MCHumanEntity> getViewers() {
-			List<MCHumanEntity> viewers = Collections.emptyList();
+			List<MCHumanEntity> viewers = new ArrayList<MCHumanEntity>();
 
 			for (HumanEntity viewer : event.getViewers()) {
 				viewers.add(new BukkitMCHumanEntity(viewer));
