@@ -677,7 +677,7 @@ public class PlayerManagement {
 			}
 			if (index == 5 || index == -1) {
 				//MCPlayer health
-				retVals.add(new CInt((long) p.getHealth(), t));
+				retVals.add(new CDouble(p.getHealth(), t));
 			}
 			if (index == 6 || index == -1) {
 				//Item in hand
@@ -1765,7 +1765,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], health} Sets the player's health. health should be an integer from 0-20.";
+			return "void {[player], health} Sets the player's health. Health should be a double between 0 and their max health.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -1790,17 +1790,18 @@ public class PlayerManagement {
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
-			int health = 0;
+			double health;
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				health = Static.getInt32(args[1], t);
+				health = Static.getDouble(args[1], t);
 			} else {
-				health = Static.getInt32(args[0], t);
-			}
-			if (health < 0 || health > 20) {
-				throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, t);
+				health = Static.getDouble(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
+			if (health < 0 || health > m.getMaxHealth()) {
+				throw new ConfigRuntimeException("Health must be between 0 and the player's max health (currently "
+						+ m.getMaxHealth() + " for " + m.getName() + ").", ExceptionType.RangeException, t);
+			}
 			m.setHealth(health);
 			return new CVoid(t);
 		}

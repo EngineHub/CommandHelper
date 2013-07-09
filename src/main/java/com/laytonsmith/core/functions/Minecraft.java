@@ -585,8 +585,55 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {entityID, healthPercent} Sets the specified entity's health (0 kills it), or ignores this call if the entityID doesn't exist or isn't"
-					+ "a LivingEntity.";
+			return "void {entityID, healthPercent} Sets the specified entity's health as a percentage,"
+					+ " where 0 kills it and 100 gives it full health."
+					+ " An exception is thrown if the entityID doesn't exist or isn't a LivingEntity.";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
+					ExceptionType.RangeException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			double percent = Static.getDouble(args[1], t);
+			if (percent < 0 || percent > 100) {
+				throw new ConfigRuntimeException("Health was expected to be a percentage between 0 and 100",
+						ExceptionType.RangeException, t);
+			} else {
+				e.setHealth(percent / 100.0 * e.getMaxHealth());
+			}
+			return new CVoid(t);
+		}
+	}
+
+	@api
+	public static class get_entity_health extends AbstractFunction {
+
+		public String getName() {
+			return "get_entity_health";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "double {entityID} Returns the entity's health as a percentage of its maximum health."
+					+ " If the specified entity doesn't exist, or is not a LivingEntity, a format exception is thrown.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -607,52 +654,7 @@ public class Minecraft {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			int health = (int) ((double) Static.getInt(args[1], t) / 100.0 * (double) e.getMaxHealth());
-			if (health != 0) {
-				e.setHealth(health);
-			} else {
-				e.damage(e.getMaxHealth() + 1); //Since mobs can now have custom max health
-			}
-			return new CVoid(t);
-		}
-	}
-
-	@api
-	public static class get_entity_health extends AbstractFunction {
-
-		public String getName() {
-			return "get_entity_health";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		public String docs() {
-			return "int {entityID} Returns the entity's health, as a percentage. If the specified entity doesn't exist, or is not"
-					+ " a LivingEntity, a format exception is thrown.";
-		}
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.BadEntityException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			int h = (int) (((double) e.getHealth() / (double) e.getMaxHealth()) * 100);
-			return new CInt(h, t);
+			return new CDouble(e.getHealth() / e.getMaxHealth() * 100.0, t);
 		}
 	}
 
