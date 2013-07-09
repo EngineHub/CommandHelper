@@ -1640,7 +1640,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {player, potionID, strength, [seconds], [ambient]} Effect is 1-19. Seconds defaults to 30."
+			return "boolean {player, potionID, strength, [seconds], [ambient]} Effect is 1-23. Seconds defaults to 30."
 					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
 					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects"
 					+ " for a complete list of potions that can be added. To remove an effect, set the seconds to 0."
@@ -1671,6 +1671,13 @@ public class PlayerManagement {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
 			int effect = Static.getInt32(args[1], t);
+			//To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
+			//otherwise the client crashes, and requires deletion of
+			//player data to fix.
+			if (effect < 1 || effect > m.getMaxEffect()) {
+				throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(), 
+						ExceptionType.RangeException, t);
+			}
 
 			int strength = Static.getInt32(args[2], t);
 			int seconds = 30;

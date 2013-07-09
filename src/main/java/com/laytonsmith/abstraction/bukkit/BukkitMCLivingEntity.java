@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -181,13 +182,6 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 	}
 
 	public void addEffect(int potionID, int strength, int seconds, boolean ambient, Target t) {
-		//To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
-		//otherwise the client crashes, and requires deletion of
-		//player data to fix.
-		if (potionID < 1 || potionID > 20) {
-			throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-20", 
-					ExceptionType.RangeException, t);
-		}
 		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000), 
 				strength, ambient);
 		try{
@@ -220,6 +214,15 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 //                Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
 //            }
 //        }
+	}
+	
+	public int getMaxEffect(){
+		try {
+			PotionEffectType[] arr = (PotionEffectType[])ReflectionUtils.get(PotionEffectType.class, "byId");
+			return arr.length - 1;
+		} catch(ReflectionUtils.ReflectionException e){
+			return Integer.MAX_VALUE;
+		}
 	}
 
     public boolean removeEffect(int potionID) {

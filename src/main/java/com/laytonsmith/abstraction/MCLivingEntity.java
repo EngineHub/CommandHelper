@@ -15,6 +15,11 @@ public interface MCLivingEntity extends MCEntity {
 
 	public void addEffect(int potionID, int strength, int seconds, boolean ambient, Target t);
 	public boolean removeEffect(int potionID);
+	/**
+	 * Returns the maximum effect id, inclusive.
+	 * @return 
+	 */
+	public int getMaxEffect();
 	public List<MCEffect> getEffects();
     public void damage(double amount);
     public void damage(double amount, MCEntity source);
