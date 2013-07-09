@@ -177,6 +177,8 @@ public final class ClassDiscovery {
 						//Internal class error, ignore
 					} catch (SecurityException ex){
 						//Again, ignore
+					} catch (LinkageError ex){
+						//ignore
 					}
 				}
 			}
