@@ -8,9 +8,13 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
+import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.abstraction.enums.MCResult;
 import com.laytonsmith.abstraction.enums.MCSlotType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCClickType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInventoryAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCResult;
 import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
@@ -157,15 +161,23 @@ public class BukkitInventoryEvents {
 		}
 
 		public boolean isLeftClick() {
-			return ic.isLeftClick();
+			return ic.getClick().isLeftClick();
 		}
 
 		public boolean isRightClick() {
-			return ic.isRightClick();
+			return ic.getClick().isRightClick();
 		}
 
 		public boolean isShiftClick() {
-			return ic.isShiftClick();
+			return ic.getClick().isShiftClick();
+		}
+
+		public boolean isCreativeClick() {
+			return ic.getClick().isCreativeAction();
+		}
+		
+		public boolean isKeyboardClick() {
+			return ic.getClick().isKeyboardClick();
 		}
 
 		public void setCurrentItem(MCItemStack slot) {
@@ -178,6 +190,14 @@ public class BukkitInventoryEvents {
 
 		public void setCursor(MCItemStack cursor) {
 			ic.setCursor(((BukkitMCItemStack) cursor).asItemStack());
+		}
+
+		public MCInventoryAction getAction() {
+			return BukkitMCInventoryAction.getConvertor().getAbstractedEnum(ic.getAction());
+		}
+
+		public MCClickType getClickType() {
+			return BukkitMCClickType.getConvertor().getAbstractedEnum((ic.getClick()));
 		}
 	}
 
