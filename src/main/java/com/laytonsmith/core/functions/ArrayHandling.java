@@ -328,16 +328,15 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			throw new Error();
-//			if (args[0] instanceof CArray) {
-//				try {
-//					((CArray) args[0]).set(args[1], args[2], t);
-//				} catch (IndexOutOfBoundsException e) {
-//					throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
-//				}
-//				return new CVoid(t);
-//			}
-//			throw new ConfigRuntimeException("Argument 1 of array_set must be an array", ExceptionType.CastException, t);
+			if (args[0] instanceof CArray) {
+				try {
+					((CArray) args[0]).set(args[1], args[2], t);
+				} catch (IndexOutOfBoundsException e) {
+					throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
+				}
+				return new CVoid(t);
+			}
+			throw new ConfigRuntimeException("Argument 1 of array_set must be an array", ExceptionType.CastException, t);
 		}
 
 		public ExceptionType[] thrown() {

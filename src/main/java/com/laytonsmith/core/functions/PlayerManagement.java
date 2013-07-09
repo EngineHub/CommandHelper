@@ -677,7 +677,7 @@ public class PlayerManagement {
 			}
 			if (index == 5 || index == -1) {
 				//MCPlayer health
-				retVals.add(new CInt((long) p.getHealth(), t));
+				retVals.add(new CDouble(p.getHealth(), t));
 			}
 			if (index == 6 || index == -1) {
 				//Item in hand
@@ -1640,7 +1640,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {player, potionID, strength, [seconds], [ambient]} Effect is 1-19. Seconds defaults to 30."
+			return "boolean {player, potionID, strength, [seconds], [ambient]} Effect is 1-23. Seconds defaults to 30."
 					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
 					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects"
 					+ " for a complete list of potions that can be added. To remove an effect, set the seconds to 0."
@@ -1671,6 +1671,13 @@ public class PlayerManagement {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
 			int effect = Static.getInt32(args[1], t);
+			//To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
+			//otherwise the client crashes, and requires deletion of
+			//player data to fix.
+			if (effect < 1 || effect > m.getMaxEffect()) {
+				throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(), 
+						ExceptionType.RangeException, t);
+			}
 
 			int strength = Static.getInt32(args[2], t);
 			int seconds = 30;
@@ -1758,7 +1765,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], health} Sets the player's health. health should be an integer from 0-20.";
+			return "void {[player], health} Sets the player's health. Health should be a double between 0 and their max health.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -1783,17 +1790,18 @@ public class PlayerManagement {
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
-			int health = 0;
+			double health;
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				health = Static.getInt32(args[1], t);
+				health = Static.getDouble(args[1], t);
 			} else {
-				health = Static.getInt32(args[0], t);
-			}
-			if (health < 0 || health > 20) {
-				throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, t);
+				health = Static.getDouble(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
+			if (health < 0 || health > m.getMaxHealth()) {
+				throw new ConfigRuntimeException("Health must be between 0 and the player's max health (currently "
+						+ m.getMaxHealth() + " for " + m.getName() + ").", ExceptionType.RangeException, t);
+			}
 			m.setHealth(health);
 			return new CVoid(t);
 		}
