@@ -152,7 +152,12 @@ public class Regex {
             String subject = args[1].val();
             CArray fret = new CArray(t);
             Matcher m = pattern.matcher(subject);
-            while(m.find()){
+			int onGroup = 0;			
+            while(m.find(onGroup)){
+				//Apparently m.namedGroups() resets the matcher, which causes
+				//it to get stuck in an infinite loop. So we're just gonna keep
+				//track of the the group ourselves.
+				onGroup = m.end();
                 CArray ret = CArray.GetAssociativeArray(t);
                 ret.set(0, new CString(m.group(0), t), t);
 
