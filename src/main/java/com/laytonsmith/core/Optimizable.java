@@ -90,7 +90,17 @@ public interface Optimizable extends Function {
 		TERMINAL("If a function is \"terminal\", that is, it is guaranteed to have abnormal code flow (for instance,"
 				+ " return() or throw()) it is marked terminal, which is used by the compiler to issue warnings, in the"
 				+ " event you make some code unreachable by putting it under a terminal statement, and to optimize"
-				+ " by removing the unreachable code from the code tree.", CHVersion.V3_3_1);
+				+ " by removing the unreachable code from the code tree.", CHVersion.V3_3_1),
+		/**
+		 * If a function is "side effect free", that is, if the return value is unused, the function
+		 * itself does nothing, then this optimization can be specified. This is mostly useful for cases
+		 * where the value returns a check, but the check has been determined by the compiler to be unused,
+		 * making the entire call itself unneeded, allowing the call itself to be removed from the tree.
+		 */
+		NO_SIDE_EFFECTS("If a function is \"side effect free\", that is, if the return value is unused, the function"
+				+ " itself does nothing, then this optimization can be specified. This is mostly useful for cases"
+				+ " where the value returns a check, but the check has been determined by the compiler to be unused,"
+				+ " making the entire call itself unneeded, allowing the call itself to be removed from the tree.", CHVersion.V3_3_1);
 		
 		private final CHVersion since;
 		private final String docs;

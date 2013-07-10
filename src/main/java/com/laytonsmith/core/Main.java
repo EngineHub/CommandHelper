@@ -272,9 +272,12 @@ public class Main {
 				System.exit(0);
 			} else if (mode == optimizerTestMode) {
 				Implementation.setServerType(Implementation.Type.SHELL);
+				CHLog.initialize(jarFolder);
 				String path = parsedArgs.getStringArgument();
-				String plain = FileUtility.read(new File(path));
-				String optimized = OptimizationUtilities.optimize(plain);
+				File source = new File(path);
+				String plain = FileUtility.read(source);
+				Security.setSecurityEnabled(false);
+				String optimized = OptimizationUtilities.optimize(plain, source);
 				System.out.println(optimized);
 				System.exit(0);
 			} else if (mode == helpMode) {

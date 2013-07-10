@@ -362,6 +362,11 @@
 			<type>jar</type>
 			<version>1.8</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.tony19</groupId>
+			<artifactId>named-regexp</artifactId>
+			<version>0.1.9</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<site>
@@ -487,6 +492,7 @@
 									<include>redis.clients:jedis:jar:*</include>
 									<include>mysql:mysql-connector-java:jar:*</include>
 									<include>commons-codec:commons-codec:jar:*</include>
+									<include>com.github.tony19:named-regexp:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -547,6 +553,10 @@
 								<relocation>
 									<pattern>org.apache.commons.codec</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.apache.commons.codec</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.code.regexp</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.google.code.regexp</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -619,6 +629,12 @@
 								</filter>
 								<filter>
 									<artifact>commons-codec:commons-codec:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>com.github.tony19:named-regexp:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>

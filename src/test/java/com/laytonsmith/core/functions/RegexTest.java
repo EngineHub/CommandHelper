@@ -99,4 +99,12 @@ public class RegexTest {
     public void testRegFailureDynamic() throws ConfigCompileException{
         SRun("assign(@a, '(?i)asd(') reg_match(@a, 'irrelevant')", null);        
     }
+	
+	@Test
+	public void testNamedCaptures() throws Exception {
+		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')['foo']", null));
+		assertEquals("123", SRun("reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')[0]['foo']", null));
+		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']", null));
+		assertEquals("123", SRun("reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", null));
+	}
 }

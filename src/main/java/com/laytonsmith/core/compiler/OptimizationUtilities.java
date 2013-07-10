@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -46,8 +47,8 @@ public class OptimizationUtilities {
 	 * @return
 	 * @throws ConfigCompileException 
 	 */
-	public static String optimize(String script) throws ConfigCompileException{
-        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true));        
+	public static String optimize(String script, File source) throws ConfigCompileException{
+        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, source, true));        
         StringBuilder b = new StringBuilder();
         //The root always contains null.
         for(ParseTree child : tree.getChildren()){

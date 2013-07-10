@@ -19,7 +19,7 @@ public class OptimizationTest {
 	}
     
     public String optimize(String script) throws ConfigCompileException{
-        return OptimizationUtilities.optimize(script);
+        return OptimizationUtilities.optimize(script, null);
     }
     
     @Test public void testTestFramework() throws ConfigCompileException{
@@ -196,6 +196,19 @@ public class OptimizationTest {
 	@Test public void testOrRemovesFalses() throws Exception{
 		assertEquals("or(dyn(),dyn())", optimize("or(false, dyn(), false, dyn())"));
 		assertEquals("false", optimize("or(false, false, false)"));
+	}
+	
+	@Test public void testNoOperationIf() throws Exception {
+		assertEquals("g(dyn(1))", optimize("if(dyn(1)){ }"));
+	}
+	
+	//This won't work as easily, because the reg_count has already been evaluated
+//	@Test public void testNoSideEffectsRemovesUnusedBranches1() throws Exception {
+//		assertEquals("msg('hi')", optimize("if(reg_count('hi', 'hi')){ } msg('hi')"));
+//	}
+	
+	@Test public void testNoSideEffectsRemovesUnusedBranches2() throws Exception {
+		assertEquals("msg('hi')", optimize("if(reg_count('hi', dyn('hi'))){ } msg('hi')"));
 	}
 	
     

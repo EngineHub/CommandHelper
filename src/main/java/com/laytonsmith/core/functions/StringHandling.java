@@ -23,6 +23,7 @@ import java.util.EnumSet;
 import java.util.Formatter;
 import java.util.HashSet;
 import java.util.IllegalFormatException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -264,6 +265,22 @@ public class StringHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			//Remove empty g or p children
+			Iterator<ParseTree> it = children.iterator();
+			while(it.hasNext()){
+				ParseTree n = it.next();
+				if(n.getData() instanceof CFunction){
+					Function f = ((CFunction)n.getData()).getFunction();
+					if((f instanceof Compiler.p
+							|| f instanceof Meta.g) && !n.hasChildren()){
+						it.remove();
+					}
+				}
+			}
+			//If we don't have any children, remove us as well
+			if(children.size() == 1){
+				return children.get(0);
+			}
 			return null;
 		}
 
