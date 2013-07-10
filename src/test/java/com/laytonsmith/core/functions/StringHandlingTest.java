@@ -121,6 +121,16 @@ public class StringHandlingTest {
 		assertEquals("{a, , b}", SRun("split('.', 'a..b')", null));
 	}
 	
+	@Test
+	public void testSplitWithLimit() throws Exception {
+		assertEquals("{a, bzczd}", SRun("split('z', 'azbzczd', 1)", null));
+	}
+	
+	@Test
+	public void testSplitWithLimit2() throws Exception {
+		assertEquals("{a, b, czd}", SRun("split('z', 'azbzczd', 2)", null));
+	}
+	
 	@Test public void testMulticharacterSplit() throws Exception{
 		assertEquals("{aa, aa, aa}", SRun("split('ab', 'aaabaaabaa')", null));
 	}
