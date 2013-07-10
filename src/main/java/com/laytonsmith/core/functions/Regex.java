@@ -339,7 +339,7 @@ public class Regex {
 			 * length 2, as in, there were 1 splits performed. This matches the behavior of split().
 			 */
 			int limit = Integer.MAX_VALUE - 1;
-			if(args.length <= 3){
+			if(args.length >= 3){
 				limit = Static.getInt32(args[2], t);
 			}
             String [] rsplit = pattern.split(subject, limit + 1);
