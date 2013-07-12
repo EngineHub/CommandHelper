@@ -853,14 +853,15 @@ public class StringHandling {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		public String docs() {
-			return "array {split, string} Splits a string into parts, using the split as the index. Though it can be used in every single case"
+			return "array {split, string, [limit]} Splits a string into parts, using the split as the index. Though it can be used in every single case"
 					+ " you would use reg_split, this does not use regex,"
 					+ " and therefore can take a literal split expression instead of needing an escaped regex, and *may* perform better than the"
-					+ " regex versions, as it uses an optimized tokenizer split, instead of Java regex.";
+					+ " regex versions, as it uses an optimized tokenizer split, instead of Java regex. Limit defaults to infinity, but if set, only"
+					+ " that number of splits will occur.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -886,6 +887,10 @@ public class StringHandling {
 			CArray array = new CArray(t);
 			String split = args[0].val();
 			String string = args[1].val();
+			int limit = Integer.MAX_VALUE;
+			if(args.length >= 3){
+				limit = Static.getInt32(args[2], t);
+			}
 			int sp = 0;
 			if(split.length() == 0){
 				//Empty string, so special case.
@@ -894,9 +899,11 @@ public class StringHandling {
 				}
 				return array;
 			}
-			for (int i = 0; i < string.length() - split.length(); i++) {
+			int splitsFound = 0;
+			for (int i = 0; i < string.length() - split.length() && splitsFound < limit; i++) {
 				if (string.substring(i, i + split.length()).equals(split)) {
 					//Split point found
+					splitsFound++;
 					array.push(new CString(string.substring(sp, i), t));
 					sp = i + split.length();
 					i += split.length() - 1;
@@ -917,6 +924,7 @@ public class StringHandling {
 						new ExampleScript("Simple split on one character. Note that unlike reg_split, no escaping is needed on the period.", "split('.', '1.2.3.4.5')"),
 						new ExampleScript("Split with multiple characters", "split('ab', 'aaabaaabaaabaa')"),
 						new ExampleScript("Split all characters", "split('', 'abcdefg')"),
+						new ExampleScript("Split with limit", "split('|', 'this|is|a|limit', 1)")
 			};
 		}
 

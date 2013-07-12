@@ -66,6 +66,21 @@ public class RegexTest {
     public void testRegSplit() throws ConfigCompileException {
         assertEquals("{one, two, three}", SRun("reg_split('\\\\|', 'one|two|three')", null));
     }
+	
+	@Test
+	public void testRegSplitLimit0() throws Exception {
+		assertEquals("{a1b2c3d}", SRun("reg_split('\\\\d', 'a1b2c3d', 0)", null));
+	}
+	
+	@Test
+	public void testRegSplitLimit1() throws Exception {
+		assertEquals("{a, b2c3d}", SRun("reg_split('\\\\d', 'a1b2c3d', 1)", null));
+	}
+	
+	@Test
+	public void testRegSplitLimit2() throws Exception {
+		assertEquals("{a, b, c3d}", SRun("reg_split('\\\\d', 'a1b2c3d', 2)", null));
+	}
 
     @Test(timeout = 10000)
     public void testRegCount() throws ConfigCompileException {

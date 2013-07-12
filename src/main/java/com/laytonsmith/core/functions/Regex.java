@@ -301,12 +301,14 @@ public class Regex {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{2, 3};
         }
 
         public String docs() {
-            return "array {pattern, subject} Splits a string on the given regex, and returns an array of the parts. If"
-                    + " nothing matched, an array with one element, namely the original subject, is returned.";
+            return "array {pattern, subject, [limit]} Splits a string on the given regex, and returns an array of the parts. If"
+                    + " nothing matched, an array with one element, namely the original subject, is returned."
+					+ " Limit defaults to infinity, but if set, only"
+					+ " that number of splits will occur.";
         }
 
         public ExceptionType[] thrown() {
@@ -329,7 +331,18 @@ public class Regex {
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
-            String [] rsplit = pattern.split(subject);
+			/**
+			 * We use a different indexing notation than Java's regex split. In the case of
+			 * 0 for the limit, we will still return an array of length 1, assuming there are actual
+			 * splits available. In Java, a split of 0 will return the same as length 1. In our method
+			 * though, the limit is the number of splits themselves, so 1 means that the array will be
+			 * length 2, as in, there were 1 splits performed. This matches the behavior of split().
+			 */
+			int limit = Integer.MAX_VALUE - 1;
+			if(args.length >= 3){
+				limit = Static.getInt32(args[2], t);
+			}
+            String [] rsplit = pattern.split(subject, limit + 1);
             CArray ret = new CArray(t);
             for(String split : rsplit){
                 ret.push(new CString(split, t));
