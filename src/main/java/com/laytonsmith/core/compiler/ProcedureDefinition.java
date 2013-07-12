@@ -23,6 +23,7 @@ public class ProcedureDefinition extends Construct{
 		super(name, Construct.ConstructType.FUNCTION, target);
 	}
 
+	@Override
 	public boolean isDynamic() {
 		boolean ret = true;
 		for(ParseTree defs : varDefaults){

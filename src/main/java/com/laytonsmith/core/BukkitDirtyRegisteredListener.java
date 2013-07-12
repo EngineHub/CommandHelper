@@ -50,8 +50,8 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
         public DirtyEnumMap(Map<K, ? extends V> m) {
             super(m);
         }
-
-        @Override
+        
+		@Override
         public V put(K key, V value) {
             if (!(value instanceof DirtyTreeSet) && value instanceof TreeSet) {
                 return super.put(key, (V) DirtyTreeSet.GenerateDirtyTreeSet((TreeSet) value));

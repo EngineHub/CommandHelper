@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
@@ -515,7 +516,7 @@ public class ByteArrays {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
-		public CHVersion since() {
+		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 

@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.annotations.MustUseOverride;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
@@ -20,6 +21,8 @@ import java.util.List;
  * to it.
  * @author layton
  */
+//This will be re-added at some point, so get ready!
+//@MustUseOverride
 public interface Function extends FunctionBase, Documentation {    
 
     /**

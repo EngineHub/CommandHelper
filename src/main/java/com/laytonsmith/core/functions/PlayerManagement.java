@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -2919,6 +2920,7 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@hide("TODO: I'm not sure why this is hidden.")
 	public static class pvelocity extends AbstractFunction {
 
 		public String getName() {
@@ -2964,11 +2966,6 @@ public class PlayerManagement {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
-		}
-
-		@Override
-		public boolean appearInDocumentation() {
-			return false;
 		}
 	}
 

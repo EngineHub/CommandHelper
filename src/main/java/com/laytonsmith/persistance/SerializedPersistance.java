@@ -396,10 +396,12 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 		return list;
 	}
 
+	@Override
 	public String get0(String[] key, boolean bypassTransient) {
 		return getValue(StringUtils.Join(key, "."), bypassTransient);
 	}
 
+	@Override
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, IOException {
 		setValue(dm, key, value);
 		save(dm);

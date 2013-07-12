@@ -37,11 +37,11 @@ public class RegexTest {
 
     @Test(timeout = 10000)
     public void testRegMatch() throws ConfigCompileException {
-        assertEquals("{word}", SRun("reg_match('word', 'This is a word')", null));
+        assertEquals("{0: word}", SRun("reg_match('word', 'This is a word')", null));
         assertEquals("{}", SRun("reg_match('word', 'This is an airplane')", null));
-        assertEquals("{word, word}", SRun("reg_match('(word)', 'This is a word')", null));
-        assertEquals("{This is a word, word}", SRun("reg_match('This is a (word)', 'This is a word')", null));
-        assertEquals("{WORD}", SRun("reg_match(array(word, i), 'THIS IS A WORD')", null));
+        assertEquals("{0: word, 1: word}", SRun("reg_match('(word)', 'This is a word')", null));
+        assertEquals("{0: This is a word, 1: word}", SRun("reg_match('This is a (word)', 'This is a word')", null));
+        assertEquals("{0: WORD}", SRun("reg_match(array(word, i), 'THIS IS A WORD')", null));
         try {
             SRun("reg_match(array(word, l), hi)", null);
             fail();
@@ -52,7 +52,7 @@ public class RegexTest {
 
     @Test(timeout = 10000)
     public void testRegMatchAll() throws ConfigCompileException {
-        assertEquals("{{This is a word, word}, {This is a word, word}}", SRun("reg_match_all('This is a (word)', 'word, This is a word, This is a word')", null));
+        assertEquals("{{0: This is a word, 1: word}, {0: This is a word, 1: word}}", SRun("reg_match_all('This is a (word)', 'word, This is a word, This is a word')", null));
         assertEquals("{}", SRun("reg_match_all('word', 'yay')", null));
     }
 

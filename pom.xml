@@ -315,6 +315,14 @@
 		</dependency>
         
 		<!-- Test libraries -->
+		<!-- Hamcrest must come before powermock -->
+		<dependency>
+			<artifactId>hamcrest-core</artifactId>
+			<groupId>org.hamcrest</groupId>
+			<type>jar</type>
+			<version>1.3</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -644,6 +652,26 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.bsc.maven</groupId>
+				<artifactId>maven-processor-plugin</artifactId>
+				<version>2.2.4</version>
+				<executions>
+					<execution>
+						<id>process</id>
+						<goals>
+							<goal>process</goal>
+						</goals>
+						<phase>compile</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<outputDirectory>src/main/generated</outputDirectory>
+					<processors>
+						<processor>com.laytonsmith.annotations.processors.CheckOverrides</processor>
+					</processors>
+				</configuration>
+			</plugin>
             
 			<!-- Getting rid of maven warnings by providing versions for the following plugins -->
 			<plugin>
@@ -735,4 +763,10 @@
 			</build>
 		</profile>
 	</profiles>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>maven-annotation-plugin</id>
+			<url>http://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
+		</pluginRepository>
+	</pluginRepositories>
 </project>

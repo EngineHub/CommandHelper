@@ -317,8 +317,8 @@ public class DataHandlingTest {
                 "   assign(@var, array('Am', 'I', 'borked?'))" +
                 "   export('borked', @var)" +
                 "   msg(import('borked'))" +
-                ")" +
-                "_derping()"+
+                ")\n" +
+                "_derping()\n"+
                 "_derping()", fakePlayer);
         verify(fakePlayer).sendMessage("null");
         verify(fakePlayer, times(3)).sendMessage("{Am, I, borked?}");

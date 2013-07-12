@@ -181,6 +181,9 @@ public class StringHandling {
 	@noprofile
 	public static class sconcat extends AbstractFunction implements Optimizable {
 
+		private static final String g = new Meta.g().getName();
+		private static final String p = new Compiler.p().getName();
+		
 		public String getName() {
 			return "sconcat";
 		}
@@ -269,12 +272,11 @@ public class StringHandling {
 			Iterator<ParseTree> it = children.iterator();
 			while(it.hasNext()){
 				ParseTree n = it.next();
-				if(n.getData() instanceof CFunction){
-					Function f = ((CFunction)n.getData()).getFunction();
-					if((f instanceof Compiler.p
-							|| f instanceof Meta.g) && !n.hasChildren()){
-						it.remove();
-					}
+				if(n.getData() instanceof CFunction && 
+						(g.equals(n.getData().val())
+							|| p.equals(n.getData().val())) 
+						&& !n.hasChildren()){
+					it.remove();
 				}
 			}
 			//If we don't have any children, remove us as well

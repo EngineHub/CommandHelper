@@ -61,6 +61,7 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 		return model.keySet();
 	}
 
+	@Override
 	protected final String get0(String[] key, boolean bypassTransient) throws DataSourceException {
 		return model.get(key);
 	}

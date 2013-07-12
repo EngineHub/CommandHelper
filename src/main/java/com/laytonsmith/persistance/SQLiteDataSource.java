@@ -87,6 +87,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 		}
 	}
 
+	@Override
 	public String get0(String[] key, boolean bypassTransient) throws DataSourceException {
 		try{
 			try{
@@ -107,6 +108,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 		}
 	}
 
+	@Override
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		if(value == null){
 			clearKey(dm, key);
