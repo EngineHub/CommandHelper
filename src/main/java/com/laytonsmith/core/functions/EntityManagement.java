@@ -524,7 +524,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {entityId, potionID, strength, [seconds], [ambient]} Effect is 1-19. Seconds defaults to 30."
+			return "boolean {entityId, potionID, strength, [seconds], [ambient]} Effect is 1-23. Seconds defaults to 30."
 					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
 					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects"
 					+ " for a complete list of potions that can be added. To remove an effect, set the seconds to 0."
