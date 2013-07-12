@@ -102,25 +102,19 @@ public class SimpleVersion implements Version {
     }
 
     public int compareTo(Version o) {
-        if(major < o.getMajor()){
-            return -1;
-        } else if(major > o.getMajor()){
-            return 1;
-        } else {
-            if(minor < o.getMinor()){
-                return -1;
-            } else if(minor > o.getMinor()){
-                return 1;
-            } else {
-                if(supplemental < o.getSupplemental()){
-                    return -1;
-                } else if(supplemental > o.getSupplemental()){
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        }
+		int [] thisParts = new int[]{major, minor, supplemental};
+		int [] otherParts = new int[]{o.getMajor(), o.getMinor(), o.getSupplemental()};
+		for(int i = 0; i < thisParts.length; i++){
+			int n1 = thisParts[i];
+			int n2 = otherParts[i];
+			if(n1 < n2){
+				return -1;
+			}
+			if(n1 > n2){
+				return 1;
+			}
+		}
+		return 0;
     }
 
     @Override
