@@ -7,6 +7,8 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHorse;
+import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -321,7 +323,10 @@ public class BukkitMCWorld implements MCWorld {
 				case WITCH:
 					mobType = Witch.class;
 					break;
-            }
+				case HORSE:
+					mobType = Horse.class;
+					break;
+			}
         } catch (IllegalArgumentException e) {
             throw new ConfigRuntimeException("No mob of type " + name + " exists",
                     ExceptionType.FormatException, t);
@@ -398,19 +403,6 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof PigZombie){
-					PigZombie pz = (PigZombie)((BukkitMCEntity)e).asEntity();
-					for (String type : subTypes) {
-						if(!"".equals(type)){
-							try{
-								pz.setAnger(Integer.parseInt(type));
-							} catch (IllegalArgumentException ex){
-								throw new ConfigRuntimeException(type + " is not a valid anger level",
-										ExceptionType.FormatException, t);
-							}
-						}
-					}
-				}
 				if (((BukkitMCEntity)e).asEntity() instanceof Villager) {
 					Villager v = (Villager) ((BukkitMCEntity)e).asEntity();
 					MCProfession job = MCProfession.FARMER;
@@ -462,24 +454,31 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if((((BukkitMCEntity)e).asEntity() instanceof Zombie) && !(((BukkitMCEntity)e).asEntity() instanceof PigZombie)){
+				if(((BukkitMCEntity)e).asEntity() instanceof Zombie){
 					Zombie z = (Zombie)((BukkitMCEntity)e).asEntity();
 					for (String type : subTypes) {
 						try {
 							MCZombieType ztype = MCZombieType.valueOf(type);
 							switch (ztype) {
-							case BABY:
-								z.setBaby(true);
-								break;
-							case VILLAGER:
-								z.setVillager(true);
-								break;
-							default:
-								break;
+								case BABY:
+									z.setBaby(true);
+									break;
+								case VILLAGER:
+									z.setVillager(true);
+									break;
 							}
 						} catch (IllegalArgumentException ex){
-							throw new ConfigRuntimeException(type + " is not a zombie state",
-									ExceptionType.FormatException, t);
+							if (z instanceof PigZombie) {
+								try {
+									((PigZombie) z).setAnger(Integer.valueOf(type));
+								} catch (IllegalArgumentException iae) {
+									throw new ConfigRuntimeException(type + " was neither a zombie state nor a number.",
+											ExceptionType.FormatException, t);
+								}
+							} else {
+								throw new ConfigRuntimeException(type + " is not a zombie state",
+										ExceptionType.FormatException, t);
+							}
 						}
 					}
 				}
@@ -498,6 +497,28 @@ public class BukkitMCWorld implements MCWorld {
 						} catch (IllegalArgumentException ex){
 							throw new ConfigRuntimeException(type + " is not a pig state",
 									ExceptionType.FormatException, t);
+						}
+					}
+				}
+				if(((BukkitMCEntity) e).asEntity() instanceof Horse) {
+					Horse h = (Horse) ((BukkitMCEntity) e).asEntity();
+					for (String type : subTypes) {
+						try {
+							MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);
+							h.setVariant(BukkitMCHorse.BukkitMCHorseVariant.getConvertor().getConcreteEnum(htype));
+						} catch (IllegalArgumentException notVar) {
+							try {
+								MCHorse.MCHorseColor hcolor = MCHorse.MCHorseColor.valueOf(type);
+								h.setColor(BukkitMCHorse.BukkitMCHorseColor.getConvertor().getConcreteEnum(hcolor));
+							} catch (IllegalArgumentException notColor) {
+								try {
+									MCHorse.MCHorsePattern hpattern = MCHorse.MCHorsePattern.valueOf(type);
+									h.setStyle(BukkitMCHorse.BukkitMCHorsePattern.getConvertor().getConcreteEnum(hpattern));
+								} catch (IllegalArgumentException notAnything) {
+									throw new ConfigRuntimeException("Type " + type + " did not match any horse variants,"
+											+ " colors, or patterns.", ExceptionType.FormatException, t);
+								}
+							}
 						}
 					}
 				}
