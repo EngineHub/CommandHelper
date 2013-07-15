@@ -23,10 +23,12 @@ public class YMLDataSource extends StringSerializableDataSource{
         super(uri, options);
     }    
 
+	@Override
     public DataSourceModifier[] implicitModifiers() {
         return null;
     }
 
+	@Override
     public DataSourceModifier[] invalidModifiers() {
         return null;
     }

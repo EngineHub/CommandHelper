@@ -29,10 +29,12 @@ public class XMLDataSource extends StringSerializableDataSource{
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+	@Override
     public DataSourceModifier[] implicitModifiers() {
         return null;
     }
 
+	@Override
     public DataSourceModifier[] invalidModifiers() {
         return null;
     }

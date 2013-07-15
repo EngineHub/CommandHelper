@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -68,6 +70,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 		}
 	}
 
+	@Override
 	public Set<String[]> keySet() throws DataSourceException{
 		try{
 			try {
@@ -88,7 +91,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 	}
 
 	@Override
-	public String get0(String[] key, boolean bypassTransient) throws DataSourceException {
+	public String get0(String[] key) throws DataSourceException {
 		try{
 			try{
 				connect();
@@ -147,14 +150,17 @@ public class SQLiteDataSource extends AbstractDataSource{
 		}
 	}		
 
+	@Override
 	public void populate() throws DataSourceException {
 		//All data is transient
 	}
 
+	@Override
 	public DataSourceModifier[] implicitModifiers() {
 		return new DataSourceModifier[]{DataSourceModifier.TRANSIENT};
 	}
 
+	@Override
 	public DataSourceModifier[] invalidModifiers() {
 		return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.SSH,
 			DataSourceModifier.PRETTYPRINT
@@ -169,5 +175,27 @@ public class SQLiteDataSource extends AbstractDataSource{
 
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
+	}
+
+	@Override
+	protected void startTransaction0(DaemonManager dm) {
+		try {
+			connection.prepareStatement("BEGIN TRANSACTION").execute();
+		} catch (SQLException ex) {
+			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+
+	@Override
+	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
+		try {
+			if(rollback){
+				connection.prepareStatement("ROLLBACK TRANSACTION").execute();
+			} else {
+				connection.prepareStatement("END TRANSACTION").execute();
+			}
+		} catch (SQLException ex) {
+			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 }

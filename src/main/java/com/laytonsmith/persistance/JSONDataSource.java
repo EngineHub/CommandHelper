@@ -48,10 +48,12 @@ public class JSONDataSource extends StringSerializableDataSource {
 		return writer.toString();
 	}
 
+	@Override
 	public DataSourceModifier[] implicitModifiers() {
 		return null;
 	}
 
+	@Override
 	public DataSourceModifier[] invalidModifiers() {
 		return new DataSourceModifier[]{DataSourceModifier.PRETTYPRINT};
 	}

@@ -5,6 +5,8 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * For data sources that can input and output strings as the complete
@@ -19,6 +21,18 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	 * A reference to the DataSourceModel used by the set and get methods.
 	 */
 	protected DataSourceModel model;
+	
+	/**
+	 * When a transaction starts or stops, this is set to true. If this
+	 * is true, populate will run, then set this to false, and if this is false,
+	 * populate will simply return.
+	 */
+	private boolean doPopulate = true;
+	/**
+	 * If in a transaction, and we made a change, we know we need to write it out
+	 * when the transaction finishes.
+	 */
+	private boolean hasChanges = false;
 	
 	protected StringSerializableDataSource(){
 		
@@ -35,9 +49,6 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	 * @throws IOException
 	 */
 	protected void writeData(DaemonManager dm, String data) throws IOException, ReadOnlyException, DataSourceException {
-		if (modifiers.contains(DataSourceModifier.READONLY)) {
-			throw new ReadOnlyException();
-		}
 		getConnectionMixin().writeData(dm, data);
 	}
 
@@ -47,7 +58,47 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 		writeData(dm, serializeModel());
 	}
 
+	@Override
+	protected final void startTransaction0(DaemonManager dm) {
+		doPopulate = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * When we rollback, we simply re-populate the data, instead of tracking
+	 * changes that happened since the transaction started.
+	 * @param rollback
+	 * @throws DataSourceException
+	 * @throws IOException 
+	 */
+	@Override
+	protected final void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
+		doPopulate = true;
+		if(hasChanges){
+			hasChanges = false;
+			if(rollback){
+				populate();
+			} else {
+				try {
+					writeData(dm, serializeModel());
+				} catch (ReadOnlyException ex) {
+					//This shouldn't happen, because we won't have been allowed to set any 
+					Logger.getLogger(StringSerializableDataSource.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+		}
+	}
+
+	@Override
 	public void populate() throws DataSourceException {
+		if(inTransaction()){
+			if(doPopulate){
+				doPopulate = false;
+			} else {
+				return;
+			}
+		}
 		String data;
 		try {
 			data = getConnectionMixin().getData();
@@ -57,24 +108,32 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 		populateModel(data);
 	}
 
+	@Override
 	public Set<String[]> keySet() {
 		return model.keySet();
 	}
 
 	@Override
-	protected final String get0(String[] key, boolean bypassTransient) throws DataSourceException {
+	protected final String get0(String[] key) throws DataSourceException {
 		return model.get(key);
 	}
 
 	@Override
 	protected final boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, IOException, DataSourceException {
-		String old = get(key, false);
+		if (modifiers.contains(DataSourceModifier.READONLY)) {
+			throw new ReadOnlyException();
+		}
+		String old = get(key);
 		if ((old == null && value == null) || (old != null && old.equals(value))) {
 			return false;
 		}
 		model.set(key, value);
-		//We need to output the model now
-		writeData(dm, serializeModel());
+		if(!inTransaction()){
+			//We need to output the model now
+			writeData(dm, serializeModel());
+		} else {
+			hasChanges = true;
+		}
 		return true;
 	}
 

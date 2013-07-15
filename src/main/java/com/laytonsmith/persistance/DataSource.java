@@ -1,6 +1,7 @@
 package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.annotations.MustUseOverride;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.Set;
  *
  * @author lsmith
  */
+@MustUseOverride
 public interface DataSource extends Documentation {
 
 	/**
@@ -49,19 +51,6 @@ public interface DataSource extends Documentation {
 	 * @return 
 	 */
 	public String get(String[] key) throws DataSourceException;
-	
-	/**
-	 * Retrieves a value from the data source. If bypassTransient is true,
-	 * then this should not re-populate the data (if transient isn't
-	 * inherently an option, that is). This indicates that it is being used
-	 * in a transaction, and the data source should not refresh during this
-	 * period. If the key doesn't exist, null is returned.
-	 *
-	 * @param key
-	 * @return
-	 * @throws IllegalArgumentException If the key is invalid
-	 */
-	public String get(String[] key, boolean bypassTransient) throws DataSourceException, IllegalArgumentException;
 
 	/**
 	 * Sets a value in the data source. If value is null, the key is
@@ -126,6 +115,13 @@ public interface DataSource extends Documentation {
 	 * @return
 	 */
 	public Set<DataSourceModifier> getModifiers();
+	
+	/**
+	 * Returns true if this data source has the specified modifier.
+	 * @param modifier The modifier to check
+	 * @return True if the modifier is present
+	 */
+	public boolean hasModifier(DataSourceModifier modifier);
 
 	/**
 	 * Returns true if the data source contains this key or not.
@@ -140,7 +136,29 @@ public interface DataSource extends Documentation {
 	 * @throws DataSourceException 
 	 */
 	public void clearKey(DaemonManager dm, String [] key) throws DataSourceException, ReadOnlyException, IOException;
-
+	
+	/**
+	 * Starts a transaction for this data source. If the data source is not
+	 * transient, this has no effect, but if it is, then all reads and writes
+	 * will not be transient until the transaction is stopped.
+	 */
+	public void startTransaction(DaemonManager dm);
+	
+	/**
+	 * When stopping the transaction, any pending writes will potentially
+	 * occur then, so this can throw an exception at that point,
+	 * much like set could, however, it will not throw ReadOnlyExceptions. 
+	 * If an exception is thrown during the middle of the transaction, it is up 
+	 * to the calling code to call stopTransaction(). If rollback is true, then
+	 * any changes since the last startTransaction call will be rolled
+	 * back. If any exceptions are thrown from this method, and rollback is
+	 * true, then no changes will have been made to the data set.
+	 * @param rollback If true, changes since the transaction started will 
+	 * be rolled back.
+	 * @throws IOException If any cached data couldn't be written out
+	 * @throws DataSourceException If any other exception occurs
+	 */
+	public void stopTransaction(DaemonManager dm, boolean rollback) throws DataSourceException, IOException;
 
 	/**
 	 * These are the valid modifiers for a generic connection. Not all data

@@ -52,10 +52,12 @@ public class INIDataSource extends StringSerializableDataSource {
         return b.toString();
     }
 
+	@Override
     public DataSourceModifier[] implicitModifiers() {
         return null;
     }
 
+	@Override
     public DataSourceModifier[] invalidModifiers() {
         return new DataSourceModifier[]{DataSourceModifier.PRETTYPRINT};
     }

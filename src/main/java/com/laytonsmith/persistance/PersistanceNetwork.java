@@ -96,7 +96,7 @@ public class PersistanceNetwork {
 	public synchronized String get(String[] key/*boolean isMainThread*/) throws DataSourceException, IllegalArgumentException {
 		//TODO: Use isMainThread here
 		DataSource ds = getDataSource(filter.getConnection(key));
-		return ds.get(key, false);
+		return ds.get(key);
 	}
 
 	/**
