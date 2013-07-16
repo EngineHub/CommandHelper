@@ -2,7 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import org.bukkit.entity.Pig;
+import org.bukkit.entity.Animals;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -31,7 +31,7 @@ public class BukkitVehicleListener implements Listener{
 		EventUtils.TriggerListener(Driver.VEHICLE_ENTER, "vehicle_enter", vee);
 	}
 	
-	//@EventHandler(priority= EventPriority.LOWEST)
+	@EventHandler(priority= EventPriority.LOWEST)
 	public void onExit(VehicleExitEvent event) {
 		BukkitMCVehicleExitEvent vee = new BukkitMCVehicleExitEvent(event);
 		EventUtils.TriggerExternal(vee);
@@ -40,7 +40,7 @@ public class BukkitVehicleListener implements Listener{
 	
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onBlockCollide(VehicleBlockCollisionEvent event) {
-		if (event.getVehicle() instanceof Pig && !((Pig) event.getVehicle()).hasSaddle()) {
+		if (event.getVehicle() instanceof Animals && event.getVehicle().getPassenger() == null) {
 			return;
 		}
 		BukkitMCVehicleBlockCollideEvent vbc = new BukkitMCVehicleBlockCollideEvent(event);
