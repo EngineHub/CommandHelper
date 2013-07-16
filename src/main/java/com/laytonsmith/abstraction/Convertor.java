@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -62,6 +63,14 @@ public interface Convertor {
     public MCEntity GetCorrectEntity(MCEntity e);
 
 	public MCItemMeta GetCorrectMeta(MCItemMeta im);
+	
+	/**
+	 * Returns the entities at the specified location, or null
+	 * if no entities are in this location.
+	 * @param loc
+	 * @return 
+	 */
+	public List<MCEntity> GetEntitiesAt(MCLocation loc, double radius);
 	
 	/**
 	 * Gets the inventory of the specified entity, or null if the entity id

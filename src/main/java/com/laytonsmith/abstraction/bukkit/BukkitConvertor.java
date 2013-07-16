@@ -10,10 +10,14 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -217,6 +221,10 @@ public class BukkitConvertor extends AbstractConvertor {
             return new BukkitMCProjectile((Projectile)be);
         }
     	
+		if(be instanceof Painting){
+			return new BukkitMCPainting((Painting)be);
+		}
+		
     	if(be instanceof Hanging){
     		return new BukkitMCHanging(be);
     	}
@@ -282,6 +290,23 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCItemMeta GetCorrectMeta(MCItemMeta im) {
 		ItemMeta bim = ((BukkitMCItemMeta) im).asItemMeta();
 		return BukkitConvertor.BukkitGetCorrectMeta(bim);
+	}
+
+	public List<MCEntity> GetEntitiesAt(MCLocation location, double radius) {
+		if(location == null){
+			return Collections.EMPTY_LIST;
+		}
+		if(radius <= 0){
+			radius = 1;
+		}
+		Entity tempEntity = ((BukkitMCEntity)location.getWorld().spawn(location, MCEntityType.ARROW)).asEntity();
+		List<Entity> near = tempEntity.getNearbyEntities(radius, radius, radius);
+		tempEntity.remove();
+		List<MCEntity> entities = new ArrayList<MCEntity>();
+		for(Entity e : near){
+			entities.add(BukkitGetCorrectEntity(e));
+		}
+		return entities;
 	}
 
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {

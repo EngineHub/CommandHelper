@@ -1,10 +1,12 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.entities.MCMinecart;
+import com.laytonsmith.abstraction.enums.MCArt;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -1383,4 +1385,90 @@ public class EntityManagement {
 			return "void {entityID, boolean} Sets a living entity's ability to pick up items.";
 		}
 	}
+	
+	@api public static class get_art_at extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
+				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			}
+			List<MCEntity> es = StaticLayer.GetConvertor().GetEntitiesAt(ObjectGenerator.GetGenerator().location(args[0], w, t), 1);
+			for(MCEntity e : es){
+				if(e instanceof MCPainting){
+					return new CString(((MCPainting)e).getArt().name(), t);
+				}
+			}
+			throw new ConfigRuntimeException("There is no painting at the specified location", ExceptionType.BadEntityException, t);
+		}
+
+		public String getName() {
+			return "get_art_at";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "string {locationArray} Gets the specified art at the given location. If the item"
+					+ " at the specified location isn't a painting, an ----"
+					+ " Will be one of the following: " + StringUtils.Join(MCArt.values(), ", ") + ".";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+//	@api public static class set_art_at extends AbstractFunction {
+//
+//		public ExceptionType[] thrown() {
+//			return new ExceptionType[]{};
+//		}
+//
+//		public boolean isRestricted() {
+//			return true;
+//		}
+//
+//		public Boolean runAsync() {
+//			return false;
+//		}
+//
+//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//			
+//		}
+//
+//		public String getName() {
+//			return "set_art_at";
+//		}
+//
+//		public Integer[] numArgs() {
+//			return new Integer[]{2, 3};
+//		}
+//
+//		public String docs() {
+//			return "boolean {locationArray, art} Sets the art at the specified location. If the art"
+//					+ " doesn't fit, nothing happens, and false is returned. Otherwise, true is returned."
+//					+ " ---- Art may be one of the following: " + StringUtils.Join(MCArt.values(), ", ");
+//		}
+//
+//		public Version since() {
+//			return CHVersion.V3_3_1;
+//		}
+//		
+//	}
 }

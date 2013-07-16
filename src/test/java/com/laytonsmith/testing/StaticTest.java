@@ -699,6 +699,10 @@ public class StaticTest {
 		public MCItemMeta GetCorrectMeta(MCItemMeta im) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
+
+		public List<MCEntity> GetEntitiesAt(MCLocation loc, double radius) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
         
     }
     
