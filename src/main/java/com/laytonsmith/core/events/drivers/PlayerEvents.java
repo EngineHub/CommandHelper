@@ -1533,23 +1533,22 @@ public class PlayerEvents {
 		 * whether or not a teleport should count as a movement or not.
 		 */
 
-		private boolean threadRunning = false;
+		private static Thread thread = null;
 		private Set<Integer> thresholdList = new HashSet<Integer>();
 		private Map<Integer, Map<String, MCLocation>> thresholds = new HashMap<Integer, Map<String, MCLocation>>();
 
 		@Override
-		public void bind(Map<String, Construct> prefilters) {
-			if(prefilters.containsKey("threshold")){
-				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
-				thresholdList.add(i);
-			}
-			if(!threadRunning){
+		public void hook() {
+			if(thread == null){
+				thresholdList.clear();
 				thresholdList.add(1);
-				threadRunning = true;
-				new Thread(new Runnable() {
+				thread = new Thread(new Runnable() {
 
 					public void run() {
 						outerLoop: while(true){
+							if(thread == null){
+								return; //Kill it
+							}
 							MCPlayer players[] = Static.getServer().getOnlinePlayers();
 							for(final MCPlayer p : players){
 								//We need to loop through all the thresholds
@@ -1645,7 +1644,22 @@ public class PlayerEvents {
 							}
 						}
 					}
-				}, "CommandHelperPlayerMoveEventRunner").start();
+				}, Implementation.GetServerType().getBranding() + "PlayerMoveEventRunner");
+				thread.start();
+				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+
+					public void run() {
+						thread = null;
+					}
+				});
+			}
+		}
+
+		@Override
+		public void bind(Map<String, Construct> prefilters) {
+			if(prefilters.containsKey("threshold")){
+				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+				thresholdList.add(i);
 			}
 		}
 
