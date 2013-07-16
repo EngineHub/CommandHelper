@@ -1389,7 +1389,7 @@ public class EntityManagement {
 	@api public static class get_art_at extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException};
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -1437,7 +1437,7 @@ public class EntityManagement {
 	@api public static class set_art_at extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
