@@ -100,7 +100,7 @@ public class VehicleEvents {
 		}
 	}
 	
-	//@api
+	@api
 	public static class vehicle_leave extends AbstractEvent {
 
 		public String getName() {
