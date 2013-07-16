@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
+import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
@@ -767,7 +768,7 @@ public class EntityEvents {
 		}
 
 		public String docs() {
-			return "{} "
+			return "{damager <string match>} "
             		+ "This event is called when a player is damaged by another entity."
                     + "{player: The player being damaged | damager: The type of entity causing damage | "
             		+ "amount: amount of damage caused | cause: the cause of damage | "
@@ -779,10 +780,11 @@ public class EntityEvents {
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
 				throws PrefilterNonMatchException {
-			if(e instanceof MCEntityDamageByEntityEvent){
+			if (e instanceof MCEntityDamageByEntityEvent) {
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
-				return event.getEntity() instanceof MCPlayer;
+				Prefilters.match(prefilter, "damager", event.getDamager().getType().name(), PrefilterType.MACRO);
 			}
+
 			return false;
 		}
 
@@ -1001,6 +1003,76 @@ public class EntityEvents {
 			return Driver.ENTITY_ENTER_PORTAL;
 		}
 	
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class entity_change_block extends AbstractEvent {
+
+		public String getName() {
+			return "entity_change_block";
+		}
+
+		public String docs() {
+			return "{from: <math match> the block ID before the change | to: <math match> the block ID after change"
+					+ " | location: the location of the block changed}"
+					+ " Fires when an entity change block in some way."
+					+ " {entity: the entity ID of the entity which changed block | from: the block ID before the change"
+					+ " | data: the data value for the block being changed | to: the block ID after change"
+					+ " | location: the location of the block changed}"
+					+ " {}"
+					+ " {from|to|location}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if (e instanceof MCEntityChangeBlockEvent) {
+				MCEntityChangeBlockEvent event = (MCEntityChangeBlockEvent) e;
+				Prefilters.match(prefilter, "from", event.getBlock().getTypeId(), PrefilterType.MATH_MATCH);
+				Prefilters.match(prefilter, "to", event.getTo().getType(), PrefilterType.MATH_MATCH);
+				if (prefilter.containsKey("location")) {
+					MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, Target.UNKNOWN);
+					if (!event.getBlock().getLocation().equals(loc)) {
+						return false;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if (e instanceof MCEntityChangeBlockEvent) {
+				MCEntityChangeBlockEvent event = (MCEntityChangeBlockEvent) e;
+				Target t = Target.UNKNOWN;
+				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("entity", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("from", new CInt(event.getBlock().getTypeId(), t));
+				ret.put("data", new CInt(event.getData(), t));
+				ret.put("to", new CInt(event.getTo().getType(), t));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation()));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityChangeBlockEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			return false;
+		}
+
+		public Driver driver() {
+			return Driver.ENTITY_CHANGE_BLOCK;
+		}
+
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

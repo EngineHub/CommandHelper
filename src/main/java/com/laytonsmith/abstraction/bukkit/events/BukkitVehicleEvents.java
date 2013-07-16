@@ -9,16 +9,22 @@ import org.bukkit.event.vehicle.VehicleExitEvent;
 
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCVehicle;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCVehicle;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCCollisionType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnitityCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnterExitEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEvent;
+import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
 import com.laytonsmith.annotations.abstraction;
+import org.bukkit.Location;
+import org.bukkit.entity.Vehicle;
 
 /**
  * 
@@ -120,14 +126,14 @@ public class BukkitVehicleEvents {
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getExited());
 		}
 	}
-	
+
 	public static class BukkitMCVehicleEvent implements MCVehicleEvent {
 
 		VehicleEvent ve;
 		public BukkitMCVehicleEvent(VehicleEvent event) {
 			ve = event;
 		}
-		
+
 		public MCVehicle getVehicle() {
 			if (ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
 				return (MCVehicle) BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
@@ -137,6 +143,45 @@ public class BukkitVehicleEvents {
 
 		public Object _GetObject() {
 			return ve;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCVehicleMoveEvent implements MCVehicleMoveEvent {
+
+		BukkitMCLocation from;
+		BukkitMCLocation to;
+		BukkitMCVehicle vehicle;
+		boolean cancelled = false;
+
+		public BukkitMCVehicleMoveEvent(Vehicle vehicle, Location from, Location to) {
+			this.vehicle = new BukkitMCVehicle(vehicle);
+			this.from = new BukkitMCLocation(from);
+			this.to = new BukkitMCLocation(to);
+		}
+
+		public MCLocation getFrom() {
+			return from;
+		}
+
+		public MCLocation getTo() {
+			return to;
+		}
+
+		public MCVehicle getVehicle() {
+			return vehicle;
+		}
+
+		public Object _GetObject() {
+			return null;
+		}
+
+		public void setCancelled(boolean state) {
+			cancelled = state;
+		}
+
+		public boolean isCancelled() {
+			return cancelled;
 		}
 	}
 }

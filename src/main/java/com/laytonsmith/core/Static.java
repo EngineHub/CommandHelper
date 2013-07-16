@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.*;
@@ -27,6 +25,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -656,7 +655,7 @@ public final class Static {
 	 * Returns the living entity with the specified id. If it doesn't exist or isn't living,
 	 * a ConfigRuntimeException is thrown.
 	 * @param id
-	 * @return 
+	 * @return
 	 */
 	public static MCLivingEntity getLivingEntity(int id, Target t) {
         for (MCWorld w : Static.getServer().getWorlds()) {
@@ -673,6 +672,26 @@ public final class Static {
         }
         throw new ConfigRuntimeException("That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
     }
+
+	/**
+	 * Returns all vehicles from all maps.
+	 *
+	 * @return
+	 */
+	public static List<MCVehicle> getVehicles() {
+
+		List<MCVehicle> vehicles = new ArrayList<MCVehicle>();
+
+		for (MCWorld w : Static.getServer().getWorlds()) {
+			for (MCEntity e : w.getEntities()) {
+				MCEntity entity = StaticLayer.GetCorrectEntity(e);
+				if (entity instanceof MCVehicle) {
+					vehicles.add((MCVehicle) entity);
+				}
+			}
+		}
+		return vehicles;
+	}
 
     public static String strJoin(Collection c, String inner) {
         StringBuilder b = new StringBuilder();

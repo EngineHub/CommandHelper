@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
@@ -15,8 +16,11 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.util.Vector;
 
 /**
  *
@@ -146,4 +150,60 @@ public class BukkitBlockEvents {
             return pie;
         }
     }
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockEvent implements MCBlockEvent {
+
+		BlockEvent be;
+
+		public BukkitMCBlockEvent(BlockEvent e) {
+			be = e;
+		}
+
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(be.getBlock());
+		}
+
+		public Object _GetObject() {
+			return be;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockDispenseEvent extends BukkitMCBlockEvent
+			implements MCBlockDispenseEvent {
+
+		BlockDispenseEvent bde;
+
+		public BukkitMCBlockDispenseEvent(BlockDispenseEvent e) {
+			super(e);
+			bde = e;
+		}
+
+		public MCItemStack getItem() {
+			return new BukkitMCItemStack(bde.getItem());
+		}
+
+		public void setItem(MCItemStack item) {
+			bde.setItem(((BukkitMCItemStack) item).asItemStack());
+		}
+
+		public Velocity getVelocity() {
+			Vector v = bde.getVelocity();
+			return new Velocity(v.length(), v.getX(), v.getY(), v.getZ());
+		}
+
+		public void setVelocity(MCEntity.Velocity vel) {
+			Vector v = new Vector(vel.x, vel.y, vel.z);
+			bde.setVelocity(v);
+		}
+
+		public boolean isCancelled() {
+			return bde.isCancelled();
+		}
+
+		public void setCancelled(boolean cancel) {
+			bde.setCancelled(cancel);
+		}
+	}
 }
