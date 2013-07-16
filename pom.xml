@@ -477,6 +477,7 @@
 						<configuration>
 							<shadedArtifactAttached>false</shadedArtifactAttached>
 							<shadedClassifierName>Bundle</shadedClassifierName>
+							<minimizeJar>true</minimizeJar>
 							<!-- To add a new shaded dependency, there are three steps.
 								1. Add a reference to the artifact set
 								2. Add a relocation tag (usually recommended, though not always)
