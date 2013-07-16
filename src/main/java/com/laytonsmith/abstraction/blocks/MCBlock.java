@@ -64,4 +64,6 @@ public interface MCBlock {
 	public boolean isBlockPowered();
 
 	public MCBlock getRelative(MCBlockFace face);
+
+	public MCBlockFace getFace(MCBlock get);
 }

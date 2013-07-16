@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.Material;
@@ -164,5 +165,9 @@ public class BukkitMCBlock implements MCBlock{
 
 	public MCBlock getRelative(MCBlockFace face) {
 		return new BukkitMCBlock(b.getRelative(face.getModX(), face.getModY(), face.getModZ()));
+	}
+
+	public MCBlockFace getFace(MCBlock block) {
+		return BukkitMCBlockFace.getConvertor().getAbstractedEnum(b.getFace(((BukkitMCBlock)block).b));
 	}
 }
