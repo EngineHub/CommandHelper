@@ -245,6 +245,10 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCSheep((Sheep) be);
 		}
 		
+		if (be instanceof Horse) {
+			return new BukkitMCHorse((Horse) be);
+		}
+		
 		if (be instanceof Pig) {
 			return new BukkitMCPig((Pig) be);
 		}
