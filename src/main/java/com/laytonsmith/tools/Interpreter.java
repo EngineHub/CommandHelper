@@ -451,6 +451,10 @@ public class Interpreter {
 		public MCItemMeta GetCorrectMeta(MCItemMeta im) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
+
+		public List<MCEntity> GetEntitiesAt(MCLocation loc, double radius) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
 		
 	}
 }

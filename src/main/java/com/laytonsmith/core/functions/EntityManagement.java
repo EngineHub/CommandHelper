@@ -1434,41 +1434,68 @@ public class EntityManagement {
 		
 	}
 	
-//	@api public static class set_art_at extends AbstractFunction {
-//
-//		public ExceptionType[] thrown() {
-//			return new ExceptionType[]{};
-//		}
-//
-//		public boolean isRestricted() {
-//			return true;
-//		}
-//
-//		public Boolean runAsync() {
-//			return false;
-//		}
-//
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			
-//		}
-//
-//		public String getName() {
-//			return "set_art_at";
-//		}
-//
-//		public Integer[] numArgs() {
-//			return new Integer[]{2, 3};
-//		}
-//
-//		public String docs() {
-//			return "boolean {locationArray, art} Sets the art at the specified location. If the art"
-//					+ " doesn't fit, nothing happens, and false is returned. Otherwise, true is returned."
-//					+ " ---- Art may be one of the following: " + StringUtils.Join(MCArt.values(), ", ");
-//		}
-//
-//		public Version since() {
-//			return CHVersion.V3_3_1;
-//		}
-//		
-//	}
+	@api public static class set_art_at extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
+				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCArt art;
+			try{
+				art = MCArt.valueOf(args[1].val());
+			} catch(IllegalArgumentException e){
+				throw new ConfigRuntimeException("Invalid type: " + args[1].val(), ExceptionType.FormatException, t);
+			}
+			//If there's already a painting there, just use that one. Otherwise, spawn a new one.
+			
+			MCPainting p = null;
+			for(MCEntity e : StaticLayer.GetConvertor().GetEntitiesAt(loc, 1)){
+				if(e instanceof MCPainting){
+					p = (MCPainting)e;
+					break;
+				}
+			}
+			if(p == null){
+				p = (MCPainting)loc.getWorld().spawn(loc, MCEntityType.PAINTING);
+			}
+			boolean worked = p.setArt(art);
+			if(!worked){
+				p.remove();
+			}
+			return new CBoolean(worked, t);
+		}
+
+		public String getName() {
+			return "set_art_at";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "boolean {locationArray, art} Sets the art at the specified location. If the art"
+					+ " doesn't fit, nothing happens, and false is returned. Otherwise, true is returned."
+					+ " ---- Art may be one of the following: " + StringUtils.Join(MCArt.values(), ", ");
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }
