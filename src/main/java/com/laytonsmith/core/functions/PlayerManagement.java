@@ -490,7 +490,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			List<MCBlock> blocks = p.getLastTwoTargetBlocks(null, 10000);
-			return ObjectGenerator.GetGenerator().location(blocks.get(1).getLocation());
+			return ObjectGenerator.GetGenerator().location(blocks.get(0).getLocation());
 		}
 
 		public String getName() {
