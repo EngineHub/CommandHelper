@@ -318,6 +318,7 @@ public class ParseTree implements Cloneable{
 		return clone;
 	}
 	
+	@Override
 	public String toString(){
 		return data.toString();
 	}

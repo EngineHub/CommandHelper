@@ -154,6 +154,7 @@ public class BukkitEntityEvents {
 			pse = event;
 		}
 
+		@Override
 		public Object _GetObject() {
 			return pse;
 		}

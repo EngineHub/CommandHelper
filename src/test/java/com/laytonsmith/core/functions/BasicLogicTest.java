@@ -319,7 +319,7 @@ public class BasicLogicTest {
         assertEquals("4611686018427387901", SRun("urshift(-10, 2)", null));
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void testIfelse() throws ConfigCompileException {
         assertEquals("3", SRun("ifelse("
                 + "false, 1,"

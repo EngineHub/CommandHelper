@@ -29,10 +29,12 @@ public class CSVDataSource extends StringSerializableDataSource {
 		return "";
 	}
 
+	@Override
 	public DataSourceModifier[] implicitModifiers() {
 		return null;
 	}
 
+	@Override
 	public DataSourceModifier[] invalidModifiers() {
 		return null;
 	}

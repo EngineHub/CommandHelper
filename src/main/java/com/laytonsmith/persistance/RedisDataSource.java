@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.Transaction;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
@@ -23,6 +24,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 public class RedisDataSource extends AbstractDataSource {
 
 	private Jedis connection;
+	private Transaction transaction;
 	private JedisShardInfo shardInfo;
 	private String host;
 	private int port;
@@ -70,7 +72,11 @@ public class RedisDataSource extends AbstractDataSource {
 		String ckey = StringUtils.Join(key, ".");
 		String status;
 		try{
-			status = connection.set(ckey, value);
+			if(inTransaction()){
+				status = transaction.set(ckey, value).get();
+			} else {
+				status = connection.set(ckey, value);
+			}
 		} catch(JedisConnectionException e){
 			throw new DataSourceException(e);
 		}
@@ -82,28 +88,41 @@ public class RedisDataSource extends AbstractDataSource {
 		connect();
 		String ckey = StringUtils.Join(key, ".");
 		try{
-			connection.del(ckey);
+			if(inTransaction()){
+				transaction.del(ckey);
+			} else {
+				connection.del(ckey);				
+			}
 		} catch(JedisConnectionException e){
 			throw new DataSourceException(e);
 		}
 	}
 
 	@Override
-	protected String get0(String[] key, boolean bypassTransient) throws DataSourceException {
+	protected String get0(String[] key) throws DataSourceException {
 		connect();
 		String ckey = StringUtils.Join(key, ".");
 		try{
-			return connection.get(ckey);
+			if(inTransaction()){
+				return transaction.get(ckey).get();
+			} else {
+				return connection.get(ckey);
+			}
 		} catch(JedisConnectionException e){
 			throw new DataSourceException(e);
 		}
 	}
 
+	@Override
 	public Set<String[]> keySet() throws DataSourceException {
 		connect();
 		Set<String> ret;
 		try{
-			ret = connection.keys("*");
+			if(inTransaction()){
+				ret = transaction.keys("*").get();
+			} else {
+				ret = connection.keys("*");
+			}
 		} catch(JedisConnectionException e){
 			throw new DataSourceException(e);
 		}
@@ -114,16 +133,19 @@ public class RedisDataSource extends AbstractDataSource {
 		return parsed;
 	}
 
+	@Override
 	public void populate() throws DataSourceException {
 		//Unneeded
 	}
 
+	@Override
 	public DataSourceModifier[] implicitModifiers() {
 		return new DataSourceModifier[]{
 			DataSourceModifier.TRANSIENT
 		};
 	}
 
+	@Override
 	public DataSourceModifier[] invalidModifiers() {
 		return new DataSourceModifier[]{
 			DataSourceModifier.HTTP,
@@ -144,6 +166,24 @@ public class RedisDataSource extends AbstractDataSource {
 
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
+	}
+
+	@Override
+	protected void startTransaction0(DaemonManager dm) {
+		dm.activateThread(null);
+		connection.multi();
+		dm.deactivateThread(null);
+	}
+
+	@Override
+	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
+		dm.activateThread(null);
+		if(rollback){
+			transaction.discard();
+		} else {
+			transaction.exec();
+		}
+		dm.deactivateThread(null);
 	}
 	
 }

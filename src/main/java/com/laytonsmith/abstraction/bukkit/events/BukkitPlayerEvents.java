@@ -518,6 +518,7 @@ public class BukkitPlayerEvents {
             pde = event;
         }
 
+		@Override
         public Object _GetObject() {
             return pde;
         }

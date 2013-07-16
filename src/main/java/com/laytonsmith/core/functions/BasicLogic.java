@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
@@ -481,7 +482,7 @@ public class BasicLogic {
 				} else {
 					optimizedTree.add(ret);
 				}
-				if (optimizedTree.size() == 1) {
+				if (children.size() == 1 && optimizedTree.size() == 1) {
 					//Oh. Well, we can just return this node then, though we have
 					//to surround it with g() so there are no side effects. However,
 					//if the function itself has no side effects, we can simply remove
@@ -500,8 +501,8 @@ public class BasicLogic {
 				}
 			}
 			if (optimizedTree.size() == 1) {
-				//The whole tree has been optimized out. Return void
-				return new ParseTree(new CVoid(t), new FileOptions(new HashMap<String, String>()));
+				//The whole tree has been optimized out. Return just the element
+				return optimizedTree.get(0);
 			}
 			node.setChildren(optimizedTree);
 			if(node.getChildren().isEmpty()){
@@ -2068,6 +2069,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@hide("This isn't a true function, and shouldn't be directly used. It will eventually be removed.")
 	public static class _elseif extends AbstractFunction implements Optimizable {
 
 		public String getName() {
@@ -2124,14 +2126,10 @@ public class BasicLogic {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			return Optimizable.PULL_ME_UP;
 		}
-
-		@Override
-		public boolean appearInDocumentation() {
-			return false;
-		}
 	}
 
 	@api
+	@hide("This isn't a true function, and shouldn't be used as such. Eventually this will be removed.")
 	public static class _else extends AbstractFunction {
 
 		public String getName() {
@@ -2175,11 +2173,6 @@ public class BasicLogic {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public boolean appearInDocumentation() {
-			return false;
 		}
 	}
 }

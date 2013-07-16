@@ -28,6 +28,7 @@ public abstract class AbstractDataSource implements DataSource {
 	private Set<DataSourceModifier> invalidModifiers;
 	private ConnectionMixin connectionMixin;
 	private ConnectionMixinFactory.ConnectionMixinOptions mixinOptions;
+	private boolean inTransaction = false;
 			
 	
 	protected AbstractDataSource() {
@@ -60,19 +61,36 @@ public abstract class AbstractDataSource implements DataSource {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final String get(String[] key) throws DataSourceException {
-		return get(key, false);
+		checkGet(key);
+		return get0(key);
+	}
+
+	@Override
+	public final void startTransaction(DaemonManager dm) {
+		inTransaction = true;
+		startTransaction0(dm);
+	}
+
+	@Override
+	public final void stopTransaction(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
+		inTransaction = false;
+		stopTransaction0(dm, rollback);
 	}
 	
 	/**
-	 * {@inheritDoc}
+	 * Returns true if we are currently in a transaction. Inside of the call to
+	 * stopTransaction, this will be false.
+	 * @return 
 	 */
-	public final String get(String[] key, boolean bypassTransient) throws DataSourceException {
-		if(!bypassTransient){
-			checkGet(key);
-		}
-		return get0(key, bypassTransient);
+	public boolean inTransaction(){
+		return inTransaction;
 	}
+	
+	protected abstract void startTransaction0(DaemonManager dm);
+	
+	protected abstract void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException;
 
 	@Override
 	public final boolean set(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
@@ -96,10 +114,9 @@ public abstract class AbstractDataSource implements DataSource {
 	 * Subclasses should implement this, instead of get(), as our version of get() does
 	 * some standard validation on the input.
 	 * @param key
-	 * @param bypassTransient
 	 * @return 
 	 */
-	protected abstract String get0(String[] key, boolean bypassTransient) throws DataSourceException;
+	protected abstract String get0(String[] key) throws DataSourceException;
 
 	/**
 	 * The default implementation of string simply walks through keySet, and
@@ -108,6 +125,7 @@ public abstract class AbstractDataSource implements DataSource {
 	 *
 	 * @return
 	 */
+	@Override
 	public Set<String> stringKeySet() throws DataSourceException {
 		Set<String> keys = new TreeSet<String>();
 		for (String[] key : keySet()) {
@@ -116,6 +134,7 @@ public abstract class AbstractDataSource implements DataSource {
 		return keys;
 	}
 
+	@Override
 	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException {
 		Set<String[]> list = new HashSet<String[]>();
 		String ns = StringUtils.Join(namespace, ".");
@@ -140,6 +159,7 @@ public abstract class AbstractDataSource implements DataSource {
 		return this.getClass().getAnnotation(datasource.class).value();
 	}
 
+	@Override
 	public final void addModifier(DataSourceModifier modifier) {
 		if (invalidModifiers != null && invalidModifiers.contains(modifier)) {
 			return;
@@ -155,6 +175,7 @@ public abstract class AbstractDataSource implements DataSource {
 	}
 		
 
+	@Override
 	public final boolean hasKey(String[] key) throws DataSourceException {
 		checkGet(key);
 		return hasKey0(key);
@@ -168,7 +189,7 @@ public abstract class AbstractDataSource implements DataSource {
 	 * @throws DataSourceException 
 	 */
 	protected boolean hasKey0(String[] key) throws DataSourceException{
-		return get(key, false) != null;
+		return get(key) != null;
 	}
 	
 	@Override
@@ -221,6 +242,7 @@ public abstract class AbstractDataSource implements DataSource {
 		}
 	}
 
+	@Override
 	public final boolean hasModifier(DataSourceModifier modifier) {
 		return modifiers.contains(modifier);
 	}
@@ -260,6 +282,7 @@ public abstract class AbstractDataSource implements DataSource {
 		}
 	}
 
+	@Override
 	public final Set<DataSourceModifier> getModifiers() {
 		return EnumSet.copyOf(modifiers);
 	}

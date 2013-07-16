@@ -627,7 +627,10 @@ public class MethodScriptCompilerTest {
     }
     
     @Test public void testSymbolicConcat() throws ConfigCompileException{
-        assertEquals("helloworld", SRun("g(assign(@hello, 'hello') assign(@world, 'world')) @hello.@world", fakePlayer));
+        SRun("@hello = 'hello'\n"
+				+ "@world = 'world'\n"
+				+ "msg(@hello.@world)", fakePlayer);
+		verify(fakePlayer).sendMessage("helloworld");
     }
     
     @Test public void testSymbolicLogic1() throws ConfigCompileException{

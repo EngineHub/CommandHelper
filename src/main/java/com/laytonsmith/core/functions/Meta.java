@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -318,6 +319,7 @@ public class Meta {
 
 	@api
 	@noprofile
+	@hide("This will eventually be replaced by ; statements.")
 	public static class g extends AbstractFunction {
 
 		public String getName() {

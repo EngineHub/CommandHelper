@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -437,7 +438,9 @@ public class Sandbox {
         }
     }
 	
-	@api public static class moo extends DummyFunction{
+	@api
+	@hide("This is an easter egg.")
+	public static class moo extends DummyFunction{
 
 		@Override
 		public Integer[] numArgs() {

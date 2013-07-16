@@ -35,15 +35,8 @@ public abstract class DummyFunction extends AbstractFunction{
 		return CHVersion.V0_0_0;
 	}
 
-	@Override
-	public boolean appearInDocumentation() {
-		return false;
-	}
-
 	public String getName() {
 		return this.getClass().getSimpleName();
 	}		
-	
-	
 	
 }

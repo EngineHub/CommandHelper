@@ -77,6 +77,7 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl{
 		return new ArrayList<ParseTree>(includes);
 	}
 
+	@Override
 	public EnvironmentImpl clone() throws CloneNotSupportedException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StreamUtils;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
@@ -50,12 +51,14 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * Most functions should show up in the normal documentation.
+	 * Most functions should show up in the normal documentation. However,
+	 * if this function shouldn't show up in the documentation, it should
+	 * mark itself with the @hide annotation.
 	 *
 	 * @return
 	 */
-	public boolean appearInDocumentation() {
-		return true;
+	public final boolean appearInDocumentation() {
+		return this.getClass().getAnnotation(hide.class) == null;
 	}
 
 	/**

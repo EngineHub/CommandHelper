@@ -38,6 +38,7 @@ public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlo
 		f.setDropItem(drop);
 	}
 
+	@Override
 	public Object getHandle() {
 		return f;
 	}

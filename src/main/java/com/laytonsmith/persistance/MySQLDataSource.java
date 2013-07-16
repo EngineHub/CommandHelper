@@ -22,11 +22,13 @@ public class MySQLDataSource extends AbstractDataSource{
 		super(uri, options);
 	}
 
+	@Override
 	public Set<String[]> keySet() {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public String get0(String[] key, boolean bypassTransient) throws DataSourceException {
+	@Override
+	public String get0(String[] key) throws DataSourceException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
@@ -35,14 +37,17 @@ public class MySQLDataSource extends AbstractDataSource{
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
+	@Override
 	public void populate() throws DataSourceException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
+	@Override
 	public DataSourceModifier[] implicitModifiers() {
 		return null;
 	}
 
+	@Override
 	public DataSourceModifier[] invalidModifiers() {
 		return null;
 	}
@@ -62,6 +67,16 @@ public class MySQLDataSource extends AbstractDataSource{
 
 	public CHVersion since() {
 		return CHVersion.V0_0_0;
+	}
+
+	@Override
+	protected void startTransaction0(DaemonManager dm) {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
+	}
+
+	@Override
+	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
 	}
 	
 }

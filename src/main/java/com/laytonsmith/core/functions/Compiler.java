@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -29,14 +30,17 @@ public class Compiler {
 
 	@api
 	@noprofile
+	@hide("This is only used internally by the compiler.")
 	public static class p extends DummyFunction {
 
 		private static final CVoid VOID = new CVoid(Target.UNKNOWN);
 
+		@Override
 		public String getName() {
 			return "p";
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {c...} Used internally by the compiler. You shouldn't use it.";
 		}
@@ -65,8 +69,10 @@ public class Compiler {
 
 	@api
 	@noprofile
+	@hide("This is only used internally by the compiler.")
 	public static class centry extends DummyFunction {
 
+		@Override
 		public String docs() {
 			return "CEntry {label, content} Dynamically creates a CEntry. This is used internally by the "
 					+ "compiler.";
@@ -79,6 +85,7 @@ public class Compiler {
 
 	@api
 	@noprofile
+	@hide("This is only used internally by the compiler.")
 	public static class __autoconcat__ extends DummyFunction implements Optimizable {
 
 		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t) {
@@ -101,6 +108,7 @@ public class Compiler {
 			throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
 		}
 
+		@Override
 		public String docs() {
 			return "string {var1, [var2...]} This function should only be used by the compiler, behavior"
 					+ " may be undefined if it is used in code.";
@@ -439,6 +447,7 @@ public class Compiler {
 	}
 
 	@api
+	@hide("This is only used for testing unexpected error handling.")
 	public static class npe extends DummyFunction {
 
 		@Override
@@ -466,8 +475,10 @@ public class Compiler {
 
 	@api
 	@noprofile
+	@hide("This is only used for testing.")
 	public static class dyn extends DummyFunction {
 
+		@Override
 		public String docs() {
 			return "exception {[argument]} Registers as a dynamic component, for optimization testing; that is"
 					+ " to say, this will not be optimizable ever."
@@ -483,6 +494,7 @@ public class Compiler {
 	}
 
 	@api
+	@hide("This is only used internally by the compiler, and will be removed at some point.")
 	public static class __cbracket__ extends DummyFunction implements Optimizable {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -516,6 +528,7 @@ public class Compiler {
 	}
 
 	@api
+	@hide("This is only used internally by the compiler, and will be removed at some point.")
 	public static class __cbrace__ extends DummyFunction implements Optimizable {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {

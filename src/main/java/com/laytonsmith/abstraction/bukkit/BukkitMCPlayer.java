@@ -80,6 +80,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return p.getFoodLevel();
     }
 
+	@Override
     public MCPlayerInventory getInventory() {
         if (p == null || p.getInventory() == null) {
             return null;
@@ -227,6 +228,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.kickPlayer(message);
     }
 
+	@Override
     public boolean removeEffect(int potionID) {
 		PotionEffectType t = PotionEffectType.getById(potionID);
 		boolean hasIt = false;
@@ -452,6 +454,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		p.setBedSpawnLocation((Location)l.getHandle(), true);
 	}
 
+	@Override
 	public MCEntity getVehicle() {
 		return new BukkitMCEntity(p.getVehicle());
 	}

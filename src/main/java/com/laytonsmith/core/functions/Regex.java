@@ -295,6 +295,8 @@ public class Regex {
     }
     
     @api public static class reg_split extends AbstractFunction implements Optimizable{
+		
+		private final static String split = new StringHandling.split().getName();
 
         public String getName() {
             return "reg_split";
@@ -312,7 +314,7 @@ public class Regex {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -357,10 +359,10 @@ public class Regex {
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)){
 					//We want to replace this with split()
-					ParseTree split = new ParseTree(new CFunction("split", t), data.getFileOptions());
-					split.addChildAt(0, new ParseTree(new CString(getLiteralRegex(pattern), t), split.getFileOptions()));
-					split.addChildAt(1, children.get(1));
-					return split;
+					ParseTree splitNode = new ParseTree(new CFunction(split, t), data.getFileOptions());
+					splitNode.addChildAt(0, new ParseTree(new CString(getLiteralRegex(pattern), t), splitNode.getFileOptions()));
+					splitNode.addChildAt(1, children.get(1));
+					return splitNode;
 				} else {
 					getPattern(data.getData(), t);
 				}

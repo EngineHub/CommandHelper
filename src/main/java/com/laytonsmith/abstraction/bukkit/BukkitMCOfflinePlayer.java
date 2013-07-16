@@ -24,6 +24,7 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
         return op.isOnline();
     }
 
+	@Override
     public String getName() {
         return op.getName();
     }

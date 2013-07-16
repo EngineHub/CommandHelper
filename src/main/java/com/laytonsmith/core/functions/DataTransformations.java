@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -19,8 +20,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.xpath.XPathExpressionException;
 import org.xml.sax.SAXException;
 import org.yaml.snakeyaml.DumperOptions;
@@ -236,7 +235,16 @@ public class DataTransformations {
 				throw new Exceptions.CastException("Expecting an associative array", t);
 			}
 			for(String key : arr.keySet()){
-				props.setProperty(key, arr.get(key).val());
+				Construct c = arr.get(key);
+				String val;
+				if(c instanceof CNull){
+					val = "";
+				} else if(c instanceof CArray){
+					throw new Exceptions.CastException("Arrays cannot be encoded with ini_encode.", t);
+				} else {
+					val = c.val();
+				}
+				props.setProperty(key, val);
 			}
 			StringWriter writer = new StringWriter();
 			try {
@@ -258,8 +266,12 @@ public class DataTransformations {
 		public String docs() {
 			return "string {array, [comment]} Encodes an array into an INI format output. An associative array is expected, and"
 					+ " a format exception is thrown if it is a normal array. The comment is optional, but if provided will"
-					+ " be added to the header of the returned string. All values are toString'd before output, so things like"
-					+ " arrays, if stored as a value, will not be returned as arrays.";
+					+ " be added to the header of the returned string. Inner arrays cannot be stored, and will"
+					+ " throw a CastException if attempted. Nulls are encoded as an empty string,"
+					+ " so when reading the value back in, the difference between '' and null is lost. All values are"
+					+ " stored as strings, so if 1 is stored, it will be returned as a string '1'. This is a limitation"
+					+ " of the ini format, as it is expected that the code that reads the ini knows what the type of the"
+					+ " data is anticipated, not the data itself.";
 		}
 
 		public Version since() {
@@ -311,7 +323,13 @@ public class DataTransformations {
 					+ " as a set of key->value pairs, which lends itself to an associative array format. Key value"
 					+ " pairs are denoted usually by a <code>key=value</code> format. The specific rules for"
 					+ " decoding an INI file can be found [http://docs.oracle.com/javase/6/docs/api/java/util/Properties.html#load%28java.io.Reader%29 here]."
-					+ " An associative array is returned.";
+					+ " An associative array is returned. All values are"
+					+ " stored as strings, so if 1 was stored, it will be returned as a string '1'. This is a limitation"
+					+ " of the ini format, as it is expected that the code that reads the ini knows what the type of the"
+					+ " data is anticipated, not the data itself. You can easily cast data that is expected to be numeric"
+					+ " via the {{function|integer}} and {{function|float}} functions when reading in the data if exact types"
+					+ " are truly needed. INI doesn't easily support non-string values, if that is needed, consider using"
+					+ " {{function|json_encode}}/{{function|json_decode}} instead.";
 		}
 
 		public Version since() {

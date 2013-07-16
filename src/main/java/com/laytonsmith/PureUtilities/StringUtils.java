@@ -168,33 +168,42 @@ public final class StringUtils {
 	 * @return The concatenated string
 	 */
 	public static String Join(Set set, String glue, String lastGlue, String glueForTwoItems, String empty) {
-		List list = new ArrayList(set);
-		if (lastGlue == null) {
-			lastGlue = glue;
-		}
-		if (glueForTwoItems == null) {
-			glueForTwoItems = lastGlue;
-		}
-		if (list.isEmpty()) {
-			return empty == null ? "" : empty;
-		} else if (list.size() == 2) {
-			StringBuilder b = new StringBuilder();
-			return b.append(list.get(0)).append(glueForTwoItems).append(list.get(1)).toString();
-		} else {
-			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < list.size(); i++) {
-				Object o = list.get(i);
-				if (i != 0) {
-					if (i == list.size() - 1) {
-						b.append(lastGlue);
-					} else {
-						b.append(glue);
-					}
-				}
-				b.append(o);
+		return Join(set, glue, lastGlue, glueForTwoItems, empty, null);
+	}
+	
+	/**
+	 * Joins a set together (using StringBuilder's {
+	 *
+	 * @see StringBuilder#append(Object)} method to "toString" the Object) using
+	 * the specified string for glue. If lastGlue is null, it is the same as
+	 * glue, but otherwise it is used to glue just the last two items together,
+	 * which is useful for sets that are being read by a human, to have a proper
+	 * conjunction at the end.
+	 * @param list The set to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the set, then this glue
+	 * is used instead. If it is null, then lastGlue is used instead.
+	 * @param empty If the set is completely empty, this string is simply
+	 * returned. If null, an empty string is used.
+	 * @return The concatenated string
+	 */
+	public static <T> String Join(Set<T> set, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer) {
+		final List<T> list = new ArrayList<T>(set);
+		return doJoin(new ItemGetter<T>() {
+
+			public T get(int index) {
+				return list.get(index);
 			}
-			return b.toString();
-		}
+
+			public int size() {
+				return list.size();
+			}
+
+			public boolean isEmpty() {
+				return list.isEmpty();
+			}
+		}, glue, lastGlue, glueForTwoItems, empty, renderer);
 	}
 
 	/**
@@ -264,32 +273,42 @@ public final class StringUtils {
 	 * @return The concatenated string
 	 */
 	public static String Join(Object[] list, String glue, String lastGlue, String glueForTwoItems, String empty) {
-		if (lastGlue == null) {
-			lastGlue = glue;
-		}
-		if (glueForTwoItems == null) {
-			glueForTwoItems = lastGlue;
-		}
-		if (list.length == 0) {
-			return empty == null ? "" : empty;
-		} else if (list.length == 2) {
-			StringBuilder b = new StringBuilder();
-			return b.append(list[0]).append(glueForTwoItems).append(list[1]).toString();
-		} else {
-			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < list.length; i++) {
-				Object o = list[i];
-				if (i != 0) {
-					if (i == list.length - 1) {
-						b.append(lastGlue);
-					} else {
-						b.append(glue);
-					}
-				}
-				b.append(o);
+		return Join(list, glue, lastGlue, glueForTwoItems, empty, null);
+	}
+	/**
+	 * Joins an array together (using StringBuilder's {
+	 *
+	 * @see StringBuilder#append(Object)} method to "toString" the Object) using
+	 * the specified string for glue. If lastGlue is null, it is the same as
+	 * glue, but otherwise it is used to glue just the last two items together,
+	 * which is useful for lists that are being read by a human, to have a
+	 * proper conjunction at the end.
+	 * @param list The array to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the array, then this glue
+	 * is used instead. If it is null, then lastGlue is used instead.
+	 * @param empty If the array is completely empty, this string is simply
+	 * returned. If null, an empty string is used.
+	 * @param renderer The item renderer. This renders each item in the list, one at a time.
+	 * If null, toString will be used by default on each item.
+	 * @return The concatenated string
+	 */
+	public static String Join(final Object[] list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<Object> renderer) {
+		return doJoin(new ItemGetter<Object>() {
+
+			public Object get(int index) {
+				return list[index];
 			}
-			return b.toString();
-		}
+
+			public int size() {
+				return list.length;
+			}
+
+			public boolean isEmpty() {
+				return list.length == 0;
+			}
+		}, glue, lastGlue, glueForTwoItems, empty, renderer);
 	}
 
 	/**
@@ -358,33 +377,118 @@ public final class StringUtils {
 	 * returned. If null, an empty string is used.
 	 * @return The concatenated string
 	 */
-	public static String Join(List list, String glue, String lastGlue, String glueForTwoItems, String empty) {
+	public static String Join(final List list, String glue, String lastGlue, String glueForTwoItems, String empty) {
+		return Join(list, glue, lastGlue, glueForTwoItems, empty, null);
+	}
+	
+	/**
+	 * Joins a list together (using StringBuilder's {
+	 *
+	 * @see StringBuilder#append(Object)} method to "toString" the Object) using
+	 * the specified string for glue. If lastGlue is null, it is the same as
+	 * glue, but otherwise it is used to glue just the last two items together,
+	 * which is useful for lists that are being read by a human, to have a
+	 * proper conjunction at the end.
+	 * @param list The list to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the list, then this glue
+	 * is used instead. If it is null, then lastGlue is used instead.
+	 * @param empty If the list is completely empty, this string is simply
+	 * returned. If null, an empty string is used.
+	 * @param renderer The item renderer. This renders each item in the list, one at a time.
+	 * If null, toString will be used by default on each item.
+	 * @return The concatenated string
+	 */
+	public static <T> String Join(final List<T> list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer) {
+		return doJoin(new ItemGetter<T>() {
+
+			public T get(int index) {
+				return list.get(index);
+			}
+
+			public int size() {
+				return list.size();
+			}
+
+			public boolean isEmpty() {
+				return list.isEmpty();
+			}
+		}, glue, lastGlue, glueForTwoItems, empty, renderer);
+	}
+	
+	/**
+	 * Abstracted version of the join algorithm.
+	 * @param <T>
+	 * @param items
+	 * @param glue
+	 * @param lastGlue
+	 * @param glueForTwoItems
+	 * @param empty
+	 * @param renderer
+	 * @return 
+	 */
+	private static <T> String doJoin(ItemGetter<T> items, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer){
+		if(renderer == null){
+			renderer = new Renderer<T>() {
+
+				public String toString(T item) {
+					if(item == null){
+						return "null";
+					} else {
+						return item.toString();
+					}
+				}
+			};
+		}
 		if (lastGlue == null) {
 			lastGlue = glue;
 		}
 		if (glueForTwoItems == null) {
 			glueForTwoItems = lastGlue;
 		}
-		if (list.isEmpty()) {
+		if (items.isEmpty()) {
 			return empty == null ? "" : empty;
-		} else if (list.size() == 2) {
+		} else if (items.size() == 2) {
 			StringBuilder b = new StringBuilder();
-			return b.append(list.get(0)).append(glueForTwoItems).append(list.get(1)).toString();
+			return b.append(renderer.toString(items.get(0)))
+					.append(glueForTwoItems)
+					.append(renderer.toString(items.get(1))).toString();
 		} else {
 			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < list.size(); i++) {
-				Object o = list.get(i);
+			for (int i = 0; i < items.size(); i++) {
+				T o = items.get(i);
 				if (i != 0) {
-					if (i == list.size() - 1) {
+					if (i == items.size() - 1) {
 						b.append(lastGlue);
 					} else {
 						b.append(glue);
 					}
 				}
-				b.append(o);
+				b.append(renderer.toString(o));
 			}
 			return b.toString();
 		}
+	}
+	
+	private static interface ItemGetter<T> {
+		T get(int index);
+		int size();
+		boolean isEmpty();
+	}
+	
+	/**
+	 * Used to provide a renderer for each item when glueing the items
+	 * together.
+	 * @param <T> The type of each item
+	 */
+	public static interface Renderer<T> {
+		/**
+		 * 
+		 * @param item
+		 * @return 
+		 */
+		String toString(T item);
 	}
 
 	private static int minimum(int a, int b, int c) {
@@ -691,5 +795,47 @@ public final class StringUtils {
 		} else {
 			return String.format(pluralTemplate, count);
 		}
+	}
+	
+	/**
+	 * This is the system newline string. For instance, on windows, this would
+	 * likely be \r\n, and unix systems would likely be \n.
+	 */
+	public static final String nl = System.getProperty("line.separator");
+	
+	/**
+	 * This returns the system newline string. For instance, on windows, this would
+	 * likely return \r\n, and unix systems would likely return \n.
+	 * @return The system newline string.
+	 */
+	public static String nl(){
+		return nl;
+	}
+	
+	/**
+	 * Multiplies a string. For instance, stringMultiply(3, "abc") would
+	 * return "abcabcabc". If count is 0, an empty string is returned, and
+	 * if count is 1, the character sequence itself is returned.
+	 * @param count The repeat count
+	 * @param s The sequence to repeat
+	 * @return The multiplied string
+	 * @throws IllegalArgumentException If count is less than 0.
+	 */
+	public static String stringMultiply(int count, CharSequence s){
+		if(count < 0){
+			throw new IllegalArgumentException("Count must be greater than or equal to 0");
+		}
+		if(count == 0){
+			return "";
+		}
+		if(count == 1){
+			return s.toString();
+		}
+		//Ok, actually have to do the multiply now.
+		StringBuilder b = new StringBuilder();
+		for(int i = 0; i < count; i++){
+			b.append(s);
+		}
+		return b.toString();
 	}
 }

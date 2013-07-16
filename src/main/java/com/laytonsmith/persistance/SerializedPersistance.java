@@ -36,6 +36,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	 * will break all current serialized databases.
 	 */
 	private HashMap<String, String> data = new HashMap<String, String>();
+	private HashMap<String, String> transactionData = new HashMap<String, String>();
 	private boolean isLoaded = false;
 	private boolean finishedInitializing = false;
 	private static RunnableQueue queue = new RunnableQueue("SerializedPersistanceQueue");
@@ -141,46 +142,48 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	 */
 	@Override
 	public void save(final DaemonManager dm) throws IOException{
-		if(writer == null){
-			writer = MemoryMapFileUtil.getInstance(storageLocation, grabber);
-		}
-		queue.invokeLater(dm, new Runnable() {
-			public void run() {
-				ObjectOutputStream out = null;
-				ByteArrayOutputStream baos = null;
-				try {
-					if (storageLocation.getParentFile() != null) {
-						storageLocation.getParentFile().mkdirs();
-					}
-					if (!storageLocation.exists()) {
-						storageLocation.createNewFile();
-					}
-//					fos = new FileOutputStream(storageLocation);
-					baos = new ByteArrayOutputStream();
-					out = new ObjectOutputStream(baos);
-					out.writeObject(new HashMap(data));
-					byteData = baos.toByteArray();
-					writer.mark(dm);
-				} catch (IOException ex) {
-					Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
-				} finally {
+		if(!inTransaction()){
+			if(writer == null){
+				writer = MemoryMapFileUtil.getInstance(storageLocation, grabber);
+			}
+			queue.invokeLater(dm, new Runnable() {
+				public void run() {
+					ObjectOutputStream out = null;
+					ByteArrayOutputStream baos = null;
 					try {
-						if (baos != null) {
-							baos.close();
+						if (storageLocation.getParentFile() != null) {
+							storageLocation.getParentFile().mkdirs();
 						}
+						if (!storageLocation.exists()) {
+							storageLocation.createNewFile();
+						}
+	//					fos = new FileOutputStream(storageLocation);
+						baos = new ByteArrayOutputStream();
+						out = new ObjectOutputStream(baos);
+						out.writeObject(new HashMap(data));
+						byteData = baos.toByteArray();
+						writer.mark(dm);
 					} catch (IOException ex) {
 						Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
-					}
-					try {
-						if (out != null) {
-							out.close();
+					} finally {
+						try {
+							if (baos != null) {
+								baos.close();
+							}
+						} catch (IOException ex) {
+							Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
 						}
-					} catch (IOException ex) {
-						Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
+						try {
+							if (out != null) {
+								out.close();
+							}
+						} catch (IOException ex) {
+							Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	/**
@@ -210,9 +213,9 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 		return oldVal;
 	}
 
-	private String getValue(String key, boolean bypassTransient) {
+	private String getValue(String key) {
 		//defer loading until we actually try and use the data structure
-		if (isLoaded == false && !bypassTransient) {
+		if (isLoaded == false) {
 			try {
 				load();
 			} catch (Exception ex) {
@@ -259,7 +262,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	 * @return
 	 */
 	public String getValue(String[] key) {
-		return getValue(getNamespace0(key), false);
+		return getValue(getNamespace0(key));
 	}
 
 	/**
@@ -388,6 +391,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 		}
 	}
 
+	@Override
 	public Set<String[]> keySet() {
 		Set<String[]> list = new HashSet<String[]>();
 		for (String key : data.keySet()) {
@@ -396,16 +400,19 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 		return list;
 	}
 
-	public String get0(String[] key, boolean bypassTransient) {
-		return getValue(StringUtils.Join(key, "."), bypassTransient);
+	@Override
+	public String get0(String[] key) {
+		return getValue(StringUtils.Join(key, "."));
 	}
 
+	@Override
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, IOException {
 		setValue(dm, key, value);
 		save(dm);
 		return true;
 	}
 
+	@Override
 	public void populate() throws DataSourceException {
 		if (!finishedInitializing) {
 			return;
@@ -417,10 +424,12 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 		}
 	}
 
+	@Override
 	public DataSourceModifier[] implicitModifiers() {
 		return null;
 	}
 
+	@Override
 	public DataSourceModifier[] invalidModifiers() {
 		return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.PRETTYPRINT};
 	}
@@ -435,5 +444,21 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 
 	public CHVersion since() {
 		return CHVersion.V3_0_2;
+	}
+
+	@Override
+	protected void startTransaction0(DaemonManager dm) {
+		//Save the existing data
+		transactionData = (HashMap<String, String>) data.clone();
+	}
+
+	@Override
+	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
+		if(!rollback){
+			save(dm);
+		} else {
+			data = transactionData;
+		}
+		transactionData = null;
 	}
 }
