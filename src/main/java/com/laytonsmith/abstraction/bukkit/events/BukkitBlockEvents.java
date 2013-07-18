@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 
@@ -89,6 +90,24 @@ public class BukkitBlockEvents {
 
         public MCBlockState getBlockReplacedState() {            
             return new BukkitMCBlockState(event.getBlockReplacedState());
+        }
+    }
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
+    public static class BukkitMCBlockBurnEvent implements MCBlockBurnEvent {
+
+        BlockBurnEvent event;
+
+        public BukkitMCBlockBurnEvent(BlockBurnEvent e) {
+            event = e;
+        }
+
+        public Object _GetObject() {
+            return event;
+        }
+
+        public MCBlock getBlock() {
+            return new BukkitMCBlock(event.getBlock());
         }
     }
 
