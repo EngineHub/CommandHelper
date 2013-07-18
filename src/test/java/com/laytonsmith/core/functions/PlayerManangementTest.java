@@ -135,8 +135,8 @@ public class PlayerManangementTest {
 
     @Test(timeout = 10000)
     public void testKill() throws ConfigCompileException {
-        Run("kill()", fakePlayer);
-        Run("kill('" + fakePlayer.getName() + "')", fakePlayer);
+        Run("pkill()", fakePlayer);
+        Run("pkill('" + fakePlayer.getName() + "')", fakePlayer);
         verify(fakePlayer, times(2)).setHealth(0);
     }
 
@@ -148,7 +148,7 @@ public class PlayerManangementTest {
     
     @Test
     public void testPlayerNotProvided() throws ConfigCompileException{
-        assertEquals("success", SRun("try(kill(), assign(@success, 'success')) @success", null));        
+        assertEquals("success", SRun("try(pkill(), assign(@success, 'success')) @success", null));        
     }
     
     @Test
