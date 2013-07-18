@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
@@ -467,6 +468,49 @@ public class PlayerManagement {
 		}
 	}
 	
+	@api
+	public static class ptarget_space extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(args.length > 0){
+				p = Static.GetPlayer(args[0], t);
+			}
+			Static.AssertPlayerNonNull(p, t);
+			List<MCBlock> blocks = p.getLastTwoTargetBlocks(null, 10000);
+			return ObjectGenerator.GetGenerator().location(blocks.get(0).getLocation());
+		}
+
+		public String getName() {
+			return "ptarget_space";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pkill extends AbstractFunction {
 		
