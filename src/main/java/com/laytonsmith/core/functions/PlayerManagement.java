@@ -472,7 +472,7 @@ public class PlayerManagement {
 	public static class ptarget_space extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {
