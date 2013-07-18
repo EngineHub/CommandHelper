@@ -56,6 +56,11 @@ public interface MCLivingEntity extends MCEntity {
     public void setNoDamageTicks(int ticks);
     public void setRemainingAir(int ticks);
 	public void setTarget(MCLivingEntity target, Target t);
+	/**
+	 * Kills the entity. In some cases, this will be equivalent to setHealth(0), but
+	 * may not be, so this method should be used instead.
+	 */
+	public void kill();
 
 	public static class MCEffect{
 

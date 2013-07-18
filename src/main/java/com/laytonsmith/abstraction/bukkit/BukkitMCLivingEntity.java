@@ -26,6 +26,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
@@ -329,5 +330,10 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 
 	public void setCustomNameVisible(boolean visible) {
 		le.setCustomNameVisible(visible);
+	}
+	
+	public void kill(){
+		le.setLastDamageCause(new EntityDamageEvent(le, EntityDamageEvent.DamageCause.CUSTOM, le.getHealth()));
+		le.setHealth(0D);
 	}
 }
