@@ -137,7 +137,7 @@ public class PlayerManangementTest {
     public void testKill() throws ConfigCompileException {
         Run("pkill()", fakePlayer);
         Run("pkill('" + fakePlayer.getName() + "')", fakePlayer);
-        verify(fakePlayer, times(2)).setHealth(0);
+        verify(fakePlayer, times(2)).kill();
     }
 
     //@Test(timeout=10000)

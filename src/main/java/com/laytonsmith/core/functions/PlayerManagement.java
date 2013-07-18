@@ -502,7 +502,8 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "";
+			return "{[player]} Returns the \"target space\" that the player is currently targetting. This is the \"space\" where"
+					+ " if they placed a block (and were close enough), it would end up going.";
 		}
 
 		public Version since() {
