@@ -375,6 +375,17 @@
 			<artifactId>named-regexp</artifactId>
 			<version>0.1.9</version>
 		</dependency>
+		<!-- If ASM doesn't end up working out, this could also be used
+		<dependency>
+			<groupId>org.apache.bcel</groupId>
+			<artifactId>bcel</artifactId>
+			<version>6.0-SNAPSHOT</version>
+		</dependency>-->
+		<dependency>
+			<groupId>asm</groupId>
+			<artifactId>asm-all</artifactId>
+			<version>3.3.1</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<site>
@@ -502,6 +513,8 @@
 									<include>mysql:mysql-connector-java:jar:*</include>
 									<include>commons-codec:commons-codec:jar:*</include>
 									<include>com.github.tony19:named-regexp:jar:*</include>
+									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
+									<include>asm:asm-all:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -566,6 +579,14 @@
 								<relocation>
 									<pattern>com.google.code.regexp</pattern>
 									<shadedPattern>com.laytonsmith.libs.com.google.code.regexp</shadedPattern>
+								</relocation>
+								<!--<relocation>
+									<pattern>org.apache.bcel</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.bcel</shadedPattern>
+								</relocation>-->
+								<relocation>
+									<pattern>org.objectweb.asm</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.objectweb.asm</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -644,6 +665,18 @@
 								</filter>
 								<filter>
 									<artifact>com.github.tony19:named-regexp:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<!--<filter>
+									<artifact>org.apache.bcel:bcel:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>-->
+								<filter>
+									<artifact>asm:asm-all:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>

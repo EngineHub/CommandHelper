@@ -1,42 +1,29 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.SimpleVersion;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.functions.Regex;
-import com.laytonsmith.core.functions.StringHandling;
-import com.laytonsmith.database.DB;
-import com.laytonsmith.database.MySQL;
-import java.net.InetAddress;
-import java.sql.ResultSet;
-
 /**
  * This class is for testing concepts
- *
- * @author Layton
  */
 public class MainSandbox {
 
 	public static void main(String[] argv) throws Exception {
-		System.exit(0);
-		//URI information
-		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
-		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file",
-		"sqlite://../../file.db?query"};
-		for (String s : uris) {
-			java.net.URI uri = new java.net.URI(s);
-			System.out.println("For the URI " + uri.toString() + ", the following are set:");
-			System.out.println("Scheme: " + uri.getScheme());
-			System.out.println("Scheme specific part: " + uri.getSchemeSpecificPart());
-			System.out.println("Authority: " + uri.getAuthority());
-			System.out.println("User info: " + uri.getUserInfo());
-			System.out.println("Host: " + uri.getHost());
-			System.out.println("Port: " + uri.getPort());
-			System.out.println("Path: " + uri.getPath());
-			System.out.println("Query: " + uri.getQuery());
-			System.out.println("Fragment: " + uri.getFragment());
-			System.out.println("\n\n***********************************\n\n");
-		}
+//		//URI information
+//		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
+//		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file",
+//		"sqlite://../../file.db?query"};
+//		for (String s : uris) {
+//			java.net.URI uri = new java.net.URI(s);
+//			System.out.println("For the URI " + uri.toString() + ", the following are set:");
+//			System.out.println("Scheme: " + uri.getScheme());
+//			System.out.println("Scheme specific part: " + uri.getSchemeSpecificPart());
+//			System.out.println("Authority: " + uri.getAuthority());
+//			System.out.println("User info: " + uri.getUserInfo());
+//			System.out.println("Host: " + uri.getHost());
+//			System.out.println("Port: " + uri.getPort());
+//			System.out.println("Path: " + uri.getPath());
+//			System.out.println("Query: " + uri.getQuery());
+//			System.out.println("Fragment: " + uri.getFragment());
+//			System.out.println("\n\n***********************************\n\n");
+//		}
 		
 		//Execution queue usage
 //		final ExecutionQueue queue = new ExecutionQueue("Test", "default");
