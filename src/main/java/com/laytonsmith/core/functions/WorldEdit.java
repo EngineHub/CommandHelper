@@ -237,7 +237,8 @@ public class WorldEdit {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PluginInternalException};
+			return new ExceptionType[]{ExceptionType.PluginInternalException, 
+				ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
