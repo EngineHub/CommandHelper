@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCPlayer;
@@ -11,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -124,5 +123,12 @@ public class BukkitEntityListener implements Listener{
 		BukkitEntityEvents.BukkitMCItemSpawnEvent is = new BukkitEntityEvents.BukkitMCItemSpawnEvent(event);
 		EventUtils.TriggerExternal(is);
 		EventUtils.TriggerListener(Driver.ITEM_SPAWN, "item_spawn", is);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onChangeBlock(EntityChangeBlockEvent event) {
+		BukkitEntityEvents.BukkitMCEntityChangeBlockEvent ecbe = new BukkitEntityEvents.BukkitMCEntityChangeBlockEvent(event);
+		EventUtils.TriggerExternal(ecbe);
+		EventUtils.TriggerListener(Driver.ENTITY_CHANGE_BLOCK, "entity_change_block", ecbe);
 	}
 }

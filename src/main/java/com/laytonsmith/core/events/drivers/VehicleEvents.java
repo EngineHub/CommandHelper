@@ -1,16 +1,21 @@
 package com.laytonsmith.core.events.drivers;
 
-import java.util.Map;
-
+import com.laytonsmith.PureUtilities.Geometry.Point3D;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCVehicle;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCCollisionType;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnitityCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnterExitEvent;
+import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -24,12 +29,26 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventBuilder;
+import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -271,6 +290,289 @@ public class VehicleEvents {
 		}
 
 		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class vehicle_move extends AbstractEvent {
+
+		private static Thread thread = null;
+		private Set<Integer> thresholdList = new HashSet<Integer>();
+		private Map<Integer, Map<Integer, MCLocation>> thresholds = new HashMap<Integer, Map<Integer, MCLocation>>();
+
+		@Override
+		public void hook() {
+			if (thread == null) {
+				thresholdList.clear();
+				thresholdList.add(1);
+				thread = new Thread(new Runnable() {
+					public void run() {
+						outerLoop:
+						while (true) {
+							if (thread == null) {
+								return; //Kill it
+							}
+
+							List<MCVehicle> vehicles = null;
+							try {
+								vehicles = Static.getVehicles();
+							} catch (ConcurrentModificationException ex) {
+								continue outerLoop;
+							}
+
+							for (final MCVehicle v : vehicles) {
+								//We need to loop through all the thresholds
+								//and see if any of the points meet them. If so,
+								//we know we need to fire the event. If none of them
+								//match, carry on with the next vehicle. As soon as
+								//one matches though, we can't quit the loop, because
+								//we have to set all the thresholds.
+								thresholdLoop:
+								for (Integer i : thresholdList) {
+									if (thresholds.containsKey(i) && thresholds.get(i).containsKey(v.getEntityId())) {
+										final MCLocation last = thresholds.get(i).get(v.getEntityId());
+										final MCLocation current = ((MCEntity) v).asyncGetLocation();
+										if (!v.getWorld().getName().equals(last.getWorld().getName())) {
+											//They moved worlds. simply put their new location in here, then
+											//continue.
+											thresholds.get(i).put(v.getEntityId(), v.getLocation());
+											continue thresholdLoop;
+										}
+										Point3D lastPoint = new Point3D(last.getX(), last.getY(), last.getZ());
+										Point3D currentPoint = new Point3D(current.getX(), current.getY(), current.getZ());
+										double distance = lastPoint.distance(currentPoint);
+										if (distance > i) {
+											//We've met the threshold.
+											//Well, we're still not sure. To run the prefilters on this thread,
+											//we're gonna simulate a prefilter match now. We have to run this manually,
+											//because each bind could have a different threshold, and it will be expecting
+											//THIS from location. Other binds will be expecting other from locations.
+											final MCVehicleMoveEvent fakeEvent = new MCVehicleMoveEvent() {
+												boolean cancelled = false;
+
+												public MCLocation getFrom() {
+													return last;
+												}
+
+												public MCLocation getTo() {
+													return current;
+												}
+
+												public Object _GetObject() {
+													return null;
+												}
+
+												public void setCancelled(boolean state) {
+													cancelled = state;
+												}
+
+												public boolean isCancelled() {
+													return cancelled;
+												}
+
+												public MCVehicle getVehicle() {
+													return v;
+												}
+											};
+											//We need to run the prefilters on this thread, so we have
+											//to do this all by hand.
+											final SortedSet<BoundEvent> toRun = EventUtils.GetMatchingEvents(Driver.VEHICLE_MOVE, vehicle_move.this.getName(), fakeEvent, vehicle_move.this);
+											//Ok, now the events to be run need to actually be run on the main server thread, so let's run that now.
+											try {
+												StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+													public Object call() throws Exception {
+														EventUtils.FireListeners(toRun, vehicle_move.this, fakeEvent);
+														return null;
+													}
+												});
+											} catch (Exception ex) {
+												Logger.getLogger(VehicleEvents.class.getName()).log(Level.SEVERE, null, ex);
+											}
+											if (fakeEvent.isCancelled()) {
+												//Put them back at the from location
+												v.teleport(last);
+											} else {
+												thresholds.get(i).put(v.getEntityId(), current);
+											}
+										}
+									} else {
+										//If there is no location here, just put the current location in there.
+										if (!thresholds.containsKey(i)) {
+											Map<Integer, MCLocation> map = new HashMap<Integer, MCLocation>();
+											thresholds.put(i, map);
+										}
+										thresholds.get(i).put(v.getEntityId(), v.asyncGetLocation());
+									}
+								}
+								synchronized (vehicle_move.this) {
+									try {
+										//Throttle this thread just a little
+										vehicle_move.this.wait(10);
+									} catch (InterruptedException ex) {
+										//
+									}
+								}
+							}
+						}
+					}
+				}, Implementation.GetServerType().getBranding() + "VehicleMoveEventRunner");
+				thread.start();
+				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+					public void run() {
+						thread = null;
+					}
+				});
+			}
+		}
+
+		@Override
+		public void bind(Map<String, Construct> prefilters) {
+			if (prefilters.containsKey("threshold")) {
+				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+				thresholdList.add(i);
+			}
+		}
+
+		public String getName() {
+			return "vehicle_move";
+		}
+
+		public String docs() {
+			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
+					+ " the enitytype of the passenger} Fires when an vehicle is moving."
+					+ " {from: Get the previous position | to: Get the next position"
+					+ " | vehicletype | passengertype | id: entityID | passenger: entityID"
+					+ " | player: player name if passenger is a player, null otherwise}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public void cancel(BindableEvent o, boolean state) {
+			if (o instanceof MCVehicleMoveEvent) {
+				((MCVehicleMoveEvent) o).setCancelled(state);
+			}
+		}
+
+		@Override
+		public boolean isCancellable(BindableEvent o) {
+			return true;
+		}
+
+		@Override
+		public boolean isCancelled(BindableEvent o) {
+			if (o instanceof MCVehicleMoveEvent) {
+				return ((MCVehicleMoveEvent) o).isCancelled();
+			} else {
+				return false;
+			}
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCVehicleMoveEvent) {
+				MCVehicleMoveEvent event = (MCVehicleMoveEvent) e;
+
+				if (!event.getFrom().getWorld().getName().equals(event.getTo().getWorld().getName())) {
+					return false;
+				}
+
+				if (prefilter.containsKey("threshold")) {
+					Point3D from = new Point3D(event.getFrom().getX(), event.getFrom().getY(), event.getFrom().getZ());
+					Point3D to = new Point3D(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ());
+					double distance = from.distance(to);
+					double pDistance = Static.getNumber(prefilter.get("threshold"), Target.UNKNOWN);
+					if (pDistance > distance) {
+						return false;
+					}
+				}
+				if (prefilter.containsKey("from")) {
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getVehicle().getVehicle().getWorld(), Target.UNKNOWN);
+					MCLocation loc = event.getFrom();
+					if (loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
+						return false;
+					}
+				}
+				if (prefilter.containsKey("to")) {
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getVehicle().getVehicle().getWorld(), Target.UNKNOWN);
+					MCLocation loc = event.getFrom();
+					if (loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
+						return false;
+					}
+				}
+
+				Prefilters.match(prefilter, "vehicletype", event.getVehicle().getType().name(), PrefilterType.MACRO);
+				MCEntity passenger = event.getVehicle().getPassenger();
+				if (passenger != null) {
+					Prefilters.match(prefilter, "passengertype", passenger.getType().name(), PrefilterType.MACRO);
+				}
+
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+
+			int id = Static.getInt32(manualObject.get("id"), Target.UNKNOWN);
+			MCEntity e = Static.getEntity(id, Target.UNKNOWN);
+			if (!(e instanceof MCVehicle)) {
+				throw new ConfigRuntimeException("The id was not a vehicle",
+						ExceptionType.BadEntityException, Target.UNKNOWN);
+			}
+
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), e.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), e.getWorld(), manualObject.getTarget());
+			return EventBuilder.instantiate(MCVehicleMoveEvent.class, e, from, to);
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCVehicleMoveEvent) {
+				MCVehicleMoveEvent e = (MCVehicleMoveEvent) event;
+				Target t = Target.UNKNOWN;
+				Map<String, Construct> ret = evaluate_helper(e);
+				ret.put("from", ObjectGenerator.GetGenerator().location(((MCVehicleMoveEvent) e).getFrom()));
+				ret.put("to", ObjectGenerator.GetGenerator().location(((MCVehicleMoveEvent) e).getTo()));
+				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
+				ret.put("id", new CInt(e.getVehicle().getEntityId(), t));
+
+				MCEntity passenger = e.getVehicle().getPassenger();
+
+				if (passenger == null) {
+					ret.put("passenger", new CNull(t));
+					ret.put("passengertype", new CNull(t));
+					ret.put("player", new CNull(t));
+				} else {
+
+					MCEntityType passengertype = e.getVehicle().getPassenger().getType();
+
+					ret.put("passengertype", new CString(passengertype.name(), t));
+					ret.put("passenger", new CInt(passenger.getEntityId(), t));
+
+					if (passengertype == MCEntityType.PLAYER) {
+						ret.put("player", new CString(((MCPlayer) e.getVehicle().getPassenger()).getName(), t));
+					} else {
+						ret.put("player", new CNull(t));
+					}
+				}
+
+
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCVehicleMoveEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.VEHICLE_MOVE;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			//Nothing can be modified, so always return false
+			return false;
+		}
+
+		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 	}

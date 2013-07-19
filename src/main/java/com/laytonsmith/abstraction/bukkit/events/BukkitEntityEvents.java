@@ -1,8 +1,8 @@
-
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItem;
@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCProjectile;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -30,6 +31,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -471,6 +473,43 @@ public class BukkitEntityEvents {
 	
 		public MCLocation getLocation() {
 			return new BukkitMCLocation(epe.getLocation());
+		}
+	}
+
+	public static class BukkitMCEntityChangeBlockEvent implements MCEntityChangeBlockEvent {
+
+		EntityChangeBlockEvent ecb;
+
+		public BukkitMCEntityChangeBlockEvent(EntityChangeBlockEvent event) {
+			ecb = event;
+		}
+
+		public MCEntity getEntity() {
+			return new BukkitMCEntity(ecb.getEntity());
+		}
+
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(ecb.getBlock());
+		}
+
+		public MCMaterial getTo() {
+			return new BukkitMCMaterial(ecb.getTo());
+		}
+
+		public byte getData() {
+			return ecb.getData();
+		}
+
+		public boolean isCancelled() {
+			return ecb.isCancelled();
+		}
+
+		public void setCancelled(boolean cancelled) {
+			ecb.setCancelled(cancelled);
+		}
+
+		public Object _GetObject() {
+			return ecb;
 		}
 	}
 }

@@ -9,7 +9,6 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
-import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.*;
@@ -30,7 +29,6 @@ import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.StringHandling;
 
-import java.net.BindException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -319,14 +317,16 @@ public class PlayerEvents {
 			return "{player: <macro> | from: <custom> This should be a location array (x, y, z, world)."
 					+ " The location is matched via block matching, so if the array's x parameter were 1, if the player"
 					+ "moved from 1.3, that parameter would match."
-                    + "| to: <custom> The location the player is coming to. This should be a location array as well."
-					+ "type: the type of portal occuring, one of: " +  StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
+                    + " | to: <custom> The location the player is coming to. This should be a location array as well."
+					+ " | type: the type of portal occuring, one of: " +  StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 					+ "Fired when a player collides with portal."
 					+ "{player: The player that teleport | from: The location the player is coming from"
-					+ "| to: The location the player is coming to. Returns null when using Nether portal and \"allow-nether\""
+					+ " | to: The location the player is coming to. Returns null when using Nether portal and \"allow-nether\""
 					+ " in server.properties is set to false or when using Ender portal and \"allow-end\" in bukkit.yml"
-					+ " is set to false. | type: the type of portal occuring}"
-					+ "{to}"
+					+ " is set to false. | type: the type of portal occuring | creationradius: Gets the maximum radius from"
+					+ " the given location to create a portal. | searchradius: Gets the search radius value for finding"
+					+ " an available portal.}"
+					+ "{to|creationradius|searchradius}"
 					+ "{}";
 		}
 
@@ -348,7 +348,7 @@ public class PlayerEvents {
 					}
 				}
 
-				if(prefilter.containsKey("to")) {
+				if (prefilter.containsKey("to")) {
 					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getPlayer().getWorld(), Target.UNKNOWN);
 					MCLocation loc = event.getTo();
 
@@ -387,7 +387,8 @@ public class PlayerEvents {
 					map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
 				}
 				map.put("type", new CString(event.getCause().toString(), Target.UNKNOWN));
-
+				map.put("creationradius", new CInt(event.getPortalTravelAgent().getCreationRadius(), Target.UNKNOWN));
+				map.put("searchradius", new CInt(event.getPortalTravelAgent().getSearchRadius(), Target.UNKNOWN));
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPlayerPortalEvent");
@@ -405,10 +406,21 @@ public class PlayerEvents {
 				MCPlayerPortalEvent e = (MCPlayerPortalEvent)event;
 
 				if (key.equalsIgnoreCase("to")) {
+					e.useTravelAgent(true);
 					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
 					e.setTo(loc);
-					e.useTravelAgent(true);
+					return true;
+				}
 
+				if (key.equalsIgnoreCase("creationradius")) {
+					e.useTravelAgent(true);
+					e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+
+				if (key.equalsIgnoreCase("searchradius")) {
+					e.useTravelAgent(true);
+					e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, Target.UNKNOWN));
 					return true;
 				}
 			}
@@ -764,6 +776,7 @@ public class PlayerEvents {
                             new CInt(b.getY(), Target.UNKNOWN), new CInt(b.getZ(), Target.UNKNOWN),
                             new CString(b.getWorld().getName(), Target.UNKNOWN)));
                 }
+				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
                 map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
                 return map;
             } else {
@@ -1531,6 +1544,7 @@ public class PlayerEvents {
 		 * 4. Figure out why the cancel() isn't working.
 		 * 5. Tie this in to player teleport events. Probably set a prefilter that determines
 		 * whether or not a teleport should count as a movement or not.
+		 * 6. Remember to change also vehicle_move and entity_change_block, if needed.
 		 */
 
 		private static Thread thread = null;

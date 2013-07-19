@@ -702,7 +702,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			int maxIndex = 18;
 			if (index < -1 || index > maxIndex) {
-				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and " + maxIndex,
+				throw new ConfigRuntimeException(this.getName() + " expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
 			}
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
