@@ -159,7 +159,7 @@ public class BukkitMCWorld implements MCWorld {
         w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), e, data);
     }
 
-	public void playSound(MCLocation l, MCSound sound, int volume, int pitch) {
+	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
 		w.playSound(((BukkitMCLocation) l).asLocation(), 
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}

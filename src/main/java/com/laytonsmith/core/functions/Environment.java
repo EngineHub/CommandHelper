@@ -876,7 +876,7 @@ public class Environment {
 				Construct... args) throws ConfigRuntimeException {
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound = MCSound.BREATH;
-			int volume = 1; int pitch = 1;
+			float volume = 1, pitch = 1;
 			if (!(args[1] instanceof CArray)) {
 				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
 			}
@@ -891,10 +891,10 @@ public class Environment {
 				throw new Exceptions.FormatException("Sound field was missing.", t);
 			}
 			if (sa.containsKey("volume")) {
-				volume = Static.getInt32(sa.get("volume", t), t);
+				volume = Static.getDouble32(sa.get("volume", t), t);
 			}
 			if (sa.containsKey("pitch")) {
-				pitch = Static.getInt32(sa.get("pitch", t), t);
+				pitch = Static.getDouble32(sa.get("pitch", t), t);
 			}
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
