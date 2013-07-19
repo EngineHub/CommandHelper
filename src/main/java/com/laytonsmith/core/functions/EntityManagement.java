@@ -155,6 +155,29 @@ public class EntityManagement {
 	}
 
 	@api
+	public static class entity_exists extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity e;
+			try {
+				e = Static.getEntity(Static.getInt32(args[0], t), t);
+			} catch (ConfigRuntimeException cre) {
+				return new CBoolean(false, t);
+			}
+			return new CBoolean(true, t);
+		}
+
+		public String getName() {
+			return "entity_exists";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns true if entity exists, otherwise false.";
+		}
+	}
+
+	@api
 	public static class entity_loc extends EntityGetterFunction {
 
 		public Construct exec(Target t, Environment environment,

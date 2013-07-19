@@ -12,6 +12,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
+import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Collection;
@@ -471,4 +472,79 @@ public class BlockEvents {
             return e;
         }
     }
+
+	@api
+	public static class block_dispense extends AbstractEvent {
+
+		public String getName() {
+			return "block_dispense";
+		}
+
+		public String docs() {
+			return "{type: <string match> Type of dispenser | item: <item match> Item which is dispensed}"
+					+ " This event is called when a dispenser dispense an item. Cancelling the event cancels dispensing."
+					+ "{type: Type of dispenser | item: Item which is dispensed | velocity: Returns an associative array"
+					+ " indicating the x/y/z components of item velocity. As a convenience, the magnitude is also included."
+					+ " | location: Location of dispenser} "
+					+ "{item|velocity} "
+					+ "{type|item|velocity|location}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Driver driver() {
+			return Driver.BLOCK_DISPENSE;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if (e instanceof MCBlockDispenseEvent) {
+				MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
+				Prefilters.match(prefilter, "type",
+						StaticLayer.GetConvertor().LookupMaterialName(event.getBlock().getTypeId()), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), PrefilterType.ITEM_MATCH);
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
+			Map<String, Construct> map = evaluate_helper(e);
+			MCBlock blk = event.getBlock();
+
+			map.put("type", new CString(StaticLayer.GetConvertor().LookupMaterialName(event.getBlock().getTypeId()), Target.UNKNOWN));
+
+			map.put("item", ObjectGenerator.GetGenerator().item(event.getItem(), Target.UNKNOWN));
+
+			map.put("velocity", ObjectGenerator.GetGenerator().velocity(event.getVelocity(), Target.UNKNOWN));
+
+			CArray location = ObjectGenerator.GetGenerator()
+					.location(StaticLayer.GetLocation(blk.getWorld(), blk.getX(), blk.getY(), blk.getZ()));
+			map.put("location", location);
+
+			return map;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCBlockDispenseEvent) {
+				if ("item".equals(key)) {
+					((MCBlockDispenseEvent) event).setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+				if ("velocity".equals(key)) {
+					((MCBlockDispenseEvent) event).setVelocity(ObjectGenerator.GetGenerator().velocity(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 }

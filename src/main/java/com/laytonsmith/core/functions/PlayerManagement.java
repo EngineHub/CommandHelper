@@ -472,7 +472,7 @@ public class PlayerManagement {
 	public static class ptarget_space extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {
@@ -502,7 +502,8 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "";
+			return "{[player]} Returns the \"target space\" that the player is currently targetting. This is the \"space\" where"
+					+ " if they placed a block (and were close enough), it would end up going.";
 		}
 
 		public Version since() {
@@ -512,10 +513,10 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class kill extends AbstractFunction {
-
+	public static class pkill extends AbstractFunction {
+		
 		public String getName() {
-			return "kill";
+			return "pkill";
 		}
 
 		public Integer[] numArgs() {
@@ -533,7 +534,7 @@ public class PlayerManagement {
 				}
 			}
 			Static.AssertPlayerNonNull(m, t);
-			m.setHealth(0);
+			m.kill();
 			return new CVoid(t);
 		}
 
@@ -556,6 +557,29 @@ public class PlayerManagement {
 		public Boolean runAsync() {
 			return false;
 		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@hide("Deprecated in favor of pkill")
+	@Deprecated
+	public static class kill extends pkill implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "kill";
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "kill is deprecated, in favor of the more conventionally named pkill. Please change"
+					+ " all usages of kill() to pkill() ", t);
+			return null;
+		}
+		
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
@@ -678,7 +702,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			int maxIndex = 18;
 			if (index < -1 || index > maxIndex) {
-				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and " + maxIndex,
+				throw new ConfigRuntimeException(this.getName() + " expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
 			}
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
@@ -852,12 +876,35 @@ public class PlayerManagement {
 			return new CString(m.getWorld().getName(), t);
 		}
 	}
+	
+	@api
+	@hide("Deprecated in favor of pkick")
+	@Deprecated
+	public static class kick extends pkick implements Optimizable {
 
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class kick extends AbstractFunction {
-
+		@Override
 		public String getName() {
 			return "kick";
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "kick is deprecated, in favor of the more conventionally named pkick. Please change"
+					+ " all usages of kick() to pkick() ", t);
+			return null;
+		}
+		
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pkick extends AbstractFunction {
+
+		public String getName() {
+			return "pkick";
 		}
 
 		public Integer[] numArgs() {
