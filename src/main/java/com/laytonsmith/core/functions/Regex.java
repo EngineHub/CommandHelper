@@ -152,19 +152,17 @@ public class Regex {
             String subject = args[1].val();
             CArray fret = new CArray(t);
             Matcher m = pattern.matcher(subject);
-			int onGroup = 0;			
-            while(m.find(onGroup)){
-				//Apparently m.namedGroups() resets the matcher, which causes
-				//it to get stuck in an infinite loop. So we're just gonna keep
-				//track of the the group ourselves.
-				onGroup = m.end();
+			Set<String> namedGroups = m.namedGroups().keySet();
+			//Reset the matcher all the way, since apparently namedGroups() breaks things
+			m = pattern.matcher(subject);
+            while(m.find()){
                 CArray ret = CArray.GetAssociativeArray(t);
                 ret.set(0, new CString(m.group(0), t), t);
 
                 for(int i = 1; i <= m.groupCount(); i++){
                     ret.set(i, new CString(m.group(i), t), t);
                 }
-				for(String key : m.namedGroups().keySet()){
+				for(String key : namedGroups){
 					ret.set(key, m.group(key), t);
 				}
                 fret.push(ret);

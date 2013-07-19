@@ -101,10 +101,29 @@ public class RegexTest {
     }
 	
 	@Test
-	public void testNamedCaptures() throws Exception {
-		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')['foo']", null));
-		assertEquals("123", SRun("reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')[0]['foo']", null));
-		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']", null));
+	public void testNamedCaptures1() throws Exception {
+		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')['foo']", null));	
+	}
+	
+	@Test
+	public void testNamedCaptures2() throws Exception {
+		assertEquals("123", SRun("reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyzabc456xyz')[0]['foo']", null));		
+		assertEquals("456", SRun("reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyzabc456xyz')[1]['foo']", null));		
+	}
+	
+	@Test
+	public void testNamedCaptures3() throws Exception {
+		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']", null));		
+	}
+	
+	@Test
+	public void testNamedCaptures4() throws Exception {
 		assertEquals("123", SRun("reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", null));
+	}
+	
+	@Test(timeout = 60000)
+	public void testInfiniteLoopInRegexCaptures() throws Exception {
+		//This code has caused infinite loops in reg_match_all
+		SRun("reg_match_all('(?<=@)[^@]*', '@@@@')", null);
 	}
 }
