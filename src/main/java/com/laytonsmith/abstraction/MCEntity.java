@@ -45,6 +45,13 @@ public interface MCEntity extends MCMetadatable {
 
 	public MCLocation getLocation();
 
+	/**
+	 * Unlike {@see MCEntity#getLocation}, this will work when not run on the server
+	 * thread, but this does mean that the data recieved may be slightly outdated.
+	 * @return
+	 */
+	public MCLocation asyncGetLocation();
+
 	public int getMaxFireTicks();
 
 	public List<MCEntity> getNearbyEntities(double x, double y, double z);
