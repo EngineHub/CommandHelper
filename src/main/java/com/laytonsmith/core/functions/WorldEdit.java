@@ -210,124 +210,163 @@ public class WorldEdit {
 //            return new CVoid(t);
 //        }
 //    }
-    @api
-    public static class sk_region_info extends SKFunction {
+	@api
+	public static class sk_region_info extends SKFunction {
 
-        public String getName() {
-            return "sk_region_info";
-        }
+		public String getName() {
+			return "sk_region_info";
+		}
 
-        public Integer[] numArgs() {
-            return new Integer[]{2};
-        }
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
 
-        public String docs() {
-            return "array {region, world} Given a region name, returns an array of information about that region."
-                    + " ---- The following information is returned:<ul>"
-                    + " <li>0 - An array of points that define this region</li>"
-                    + " <li>1 - An array of owners of this region</li>"
-                    + " <li>2 - An array of members of this region</li>"
-                    + " <li>3 - An array of arrays of this region's flags, where each array is: array(flag_name, value)</li>"
-                    + " <li>4 - This region's priority</li>"
-                    + " <li>5 - The volume of this region (in meters cubed)</li>"
-                    + "</ul>"
-                    + "If the region cannot be found, a PluginInternalException is thrown.";
-        }
+		public String docs() {
+			return "array {region, world, [value]} Given a region name, returns an array of information about that region."
+					+ " ---- If value is set, it should be an integer of one of the following indexes, and only that information for that index"
+					+ " will be returned. Otherwise if value is not specified (or is -1), it returns an array of"
+					+ " information with the following pieces of information in the specified index:<ul>"
+					+ " <li>0 - An array of points that define this region</li>"
+					+ " <li>1 - An array of owners of this region</li>"
+					+ " <li>2 - An array of members of this region</li>"
+					+ " <li>3 - An array of arrays of this region's flags, where each array is: array(flag_name, value)</li>"
+					+ " <li>4 - This region's priority</li>"
+					+ " <li>5 - The volume of this region (in meters cubed)</li>"
+					+ "</ul>"
+					+ "If the region cannot be found, a PluginInternalException is thrown.";
+		}
 
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PluginInternalException};
-        }
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		}
 
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            try {
-                String regionName = args[0].val();
-                String worldName = args[1].val();
-                //Fill these data structures in with the information we need
-                List<Location> points = new ArrayList<Location>();
-                List<String> ownersPlayers = new ArrayList<String>();
-                List<String> ownersGroups = new ArrayList<String>();
-                List<String> membersPlayers = new ArrayList<String>();
-                List<String> membersGroups = new ArrayList<String>();
-                Map<String, String> flags = new HashMap<String, String>();
-                int priority = -1;
-                float volume = -1;
-                World world = Bukkit.getServer().getWorld(worldName);
-                if (world == null) {
-                    throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, t);
-                }
-                RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
-                ProtectedRegion region = mgr.getRegion(regionName);
-                if (region == null) {
-                    throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, t);
-                }
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			try {
+				String regionName = args[0].val();
+				String worldName = args[1].val();
+				int index = -1;
 
-                ownersPlayers.addAll(region.getOwners().getPlayers());
-                ownersGroups.addAll(region.getOwners().getGroups());
-                membersPlayers.addAll(region.getMembers().getPlayers());
-                membersGroups.addAll(region.getMembers().getGroups());
-                for (Map.Entry<Flag<?>, Object> ent : region.getFlags().entrySet()) {
-                    flags.put(ent.getKey().getName(), String.valueOf(ent.getValue()));
-                }
-                priority = region.getPriority();
-                volume = region.volume();
-                boolean first = true;
-                if (region instanceof ProtectedPolygonalRegion) {
-                    for (BlockVector2D pt : ( (ProtectedPolygonalRegion) region ).getPoints()) {
-                        points.add(new Location(world, pt.getX(), first ? region.getMaximumPoint().getY()
-                                : region.getMinimumPoint().getY(), pt.getZ()));
-                        first = false;
-                    }
-                } else {
-                    points.add(com.sk89q.worldguard.bukkit.BukkitUtil.toLocation(world, region.getMaximumPoint()));
-                    points.add(com.sk89q.worldguard.bukkit.BukkitUtil.toLocation(world, region.getMinimumPoint()));
-                }
+				if (args.length == 3) {
+					index = Static.getInt32(args[2], t);
+				}
 
+				int maxIndex = 5;
+				if (index < -1 || index > maxIndex) {
+					throw new ConfigRuntimeException(this.getName() + " expects the index to be between -1 and " + maxIndex,
+							ExceptionType.RangeException, t);
+				}
 
-                CArray ret = new CArray(t);
+				World world = Bukkit.getServer().getWorld(worldName);
+				if (world == null) {
+					throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, t);
+				}
+				RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+				ProtectedRegion region = mgr.getRegion(regionName);
+				if (region == null) {
+					throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, t);
+				}
 
-                CArray pointSet = new CArray(t);
-                for (Location l : points) {
-                    CArray point = new CArray(t);
-                    point.push(new CInt(l.getBlockX(), t));
-                    point.push(new CInt(l.getBlockY(), t));
-                    point.push(new CInt(l.getBlockZ(), t));
-                    point.push(new CString(l.getWorld().getName(), t));
-                    pointSet.push(point);
-                }
-                CArray ownerSet = new CArray(t);
-                for (String owner : ownersPlayers) {
-                    ownerSet.push(new CString(owner, t));
-                }
-				for (String owner : ownersGroups) {
-                    ownerSet.push(new CString("*" + owner, t));
-                }
-                CArray memberSet = new CArray(t);
-                for (String member : membersPlayers) {
-                    memberSet.push(new CString(member, t));
-                }
-				for (String member : membersGroups) {
-                    memberSet.push(new CString("*" + member, t));
-                }
-                CArray flagSet = new CArray(t);
-                for (Map.Entry<String, String> flag : flags.entrySet()) {
-                    CArray fl = new CArray(t,
-                            new CString(flag.getKey(), t),
-                            new CString(flag.getValue(), t));
-                    flagSet.push(fl);
-                }
-                ret.push(pointSet);
-                ret.push(ownerSet);
-                ret.push(memberSet);
-                ret.push(flagSet);
-                ret.push(new CInt(priority, t));
-                ret.push(new CDouble(volume, t));
-                return ret;
+				CArray ret = new CArray(t);
 
-            } catch (NoClassDefFoundError e) {
-                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, t, e);
-            }
-        }
-    }
+				//Fill these data structures in with the information we need
+				if (index == 0 || index == -1) {
+					List<Location> points = new ArrayList<Location>();
+
+					boolean first = true;
+					if (region instanceof ProtectedPolygonalRegion) {
+						for (BlockVector2D pt : ((ProtectedPolygonalRegion) region).getPoints()) {
+							points.add(new Location(world, pt.getX(), first ? region.getMaximumPoint().getY()
+									: region.getMinimumPoint().getY(), pt.getZ()));
+							first = false;
+						}
+					} else {
+						points.add(com.sk89q.worldguard.bukkit.BukkitUtil.toLocation(world, region.getMaximumPoint()));
+						points.add(com.sk89q.worldguard.bukkit.BukkitUtil.toLocation(world, region.getMinimumPoint()));
+					}
+
+					CArray pointSet = new CArray(t);
+					for (Location l : points) {
+						CArray point = new CArray(t);
+						point.push(new CInt(l.getBlockX(), t));
+						point.push(new CInt(l.getBlockY(), t));
+						point.push(new CInt(l.getBlockZ(), t));
+						point.push(new CString(l.getWorld().getName(), t));
+						pointSet.push(point);
+					}
+
+					ret.push(pointSet);
+				}
+
+				if (index == 1 || index == -1) {
+					List<String> ownersPlayers = new ArrayList<String>();
+					List<String> ownersGroups = new ArrayList<String>();
+					ownersPlayers.addAll(region.getOwners().getPlayers());
+					ownersGroups.addAll(region.getOwners().getGroups());
+
+					CArray ownerSet = new CArray(t);
+					for (String owner : ownersPlayers) {
+						ownerSet.push(new CString(owner, t));
+					}
+					for (String owner : ownersGroups) {
+						ownerSet.push(new CString("*" + owner, t));
+					}
+
+					ret.push(ownerSet);
+				}
+
+				if (index == 2 || index == -1) {
+					List<String> membersPlayers = new ArrayList<String>();
+					List<String> membersGroups = new ArrayList<String>();
+					membersPlayers.addAll(region.getMembers().getPlayers());
+					membersGroups.addAll(region.getMembers().getGroups());
+
+					CArray memberSet = new CArray(t);
+					for (String member : membersPlayers) {
+						memberSet.push(new CString(member, t));
+					}
+					for (String member : membersGroups) {
+						memberSet.push(new CString("*" + member, t));
+					}
+
+					ret.push(memberSet);
+				}
+
+				if (index == 3 || index == -1) {
+					Map<String, String> flags = new HashMap<String, String>();
+					for (Map.Entry<Flag<?>, Object> ent : region.getFlags().entrySet()) {
+						flags.put(ent.getKey().getName(), String.valueOf(ent.getValue()));
+					}
+
+					CArray flagSet = new CArray(t);
+					for (Map.Entry<String, String> flag : flags.entrySet()) {
+						CArray fl = new CArray(t,
+								new CString(flag.getKey(), t),
+								new CString(flag.getValue(), t));
+						flagSet.push(fl);
+					}
+
+					ret.push(flagSet);
+				}
+
+				if (index == 4 || index == -1) {
+					int priority;
+					priority = region.getPriority();
+					ret.push(new CInt(priority, t));
+				}
+
+				if (index == 5 || index == -1) {
+					float volume;
+					volume = region.volume();
+					ret.push(new CDouble(volume, t));
+				}
+
+				return ret;
+
+			} catch (NoClassDefFoundError e) {
+				throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, t, e);
+			}
+		}
+	}
 
     @api
     public static class sk_region_overlaps extends SKFunction {
@@ -1432,6 +1471,60 @@ public class WorldEdit {
         }
     }
 
+	@api
+	public static class sk_region_owners extends SKFunction {
+
+		public String getName() {
+			return "sk_region_owners";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "array {region, world} Returns an array of owners of this region. If the world"
+					+ " or region cannot be found, a PluginInternalException is thrown.";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			try {
+				String regionName = args[0].val();
+				String worldName = args[1].val();
+				List<String> ownersPlayers = new ArrayList<String>();
+				List<String> ownersGroups = new ArrayList<String>();
+				World world = Bukkit.getServer().getWorld(worldName);
+				if (world == null) {
+					throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, t);
+				}
+				RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+				ProtectedRegion region = mgr.getRegion(regionName);
+				if (region == null) {
+					throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, t);
+				}
+
+				ownersPlayers.addAll(region.getOwners().getPlayers());
+				ownersGroups.addAll(region.getOwners().getGroups());
+
+				CArray owners = new CArray(t);
+				for (String owner : ownersPlayers) {
+					owners.push(new CString(owner, t));
+				}
+				for (String owner : ownersGroups) {
+					owners.push(new CString("*" + owner, t));
+				}
+				return owners;
+
+			} catch (NoClassDefFoundError e) {
+				throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, t, e);
+			}
+		}
+	}
+
     @api
     public static class sk_region_addmember extends SKFunction {
 
@@ -1636,6 +1729,60 @@ public class WorldEdit {
             return CHVersion.V3_3_1;
         }
     }
+
+	@api
+	public static class sk_region_members extends SKFunction {
+
+		public String getName() {
+			return "sk_region_members";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "array {region, world} Returns an array of members of this region. If the world"
+					+ " or region cannot be found, a PluginInternalException is thrown.";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			try {
+				String regionName = args[0].val();
+				String worldName = args[1].val();
+				List<String> membersPlayers = new ArrayList<String>();
+				List<String> membersGroups = new ArrayList<String>();
+				World world = Bukkit.getServer().getWorld(worldName);
+				if (world == null) {
+					throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, t);
+				}
+				RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+				ProtectedRegion region = mgr.getRegion(regionName);
+				if (region == null) {
+					throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, t);
+				}
+
+				membersPlayers.addAll(region.getMembers().getPlayers());
+				membersGroups.addAll(region.getMembers().getGroups());
+
+				CArray members = new CArray(t);
+				for (String member : membersPlayers) {
+					members.push(new CString(member, t));
+				}
+				for (String member : membersGroups) {
+					members.push(new CString("*" + member, t));
+				}
+				return members;
+
+			} catch (NoClassDefFoundError e) {
+				throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, t, e);
+			}
+		}
+	}
 
     @api
     public static class sk_region_flag extends SKFunction {
