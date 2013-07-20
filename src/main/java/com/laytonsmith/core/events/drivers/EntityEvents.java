@@ -783,6 +783,8 @@ public class EntityEvents {
 			if (e instanceof MCEntityDamageByEntityEvent) {
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
 				Prefilters.match(prefilter, "damager", event.getDamager().getType().name(), PrefilterType.MACRO);
+
+				return true;
 			}
 
 			return false;
