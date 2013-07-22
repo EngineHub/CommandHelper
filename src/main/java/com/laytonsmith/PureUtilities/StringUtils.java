@@ -838,4 +838,18 @@ public final class StringUtils {
 		}
 		return b.toString();
 	}
+	
+	/**
+	 * Given a string, returns a string that could be printed out in Java source
+	 * code. That is, all escapable characters are reversed. The returned string will
+	 * already be surrounded by quotes.
+	 * @param s
+	 * @return 
+	 */
+	public static String toCodeString(String s){
+		return "\"" + s.replace("\\", "\\\\")
+				.replace("\"", "\\\"")
+				.replace("\n", "\\n")
+				.replace("\t", "\\t") + "\"";
+	}
 }

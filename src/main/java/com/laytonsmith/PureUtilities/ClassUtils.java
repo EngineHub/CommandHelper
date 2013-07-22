@@ -138,6 +138,39 @@ public class ClassUtils {
 	}
 	
 	/**
+	 * Returns the name of the class, as the JVM would output it. For instance,
+	 * for an int, "I" is returned, for an array of Objects, "[Ljava/lang/Object;" is
+	 * returned.
+	 * @param className
+	 * @return 
+	 */
+	public static String getJVMName(Class clazz){
+		//For arrays, .getName() is fine.
+		if(clazz.isArray()){
+			return clazz.getName().replace(".", "/");
+		}
+		if(clazz == boolean.class){
+			return "Z";
+		} else if(clazz == byte.class){
+			return "B";
+		} else if(clazz == short.class){
+			return "S";
+		} else if(clazz == int.class){
+			return "I";
+		} else if(clazz == long.class){
+			return "J";
+		} else if(clazz == float.class){
+			return "F";
+		} else if(clazz == double.class){
+			return "D";
+		} else if(clazz == char.class){
+			return "C";
+		} else {
+			return "L" + clazz.getName().replace(".", "/") + ";";
+		}
+	}
+	
+	/**
 	 * Returns the common name of a class, as it would be typed out in source code.
 	 * In general, this returns the same as Class.getName, but for arrays, it outputs
 	 * <code>[[Ljava.lang.Object;</code> which would be better written as 
@@ -156,5 +189,40 @@ public class ClassUtils {
 			cc = cc.getComponentType();
 		}
 		return cc.getName() + StringUtils.stringMultiply(arrayCount, "[]");
+	}
+	
+	/**
+	 * Converts the binary name to the common name. For instance,
+	 * for [Ljava/lang/Object;, java.lang.Object[] would be returned. The classes
+	 * don't necessarily need to exist for this method to work.
+	 * @param classname
+	 * @return 
+	 */
+	public static String getCommonNameFromJVMName(String classname){
+		int arrayCount = classname.lastIndexOf("[") + 1;
+		classname = classname.substring(arrayCount);
+		//ZBSIJDFC
+		if("Z".equals(classname)){
+			classname = "boolean";
+		} else if("B".equals(classname)){
+			classname = "byte";
+		} else if("S".equals(classname)){
+			classname = "short";
+		} else if("I".equals(classname)){
+			classname = "int";
+		} else if("J".equals(classname)){
+			classname = "long";
+		} else if("D".equals(classname)){
+			classname = "double";
+		} else if("F".equals(classname)){
+			classname = "float";
+		} else if("C".equals(classname)){
+			classname = "char";
+		} else if("V".equals(classname)){
+			return "void"; //special case
+		} else {
+			classname = classname.substring(1, classname.length() - 1).replace("/", ".").replace("$", ".");
+		}
+		return classname + StringUtils.stringMultiply(arrayCount, "[]");
 	}
 }
