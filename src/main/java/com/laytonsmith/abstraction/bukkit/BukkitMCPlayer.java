@@ -425,7 +425,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		p.playNote((Location)loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note)note.getHandle());
 	}
 	
-	public void playSound(MCLocation l, MCSound sound, int volume, int pitch) {
+	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
 		p.playSound(((BukkitMCLocation) l).asLocation(), 
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}
