@@ -3,12 +3,14 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents;
+import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
@@ -46,4 +48,12 @@ public class BukkitBlockListener implements Listener{
 		EventUtils.TriggerExternal(bde);
 		EventUtils.TriggerListener(Driver.BLOCK_DISPENSE, "block_dispense", bde);
 	}
+	
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void onBlockBurn(BlockBurnEvent e){
+		BukkitBlockEvents.BukkitMCBlockBurnEvent bbe = new BukkitBlockEvents.BukkitMCBlockBurnEvent(e);
+		EventUtils.TriggerExternal(bbe);
+		EventUtils.TriggerListener(Driver.BLOCK_BURN, "block_burn", bbe);
+	}
+	
 }

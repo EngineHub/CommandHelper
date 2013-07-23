@@ -343,6 +343,111 @@ public class BlockEvents {
             return false;
         }
     }
+	
+	@api
+    public static class block_burn extends AbstractEvent {
+
+        public String getName() {
+            return "block_burn";
+        }
+
+        public String docs() {
+            return "{type: <string match> | data: <string match>} "
+                    + "This event is called when a block is burned. "
+                    + "Cancelling the event cancels the burn. "
+                    + "block: An array with "
+                    + "keys 'type' (int), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int) "
+                    + "and 'world' (string) for the physical location of the block | "
+                    + "location: the locationArray of this block | drops | xp} "
+                    + "{block}";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Driver driver() {
+            return Driver.BLOCK_BURN;
+        }
+
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+                throws PrefilterNonMatchException {
+            if (e instanceof MCBlockBurnEvent) {
+                MCBlockBurnEvent event = (MCBlockBurnEvent) e;
+
+                if (prefilter.containsKey("type")) {
+                    Construct v = prefilter.get("type");
+
+                    if (v instanceof CInt) {
+                        int val = Integer.parseInt(v.val());
+
+                        if (event.getBlock().getTypeId() != val) {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+
+                if (prefilter.containsKey("data")) {
+                    Construct v = prefilter.get("data");
+
+                    if (v instanceof CInt) {
+                        int val = Integer.parseInt(v.val());
+
+                        if ((int) event.getBlock().getData() != val) {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public BindableEvent convert(CArray manualObject) {
+            return null;
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e)
+                throws EventException {
+
+            MCBlockBurnEvent event = (MCBlockBurnEvent) e;
+            Map<String, Construct> map = evaluate_helper(event);
+
+            CArray blk = new CArray(Target.UNKNOWN);
+
+            int blktype = event.getBlock().getTypeId();
+            blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
+
+            int blkdata = event.getBlock().getData();
+            blk.set("data", new CInt(blkdata, Target.UNKNOWN), Target.UNKNOWN);
+
+            blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN), Target.UNKNOWN);
+            blk.set("Y", new CInt(event.getBlock().getY(), Target.UNKNOWN), Target.UNKNOWN);
+            blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN), Target.UNKNOWN);
+            blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
+
+            map.put("block", blk);
+			
+			CArray location = ObjectGenerator.GetGenerator()
+					.location(StaticLayer.GetLocation(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
+			map.put("location", location);
+
+            return map;
+        }
+
+        public boolean modifyEvent(String key, Construct value,
+                BindableEvent e) {
+
+            MCBlockBreakEvent event = (MCBlockBreakEvent) e;
+            MCBlock blk = event.getBlock();
+
+            return false;
+        }
+    }
 
     @api
     public static class sign_changed extends AbstractEvent {
