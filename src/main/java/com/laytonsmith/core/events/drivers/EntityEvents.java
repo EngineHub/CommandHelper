@@ -783,13 +783,13 @@ public class EntityEvents {
 			if (e instanceof MCEntityDamageByEntityEvent) {
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
 				Prefilters.match(prefilter, "damager", event.getDamager().getType().name(), PrefilterType.MACRO);
+				return event.getEntity() instanceof MCPlayer;
 			}
-
 			return false;
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			return null;
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		public Map<String, Construct> evaluate(BindableEvent e)

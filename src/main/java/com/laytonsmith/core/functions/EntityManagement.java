@@ -695,10 +695,8 @@ public class EntityManagement {
 			Set<Integer> eSet = new HashSet<Integer>();
 			for (int chX = 0 - chunkRadius; chX <= chunkRadius; chX++) {
 				for (int chZ = 0 - chunkRadius; chZ <= chunkRadius; chZ++) {
-					for (MCEntity e : loc.getChunk().getEntities()) {
-						if (!e.getWorld().equals(loc.getWorld())) {
-							continue;
-						}
+					MCLocation nl = StaticLayer.GetLocation(loc.getWorld(), loc.getX()+(chX*16), loc.getY(), loc.getZ()+(chZ*16));
+					for (MCEntity e : nl.getChunk().getEntities()) {
 						if (e.getLocation().distance(loc) <= dist && e.getLocation().getBlock() != loc.getBlock()) {
 							if (types.isEmpty() || types.contains(e.getType().name())) {
 								eSet.add(e.getEntityId());
