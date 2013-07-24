@@ -70,6 +70,10 @@ class AbstractFieldOrMethodMirror {
 		return null;
 	}
 	
+	public boolean hasAnnotation(Class<? extends Annotation> annotation){
+		return getAnnotation(annotation) != null;
+	}
+	
 	/**
 	 * Loads the corresponding Annotation type for this field
 	 * or method. This actually loads the Annotation class into memory.

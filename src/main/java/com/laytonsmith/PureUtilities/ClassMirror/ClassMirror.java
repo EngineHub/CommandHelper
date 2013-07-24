@@ -79,6 +79,10 @@ public class ClassMirror {
 		void myMethod();
 	}
 	
+	public interface TestInterface2 extends TestInterface {
+		
+	}
+	
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface TestAnnotation{
 		String theValue();
@@ -91,6 +95,8 @@ public class ClassMirror {
 		System.out.println("Modifiers: " + cr.getModifiers().toString());
 		System.out.println("JVM Name: " + cr.getJVMClassName());
 		System.out.println("Class Name: " + cr.getClassName());
+		System.out.println("Super class: " + cr.getSuperClass());
+		System.out.println("Interfaces: " + cr.getInterfaces());
 		System.out.println("Has annotation TestAnnotation: " + cr.hasAnnotation(TestAnnotation.class));
 		System.out.println("Is annotation visible? " + cr.isAnnotationVisible(TestAnnotation.class));
 		System.out.println("Fields: " + StringUtils.Join(cr.getFields(), "\n"));
@@ -98,17 +104,39 @@ public class ClassMirror {
 		System.out.println("Class annotation TestAnnotation.unused: " + cr.loadAnnotation(TestAnnotation.class).unused());
 		System.out.println("Methods: " + Arrays.toString(cr.getMethods()));
 		System.out.println("myMethod @TestAnnotation.theValue: " + cr.getMethod("myMethod").loadAnnotation(TestAnnotation.class).theValue());
+		System.out.println("Does it extend from ClassInfo? " + cr.directlyExtendsFrom(ClassInfo.class));
+		System.out.println("Does it extend from TestInterface? " + cr.directlyExtendsFrom(TestInterface.class));
+		System.out.println("Does it extend from Serializable? " + cr.directlyExtendsFrom(java.io.Serializable.class));
+		System.out.println("Does it extend from Object? " + cr.directlyExtendsFrom(Object.class));
+		
+		File f2 = new File("target/classes/" + TestInterface2.class.getName().replace(".", "/") + ".class");
+		ClassMirror cr2 = new ClassMirror(f2);
+		System.out.println("TestInterface2 super classes: " + cr2.getSuperClass());
+		System.out.println("TestInterface2 interfaces: " + cr2.getInterfaces());
 	}
 	
 	/////*************************** END TEST STUFF
 	
 	ClassInfo info = new ClassInfo();
 	org.objectweb.asm.ClassReader reader;
+	
+	/**
+	 * Creates a ClassMirror object for a given input stream representing
+	 * a class file.
+	 * @param is
+	 * @throws IOException 
+	 */
 	public ClassMirror(InputStream is) throws IOException {
 		reader = new org.objectweb.asm.ClassReader(is);
 		parse();
 	}
 	
+	/**
+	 * Creates a ClassMirror object for a given class file.
+	 * @param file
+	 * @throws FileNotFoundException
+	 * @throws IOException 
+	 */
 	public ClassMirror(File file) throws FileNotFoundException, IOException {
 		this(new FileInputStream(file));
 	}
@@ -147,6 +175,18 @@ public class ClassMirror {
 	
 	public boolean isInterface(){
 		return info.isInterface;
+	}
+	
+	public ClassReferenceMirror getSuperClass(){
+		return new ClassReferenceMirror("L" + info.superClass + ";");
+	}
+	
+	public List<ClassReferenceMirror> getInterfaces(){
+		List<ClassReferenceMirror> l = new ArrayList<ClassReferenceMirror>();
+		for(String inter : info.interfaces){
+			l.add(new ClassReferenceMirror("L" + inter + ";"));
+		}
+		return l;
 	}
 	
 	/**
@@ -291,6 +331,39 @@ public class ClassMirror {
 	 */
 	public Class<?> loadClass(ClassLoader loader, boolean initialize) throws ClassNotFoundException{
 		return info.classReferenceMirror.loadClass(loader, initialize);
+	}
+	
+	/**
+	 * Returns true if this class either extends or implements the class
+	 * specified, or is the same as that class. Note that if it transiently
+	 * extends from this class, it can't necessarily find that information without
+	 * actually loading the intermediate class, so this is a less useful method
+	 * than {@link Class#isAssignableFrom(java.lang.Class)}, however, in combination
+	 * with a system that is aware of all classes in a class ecosystem, this can
+	 * be used to piece together that information without actually loading the
+	 * classes.
+	 * @param superClass
+	 * @return 
+	 */
+	public boolean directlyExtendsFrom(Class superClass){
+		String name = superClass.getName().replace(".", "/");
+		if(info.superClass.equals(name)){
+			return true;
+		}
+		for(String in : info.interfaces){
+			if(in.equals(name)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		return (isInterface()?
+				"interface":
+				(isEnum()?"enum":"class")) 
+				+ " " + getClassName();
 	}
 	
 	private static class ClassInfo implements ClassVisitor {
