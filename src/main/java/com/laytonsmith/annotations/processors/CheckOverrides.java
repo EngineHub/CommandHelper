@@ -1,6 +1,7 @@
 package com.laytonsmith.annotations.processors;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassUtils;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
@@ -314,8 +315,9 @@ public class CheckOverrides extends AbstractProcessor {
 	private static void setup() {
 		if (methods == null) {
 			methods = new HashMap<Class, Set<Method>>();
-			Class[] classes = ClassDiscovery.GetClassesWithinPackageHierarchy();
-			for (Class c : classes) {
+			List<ClassMirror<?>> classes = ClassDiscovery.getDefaultInstance().getKnownClasses(ClassDiscovery.GetClassContainer(CheckOverrides.class));
+			for (ClassMirror cm : classes) {
+				Class c = cm.loadClass();
 				if (c.isInterface()) {
 					continue;
 				}

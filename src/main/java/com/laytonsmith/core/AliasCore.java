@@ -250,7 +250,7 @@ public class AliasCore {
 			StaticLayer.GetConvertor().runShutdownHooks();
 			CHLog.initialize(parent.chDirectory);
 			//Install bukkit into the class discovery class
-			ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(Server.class));
+			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 			ExtensionManager.Startup();
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
 			parent.profiler = new Profiler(new File(parent.chDirectory, "profiler.config"));

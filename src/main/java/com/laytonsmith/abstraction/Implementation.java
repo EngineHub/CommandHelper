@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.abstractionenum;
 import com.laytonsmith.core.Prefs;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * This class dynamically detects the server version being run, using various
@@ -48,7 +49,7 @@ public final class Implementation {
 						} catch (InterruptedException ex) {
 							//
 						}
-						Class[] abstractionenums = ClassDiscovery.GetClassesWithAnnotation(abstractionenum.class);
+						Set<Class> abstractionenums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
 						for (Class c : abstractionenums) {
 							abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);
 							if (EnumConvertor.class.isAssignableFrom(c)) {

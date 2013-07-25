@@ -527,8 +527,8 @@ public class StaticTest {
         if(frontendInstalled){
             return;
         }
-		ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(Static.class));
-		ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(StaticTest.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Static.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(StaticTest.class));
 		Implementation.setServerType(Implementation.Type.TEST);
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();
@@ -553,7 +553,7 @@ public class StaticTest {
         try {
             //We need to add the test directory to the ClassDiscovery path
             //This should probably not be hard coded at some point.
-            ClassDiscovery.InstallDiscoveryLocation(new File("./target/test-classes").toURI().toURL().toString());
+            ClassDiscovery.getDefaultInstance().addDiscoveryLocation(new File("./target/test-classes").toURI().toURL());
         }
         catch (MalformedURLException ex) {
             throw new RuntimeException(ex);

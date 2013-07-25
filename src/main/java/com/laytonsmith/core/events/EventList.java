@@ -98,7 +98,7 @@ public final class EventList {
     
     private static void initEvents() {
         //Register internal classes first, so they can't be overridden
-        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
+        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
         int total = 0;
 		StringBuilder message = new StringBuilder();
         for(Class c : classes){

@@ -10,7 +10,18 @@ import com.laytonsmith.PureUtilities.ClassUtils;
  * loading the actual class referenced, at which point more information could be
  * retrieved.
  */
-public class ClassReferenceMirror {
+public class ClassReferenceMirror<T> {
+	
+	/**
+	 * Returns a ClassReferenceMirror for a given real class. This is
+	 * useful when doing comparisons.
+	 * @param c
+	 * @return 
+	 */
+	public static ClassReferenceMirror fromClass(Class c){
+		return new ClassReferenceMirror(ClassUtils.getJVMName(c));
+	}
+	
 	private String name;
 	/**
 	 * The name should look similar to e.g.: "Ljava/lang/Object;" or "I"
@@ -34,7 +45,7 @@ public class ClassReferenceMirror {
 	 * class loader is used, and the class is initialized.
 	 * @return 
 	 */
-	public Class<?> loadClass() throws ClassNotFoundException{
+	public Class<T> loadClass() throws ClassNotFoundException{
 		return loadClass(ClassReferenceMirror.class.getClassLoader(), true);
 	}
 	
@@ -44,7 +55,7 @@ public class ClassReferenceMirror {
 	 * @param loader
 	 * @return 
 	 */
-	public Class<?> loadClass(ClassLoader loader, boolean initialize) throws ClassNotFoundException{
+	public Class<T> loadClass(ClassLoader loader, boolean initialize) throws ClassNotFoundException{
 		return ClassUtils.forCanonicalName(ClassUtils.getCommonNameFromJVMName(name), initialize, loader);
 	}
 	

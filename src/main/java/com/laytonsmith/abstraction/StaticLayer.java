@@ -6,6 +6,9 @@ import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -22,7 +25,7 @@ public final class StaticLayer {
     }        
     
     private static void InitConvertor(){
-        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(convert.class);
+        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(convert.class);
         for(Class c : classes){
             if(!Convertor.class.isAssignableFrom(c)){
                 System.err.println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");

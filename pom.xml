@@ -514,7 +514,7 @@
 									<include>commons-codec:commons-codec:jar:*</include>
 									<include>com.github.tony19:named-regexp:jar:*</include>
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
-									<!--<include>asm:asm-all:jar:*</include>-->
+									<include>asm:asm-all:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -584,10 +584,10 @@
 									<pattern>org.apache.bcel</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.apache.bcel</shadedPattern>
 								</relocation>-->
-								<!--<relocation>
+								<relocation>
 									<pattern>org.objectweb.asm</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.objectweb.asm</shadedPattern>
-								</relocation>-->
+								</relocation>
 							</relocations>
 							<filters>
 								<filter>
@@ -675,12 +675,12 @@
 										<include>**</include>
 									</includes>
 								</filter>-->
-								<!--<filter>
+								<filter>
 									<artifact>asm:asm-all:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
-								</filter>-->
+								</filter>
 							</filters>
 						</configuration>
 					</execution>

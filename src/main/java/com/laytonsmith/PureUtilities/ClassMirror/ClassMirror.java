@@ -29,7 +29,7 @@ import org.objectweb.asm.Opcodes;
  * the class into memory. Most of the methods in {@link java.lang.Class} are
  * available in this class (or have an equivalent Mirror version).
  */
-public class ClassMirror {	
+public class ClassMirror<T> {	
 	ClassInfo info = new ClassInfo();
 	org.objectweb.asm.ClassReader reader;
 	
@@ -214,16 +214,32 @@ public class ClassMirror {
 	 * @return 
 	 */
 	public MethodMirror getMethod(String name, Class...params) throws NoSuchMethodException{
-		List<ClassReferenceMirror> crmParams = new ArrayList<ClassReferenceMirror>();
-		for(Class p : params){
-			crmParams.add(new ClassReferenceMirror(ClassUtils.getJVMName(p)));
+		ClassReferenceMirror mm [] = new ClassReferenceMirror[params.length];
+		for(int i = 0; i < params.length; i++){
+			mm[i] = new ClassReferenceMirror(ClassUtils.getJVMName(params[i]));
 		}
+		return getMethod(name, mm);
+	}
+	
+	/**
+	 * Returns the method, given by name. This traverses the parent Object heirarchy
+	 * if the methods are apart of the visible interface, as well as private methods
+	 * in this class itself.
+	 * @param name
+	 * @param params
+	 * @return
+	 * @throws NoSuchMethodException 
+	 */
+	public MethodMirror getMethod(String name, ClassReferenceMirror... params) throws NoSuchMethodException {
+		List<ClassReferenceMirror> crmParams = new ArrayList<ClassReferenceMirror>();
+		crmParams.addAll(Arrays.asList(params));
 		for(MethodMirror m : getMethods()){
 			if(m.getName().equals(name) && m.getParams().equals(crmParams)){
 				return m;
 			}
 		}
 		throw new NoSuchMethodException("No method matching the signature " + name + "(" + StringUtils.Join(crmParams, ", ") + ") was found.");
+		
 	}
 	
 	/**
@@ -232,8 +248,12 @@ public class ClassMirror {
 	 * class loader is used, and the class is initialized.
 	 * @return 
 	 */
-	public Class<?> loadClass() throws ClassNotFoundException{
-		return info.classReferenceMirror.loadClass();
+	public Class<T> loadClass() throws NoClassDefFoundError {
+		try{
+			return (Class<T>)info.classReferenceMirror.loadClass();
+		} catch(ClassNotFoundException ex){
+			throw new NoClassDefFoundError();
+		}
 	}
 	
 	/**
@@ -242,8 +262,12 @@ public class ClassMirror {
 	 * @param loader
 	 * @return 
 	 */
-	public Class<?> loadClass(ClassLoader loader, boolean initialize) throws ClassNotFoundException{
-		return info.classReferenceMirror.loadClass(loader, initialize);
+	public Class<T> loadClass(ClassLoader loader, boolean initialize) throws NoClassDefFoundError {
+		try{
+			return info.classReferenceMirror.loadClass(loader, initialize);
+		} catch(ClassNotFoundException ex){
+			throw new NoClassDefFoundError();
+		}
 	}
 	
 	/**
@@ -307,6 +331,10 @@ public class ClassMirror {
 				"interface":
 				(isEnum()?"enum":"class")) 
 				+ " " + getClassName();
+	}
+
+	public ClassReferenceMirror getClassReference() {
+		return new ClassReferenceMirror("L" + getJVMClassName() + ";");
 	}
 	
 	private static class ClassInfo implements ClassVisitor {
@@ -425,7 +453,8 @@ public class ClassMirror {
 				}
 			}
 			final MethodMirror mm = new MethodMirror(classReferenceMirror, new ModifierMirror(ModifierMirror.Type.METHOD, access),
-					new ClassReferenceMirror(ret), name, params, (access & Opcodes.ACC_VARARGS) > 0);
+					new ClassReferenceMirror(ret), name, params, 
+					(access & Opcodes.ACC_VARARGS) > 0, (access & Opcodes.ACC_SYNTHETIC) > 0);
 			methods.add(mm);
 			return new MethodVisitor() {
 

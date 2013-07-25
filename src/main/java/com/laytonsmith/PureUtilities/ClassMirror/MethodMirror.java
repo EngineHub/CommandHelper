@@ -5,8 +5,6 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class gathers information about a method, without actually loading 
@@ -18,21 +16,24 @@ public class MethodMirror extends AbstractElementMirror {
 	private List<ClassReferenceMirror> params;
 	private ClassReferenceMirror parentClass;
 	private boolean isVararg = false;
+	private boolean isSynthetic = false;
 	public MethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers, 
-			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg){
+			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){
 		super(annotations, modifiers, type, name);
 		this.parentClass = parentClass;
 		this.params = params;
 		this.isVararg = isVararg;
+		this.isSynthetic = isSynthetic;
 	}
 	
 	/* package */ MethodMirror(ClassReferenceMirror parentClass, ModifierMirror modifiers, ClassReferenceMirror type, 
-			String name, List<ClassReferenceMirror> params, boolean isVararg){
+			String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){
 		super(null, modifiers, type, name);
 		annotations = new ArrayList<AnnotationMirror>();
 		this.parentClass = parentClass;
 		this.params = params;
 		this.isVararg = isVararg;
+		this.isSynthetic = isSynthetic;
 	}
 	
 	/**
@@ -49,6 +50,14 @@ public class MethodMirror extends AbstractElementMirror {
 	 */
 	public boolean isVararg(){
 		return isVararg;
+	}
+	
+	/**
+	 * Returns true if this method is synthetic.
+	 * @return 
+	 */
+	public boolean isSynthetic(){
+		return isSynthetic;
 	}
 	
 	/**
@@ -80,6 +89,14 @@ public class MethodMirror extends AbstractElementMirror {
 			//There's really no way for any exception to happen here, so just rethrow
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	/**
+	 * Returns a ClassReferenceMirror to the parent class.
+	 * @return 
+	 */
+	public ClassReferenceMirror getDeclaringClass(){
+		return parentClass;
 	}
 
 	@Override

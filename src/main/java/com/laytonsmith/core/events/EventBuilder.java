@@ -24,7 +24,7 @@ public final class EventBuilder {
     private static final Map<Class<BindableEvent>, Class<BindableEvent>> eventImplementations = new HashMap<Class<BindableEvent>, Class<BindableEvent>>();
     static{
         //First, we need to pull all the event implementors
-        for(Class c : ClassDiscovery.GetClassesWithAnnotation(abstraction.class)){
+        for(Class c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstraction.class)){
             if(BindableEvent.class.isAssignableFrom(c)){
                 abstraction abs = (abstraction)c.getAnnotation(abstraction.class);
                 if(abs.type().equals(Implementation.GetServerType())){

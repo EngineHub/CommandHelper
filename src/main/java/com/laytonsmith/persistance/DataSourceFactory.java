@@ -93,7 +93,7 @@ public class DataSourceFactory {
 	private static void init() {
 		if (protocolHandlers == null) {
 			protocolHandlers = new HashMap<String, Class>();
-			Class[] classes = ClassDiscovery.GetClassesWithAnnotation(datasource.class);
+			Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
 			for (Class c : classes) {
 				if (DataSource.class.isAssignableFrom(c)) {
 					protocolHandlers.put(((datasource) c.getAnnotation(datasource.class)).value(), c);

@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.StackTraceUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.shutdown;
@@ -35,8 +36,8 @@ public class ExtensionManager {
 					URLClassLoader child = new URLClassLoader (new URL[]{f.toURI().toURL()}, ExtensionManager.class.getClassLoader());
 					Set<ClassLoader> cl = new HashSet<ClassLoader>();
 					cl.add(child);
-					ClassDiscovery.GetClassesWithinPackageHierarchy("jar:" + f.toURI().toURL().toString(), cl);
-					ClassDiscovery.InstallDiscoveryLocation("jar:" + f.toURI().toURL().toString());
+					ClassDiscovery.getDefaultInstance().addDiscoveryLocation(new URL("jar:" + f.toURI().toURL().toString()));
+					ClassDiscovery.getDefaultInstance().getKnownClasses(new URL("jar:" + f.toURI().toURL().toString()));
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
 				} catch (MalformedURLException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -51,17 +52,18 @@ public class ExtensionManager {
 	 */
 	public static void Startup(){
 		
-		for(Method m : ClassDiscovery.GetMethodsWithAnnotation(startup.class)){
-			if(m.getParameterTypes().length != 0){
+		for(MethodMirror mm : ClassDiscovery.getDefaultInstance().getMethodsWithAnnotation(startup.class)){
+			if(!mm.getParams().isEmpty()){
 				//Error, but skip this one, don't throw an exception ourselves, just log it.
 				Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, "Method annotated with @" + startup.class.getSimpleName() 
 						+ " takes parameters; it should not.");
 			} else {
 				try{
+					Method m = mm.loadMethod();
 					m.setAccessible(true);
 					m.invoke(null);
 				} catch(Exception e){
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + m.getDeclaringClass() + "#" + m.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
+					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + mm.getDeclaringClass() + "#" + mm.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
 				}
 			}
 		}
@@ -69,17 +71,18 @@ public class ExtensionManager {
 		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
 			public void run() {
-				for(Method m : ClassDiscovery.GetMethodsWithAnnotation(shutdown.class)){
-					if(m.getParameterTypes().length != 0){
+				for(MethodMirror mm : ClassDiscovery.getDefaultInstance().getMethodsWithAnnotation(shutdown.class)){
+					if(!mm.getParams().isEmpty()){
 						//Error, but skip this one, don't throw an exception ourselves, just log it.
 						CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method annotated with @" + shutdown.class.getSimpleName() 
-								+ " takes parameters; it should not. (Found in " + m.getDeclaringClass().getName() + "#" + m.getName() + ")", Target.UNKNOWN);
+								+ " takes parameters; it should not. (Found in " + mm.getDeclaringClass() + "#" + mm.getName() + ")", Target.UNKNOWN);
 					} else {
 						try{
+							Method m = mm.loadMethod();
 							m.setAccessible(true);
 							m.invoke(null);
 						} catch(Exception e){
-							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + m.getDeclaringClass() + "#" + m.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
+							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + mm.getDeclaringClass() + "#" + mm.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
 						}
 					}
 				}
