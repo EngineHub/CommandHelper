@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  * the containing class into memory. Most of the methods in {@link java.lang.reflect.Method} are
  * available in this class (or have an equivalent Mirror version).
  */
-public class MethodMirror extends AbstractFieldOrMethodMirror {
+public class MethodMirror extends AbstractElementMirror {
 	
 	private List<ClassReferenceMirror> params;
 	private ClassReferenceMirror parentClass;

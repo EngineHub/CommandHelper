@@ -13,7 +13,7 @@ import com.laytonsmith.PureUtilities.ClassUtils;
 public class ClassReferenceMirror {
 	private String name;
 	/**
-	 * 
+	 * The name should look similar to e.g.: "Ljava/lang/Object;" or "I"
 	 * @param name The JVM binary name for this class.
 	 */
 	public ClassReferenceMirror(String name){

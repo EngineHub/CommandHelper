@@ -10,7 +10,7 @@ import java.util.List;
  * the containing class into memory. Most of the methods in {@link java.lang.reflect.Field} are
  * available in this class (or have an equivalent Mirror version).
  */
-public class FieldMirror extends AbstractFieldOrMethodMirror {
+public class FieldMirror extends AbstractElementMirror {
 	private Object value;
 	
 	public FieldMirror(List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value){

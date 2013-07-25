@@ -29,94 +29,7 @@ import org.objectweb.asm.Opcodes;
  * the class into memory. Most of the methods in {@link java.lang.Class} are
  * available in this class (or have an equivalent Mirror version).
  */
-public class ClassMirror {
-	
-	public static enum TestEnum {
-		ONE, TWO;
-	}
-	
-	@TestAnnotation(theValue = "Test Value Class")
-	@Deprecated
-	public static class TestClass extends ClassInfo implements Cloneable, TestInterface {
-		public int myPublicInt;
-		private int myPrivateInt;
-		private static int myPrivateStaticInt;
-		String myString;
-		private static int [] my1DArray;
-		@Deprecated
-		@TestAnnotation(theValue = "The \"field\" annotation value")
-		private static final int [][] my2DFinalArray;
-		public static final double myDouble = 8.0;
-		public static final long myLong = 9001;
-		private static final float myFloat = 4.0F;
-		private static final float NaN = Float.NaN;
-		private static final float posInf = Float.POSITIVE_INFINITY;
-		private static final float negInf = Float.NEGATIVE_INFINITY;
-		private static final int myInt = 1;
-		static {
-			System.out.println("Static initialization block");
-			my2DFinalArray = new int[0][0];
-		}
-		public TestClass(String s){
-		}
-		
-		private String[] aaaa(String[] one, int[][] a, String two, int... three){
-			return new String[]{};
-		}
-		
-		@TestAnnotation(theValue = "Test Value Method")
-		public void myMethod(){
-			
-		}
-		
-		public void myMethodP(String s){
-			
-		}
-		
-	}
-	
-	public interface TestInterface {
-		void myMethod();
-	}
-	
-	public interface TestInterface2 extends TestInterface {
-		
-	}
-	
-	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface TestAnnotation{
-		String theValue();
-		String unused() default "default";
-	}
-	
-	public static void main(String[] argv) throws Exception {
-		File f = new File("target/classes/" + TestClass.class.getName().replace(".", "/") + ".class");
-		ClassMirror cr = new ClassMirror(f);
-		System.out.println("Modifiers: " + cr.getModifiers().toString());
-		System.out.println("JVM Name: " + cr.getJVMClassName());
-		System.out.println("Class Name: " + cr.getClassName());
-		System.out.println("Super class: " + cr.getSuperClass());
-		System.out.println("Interfaces: " + cr.getInterfaces());
-		System.out.println("Has annotation TestAnnotation: " + cr.hasAnnotation(TestAnnotation.class));
-		System.out.println("Is annotation visible? " + cr.isAnnotationVisible(TestAnnotation.class));
-		System.out.println("Fields: " + StringUtils.Join(cr.getFields(), "\n"));
-		System.out.println("Field my2DFinalArray: " + cr.getField("my2DFinalArray").getAnnotation(TestAnnotation.class).getDefinedValuesWithDefault());
-		System.out.println("Class annotation TestAnnotation.unused: " + cr.loadAnnotation(TestAnnotation.class).unused());
-		System.out.println("Methods: " + Arrays.toString(cr.getMethods()));
-		System.out.println("myMethod @TestAnnotation.theValue: " + cr.getMethod("myMethod").loadAnnotation(TestAnnotation.class).theValue());
-		System.out.println("Does it extend from ClassInfo? " + cr.directlyExtendsFrom(ClassInfo.class));
-		System.out.println("Does it extend from TestInterface? " + cr.directlyExtendsFrom(TestInterface.class));
-		System.out.println("Does it extend from Serializable? " + cr.directlyExtendsFrom(java.io.Serializable.class));
-		System.out.println("Does it extend from Object? " + cr.directlyExtendsFrom(Object.class));
-		
-		File f2 = new File("target/classes/" + TestInterface2.class.getName().replace(".", "/") + ".class");
-		ClassMirror cr2 = new ClassMirror(f2);
-		System.out.println("TestInterface2 super classes: " + cr2.getSuperClass());
-		System.out.println("TestInterface2 interfaces: " + cr2.getInterfaces());
-	}
-	
-	/////*************************** END TEST STUFF
-	
+public class ClassMirror {	
 	ClassInfo info = new ClassInfo();
 	org.objectweb.asm.ClassReader reader;
 	
@@ -356,6 +269,36 @@ public class ClassMirror {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Returns the Package this class is in. If this is not in a package,
+	 * null is returned.
+	 * @return 
+	 */
+	public PackageMirror getPackage(){
+		String[] split = getClassName().split("\\.");
+		if(split.length == 1){
+			return null;
+		}
+		StringBuilder b = new StringBuilder();
+		for(int i = 0; i < split.length - 1; i++){
+			if(i != 0){
+				b.append(".");
+			}
+			b.append(split[i]);
+		}
+		return new PackageMirror(b.toString());
+	}
+	
+	/**
+	 * Returns the simple name of this class. I.e. for java.lang.String, "String" is
+	 * returned.
+	 * @return 
+	 */
+	public String getSimpleName(){
+		String[] split = getClassName().split("\\.");
+		return split[split.length - 1];
 	}
 
 	@Override

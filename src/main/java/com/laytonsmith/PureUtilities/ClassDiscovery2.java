@@ -83,7 +83,7 @@ public class ClassDiscovery2 {
 	/**
 	 * Maps the fuzzy class name to actual Class object.
 	 */
-	private Map<String, Class> fuzzyClassCache = new HashMap<String, Class>();
+	private Map<String, ClassMirror> fuzzyClassCache = new HashMap<String, ClassMirror>();
 	/**
 	 * List of all URLs from which to pull classes.
 	 */
@@ -452,6 +452,59 @@ public class ClassDiscovery2 {
 		}
 		methodAnnotationCache.put(annotation, mirrors);
 		return mirrors;
+	}
+	
+	/**
+	 * Calls forFuzzyName with initialize true, and the class loader used to load this class.
+	 * @param packageRegex
+	 * @param className
+	 * @return 
+	 */
+	public ClassMirror forFuzzyName(String packageRegex, String className){
+		return forFuzzyName(packageRegex, className, true, ClassDiscovery2.class.getClassLoader());
+	}
+	
+	/**
+	 * Returns a class given a "fuzzy" package name, that is, the package name provided is a
+	 * regex. The class name must match exactly, but the package name will be the closest match,
+	 * or undefined if there is no clear candidate. If no matches are found, null is returned.
+	 * @param packageRegex
+	 * @param className
+	 * @param initialize
+	 * @param classLoader
+	 * @return 
+	 */
+	public ClassMirror forFuzzyName(String packageRegex, String className, boolean initialize, ClassLoader classLoader){
+		String index = packageRegex + className;
+		if(fuzzyClassCache.containsKey(index)){
+			return fuzzyClassCache.get(index);
+		}
+		Set<ClassMirror> found = new HashSet<ClassMirror>();
+		Set<ClassMirror> searchSpace = getKnownClasses();
+		for(ClassMirror c : searchSpace){
+			if(c.getPackage().getName().matches(packageRegex) && c.getSimpleName().equals(className)){
+				found.add(c);
+			}
+		}
+		ClassMirror find;
+		if(found.size() == 1){
+			find = found.iterator().next();
+		} else if(found.isEmpty()){
+			find = null;
+		} else {
+			ClassMirror candidate = null;
+			int max = Integer.MAX_VALUE;
+			for(ClassMirror f : found){
+				int distance = StringUtils.LevenshteinDistance(f.getPackage().getName(), packageRegex);
+				if(distance < max){
+					candidate = f;
+					max = distance;
+				}
+			}
+			find = candidate;
+		}
+		fuzzyClassCache.put(index, find);
+		return find;
 	}
 	
 	private static void descend(File start, List<File> fileList) {

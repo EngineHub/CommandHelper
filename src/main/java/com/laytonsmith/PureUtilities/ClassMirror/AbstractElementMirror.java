@@ -9,13 +9,13 @@ import java.util.List;
 /**
  *
  */
-class AbstractFieldOrMethodMirror {
+class AbstractElementMirror {
 	protected ModifierMirror modifiers;
 	protected String name;
 	protected ClassReferenceMirror type;
 	protected List<AnnotationMirror> annotations;
 	
-	protected AbstractFieldOrMethodMirror(List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name){
+	protected AbstractElementMirror(List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name){
 		this.annotations = annotations;
 		this.modifiers = modifiers;
 		this.type = type;
