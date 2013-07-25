@@ -81,6 +81,7 @@ public class VirtualFileSystem {
 	
 	private static final Map<String, Constructor> FSLProviders = new HashMap<String, Constructor>();
 	static {
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(VirtualFileSystem.class));
 		Set<ClassMirror<?>> fslayerClasses = ClassDiscovery.getDefaultInstance().getClassesWithAnnotation(FileSystemLayer.fslayer.class);
 		for(ClassMirror<?> clazzMirror : fslayerClasses){
 			try {

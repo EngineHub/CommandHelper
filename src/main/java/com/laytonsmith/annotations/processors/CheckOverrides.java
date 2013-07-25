@@ -315,9 +315,10 @@ public class CheckOverrides extends AbstractProcessor {
 	private static void setup() {
 		if (methods == null) {
 			methods = new HashMap<Class, Set<Method>>();
+			
 			List<ClassMirror<?>> classes = ClassDiscovery.getDefaultInstance().getKnownClasses(ClassDiscovery.GetClassContainer(CheckOverrides.class));
 			for (ClassMirror cm : classes) {
-				Class c = cm.loadClass();
+				Class c = cm.loadClass(CheckOverrides.class.getClassLoader(), false);
 				if (c.isInterface()) {
 					continue;
 				}

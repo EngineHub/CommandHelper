@@ -220,10 +220,15 @@ public class ClassDiscovery {
 	/**
 	 * Adds a new discovery URL. This makes the URL eligible to be
 	 * included when finding classes/methods/fields with the various
-	 * other methods.
+	 * other methods. If the URL already has been added, this has no
+	 * effect.
 	 * @param url 
 	 */
 	public void addDiscoveryLocation(URL url){
+		if(urlCache.contains(url)){
+			//Already here, so just return.
+			return;
+		}
 		if(url == null){
 			throw new NullPointerException("url cannot be null");
 		}
@@ -267,11 +272,16 @@ public class ClassDiscovery {
 	}
 	
 	/**
-	 * Gets all known classes, only within this URL.
+	 * Gets all known classes, only within this URL. If this url isn't
+	 * in the list of discovery locations, it is automatically added, 
+	 * via {@link #addDiscoveryLocation(java.net.URL)}.
 	 * @param url
 	 * @return 
 	 */
 	public List<ClassMirror<?>> getKnownClasses(URL url){
+		if(!classCache.containsKey(url)){
+			addDiscoveryLocation(url);
+		}
 		doDiscovery();
 		return new ArrayList<ClassMirror<?>>(classCache.get(url));
 	}
