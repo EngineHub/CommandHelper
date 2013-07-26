@@ -1407,6 +1407,39 @@ public class EntityManagement {
 		}
 	}
 	
+	@api
+	public static class get_entity_persistence extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway(), t);
+		}
+
+		public String getName() {
+			return "get_entity_persistence";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will.";
+		}
+	}
+	
+	@api
+	public static class set_entity_persistence extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemoveWhenFarAway(Static.getBoolean(args[1]));
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_entity_persistence";
+		}
+
+		public String docs() {
+			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will.";
+		}
+	}
+	
 	@api public static class get_art_at extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
