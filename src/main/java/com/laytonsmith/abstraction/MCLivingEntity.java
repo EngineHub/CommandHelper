@@ -24,6 +24,7 @@ public interface MCLivingEntity extends MCEntity {
     public void damage(double amount);
     public void damage(double amount, MCEntity source);
 	public boolean getCanPickupItems();
+	public boolean getRemoveWhenFarAway();
 	public String getCustomName();
 	public MCEntityEquipment getEquipment();
     public double getEyeHeight();
@@ -46,6 +47,7 @@ public interface MCLivingEntity extends MCEntity {
     public MCProjectile launchProjectile(MCProjectileType projectile);
 	public void resetMaxHealth();
 	public void setCanPickupItems(boolean pickup);
+	public void setRemoveWhenFarAway(boolean remove);
 	public void setCustomName(String name);
 	public void setCustomNameVisible(boolean visible);
     public void setHealth(double health);

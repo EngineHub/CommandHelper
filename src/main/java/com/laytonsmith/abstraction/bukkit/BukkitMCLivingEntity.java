@@ -298,6 +298,14 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 	public void setCanPickupItems(boolean pickup) {
 		le.setCanPickupItems(pickup);
 	}
+	
+	public boolean getRemoveWhenFarAway() {
+			return le.getRemoveWhenFarAway();
+	}
+	
+	public void setRemoveWhenFarAway(boolean remove) {
+		le.setRemoveWhenFarAway(remove);
+	}
 
 	public MCLivingEntity getTarget(Target t) {
 		if (!(le instanceof Creature)) {
