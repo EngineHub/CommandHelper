@@ -1408,14 +1408,14 @@ public class EntityManagement {
 	}
 	
 	@api
-	public static class get_persistence extends EntityGetterFunction {
+	public static class get_entity_persistence extends EntityGetterFunction {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway(), t);
 		}
 
 		public String getName() {
-			return "get_persistence";
+			return "get_entity_persistence";
 		}
 
 		public String docs() {
@@ -1424,7 +1424,7 @@ public class EntityManagement {
 	}
 	
 	@api
-	public static class set_persistence extends EntitySetterFunction {
+	public static class set_entity_persistence extends EntitySetterFunction {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemoveWhenFarAway(Static.getBoolean(args[1]));
@@ -1432,7 +1432,7 @@ public class EntityManagement {
 		}
 
 		public String getName() {
-			return "set_persistence";
+			return "set_entity_persistence";
 		}
 
 		public String docs() {
