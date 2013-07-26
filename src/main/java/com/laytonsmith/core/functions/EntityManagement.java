@@ -1411,7 +1411,7 @@ public class EntityManagement {
 	public static class get_entity_persistence extends EntityGetterFunction {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway(), t);
+			return new CBoolean(!Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway(), t);
 		}
 
 		public String getName() {
@@ -1419,7 +1419,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will.";
+			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will not.";
 		}
 	}
 	
@@ -1427,7 +1427,7 @@ public class EntityManagement {
 	public static class set_entity_persistence extends EntitySetterFunction {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemoveWhenFarAway(Static.getBoolean(args[1]));
+			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemoveWhenFarAway(!Static.getBoolean(args[1]));
 			return new CVoid(t);
 		}
 
@@ -1436,7 +1436,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will.";
+			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will not.";
 		}
 	}
 	
