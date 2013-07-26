@@ -37,6 +37,8 @@ import javax.tools.Diagnostic;
 @SupportedAnnotationTypes({"java.lang.Override", "com.laytonsmith.annotations.MustUseOverride"})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class CheckOverrides extends AbstractProcessor {
+	
+	private static final boolean enabled = false;
 
 	private static Map<Class, Set<Method>> methods = null;
 	private static Set<Class> interfacesWithMustUseOverride = new HashSet<Class>();
@@ -45,6 +47,10 @@ public class CheckOverrides extends AbstractProcessor {
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+		if(!enabled){
+			processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "CheckOverrides processor is turned off!");
+			return false;
+		}
 		setup();
 		if (!roundEnv.processingOver()) {
 			for (Element element : roundEnv.getElementsAnnotatedWith(MustUseOverride.class)) {

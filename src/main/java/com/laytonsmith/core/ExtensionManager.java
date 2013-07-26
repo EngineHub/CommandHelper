@@ -36,8 +36,7 @@ public class ExtensionManager {
 					URLClassLoader child = new URLClassLoader (new URL[]{f.toURI().toURL()}, ExtensionManager.class.getClassLoader());
 					Set<ClassLoader> cl = new HashSet<ClassLoader>();
 					cl.add(child);
-					ClassDiscovery.getDefaultInstance().addDiscoveryLocation(new URL("jar:" + f.toURI().toURL().toString()));
-					ClassDiscovery.getDefaultInstance().getKnownClasses(new URL("jar:" + f.toURI().toURL().toString()));
+					ClassDiscovery.getDefaultInstance().addDiscoveryLocation(f.toURI().toURL());
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
 				} catch (MalformedURLException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);

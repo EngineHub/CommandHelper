@@ -8,6 +8,7 @@ import com.laytonsmith.PureUtilities.ClassMirror.MethodMirror;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -16,6 +17,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +25,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -144,6 +151,20 @@ public class ClassDiscovery {
 			url = GetClassContainer(ClassDiscovery.class).toString();
 		}
 		List<String> classNameList = new ArrayList<String>();
+		final File rootLocationFile;
+		if(!classCache.containsKey(rootLocation)){
+			classCache.put(rootLocation, Collections.synchronizedSet(new HashSet<ClassMirror<?>>()));
+		} else {
+			classCache.get(rootLocation).clear();
+		}
+		final Set<ClassMirror<?>> mirrors = classCache.get(rootLocation);
+		final AtomicInteger id = new AtomicInteger(0);
+		ExecutorService service = Executors.newFixedThreadPool(10, new ThreadFactory() {
+
+			public Thread newThread(Runnable r) {
+				return new Thread(r, "ClassDiscovery-Async-" + id.incrementAndGet());
+			}
+		});
 		if (url.startsWith("file:")) {
 			//We are running from the file system
 			//First, get the "root" of the class structure. We assume it's
@@ -156,64 +177,90 @@ public class ClassDiscovery {
 			//go through everything and pull out the files
 			List<File> fileList = new ArrayList<File>();
 			descend(new File(root), fileList);
+			try{
+				rootLocationFile = new File(rootLocation.toURI());
+			} catch(URISyntaxException ex){
+				//This shouldn't ever happen
+				throw new RuntimeException(ex);
+			}
 			//Now, we have all the class files in the package. But, it's the absolute path
 			//to all of them. We have to first remove the "front" part
 			for (File f : fileList) {
-				classNameList.add(f.getAbsolutePath().replaceFirst(Pattern.quote(new File(root).getAbsolutePath() + File.separator), ""));
+				String file = f.toString();
+				if (!file.matches(".*\\$(?:\\d)*\\.class") && file.endsWith(".class")) {
+					InputStream stream = null;
+					try {
+						stream = FileUtility.readAsStream(new File(rootLocationFile, 
+								f.getAbsolutePath().replaceFirst(Pattern.quote(new File(root).getAbsolutePath() + File.separator), "")));
+						ClassMirror cm = new ClassMirror(stream);
+						mirrors.add(cm);
+					} catch (IOException ex) {
+						Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+					} finally {
+						if(stream != null){
+							try {
+								stream.close();
+							} catch (IOException ex) {
+								Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
+					}
+				}
 			}
-
+			service.shutdown();
+			try {
+				//Doesn't look like 0 is an option, so we'll just wait a day.
+				service.awaitTermination(1, TimeUnit.DAYS);
+			} catch (InterruptedException ex) {
+				Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			return;
 		} else if (url.startsWith("jar:")) {
 			//We are running from a jar
 			if (url.endsWith("!/")) {
 				url = StringUtils.replaceLast(url, "!/", "");
 			}
 			url = url.replaceFirst("jar:", "");
-			ZipInputStream zip = null;
+			url = url.replaceFirst("file:", "");
+			rootLocationFile = new File(url);
+			ZipIterator zi = new ZipIterator(rootLocationFile);
 			try {
-				URL jar = new URL(url);
-				zip = new ZipInputStream(jar.openStream());
-				ZipEntry ze;
-				while ((ze = zip.getNextEntry()) != null) {
-					classNameList.add(ze.getName());
-				}
+				zi.iterate(new ZipIterator.ZipIteratorCallback() {
+
+					public void handle(String filename, InputStream in) {
+						if (!filename.matches(".*\\$(?:\\d)*\\.class") && filename.endsWith(".class")) {
+							try {
+								ClassMirror cm = new ClassMirror(in);
+								mirrors.add(cm);
+							} catch (IOException ex) {
+								Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+							}
+							
+						}
+					}
+				});
 			} catch (IOException ex) {
 				Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-			} finally {
-				try {
-					zip.close();
-				} catch (IOException ex) {
-					//Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-				}
 			}
-		}
-		File rootLocationFile;
-		try{
-			rootLocationFile = new File(rootLocation.toURI());
-		} catch(URISyntaxException ex){
-			//This shouldn't ever happen
-			throw new RuntimeException(ex);
-		}
-		//At this point, we're going to reload the catalog for this url, so clear
-		//it out in the cache
-		if(!classCache.containsKey(rootLocation)){
-			classCache.put(rootLocation, new HashSet<ClassMirror<?>>());
+	//			ZipInputStream zip = null;
+	//			try {
+	//				URL jar = new URL(url);
+	//				zip = new ZipInputStream(jar.openStream());
+	//				ZipEntry ze;
+	//				while ((ze = zip.getNextEntry()) != null) {
+	//					classNameList.add(ze.getName());
+	//				}
+	//			} catch (IOException ex) {
+	//				Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+	//			} finally {
+	//				try {
+	//					zip.close();
+	//				} catch (IOException ex) {
+	//					//Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+	//				}
+	//			}
 		} else {
-			classCache.get(rootLocation).clear();
-		}
-		Set<ClassMirror<?>> mirrors = classCache.get(rootLocation);
-		for(String file : classNameList){
-			//Don't consider anonymous classes, or non class resources
-			if (!file.matches(".*\\$(?:\\d)*\\.class") && file.endsWith(".class")) {
-				ZipReader zr = new ZipReader(new File(rootLocationFile, file));
-				try {
-					ClassMirror cm = new ClassMirror(zr.getInputStream());
-					mirrors.add(cm);
-				} catch (FileNotFoundException ex) {
-					Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (IOException ex) {
-					Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
+			throw new RuntimeException("Unknown url type: " + rootLocation);
 		}
 	}
 	
@@ -301,6 +348,7 @@ public class ClassDiscovery {
 		if(classSubtypeCache.containsKey(superType)){
 			return new HashSet<ClassMirror<T>>((Set)classSubtypeCache.get(superType));
 		}
+		doDiscovery();
 		Set<ClassMirror<?>> mirrors = new HashSet<ClassMirror<?>>();
 		Set<ClassMirror<T>> knownClasses = (Set)getKnownClasses();
 		outer: for(ClassMirror m : knownClasses){
@@ -449,6 +497,7 @@ public class ClassDiscovery {
 		if(classAnnotationCache.containsKey(annotation)){
 			return new HashSet<ClassMirror<?>>(classAnnotationCache.get(annotation));
 		}
+		doDiscovery();
 		Set<ClassMirror<?>> mirrors = new HashSet<ClassMirror<?>>();
 		for(ClassMirror m : getKnownClasses()){
 			if(m.hasAnnotation(annotation)){
@@ -498,6 +547,7 @@ public class ClassDiscovery {
 		if(fieldAnnotationCache.containsKey(annotation)){
 			return new HashSet<FieldMirror>(fieldAnnotationCache.get(annotation));
 		}
+		doDiscovery();
 		Set<FieldMirror> mirrors = new HashSet<FieldMirror>();
 		for(ClassMirror m : getKnownClasses()){
 			for(FieldMirror f : m.getFields()){
@@ -521,6 +571,7 @@ public class ClassDiscovery {
 		if(methodAnnotationCache.containsKey(annotation)){
 			return new HashSet<MethodMirror>(methodAnnotationCache.get(annotation));
 		}
+		doDiscovery();
 		Set<MethodMirror> mirrors = new HashSet<MethodMirror>();
 		for(ClassMirror m : getKnownClasses()){
 			for(MethodMirror mm : m.getMethods()){
@@ -676,9 +727,6 @@ public class ClassDiscovery {
 				//This is the full path to THIS file, but we need to get the package root.
 				String thisClass = c.getResource(c.getSimpleName() + ".class").toString();
 				packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(c.getName().replaceAll("\\.", "/") + ".class"), "");
-				if(packageRoot.endsWith("!/")){
-					packageRoot = StringUtils.replaceLast(packageRoot, "!/", "");
-				}
 			} catch (Exception e) {
 				//Hmm, ok, try this then
 				packageRoot = c.getProtectionDomain().getCodeSource().getLocation().toString();
