@@ -9,13 +9,13 @@ import java.util.regex.Pattern;
 
 /**
  * Represents a javadoc style comment block, at its lowest level. The rules of smart comment
- * are that it must start with /** and end with * / (minus the space). Within the comment, the first
+ * are that it must start with /** and end with &#42;/. Within the comment, the first
  * whitespace characters, * and optionally a single space after will be removed, so the line "   * Text"
  * would be simply "Text". Annotations are supported, there are two types of annotations, embedded, and normal.
  * An embedded annotation is a data transformation construct, and a normal annotation is stored separately
  * from the "body" of the comment, and multiple of the same annotation are allowed. Embedded annotations
  * are transformed at parse time, and you provide the callback to do the transformation. For instance, the
- * embedded annotation { @ code myCode } can be configured to return "&lt;code&gt;myCode&lt;/code&gt;"
+ * embedded annotation {&#64; code myCode} can be configured to return "&lt;code&gt;myCode&lt;/code&gt;"
  * Newlines and spaces are preserved in the body of the comment, but newlines are not stored with annotation
  * parameters.
  * @author lsmith
