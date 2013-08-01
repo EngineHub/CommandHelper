@@ -6,12 +6,13 @@ import com.laytonsmith.PureUtilities.ClassMirror.ClassReferenceMirror;
 import com.laytonsmith.PureUtilities.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassMirror.MethodMirror;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -33,8 +34,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * This class contains methods for dynamically determining things about Classes,
@@ -68,6 +67,16 @@ public class ClassDiscovery {
 	}
 	
 	/**
+	 * Can be used to set the default ClassDiscovery instance returned
+	 * by getDefaultInstance. Setting it to null is acceptable, and then a
+	 * new, default ClassDiscovery instance will be generated.
+	 * @param cd 
+	 */
+	public static void setDefaultInstance(ClassDiscovery cd){
+		defaultInstance = cd;
+	}
+	
+	/**
 	 * Creates a new instance of the ClassDiscovery class. Normally, you
 	 * should probably just use the default instance, as caching across the board
 	 * is a good thing, however, it may be the case that you need a standalone
@@ -81,49 +90,49 @@ public class ClassDiscovery {
 	 * Stores the mapping of class name to ClassMirror object. At any given time,
 	 * after doDiscovery is called, this will be up to date with all known classes.
 	 */
-	private Map<URL, Set<ClassMirror<?>>> classCache = new HashMap<URL, Set<ClassMirror<?>>>();
+	private final Map<URL, Set<ClassMirror<?>>> classCache = new HashMap<URL, Set<ClassMirror<?>>>();
 	/**
 	 * This cache maps jvm name to the associated ClassMirror object, to speed up
 	 * lookups.
 	 */
-	private Map<String, ClassMirror<?>> jvmNameToMirror = new HashMap<String, ClassMirror<?>>();
+	private final Map<String, ClassMirror<?>> jvmNameToMirror = new HashMap<String, ClassMirror<?>>();
 	/**
 	 * Maps the fuzzy class name to actual Class object.
 	 */
-	private Map<String, ClassMirror<?>> fuzzyClassCache = new HashMap<String, ClassMirror<?>>();
+	private final Map<String, ClassMirror<?>> fuzzyClassCache = new HashMap<String, ClassMirror<?>>();
 	/**
 	 * Maps the forName cache.
 	 */
-	private Map<String, ClassMirror<?>> forNameCache = new HashMap<String, ClassMirror<?>>();
+	private final Map<String, ClassMirror<?>> forNameCache = new HashMap<String, ClassMirror<?>>();
 	/**
 	 * List of all URLs from which to pull classes.
 	 */
-	private Set<URL> urlCache = new HashSet<URL>();
+	private final Set<URL> urlCache = new HashSet<URL>();
 	/**
 	 * When a URL is added to urlCache, it is also initially added here.
 	 * If there are any URLs in this set, they must be resolved first.
 	 */
-	private Set<URL> dirtyURLs = new HashSet<URL>();
+	private final Set<URL> dirtyURLs = new HashSet<URL>();
 	
 	/**
 	 * Cache for class subtypes. Whenever a new URL is added to the URL cache, this is cleared.
 	 */
-	private Map<Class<?>, Set<ClassMirror<?>>> classSubtypeCache 
+	private final Map<Class<?>, Set<ClassMirror<?>>> classSubtypeCache 
 			= new HashMap<Class<?>, Set<ClassMirror<?>>>();
 	/**
 	 * Cache for class annotations. Whenever a new URL is added to the URL cache, this is cleared.
 	 */
-	private Map<Class<? extends Annotation>, Set<ClassMirror<?>>> classAnnotationCache 
+	private final Map<Class<? extends Annotation>, Set<ClassMirror<?>>> classAnnotationCache 
 			= new HashMap<Class<? extends Annotation>, Set<ClassMirror<?>>>();
 	/**
 	 * Cache for field annotations. Whenever a new URL is added to the URL cache, this is cleared.
 	 */
-	private Map<Class<? extends Annotation>, Set<FieldMirror>> fieldAnnotationCache 
+	private final Map<Class<? extends Annotation>, Set<FieldMirror>> fieldAnnotationCache 
 			= new HashMap<Class<? extends Annotation>, Set<FieldMirror>>();
 	/**
 	 * Cache for method annotations. Whenever a new URL is added to the URL cache, this is cleared.
 	 */
-	private Map<Class<? extends Annotation>, Set<MethodMirror>> methodAnnotationCache 
+	private final Map<Class<? extends Annotation>, Set<MethodMirror>> methodAnnotationCache 
 			= new HashMap<Class<? extends Annotation>, Set<MethodMirror>>();
 	
 	/**
@@ -214,7 +223,6 @@ public class ClassDiscovery {
 			} catch (InterruptedException ex) {
 				Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 			}
-			return;
 		} else if (url.startsWith("jar:")) {
 			//We are running from a jar
 			if (url.endsWith("!/")) {
@@ -242,25 +250,27 @@ public class ClassDiscovery {
 			} catch (IOException ex) {
 				Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 			}
-	//			ZipInputStream zip = null;
-	//			try {
-	//				URL jar = new URL(url);
-	//				zip = new ZipInputStream(jar.openStream());
-	//				ZipEntry ze;
-	//				while ((ze = zip.getNextEntry()) != null) {
-	//					classNameList.add(ze.getName());
-	//				}
-	//			} catch (IOException ex) {
-	//				Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-	//			} finally {
-	//				try {
-	//					zip.close();
-	//				} catch (IOException ex) {
-	//					//Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-	//				}
-	//			}
 		} else {
 			throw new RuntimeException("Unknown url type: " + rootLocation);
+		}
+	}
+	
+	private ClassLoader defaultClassLoader = null;
+	/**
+	 * Sets the default class loader for the various load methods
+	 * that are called without a ClassLoader. This is optional, and if
+	 * not set, the class loader of this class is used.
+	 * @param cl 
+	 */
+	public void setDefaultClassLoader(ClassLoader cl){
+		defaultClassLoader = cl;
+	}
+	
+	private ClassLoader getDefaultClassLoader(){
+		if(defaultClassLoader == null){
+			return ClassDiscovery.class.getClassLoader();
+		} else {
+			return defaultClassLoader;
 		}
 	}
 	
@@ -336,6 +346,7 @@ public class ClassDiscovery {
 	/**
 	 * Returns a list of known classes that extend the given superclass,
 	 * or implement the given interface.
+	 * @param <T>
 	 * @param superType
 	 * @return 
 	 */
@@ -449,7 +460,7 @@ public class ClassDiscovery {
 	 * @return 
 	 */
 	public <T> Set<Class<T>> loadClassesThatExtend(Class<T> superType){
-		return loadClassesThatExtend(superType, ClassDiscovery.class.getClassLoader(), true);
+		return loadClassesThatExtend(superType, getDefaultClassLoader(), true);
 	}
 	
 	/**
@@ -517,7 +528,7 @@ public class ClassDiscovery {
 	 * @return 
 	 */
 	public Set<Class> loadClassesWithAnnotation(Class<? extends Annotation> annotation) {
-		return loadClassesWithAnnotation(annotation, ClassDiscovery.class.getClassLoader(), true);
+		return loadClassesWithAnnotation(annotation, getDefaultClassLoader(), true);
 	}
 	
 	/**
@@ -526,6 +537,8 @@ public class ClassDiscovery {
 	 * This is useful if you are for sure going to use these classes immediately, and don't
 	 * want to have to lazy load them individually.
 	 * @param annotation
+	 * @param loader
+	 * @param initialize
 	 * @return 
 	 */
 	public Set<Class> loadClassesWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
@@ -593,7 +606,7 @@ public class ClassDiscovery {
 	 * @return 
 	 */
 	public Set<Method> loadMethodsWithAnnotation(Class<? extends Annotation> annotation){
-		return loadMethodsWithAnnotation(annotation, ClassDiscovery.class.getClassLoader(), true);
+		return loadMethodsWithAnnotation(annotation, getDefaultClassLoader(), true);
 	}
 	
 	/**
@@ -602,6 +615,8 @@ public class ClassDiscovery {
 	 * objects. This is useful if you are for sure going to use these methods immediately, and don't
 	 * want to have to lazy load them individually.
 	 * @param annotation
+	 * @param loader
+	 * @param initialize
 	 * @return 
 	 */
 	public Set<Method> loadMethodsWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize){
@@ -621,6 +636,7 @@ public class ClassDiscovery {
 	 * JVM name, or canonical name works.
 	 * @param className
 	 * @return 
+	 * @throws java.lang.ClassNotFoundException 
 	 */
 	public ClassMirror forName(String className) throws ClassNotFoundException{
 		if(forNameCache.containsKey(className)){
@@ -642,7 +658,7 @@ public class ClassDiscovery {
 	 * @return 
 	 */
 	public ClassMirror forFuzzyName(String packageRegex, String className){
-		return forFuzzyName(packageRegex, className, true, ClassDiscovery.class.getClassLoader());
+		return forFuzzyName(packageRegex, className, true, getDefaultClassLoader());
 	}
 	
 	/**
@@ -733,7 +749,9 @@ public class ClassDiscovery {
 			}
 			packageRoot = URLDecoder.decode(packageRoot, "UTF-8");
 			return new URL(packageRoot);
-		} catch (Exception e) {
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);
+		} catch (MalformedURLException e) {
 			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);
 		}
 	}

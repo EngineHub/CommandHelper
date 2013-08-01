@@ -1,11 +1,15 @@
 package com.laytonsmith.core;
 
+import java.util.logging.Level;
+
 /**
  * This class is for testing concepts
  */
 public class MainSandbox {
 
 	public static void main(String[] argv) throws Exception {
+		double d = Math.random();
+		Static.getLogger().log(Level.INFO, "A string {0} more", d);
 //		//URI information
 //		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
 //		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file",

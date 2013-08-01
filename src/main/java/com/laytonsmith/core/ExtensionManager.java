@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassMirror.MethodMirror;
+import com.laytonsmith.PureUtilities.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.StackTraceUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.shutdown;
@@ -25,24 +26,23 @@ public class ExtensionManager {
 
 	/**
 	 * Initializes the extension manager. This operation is not necessarily required,
-	 * and is guaranteed to not run more than once per classloader startup.
+	 * and must be guaranteed to not run more than once per ClassDiscovery object.
 	 */
-	public static void Initialize(File root){
+	public static void Initialize(File root, ClassDiscovery cd){
 		//Look in the extension folder for jars, add them to our class discover, then initialize everything
+		DynamicClassLoader dcl = new DynamicClassLoader();
 		for(File f : root.listFiles()){
 			if(f.getName().endsWith(".jar")){
 				try {
 					//First, load it with our custom class loader
-					URLClassLoader child = new URLClassLoader (new URL[]{f.toURI().toURL()}, ExtensionManager.class.getClassLoader());
-					Set<ClassLoader> cl = new HashSet<ClassLoader>();
-					cl.add(child);
-					ClassDiscovery.getDefaultInstance().addDiscoveryLocation(f.toURI().toURL());
+					dcl.addJar(f.toURI().toURL());
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
 				} catch (MalformedURLException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
 		}
+		cd.setDefaultClassLoader(dcl);
 	}
 	
 	/**
