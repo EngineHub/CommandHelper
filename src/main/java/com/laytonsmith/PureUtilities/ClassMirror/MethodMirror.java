@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class MethodMirror extends AbstractElementMirror {
 	
-	private List<ClassReferenceMirror> params;
-	private ClassReferenceMirror parentClass;
+	private final List<ClassReferenceMirror> params;
+	private final ClassReferenceMirror parentClass;
 	private boolean isVararg = false;
 	private boolean isSynthetic = false;
 	public MethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers, 

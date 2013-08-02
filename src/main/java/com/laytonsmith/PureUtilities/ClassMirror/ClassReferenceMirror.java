@@ -2,6 +2,7 @@
 package com.laytonsmith.PureUtilities.ClassMirror;
 
 import com.laytonsmith.PureUtilities.ClassUtils;
+import java.io.Serializable;
 
 /**
  * A class reference mirror is a wrapper around a simple class name reference.
@@ -10,7 +11,7 @@ import com.laytonsmith.PureUtilities.ClassUtils;
  * loading the actual class referenced, at which point more information could be
  * retrieved.
  */
-public class ClassReferenceMirror<T> {
+public class ClassReferenceMirror<T> implements Serializable {
 	
 	/**
 	 * Returns a ClassReferenceMirror for a given real class. This is
@@ -22,7 +23,7 @@ public class ClassReferenceMirror<T> {
 		return new ClassReferenceMirror(ClassUtils.getJVMName(c));
 	}
 	
-	private String name;
+	private final String name;
 	/**
 	 * The name should look similar to e.g.: "Ljava/lang/Object;" or "I"
 	 * @param name The JVM binary name for this class.

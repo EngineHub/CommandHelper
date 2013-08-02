@@ -3,6 +3,7 @@ package com.laytonsmith.PureUtilities.ClassMirror;
 
 import com.laytonsmith.PureUtilities.ClassUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  *
  */
-public class AnnotationMirror {
+public class AnnotationMirror implements Serializable {
 	private ClassReferenceMirror type;
 	private boolean visible;
 	private List<AnnotationValue> values;
@@ -151,7 +152,7 @@ public class AnnotationMirror {
 		return "@" + type + "(" + StringUtils.Join(values, ", ") + ")";
 	}
 	
-	public static class AnnotationValue {
+	public static class AnnotationValue implements Serializable {
 		private String name;
 		private Object value;
 		

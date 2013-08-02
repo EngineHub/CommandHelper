@@ -141,6 +141,31 @@ public class ClassDiscovery {
 	private ProgressIterator progressIterator = null;
 	
 	/**
+	 * External cache. If added before discovery happens for a URL, this will cause
+	 * the discovery process to be skipped entirely for a given URL.
+	 */
+	private final Map<URL, ClassDiscoveryCache> caches = new HashMap<URL, ClassDiscoveryCache>();
+	
+	/**
+	 * Removes the cache for this URL. After calling this, it is ensured that
+	 * the discovery methods won't be pulling from a cache. This is used during initial
+	 * cache creation.
+	 * @param url 
+	 */
+	public void removeCacheForURL(URL url){
+		caches.remove(url);
+	}
+	
+	/**
+	 * Adds a cache for a given URL. This is done automatically in the {@link ClassDiscoveryCache#ClassDiscoveryCache(java.net.URL, com.laytonsmith.PureUtilities.ClassDiscovery)}
+	 * constructor.
+	 * @param cache 
+	 */
+	public void addPreCache(ClassDiscoveryCache cache){
+		caches.put(cache.getURL(), cache);
+	}
+	
+	/**
 	 * Sets the progress iterator for when this class starts up. This is an optional
 	 * operation.
 	 * @param progressIterator 

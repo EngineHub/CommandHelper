@@ -1,6 +1,13 @@
 package com.laytonsmith.core;
 
-import java.util.logging.Level;
+import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassDiscoveryCache;
+import com.laytonsmith.PureUtilities.StringUtils;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * This class is for testing concepts
@@ -8,8 +15,25 @@ import java.util.logging.Level;
 public class MainSandbox {
 
 	public static void main(String[] argv) throws Exception {
-		double d = Math.random();
-		Static.getLogger().log(Level.INFO, "A string {0} more", d);
+		URL url = ClassDiscovery.GetClassContainer(MainSandbox.class);
+		long start;
+		start = System.currentTimeMillis();
+		ClassDiscoveryCache cdc = new ClassDiscoveryCache(url);
+		System.out.println((System.currentTimeMillis() - start) + "ms for first one");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		cdc.writeDescriptor(baos);
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		start = System.currentTimeMillis();
+		cdc = new ClassDiscoveryCache(url, bais);
+		System.out.println((System.currentTimeMillis() - start) + "ms for second one");
+		System.out.println(StringUtils.HumanReadableByteCount(baos.size()));
+		baos = new ByteArrayOutputStream();
+		ZipOutputStream zip = new ZipOutputStream(baos);
+		zip.putNextEntry(new ZipEntry("root"));
+		cdc.writeDescriptor(zip);
+		zip.close();
+		System.out.println(StringUtils.HumanReadableByteCount(baos.toByteArray().length));
+		
 //		//URI information
 //		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
 //		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file",
