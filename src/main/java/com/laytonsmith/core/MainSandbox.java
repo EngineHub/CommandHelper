@@ -1,11 +1,17 @@
 package com.laytonsmith.core;
 
+import java.math.BigDecimal;
+
 /**
  * This class is for testing concepts
  */
 public class MainSandbox {
 
 	public static void main(String[] argv) throws Exception {
+		BigDecimal sixty = new BigDecimal("60");
+		BigDecimal fiftysixpointone = new BigDecimal("56.1");
+		System.out.println(sixty.subtract(fiftysixpointone).toString());
+		
 //		//URI information
 //		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
 //		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file",
