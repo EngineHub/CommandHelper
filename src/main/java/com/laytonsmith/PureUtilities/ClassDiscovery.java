@@ -136,6 +136,20 @@ public class ClassDiscovery {
 			= new HashMap<Class<? extends Annotation>, Set<MethodMirror>>();
 	
 	/**
+	 * By default null, but this can be set per instance.
+	 */
+	private ProgressIterator progressIterator = null;
+	
+	/**
+	 * Sets the progress iterator for when this class starts up. This is an optional
+	 * operation.
+	 * @param progressIterator 
+	 */
+	public void setProgressIterator(ProgressIterator progressIterator){
+		this.progressIterator = progressIterator;
+	}
+	
+	/**
 	 * Looks through all the URLs and pulls out all known classes, and caches them in
 	 * the classCache object.
 	 */
@@ -246,7 +260,7 @@ public class ClassDiscovery {
 							
 						}
 					}
-				});
+				}, progressIterator);
 			} catch (IOException ex) {
 				Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 			}
@@ -544,7 +558,11 @@ public class ClassDiscovery {
 	public Set<Class> loadClassesWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
 		Set<Class> set = new HashSet<Class>();
 		for(ClassMirror<?> cm : getClassesWithAnnotation(annotation)){
-			set.add(cm.loadClass(loader, initialize));
+			try{
+				set.add(cm.loadClass(loader, initialize));
+			} catch(Error e){
+				throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
+			}
 		}
 		return set;
 	}

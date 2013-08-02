@@ -20,6 +20,7 @@ package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -103,6 +104,21 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
+		ClassDiscovery.getDefaultInstance().setProgressIterator(new ProgressIterator() {
+			private int last = -1;
+			public void progressChanged(double current, double total) {
+//				if(current == total){
+//					System.out.println();
+//				} else {
+//					int percent = (int)((current / total) * 100);
+//					int modulo = percent % 5;
+//					if(modulo == 0 && last != percent){
+//						last = percent;
+//						System.out.print("Enabling " + Implementation.GetServerType().getBranding() + "... " + percent + "%");
+//					}
+//				}
+			}
+		});
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 		Implementation.setServerType(Implementation.Type.BUKKIT);

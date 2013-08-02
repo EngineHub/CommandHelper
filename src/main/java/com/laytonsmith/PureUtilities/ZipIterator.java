@@ -20,19 +20,36 @@ public class ZipIterator {
 	}
 	
 	/**
-	 * Iterate
+	 * Iterates a zip file.
 	 * @param callback
 	 * @throws FileNotFoundException 
 	 */
 	public void iterate(ZipIteratorCallback callback) throws IOException{
-		final ZipInputStream zis = new ZipInputStream(new FileInputStream(zip));
+		iterate(callback, null);
+	}
+	
+	/**
+	 * Iterates a zip file.
+	 * @param callback
+	 * @throws FileNotFoundException 
+	 */
+	public void iterate(ZipIteratorCallback callback, final ProgressIterator progressIterator) throws IOException{
+		final ZipInputStream zis = new ZipInputStream(new FileInputStream(zip)); 
+		final double size = zip.length();
 		ZipEntry entry;
 		while((entry = zis.getNextEntry()) != null){
 			if(!entry.isDirectory()){
 				callback.handle(entry.getName(), new InputStream() {
-
+					private double soFar = 0;
+					
 					@Override
 					public int read() throws IOException {
+						if(progressIterator != null){
+							++soFar;
+							if(soFar % 128 == 0){
+								progressIterator.progressChanged(soFar, size);
+							}
+						}
 						return zis.read();
 					}
 

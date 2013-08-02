@@ -452,7 +452,7 @@ public class WorldEdit {
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String region1 = args[1].val();
             List<ProtectedRegion> checkRegions = new ArrayList<ProtectedRegion>();
-			List<ProtectedRegion> getRegions = new ArrayList<ProtectedRegion>();
+			List<ProtectedRegion> getRegions;
 			CArray listRegions = new CArray(t);
 
             Static.checkPlugin("WorldGuard", t);

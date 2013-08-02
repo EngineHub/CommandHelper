@@ -31,7 +31,7 @@ public class DynamicClassLoader extends ClassLoader {
 			return;
 		}
 		urls.add(url);
-		classLoaders.add(new URLClassLoader(new URL[]{url}, getParent()));
+		classLoaders.add(new URLClassLoader(new URL[]{url}, DynamicClassLoader.class.getClassLoader()));
 	}
 
 	@Override
