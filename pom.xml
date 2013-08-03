@@ -695,11 +695,11 @@
 				<version>1.2.1</version>
 				<executions>
 					<execution>
-						<id>process</id>
+						<id>cache-annotations</id>
 						<goals>
 							<goal>java</goal>
 						</goals>
-						<phase>compile</phase>
+						<phase>process-classes</phase>
 					</execution>
 				</executions>
 				<configuration>
@@ -720,7 +720,7 @@
 						<goals>
 							<goal>process</goal>
 						</goals>
-						<phase>compile</phase>
+						<phase>process-classes</phase>
 					</execution>
 				</executions>
 				<configuration>

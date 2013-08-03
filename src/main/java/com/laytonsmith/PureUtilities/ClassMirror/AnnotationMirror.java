@@ -15,6 +15,7 @@ import java.util.List;
  *
  */
 public class AnnotationMirror implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private ClassReferenceMirror type;
 	private boolean visible;
 	private List<AnnotationValue> values;
@@ -153,6 +154,7 @@ public class AnnotationMirror implements Serializable {
 	}
 	
 	public static class AnnotationValue implements Serializable {
+		private static final long serialVersionUID = 1L;
 		private String name;
 		private Object value;
 		

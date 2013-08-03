@@ -3,7 +3,6 @@ package com.laytonsmith.annotations.processors;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassUtils;
-import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.MustUseOverride;
 import java.lang.reflect.Method;
@@ -38,7 +37,7 @@ import javax.tools.Diagnostic;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class CheckOverrides extends AbstractProcessor {
 	
-	private static final boolean enabled = false;
+	private static final boolean enabled = true;
 
 	private static Map<Class, Set<Method>> methods = null;
 	private static Set<Class> interfacesWithMustUseOverride = new HashSet<Class>();

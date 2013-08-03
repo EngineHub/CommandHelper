@@ -12,6 +12,7 @@ import java.io.Serializable;
  * retrieved.
  */
 public class ClassReferenceMirror<T> implements Serializable {
+	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * Returns a ClassReferenceMirror for a given real class. This is

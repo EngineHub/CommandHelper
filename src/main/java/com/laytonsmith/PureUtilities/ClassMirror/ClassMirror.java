@@ -30,7 +30,8 @@ import org.objectweb.asm.Opcodes;
  * available in this class (or have an equivalent Mirror version).
  * @param <T>
  */
-public class ClassMirror<T> implements Serializable {	
+public class ClassMirror<T> implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private final ClassInfo info = new ClassInfo();
 	//Transient, because it's only used during construction
 	private final transient org.objectweb.asm.ClassReader reader;
@@ -351,6 +352,7 @@ public class ClassMirror<T> implements Serializable {
 	}
 	
 	private static class ClassInfo implements ClassVisitor, Serializable {
+		private static final long serialVersionUID = 1L;
 		
 		public ModifierMirror modifiers;
 		public String name;

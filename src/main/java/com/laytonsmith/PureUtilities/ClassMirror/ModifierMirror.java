@@ -12,6 +12,7 @@ import org.objectweb.asm.Opcodes;
  * This is a mirror for the {@link java.lang.reflect.Modifier} class.
  */
 public class ModifierMirror implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private final int access;
 	private int modifiers = 0;
 	/**

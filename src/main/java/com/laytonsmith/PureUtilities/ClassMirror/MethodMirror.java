@@ -12,6 +12,7 @@ import java.util.List;
  * available in this class (or have an equivalent Mirror version).
  */
 public class MethodMirror extends AbstractElementMirror {
+	private static final long serialVersionUID = 1L;
 	
 	private final List<ClassReferenceMirror> params;
 	private final ClassReferenceMirror parentClass;
