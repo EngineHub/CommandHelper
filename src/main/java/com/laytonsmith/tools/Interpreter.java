@@ -1,5 +1,7 @@
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.RunnableQueue;
@@ -77,6 +79,12 @@ public class Interpreter {
 	private static final File chDirectory = new File(jarLocation, "CommandHelper/");
 
 	public static void start(List<String> args) throws IOException, DataSourceException, URISyntaxException {
+		File cdcDir = new File(chDirectory, ".cache");
+		cdcDir.mkdirs();
+		ClassDiscoveryCache cdc = new ClassDiscoveryCache(cdcDir);
+		cdc.setLogger(Logger.getLogger(Interpreter.class.getName()));
+		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(new ClassDiscoveryCache(cdcDir));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Interpreter.class));
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
 		Installer.Install(chDirectory);

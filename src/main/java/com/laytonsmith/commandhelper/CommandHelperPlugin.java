@@ -124,7 +124,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		cdcDir.mkdirs();
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(cdcDir);
 		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
-		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(new ClassDiscoveryCache(chDirectory));
+		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(new ClassDiscoveryCache(cdcDir));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 		Implementation.setServerType(Implementation.Type.BUKKIT);

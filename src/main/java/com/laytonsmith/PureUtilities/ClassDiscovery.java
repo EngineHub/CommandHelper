@@ -61,7 +61,7 @@ public class ClassDiscovery {
 	public static synchronized ClassDiscovery getDefaultInstance() {
 		if (defaultInstance == null) {
 			defaultInstance = new ClassDiscovery();
-			defaultInstance.setDebugMode(true);
+			//defaultInstance.setDebugMode(true);
 		}
 		return defaultInstance;
 	}
@@ -210,7 +210,7 @@ public class ClassDiscovery {
 	 * Looks through all the URLs and pulls out all known classes, and caches
 	 * them in the classCache object.
 	 */
-	private void doDiscovery() {
+	private synchronized void doDiscovery() {
 		if (!dirtyURLs.isEmpty()) {
 			Iterator<URL> it = dirtyURLs.iterator();
 			while (it.hasNext()) {
@@ -225,7 +225,7 @@ public class ClassDiscovery {
 	 * called by doDiscovery. Other internal methods should call doDiscovery,
 	 * which handles looking through the dirtyURLs.
 	 */
-	private void discover(URL rootLocation) {
+	private synchronized void discover(URL rootLocation) {
 		long start = System.currentTimeMillis();
 		if(debug){
 			System.out.println("Beginning discovery of " + rootLocation);
@@ -366,7 +366,7 @@ public class ClassDiscovery {
 	 *
 	 * @param url
 	 */
-	public void addDiscoveryLocation(URL url) {
+	public synchronized void addDiscoveryLocation(URL url) {
 		if (urlCache.contains(url)) {
 			//Already here, so just return.
 			return;
@@ -640,8 +640,9 @@ public class ClassDiscovery {
 		for (ClassMirror<?> cm : getClassesWithAnnotation(annotation)) {
 			try {
 				set.add(cm.loadClass(loader, initialize));
-			} catch (Error e) {
-				throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
+			} catch (NoClassDefFoundError e) {
+				//Ignore this for now?
+				//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
 			}
 		}
 		return set;

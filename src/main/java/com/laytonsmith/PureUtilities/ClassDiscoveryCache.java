@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -70,8 +71,14 @@ public class ClassDiscoveryCache {
 	 * @return 
 	 */
 	public ClassDiscoveryURLCache getURLCache(URL fromClassLocation){
-		if(fromClassLocation.toString().endsWith(".jar")){
-			File location = new File(fromClassLocation.getFile() + "/" + ClassDiscoveryCache.OUTPUT_FILENAME);
+		URL classLocation;
+		try {
+			classLocation = new URL(StringUtils.replaceLast(fromClassLocation.getFile(), "!/", ""));
+		} catch (MalformedURLException ex) {
+			throw new Error();
+		}
+		if(classLocation.toString().endsWith(".jar")){
+			File location = new File(classLocation.getFile() + "/" + ClassDiscoveryCache.OUTPUT_FILENAME);
 			ZipReader reader = new ZipReader(location);
 			if(reader.exists()){
 				try {
@@ -82,7 +89,7 @@ public class ClassDiscoveryCache {
 			}
 			File cacheOutputName = null;
 			try {
-				File jarFile = new File(fromClassLocation.getFile());
+				File jarFile = new File(classLocation.getFile());
 				FileInputStream fis = new FileInputStream(jarFile);
 				byte[] data = new byte[READ_SIZE];
 				fis.read(data);
@@ -104,18 +111,24 @@ public class ClassDiscoveryCache {
 			} catch (Exception ex) {
 				//Hmm. Ok, well, we'll just regenerate.
 			}
-			logger.log(Level.INFO, "Performing one time scans of {0}, this may take a few moments.", fromClassLocation);
+			if(logger != null){
+				logger.log(Level.INFO, "Performing one time scans of {0}, this may take a few moments.", fromClassLocation);
+			}
 			ClassDiscoveryURLCache cache = new ClassDiscoveryURLCache(fromClassLocation, progress);
 			if(cacheOutputName != null){
 				try {
 					ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(cacheOutputName, false));
 					zos.putNextEntry(new ZipEntry("data"));
 					cache.writeDescriptor(zos);
-					zos.closeEntry();
 					zos.close();
 				} catch (IOException ex) {
 					//Well, we couldn't write it out, so report the error, but continue anyways.
-					logger.log(Level.SEVERE, null, ex);
+					if(logger != null){
+						logger.log(Level.SEVERE, null, ex);
+					} else {
+						//Report errors even if the logger passed in is null.
+						Logger.getLogger(ClassDiscoveryCache.class.getName()).log(Level.SEVERE, null, ex);
+					}
 				}
 			}
 			return cache;
