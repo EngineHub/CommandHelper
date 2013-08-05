@@ -19,6 +19,7 @@
 package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.SimpleVersion;
@@ -119,6 +120,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 //				}
 			}
 		});
+		File cdcDir = new File(chDirectory, ".cache");
+		cdcDir.mkdirs();
+		ClassDiscoveryCache cdc = new ClassDiscoveryCache(cdcDir);
+		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
+		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(new ClassDiscoveryCache(chDirectory));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 		Implementation.setServerType(Implementation.Type.BUKKIT);

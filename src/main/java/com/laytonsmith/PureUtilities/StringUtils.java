@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -852,4 +853,14 @@ public final class StringUtils {
 				.replace("\n", "\\n")
 				.replace("\t", "\\t") + "\"";
 	}
+	
+	/**
+	 * Takes a byte array, and returns a string hex representation.
+	 * @param bytes
+	 * @return 
+	 */
+	public static String toHex(byte[] bytes) {
+        BigInteger bi = new BigInteger(1, bytes);
+        return String.format("%0" + (bytes.length << 1) + "X", bi);
+    }
 }

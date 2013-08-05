@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -137,7 +138,7 @@ public class Crypto {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
                 digest.update(args[0].val().getBytes());
-                String hash = toHex(digest.digest()).toLowerCase();
+                String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
                 throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
@@ -196,7 +197,7 @@ public class Crypto {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
                 digest.update(args[0].val().getBytes());
-                String hash = toHex(digest.digest()).toLowerCase();
+                String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
                 throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
@@ -254,7 +255,7 @@ public class Crypto {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
                 digest.update(args[0].val().getBytes());
-                String hash = toHex(digest.digest()).toLowerCase();
+                String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
                 throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
@@ -472,8 +473,4 @@ public class Crypto {
 		
 	}
 
-    public static String toHex(byte[] bytes) {
-        BigInteger bi = new BigInteger(1, bytes);
-        return String.format("%0" + (bytes.length << 1) + "X", bi);
-    }
 }

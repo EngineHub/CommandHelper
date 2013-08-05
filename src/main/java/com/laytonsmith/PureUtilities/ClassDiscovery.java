@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassMirror.ClassReferenceMirror;
 import com.laytonsmith.PureUtilities.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassMirror.MethodMirror;
-import com.laytonsmith.annotations.processors.CacheAnnotations;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,14 +48,6 @@ public class ClassDiscovery {
 	 * The default instance.
 	 */
 	private static ClassDiscovery defaultInstance = null;
-	
-	/**
-	 * This is the name of the jar annotation file. getResource(ClassDiscovery.OUTPUT_FILENAME) should
-	 * return the file that was output during the build, for this jar for sure. Third party libs
-	 * may not be using the same convention though, so this will fail. Regardless, the system should
-	 * still function, though it will have to do one time cache setup first.
-	 */
-	public static final String OUTPUT_FILENAME = "jarInfo.ser";
 
 	/**
 	 * Returns the default, shared instance. This is usually how you want to
@@ -71,19 +62,6 @@ public class ClassDiscovery {
 		if (defaultInstance == null) {
 			defaultInstance = new ClassDiscovery();
 			defaultInstance.setDebugMode(true);
-			InputStream jarInfo = ClassDiscovery.class.getResourceAsStream("/" + OUTPUT_FILENAME);
-			if(jarInfo != null){
-				URL myURL = ClassDiscovery.GetClassContainer(ClassDiscovery.class);
-				System.out.println("Setting the URL to " + myURL);
-				try {
-					defaultInstance.addPreCache(myURL, new ClassDiscoveryCache(null, jarInfo));
-				} catch (Exception ex) {
-					//Hmm. Do nothing at this point. There will be an error later though.
-					System.out.println("Could not use builtin precache: " + ex.getMessage());
-				}
-			} else {
-				System.out.println("jarInfo wasn't found!");
-			}
 		}
 		return defaultInstance;
 	}
@@ -165,11 +143,16 @@ public class ClassDiscovery {
 	 * External cache. If added before discovery happens for a URL, this will
 	 * cause the discovery process to be skipped entirely for a given URL.
 	 */
-	private final Map<URL, ClassDiscoveryCache> preCaches = new HashMap<URL, ClassDiscoveryCache>();
+	private final Map<URL, ClassDiscoveryURLCache> preCaches = new HashMap<URL, ClassDiscoveryURLCache>();
 	/**
 	 * If true, debug information will be printed out.
 	 */
 	private boolean debug;
+	
+	/**
+	 * May be null, but if set, is the cache retriever.
+	 */
+	private ClassDiscoveryCache classDiscoveryCache;
 	
 	/**
 	 * Turns debug mode on. If true, data about what is happening is printed out,
@@ -194,13 +177,23 @@ public class ClassDiscovery {
 	/**
 	 * Adds a pre cache for a given URL.
 	 *
+	 * @param url
 	 * @param cache
 	 */
-	public void addPreCache(URL url, ClassDiscoveryCache cache) {
+	public void addPreCache(URL url, ClassDiscoveryURLCache cache) {
 		if(debug){
 			System.out.println("Adding precache for " + url);
 		}
 		preCaches.put(url, cache);
+	}
+	
+	/**
+	 * Sets the class discovery cache. This is optional, but if set
+	 * is used to potentially speed up caching.
+	 * @param cache 
+	 */
+	public void setClassDiscoveryCache(ClassDiscoveryCache cache){
+		this.classDiscoveryCache = cache;
 	}
 
 	/**
@@ -238,6 +231,11 @@ public class ClassDiscovery {
 			System.out.println("Beginning discovery of " + rootLocation);
 		}
 		try {
+			//If the ClassDiscoveryCache is set, just use this.
+			if(classDiscoveryCache != null){
+				ClassDiscoveryURLCache cduc = classDiscoveryCache.getURLCache(rootLocation);
+				preCaches.put(rootLocation, cduc);
+			}
 			String url = rootLocation.toString();
 			if (url == null) {
 				url = GetClassContainer(ClassDiscovery.class).toString();

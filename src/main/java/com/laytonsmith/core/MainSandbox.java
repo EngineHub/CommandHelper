@@ -1,7 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassDiscoveryCache;
+import com.laytonsmith.PureUtilities.ClassDiscoveryURLCache;
 import com.laytonsmith.PureUtilities.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,13 +18,13 @@ public class MainSandbox {
 		URL url = ClassDiscovery.GetClassContainer(MainSandbox.class);
 		long start;
 		start = System.currentTimeMillis();
-		ClassDiscoveryCache cdc = new ClassDiscoveryCache(url);
+		ClassDiscoveryURLCache cdc = new ClassDiscoveryURLCache(url);
 		System.out.println((System.currentTimeMillis() - start) + "ms for first one");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		cdc.writeDescriptor(baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		start = System.currentTimeMillis();
-		cdc = new ClassDiscoveryCache(url, bais);
+		cdc = new ClassDiscoveryURLCache(url, bais);
 		System.out.println((System.currentTimeMillis() - start) + "ms for second one");
 		System.out.println(StringUtils.HumanReadableByteCount(baos.size()));
 		baos = new ByteArrayOutputStream();
