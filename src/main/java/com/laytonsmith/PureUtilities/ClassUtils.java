@@ -106,34 +106,34 @@ public class ClassUtils {
 			}
 		}
 		Class c = null;
-			try {
-				if(useInitializer){
-					c = Class.forName(className, initialize, classLoader);
-				} else {
-					c = Class.forName(className);
-				}
-			} catch (ClassNotFoundException ex) {
-				//Ok, try replacing the last . with $ as this may be an inner class
-				String name = className;
-				while (name.contains(".")) {
-					name = StringUtils.replaceLast(name, "\\.", "$");
-					try {
-						if(useInitializer){
-							c = Class.forName(name, initialize, classLoader);
-						} else {
-							c = Class.forName(name);
-						}
-						//Awesome, found it.
-						break;
-					} catch (ClassNotFoundException e) {
-						//No? Try again then.
+		try {
+			if(useInitializer){
+				c = Class.forName(className, initialize, classLoader);
+			} else {
+				c = Class.forName(className);
+			}
+		} catch (ClassNotFoundException ex) {
+			//Ok, try replacing the last . with $ as this may be an inner class
+			String name = className;
+			while (name.contains(".")) {
+				name = StringUtils.replaceLast(name, "\\.", "$");
+				try {
+					if(useInitializer){
+						c = Class.forName(name, initialize, classLoader);
+					} else {
+						c = Class.forName(name);
 					}
-				}
-				if (c == null) {
-					//We really couldn't find it.
-					throw ex;
+					//Awesome, found it.
+					break;
+				} catch (ClassNotFoundException e) {
+					//No? Try again then.
 				}
 			}
+			if (c == null) {
+				//We really couldn't find it.
+				throw ex;
+			}
+		}
 		return c;
 	}
 	

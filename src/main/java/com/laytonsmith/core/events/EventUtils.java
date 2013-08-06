@@ -237,7 +237,7 @@ public final class EventUtils {
     }
 	
 	public static void TriggerExternal(BindableEvent mce) {
-		for(Method m : ClassDiscovery.GetMethodsWithAnnotation(event.class)){
+		for(Method m : ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(event.class)){
 			Class<?>[] params = m.getParameterTypes();
 			if(params.length != 1 || !BindableEvent.class.isAssignableFrom(params[0])){
 				Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, "An event handler annotated with @"

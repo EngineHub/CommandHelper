@@ -11,7 +11,8 @@ import java.util.List;
  * available in this class (or have an equivalent Mirror version).
  */
 public class FieldMirror extends AbstractElementMirror {
-	private Object value;
+	private static final long serialVersionUID = 1L;
+	private final Object value;
 	
 	public FieldMirror(List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value){
 		super(annotations, modifiers, type, name);

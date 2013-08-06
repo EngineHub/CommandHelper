@@ -1437,7 +1437,9 @@ public class DataHandling {
 				new ExampleScript("True condition", "is_numeric('1.0')"),
 				new ExampleScript("True condition", "is_numeric('1')"),
 				new ExampleScript("True condition", "is_numeric(1)"),
+				new ExampleScript("True condition", "is_numeric(1.5)"),
 				new ExampleScript("False condition", "is_numeric('string')"),
+				new ExampleScript("True condition, because null is coerced to 0.0, which is numeric.", "is_numeric(null)"),
 			};
 		}
 	}
@@ -1504,6 +1506,7 @@ public class DataHandling {
 				new ExampleScript("True condition", "is_integral('5.0')"),
 				new ExampleScript("True condition", "is_integral('6')"),
 				new ExampleScript("False condition", "is_integral(1.5)"),
+				new ExampleScript("True condition, because null is coerced to 0, which is integral", "is_integral(null)"),
 			};
 		}
 	}

@@ -8,8 +8,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,10 +28,13 @@ import org.objectweb.asm.Opcodes;
  * This class gathers information about a class, without actually loading 
  * the class into memory. Most of the methods in {@link java.lang.Class} are
  * available in this class (or have an equivalent Mirror version).
+ * @param <T>
  */
-public class ClassMirror {	
-	ClassInfo info = new ClassInfo();
-	org.objectweb.asm.ClassReader reader;
+public class ClassMirror<T> implements Serializable {
+	private static final long serialVersionUID = 1L;
+	private final ClassInfo info = new ClassInfo();
+	//Transient, because it's only used during construction
+	private final transient org.objectweb.asm.ClassReader reader;
 	
 	/**
 	 * Creates a ClassMirror object for a given input stream representing
@@ -154,6 +157,14 @@ public class ClassMirror {
 	}
 	
 	/**
+	 * Returns a list of annotations on this class.
+	 * @return 
+	 */
+	public List<AnnotationMirror> getAnnotations(){
+		return new ArrayList<AnnotationMirror>(info.annotations);
+	}
+	
+	/**
 	 * Loads the corresponding Annotation type for this field
 	 * or method. This actually loads the Annotation class into memory.
 	 * This is equivalent to getAnnotation(type).getProxy(type), however
@@ -185,6 +196,7 @@ public class ClassMirror {
 	 * Object hierarchy, unlike {@link Class#getField(java.lang.String)}.
 	 * @param name
 	 * @return 
+	 * @throws java.lang.NoSuchFieldException 
 	 */
 	public FieldMirror getField(String name) throws NoSuchFieldException {
 		for(FieldMirror m : info.fields){
@@ -212,18 +224,35 @@ public class ClassMirror {
 	 * @param name
 	 * @param params
 	 * @return 
+	 * @throws java.lang.NoSuchMethodException 
 	 */
 	public MethodMirror getMethod(String name, Class...params) throws NoSuchMethodException{
-		List<ClassReferenceMirror> crmParams = new ArrayList<ClassReferenceMirror>();
-		for(Class p : params){
-			crmParams.add(new ClassReferenceMirror(ClassUtils.getJVMName(p)));
+		ClassReferenceMirror mm [] = new ClassReferenceMirror[params.length];
+		for(int i = 0; i < params.length; i++){
+			mm[i] = new ClassReferenceMirror(ClassUtils.getJVMName(params[i]));
 		}
+		return getMethod(name, mm);
+	}
+	
+	/**
+	 * Returns the method, given by name. This traverses the parent Object heirarchy
+	 * if the methods are apart of the visible interface, as well as private methods
+	 * in this class itself.
+	 * @param name
+	 * @param params
+	 * @return
+	 * @throws NoSuchMethodException 
+	 */
+	public MethodMirror getMethod(String name, ClassReferenceMirror... params) throws NoSuchMethodException {
+		List<ClassReferenceMirror> crmParams = new ArrayList<ClassReferenceMirror>();
+		crmParams.addAll(Arrays.asList(params));
 		for(MethodMirror m : getMethods()){
 			if(m.getName().equals(name) && m.getParams().equals(crmParams)){
 				return m;
 			}
 		}
 		throw new NoSuchMethodException("No method matching the signature " + name + "(" + StringUtils.Join(crmParams, ", ") + ") was found.");
+		
 	}
 	
 	/**
@@ -232,18 +261,27 @@ public class ClassMirror {
 	 * class loader is used, and the class is initialized.
 	 * @return 
 	 */
-	public Class<?> loadClass() throws ClassNotFoundException{
-		return info.classReferenceMirror.loadClass();
+	public Class<T> loadClass() throws NoClassDefFoundError {
+		try{
+			return (Class<T>)info.classReferenceMirror.loadClass();
+		} catch(ClassNotFoundException ex){
+			throw new NoClassDefFoundError();
+		}
 	}
 	
 	/**
 	 * Loads the class into memory and returns the class object. For this
 	 * call to succeed, the classloader specified must be able to find the class.
 	 * @param loader
+	 * @param initialize
 	 * @return 
 	 */
-	public Class<?> loadClass(ClassLoader loader, boolean initialize) throws ClassNotFoundException{
-		return info.classReferenceMirror.loadClass(loader, initialize);
+	public Class<T> loadClass(ClassLoader loader, boolean initialize) throws NoClassDefFoundError {
+		try{
+			return info.classReferenceMirror.loadClass(loader, initialize);
+		} catch(ClassNotFoundException ex){
+			throw new NoClassDefFoundError();
+		}
 	}
 	
 	/**
@@ -308,14 +346,16 @@ public class ClassMirror {
 				(isEnum()?"enum":"class")) 
 				+ " " + getClassName();
 	}
+
+	public ClassReferenceMirror getClassReference() {
+		return new ClassReferenceMirror("L" + getJVMClassName() + ";");
+	}
 	
-	private static class ClassInfo implements ClassVisitor {
+	private static class ClassInfo implements ClassVisitor, Serializable {
+		private static final long serialVersionUID = 1L;
 		
-		public int version;
-		public int access;
 		public ModifierMirror modifiers;
 		public String name;
-		public String signature;
 		public String superClass;
 		public String[] interfaces;
 		public List<AnnotationMirror> annotations = new ArrayList<AnnotationMirror>();
@@ -332,14 +372,11 @@ public class ClassMirror {
 			if((access & Opcodes.ACC_INTERFACE) > 0){
 				isInterface = true;
 			}
-			this.version = version;
-			this.access = access;
 			this.modifiers = new ModifierMirror(ModifierMirror.Type.CLASS, access);
 			this.name = name;
 			//We know we aren't an array or a primitive, so we just add L...; to make
 			//the binary name, which is what ClassReferenceMirror expects.
 			this.classReferenceMirror = new ClassReferenceMirror("L" + name + ";");
-			this.signature = signature;
 			this.superClass = superName;
 			this.interfaces = interfaces;
 		}
@@ -388,7 +425,7 @@ public class ClassMirror {
 			};
 		}
 		
-		private static final Pattern METHOD_SIGNATURE_PATTERN = Pattern.compile("^\\((.*)\\)(.*)$");
+		private static transient final Pattern METHOD_SIGNATURE_PATTERN = Pattern.compile("^\\((.*)\\)(.*)$");
 
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 			if("<init>".equals(name) || "<clinit>".equals(name)){
@@ -425,7 +462,8 @@ public class ClassMirror {
 				}
 			}
 			final MethodMirror mm = new MethodMirror(classReferenceMirror, new ModifierMirror(ModifierMirror.Type.METHOD, access),
-					new ClassReferenceMirror(ret), name, params, (access & Opcodes.ACC_VARARGS) > 0);
+					new ClassReferenceMirror(ret), name, params, 
+					(access & Opcodes.ACC_VARARGS) > 0, (access & Opcodes.ACC_SYNTHETIC) > 0);
 			methods.add(mm);
 			return new MethodVisitor() {
 
@@ -537,12 +575,19 @@ public class ClassMirror {
 	
 	private static class AnnotationV implements AnnotationVisitor {
 		
-		private AnnotationMirror mirror;
+		private final AnnotationMirror mirror;
 		public AnnotationV(AnnotationMirror mirror){
 			this.mirror = mirror;
 		}
 
 		public void visit(String name, Object value) {
+			if(value instanceof org.objectweb.asm.Type){
+				//Type can't serialize, so we need to store a reference to it.
+				//This will only happen if it's a class type, so a ClassReferenceMirror
+				//is what we need anyways.
+				org.objectweb.asm.Type type = (org.objectweb.asm.Type) value;
+				value = new ClassReferenceMirror(type.getDescriptor());
+			}
 			mirror.addAnnotationValue(name, value);
 		}
 

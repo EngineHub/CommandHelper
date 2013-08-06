@@ -25,6 +25,7 @@ import java.lang.reflect.Modifier;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -55,7 +56,7 @@ public class DocGenTemplates {
 		} catch (IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(DocGenTemplates.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
 		//Grab the template from the resources
 		String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/docs/" + forPage));
 		//Find all the %%templates%% in the template
@@ -120,7 +121,7 @@ public class DocGenTemplates {
 		} catch (IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(DocGenTemplates.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
 
 		//Find all the %%templates%% in the template
 		Matcher m = Pattern.compile("%%([^\\|%]+)([^%]*?)%%").matcher(template);
@@ -173,7 +174,7 @@ public class DocGenTemplates {
 	public static Generator persistance_connections = new Generator(){
 
 		public String generate(String ... args) {
-			Class [] classes = ClassDiscovery.GetClassesWithAnnotation(datasource.class);
+			Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
 			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*?)\\s*$");
 			SortedSet<String> set = new TreeSet<String>();
 			for(Class c : classes){
@@ -269,7 +270,7 @@ public class DocGenTemplates {
 	public static Generator GET_CLASS = new Generator() {
 
 		public String generate(String... args) {
-			Class c = ClassDiscovery.forFuzzyName(args[0], args[1]);
+			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
 			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getName() + "]";
 		}
 	};
@@ -282,7 +283,7 @@ public class DocGenTemplates {
 	public static Generator GET_SIMPLE_CLASS = new Generator() {
 
 		public String generate(String... args) {
-			Class c = ClassDiscovery.forFuzzyName(args[0], args[1]);
+			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
 			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getSimpleName() + "]";
 		}
 	};

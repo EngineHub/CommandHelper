@@ -2,6 +2,7 @@
 package com.laytonsmith.PureUtilities.ClassMirror;
 
 import com.laytonsmith.PureUtilities.ClassUtils;
+import java.io.Serializable;
 
 /**
  * A class reference mirror is a wrapper around a simple class name reference.
@@ -10,8 +11,20 @@ import com.laytonsmith.PureUtilities.ClassUtils;
  * loading the actual class referenced, at which point more information could be
  * retrieved.
  */
-public class ClassReferenceMirror {
-	private String name;
+public class ClassReferenceMirror<T> implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Returns a ClassReferenceMirror for a given real class. This is
+	 * useful when doing comparisons.
+	 * @param c
+	 * @return 
+	 */
+	public static ClassReferenceMirror fromClass(Class c){
+		return new ClassReferenceMirror(ClassUtils.getJVMName(c));
+	}
+	
+	private final String name;
 	/**
 	 * The name should look similar to e.g.: "Ljava/lang/Object;" or "I"
 	 * @param name The JVM binary name for this class.
@@ -34,7 +47,7 @@ public class ClassReferenceMirror {
 	 * class loader is used, and the class is initialized.
 	 * @return 
 	 */
-	public Class<?> loadClass() throws ClassNotFoundException{
+	public Class<T> loadClass() throws ClassNotFoundException{
 		return loadClass(ClassReferenceMirror.class.getClassLoader(), true);
 	}
 	
@@ -44,7 +57,7 @@ public class ClassReferenceMirror {
 	 * @param loader
 	 * @return 
 	 */
-	public Class<?> loadClass(ClassLoader loader, boolean initialize) throws ClassNotFoundException{
+	public Class<T> loadClass(ClassLoader loader, boolean initialize) throws ClassNotFoundException{
 		return ClassUtils.forCanonicalName(ClassUtils.getCommonNameFromJVMName(name), initialize, loader);
 	}
 	

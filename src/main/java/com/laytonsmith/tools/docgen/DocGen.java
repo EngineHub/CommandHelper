@@ -367,7 +367,7 @@ public class DocGen {
     }
 
     public static String events(String type) {
-        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
+        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
         Set<Documentation> list = new TreeSet<Documentation>();
         for (Class c : classes) {
             if (Event.class.isAssignableFrom(c)

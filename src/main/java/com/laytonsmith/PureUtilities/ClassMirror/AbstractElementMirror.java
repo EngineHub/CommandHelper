@@ -2,6 +2,7 @@
 package com.laytonsmith.PureUtilities.ClassMirror;
 
 import com.laytonsmith.PureUtilities.ClassUtils;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,8 @@ import java.util.List;
 /**
  *
  */
-class AbstractElementMirror {
+class AbstractElementMirror implements Serializable {
+	private static final long serialVersionUID = 1L;
 	protected ModifierMirror modifiers;
 	protected String name;
 	protected ClassReferenceMirror type;
@@ -61,9 +63,9 @@ class AbstractElementMirror {
 	 * @return 
 	 */
 	public AnnotationMirror getAnnotation(Class<? extends Annotation> annotation){
-		String name = ClassUtils.getJVMName(annotation);
+		String jvmName = ClassUtils.getJVMName(annotation);
 		for(AnnotationMirror a : annotations){
-			if(a.getType().getJVMName().equals(name)){
+			if(a.getType().getJVMName().equals(jvmName)){
 				return a;
 			}
 		}

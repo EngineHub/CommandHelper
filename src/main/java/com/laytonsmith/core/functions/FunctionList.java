@@ -33,7 +33,7 @@ public class FunctionList {
 
     private static void initFunctions() {
         //Register internal classes first, so they can't be overridden
-        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
+        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
 		StringBuilder message = new StringBuilder();
         for(Class c : classes){
             String apiClass = (c.getEnclosingClass() != null

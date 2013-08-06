@@ -68,7 +68,7 @@ public class RandomTests {
 		//Ensure that all the abstraction objects overloaded
 		StaticTest.InstallFakeServerFrontend();
 		outer:
-		for (Class c : ClassDiscovery.GetAllClassesOfSubtype(AbstractionObject.class, null)) {
+		for (Class c : ClassDiscovery.getDefaultInstance().loadClassesThatExtend(AbstractionObject.class)) {
 			inner:
 			for (Class inter : c.getInterfaces()) {
 				for (Class extended : inter.getInterfaces()) {

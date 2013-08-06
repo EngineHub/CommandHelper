@@ -314,7 +314,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Server server = Bukkit.getServer();
 
-        Class serverClass = ClassDiscovery.forFuzzyName("org.bukkit.craftbukkit.*", "CraftServer");
+        Class serverClass = ClassDiscovery.getDefaultInstance().forFuzzyName("org.bukkit.craftbukkit.*", "CraftServer").loadClass();
 
         if (!server.getClass().isAssignableFrom(serverClass)) {
             throw new IllegalStateException("Running server isn't CraftBukkit");
@@ -325,13 +325,13 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			//Probably 1.4.5
 			/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
 			/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
-			opSet = (Set) ReflectionUtils.get(ClassDiscovery.forFuzzyName("net.minecraft.server.*", "ServerConfigurationManagerAbstract"), obcServerConfigurationmanagerAbstract, "operators");
+			opSet = (Set) ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "ServerConfigurationManagerAbstract").loadClass(), obcServerConfigurationmanagerAbstract, "operators");
 		} catch(ReflectionUtils.ReflectionException e){
 			//Probably 1.4.6
-			Class nmsMinecraftServerClass = ClassDiscovery.forFuzzyName("net.minecraft.server.*", "MinecraftServer");
+			Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
 			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
 			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-			opSet = (Set)ReflectionUtils.get(ClassDiscovery.forFuzzyName("net.minecraft.server.*", "PlayerList"), nmsPlayerList, "operators");
+			opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
 		}
 
         // since all Java objects pass by reference, we don't need to set field back to object

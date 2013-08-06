@@ -1,8 +1,8 @@
 package com.laytonsmith.annotations.processors;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassUtils;
-import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.MustUseOverride;
 import java.lang.reflect.Method;
@@ -36,6 +36,8 @@ import javax.tools.Diagnostic;
 @SupportedAnnotationTypes({"java.lang.Override", "com.laytonsmith.annotations.MustUseOverride"})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class CheckOverrides extends AbstractProcessor {
+	
+	private static final boolean enabled = true;
 
 	private static Map<Class, Set<Method>> methods = null;
 	private static Set<Class> interfacesWithMustUseOverride = new HashSet<Class>();
@@ -44,6 +46,10 @@ public class CheckOverrides extends AbstractProcessor {
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+		if(!enabled){
+			processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "CheckOverrides processor is turned off!");
+			return false;
+		}
 		setup();
 		if (!roundEnv.processingOver()) {
 			for (Element element : roundEnv.getElementsAnnotatedWith(MustUseOverride.class)) {
@@ -314,8 +320,10 @@ public class CheckOverrides extends AbstractProcessor {
 	private static void setup() {
 		if (methods == null) {
 			methods = new HashMap<Class, Set<Method>>();
-			Class[] classes = ClassDiscovery.GetClassesWithinPackageHierarchy();
-			for (Class c : classes) {
+			
+			List<ClassMirror<?>> classes = ClassDiscovery.getDefaultInstance().getKnownClasses(ClassDiscovery.GetClassContainer(CheckOverrides.class));
+			for (ClassMirror cm : classes) {
+				Class c = cm.loadClass(CheckOverrides.class.getClassLoader(), false);
 				if (c.isInterface()) {
 					continue;
 				}

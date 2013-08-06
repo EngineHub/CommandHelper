@@ -98,7 +98,7 @@ public final class EventList {
     
     private static void initEvents() {
         //Register internal classes first, so they can't be overridden
-        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
+        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
         int total = 0;
 		StringBuilder message = new StringBuilder();
         for(Class c : classes){
@@ -156,16 +156,24 @@ public final class EventList {
         }
         event_list.get(e.driver()).add(e);
         
-        try{
-            e.hook();
-        } catch(UnsupportedOperationException ex){}
-        
         if(Prefs.DebugMode()){
             message.append(" \"").append(e.getName()).append("\"");
         }
     }
     
-
+	/**
+	 * This runs the hooks on all events. This should be called each time
+	 * the server "starts up".
+	 */
+	public static void RunHooks(){
+		for(SortedSet<Event> s : event_list.values()){
+			for(Event e : s){
+				try{
+					e.hook();
+				} catch(UnsupportedOperationException ex){}
+			}
+		}
+	}
     
     
     /**

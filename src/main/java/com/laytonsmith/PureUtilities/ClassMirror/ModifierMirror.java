@@ -2,6 +2,7 @@
 package com.laytonsmith.PureUtilities.ClassMirror;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,13 +11,14 @@ import org.objectweb.asm.Opcodes;
 /**
  * This is a mirror for the {@link java.lang.reflect.Modifier} class.
  */
-public class ModifierMirror {
-	private int access;
+public class ModifierMirror implements Serializable {
+	private static final long serialVersionUID = 1L;
+	private final int access;
 	private int modifiers = 0;
 	/**
 	 * This is the canonical order of modifiers, used in the toString method.
 	 */
-	private static final Object[] order = new Object[]{Modifier.PUBLIC, "public", Modifier.PRIVATE, "private", Modifier.PROTECTED, "protected", Modifier.STATIC, "static", Modifier.FINAL, "final", Modifier.SYNCHRONIZED, "synchronized", Modifier.VOLATILE, "volatile", Modifier.TRANSIENT, "transient", Modifier.NATIVE, "native", Modifier.INTERFACE, "interface", Modifier.ABSTRACT, "abstract", Modifier.STRICT, "strict"};
+	private static transient final Object[] order = new Object[]{Modifier.PUBLIC, "public", Modifier.PRIVATE, "private", Modifier.PROTECTED, "protected", Modifier.STATIC, "static", Modifier.FINAL, "final", Modifier.SYNCHRONIZED, "synchronized", Modifier.VOLATILE, "volatile", Modifier.TRANSIENT, "transient", Modifier.NATIVE, "native", Modifier.INTERFACE, "interface", Modifier.ABSTRACT, "abstract", Modifier.STRICT, "strict"};
 
 	/**
 	 * Creates a new ModifierMirror. Type is needed to determine which flags are applicable, and access

@@ -3,6 +3,7 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassMirror.ClassMirror;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
@@ -14,6 +15,7 @@ import com.laytonsmith.core.functions.Function;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -178,9 +180,9 @@ public class SyntaxHighlighters {
     
     private static List<Documentation> GetEvents(){
         List<Documentation> l = new ArrayList<Documentation>();
-        Class[] classes = ClassDiscovery.GetClassesWithinPackageHierarchy();
-        for(Class c : classes){
-            if (Event.class.isAssignableFrom(c) && Documentation.class.isAssignableFrom(c)) {
+        Set<Class<Event>> classes = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Event.class);
+        for(Class<Event> c : classes){
+            if (Documentation.class.isAssignableFrom(c)) {
                 try {
                     Constructor m = c.getConstructor();
                     Documentation e = (Documentation)m.newInstance();
@@ -195,7 +197,7 @@ public class SyntaxHighlighters {
     
     private static List<Function> GetFunctions(){
         List<Function> fl = new ArrayList<Function>();
-        Class[] functions = ClassDiscovery.GetClassesWithAnnotation(api.class);
+        Set<Class> functions = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
         for(Class c : functions){
             if(Function.class.isAssignableFrom(c)){
                 try {

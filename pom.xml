@@ -190,7 +190,7 @@
 		<dependency>
 			<groupId>com.sk89q</groupId>
 			<artifactId>worldguard</artifactId>
-			<version>5.7.3</version>
+			<version>5.8.1-SNAPSHOT</version>
 		</dependency>
     
 		<!-- Used for economy stuff -->
@@ -429,6 +429,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
+				<configuration>
+					<showDeprecation>true</showDeprecation>
+				</configuration>
 			</plugin>
 
 			<!-- JAR creation plugin -->
@@ -488,7 +491,7 @@
 						<configuration>
 							<shadedArtifactAttached>false</shadedArtifactAttached>
 							<shadedClassifierName>Bundle</shadedClassifierName>
-							<minimizeJar>true</minimizeJar>
+							<minimizeJar>false</minimizeJar>
 							<!-- To add a new shaded dependency, there are three steps.
 								1. Add a reference to the artifact set
 								2. Add a relocation tag (usually recommended, though not always)
@@ -514,7 +517,7 @@
 									<include>commons-codec:commons-codec:jar:*</include>
 									<include>com.github.tony19:named-regexp:jar:*</include>
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
-									<!--<include>asm:asm-all:jar:*</include>-->
+									<include>asm:asm-all:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -584,10 +587,10 @@
 									<pattern>org.apache.bcel</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.apache.bcel</shadedPattern>
 								</relocation>-->
-								<!--<relocation>
+								<relocation>
 									<pattern>org.objectweb.asm</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.objectweb.asm</shadedPattern>
-								</relocation>-->
+								</relocation>
 							</relocations>
 							<filters>
 								<filter>
@@ -675,16 +678,37 @@
 										<include>**</include>
 									</includes>
 								</filter>-->
-								<!--<filter>
+								<filter>
 									<artifact>asm:asm-all:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
-								</filter>-->
+								</filter>
 							</filters>
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<id>cache-annotations</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>com.laytonsmith.annotations.processors.CacheAnnotations</mainClass>
+					<arguments>
+						<argument>${basedir}/target/classes</argument>
+						<argument>${basedir}/target/classes</argument>
+					</arguments>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.bsc.maven</groupId>
@@ -696,7 +720,7 @@
 						<goals>
 							<goal>process</goal>
 						</goals>
-						<phase>compile</phase>
+						<phase>process-classes</phase>
 					</execution>
 				</executions>
 				<configuration>

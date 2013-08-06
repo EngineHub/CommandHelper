@@ -1,5 +1,6 @@
 package com.laytonsmith.tools.docgen;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Web.CookieJar;
 import com.laytonsmith.PureUtilities.Web.HTTPMethod;
 import com.laytonsmith.PureUtilities.Web.HTTPResponse;
@@ -396,7 +397,7 @@ public class DocGenUIHandler {
 		try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
                 digest.update(content.getBytes());
-                String hash = Crypto.toHex(digest.digest()).toLowerCase();
+                String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return hash;
             } catch (NoSuchAlgorithmException ex) {
                 throw new RuntimeException("An error occured while trying to hash your data", ex);

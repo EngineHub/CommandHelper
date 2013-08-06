@@ -1552,7 +1552,11 @@ public class PlayerEvents {
 		private Map<Integer, Map<String, MCLocation>> thresholds = new HashMap<Integer, Map<String, MCLocation>>();
 
 		@Override
-		public void hook() {
+		public void bind(Map<String, Construct> prefilters) {
+			if(prefilters.containsKey("threshold")){
+				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+				thresholdList.add(i);
+			}
 			if(thread == null){
 				thresholdList.clear();
 				thresholdList.add(1);
@@ -1560,8 +1564,9 @@ public class PlayerEvents {
 
 					public void run() {
 						outerLoop: while(true){
-							if(thread == null){
-								return; //Kill it
+							if(thread != Thread.currentThread()){
+								//If it's a different thread, kill it.
+								return;
 							}
 							MCPlayer players[] = Static.getServer().getOnlinePlayers();
 							for(final MCPlayer p : players){
@@ -1647,13 +1652,13 @@ public class PlayerEvents {
 										thresholds.get(i).put(p.getName(), p.asyncGetLocation());
 									}
 								}
-								synchronized(player_move.this){
-									try {
-										//Throttle this thread just a little
-										player_move.this.wait(10);
-									} catch (InterruptedException ex) {
-										//
-									}
+							}
+							synchronized(player_move.this){
+								try {
+									//Throttle this thread just a little
+									player_move.this.wait(10);
+								} catch (InterruptedException ex) {
+									//
 								}
 							}
 						}
@@ -1666,14 +1671,6 @@ public class PlayerEvents {
 						thread = null;
 					}
 				});
-			}
-		}
-
-		@Override
-		public void bind(Map<String, Construct> prefilters) {
-			if(prefilters.containsKey("threshold")){
-				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
-				thresholdList.add(i);
 			}
 		}
 

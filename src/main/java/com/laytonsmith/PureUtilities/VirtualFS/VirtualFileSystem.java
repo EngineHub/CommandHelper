@@ -1,6 +1,7 @@
 package com.laytonsmith.PureUtilities.VirtualFS;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.PureUtilities.VirtualFS.VirtualFileSystemSettings.VirtualFileSystemSetting;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -79,14 +81,16 @@ public class VirtualFileSystem {
 	
 	private static final Map<String, Constructor> FSLProviders = new HashMap<String, Constructor>();
 	static {
-		Class fslayerClasses [] = ClassDiscovery.GetClassesWithAnnotation(FileSystemLayer.fslayer.class);
-		for(Class<? extends FileSystemLayer> clazz : fslayerClasses){
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(VirtualFileSystem.class));
+		Set<ClassMirror<?>> fslayerClasses = ClassDiscovery.getDefaultInstance().getClassesWithAnnotation(FileSystemLayer.fslayer.class);
+		for(ClassMirror<?> clazzMirror : fslayerClasses){
 			try {
-				Constructor<? extends FileSystemLayer> constructor = clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
+				Class<?> clazz = clazzMirror.loadClass();
+				Constructor<?> constructor = clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
 				FileSystemLayer.fslayer annotation = clazz.getAnnotation(FileSystemLayer.fslayer.class);
 				FSLProviders.put(annotation.value(), constructor);
 			} catch (NoSuchMethodException ex) {
-				throw new Error(clazz.getName() + " must implement a constructor with the signature: public " + clazz.getSimpleName() + "("
+				throw new Error(clazzMirror.getClassName() + " must implement a constructor with the signature: public " + clazzMirror.getSimpleName() + "("
 						+ VirtualFile.class.getSimpleName() + ", " + VirtualFileSystem.class.getSimpleName() + ", " + String.class.getSimpleName() + ")");
 			} catch (SecurityException ex) {
 				Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, "Security exception while loading a class. Symlinks may not work.", ex);

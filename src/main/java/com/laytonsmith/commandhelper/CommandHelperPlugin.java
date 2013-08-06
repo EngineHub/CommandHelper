@@ -18,6 +18,8 @@
  */
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.SimpleVersion;
@@ -49,6 +51,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Server;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -102,6 +105,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
+		File cdcDir = new File(chDirectory, ".cache");
+		cdcDir.mkdirs();
+		ClassDiscoveryCache cdc = new ClassDiscoveryCache(cdcDir);
+		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
+		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 		try {
 			Prefs.init(new File(chDirectory, "preferences.txt"));
@@ -163,9 +173,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} catch (DataSourceException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		Static.getLogger().info("CommandHelper/CommandHelper " + getDescription().getVersion() + " enabled");
+		Static.getLogger().log(Level.INFO, "CommandHelper/CommandHelper {0} enabled", getDescription().getVersion());
 		if(firstLoad){
-			ExtensionManager.Initialize(new File(chDirectory, "extensions"));
+			ExtensionManager.Initialize(new File(chDirectory, "extensions"), ClassDiscovery.getDefaultInstance());
 			firstLoad = false;
 		}
 		version = new SimpleVersion(getDescription().getVersion());
@@ -255,9 +265,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	/**
 	 * Register an event.
 	 *
-	 * @param type
 	 * @param listener
-	 * @param priority
 	 */
 	public void registerEvent(Listener listener) {
 		getServer().getPluginManager().registerEvents(listener, this);
@@ -265,6 +273,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	/**
 	 * Called when a command registered by this plugin is received.
+	 * @param sender
+	 * @param cmd
+	 * @param commandLabel
+	 * @param args
+	 * @return 
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
@@ -396,7 +409,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			int page = 0;
 			try {
 				page = Integer.parseInt(args[0]);
-			} catch (Exception e) {
+			} catch (NumberFormatException e) {
 				//Meh. Index out of bounds, or number format exception. Whatever, show page 1
 			}
 			Static.SendMessage(player, um.getAllAliases(page, persistanceNetwork));
@@ -411,9 +424,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 			}
 			try {
 				ArrayList<String> deleted = new ArrayList<String>();
-				for (int i = 0; i < args.length; i++) {
-					um.delAlias(Integer.parseInt(args[i]), persistanceNetwork);
-					deleted.add("#" + args[i]);
+				for (String arg : args) {
+					um.delAlias(Integer.parseInt(arg), persistanceNetwork);
+					deleted.add("#" + arg);
 				}
 				if (args.length > 1) {
 					String s = MCChatColor.YELLOW + "Aliases " + deleted.toString() + " were deleted";
