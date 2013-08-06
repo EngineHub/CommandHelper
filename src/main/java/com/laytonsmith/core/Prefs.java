@@ -39,7 +39,8 @@ public final class Prefs {
         PROFILING_FILE("profiling-file"),
         SHOW_SPLASH_SCREEN("show-splash-screen"),
         USE_COLORS("use-colors"),
-        HALT_ON_FAILURE("halt-on-failure");
+        HALT_ON_FAILURE("halt-on-failure"),
+		USE_SUDO_FALLBACK("use-sudo-fallback");
         String name;
         private PNames(String name){
             this.name = name;
@@ -72,6 +73,7 @@ public final class Prefs {
         a.add(new Preference(PNames.SHOW_SPLASH_SCREEN.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to show the splash screen at server startup"));
         a.add(new Preference(PNames.USE_COLORS.config(), (TermColors.SYSTEM == TermColors.SYS.WINDOWS ? "false" : "true"), Preferences.Type.BOOLEAN, "Whether or not to use console colors. If this is a Windows machine, defaults to false, however, it can be toggled manually, and will then respect your setting."));
         a.add(new Preference(PNames.HALT_ON_FAILURE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to halt compilation of pure mscript files if a compilation failure occurs in any one of the files."));
+		a.add(new Preference(PNames.USE_SUDO_FALLBACK.config(), "false", Preferences.Type.BOOLEAN, "If true, sudo() will use a less safe fallback method if it fails. See the documentation on the sudo function for more details. If this is true, a warning is issued at startup."));
         prefs = new Preferences("CommandHelper", Static.getLogger(), a);
         prefs.init(f);
     }
@@ -143,4 +145,8 @@ public final class Prefs {
     public static Boolean HaltOnFailure() {
         return (Boolean)pref(PNames.HALT_ON_FAILURE);
     }
+	
+	public static Boolean UseSudoFallback(){
+		return (Boolean)pref(PNames.USE_SUDO_FALLBACK);
+	}
 }

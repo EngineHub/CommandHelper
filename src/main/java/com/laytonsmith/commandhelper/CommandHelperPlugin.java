@@ -19,6 +19,7 @@
 package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -137,9 +138,20 @@ public class CommandHelperPlugin extends JavaPlugin {
 		self = this;
 		myServer = StaticLayer.GetServer();
 		try {
-			Prefs.init(new File(chDirectory, "preferences.txt"));
+			//Upgrade preferences.txt to preferences.ini
+			File oldPreferences = new File(chDirectory, "preferences.txt");
+			File newPreferences = new File(chDirectory, "preferences.ini");
+			if(oldPreferences.exists() && !newPreferences.exists()){
+				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "Old preferences.txt file detected. Moving preferences.txt to preferences.ini.", Target.UNKNOWN);
+				FileUtility.copy(oldPreferences, newPreferences, true);
+				oldPreferences.deleteOnExit();
+			}
+			Prefs.init(newPreferences);
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		if(Prefs.UseSudoFallback()){
+			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.WARNING, "In your preferences, use-sudo-fallback is turned on. Consider turning this off if you can.");
 		}
 		CHLog.initialize(chDirectory);
 		try {

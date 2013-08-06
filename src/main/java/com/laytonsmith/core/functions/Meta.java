@@ -217,7 +217,14 @@ public class Meta {
 
 		public String docs() {
 			return "void {command} Runs a single command for this user, as op. Works like runas(~op, '/command') used to work,"
-					+ " before it was deprecated.";
+					+ " before it was deprecated. ---- This is guaranteed to not allow the player to stay op, even if a fatal"
+					+ " error occurs during the command. If this guarantee cannot be met, the function will simply fail. This"
+					+ " guarantee only exists in CraftBukkit. Other server types may find that this function does not work at"
+					+ " all, if that's the case, and you are ok with losing the deop guarantee, you can set use-sudo-fallback"
+					+ " to true in your preferences. If the normal sudo functionality fails on your server then, it will"
+					+ " actually fully op the player, run the command, then deop the player, however, this is less reliable than"
+					+ " the normal sudo mechanism, and could potentially fail, leaving the player as op, so is not recommended."
+					+ " Enable that setting at your own risk.";
 		}
 
 		public CHVersion since() {
@@ -234,15 +241,17 @@ public class Meta {
 			if (!(player instanceof MCPlayer) || player.isOp() == value) {
 				return;
 			}
-
+			MCPlayer p = (MCPlayer) player;
 			try {
-				((MCPlayer) player).setTempOp(value);
-			} catch (ClassNotFoundException e) {
-			} catch (IllegalStateException e) {
+				p.setTempOp(value);
 			} catch (Throwable e) {
-				Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
-				System.err.println("Extra information about the error: ");
-				e.printStackTrace();
+				if(Prefs.UseSudoFallback()){
+					p.setOp(value);
+				} else {
+					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
+					System.err.println("Extra information about the error: ");
+					e.printStackTrace();
+				}
 			}
 		}
 
