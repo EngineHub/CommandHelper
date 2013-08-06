@@ -344,4 +344,16 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		le.setLastDamageCause(new EntityDamageEvent(le, EntityDamageEvent.DamageCause.CUSTOM, le.getHealth()));
 		le.setHealth(0D);
 	}
+
+	public MCEntity getLeashHolder() {
+		return le.isLeashed() ? BukkitConvertor.BukkitGetCorrectEntity(le.getLeashHolder()) : null;
+	}
+
+	public boolean isLeashed() {
+		return le.isLeashed();
+	}
+
+	public void setLeashHolder(MCEntity holder) {
+		le.setLeashHolder(holder == null ? null : ((BukkitMCEntity) holder).asEntity());
+	}
 }
