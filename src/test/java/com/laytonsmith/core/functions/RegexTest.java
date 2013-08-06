@@ -6,6 +6,9 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.hamcrest.Matcher;
 import org.junit.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -102,22 +105,34 @@ public class RegexTest {
 	
 	@Test
 	public void testNamedCaptures1() throws Exception {
+		if(!hasNamedCaptureCapability()){
+			return;
+		}
 		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')['foo']", null));	
 	}
 	
 	@Test
 	public void testNamedCaptures2() throws Exception {
+		if(!hasNamedCaptureCapability()){
+			return;
+		}
 		assertEquals("123", SRun("reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyzabc456xyz')[0]['foo']", null));		
 		assertEquals("456", SRun("reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyzabc456xyz')[1]['foo']", null));		
 	}
 	
 	@Test
 	public void testNamedCaptures3() throws Exception {
+		if(!hasNamedCaptureCapability()){
+			return;
+		}
 		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']", null));		
 	}
 	
 	@Test
 	public void testNamedCaptures4() throws Exception {
+		if(!hasNamedCaptureCapability()){
+			return;
+		}
 		assertEquals("123", SRun("reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", null));
 	}
 	
@@ -125,5 +140,16 @@ public class RegexTest {
 	public void testInfiniteLoopInRegexCaptures() throws Exception {
 		//This code has caused infinite loops in reg_match_all
 		SRun("reg_match_all('(?<=@)[^@]*', '@@@@')", null);
+	}
+	
+	public static boolean hasNamedCaptureCapability(){
+		try {
+			Matcher.class.getMethod("group", String.class);
+			return true;
+		} catch (NoSuchMethodException ex) {
+			return false;
+		} catch (SecurityException ex) {
+			throw new Error(ex);
+		}
 	}
 }

@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -10,10 +11,11 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.google.code.regexp.Matcher;
-import com.google.code.regexp.Pattern;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -28,7 +30,7 @@ public class Regex {
                 + " to the Java regex mechanism. If you need to set a flag on the regex, where the api calls"
                 + " for a pattern, instead send array('pattern', 'flags') where flags is any of i, m, or s."
                 + " Alternatively, using the embedded flag system that Java provides is also valid. Named captures are"
-				+ " also supported, using Java 7 syntax.";
+				+ " also supported if you are using Java 7, otherwise they are not supported.";
     }
     
     @api public static class reg_match extends AbstractFunction implements Optimizable {
@@ -79,8 +81,15 @@ public class Regex {
                         ret.set(i, Static.resolveConstruct(m.group(i), t), t);
                     }
                 }
-				for(String key : m.namedGroups().keySet()){
-					ret.set(key, m.group(key), t);
+				//Named groups are only supported in Java 7, but we can
+				//dynamically enable this feature if they have it.
+				Set<String> namedGroups = getNamedGroups(pattern.pattern());
+				try{
+					for(String key : namedGroups){
+						ret.set(key, (String)ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
+					}
+				} catch(ReflectionUtils.ReflectionException ex){
+					throw new ConfigRuntimeException("Named captures are only supported with Java 7.", ExceptionType.FormatException, t);
 				}
             }
             return ret;
@@ -152,9 +161,7 @@ public class Regex {
             String subject = args[1].val();
             CArray fret = new CArray(t);
             Matcher m = pattern.matcher(subject);
-			Set<String> namedGroups = m.namedGroups().keySet();
-			//Reset the matcher all the way, since apparently namedGroups() breaks things
-			m = pattern.matcher(subject);
+			Set<String> namedGroups = getNamedGroups(pattern.pattern());
             while(m.find()){
                 CArray ret = CArray.GetAssociativeArray(t);
                 ret.set(0, new CString(m.group(0), t), t);
@@ -162,8 +169,14 @@ public class Regex {
                 for(int i = 1; i <= m.groupCount(); i++){
                     ret.set(i, new CString(m.group(i), t), t);
                 }
-				for(String key : namedGroups){
-					ret.set(key, m.group(key), t);
+				//Named groups are only supported in Java 7, but we can
+				//dynamically enable this feature if they have it.
+				try{
+					for(String key : namedGroups){
+						ret.set(key, (String)ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
+					}
+				} catch(ReflectionUtils.ReflectionException e){
+					throw new ConfigRuntimeException("Named captures are only supported with Java 7.", ExceptionType.FormatException, t);
 				}
                 fret.push(ret);
             }
@@ -573,4 +586,15 @@ public class Regex {
 			return regex;
 		}		
 	}
+	
+	private static final Pattern NAMED_GROUP = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>");
+	private static Set<String> getNamedGroups(String regex){
+		Matcher m = NAMED_GROUP.matcher(regex);
+		Set<String> ret = new HashSet<String>();
+		while(m.find()){
+			ret.add(m.group(1));
+		}
+		return ret;
+	}
+	
 }
