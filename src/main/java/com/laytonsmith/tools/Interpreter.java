@@ -83,7 +83,7 @@ public class Interpreter {
 		cdcDir.mkdirs();
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(cdcDir);
 		cdc.setLogger(Logger.getLogger(Interpreter.class.getName()));
-		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(new ClassDiscoveryCache(cdcDir));
+		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Interpreter.class));
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
