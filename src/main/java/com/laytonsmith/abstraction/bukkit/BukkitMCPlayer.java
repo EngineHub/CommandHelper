@@ -299,8 +299,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.setLevel(xp);
     }
 
-    public void setPlayerTime(Long time) {
-        p.setPlayerTime(time, false);
+    public void setPlayerTime(Long time, boolean relative) {
+        p.setPlayerTime(time, relative);
     }
 
 	public void setPlayerWeather(MCWeather type) {

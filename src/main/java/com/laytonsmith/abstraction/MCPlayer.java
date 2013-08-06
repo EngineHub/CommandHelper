@@ -86,7 +86,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
     public void setPlayerListName(String listName);
 
-    public void setPlayerTime(Long time);
+    public void setPlayerTime(Long time, boolean relative);
 
 	public void setPlayerWeather(MCWeather type);
 
