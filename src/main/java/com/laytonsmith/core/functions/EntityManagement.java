@@ -1550,6 +1550,53 @@ public class EntityManagement {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+	}
+	
+	@api
+	public static class get_leashholder extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			if (!le.isLeashed()) {
+				return new CNull(t);
+			}
+			return new CInt(le.getLeashHolder().getEntityId(), t);
+		}
+
+		public String getName() {
+			return "get_leashholder";
+		}
+
+		public String docs() {
+			return "int {entityID} Returns the entityID of the entity that is holding the given living entity's leash,"
+					+ " or null if it isn't being held.";
+		}
+	}
+	
+	@api
+	public static class set_leashholder extends EntitySetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCEntity holder;
+			if (args[1] instanceof CNull) {
+				holder = null;
+			} else {
+				holder = Static.getEntity(Static.getInt32(args[1], t), t);
+			}
+			le.setLeashHolder(holder);
+			return null;
+		}
+
+		public String getName() {
+			return "set_leashholder";
+		}
+
+		public String docs() {
+			return "void {entityID, entityID} The first entity is the entity to be held on a leash, and must be living."
+					+ " The second entity is the holder of the leash. This does not have to be living,"
+					+ " but the only non-living entity that will persist as a holder across restarts is the leash hitch."
+					+ " Bats, enderdragons, players, and withers can not be held by leashes due to minecraft limitations.";
+		}
 	}
 }

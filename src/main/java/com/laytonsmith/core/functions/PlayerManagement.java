@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
@@ -2740,14 +2739,16 @@ public class PlayerManagement {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{1, 2, 3};
 		}
 
 		public String docs() {
 			StringBuilder doc = new StringBuilder();
-			doc.append("void {[player], time} Sets the time of a given player. Should be a number from 0 to"
-					+ " 24000, if not, it is modulo scaled. Alternatively, common time notation (9:30pm, 4:00 am)"
-					+ " is acceptable, and convenient english mappings also exist:");
+			doc.append("void {[player], time, [relative]} Sets the time of a given player. Relative defaults to false,"
+					+ " but if true, the time will be an offset and the player's time will still progress with the world."
+					+ " Otherwise it will be locked and should be a number from 0 to 24000, else it is modulo scaled."
+					+ " Alternatively, common time notation (9:30pm, 4:00 am) is acceptable,"
+					+ " and convenient english mappings also exist:");
 			doc.append("<ul>");
 			for (String key : TimeLookup.keySet()) {
 				doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>");
@@ -2774,11 +2775,15 @@ public class PlayerManagement {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
+			boolean relative = false;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
-			if (args.length == 2) {
+			if (args.length >= 2) {
 				p = Static.GetPlayer(args[0], t);
+			}
+			if (args.length == 3) {
+				relative = Static.getBoolean(args[2]);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			long time = 0;
@@ -2820,7 +2825,7 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
 			}
 			time = Long.parseLong(stime);
-			p.setPlayerTime(time);
+			p.setPlayerTime(time, relative);
 			return new CVoid(t);
 		}
 	}
