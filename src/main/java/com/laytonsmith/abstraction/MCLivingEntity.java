@@ -33,6 +33,7 @@ public interface MCLivingEntity extends MCEntity {
     public double getHealth();
     public MCPlayer getKiller();
     public double getLastDamage();
+    public MCEntity getLeashHolder();
 	public MCLivingEntity getTarget(Target t);
 	public MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance, boolean castToByte);
 	public MCBlock getTargetBlock(HashSet<Byte> transparent, int maxDistance);
@@ -44,6 +45,7 @@ public interface MCLivingEntity extends MCEntity {
     public int getNoDamageTicks();
     public int getRemainingAir();
 	public boolean isCustomNameVisible();
+	public boolean isLeashed();
     public MCProjectile launchProjectile(MCProjectileType projectile);
 	public void resetMaxHealth();
 	public void setCanPickupItems(boolean pickup);
@@ -52,6 +54,7 @@ public interface MCLivingEntity extends MCEntity {
 	public void setCustomNameVisible(boolean visible);
     public void setHealth(double health);
     public void setLastDamage(double damage);
+    public void setLeashHolder(MCEntity holder);
 	public void setMaxHealth(double health);
     public void setMaximumAir(int ticks);
     public void setMaximumNoDamageTicks(int ticks);
