@@ -43,7 +43,7 @@ public class DocGen {
 			//Boilerplate startup stuff
 			Implementation.setServerType(Implementation.Type.BUKKIT);
 			Installer.Install(DocGenUI.chDirectory);
-			Prefs.init(new File(DocGenUI.chDirectory, "preferences.txt"));
+			Prefs.init(new File(DocGenUI.chDirectory, "preferences.ini"));
 			CHLog.initialize(DocGenUI.chDirectory);
 			
 			//System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));

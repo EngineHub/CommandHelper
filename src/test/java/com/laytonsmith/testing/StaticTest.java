@@ -491,7 +491,7 @@ public class StaticTest {
 //        CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
 //        AliasCore ac = new AliasCore(new File("plugins/CommandHelper/config.txt"), 
 //                new File("plugins/CommandHelper/LocalPackages"), 
-//                new File("plugins/CommandHelper/preferences.txt"), 
+//                new File("plugins/CommandHelper/preferences.ini"), 
 //                new File("plugins/CommandHelper/main.ms"), prm, chp);
 //        try{
 //            Field aliasCore = CommandHelperPlugin.class.getDeclaredField("ac");
@@ -535,7 +535,7 @@ public class StaticTest {
 		SetPrivate(CommandHelperPlugin.class, "ac", fakeCore, AliasCore.class);       
        frontendInstalled = true;
 		try {
-			Prefs.init(new File("preferences.txt"));
+			Prefs.init(new File("preferences.ini"));
 		} catch (IOException ex) {
 			Logger.getLogger(StaticTest.class.getName()).log(Level.SEVERE, null, ex);
 		}

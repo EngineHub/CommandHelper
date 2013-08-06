@@ -45,7 +45,7 @@ public class PermissionsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        Prefs.init(new File("plugins/CommandHelper/preferences.txt"));
+        Prefs.init(new File("plugins/CommandHelper/preferences.ini"));
     }
 
     @AfterClass

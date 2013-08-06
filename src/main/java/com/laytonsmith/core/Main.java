@@ -143,7 +143,7 @@ public class Main {
 				parsedArgs = null;
 			}
 
-			Prefs.init(new File(jarFolder, "CommandHelper/preferences.txt"));
+			Prefs.init(new File(jarFolder, "CommandHelper/preferences.ini"));
 			if (mode == managerMode) {
 				Manager.start();
 				System.exit(0);

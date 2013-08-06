@@ -18,7 +18,7 @@ public class PrefsTest {
     
     @Test public void testPrefs() throws Exception{
         Map<String, Preferences.Preference> prefs;
-        Prefs.init(new File("plugins/CommandHelper/preferences.txt"));
+        Prefs.init(new File("plugins/CommandHelper/preferences.ini"));
         Field f = Preferences.class.getDeclaredField("prefs");
         f.setAccessible(true);
         Field storedPrefs = Prefs.class.getDeclaredField("prefs");

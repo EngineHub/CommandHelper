@@ -80,11 +80,12 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public static ExecutorService hostnameLookupThreadPool;
 	public static ConcurrentHashMap<String, String> hostnameLookupCache;
 	private static int hostnameThreadPoolID = 0;
+	public static final File chDirectory = new File("plugins/CommandHelper");
+	public static final File preferencesFile = new File(chDirectory, "preferences.ini");
 	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PermissionsResolver permissionsResolver;
 	public PersistanceNetwork persistanceNetwork;
-	public File chDirectory = new File("plugins/CommandHelper");
 	public boolean firstLoad = true;
 	/**
 	 * Listener for the plugin system.
@@ -114,7 +115,14 @@ public class CommandHelperPlugin extends JavaPlugin {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 		try {
-			Prefs.init(new File(chDirectory, "preferences.txt"));
+			//Upgrade preferences.txt to preferences.ini
+			File oldPreferences = new File(chDirectory, "preferences.txt");
+			if(oldPreferences.exists() && !preferencesFile.exists()){
+				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.WARNING, TermColors.BRIGHT_YELLOW + "Old preferences.txt file detected. Moving preferences.txt to preferences.ini.");
+				FileUtility.copy(oldPreferences, preferencesFile, true);
+				oldPreferences.deleteOnExit();
+			}
+			Prefs.init(preferencesFile);
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -148,15 +156,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		self = this;
 		myServer = StaticLayer.GetServer();
 		try {
-			//Upgrade preferences.txt to preferences.ini
-			File oldPreferences = new File(chDirectory, "preferences.txt");
-			File newPreferences = new File(chDirectory, "preferences.ini");
-			if(oldPreferences.exists() && !newPreferences.exists()){
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "Old preferences.txt file detected. Moving preferences.txt to preferences.ini.", Target.UNKNOWN);
-				FileUtility.copy(oldPreferences, newPreferences, true);
-				oldPreferences.deleteOnExit();
-			}
-			Prefs.init(newPreferences);
+			Prefs.init(preferencesFile);
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -185,30 +185,23 @@ public class CommandHelperPlugin extends JavaPlugin {
 		if (pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin) {
 			wep = (WorldEditPlugin) pwep;
 		}
-		try {
-			//Though the core will reload the preferences for us, we need them now, so we can gather
-			//some information from them.
-			File prefsFile = new File(chDirectory, "preferences.txt");
-			Prefs.init(prefsFile);
-			if (Prefs.UseColors()) {
-				TermColors.EnableColors();
-			} else {
-				TermColors.DisableColors();
-			}
-			String script_name = Prefs.ScriptName();
-			String main_file = Prefs.MainFile();
-			boolean showSplashScreen = Prefs.ShowSplashScreen();
-			if (showSplashScreen) {
-				System.out.println(TermColors.reset());
-				//System.out.flush();
-				System.out.println("\n\n\n" + Static.Logo());
-			}
-			ac = new AliasCore(new File(chDirectory, script_name), new File(chDirectory, "LocalPackages"),
-					prefsFile, new File(chDirectory, main_file), permissionsResolver, this);
-			ac.reload(null);
-		} catch (IOException ex) {
-			Static.getLogger().log(Level.SEVERE, null, ex);
+		
+		if (Prefs.UseColors()) {
+			TermColors.EnableColors();
+		} else {
+			TermColors.DisableColors();
 		}
+		String script_name = Prefs.ScriptName();
+		String main_file = Prefs.MainFile();
+		boolean showSplashScreen = Prefs.ShowSplashScreen();
+		if (showSplashScreen) {
+			System.out.println(TermColors.reset());
+			//System.out.flush();
+			System.out.println("\n\n\n" + Static.Logo());
+		}
+		ac = new AliasCore(new File(chDirectory, script_name), new File(chDirectory, "LocalPackages"),
+				preferencesFile, new File(chDirectory, main_file), permissionsResolver, this);
+		ac.reload(null);
 
 		//Clear out our hostname cache
 		hostnameLookupCache = new ConcurrentHashMap<String, String>();

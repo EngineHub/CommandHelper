@@ -279,7 +279,7 @@ public class DocGenUI extends javax.swing.JFrame {
 
 				public void run() {
 					try {
-						Prefs.init(new File(chDirectory, "preferences.txt"));
+						Prefs.init(new File(chDirectory, "preferences.ini"));
 						CHLog.initialize(chDirectory);
 					} catch (IOException ex) {
 						Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
