@@ -75,7 +75,7 @@ thor:/thor $player [$=''] = >>>
     lightning(ploc($player))
     msg('Thou hast smitten the evil player ', $player, ' with thy mighty hand')
     tmsg($player, color('red'), if(equals($, ''), 'You have been smitten by Thor\'s Hammer!', $))
-    kill($player)
+    pkill($player)
 <<<
 
 #Suppose we have a plugin that broadcasts messages only to moderators, but it doesn't include the user's name
