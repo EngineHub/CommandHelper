@@ -38,8 +38,9 @@ public class DynamicClassLoader extends ClassLoader {
 	protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		checkDestroy();
 		try{
-			//If the superclass knows about it, we're done.
-			return super.loadClass(name, resolve);
+			//If the parent class knows about it, we're done.
+			Class c = Class.forName(name, resolve, DynamicClassLoader.class.getClassLoader());
+			return c;
 		} catch(ClassNotFoundException ex){
 			//Otherwise we need to find the class ourselves.
 			for(URLClassLoader url : classLoaders){

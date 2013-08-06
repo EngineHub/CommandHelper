@@ -105,21 +105,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
-		ClassDiscovery.getDefaultInstance().setProgressIterator(new ProgressIterator() {
-			private int last = -1;
-			public void progressChanged(double current, double total) {
-//				if(current == total){
-//					System.out.println();
-//				} else {
-//					int percent = (int)((current / total) * 100);
-//					int modulo = percent % 5;
-//					if(modulo == 0 && last != percent){
-//						last = percent;
-//						System.out.print("Enabling " + Implementation.GetServerType().getBranding() + "... " + percent + "%");
-//					}
-//				}
-			}
-		});
 		File cdcDir = new File(chDirectory, ".cache");
 		cdcDir.mkdirs();
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(cdcDir);
