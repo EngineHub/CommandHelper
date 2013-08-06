@@ -302,7 +302,11 @@ public class VehicleEvents {
 		private Map<Integer, Map<Integer, MCLocation>> thresholds = new HashMap<Integer, Map<Integer, MCLocation>>();
 
 		@Override
-		public void hook() {
+		public void bind(Map<String, Construct> prefilters) {
+			if (prefilters.containsKey("threshold")) {
+				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+				thresholdList.add(i);
+			}
 			if (thread == null) {
 				thresholdList.clear();
 				thresholdList.add(1);
@@ -310,8 +314,9 @@ public class VehicleEvents {
 					public void run() {
 						outerLoop:
 						while (true) {
-							if (thread == null) {
-								return; //Kill it
+							if (thread != Thread.currentThread()) {
+								//If it's a different thread, kill it.
+								return;
 							}
 
 							List<MCVehicle> vehicles = null;
@@ -405,13 +410,13 @@ public class VehicleEvents {
 										thresholds.get(i).put(v.getEntityId(), v.asyncGetLocation());
 									}
 								}
-								synchronized (vehicle_move.this) {
-									try {
-										//Throttle this thread just a little
-										vehicle_move.this.wait(10);
-									} catch (InterruptedException ex) {
-										//
-									}
+							}
+							synchronized (vehicle_move.this) {
+								try {
+									//Throttle this thread just a little
+									vehicle_move.this.wait(10);
+								} catch (InterruptedException ex) {
+									//
 								}
 							}
 						}
@@ -423,14 +428,6 @@ public class VehicleEvents {
 						thread = null;
 					}
 				});
-			}
-		}
-
-		@Override
-		public void bind(Map<String, Construct> prefilters) {
-			if (prefilters.containsKey("threshold")) {
-				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
-				thresholdList.add(i);
 			}
 		}
 

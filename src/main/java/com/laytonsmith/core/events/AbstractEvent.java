@@ -45,11 +45,10 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 
     /**
      * If the event needs to run special code at server startup, it can be done
-     * here. By default, an UnsupportedOperationException is thrown, but is caught
-     * and ignored.
+     * here. By default, nothing happens.
      */
     public void hook() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     

@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -267,6 +268,7 @@ public class AliasCore {
 			Globals.clear();
 			Scheduling.ClearScheduledRunners();
 			EventUtils.UnregisterAll();
+			EventList.RunHooks();
 			IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
 			if (!aliasConfig.exists()) {
 				aliasConfig.getParentFile().mkdirs();
