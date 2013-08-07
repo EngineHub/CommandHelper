@@ -82,6 +82,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 	private static int hostnameThreadPoolID = 0;
 	public static final File chDirectory = new File("plugins/CommandHelper");
 	public static final File preferencesFile = new File(chDirectory, "preferences.ini");
+	/**
+	 * This is the 
+	 */
+	public static final File cdcDir = new File(chDirectory, ".cache");
+	public static final File upgradeLogFile = new File(cdcDir, "upgradeLog.json");
 	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PermissionsResolver permissionsResolver;
@@ -106,7 +111,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
-		File cdcDir = new File(chDirectory, ".cache");
 		cdcDir.mkdirs();
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(cdcDir);
 		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
@@ -114,14 +118,51 @@ public class CommandHelperPlugin extends JavaPlugin {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 		Implementation.setServerType(Implementation.Type.BUKKIT);
-		try {
-			//Upgrade preferences.txt to preferences.ini
-			File oldPreferences = new File(chDirectory, "preferences.txt");
-			if(oldPreferences.exists() && !preferencesFile.exists()){
-				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.WARNING, TermColors.BRIGHT_YELLOW + "Old preferences.txt file detected. Moving preferences.txt to preferences.ini.");
-				FileUtility.copy(oldPreferences, preferencesFile, true);
-				oldPreferences.deleteOnExit();
+		UpgradeLog upgradeLog = new UpgradeLog(upgradeLogFile);
+		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
+
+			String version = null;
+			@Override
+			public boolean doRun() {
+				try {
+					version = "versionUpgrade-" + Main.loadSelfVersion();
+					return !hasBreadcrumb(version);
+				} catch (Exception ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+					return false;
+				}
 			}
+
+			@Override
+			public void run() {
+				leaveBreadcrumb(version);
+			}
+		});
+		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
+
+			File oldPreferences = new File(chDirectory, "preferences.txt");
+			@Override
+			public boolean doRun() {
+				return oldPreferences.exists() && !preferencesFile.exists();
+			}
+
+			@Override
+			public void run() {
+				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.WARNING, "{0}Old preferences.txt file detected. Moving preferences.txt to preferences.ini.", TermColors.BRIGHT_YELLOW);
+				try {
+					FileUtility.copy(oldPreferences, preferencesFile, true);
+					oldPreferences.deleteOnExit();
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+		});
+		try {
+			upgradeLog.runTasks();
+		} catch (IOException ex) {
+			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		try{
 			Prefs.init(preferencesFile);
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
