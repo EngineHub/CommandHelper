@@ -148,8 +148,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 			@Override
 			public void run() {
-				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.WARNING, "{0}Old preferences.txt file detected. Moving preferences.txt to preferences.ini.", TermColors.BRIGHT_YELLOW);
 				try {
+					Prefs.init(oldPreferences);
+					if (Prefs.UseColors()) {
+						TermColors.EnableColors();
+					} else {
+						TermColors.DisableColors();
+					}
+					Logger.getLogger("Minecraft").log(Level.INFO, 
+							TermColors.YELLOW + "[" + Implementation.GetServerType().getBranding() + "] Old preferences.txt file detected. Moving preferences.txt to preferences.ini." + TermColors.reset());
 					FileUtility.copy(oldPreferences, preferencesFile, true);
 					oldPreferences.deleteOnExit();
 				} catch (IOException ex) {
@@ -166,6 +173,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 			Prefs.init(preferencesFile);
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		if (Prefs.UseColors()) {
+			TermColors.EnableColors();
+		} else {
+			TermColors.DisableColors();
 		}
 		CHLog.initialize(chDirectory);
 		Installer.Install(chDirectory);
@@ -227,11 +239,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 			wep = (WorldEditPlugin) pwep;
 		}
 		
-		if (Prefs.UseColors()) {
-			TermColors.EnableColors();
-		} else {
-			TermColors.DisableColors();
-		}
 		String script_name = Prefs.ScriptName();
 		String main_file = Prefs.MainFile();
 		boolean showSplashScreen = Prefs.ShowSplashScreen();

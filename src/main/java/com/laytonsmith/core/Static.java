@@ -779,7 +779,7 @@ public final class Static {
 					}
 					break;
 				case VERBOSE:
-					color = "";
+					color = TermColors.WHITE;
 					lev = Level.INFO;
 					if(Prefs.DebugMode()){
 						show = true;
