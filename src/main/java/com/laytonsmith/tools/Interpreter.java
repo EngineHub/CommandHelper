@@ -31,6 +31,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
+import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
@@ -75,27 +76,28 @@ public class Interpreter {
 	static boolean multilineMode = false;
 	static String script;
 	private static Environment env;
-	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-	private static final File chDirectory = new File(jarLocation, "CommandHelper/");
-
-	public static void start(List<String> args) throws IOException, DataSourceException, URISyntaxException {
-		File cdcDir = new File(chDirectory, ".cache");
-		cdcDir.mkdirs();
-		ClassDiscoveryCache cdc = new ClassDiscoveryCache(cdcDir);
-		cdc.setLogger(Logger.getLogger(Interpreter.class.getName()));
-		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Interpreter.class));
-		//First, we need to initialize the convertor
-		Implementation.setServerType(Implementation.Type.SHELL);
-		Installer.Install(chDirectory);
-		CHLog.initialize(chDirectory);
-		//Next, we need to get the "installation location", so we won't spew config files everywhere
-		env = Static.GenerateStandaloneEnvironment();
-		if(Prefs.UseColors()){
-			TermColors.EnableColors();
-		} else {
-			TermColors.DisableColors();
+	
+	public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException{
+		doStartup();
+		try{
+			File fromFile = new File(file).getCanonicalFile();
+			execute(FileUtility.read(fromFile), args, fromFile);
+		} catch(ConfigCompileException ex){
+			ConfigRuntimeException.React(ex, null, null);
+			System.out.println(TermColors.reset());
+			System.exit(1);
 		}
+	}
+
+	/**
+	 * Starts the interpreter.
+	 * @param args
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException 
+	 */
+	public static void start(List<String> args) throws IOException, DataSourceException, URISyntaxException {
+		doStartup();
 		Scanner scanner = new Scanner(System.in);
 		if (System.console() != null) {
 			pl(YELLOW + "You are now in cmdline interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
@@ -132,6 +134,25 @@ public class Interpreter {
 			}
 		} catch (NoSuchElementException e) {
 			//End of file
+		}
+	}
+	
+	private static void doStartup() throws IOException, DataSourceException, URISyntaxException{
+		MethodScriptFileLocations.getDefault().getCacheDirectory().mkdirs();
+		ClassDiscoveryCache cdc = new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
+		cdc.setLogger(Logger.getLogger(Interpreter.class.getName()));
+		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Interpreter.class));
+		//First, we need to initialize the convertor
+		Implementation.setServerType(Implementation.Type.SHELL);
+		Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
+		CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
+		//Next, we need to get the "installation location", so we won't spew config files everywhere
+		env = Static.GenerateStandaloneEnvironment();
+		if(Prefs.UseColors()){
+			TermColors.EnableColors();
+		} else {
+			TermColors.DisableColors();
 		}
 	}
 
@@ -176,8 +197,14 @@ public class Interpreter {
 	}
 
 	public static void execute(String script, List<String> args) throws ConfigCompileException, IOException {
+		execute(script, args, null);
+	}
+	public static void execute(String script, List<String> args, File fromFile) throws ConfigCompileException, IOException {
+		if(fromFile == null){
+			fromFile = new File("Interpreter");
+		}
 		ProfilePoint compile = env.getEnv(GlobalEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
-		List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
+		List<Token> stream = MethodScriptCompiler.lex(script, fromFile, true);
 		ParseTree tree = MethodScriptCompiler.compile(stream);
 		compile.stop();
 		Environment env = Environment.createEnvironment(Interpreter.env.getEnv(GlobalEnv.class));

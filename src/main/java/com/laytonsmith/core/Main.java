@@ -2,6 +2,8 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ArgumentSuite;
+import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Util;
@@ -35,10 +37,7 @@ import org.yaml.snakeyaml.Yaml;
 public class Main {
 
 	static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
-	private static final File jarFile = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getFile());
-	private static final File jarFolder = jarFile.getParentFile();
-	private static final File chDirectory = new File(jarFolder, "CommandHelper/");
-	private static final File prefsFile = new File(chDirectory, "preferences.ini");
+
 	public static final ArgumentSuite ARGUMENT_SUITE;
 	private static final ArgumentParser helpMode;
 	private static final ArgumentParser managerMode;
@@ -56,12 +55,14 @@ public class Main {
 	private static final ArgumentParser apiMode;
 	private static final ArgumentParser examplesMode;
 	private static final ArgumentParser optimizerTestMode;
+	private static final ArgumentParser cmdlineMode;
 
 	static {
+		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
 		ArgumentSuite suite = new ArgumentSuite()
 				.addDescription("These are the command line tools for CommandHelper. For more information about a"
 				+ " particular mode, run help <mode name>. To run a command, in general, use the command:\n\n"
-				+ "\tjava -jar " + jarFile.getName() + " <mode name> <[mode specific arguments]>\n");
+				+ "\tjava -jar " + MethodScriptFileLocations.getDefault().getJarFile().getName() + " <mode name> <[mode specific arguments]>\n");
 		helpMode = ArgumentParser.GetParser()
 				.addDescription("Displays help for all modes, or the given mode if one is provided.")
 				.addArgument("Displays help for the given mode.", "mode name", false);
@@ -122,18 +123,28 @@ public class Main {
 				+ " tool, but could be used as an obfuscation tool as well.")
 				.addArgument("File path", "file", true);
 		suite.addMode("optimizer-test", optimizerTestMode);
+		cmdlineMode = ArgumentParser.GetParser()
+				.addDescription("Given a source file, runs it in cmdline mode. This is similar to"
+				+ " the interpreter mode, but allows for tty input (which is required for some functions,"
+				+ " like the prompt_* functions) and provides better information for errors, as the"
+				+ " file is known.")
+				.addArgument("File path/arguments", "fileAndArgs", true);
+		suite.addMode("cmdline", cmdlineMode);
 
 		ARGUMENT_SUITE = suite;
 	}
 
 	public static void main(String[] args) throws Exception {
 		try {
-			Prefs.init(prefsFile);
+			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 			Prefs.SetColors();
 			if(Prefs.UseColors()){
 				//Use jansi to enable output to color properly, even on windows.
 				org.fusesource.jansi.AnsiConsole.systemInstall();
 			}
+			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
+			ClassDiscoveryCache cdcCache 
+					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
 			if (args.length == 0) {
 				args = new String[]{"--help"};
 			}
@@ -149,7 +160,6 @@ public class Main {
 				parsedArgs = null;
 			}
 
-			Prefs.init(new File(jarFolder, "CommandHelper/preferences.ini"));
 			if (mode == managerMode) {
 				Manager.start();
 				System.exit(0);
@@ -201,10 +211,11 @@ public class Main {
 				System.exit(0);
 			} else if (mode == printDBMode) {
 				//FIXME: This is using the wrong thing.
-				File chFolder = new File(jarFolder.getParentFile(), "CommandHelper");
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-				options.setWorkingDirectory(chFolder);
-				PersistanceNetwork pn = new PersistanceNetwork(new File(chFolder, "persistance.config"), new URI("sqlite://" + new File(chFolder, "persistance.db").getCanonicalPath()), options);
+				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
+				PersistanceNetwork pn = new PersistanceNetwork(new File(MethodScriptFileLocations.getDefault().getConfigDirectory(),
+						"persistance.config"), new URI("sqlite://" + new File(MethodScriptFileLocations.getDefault().getConfigDirectory(),
+						"persistance.db").getCanonicalPath()), options);
 				Map<String[], String> values = pn.getNamespace(new String[]{});
 				for(String [] s : values.keySet()){
 					System.out.println(Arrays.toString(s));
@@ -226,7 +237,8 @@ public class Main {
 				System.err.println("Done.");
 				System.exit(0);
 			} else if (mode == examplesMode) {
-				ExampleLocalPackageInstaller.run(jarFolder, parsedArgs.getStringArgument());
+				ExampleLocalPackageInstaller.run(MethodScriptFileLocations.getDefault().getJarDirectory(),
+						parsedArgs.getStringArgument());
 			} else if (mode == verifyMode) {
 				System.out.println("This functionality is not currently implemented!");
 //                    File f = new File(".");
@@ -278,7 +290,7 @@ public class Main {
 				System.exit(0);
 			} else if (mode == optimizerTestMode) {
 				Implementation.setServerType(Implementation.Type.SHELL);
-				CHLog.initialize(jarFolder);
+				CHLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 				String path = parsedArgs.getStringArgument();
 				File source = new File(path);
 				String plain = FileUtility.read(source);
@@ -300,6 +312,16 @@ public class Main {
 					//Display the help for this mode
 					System.out.println(ARGUMENT_SUITE.getModeFromName(modeForHelp).getBuiltDescription());
 				}
+			} else if(mode == cmdlineMode){
+				List<String> allArgs = parsedArgs.getStringListArgument();
+				if(allArgs.isEmpty()){
+					System.err.println("Usage: path/to/file.ms [arg1 arg2]");
+					System.exit(1);
+				}
+				String fileName = allArgs.get(0);
+				allArgs.remove(0);
+				Interpreter.startWithTTY(fileName, allArgs);
+				System.exit(0);
 			} else {
 				throw new Error("Should not have gotten here");
 			}

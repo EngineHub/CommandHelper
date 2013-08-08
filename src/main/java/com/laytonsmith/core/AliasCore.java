@@ -95,7 +95,9 @@ public class AliasCore {
 	 */
 	public boolean alias(String command, final MCCommandSender player, List<Script> playerCommands) {
 
-		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver, parent.chDirectory);
+		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler,
+				parent.persistanceNetwork, parent.permissionsResolver,
+				MethodScriptFileLocations.getDefault().getConfigDirectory());
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(player);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
@@ -249,20 +251,21 @@ public class AliasCore {
 	public final void reload(MCPlayer player) {
 		try {
 			StaticLayer.GetConvertor().runShutdownHooks();
-			CHLog.initialize(parent.chDirectory);
+			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 			//Install bukkit into the class discovery class
 			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 			ExtensionManager.Startup();
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
-			parent.profiler = new Profiler(new File(parent.chDirectory, "profiler.config"));
+			parent.profiler = new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-			options.setWorkingDirectory(parent.chDirectory);
+			options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
 			MemoryDataSource.ClearDatabases();
 			PacketJumper.startup();
-			parent.persistanceNetwork = new PersistanceNetwork(new File(parent.chDirectory, "persistance.config"),
-					new URI("sqlite:/" + new File(parent.chDirectory, "persistance.db").getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
+			parent.persistanceNetwork = new PersistanceNetwork(MethodScriptFileLocations.getDefault().getPersistanceConfig(),
+					new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistanceDBFile()
+					.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver,
-					parent.chDirectory);
+					MethodScriptFileLocations.getDefault().getConfigDirectory());
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 			Environment env = Environment.createEnvironment(gEnv, cEnv);
 			Globals.clear();

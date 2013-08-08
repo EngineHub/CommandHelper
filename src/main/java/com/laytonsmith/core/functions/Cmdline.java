@@ -26,9 +26,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.sound.midi.MidiUnavailableException;
 
 /**
  *
@@ -495,6 +492,7 @@ public class Cmdline {
 			
 			String prompt = args[0].val();
 			System.out.print(prompt);
+			System.out.flush();
 			jline.console.ConsoleReader reader = null;
 			try {
 				reader = new jline.console.ConsoleReader();

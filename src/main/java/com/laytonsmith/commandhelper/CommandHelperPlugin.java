@@ -80,13 +80,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public static ExecutorService hostnameLookupThreadPool;
 	public static ConcurrentHashMap<String, String> hostnameLookupCache;
 	private static int hostnameThreadPoolID = 0;
-	public static final File chDirectory = new File("plugins/CommandHelper");
-	public static final File preferencesFile = new File(chDirectory, "preferences.ini");
-	/**
-	 * This is the 
-	 */
-	public static final File cdcDir = new File(chDirectory, ".cache");
-	public static final File upgradeLogFile = new File(cdcDir, "upgradeLog.json");
 	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PermissionsResolver permissionsResolver;
@@ -111,14 +104,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
-		cdcDir.mkdirs();
-		ClassDiscoveryCache cdc = new ClassDiscoveryCache(cdcDir);
+		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());		
+		CommandHelperFileLocations.getDefault().getCacheDirectory().mkdirs();
+		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
 		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 		Implementation.setServerType(Implementation.Type.BUKKIT);
-		UpgradeLog upgradeLog = new UpgradeLog(upgradeLogFile);
+		UpgradeLog upgradeLog = new UpgradeLog(CommandHelperFileLocations.getDefault().getUpgradeLogFile());
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
 			String version = null;
@@ -140,10 +134,12 @@ public class CommandHelperPlugin extends JavaPlugin {
 		});
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
-			File oldPreferences = new File(chDirectory, "preferences.txt");
+			File oldPreferences = new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
+					"preferences.txt");
 			@Override
 			public boolean doRun() {
-				return oldPreferences.exists() && !preferencesFile.exists();
+				return oldPreferences.exists() 
+						&& !CommandHelperFileLocations.getDefault().getPreferencesFile().exists();
 			}
 
 			@Override
@@ -153,7 +149,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 					Prefs.SetColors();
 					Logger.getLogger("Minecraft").log(Level.INFO, 
 							TermColors.YELLOW + "[" + Implementation.GetServerType().getBranding() + "] Old preferences.txt file detected. Moving preferences.txt to preferences.ini." + TermColors.reset());
-					FileUtility.copy(oldPreferences, preferencesFile, true);
+					FileUtility.copy(oldPreferences, CommandHelperFileLocations.getDefault().getPreferencesFile(), true);
 					oldPreferences.deleteOnExit();
 				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
@@ -166,13 +162,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		try{
-			Prefs.init(preferencesFile);
+			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		Prefs.SetColors();
-		CHLog.initialize(chDirectory);
-		Installer.Install(chDirectory);
+		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
+		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.7"))){
 			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 7. You should have plans"
 					+ " to upgrade at some point, as " + Implementation.GetServerType().getBranding() + " may require it at some point.", Target.UNKNOWN);
@@ -201,26 +197,21 @@ public class CommandHelperPlugin extends JavaPlugin {
 		self = this;
 		myServer = StaticLayer.GetServer();
 		try {
-			Prefs.init(preferencesFile);
+			//This may seem redundant, but on a /reload, we want to refresh these
+			//properties.
+			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		if(Prefs.UseSudoFallback()){
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.WARNING, "In your preferences, use-sudo-fallback is turned on. Consider turning this off if you can.");
 		}
-		CHLog.initialize(chDirectory);
-		try {
-			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-			options.setWorkingDirectory(chDirectory);
-			persistanceNetwork = new PersistanceNetwork(new File(chDirectory, "persistance.config"), new File(chDirectory, "persistance.db").toURI(), options);
-		} catch (IOException ex) {
-			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (DataSourceException ex) {
-			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
-		}
+		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
+
 		Static.getLogger().log(Level.INFO, "CommandHelper/CommandHelper {0} enabled", getDescription().getVersion());
 		if(firstLoad){
-			ExtensionManager.Initialize(new File(chDirectory, "extensions"), ClassDiscovery.getDefaultInstance());
+			ExtensionManager.Initialize(CommandHelperFileLocations.getDefault().getExtensionsDirectory(),
+					ClassDiscovery.getDefaultInstance());
 			firstLoad = false;
 		}
 		version = new SimpleVersion(getDescription().getVersion());
@@ -239,8 +230,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 			//System.out.flush();
 			System.out.println("\n\n\n" + Static.Logo());
 		}
-		ac = new AliasCore(new File(chDirectory, script_name), new File(chDirectory, "LocalPackages"),
-				preferencesFile, new File(chDirectory, main_file), permissionsResolver, this);
+		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
+				script_name), CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
+				CommandHelperFileLocations.getDefault().getPreferencesFile(), new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
+				main_file), permissionsResolver, this);
 		ac.reload(null);
 
 		//Clear out our hostname cache
