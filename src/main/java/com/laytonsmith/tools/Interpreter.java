@@ -88,11 +88,12 @@ public class Interpreter {
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
 		Installer.Install(chDirectory);
-		Prefs.init(new File(chDirectory, "preferences.ini"));
 		CHLog.initialize(chDirectory);
 		//Next, we need to get the "installation location", so we won't spew config files everywhere
 		env = Static.GenerateStandaloneEnvironment();
-		if (TermColors.SYSTEM == TermColors.SYS.WINDOWS) {
+		if(Prefs.UseColors()){
+			TermColors.EnableColors();
+		} else {
 			TermColors.DisableColors();
 		}
 		Scanner scanner = new Scanner(System.in);

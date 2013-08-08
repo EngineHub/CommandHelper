@@ -77,6 +77,17 @@ public final class Prefs {
         prefs = new Preferences("CommandHelper", Static.getLogger(), a);
         prefs.init(f);
     }
+	
+	/**
+	 * Convenience function to set the term colors based on the UseColors preference.
+	 */
+	public static void SetColors(){
+		if(UseColors()){
+			TermColors.EnableColors();
+		} else {
+			TermColors.DisableColors();
+		}
+	}
     
     public static Boolean DebugMode(){
         return (Boolean)pref(PNames.DEBUG_MODE);

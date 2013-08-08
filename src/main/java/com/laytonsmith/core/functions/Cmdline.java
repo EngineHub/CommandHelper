@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
@@ -18,12 +19,16 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sound.midi.MidiUnavailableException;
 
 /**
  *
@@ -165,8 +170,7 @@ public class Cmdline {
             if (args.length == 1) {
                 exit_code = Static.getInt32(args[0], t);
             }
-            if (environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
-					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline")) {
+            if (inCmdLine(environment)) {
                 System.exit(exit_code);
             }
             return new Echoes.die().exec(t, environment, args);
@@ -391,4 +395,254 @@ public class Cmdline {
             return CHVersion.V3_3_1;
         }
     }
+	
+	@api
+	public static class prompt_pass extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(!inCmdLine(environment)){
+				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+			}
+			boolean mask = true;
+			if(args.length > 1){
+				mask = Static.getBoolean(args[1]);
+			}
+			
+			String prompt = args[0].val();
+			Character cha = new Character((char)0);
+			if(mask){
+				cha = new Character('*');
+			}
+			jline.console.ConsoleReader reader = null;
+			try {
+				reader = new jline.console.ConsoleReader();
+				return new CString(reader.readLine(prompt, cha), t);
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+			} finally {
+				if(reader != null){
+					reader.shutdown();
+				}
+			}
+			
+		}
+
+		@Override
+		public String getName() {
+			return "prompt_pass";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "string {prompt, [mask]} Prompts the user for a password. This only works in cmdline mode. If mask is true (default),"
+					+ " then the password displays * characters for each password character they type. If mask is false, the field"
+					+ " stays blank as they type. What they type is returned once they hit enter.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class prompt_char extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(!inCmdLine(environment)){
+				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+			}
+			
+			String prompt = args[0].val();
+			System.out.print(prompt);
+			jline.console.ConsoleReader reader = null;
+			try {
+				reader = new jline.console.ConsoleReader();
+				char c = (char)reader.readCharacter();
+				System.out.println(c);
+				return new CString(c, t);
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+			} finally {
+				if(reader != null){
+					reader.shutdown();
+				}
+			}
+			
+		}
+
+		@Override
+		public String getName() {
+			return "prompt_char";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {prompt} Prompts the user for a single character. They do not need to hit enter first. This only works"
+					+ " in cmdline mode.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class prompt_line extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(!inCmdLine(environment)){
+				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+			}
+			
+			String prompt = args[0].val();
+			jline.console.ConsoleReader reader = null;
+			try {
+				reader = new jline.console.ConsoleReader();
+				String line = reader.readLine(prompt);
+				return new CString(line, t);
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+			} finally {
+				if(reader != null){
+					reader.shutdown();
+				}
+			}
+			
+		}
+
+		@Override
+		public String getName() {
+			return "prompt_line";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {prompt} Prompts the user for a line. The line typed is returned once the user presses enter. This"
+					+ " only works in cmdline mode.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class sys_beep extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.PluginInternalException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			java.awt.Toolkit.getDefaultToolkit().beep();
+			return new CVoid(t);
+		}
+
+		@Override
+		public String getName() {
+			return "sys_beep";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "void {} Emits a system beep, on the system itself, not in game. This is only useful from cmdline.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	public static boolean inCmdLine(Environment environment){
+		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
+					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
+	}
 }

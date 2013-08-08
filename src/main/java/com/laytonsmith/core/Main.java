@@ -37,6 +37,8 @@ public class Main {
 	static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
 	private static final File jarFile = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getFile());
 	private static final File jarFolder = jarFile.getParentFile();
+	private static final File chDirectory = new File(jarFolder, "CommandHelper/");
+	private static final File prefsFile = new File(chDirectory, "preferences.ini");
 	public static final ArgumentSuite ARGUMENT_SUITE;
 	private static final ArgumentParser helpMode;
 	private static final ArgumentParser managerMode;
@@ -126,11 +128,15 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 		try {
+			Prefs.init(prefsFile);
+			Prefs.SetColors();
+			if(Prefs.UseColors()){
+				//Use jansi to enable output to color properly, even on windows.
+				org.fusesource.jansi.AnsiConsole.systemInstall();
+			}
 			if (args.length == 0) {
 				args = new String[]{"--help"};
 			}
-
-
 
 			ArgumentParser mode;
 			ArgumentParser.ArgumentParserResults parsedArgs;

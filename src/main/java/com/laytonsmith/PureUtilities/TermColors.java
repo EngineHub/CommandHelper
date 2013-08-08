@@ -184,10 +184,6 @@ public final class TermColors {
     
     public static String reset(){
 		return RESET;
-//        if(SYSTEM.equals(SYS.WINDOWS)){
-//            return ""; //lol, it's already reset
-//        }
-//        return "\033[0m";
     }
     /**
      * Returns the specified color code, foreground, and dark.

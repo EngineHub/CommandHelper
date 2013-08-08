@@ -150,11 +150,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			public void run() {
 				try {
 					Prefs.init(oldPreferences);
-					if (Prefs.UseColors()) {
-						TermColors.EnableColors();
-					} else {
-						TermColors.DisableColors();
-					}
+					Prefs.SetColors();
 					Logger.getLogger("Minecraft").log(Level.INFO, 
 							TermColors.YELLOW + "[" + Implementation.GetServerType().getBranding() + "] Old preferences.txt file detected. Moving preferences.txt to preferences.ini." + TermColors.reset());
 					FileUtility.copy(oldPreferences, preferencesFile, true);
@@ -174,11 +170,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		if (Prefs.UseColors()) {
-			TermColors.EnableColors();
-		} else {
-			TermColors.DisableColors();
-		}
+		Prefs.SetColors();
 		CHLog.initialize(chDirectory);
 		Installer.Install(chDirectory);
 		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.7"))){

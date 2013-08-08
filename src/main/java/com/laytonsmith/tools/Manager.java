@@ -3,6 +3,7 @@ package com.laytonsmith.tools;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.CHLog;
@@ -93,13 +94,14 @@ public class Manager {
 			} else if (input.equalsIgnoreCase("interpreter")) {
 				Interpreter.start(null);
 			} else if (input.equalsIgnoreCase("exit")) {
-				pl("Thanks for using the " + CYAN + "Data Manager!" + reset());
+				pl("Thanks for using the " + CYAN + BOLD + "Data Manager!" + reset());
 				finished = true;
 			} else {
 				pl("I'm sorry, that's not a valid command. Here's the help:");
 				help(new String[]{});
 			}
 		} while (finished == false);
+		System.out.println(TermColors.reset());
 	}
 
 	public static void merge() {

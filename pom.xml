@@ -381,6 +381,11 @@
 			<artifactId>asm-all</artifactId>
 			<version>3.3.1</version>
 		</dependency>
+		<dependency>
+			<groupId>jline</groupId>
+			<artifactId>jline</artifactId>
+			<version>2.11</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<site>
@@ -514,6 +519,7 @@
 									<include>commons-codec:commons-codec:jar:*</include>
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
 									<include>asm:asm-all:jar:*</include>
+									<include>jline:jline:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -583,6 +589,15 @@
 									<pattern>org.objectweb.asm</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.objectweb.asm</shadedPattern>
 								</relocation>
+								<relocation>
+									<pattern>jline</pattern>
+									<shadedPattern>com.laytonsmith.libs.jline</shadedPattern>
+								</relocation>
+								<!-- Apparently this can't be relocated -->
+								<!--<relocation>
+									<pattern>org.fusesource</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.fusesource</shadedPattern>
+								</relocation>-->
 							</relocations>
 							<filters>
 								<filter>
@@ -666,6 +681,12 @@
 								</filter>-->
 								<filter>
 									<artifact>asm:asm-all:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>jline:jline:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
