@@ -58,8 +58,9 @@ public class Cmdline {
         }
 
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            System.out.print(args[0].val());
-            if (args[0].val().matches("(?m).*\033.*")) {
+			String msg = Static.MCToANSIColors(args[0].val());
+            System.out.print(msg);
+            if (msg.matches("(?m).*\033.*")) {
                 //We have color codes in it, we need to reset them
                 System.out.print(TermColors.reset());
             }
@@ -113,8 +114,9 @@ public class Cmdline {
         }
 
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            System.err.print(args[0].val());
-            if (args[0].val().matches("(?m).*\033.*")) {
+			String msg = Static.MCToANSIColors(args[0].val());
+            System.err.print(msg);
+            if (msg.matches("(?m).*\033.*")) {
                 //We have color codes in it, we need to reset them
                 System.err.print(TermColors.reset());
             }

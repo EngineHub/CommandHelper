@@ -52,7 +52,16 @@ public class Echoes {
                 b.append(args[i].val());
             }
             try{
-                Static.SendMessage(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), b.toString(), t);
+				if(env.hasEnv(CommandHelperEnvironment.class)){
+					Static.SendMessage(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), b.toString(), t);
+				} else {
+					String mes = Static.MCToANSIColors(b.toString());
+					if(mes.matches("(?m).*\033.*")){
+						//We have terminal colors, we need to reset them at the end
+						mes += TermColors.reset();
+					}
+					System.out.println(mes);
+				}
             } finally{
                 throw new CancelCommandException("", t);
             }
@@ -109,7 +118,12 @@ public class Echoes {
 				final MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				Static.SendMessage(p, b.toString(), t);
 			} else {
-				System.out.println(Static.MCToANSIColors(b.toString()));
+				String mes = Static.MCToANSIColors(b.toString());
+				if(mes.matches("(?m).*\033.*")){
+					//We have terminal colors, we need to reset them at the end
+					mes += TermColors.reset();
+				}
+				System.out.println(mes);
 				System.out.flush();
 			}
             return new CVoid(t);
@@ -518,7 +532,7 @@ public class Echoes {
                 //We have terminal colors, we need to reset them at the end
                 mes += TermColors.reset();
             }
-            com.laytonsmith.core.Static.getLogger().log(Level.INFO, mes);
+            System.out.println(mes);
             return new CVoid(t);
         }
         public Boolean runAsync(){
