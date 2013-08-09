@@ -3,8 +3,8 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.SSHWrapper;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.ZipReader;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
@@ -265,6 +265,113 @@ public class FileHandling {
 		}
 
 		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	//@api
+	public static class file_parent extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			//TODO: Doesn't work yet.
+			String path = args[0].val().trim().replace("\\", "/");
+			//Remove duplicate /
+			path = path.replaceAll("(/)(?=.*?/)", path);
+			if("/".equals(path) || path.matches("[a-zA-Z]:/")){
+				//This is the root path, return null.
+				return new CNull();
+			}
+			//If the path ends with /, take it off
+			if(path.endsWith("/")){
+				path = path.substring(0, path.length() - 2);
+			}
+			return new CString(path.substring(0, path.length() - path.lastIndexOf("/")), t);
+		}
+
+		@Override
+		public String getName() {
+			return "file_parent";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {string} Returns the parent directory for the specified file/directory path. For instance,"
+					+ " given the string '/path/to/file', then '/path/to/' would be returned. Regardless of whether"
+					+ " or not the system uses forwards or backwards slashes, the file path returned will use forward"
+					+ " slashes. The path doesn't need to actually exist for this function to work, and the path returned"
+					+ " is assumed to be a directory, so will always end with '/'. If the path represents the root path,"
+					+ " for instance, 'C:/' or '/', null is returned.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	//@api
+	public static class file_resolve extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException("TODO: Not supported yet.");
+		}
+
+		@Override
+		public String getName() {
+			return "file_resolve";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "";
+		}
+
+		@Override
+		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 		

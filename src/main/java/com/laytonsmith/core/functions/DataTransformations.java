@@ -56,8 +56,7 @@ public class DataTransformations {
 			try {
 				return new CString(Construct.json_encode(ca, t), t);
 			} catch (MarshalException ex) {
-				//This shouldn't happen, because the construct will be an array.
-				throw new Error(ex);
+				throw new Exceptions.CastException(ex.getMessage(), t);
 			}
 		}
 
@@ -70,7 +69,8 @@ public class DataTransformations {
 		}
 
 		public String docs() {
-			return "string {array} Converts an array into a JSON encoded string. Both normal and associative arrays are supported.";
+			return "string {array} Converts an array into a JSON encoded string. Both normal and associative arrays are supported."
+					+ " Within the array, only primitives and arrays can be encoded.";
 		}
 
 		public CHVersion since() {
@@ -147,7 +147,11 @@ public class DataTransformations {
 				options.setPrettyFlow(true);
 			}
 			Yaml yaml = new Yaml(options);
-			return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
+			try{
+				return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
+			} catch(ClassCastException ex){
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.CastException, t);
+			}
 		}
 
 		public String getName() {
@@ -160,7 +164,7 @@ public class DataTransformations {
 
 		public String docs() {
 			return "string {array, [prettyPrint]} Converts an array into a YML encoded string. Only associative arrays are supported."
-					+ " prettyPrint defaults to false.";
+					+ " prettyPrint defaults to false. Within the array, only primitives and arrays can be encoded.";
 		}
 
 		public CHVersion since() {

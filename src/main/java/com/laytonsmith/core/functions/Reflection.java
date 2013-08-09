@@ -114,7 +114,7 @@ public class Reflection {
 				if (t.file() == null) {
 					return new CString("Unknown (maybe the interpreter?)", t);
 				} else {
-					return new CString(t.file().getAbsolutePath(), t);
+					return new CString(t.file().getAbsolutePath().replace("\\", "/"), t);
 				}
 			} else if ("col".equalsIgnoreCase(param)) {
 				return new CInt(t.col(), t);
