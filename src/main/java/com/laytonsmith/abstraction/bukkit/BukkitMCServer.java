@@ -63,7 +63,7 @@ public class BukkitMCServer implements MCServer {
     }
     
     public boolean dispatchCommand(MCCommandSender sender, String command){
-        return s.dispatchCommand(new BukkitMCCommandSender(sender).c, command);
+        return s.dispatchCommand(((BukkitMCCommandSender)sender).c, command);
     }
 
     public MCPluginManager getPluginManager() {
