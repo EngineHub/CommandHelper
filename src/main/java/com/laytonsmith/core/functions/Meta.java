@@ -172,6 +172,10 @@ public class Meta {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
+						ExceptionType.FormatException, t);
+			}
 			String cmd = args[0].val().substring(1);
 			//If the command sender is null, then just try to run() this. It's unclear to me what
 			//would cause this for sure, but just in case. Regardless, this allows us to consolidate the error checking
