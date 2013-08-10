@@ -72,7 +72,7 @@ public class Persistance {
 			try {
 				value = Construct.json_encode(args[args.length - 1], t);
 			} catch (MarshalException e) {
-				throw ConfigRuntimeException.CreateUncatchableException(e.getMessage(), t);
+				throw new Exceptions.FormatException(e.getMessage(), t);
 			}
 			char pc = '.';
 			for (int i = 0; i < key.length(); i++) {
