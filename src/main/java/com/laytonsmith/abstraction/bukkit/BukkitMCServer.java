@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -62,8 +63,15 @@ public class BukkitMCServer implements MCServer {
         return new BukkitMCServer();
     }
     
+	@Override
     public boolean dispatchCommand(MCCommandSender sender, String command){
-        return s.dispatchCommand(((BukkitMCCommandSender)sender).c, command);
+		CommandSender cs;
+		if(sender instanceof BukkitMCPlayer){
+			cs = ((BukkitMCPlayer)sender).p;
+		} else {
+			cs = ((BukkitMCCommandSender)sender).c;
+		}
+        return s.dispatchCommand(cs, command);
     }
 
     public MCPluginManager getPluginManager() {
