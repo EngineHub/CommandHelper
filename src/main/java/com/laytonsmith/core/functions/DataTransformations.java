@@ -176,7 +176,7 @@ public class DataTransformations {
 	public static class yml_decode extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -190,7 +190,11 @@ public class DataTransformations {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String data = args[0].val();
 			Yaml yaml = new Yaml();
-			Map<String, Object> map = (Map<String, Object>) yaml.load(data);
+			Object ret = yaml.load(data);
+			if(!(ret instanceof Map)){
+				throw new Exceptions.FormatException("Improperly formatted YML", t);
+			}
+			Map<String, Object> map = (Map<String, Object>) ret;
 			return Construct.GetConstruct(map);
 		}
 
