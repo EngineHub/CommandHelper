@@ -431,7 +431,7 @@ public class Cmdline {
 			jline.console.ConsoleReader reader = null;
 			try {
 				reader = new jline.console.ConsoleReader();
-				return new CString(reader.readLine(prompt, cha), t);
+				return new CString(reader.readLine(Static.MCToANSIColors(prompt), cha), t);
 			} catch (IOException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
 			} finally {
@@ -491,7 +491,7 @@ public class Cmdline {
 			}
 			
 			String prompt = args[0].val();
-			System.out.print(prompt);
+			System.out.print(Static.MCToANSIColors(prompt));
 			System.out.flush();
 			jline.console.ConsoleReader reader = null;
 			try {
@@ -560,7 +560,7 @@ public class Cmdline {
 			jline.console.ConsoleReader reader = null;
 			try {
 				reader = new jline.console.ConsoleReader();
-				String line = reader.readLine(prompt);
+				String line = reader.readLine(Static.MCToANSIColors(prompt));
 				return new CString(line, t);
 			} catch (IOException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
