@@ -536,6 +536,7 @@ public class AliasCore {
 			for (FileInfo fi : ms) {
 				boolean exception = false;
 				try {
+					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
 					MethodScriptCompiler.registerAutoIncludes(env, null);
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
 				} catch (ConfigCompileException e) {
@@ -551,6 +552,8 @@ public class AliasCore {
 				} catch(ProgramFlowManipulationException e){
 					exception = true;
 					ConfigRuntimeException.React(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in main files.", e.getTarget()), env);
+				} finally {
+					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(null);
 				}
 				if (exception) {
 					if (Prefs.HaltOnFailure()) {

@@ -1,7 +1,5 @@
 package com.laytonsmith.PureUtilities;
 
-import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -31,6 +29,7 @@ public class ExecutionQueue {
 	private Map<String, Boolean> runningQueues;
 	private String defaultQueueName;
 	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = null;
+	private ThreadFactory threadFactory;
 	
 	public ExecutionQueue(String threadPrefix, String defaultQueueName){
 		this(threadPrefix, defaultQueueName, null);
@@ -48,18 +47,16 @@ public class ExecutionQueue {
 			throw new NullPointerException();
 		}
 		uncaughtExceptionHandler = exceptionHandler;
-		ThreadFactory threadFactory = new ThreadFactory() {
+		threadFactory = new ThreadFactory() {
 
+			@Override
 			public Thread newThread(Runnable r) {
 				Thread t = new Thread(r, threadPrefix + "-" + (++threadCount));
 				t.setDaemon(false);			
 				return t;
 			}
 		};
-		service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                                      50L, TimeUnit.MILLISECONDS,
-                                      new SynchronousQueue<Runnable>(),
-                                      threadFactory);
+		
 		queues = new HashMap<String, Deque<Runnable>>();
 		this.defaultQueueName = defaultQueueName;
 		locks = new HashMap<String, Object>();
@@ -222,13 +219,19 @@ public class ExecutionQueue {
 		}
 	}
 	
-	private void startQueue(final DaemonManager dm, final String queue){
+	private synchronized void startQueue(final DaemonManager dm, final String queue){
 		synchronized(locks.get(queue)){
 			if(!isRunning(queue)){
 				//We need to create a new thread
 				runningQueues.put(queue, true);
 				if(dm != null){
 					dm.activateThread(null);
+				}
+				if(service == null){
+					service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                      50L, TimeUnit.MILLISECONDS,
+                                      new SynchronousQueue<Runnable>(),
+                                      threadFactory);
 				}
 				service.submit(new Runnable() {
 
@@ -264,15 +267,17 @@ public class ExecutionQueue {
 	/**
 	 * Stops all executing tasks on a best effort basis.
 	 */
-	public void stopAllNow(){
+	public synchronized void stopAllNow(){
 		service.shutdownNow();
+		service = null;
 	}
 	
 	/**
 	 * Attempts an orderly shutdown of all existing tasks.
 	 */
-	public void stopAll(){
+	public synchronized void stopAll(){
 		service.shutdown();
+		service = null;
 	}
 	
 	

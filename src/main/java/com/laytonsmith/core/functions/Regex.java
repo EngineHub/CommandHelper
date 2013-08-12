@@ -253,9 +253,10 @@ public class Regex {
             try {
             	ret = pattern.matcher(subject).replaceAll(replacement);
             } catch (IndexOutOfBoundsException e) {
-            	throw new ConfigRuntimeException("Expecting a regex group at parameter 1 of reg_replace",
-            			ExceptionType.FormatException, t);
-            }
+            	throw new Exceptions.FormatException("Expecting a regex group at parameter 1 of reg_replace", t);
+            } catch(IllegalArgumentException e){
+				throw new Exceptions.FormatException(e.getMessage(), t);
+			}
             
             return new CString(ret, t);
         }           
