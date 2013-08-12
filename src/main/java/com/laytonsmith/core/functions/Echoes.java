@@ -8,6 +8,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
@@ -379,12 +380,18 @@ public class Echoes {
         }
 
         public Construct exec(final Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			env.getEnv(CommandHelperEnvironment.class).GetPlayer().chat(args[0].val());
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null){
+				p.chat(args[0].val());
+			} else {
+				throw new ConfigRuntimeException("Console cannot chat. Use something like broadcast() instead.", ExceptionType.PlayerOfflineException, t);
+			}
             return new CVoid(t);
         }
 
         public String docs() {
-            return "void {string} Echoes string to the chat, as if the user simply typed something into the chat bar.";
+            return "void {string} Echoes string to the chat, as if the user simply typed something into the chat bar. This function cannot"
+					+ " be run from console, a PlayerOfflineException is thrown if attempted. Use broadcast() instead.";
         }
         
         public ExceptionType[] thrown(){
