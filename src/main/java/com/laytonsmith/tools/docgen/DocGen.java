@@ -8,6 +8,7 @@ import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Installer;
@@ -42,9 +43,9 @@ public class DocGen {
 		try{
 			//Boilerplate startup stuff
 			Implementation.setServerType(Implementation.Type.BUKKIT);
-			Installer.Install(DocGenUI.chDirectory);
-			Prefs.init(new File(DocGenUI.chDirectory, "preferences.ini"));
-			CHLog.initialize(DocGenUI.chDirectory);
+			Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
+			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
+			CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 			
 			//System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
 			System.out.println(examples("string_append", true));

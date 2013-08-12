@@ -1,10 +1,14 @@
 package com.laytonsmith.tools.docgen;
 
+import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.UIUtils;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.tools.Interpreter;
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +30,6 @@ import org.pushingpixels.substance.api.skin.SubstanceGraphiteGlassLookAndFeel;
  */
 public class DocGenUI extends javax.swing.JFrame {
 
-	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-	static final File chDirectory = new File(jarLocation, "CommandHelper/");
 	DocGenUIHandler handler;
 	DocGenUIHandler.ProgressManager manager = new DocGenUIHandler.ProgressManager() {
 
@@ -279,8 +281,8 @@ public class DocGenUI extends javax.swing.JFrame {
 
 				public void run() {
 					try {
-						Prefs.init(new File(chDirectory, "preferences.ini"));
-						CHLog.initialize(chDirectory);
+						Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
+						CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 					} catch (IOException ex) {
 						Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
 					}
@@ -298,6 +300,11 @@ public class DocGenUI extends javax.swing.JFrame {
 	 * @param args the command line arguments
 	 */
 	public static void main(String args[]) {
+		try {
+			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
+		} catch (IOException ex) {
+			Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
+		}
 		
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
@@ -323,8 +330,9 @@ public class DocGenUI extends javax.swing.JFrame {
 			}
 		}
 		
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenUI.class));
 		Implementation.setServerType(Implementation.Type.BUKKIT);
-		Installer.Install(chDirectory);
+		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 		/* Create and display the form */
 		java.awt.EventQueue.invokeLater(new Runnable() {
@@ -332,6 +340,9 @@ public class DocGenUI extends javax.swing.JFrame {
 				new DocGenUI().setVisible(true);
 			}
 		});
+		
+		//This goes ahead and initializes the platform.
+		FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA);
 	}
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox events;

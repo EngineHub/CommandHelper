@@ -15,7 +15,7 @@ public final class Prefs {
     private static Object pref(PNames name){
         if(prefs == null){
             //Uh oh.
-            throw new Error("Preferences have not been initialized!");
+            throw new RuntimeException("Preferences have not been initialized!");
         }
         return prefs.getPreference(name.config());
     }
@@ -63,7 +63,7 @@ public final class Prefs {
         a.add(new Preference(PNames.BASE_DIR.config(), "", Preferences.Type.STRING, "The base directory that scripts can read and write to. If left blank, then the default of the server directory will be used. "
                 + "This setting affects functions like include and read."));
         a.add(new Preference(PNames.PLAY_DIRTY.config(), "false", Preferences.Type.BOOLEAN, "Makes CommandHelper play dirty and break all sorts of programming rules, so that other plugins can't interfere with the operations that you defined. Note that doing this essentially makes CommandHelper have absolute say over commands. Use this setting only if you can't get another plugin to cooperate with CH, because it is a global setting."));
-        a.add(new Preference(PNames.CASE_SENSITIVE.config(), "true", Preferences.Type.BOOLEAN, "Makes command matching be case sensitive. If set to false, if your config defines /cmd, but the user runs /CMD, it will trigger the command anyways."));
+        a.add(new Preference(PNames.CASE_SENSITIVE.config(), "false", Preferences.Type.BOOLEAN, "Makes command matching be case sensitive. If set to false, if your config defines /cmd, but the user runs /CMD, it will trigger the command anyways."));
         a.add(new Preference(PNames.MAIN_FILE.config(), "main.ms", Preferences.Type.STRING, "The path to the main file, relative to the CommandHelper folder"));
         a.add(new Preference(PNames.ALLOW_DEBUG_LOGGING.config(), "false", Preferences.Type.BOOLEAN, "If set to false, the Debug class of functions will do nothing."));
         a.add(new Preference(PNames.DEBUG_LOG_FILE.config(), "logs/debug/%Y-%M-%D-debug.log", Preferences.Type.STRING, "The path to the debug output log file. Six variables are available, %Y, %M, and %D, %h, %m, %s, which are replaced with the current year, month, day, hour, minute and second respectively. It is highly recommended that you use at least year, month, and day if you are for whatever reason leaving logging on, otherwise the file size would get excessively large. The path is relative to the CommandHelper directory and is not bound by the base-dir restriction. The logger preferences file is created in the same directory this file is in as well, and is named loggerPreferences.txt"));

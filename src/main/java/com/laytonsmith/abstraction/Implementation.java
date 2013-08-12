@@ -23,6 +23,16 @@ public final class Implementation {
 	private Implementation() {
 	}
 	private static Implementation.Type serverType = null;
+	private static boolean useAbstractEnumThread = true;
+	
+	/**
+	 * Sets whether or not we should verify enums when setServerType is called.
+	 * Defaults to true.
+	 * @param on 
+	 */
+	public static void useAbstractEnumThread(boolean on){
+		useAbstractEnumThread = on;
+	}
 
 	public static void setServerType(Implementation.Type type) {
 		if (serverType == null) {
@@ -35,7 +45,7 @@ public final class Implementation {
 		}
 
 		//Fire off our abstractionenum checks in a new Thread
-		if (type != Type.TEST && type != Type.SHELL) {
+		if (type != Type.TEST && type != Type.SHELL && useAbstractEnumThread) {
 			Thread abstractionenumsThread;
 			abstractionenumsThread = new Thread(new Runnable() {
 				public void run() {
@@ -94,7 +104,15 @@ public final class Implementation {
 
 						}
 					} catch (Exception e) {
-						if (Prefs.DebugMode()) {
+						boolean debugMode;
+						try {
+							debugMode = Prefs.DebugMode();
+						} catch(RuntimeException ex){
+							//Set it to true if we fail to load prefs, which can happen
+							//with a buggy front end.
+							debugMode = true;
+						}
+						if (debugMode) {
 							//If we're in debug mode, sure, go ahead and print the stack trace,
 							//but otherwise we don't want to bother the user.
 							e.printStackTrace();

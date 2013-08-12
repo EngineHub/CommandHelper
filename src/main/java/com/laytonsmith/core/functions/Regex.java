@@ -117,8 +117,11 @@ public class Regex {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "reg_match('(\\\\d)(\\\\d)(\\\\d)', 'abc123')"),
-				new ExampleScript("Named captures", "reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')"),
-				new ExampleScript("Named captures with backreferences", "reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']")
+				//Java 7 can't be assumed to be working on the system running the doc gen, so we'll hardcode these.
+				new ExampleScript("Named captures (Only works if your system is running Java 7)", 
+					"reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')", "{0: abc123xyz, 1: 123, 2: xyz, foo: 123}"),
+				new ExampleScript("Named captures with backreferences (Only works if your system is running Java 7)", 
+					"reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']", "123")
 			};
 		}
         
@@ -205,8 +208,11 @@ public class Regex {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "reg_match_all('(\\\\d{3})', 'abc123456')"),
-				new ExampleScript("Named captures", "reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')[0]['foo']"),
-				new ExampleScript("Named captures with backreferences", "reg_match_all('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')[0]['foo']")
+				//Same thing here, can't guarantee we're running Java 7 when these are generated.
+				new ExampleScript("Named captures (Only works if your system is running Java 7)", 
+					"reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')[0]['foo']", "123"),
+				new ExampleScript("Named captures with backreferences (Only works if your system is running Java 7)", 
+					"reg_match_all('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')[0]['foo']", "123")
 			};
 		}
         
@@ -300,7 +306,8 @@ public class Regex {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "reg_replace('\\\\d', 'Z', '123abc')"),
 				new ExampleScript("Using backreferences", "reg_replace('abc(\\\\d+)', '$1', 'abc123'"),
-				new ExampleScript("Using backreferences with named captures", "reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')")
+				new ExampleScript("Using backreferences with named captures (Only works if your system is running Java 7)", 
+					"reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", "123")
 			};
 		}
         
