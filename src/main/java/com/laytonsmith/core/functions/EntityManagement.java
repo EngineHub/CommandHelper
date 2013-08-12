@@ -1585,7 +1585,7 @@ public class EntityManagement {
 				holder = Static.getEntity(Static.getInt32(args[1], t), t);
 			}
 			le.setLeashHolder(holder);
-			return null;
+			return new CVoid(t);
 		}
 
 		public String getName() {

@@ -232,6 +232,9 @@ public class Echoes {
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String color = null;
 			String val = args[0].nval();
+			if (val == null) {
+				return new CString(MCChatColor.WHITE.toString(), t);
+			}
             if(colors.containsKey(val)){
 				return colors.get(val);
 			}
