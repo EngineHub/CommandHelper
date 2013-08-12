@@ -384,7 +384,7 @@ public class Scheduling {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -408,7 +408,12 @@ public class Scheduling {
 			if(args.length >= 3){
 				timezone = TimeZone.getTimeZone(args[2].val());
 			}
-			SimpleDateFormat dateFormat = new SimpleDateFormat(args[0].toString());
+			SimpleDateFormat dateFormat;
+			try{
+				dateFormat = new SimpleDateFormat(args[0].toString());
+			} catch(IllegalArgumentException ex){
+				throw new Exceptions.FormatException(ex.getMessage(), t);
+			}
 			dateFormat.setTimeZone(timezone);
 			return new CString(dateFormat.format(now), t);
 		}
