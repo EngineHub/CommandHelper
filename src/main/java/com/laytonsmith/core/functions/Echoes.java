@@ -268,7 +268,10 @@ public class Echoes {
 			// IMPORTANT                                                //
 			// Be sure to update COLOR_SYMBOLS if this list is updated! //
 			//////////////////////////////////////////////////////////////
-			
+			if("".equals(a.trim())){
+				//If the value is empty string, set the color to white.
+				color = MCChatColor.WHITE.toString();
+			}
             if(color == null){
                 try{
                     Character p = String.valueOf(a).charAt(0);
