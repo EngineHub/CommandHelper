@@ -99,8 +99,8 @@
 		<url>http://redmine.sk89q.com/projects/commandhelper/</url>
 	</issueManagement>
 	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://build.sk89q.com/job/CommandHelper/</url>
+		<system>TeamCity</system>
+		<url>http://builds.enginehub.org/job/commandhelper/</url>
 	</ciManagement>
 	<licenses>
 		<license>
