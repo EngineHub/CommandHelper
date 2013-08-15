@@ -212,6 +212,13 @@ public class Persistance {
 			return true;
 		}
 
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Getting values", "store_value('x.top.a',true)\nstore_value('x.top.b',false)\nmsg(get_values('x'))"),
+			};
+		}
+
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			PersistanceNetwork p = environment.getEnv(GlobalEnv.class).GetPersistanceNetwork();
 			List<String> keyChain = new ArrayList<String>();
