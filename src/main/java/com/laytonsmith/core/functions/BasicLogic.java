@@ -450,7 +450,8 @@ public class BasicLogic {
 				// in the entire block, (including lack of an else) so any code outside the inner if causes this
 				// optimization to be impossible. An inner ifelse cannot be optimized, unless it only has 2 arguments
 				// (in which case, it's a normal if())
-				if(code.getChildren().size() == 2 && code.getData() instanceof CFunction && code.getData().val().equals("ifelse")){
+				// If the outer if has an else, we can't do it either, so check that the outer if only has 2 children too.
+				if(children.size() == 2 && code.getChildren().size() == 2 && code.getData() instanceof CFunction && code.getData().val().equals("ifelse")){
 					CFunction andNode = new CFunction(and, t);
 					ParseTree andTree = new ParseTree(andNode, statement.getFileOptions());
 					andTree.addChild(statement);
