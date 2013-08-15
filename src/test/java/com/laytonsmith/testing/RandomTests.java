@@ -295,11 +295,6 @@ public class RandomTests {
 		}
 	}
 	
-	@Test
-	public void failTest(){
-		fail("Purposeful test failure.");
-	}
-	
 //    @Test
 //    public void testBlah() throws Throwable{
 //	    StaticTest.InstallFakeConvertor(fakePlayer);
