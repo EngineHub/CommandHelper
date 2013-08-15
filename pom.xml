@@ -116,6 +116,7 @@
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.test.failure.ignore>true</maven.test.failure.ignore>
 	</properties>
 	<repositories>
 		<!-- Repository for other dependencies of SK's -->
