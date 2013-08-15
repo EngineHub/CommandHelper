@@ -200,6 +200,13 @@ public class Persistance {
 					+ " a single value (in this case).";
 		}
 
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Getting values", "store_value('x.top.a',true)\nstore_value('x.top.b',false)\nget_values('x')"),
+			};
+		}
+
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
 		}
