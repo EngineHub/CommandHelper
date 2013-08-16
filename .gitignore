@@ -12,6 +12,6 @@ nbactions.xml
 true
 /logs/
 /.logs/
-/preferences.txt
+/preferences.*
 .DS_Store
 /test-backend/

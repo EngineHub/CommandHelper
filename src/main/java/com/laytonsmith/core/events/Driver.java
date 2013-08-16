@@ -57,6 +57,7 @@ public enum Driver {
 	PLAYER_PORTAL_TRAVEL,
 	GAMEMODE_CHANGE,
 	TAB_COMPLETE,
+	EXP_CHANGE,
 	/**
 	 * Used by events fired from the extension system.
 	 */

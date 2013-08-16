@@ -361,6 +361,9 @@ public class WorldEdit {
 					ret.push(new CDouble(volume, t));
 				}
 
+				if (ret.size() == 1) {
+					return ret.get(0);
+				}
 				return ret;
 
 			} catch (NoClassDefFoundError e) {
