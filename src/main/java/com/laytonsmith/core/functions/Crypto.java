@@ -283,7 +283,7 @@ public class Crypto {
     @api public static class bcrypt extends AbstractFunction{
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
         }
 
         public boolean isRestricted() {
@@ -299,8 +299,12 @@ public class Crypto {
             if(args.length == 2){
                 log_rounds = Static.getInt32(args[1], t);
             }
-            String hash = BCrypt.hashpw(args[0].val(), BCrypt.gensalt(log_rounds));
-            return new CString(hash, t);
+			try{
+				String hash = BCrypt.hashpw(args[0].val(), BCrypt.gensalt(log_rounds));
+				return new CString(hash, t);
+			} catch(IllegalArgumentException ex){
+				throw new Exceptions.RangeException(ex.getMessage(), t);
+			}
         }
 
         public String getName() {
@@ -315,7 +319,7 @@ public class Crypto {
             return "string {val, [workload]} Encrypts a value using bcrypt, using the specified workload, or 5 if none provided. BCrypt is supposedly more secure than SHA1, and"
                     + " certainly more secure than md5. Note that using bcrypt is slower, which is one of its security advantages, however, setting the workload to higher numbers"
                     + " will take exponentially more time. A workload of 5 is a moderate operation, which should complete in under a second, however, setting it to 10 will take"
-                    + " many seconds, and setting it to 15 will take a few minutes. See the documentation for check_bcrypt for full usage.";
+                    + " many seconds, and setting it to 15 will take a few minutes. The workload must be between 5 and 31. See the documentation for check_bcrypt for full usage.";
         }
 
         public CHVersion since() {
