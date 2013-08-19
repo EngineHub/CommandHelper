@@ -10,6 +10,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -398,8 +399,20 @@ public class Exceptions {
 		}
 
 		public String docs() {
+			List<ExceptionType> e = Arrays.asList(Exceptions.ExceptionType.values());
+			String exceptions = "\nValid Exceptions: ";
+			for (int i = 0; i < e.size(); i++) {
+				String exceptionType = e.get(i).getName();
+				if(i == e.size() - 1) {
+					exceptions = exceptions + exceptionType;
+				} else {
+					exceptions = exceptions + exceptionType + ", ";
+				}
+			}
+			
 			return "nothing {exceptionType, msg} This function causes an exception to be thrown. If the exception type is null,"
-					+ " it will be uncatchable. Otherwise, exceptionType may be any valid exception type.";
+					+ " it will be uncatchable. Otherwise, exceptionType may be any valid exception type."
+					+ exceptions;
 		}
 
 		public ExceptionType[] thrown() {
