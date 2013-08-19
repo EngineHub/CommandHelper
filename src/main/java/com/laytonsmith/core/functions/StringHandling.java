@@ -1582,6 +1582,9 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args[0].val().toCharArray().length == 0){
+				throw new Exceptions.RangeException("Empty string cannot be converted to unicode.", t);
+			}
 			int i = Character.codePointAt(args[0].val().toCharArray(), 0);
 			return new CInt(i, t);
 		}
