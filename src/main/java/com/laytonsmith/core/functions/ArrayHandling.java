@@ -445,6 +445,8 @@ public class ArrayHandling {
 				array.push(value, index);
 			} catch(IllegalArgumentException e){
 				throw new Exceptions.CastException(e.getMessage(), t);
+			} catch(IndexOutOfBoundsException ex){
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IndexOverflowException, t);
 			}
 			return new CVoid(t);
 		}
