@@ -400,19 +400,19 @@ public class Exceptions {
 
 		public String docs() {
 			List<ExceptionType> e = Arrays.asList(Exceptions.ExceptionType.values());
-			String Exceptions = "\nValid Exceptions: ";
+			String exceptions = "\nValid Exceptions: ";
 			for (int i = 0; i < e.size(); i++) {
-				String ExceptionType = e.get(i).getName();
+				String exceptionType = e.get(i).getName();
 				if(i == e.size() - 1) {
-					Exceptions = Exceptions + ExceptionType;
+					exceptions = exceptions + exceptionType;
 				} else {
-					Exceptions = Exceptions + ExceptionType + ", \n";
+					exceptions = exceptions + exceptionType + ", ";
 				}
 			}
 			
 			return "nothing {exceptionType, msg} This function causes an exception to be thrown. If the exception type is null,"
 					+ " it will be uncatchable. Otherwise, exceptionType may be any valid exception type."
-					+ Exceptions;
+					+ exceptions;
 		}
 
 		public ExceptionType[] thrown() {
