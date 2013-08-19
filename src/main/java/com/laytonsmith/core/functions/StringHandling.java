@@ -1518,7 +1518,7 @@ public class StringHandling {
 	@api public static class char_from_unicode extends AbstractFunction implements Optimizable {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
 		public boolean isRestricted() {
@@ -1530,7 +1530,11 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
+			try{
+				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
+			} catch(IllegalArgumentException ex){
+				throw new Exceptions.RangeException("Code point out of range: " + args[0].val(), t);
+			}
 		}
 
 		public String getName() {
