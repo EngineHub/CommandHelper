@@ -2005,4 +2005,71 @@ public class PlayerEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
+	
+	@api
+	public static class exp_change extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "exp_change";
+		}
+
+		@Override
+		public String docs() {
+			return "{player <macro>}"
+					+ " Fired when a player's experience changes naturally."
+					+ " {player | amount}"
+					+ " {amount: the amount of exp the player will recieve}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCExpChangeEvent) {
+				MCExpChangeEvent e = (MCExpChangeEvent) event;
+				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCExpChangeEvent) {
+				MCExpChangeEvent e = (MCExpChangeEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				ret.put("amount", new CInt(e.getAmount(), Target.UNKNOWN));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCExpChangeEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.EXP_CHANGE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCExpChangeEvent) {
+				MCExpChangeEvent e = (MCExpChangeEvent) event;
+				if ("amount".equals(key)) {
+					e.setAmount(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 }

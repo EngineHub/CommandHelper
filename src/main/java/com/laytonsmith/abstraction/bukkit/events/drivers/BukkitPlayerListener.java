@@ -243,4 +243,11 @@ public class BukkitPlayerListener implements Listener {
 		EventUtils.TriggerExternal(e);
 		EventUtils.TriggerListener(Driver.TAB_COMPLETE, "tab_complete_chat", e);
 	}
+	
+	@EventHandler(priority= EventPriority.LOWEST)
+	public void onExpChange(PlayerExpChangeEvent event) {
+		BukkitPlayerEvents.BukkitMCExpChangeEvent e = new BukkitPlayerEvents.BukkitMCExpChangeEvent(event);
+		EventUtils.TriggerExternal(e);
+		EventUtils.TriggerListener(Driver.EXP_CHANGE, "exp_change", e);
+	}
 }

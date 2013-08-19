@@ -773,4 +773,32 @@ public class BukkitPlayerEvents {
 			return new BukkitMCPlayer(tc.getPlayer());
 		}
 	}
+	
+	public static class BukkitMCExpChangeEvent implements MCExpChangeEvent {
+
+		PlayerExpChangeEvent ec;
+		public BukkitMCExpChangeEvent(PlayerExpChangeEvent event) {
+			ec = event;
+		}
+		
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(ec.getPlayer());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return ec;
+		}
+
+		@Override
+		public int getAmount() {
+			return ec.getAmount();
+		}
+
+		@Override
+		public void setAmount(int amount) {
+			ec.setAmount(amount);
+		}
+	}
 }
