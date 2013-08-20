@@ -59,6 +59,8 @@ public enum Driver {
 	GAMEMODE_CHANGE,
 	TAB_COMPLETE,
 	EXP_CHANGE,
+	ITEM_HELD,
+	ITEM_PRE_CRAFT,
 	/**
 	 * Used by events fired from the extension system.
 	 */

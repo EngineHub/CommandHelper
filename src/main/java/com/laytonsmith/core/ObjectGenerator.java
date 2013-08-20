@@ -3,6 +3,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -697,6 +698,37 @@ public class ObjectGenerator {
 			} else {
 				throw new Exceptions.FormatException("Expected a potion array at index" + key, t);
 			}
+		}
+		return ret;
+	}
+	
+	public Construct recipe(MCRecipe r, Target t) {
+		if (r == null) {
+			return new CNull(t);
+		}
+		CArray ret = CArray.GetAssociativeArray(t);
+		ret.set("type", new CString(r.getRecipeType().name(), t), t);
+		ret.set("result", item(r.getResult(), t), t);
+		if (r instanceof MCFurnaceRecipe) {
+			ret.set("input", item(((MCFurnaceRecipe) r).getInput(), t), t);
+		} else if (r instanceof MCShapelessRecipe) {
+			CArray il = new CArray(t);
+			for (MCItemStack i : ((MCShapelessRecipe) r).getIngredients()) {
+				il.push(item(i, t));
+			}
+			ret.set("ingredients", il, t);
+		} else if (r instanceof MCShapedRecipe) {
+			MCShapedRecipe sr = (MCShapedRecipe) r;
+			CArray shape = new CArray(t);
+			for (String line : sr.getShape()) {
+				shape.push(new CString(line, t));
+			}
+			CArray imap = CArray.GetAssociativeArray(t);
+			for (Map.Entry<Character, MCItemStack> entry : sr.getIngredientMap().entrySet()) {
+				imap.set(entry.getKey().toString(), item(entry.getValue(), t), t);
+			}
+			ret.set("shape", shape, t);
+			ret.set("ingredients", imap, t);
 		}
 		return ret;
 	}

@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.bukkit.entities.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -33,8 +34,12 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.material.MaterialData;
 
@@ -464,4 +469,34 @@ public class BukkitConvertor extends AbstractConvertor {
 		return pluginMeta;
 	}
 
+	@Override
+	public MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
+		switch (type) {
+			case FURNACE:
+				return new BukkitMCFurnaceRecipe(result);
+			case SHAPED:
+				return new BukkitMCShapedRecipe(result);
+			case SHAPELESS:
+				return new BukkitMCShapelessRecipe(result);
+		}
+		return null;
+	}
+
+	@Override
+	public MCRecipe GetRecipe(MCRecipe unspecific) {
+		Recipe r = ((BukkitMCRecipe) unspecific).r;
+		return BukkitGetRecipe(r);
+	}
+
+	public static MCRecipe BukkitGetRecipe(Recipe r) {
+		if (r instanceof ShapelessRecipe) {
+			return new BukkitMCShapelessRecipe((ShapelessRecipe) r);
+		} else if (r instanceof ShapedRecipe) {
+			return new BukkitMCShapedRecipe((ShapedRecipe) r);
+		} else if (r instanceof FurnaceRecipe) {
+			return new BukkitMCFurnaceRecipe((FurnaceRecipe) r);
+		} else {
+			return null;
+		}
+	}
 }

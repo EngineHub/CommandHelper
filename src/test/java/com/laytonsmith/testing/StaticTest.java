@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.annotations.noboilerplate;
@@ -703,7 +704,16 @@ public class StaticTest {
 		public List<MCEntity> GetEntitiesAt(MCLocation loc, double radius) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
-        
+
+		@Override
+		public MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCRecipe GetRecipe(MCRecipe unspecific) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
     }
     
     public static class FakeServerMixin implements EventMixinInterface{

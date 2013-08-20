@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.bukkit.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
@@ -17,6 +18,7 @@ import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
 import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
+import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -497,6 +499,174 @@ public class InventoryEvents {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+	
+	@api
+	public static class item_held extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_held";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a player changes which quickbar slot they have selected."
+					+ " {player | to | from: the slot the player is switching from}"
+					+ " {to: the slot that the player is switching to}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCItemHeldEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCItemHeldEvent) {
+				MCItemHeldEvent e = (MCItemHeldEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				ret.put("to", new CInt(e.getNewSlot(), Target.UNKNOWN));
+				ret.put("from", new CInt(e.getPreviousSlot(), Target.UNKNOWN));
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCItemHeldEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_HELD;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCItemHeldEvent) {
+				MCItemHeldEvent e = (MCItemHeldEvent) event;
+				if ("to".equals(key)) {
+					e.getPlayer().getInventory().setHeldItemSlot(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class item_pre_craft extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_pre_craft";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a recipe is formed in a crafting matrix, but the result has not yet been clicked."
+					+ " {viewers: all humanentities viewing the screen this event takes place in | matrix | result"
+					+ " | isRepair: true if this event was triggered by a repair operation (different than normal crafting)"
+					+ " | recipe: information about the formed recipe, or null if there is not one}"
+					+ " {}"/*" {matrix: the slots that make up the crafting grid | result: the result slot of crafting}"*/
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPrepareItemCraftEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPrepareItemCraftEvent) {
+				MCPrepareItemCraftEvent e = (MCPrepareItemCraftEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
+				CArray viewers = new CArray(t);
+				for (MCHumanEntity v : e.getViewers()) {
+					viewers.push(new CString(v.getName(), t));
+				}
+				ret.put("viewers", viewers);
+				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));
+				ret.put("isRepair", new CBoolean(e.isRepair(), t));
+				CArray matrix = CArray.GetAssociativeArray(t);
+				MCItemStack[] mi = e.getInventory().getMatrix();
+				for (int i=0; i<mi.length; i++) {
+					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t), t);
+				}
+				ret.put("matrix", matrix);
+				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t));
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCPrepareItemCraftEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_PRE_CRAFT;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			/*if (event instanceof MCPrepareItemCraftEvent) {
+				MCPrepareItemCraftEvent e = (MCPrepareItemCraftEvent) event;
+				if ("result".equals(key)) {
+					e.getInventory().setResult(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+				if ("matrix".equals(key)) {
+					if (value instanceof CArray) {
+						CArray va = (CArray) value;
+						MCItemStack[] old = e.getInventory().getMatrix();
+						MCItemStack[] repl = new MCItemStack[old.length];
+						for (int i=0; i<repl.length; i++) {
+							if (va.containsKey(i)) {
+								repl[i] = ObjectGenerator.GetGenerator().item(va, Target.UNKNOWN);
+							}
+						}
+						e.getInventory().setMatrix(repl);
+						return true;
+					} else if (value instanceof CNull) {
+						MCItemStack[] old = e.getInventory().getMatrix();
+						MCItemStack[] repl = new MCItemStack[old.length];
+						e.getInventory().setMatrix(repl);
+						return true;
+					} else {
+						throw new ConfigRuntimeException("Expected an array but recieved " + value,
+								ExceptionType.CastException, Target.UNKNOWN);
+					}
+				}
+			} */
+			return false;
+		}
 		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 }
