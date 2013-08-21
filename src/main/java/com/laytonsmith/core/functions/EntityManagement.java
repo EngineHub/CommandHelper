@@ -1599,4 +1599,22 @@ public class EntityManagement {
 					+ " Bats, enderdragons, players, and withers can not be held by leashes due to minecraft limitations.";
 		}
 	}
+	
+	@api
+	public static class entity_grounded extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			
+			return new CBoolean(e.isOnGround(), t);
+		}
+
+		public String getName() {
+			return "entity_grounded";
+		}
+
+		public String docs() {
+			return "boolean {entityID} retruns whether the entity is touching the ground";
+		}
+	}
 }

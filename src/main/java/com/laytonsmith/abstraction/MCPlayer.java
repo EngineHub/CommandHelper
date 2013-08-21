@@ -59,6 +59,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public void giveExp(int xp);
 
     public boolean isSneaking();
+	
+	public boolean isSprinting();
 
     public void kickPlayer(String message);
 
