@@ -78,6 +78,10 @@ public final class Prefs {
         prefs.init(f);
     }
 	
+	public static boolean isInitialized(){
+		return prefs != null;
+	}
+	
 	/**
 	 * Convenience function to set the term colors based on the UseColors preference.
 	 */

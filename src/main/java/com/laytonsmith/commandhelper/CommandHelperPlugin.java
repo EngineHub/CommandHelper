@@ -234,7 +234,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				script_name), CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
 				CommandHelperFileLocations.getDefault().getPreferencesFile(), new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
 				main_file), permissionsResolver, this);
-		ac.reload(null);
+		ac.reload(null, null);
 
 		//Clear out our hostname cache
 		hostnameLookupCache = new ConcurrentHashMap<String, String>();
@@ -314,7 +314,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if (sender instanceof Player) {
 				player = new BukkitMCPlayer((Player) sender);
 			}
-			ac.reload(player);
+			ac.reload(player, args);
 //            if(ac.reload(player)){
 //                if(sender instanceof Player){
 //                    Static.SendMessage(player, MCChatColor.GOLD + "Command Helper scripts sucessfully recompiled.");

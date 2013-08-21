@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
@@ -242,37 +243,128 @@ public class AliasCore {
 		}
 		return match;
 	}
+	
+	private static final ArgumentParser reloadOptions;
+	
+	static {
+		reloadOptions = ArgumentParser.GetParser().addFlag("--blacklist", "Sets the list of arguments to be a blacklist, that is,"
+				+ " only the specified modules get reloaded, the rest will be skipped. Without this option, the specified modules"
+				+ " don't get reloaded.")
+				.addFlag('g', "globals", "Specifies the globals memory. (Values stored with export/import.)")
+				.addFlag('t', "tasks", "Specifies the tasks registered with set_interval/set_timeout.")
+				.addFlag('e', "execution-queue", "Specifies the tasks registered in execution queues.")
+				.addFlag('r', "persistance-config", "Specifies that the persistance config file should be reloaded.")
+				.addFlag("persistence-config", "Alias of -r.")
+				.addFlag('p', "preferences", "Specifies that the preferences should not be reloaded.")
+				.addFlag('f', "profiler", "Specifies the profiler config should not be reloaded.")
+				.addFlag('s', "scripts", "Specifies that the scripts should not be reloaded.")
+				.addFlag('x', "extensions", "Specifies that extensions should be reloaded.")
+				.addFlag('h', "help", "Prints this list and returns. Nothing is reloaded if this option is set.")
+			;
+	}
 
 	/**
 	 * Loads the global alias file in from the file system. If a player is
 	 * running the command, send a reference to them, and they will see compile
 	 * errors, otherwise, null.
+	 * @param player
+	 * @param settings The argument list for the settings.
 	 */
-	public final void reload(MCPlayer player) {
+	public final void reload(MCPlayer player, String[] settings) {
+		boolean reloadGlobals = true;
+		boolean reloadTimeouts = true;
+		boolean reloadExecutionQueue = true;
+		boolean reloadPersistanceConfig = true;
+		boolean reloadPreferences = true;
+		boolean reloadProfiler = true;
+		boolean reloadScripts = true;
+		boolean reloadExtensions = true;
+		if(settings != null){
+			ArgumentParser.ArgumentParserResults results;
+			try {
+				results = reloadOptions.match(settings);
+			} catch (ArgumentParser.ValidationException ex) {
+				Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+				return;
+			}
+			if(results.isFlagSet('h')){
+				if(player != null){
+					player.sendMessage(reloadOptions.getBuiltDescription());
+				} else {
+					System.out.println(reloadOptions.getBuiltDescription());
+				}
+				return;
+			}
+			if(results.isFlagSet("blacklist")){
+				//Invert the results
+				reloadGlobals = false;
+				reloadTimeouts = false;
+				reloadExecutionQueue = false;
+				reloadPersistanceConfig = false;
+				reloadPreferences = false;
+				reloadProfiler = false;
+				reloadScripts = false;
+				reloadExtensions = false;
+			}
+			if(results.isFlagSet('g')){
+				reloadGlobals = !reloadGlobals;
+			}
+			if(results.isFlagSet('t')){
+				reloadTimeouts = !reloadTimeouts;
+			}
+			if(results.isFlagSet('e')){
+				reloadExecutionQueue = !reloadExecutionQueue;
+			}
+			if(results.isFlagSet('r') || results.isFlagSet("persistence-config")){
+				reloadPersistanceConfig = !reloadPersistanceConfig;
+			}
+			if(results.isFlagSet('p')){
+				reloadPreferences = !reloadPreferences;
+			}
+			if(results.isFlagSet('f')){
+				reloadProfiler = !reloadProfiler;
+			}
+			if(results.isFlagSet('s')){
+				reloadScripts = !reloadScripts;
+			}
+			if(results.isFlagSet('x')){
+				reloadExtensions = !reloadExtensions;
+			}
+		}
 		try {
 			StaticLayer.GetConvertor().runShutdownHooks();
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 			//Install bukkit into the class discovery class
 			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
-			ExtensionManager.Startup();
+			if(reloadExtensions){
+				ExtensionManager.Startup();
+			}
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
-			parent.profiler = new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
-			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-			options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-			MemoryDataSource.ClearDatabases();
-			PacketJumper.startup();
-			parent.persistanceNetwork = new PersistanceNetwork(MethodScriptFileLocations.getDefault().getPersistanceConfig(),
-					new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistanceDBFile()
-					.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
+			if(parent.profiler == null || reloadProfiler){
+				parent.profiler = new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
+			}
+			if(parent.persistanceNetwork == null || reloadPersistanceConfig){
+				MemoryDataSource.ClearDatabases();
+				//PacketJumper.startup();
+				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
+				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
+				parent.persistanceNetwork = new PersistanceNetwork(MethodScriptFileLocations.getDefault().getPersistanceConfig(),
+						new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistanceDBFile()
+						.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
+			}
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver,
 					MethodScriptFileLocations.getDefault().getConfigDirectory());
+			if(reloadExecutionQueue){
+				parent.executionQueue.stopAllNow();
+			}
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 			Environment env = Environment.createEnvironment(gEnv, cEnv);
-			Globals.clear();
-			Scheduling.ClearScheduledRunners();
-			EventUtils.UnregisterAll();
-			EventList.RunHooks();
-			IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
+			if(reloadGlobals){
+				Globals.clear();
+			}
+			if(reloadTimeouts){
+				Scheduling.ClearScheduledRunners();
+			}
 			if (!aliasConfig.exists()) {
 				aliasConfig.getParentFile().mkdirs();
 				aliasConfig.createNewFile();
@@ -299,32 +391,39 @@ public class AliasCore {
 				}
 			}
 
-			Prefs.init(prefFile);
-			scripts = new ArrayList<Script>();
+			if(!Prefs.isInitialized() || reloadPreferences){
+				Prefs.init(prefFile);
+			}
+			
+			if(reloadScripts){
+				EventUtils.UnregisterAll();
+				EventList.RunHooks();
+				IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
+				scripts = new ArrayList<Script>();
 
-			LocalPackage localPackages = new LocalPackage();
+				LocalPackage localPackages = new LocalPackage();
 
 
-			//Run the main file once           
-			String main = file_get_contents(mainFile.getAbsolutePath());
-			localPackages.appendMS(main, mainFile);
+				//Run the main file once           
+				String main = file_get_contents(mainFile.getAbsolutePath());
+				localPackages.appendMS(main, mainFile);
 
 
-			String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
-			localPackages.appendMSA(alias_config, aliasConfig);
+				String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
+				localPackages.appendMSA(alias_config, aliasConfig);
 
-			//Now that we've included the default files, search the local_packages directory
-			GetAuxAliases(auxAliases, localPackages);
+				//Now that we've included the default files, search the local_packages directory
+				GetAuxAliases(auxAliases, localPackages);
 
-			autoIncludes = localPackages.getAutoIncludes();
+				autoIncludes = localPackages.getAutoIncludes();
 
-			ProfilePoint compilerMS = parent.profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
-			localPackages.compileMS(player, env);
-			compilerMS.stop();
-			ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
-			localPackages.compileMSA(scripts, player);
-			compilerMSA.stop();
-
+				ProfilePoint compilerMS = parent.profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
+				localPackages.compileMS(player, env);
+				compilerMS.stop();
+				ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
+				localPackages.compileMSA(scripts, player);
+				compilerMSA.stop();
+			}
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
 					+ " check the location and try loading the plugin again.");

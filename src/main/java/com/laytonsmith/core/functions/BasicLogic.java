@@ -119,14 +119,14 @@ public class BasicLogic {
 					break;
 				}
 			}
+			//Now check for too many/too few arguments
+			if (args.size() == 1) {
+				throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
+			}
 			if(!allowOverloading && args.size() > 3){
 				throw new ConfigCompileException("if() can only have 3 parameters", t);
 			}
 			return new ifelse().optimizeDynamic(t, args);
-//			//Now check for too many/too few arguments
-//			if (args.size() == 1 || args.size() > 3) {
-//				throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
-//			}
 //			if (args.get(0).getData().isDynamic()) {
 //				return super.optimizeDynamic(t, args); //Can't optimize
 //			} else {
