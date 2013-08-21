@@ -13,6 +13,7 @@ import org.bukkit.enchantments.Enchantment;
  */
 public class BukkitMCEnchantment implements MCEnchantment{
     Enchantment e;
+	
     public BukkitMCEnchantment(Enchantment e){
 		if(e == null){
 			throw new NullPointerException();
@@ -21,7 +22,6 @@ public class BukkitMCEnchantment implements MCEnchantment{
     }
     
     public BukkitMCEnchantment(AbstractionObject a){
-        this((Enchantment)null);
         if(a instanceof MCEnchantment){
             this.e = ((Enchantment)a.getHandle());
         } else {
@@ -36,6 +36,10 @@ public class BukkitMCEnchantment implements MCEnchantment{
     Enchantment __Enchantment() {
         return e;
     }
+	
+	public Enchantment asEnchantment() {
+		return e;
+	}
 
     public boolean canEnchantItem(MCItemStack is) {
         return e.canEnchantItem(((BukkitMCItemStack)is).is);

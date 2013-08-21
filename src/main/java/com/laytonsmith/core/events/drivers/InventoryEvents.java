@@ -1,14 +1,18 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.abstraction.enums.MCSlotType;
+import com.laytonsmith.abstraction.events.MCEnchantItemEvent;
 import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
 import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
 import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
@@ -403,5 +407,96 @@ public class InventoryEvents {
 			return CHVersion.V3_3_1;
 		}
 
+	}
+	
+	@api
+	public static class item_enchant extends AbstractEvent {
+
+		public String getName() {
+			return "item_enchant";
+		}
+
+		public String docs() {
+			return "{} "
+					+ "Fired when a player enchants an item. "
+					+ "{player: The player that enchanted the item | "
+					+ "item: The enchanted item PRE-ENCHANT | "
+					+ "inventorytype: type of inventory | "
+					+ "levels: The amount of levels the player used | "
+					+ "enchants: Array of added enchantments | "
+					+ "location: Location of the used enchantment table | "
+					+ "option: The enchantment option the player clicke})"
+					+ "{levels: The amount of levels to use | "
+					+ "item: The item to be enchanted. this is still PRE-ENCHANT | "
+					+ "enchants: The enchants to add to the item}"
+					+ "{player|item|inventorytype|levels|enchants|location|option} ";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCEnchantItemEvent) {
+				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
+				Map<String, Construct> map = evaluate_helper(event);
+
+				map.put("player", new CString(e.GetEnchanter().getName(), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
+				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
+				map.put("levels", new CInt(e.getExpLevelCost(), Target.UNKNOWN));
+				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
+				
+				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
+					
+				loc.remove(new CString("yaw", Target.UNKNOWN));
+				loc.remove(new CString("pitch", Target.UNKNOWN));
+				loc.remove(new CString("4", Target.UNKNOWN));
+				loc.remove(new CString("5", Target.UNKNOWN));
+
+				map.put("location", loc);
+				
+				map.put("option", new CInt(e.whichButton(), Target.UNKNOWN));
+
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to MCEnchantItemEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.ITEM_ENCHANT;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCEnchantItemEvent) {
+				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
+
+				if (key.equalsIgnoreCase("levels")) {
+					e.setExpLevelCost(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+				
+				if (key.equalsIgnoreCase("item")) {
+					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+				
+				if (key.equalsIgnoreCase("enchants")) {
+					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, Target.UNKNOWN)));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }

@@ -22,7 +22,6 @@ public class BukkitMCLocation implements MCLocation {
     }
 
     public BukkitMCLocation(AbstractionObject a) {
-        this((Location)null);
         if (a instanceof MCLocation) {
             this.l = ((Location)a.getHandle());
         } else {
