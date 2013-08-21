@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents;
+import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCEnchantItemEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCInventoryClickEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCInventoryCloseEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCInventoryDragEvent;
@@ -10,6 +11,7 @@ import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -47,5 +49,12 @@ public class BukkitInventoryListener implements Listener{
 		BukkitMCInventoryCloseEvent ice = new BukkitInventoryEvents.BukkitMCInventoryCloseEvent(event);
 		EventUtils.TriggerExternal(ice);
 		EventUtils.TriggerListener(Driver.INVENTORY_CLOSE, "inventory_close", ice);
+	}
+	
+	@EventHandler(priority= EventPriority.LOWEST)
+	public void onItemEnchant(EnchantItemEvent event) {
+		BukkitMCEnchantItemEvent eie = new BukkitInventoryEvents.BukkitMCEnchantItemEvent(event);
+		EventUtils.TriggerExternal(eie);
+		EventUtils.TriggerListener(Driver.ITEM_ENCHANT, "item_enchant", eie);
 	}
 }

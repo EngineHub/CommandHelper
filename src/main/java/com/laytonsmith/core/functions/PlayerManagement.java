@@ -25,7 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
+ *p
  * @author Layton
  */
 public class PlayerManagement {
@@ -661,7 +661,7 @@ public class PlayerManagement {
 					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
 					+ " <li>13 - Player's current entity id</li><li>14 - Is player in a vehicle? Returns true or false.</li>"
 					+ " <li>15 - The slot number of the player's current hand.</li>"
-					+ " <li>16 - Is sleeping?</li><li>17 - Is blocking?</li><li>18 - Is flying?</li>"
+					+ " <li>16 - Is sleeping?</li><li>17 - Is blocking?</li><li>18 - Is flying?</li><li>19 - Is sprinting?</li>"
 					+ " </ul>";
 		}
 
@@ -699,7 +699,7 @@ public class PlayerManagement {
 			MCPlayer p = Static.GetPlayer(player, t);
 
 			Static.AssertPlayerNonNull(p, t);
-			int maxIndex = 18;
+			int maxIndex = 19;
 			if (index < -1 || index > maxIndex) {
 				throw new ConfigRuntimeException(this.getName() + " expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
@@ -817,6 +817,9 @@ public class PlayerManagement {
 			}
 			if (index == 18 || index == -1) {
 				retVals.add(new CBoolean(p.isFlying(), t));
+			}
+			if (index == 19 || index == -1) {
+				retVals.add(new CBoolean(p.isSprinting(), t));
 			}
 			if (retVals.size() == 1) {
 				return retVals.get(0);

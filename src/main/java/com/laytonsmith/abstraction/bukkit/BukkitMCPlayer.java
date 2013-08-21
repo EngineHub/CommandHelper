@@ -219,6 +219,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public boolean isSneaking() {
         return p.isSneaking();
     }
+	
+	public boolean isSprinting() {
+		return p.isSprinting();
+	}
 
     public boolean isWhitelisted() {
         return p.isWhitelisted();
