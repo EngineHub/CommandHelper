@@ -268,8 +268,10 @@ public class ExecutionQueue {
 	 * Stops all executing tasks on a best effort basis.
 	 */
 	public synchronized void stopAllNow(){
-		service.shutdownNow();
-		service = null;
+		if(service != null){
+			service.shutdownNow();
+			service = null;
+		}
 	}
 	
 	/**
