@@ -26,6 +26,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -396,6 +398,7 @@ public class Cmdline {
     }
 	
 	@api
+	@noboilerplate
 	public static class prompt_pass extends AbstractFunction {
 
 		@Override
@@ -467,6 +470,7 @@ public class Cmdline {
 	}
 	
 	@api
+	@noboilerplate
 	public static class prompt_char extends AbstractFunction {
 
 		@Override
@@ -533,6 +537,7 @@ public class Cmdline {
 	}
 	
 	@api
+	@noboilerplate
 	public static class prompt_line extends AbstractFunction {
 
 		@Override
@@ -632,6 +637,59 @@ public class Cmdline {
 		@Override
 		public String docs() {
 			return "void {} Emits a system beep, on the system itself, not in game. This is only useful from cmdline.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	@noboilerplate
+	public static class clear_screen extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(inCmdLine(environment)){
+				try {
+					new jline.console.ConsoleReader().clearScreen();
+				} catch (IOException ex) {
+					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				}
+			}
+			return new CVoid(t);
+		}
+
+		@Override
+		public String getName() {
+			return "clear_screen";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "void {} Clears the screen. This only works from cmdline mode, nothing happens otherwise.";
 		}
 
 		@Override

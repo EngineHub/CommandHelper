@@ -1518,7 +1518,7 @@ public class StringHandling {
 	@api public static class char_from_unicode extends AbstractFunction implements Optimizable {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
 		public boolean isRestricted() {
@@ -1530,7 +1530,11 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
+			try{
+				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
+			} catch(IllegalArgumentException ex){
+				throw new Exceptions.RangeException("Code point out of range: " + args[0].val(), t);
+			}
 		}
 
 		public String getName() {
@@ -1582,6 +1586,9 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args[0].val().toCharArray().length == 0){
+				throw new Exceptions.RangeException("Empty string cannot be converted to unicode.", t);
+			}
 			int i = Character.codePointAt(args[0].val().toCharArray(), 0);
 			return new CInt(i, t);
 		}

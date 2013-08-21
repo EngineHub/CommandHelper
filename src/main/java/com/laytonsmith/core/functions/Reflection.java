@@ -16,6 +16,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistance.DataSourceFactory;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -24,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,7 +77,7 @@ public class Reflection {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.IOException};
 		}
 
 		public boolean isRestricted() {
@@ -114,7 +117,11 @@ public class Reflection {
 				if (t.file() == null) {
 					return new CString("Unknown (maybe the interpreter?)", t);
 				} else {
-					return new CString(t.file().getAbsolutePath().replace("\\", "/"), t);
+					try {
+						return new CString(t.file().getCanonicalPath().replace("\\", "/"), t);
+					} catch (IOException ex) {
+						throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+					}
 				}
 			} else if ("col".equalsIgnoreCase(param)) {
 				return new CInt(t.col(), t);

@@ -149,12 +149,6 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
-			return null;
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Demonstrates basic usage", "subtract(4 - 3)"),
@@ -163,7 +157,6 @@ public class Math {
 
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_DYNAMIC,
 						OptimizationOption.CONSTANT_OFFLINE,
 						OptimizationOption.CACHE_RETURN
 			);
@@ -284,12 +277,6 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
-			return null;
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Demonstrates basic usage", "divide(4, 2)"),
@@ -300,7 +287,6 @@ public class Math {
 		
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_DYNAMIC,
 						OptimizationOption.CONSTANT_OFFLINE,
 						OptimizationOption.CACHE_RETURN
 			);
