@@ -25,7 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
+ *p
  * @author Layton
  */
 public class PlayerManagement {
@@ -699,7 +699,7 @@ public class PlayerManagement {
 			MCPlayer p = Static.GetPlayer(player, t);
 
 			Static.AssertPlayerNonNull(p, t);
-			int maxIndex = 18;
+			int maxIndex = 19;
 			if (index < -1 || index > maxIndex) {
 				throw new ConfigRuntimeException(this.getName() + " expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
