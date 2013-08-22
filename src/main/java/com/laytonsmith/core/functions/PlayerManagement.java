@@ -2192,7 +2192,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player]} Gets the players speed. The speed must be between -1 or 1";
+			return "double {[player]} Gets the players speed. The speed must be between -1 or 1";
 		}
 
 		public ExceptionType[] thrown() {
@@ -2297,7 +2297,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player]} Gets the players speed. The speed must be between -1 or 1";
+			return "double {[player]} Gets the players speed. The speed must be between -1 or 1";
 		}
 
 		public ExceptionType[] thrown() {

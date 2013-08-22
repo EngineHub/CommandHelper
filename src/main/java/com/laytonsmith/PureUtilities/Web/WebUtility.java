@@ -179,7 +179,7 @@ public final class WebUtility {
 			}
 		}
 		if(username != null && password != null){
-			conn.setRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64(password.getBytes("UTF-8")), "UTF-8"));
+			conn.setRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64((username + ":" + password).getBytes("UTF-8")), "UTF-8"));
 		}
 		if (headers != null) {
 			for (String key : headers.keySet()) {
