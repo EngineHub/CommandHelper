@@ -351,7 +351,12 @@ public class ClassDiscovery {
 		defaultClassLoader = cl;
 	}
 
-	private ClassLoader getDefaultClassLoader() {
+	/**
+	 * Gets the classloader set with {@link #setDefaultClassLoader(java.lang.ClassLoader)}, or the
+	 * builtin default if none was specified ever. Regardless, never returns null.
+	 * @return 
+	 */
+	public ClassLoader getDefaultClassLoader() {
 		if (defaultClassLoader == null) {
 			return ClassDiscovery.class.getClassLoader();
 		} else {

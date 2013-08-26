@@ -57,7 +57,7 @@ public class ExtensionManager {
 						+ " takes parameters; it should not.");
 			} else {
 				try{
-					Method m = mm.loadMethod();
+					Method m = mm.loadMethod(ClassDiscovery.getDefaultInstance().getDefaultClassLoader(), true);
 					m.setAccessible(true);
 					m.invoke(null);
 				} catch(Exception e){
@@ -76,7 +76,7 @@ public class ExtensionManager {
 								+ " takes parameters; it should not. (Found in " + mm.getDeclaringClass() + "#" + mm.getName() + ")", Target.UNKNOWN);
 					} else {
 						try{
-							Method m = mm.loadMethod();
+							Method m = mm.loadMethod(ClassDiscovery.getDefaultInstance().getDefaultClassLoader(), true);
 							m.setAccessible(true);
 							m.invoke(null);
 						} catch(Exception e){
