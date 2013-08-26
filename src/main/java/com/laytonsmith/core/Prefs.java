@@ -40,7 +40,8 @@ public final class Prefs {
         SHOW_SPLASH_SCREEN("show-splash-screen"),
         USE_COLORS("use-colors"),
         HALT_ON_FAILURE("halt-on-failure"),
-		USE_SUDO_FALLBACK("use-sudo-fallback");
+		USE_SUDO_FALLBACK("use-sudo-fallback"),
+		ALLOW_SHELL_COMMANDS("allow-shell-commands");
         String name;
         private PNames(String name){
             this.name = name;
@@ -74,6 +75,8 @@ public final class Prefs {
         a.add(new Preference(PNames.USE_COLORS.config(), (TermColors.SYSTEM == TermColors.SYS.WINDOWS ? "false" : "true"), Preferences.Type.BOOLEAN, "Whether or not to use console colors. If this is a Windows machine, defaults to false, however, it can be toggled manually, and will then respect your setting."));
         a.add(new Preference(PNames.HALT_ON_FAILURE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to halt compilation of pure mscript files if a compilation failure occurs in any one of the files."));
 		a.add(new Preference(PNames.USE_SUDO_FALLBACK.config(), "false", Preferences.Type.BOOLEAN, "If true, sudo() will use a less safe fallback method if it fails. See the documentation on the sudo function for more details. If this is true, a warning is issued at startup."));
+		a.add(new Preference(PNames.ALLOW_SHELL_COMMANDS.config(), "false", Preferences.Type.BOOLEAN, "If true, allows for the shell functions to be used from outside of cmdline mode. WARNING: Enabling these functions can be extremely dangerous if you accidentally allow uncontrolled access to them, and can"
+				+ " grant full control of your server if not careful. Leave this set to false unless you really know what you're doing."));
         prefs = new Preferences("CommandHelper", Static.getLogger(), a);
         prefs.init(f);
     }
@@ -163,5 +166,9 @@ public final class Prefs {
 	
 	public static Boolean UseSudoFallback(){
 		return (Boolean)pref(PNames.USE_SUDO_FALLBACK);
+	}
+	
+	public static Boolean AllowShellCommands(){
+		return (Boolean)pref(PNames.ALLOW_SHELL_COMMANDS);
 	}
 }

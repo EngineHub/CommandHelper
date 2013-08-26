@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -72,18 +73,30 @@ public class CommandExecutor {
 		this(StringToArray(command));
 	}
 	
-	String [] args;
-	Process process;
-	InputStream in;
-	OutputStream out;
-	OutputStream err;
+	private String [] args;
+	private Process process;
+	private InputStream in;
+	private OutputStream out;
+	private OutputStream err;
+	private File workingDir = null;
+	private Thread outThread;
+	private Thread errThread;
+	private Thread inThread;
 	public CommandExecutor(String [] command){		
-		args = command;	
+		args = command;
 	}
 	
+	/**
+	 * Starts this CommandExecutor. Afterwards, you can call .waitFor to wait
+	 * until the process has finished.
+	 * @return
+	 * @throws IOException 
+	 */
 	public CommandExecutor start() throws IOException{
+		ProcessBuilder builder = new ProcessBuilder(args);
+		builder.directory(workingDir);
 		process = Runtime.getRuntime().exec(args);
-		new Thread(new Runnable() {
+		outThread = new Thread(new Runnable() {
 
 			public void run() {
 				InputStream bout = new BufferedInputStream(process.getInputStream());
@@ -109,8 +122,9 @@ public class CommandExecutor {
 					}
 				}
 			}
-		}, Arrays.toString(args) + "-output").start();
-		new Thread(new Runnable() {
+		}, Arrays.toString(args) + "-output");
+		outThread.start();
+		errThread = new Thread(new Runnable() {
 
 			public void run() {
 				InputStream berr = new BufferedInputStream(process.getErrorStream());
@@ -136,9 +150,10 @@ public class CommandExecutor {
 					}
 				}
 			}
-		}, Arrays.toString(args) + "-error").start();
+		}, Arrays.toString(args) + "-error");
+		errThread.start();
 		if(in != null){
-			new Thread(new Runnable() {
+			inThread = new Thread(new Runnable() {
 
 				public void run() {
 					OutputStream bin = new BufferedOutputStream(process.getOutputStream());
@@ -159,7 +174,8 @@ public class CommandExecutor {
 						}
 					}
 				}
-			}, Arrays.toString(args) + "-input").start();
+			}, Arrays.toString(args) + "-input");
+			inThread.start();
 		}
 		return this;
 	}
@@ -188,7 +204,15 @@ public class CommandExecutor {
 		return this;
 	}
 	
-	public int waitFor() throws InterruptedException{
+	public CommandExecutor setWorkingDir(File workingDir){
+		if(process != null){
+			throw new RuntimeException("Process is already started! Cannot set a new working directory!");
+		}
+		this.workingDir = workingDir;
+		return this;
+	}
+	
+	public int waitFor() throws InterruptedException {
 		int ret = process.waitFor();
 		if(out != null){
 			try {
@@ -204,6 +228,8 @@ public class CommandExecutor {
 				Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		outThread.join();
+		errThread.join();
 		return ret;
 	}
 	

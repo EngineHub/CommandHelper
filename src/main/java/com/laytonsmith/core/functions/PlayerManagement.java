@@ -25,7 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *p
+ *
  * @author Layton
  */
 public class PlayerManagement {

@@ -231,7 +231,12 @@ public class Exceptions {
 		 * function recurses too deeply.
 		 */
 		StackOverflowError("Thrown if a stack overflow error happens. This can occur if a"
-				+ " function recurses too deeply.", CHVersion.V3_3_1)
+				+ " function recurses too deeply.", CHVersion.V3_3_1),
+		
+		/**
+		 * Thrown if a shell exception occurs.
+		 */
+		ShellException("Thrown if a shell exception occurs.", CHVersion.V3_3_1)
 
 		;
 		

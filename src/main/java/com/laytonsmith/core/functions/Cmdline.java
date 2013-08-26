@@ -1,5 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ArgumentParser;
+import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
@@ -19,7 +22,11 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -690,6 +697,174 @@ public class Cmdline {
 		@Override
 		public String docs() {
 			return "void {} Clears the screen. This only works from cmdline mode, nothing happens otherwise.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+//	@api
+//	public static class shell_adv extends AbstractFunction {
+//
+//		@Override
+//		public ExceptionType[] thrown() {
+//			return new ExceptionType[]{ExceptionType.InsufficientPermissionException};
+//		}
+//
+//		@Override
+//		public boolean isRestricted() {
+//			return true;
+//		}
+//
+//		@Override
+//		public Boolean runAsync() {
+//			return null;
+//		}
+//
+//		@Override
+//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//			if(!inCmdLine(environment) && !Prefs.AllowShellCommands()){
+//				throw new ConfigRuntimeException("Shell commands are not allowed.", ExceptionType.InsufficientPermissionException, t);
+//			}
+//			
+//		}
+//
+//		@Override
+//		public String getName() {
+//			return "shell_adv";
+//		}
+//
+//		@Override
+//		public Integer[] numArgs() {
+//			return new Integer[]{1, 2};
+//		}
+//
+//		@Override
+//		public String docs() {
+//			return "void {command, [options]} Runs a shell command. <code>command</code> can either be a string or an array of string arguments,"
+//					+ " which are run as an external process. The options ";
+//		}
+//
+//		@Override
+//		public Version since() {
+//			return CHVersion.V3_3_1;
+//		}
+//		
+//	}
+	
+	@api
+	public static class shell extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.ShellException, ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(!inCmdLine(environment) && !Prefs.AllowShellCommands()){
+				throw new ConfigRuntimeException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
+			}
+			String[] command;
+			int expectedExitCode = 0;
+			File workingDir = null;
+			if(args.length > 1){
+				CArray options = Static.getArray(args[1], t);
+				if(options.containsKey("expectedExitCode")){
+					expectedExitCode = Static.getInt32(options.get("expectedExitCode"), t);
+				}
+				if(options.containsKey("workingDir")){
+					workingDir = new File(options.get("workingDir").val());
+					if(!workingDir.isAbsolute()){
+						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
+					}
+				}
+			}
+			if(args[0] instanceof CArray){
+				CArray array = (CArray) args[0];
+				command = new String[(int)array.size()];
+				for(int i = 0; i < array.size(); i++){
+					command[i] = array.get(i).val();
+				}
+			} else {
+				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
+			}
+			CommandExecutor cmd = new CommandExecutor(command);
+			final StringBuilder sout = new StringBuilder();
+			OutputStream out = new BufferedOutputStream(new OutputStream() {
+
+				@Override
+				public void write(int b) throws IOException {
+					sout.append((char)b);
+				}
+			});
+			final StringBuilder serr = new StringBuilder();
+			OutputStream err = new BufferedOutputStream(new OutputStream() {
+
+				@Override
+				public void write(int b) throws IOException {
+					serr.append((char)b);
+				}
+			});
+			cmd.setSystemOut(out).setSystemErr(err).setWorkingDir(workingDir);
+			try {
+				int exitCode = cmd.start().waitFor();
+				try{
+					if(exitCode != expectedExitCode){
+						err.flush();
+						throw new ConfigRuntimeException(serr.toString(), ExceptionType.ShellException, t);
+					} else {
+						out.flush();
+						return new CString(sout.toString(), t);
+					}
+				} finally {
+					out.close();
+					err.close();
+				}
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+			} catch(InterruptedException ex){
+				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "shell";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "string {command, [options]} Runs a shell command. <code>command</code> can be either a string, or array of string"
+					+ " arguments. This works mostly like {{function|shell_adv}} however, it buffers then"
+					+ " returns the output for sysout once the process is completed, and throws a ShellException with the exception"
+					+ " message set to the syserr output if the"
+					+ " process exits with an exit code that isn't the expectedExitCode, which defaults to 0. This is useful for simple commands"
+					+ " that return output and don't need very complicated usage, and failures don't need to check the exact error code."
+					+ " If the underlying command throws an IOException, it is"
+					+ " passed through. Requires the allow-shell-commands option to be enabled in preferences, or run from command line, otherwise"
+					+ " an InsufficientPermissionException is thrown. Options is an associative array which expects zero or more"
+					+ " of the following options: expectedErrorCode - The expected error code indicating successful command completion. Defaults to 0."
+					+ " workingDir - Sets the working directory for the sub process. By default null, which represents the directory of this script."
+					+ " If the path is relative, it is relative to the directory of this script.";
 		}
 
 		@Override
