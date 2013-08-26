@@ -253,4 +253,20 @@ assign(@b, @a[])
 
 Note that this is a ''deep copy'' operation, which means that the clone is recursive. So arrays within the array are also cloned. 
 
+== Trailing Commas ==
+
+Trailing commas are allowed in arrays (and actually all functions, however, this is most useful in arrays). For instance, you can do the following:
+
+%%CODE|
+array(
+	1,
+	2,
+	4,
+	3,
+)
+%%
+
+This is useful, because if you realize that you've misordered 3 and 4, you can cut and paste the entire line,
+and not have to worry about adding or removing a comma. Double commas are not allowed, however.
+
 {{LearningTrail}}

@@ -41,7 +41,8 @@ public final class Prefs {
         USE_COLORS("use-colors"),
         HALT_ON_FAILURE("halt-on-failure"),
 		USE_SUDO_FALLBACK("use-sudo-fallback"),
-		ALLOW_SHELL_COMMANDS("allow-shell-commands");
+		ALLOW_SHELL_COMMANDS("allow-shell-commands"),
+		SCREAM_ERRORS("scream-errors");
         String name;
         private PNames(String name){
             this.name = name;
@@ -77,6 +78,10 @@ public final class Prefs {
 		a.add(new Preference(PNames.USE_SUDO_FALLBACK.config(), "false", Preferences.Type.BOOLEAN, "If true, sudo() will use a less safe fallback method if it fails. See the documentation on the sudo function for more details. If this is true, a warning is issued at startup."));
 		a.add(new Preference(PNames.ALLOW_SHELL_COMMANDS.config(), "false", Preferences.Type.BOOLEAN, "If true, allows for the shell functions to be used from outside of cmdline mode. WARNING: Enabling these functions can be extremely dangerous if you accidentally allow uncontrolled access to them, and can"
 				+ " grant full control of your server if not careful. Leave this set to false unless you really know what you're doing."));
+		a.add(new Preference(PNames.SCREAM_ERRORS.config(), "false", Preferences.Type.BOOLEAN, "Setting this to true allows you to scream errors. Regardless of other settings"
+				+ " that you may have unintentionally configured, this will override all ways of suppressing fatal errors, including uncaught exception"
+				+ " handlers, error logging turned off, etc. This is meant as a last ditch effort to diagnosing an error. This implicitely turns debug mode"
+				+ " on as well, which will cause even more error logging to occur."));
         prefs = new Preferences("CommandHelper", Static.getLogger(), a);
         prefs.init(f);
     }
@@ -97,7 +102,7 @@ public final class Prefs {
 	}
     
     public static Boolean DebugMode(){
-        return (Boolean)pref(PNames.DEBUG_MODE);
+        return (Boolean)pref(PNames.DEBUG_MODE) || ScreamErrors();
     }
     
     public static Boolean ShowWarnings(){
@@ -170,5 +175,9 @@ public final class Prefs {
 	
 	public static Boolean AllowShellCommands(){
 		return (Boolean)pref(PNames.ALLOW_SHELL_COMMANDS);
+	}
+	
+	public static Boolean ScreamErrors(){
+		return (Boolean)pref(PNames.SCREAM_ERRORS);
 	}
 }

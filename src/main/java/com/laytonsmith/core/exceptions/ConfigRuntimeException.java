@@ -124,7 +124,7 @@ public class ConfigRuntimeException extends RuntimeException {
 			} catch(FunctionReturnException retException){
 				ret = retException.getReturn();
 			}
-			if(ret instanceof CNull){
+			if(ret instanceof CNull || Prefs.ScreamErrors()){
 				reaction = Reaction.REPORT;
 			} else {
 				if(Static.getBoolean(ret)){

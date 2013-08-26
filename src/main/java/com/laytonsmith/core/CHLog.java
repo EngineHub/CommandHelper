@@ -44,16 +44,16 @@ public final class CHLog {
         COMPILER("compiler", "Logs compiler errors (but not runtime errors)", LogLevel.ERROR),
         RUNTIME("runtime", "Logs runtime errors, (exceptions that bubble all the way to the top)", LogLevel.ERROR),
         DEPRECATION("deprecation", "Shows deprecation warnings", LogLevel.WARNING),
-        PERSISTANCE("persistance", "Logs when any persistance actions occur.", LogLevel.OFF),
+        PERSISTANCE("persistance", "Logs when any persistance actions occur.", LogLevel.ERROR),
         //TODO Add the rest of these hooks into the code
 //        IO("IO", "Logs when the filesystem is accessed.", Level.OFF),
 //        ALIAS("alias", "Logs use of user aliases.", Level.OFF),
 //        EVENTS("events", "Logs bindings and use of an event.", Level.OFF),
 //        PROCEDURES("procedures", "Logs when a procedure is created", Level.OFF),
-        INCLUDES("includes", "Logs what file is requested when include() is used", LogLevel.OFF),
+        INCLUDES("includes", "Logs what file is requested when include() is used", LogLevel.ERROR),
         GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", LogLevel.ERROR),
-        META("meta", "Functions in the meta class use this tag", LogLevel.OFF),
-		EXTENSIONS("extensions", "Extension related logs use this tag", LogLevel.OFF)
+        META("meta", "Functions in the meta class use this tag", LogLevel.ERROR),
+		EXTENSIONS("extensions", "Extension related logs use this tag", LogLevel.ERROR)
         ;
         
         
@@ -252,10 +252,10 @@ public final class CHLog {
      */
     public void Log(Tags modules, LogLevel level, String message, Target t, boolean printScreen){
         LogLevel moduleLevel = GetLevel(modules);
-        if(moduleLevel == LogLevel.OFF){
+        if(moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()){
             return; //Bail as quick as we can!
         }
-        if(moduleLevel.level >= level.level){
+        if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())){
             //We want to do the log
             try{
                 Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t!=Target.UNKNOWN?" "+t.toString():""), 
