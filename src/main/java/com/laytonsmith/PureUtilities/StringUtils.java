@@ -529,7 +529,7 @@ public final class StringUtils {
 
 		return distance[str1.length()][str2.length()];
 	}
-
+	
 	/**
 	 * Splits an argument string into arguments. It is expected that the string:
 	 *
@@ -543,71 +543,62 @@ public final class StringUtils {
 	 * @return
 	 */
 	public static List<String> ArgParser(String args) {
-		//First, we have to tokenize the strings. Since we can have quoted arguments, we can't simply split on spaces.
 		List<String> arguments = new ArrayList<String>();
 		StringBuilder buf = new StringBuilder();
-		boolean state_in_single_quote = false;
-		boolean state_in_double_quote = false;
+		char escape=0;
+		char quote=0;
 		for (int i = 0; i < args.length(); i++) {
-			Character c0 = args.charAt(i);
-			Character c1 = i + 1 < args.length() ? args.charAt(i + 1) : null;
-
-			if (c0 == '\\') {
-				if (c1 != null 
-						&& (c1 == '\'' && state_in_single_quote
-						|| c1 == '"' && state_in_double_quote
-						|| c1 == ' ' && !state_in_double_quote && !state_in_single_quote
-						|| c1 == '\\' && (state_in_double_quote || state_in_single_quote))) {
-					//We are escaping the next character. Add it to the buffer instead, and
-					//skip ahead two
-					buf.append(c1);
-					i++;
+			char ch = args.charAt(i);
+			if (quote != 0) {  // we're in a quote
+				if (escape != 0) {  // we're in an escape too
+					if (ch == quote) {  // escaping the same quote gives just that quote
+						buf.append(ch);
+					} else {  // escaping anything else gives the escape and char as written
+						buf.append(escape);
+						buf.append(quote);
+					}
+					// in either case, this terminates the escape.
+					escape = 0;
+					continue;
+				} else if (ch == quote) {  // Specifying the same quote again terminates the quote.
+					quote = 0;
 					continue;
 				}
-
-			}
-
-			if (c0 == ' ') {
-				if (!state_in_double_quote && !state_in_single_quote) {
-					//argument split
-					if (buf.length() != 0) {
-						arguments.add(buf.toString());
-						buf = new StringBuilder();
-					}
+			} else {
+				if (escape != 0) {
+					// all escapes outside quotes which are supported simply output the
+					// second character, as we aren't handling special ones like \t or \n
+					buf.append(ch);
+					escape=0;
 					continue;
-				}
-			}
-			if (c0 == '\'' && !state_in_double_quote) {
-				if (state_in_single_quote) {
-					state_in_single_quote = false;
-					arguments.add(buf.toString());
-					buf = new StringBuilder();
-				} else {
-					if (buf.length() != 0) {
-						arguments.add(buf.toString());
-						buf = new StringBuilder();
+				} else { // outside of quotes and escapes
+					switch (ch) {
+						case ' ':  // we can tokenize
+							if (buf.length() != 0) {
+								arguments.add(buf.toString());
+								buf = new StringBuilder();
+							}
+							continue;
+						case '"':  // we can start quotes
+						case '\'':
+							quote = ch;
+							continue;
 					}
-					state_in_single_quote = true;
 				}
-				continue;
 			}
-			if (c0 == '"' && !state_in_single_quote) {
-				if (state_in_double_quote) {
-					state_in_double_quote = false;
-					arguments.add(buf.toString());
-					buf = new StringBuilder();
-				} else {
-					if (buf.length() != 0) {
-						arguments.add(buf.toString());
-						buf = new StringBuilder();
-					}
-					state_in_double_quote = true;
-				}
-				continue;
+			// escape handling and default handling can fall through from either branch to here
+			switch (ch) {
+				case '\\':
+					escape = ch;
+					break;
+				default:
+					buf.append(ch);
 			}
-			buf.append(c0);
 		}
-		if (buf.length() != 0) {
+		if (escape != 0) {  // makes trailing escapes be appended (erroneous string, though, IMO)
+			buf.append(escape);
+		}
+		if (buf.length() != 0) {  // add the final string
 			arguments.add(buf.toString());
 		}
 		return arguments;
