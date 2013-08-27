@@ -553,10 +553,11 @@ public final class StringUtils {
 			Character c1 = i + 1 < args.length() ? args.charAt(i + 1) : null;
 
 			if (c0 == '\\') {
-				if (c1 == '\'' && state_in_single_quote
+				if (c1 != null 
+						&& (c1 == '\'' && state_in_single_quote
 						|| c1 == '"' && state_in_double_quote
 						|| c1 == ' ' && !state_in_double_quote && !state_in_single_quote
-						|| c1 == '\\' && (state_in_double_quote || state_in_single_quote)) {
+						|| c1 == '\\' && (state_in_double_quote || state_in_single_quote))) {
 					//We are escaping the next character. Add it to the buffer instead, and
 					//skip ahead two
 					buf.append(c1);
