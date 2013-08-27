@@ -1,12 +1,12 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
@@ -26,15 +26,12 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -335,11 +332,12 @@ public class Cmdline {
             return null;
         }
 
+		@SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             //TODO: Make this more robust by having a local cache of the environment which we modify, and get_env returns from.
             Map<String, String> newenv = new HashMap<String, String>(System.getenv());
             newenv.put(args[0].val(), args[1].val());
-            boolean ret = false;
+            boolean ret;
             try {
                 Class<?> processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
                 Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
@@ -371,14 +369,14 @@ public class Cmdline {
                 catch (Exception e2) {
                     ret = false;
                     if(Prefs.DebugMode()){
-                        e2.printStackTrace();
+                        CHLog.GetLogger().e(CHLog.Tags.GENERAL, e2, t);
                     }
                 }
             }
             catch (Exception e1) {
                 ret = false;
                 if(Prefs.DebugMode()){
-                    e1.printStackTrace();
+                    CHLog.GetLogger().e(CHLog.Tags.GENERAL, e1, t);
                 }
             }
             return new CBoolean(ret, t);
@@ -870,6 +868,15 @@ public class Cmdline {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public com.laytonsmith.core.functions.ExampleScript[] examples() throws com.laytonsmith.core.exceptions.ConfigCompileException {
+			return new com.laytonsmith.core.functions.ExampleScript[]{
+				new com.laytonsmith.core.functions.ExampleScript("Basic usage with array", "shell(array('grep', '-r', 'search content', '*'))", "<output of command>"),
+				new com.laytonsmith.core.functions.ExampleScript("Basic usage with string", "shell('grep -r \"search content\" *')", "<output of command>"),
+				new com.laytonsmith.core.functions.ExampleScript("Changing the working directory", "shell('grep -r \"search content\" *', array(workingDir: '/'))", "<output of command>"),
+			};
 		}
 		
 	}

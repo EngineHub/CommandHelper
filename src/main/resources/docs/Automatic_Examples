@@ -18,3 +18,48 @@ the handwritten documentation indicates the designed behavior, and it the actual
 implementation will be considered a bug, subject to change as soon as it is fixed. 
 In other words, don't rely on the behavior of a bugged example, but you can at 
 least use that as a way to be aware of possible issues.
+
+== Contributing Examples ==
+
+If you would like to help add examples to functions, great! Here's a quick primer
+that will show you the process. You only need to know a tiny bit of java to help.
+To begin with, find the function in the source. You can find it by starting 
+[%%GITHUB_URL%%/com/laytonsmith/core/functions here],
+finding the "class" that the function is in. Click the "Edit" button at the top.
+You can then looking for the function in the file. It will probably look something like 
+
+<pre>
+@api 
+public static class function_name extends AbstractFunction {
+	...
+}
+</pre>
+
+Inside of the class, look for the "examples" function. It may not be present, if
+not, that's ok, go to the bottom of the class, and add the framework:
+
+<pre>
+@Override
+public com.laytonsmith.core.functions.ExampleScript[] examples() throws com.laytonsmith.core.exceptions.ConfigCompileException {
+	return new com.laytonsmith.core.functions.ExampleScript[]{
+		new com.laytonsmith.core.functions.ExampleScript("This is a description of the real script", "the_script()"),
+		new com.laytonsmith.core.functions.ExampleScript("This is a description of the fake script", "fake_script()", "fake output"),
+	};
+}
+</pre>
+
+There are two versions of the examples. In some examples, it's ok to let the engine
+generate the output itself, but in others, since it's not actually running in game,
+it won't work, so we have to fake the output. Use the appropriate version for each.
+(Examples of both are shown above.) You can figure out which one to use by determining
+if the function interacts with the game. If so, you need to use the fake example. If
+the output of the function will always be the same, and doesn't depend on the server
+actually running, you can use the automatic examples.
+
+{{TakeNote|text=Be sure that if you fake the output, you actually run the exact script
+first, so that you know exactly what will happen. Don't assume anything!}}
+
+For real scripts, just make sure that the script compiles and runs. They system will
+take care of making sure that the output is correct. Once you have completed your
+examples, (add as many as is necessary) then save the file, and submit a Pull Request (PR).
+Your example will be reviewed, then added to the code base, and finally the wiki!

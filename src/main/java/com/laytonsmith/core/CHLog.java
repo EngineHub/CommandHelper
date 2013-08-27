@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
+import com.laytonsmith.PureUtilities.StackTraceUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.constructs.Target;
 import java.io.File;
@@ -21,7 +22,7 @@ public final class CHLog {
     
     private CHLog(){}
     
-    private static String header = "The logger preferences allow you to granularly define what information\n"
+    private static final String header = "The logger preferences allow you to granularly define what information\n"
             + "is written out to file, to assist you in debugging or general logging.\n"
             + "You may set the granularity of all the tags individually, to any one of\n"
             + "the following values:\n"
@@ -39,7 +40,7 @@ public final class CHLog {
             + "";
     
     private static Preferences prefs;
-    private static EnumMap<Tags, LogLevel> lookup = new EnumMap<Tags, LogLevel>(Tags.class);
+    private static final EnumMap<Tags, LogLevel> lookup = new EnumMap<Tags, LogLevel>(Tags.class);
     public enum Tags{
         COMPILER("compiler", "Logs compiler errors (but not runtime errors)", LogLevel.ERROR),
         RUNTIME("runtime", "Logs runtime errors, (exceptions that bubble all the way to the top)", LogLevel.ERROR),
@@ -88,11 +89,11 @@ public final class CHLog {
 	 */
     public static void initialize(File root){
 		CHLog.root = root;
-        List<Preference> prefs = new ArrayList<Preference>();
+        List<Preference> myPrefs = new ArrayList<Preference>();
         for(Tags t : Tags.values()){
-            prefs.add(new Preference(t.name, t.level.name(), Preferences.Type.STRING, t.description));
+            myPrefs.add(new Preference(t.name, t.level.name(), Preferences.Type.STRING, t.description));
         }
-        CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), prefs, header);
+        CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, header);
         try{
             File file = new File(new File(root, Prefs.DebugLogFile()).getParentFile(), "loggerPreferences.txt");
             CHLog.prefs.init(file);
@@ -144,6 +145,8 @@ public final class CHLog {
      * For instance, given the following: LogOne(Tags.tag, new MsgBundle(Level.ERROR, "An error occured"),
      * new MsgBundle(Level.VERBOSE, "An error occured, and here is why")), if the level was set to ERROR, only "An error occured"
      * would show. If the level was set to VERBOSE, only "An error occured, and here is why" would show.
+	 * @param tag
+	 * @param t
      * @param messages 
      */
     public void LogOne(Tags tag, Target t, MsgBundle ... messages){
@@ -167,6 +170,7 @@ public final class CHLog {
      * Logs all the applicable levels. This is useful if a message is always displayed, but progressively
      * more information is displayed the more verbose it gets.
      * @param tag
+	 * @param t
      * @param messages 
      */
     public void LogAll(Tags tag, Target t, MsgBundle ... messages){
@@ -182,10 +186,21 @@ public final class CHLog {
      * Logs the given message at the level of ERROR/ON.
      * @param module
      * @param message 
+	 * @param t 
      */
     public void Log(Tags module, String message, Target t){
         Log(module, LogLevel.ERROR, message, t);
     }
+	
+	/**
+	 * Logs the given exception at the ERROR level.
+	 * @param modules
+	 * @param throwable
+	 * @param t 
+	 */
+	public void e(Tags modules, Throwable throwable, Target t){
+		Log(modules, LogLevel.ERROR, StackTraceUtils.GetStacktrace(throwable), t);
+	}
 	
 	/**
 	 * Logs the given message at the ERROR level.
@@ -239,6 +254,10 @@ public final class CHLog {
     
 	/**
 	 * Equivalent to Log(modules, level, message, t, true);
+	 * @param modules
+	 * @param level
+	 * @param message
+	 * @param t
 	 */
     public void Log(Tags modules, LogLevel level, String message, Target t){
 		Log(modules, level, message, t, true);
@@ -249,6 +268,8 @@ public final class CHLog {
      * @param modules
      * @param level
      * @param message 
+	 * @param t 
+	 * @param printScreen 
      */
     public void Log(Tags modules, LogLevel level, String message, Target t, boolean printScreen){
         LogLevel moduleLevel = GetLevel(modules);
@@ -265,7 +286,7 @@ public final class CHLog {
                 if(level.level <= 1){
                     System.err.println("Was going to print information to the log, but instead, there was"
                             + " an IOException: ");
-                    e.printStackTrace();
+                    e.printStackTrace(System.err);
                 }
             }
         }

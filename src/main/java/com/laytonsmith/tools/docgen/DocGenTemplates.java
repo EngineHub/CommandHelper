@@ -276,6 +276,17 @@ public class DocGenTemplates {
 	};
 	
 	/**
+	 * Returns the base github url for sources.
+	 */
+	public static Generator GITHUB_URL = new Generator() {
+
+		@Override
+		public String generate(String... args) {
+			return githubBaseURL;
+		}
+	};
+	
+	/**
 	 * Returns the (github linked) simple class name, given the package
 	 * regex and complete class name. For instance: %%GET_CLASS|.*|DocGenTemplates%% would
 	 * (likely) return [http://url.to.github.com/path/to/file/ DocGenTemplates]
