@@ -902,18 +902,21 @@ public class Cmdline {
 		@Override
 		public String docs() {
 			return "void {command, [options]} Runs a shell command. <code>command</code> can either be a string or an array of string arguments,"
-					+ " which are run as an external process. ---- The options can be as follows:"
-					+ " {|\n"
-					+ " |-\n| workingDir || Sets the working directory for"
+					+ " which are run as an external process. Requires the allow-shell-commands option to be enabled in preferences, or run from command line, otherwise"
+					+ " an InsufficientPermissionException is thrown. ---- <code>options</code> is an associative array with zero or more"
+					+ " of the following options:"
+					+ "{| border=\"1\" class=\"wikitable\" cellspacing=\"1\" cellpadding=\"1\"\n"
+					+ "|-\n| workingDir || Sets the working directory for"
 					+ " the sub process. By default null, which represents the directory of this script."
 					+ " If the path is relative, it is relative to the directory of this script.\n"
-					+ " |-\n| stdout || A closure which receives the program"
+					+ "|-\n| stdout || A closure which receives the program"
 					+ " output to stdout line by line. The closure should accept a single string, which will be a line.\n"
-					+ " |-\n| stderr || A closure which receives the program output to stderr line by line. The closure should accept a single string,"
+					+ "|-\n| stderr || A closure which receives the program output to stderr line by line. The closure should accept a single string,"
 					+ " which should be a line.\n"
-					+ " |-\n| exit || A closure which is triggered one time, and contains the process's exit code, once it terminates.\n"
-					+ " |-\n| subshell || A boolean. If true, the process will not block, and script execution will continue. If false (default)"
-					+ " script execution will halt until the process exits.";
+					+ "|-\n| exit || A closure which is triggered one time, and contains the process's exit code, once it terminates.\n"
+					+ "|-\n| subshell || A boolean. If true, the process will not block, and script execution will continue. If false (default)"
+					+ " script execution will halt until the process exits.\n"
+					+ "|}";
 		}
 
 		@Override

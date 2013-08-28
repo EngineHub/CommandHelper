@@ -95,7 +95,7 @@ public class CommandExecutor {
 	public CommandExecutor start() throws IOException{
 		ProcessBuilder builder = new ProcessBuilder(args);
 		builder.directory(workingDir);
-		process = Runtime.getRuntime().exec(args);
+		process = builder.start();
 		outThread = new Thread(new Runnable() {
 
 			public void run() {
