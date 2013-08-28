@@ -105,7 +105,7 @@ public class CClosure extends Construct {
      *
      * @param values
      */
-    public void execute(Construct[] values) throws ConfigRuntimeException, ProgramFlowManipulationException {
+    public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException {
 		if(node == null){
 			return;
 		}

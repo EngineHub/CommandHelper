@@ -1,9 +1,11 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.MutableObject;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHLog;
@@ -13,6 +15,9 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -32,6 +37,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -704,56 +712,219 @@ public class Cmdline {
 		
 	}
 	
-//	@api
-//	public static class shell_adv extends AbstractFunction {
-//
-//		@Override
-//		public ExceptionType[] thrown() {
-//			return new ExceptionType[]{ExceptionType.InsufficientPermissionException};
-//		}
-//
-//		@Override
-//		public boolean isRestricted() {
-//			return true;
-//		}
-//
-//		@Override
-//		public Boolean runAsync() {
-//			return null;
-//		}
-//
-//		@Override
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			if(!inCmdLine(environment) && !Prefs.AllowShellCommands()){
-//				throw new ConfigRuntimeException("Shell commands are not allowed.", ExceptionType.InsufficientPermissionException, t);
-//			}
-//			
-//		}
-//
-//		@Override
-//		public String getName() {
-//			return "shell_adv";
-//		}
-//
-//		@Override
-//		public Integer[] numArgs() {
-//			return new Integer[]{1, 2};
-//		}
-//
-//		@Override
-//		public String docs() {
-//			return "void {command, [options]} Runs a shell command. <code>command</code> can either be a string or an array of string arguments,"
-//					+ " which are run as an external process. The options ";
-//		}
-//
-//		@Override
-//		public Version since() {
-//			return CHVersion.V3_3_1;
-//		}
-//		
-//	}
+	@api
+	@noboilerplate
+	public static class shell_adv extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(!inCmdLine(environment) && !Prefs.AllowShellCommands()){
+				throw new ConfigRuntimeException("Shell commands are not allowed.", ExceptionType.InsufficientPermissionException, t);
+			}
+			String[] command;
+			File workingDir = null;
+			CClosure stdout = null;
+			CClosure stderr = null;
+			CClosure exit = null;
+			boolean subshell = false;
+			if(args[0] instanceof CArray){
+				CArray array = (CArray) args[0];
+				command = new String[(int)array.size()];
+				for(int i = 0; i < array.size(); i++){
+					command[i] = array.get(i).val();
+				}
+			} else {
+				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
+			}
+			if(args.length > 1){
+				CArray options = Static.getArray(args[1], t);
+				if(options.containsKey("workingDir") && !(options.get("workingDir") instanceof CNull)){
+					workingDir = new File(options.get("workingDir").val());
+					if(!workingDir.isAbsolute()){
+						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
+					}
+				}
+				if(options.containsKey("stdout") && !(options.get("stdout") instanceof CNull)){
+					stdout = Static.getObject(options.get("stdout"), t, "closure", CClosure.class);
+				}
+				if(options.containsKey("stderr") && !(options.get("stderr") instanceof CNull)){
+					stderr = Static.getObject(options.get("stderr"), t, "closure", CClosure.class);
+				}
+				if(options.containsKey("exit") && !(options.get("exit") instanceof CNull)){
+					exit = Static.getObject(options.get("exit"), t, "closure", CClosure.class);
+				}
+				if(options.containsKey("subshell")){
+					subshell = Static.getBoolean(options.get("subshell"));
+				}
+			}
+			final CommandExecutor cmd = new CommandExecutor(command);
+			cmd.setWorkingDir(workingDir);
+			final CClosure _stdout = stdout;
+			final CClosure _stderr = stderr;
+			final CClosure _exit = exit;
+			final MutableObject<StringBuilder> sbout = new MutableObject(new StringBuilder());
+			final MutableObject<StringBuilder> sberr = new MutableObject(new StringBuilder());
+			cmd.setSystemOut(new BufferedOutputStream(new OutputStream() {
+				@Override
+				public void write(int b) throws IOException {
+					if(_stdout == null){
+						return;
+					}
+					char c = (char)b;
+					if(c == '\n' || b == -1){
+						try {
+							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+								
+								@Override
+								public Object call() throws Exception {
+									_stdout.execute(new CString(sbout.getObject(), t));
+									return null;
+								}
+							});
+						} catch (Exception ex) {
+							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+						}
+						sbout.setObject(new StringBuilder());
+					} else {
+						sbout.getObject().append(c);
+					}
+				}
+			}));
+			cmd.setSystemErr(new BufferedOutputStream(new OutputStream() {
+				@Override
+				public void write(int b) throws IOException {
+					if(_stderr == null){
+						return;
+					}
+					char c = (char)b;
+					if(c == '\n' || b == -1){
+						try {
+							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+								
+								@Override
+								public Object call() throws Exception {
+									_stderr.execute(new CString(sberr.getObject(), t));
+									return null;
+								}
+							});
+						} catch (Exception ex) {
+							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+						}
+						sberr.setObject(new StringBuilder());
+					} else {
+						sberr.getObject().append(c);
+					}
+				}
+			}));
+			try {
+				cmd.start();
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+			}
+			
+			Runnable run = new Runnable() {
+
+				@Override
+				public void run() {
+					environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+					try {
+						final int exitCode = cmd.waitFor();
+						try {
+							cmd.getSystemOut().flush();
+							if(cmd.getSystemOut() != System.out){
+								cmd.getSystemOut().close();
+							}
+						} catch (IOException ex) {
+							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+						}
+						try {
+							cmd.getSystemErr().flush();
+							if(cmd.getSystemErr() != System.err){
+								cmd.getSystemErr().close();
+							}
+						} catch (IOException ex) {
+							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+						}
+						if(_exit != null){
+							try {
+								StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+
+									@Override
+									public Object call() throws Exception {
+										_exit.execute(new CInt(exitCode, t));
+										return null;
+									}
+								});
+							} catch (Exception ex) {
+								Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
+					} catch (InterruptedException ex) {
+						throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
+					} finally {
+						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+					}
+				}
+			};
+			if(subshell){
+				new Thread(run, "shell-adv-subshell (" + StringUtils.Join(command, " ") + ")").start();
+			} else {
+				run.run();
+			}
+			return new CVoid(t);
+		}
+
+		@Override
+		public String getName() {
+			return "shell_adv";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {command, [options]} Runs a shell command. <code>command</code> can either be a string or an array of string arguments,"
+					+ " which are run as an external process. ---- The options can be as follows:"
+					+ " {|\n"
+					+ " |-\n| workingDir || Sets the working directory for"
+					+ " the sub process. By default null, which represents the directory of this script."
+					+ " If the path is relative, it is relative to the directory of this script.\n"
+					+ " |-\n| stdout || A closure which receives the program"
+					+ " output to stdout line by line. The closure should accept a single string, which will be a line.\n"
+					+ " |-\n| stderr || A closure which receives the program output to stderr line by line. The closure should accept a single string,"
+					+ " which should be a line.\n"
+					+ " |-\n| exit || A closure which is triggered one time, and contains the process's exit code, once it terminates.\n"
+					+ " |-\n| subshell || A boolean. If true, the process will not block, and script execution will continue. If false (default)"
+					+ " script execution will halt until the process exits.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 	
 	@api
+	@noboilerplate
 	public static class shell extends AbstractFunction {
 
 		@Override
@@ -779,18 +950,6 @@ public class Cmdline {
 			String[] command;
 			int expectedExitCode = 0;
 			File workingDir = null;
-			if(args.length > 1){
-				CArray options = Static.getArray(args[1], t);
-				if(options.containsKey("expectedExitCode")){
-					expectedExitCode = Static.getInt32(options.get("expectedExitCode"), t);
-				}
-				if(options.containsKey("workingDir")){
-					workingDir = new File(options.get("workingDir").val());
-					if(!workingDir.isAbsolute()){
-						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
-					}
-				}
-			}
 			if(args[0] instanceof CArray){
 				CArray array = (CArray) args[0];
 				command = new String[(int)array.size()];
@@ -799,6 +958,18 @@ public class Cmdline {
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
+			}
+			if(args.length > 1){
+				CArray options = Static.getArray(args[1], t);
+				if(options.containsKey("expectedExitCode")){
+					expectedExitCode = Static.getInt32(options.get("expectedExitCode"), t);
+				}
+				if(options.containsKey("workingDir") && !(options.get("workingDir") instanceof CNull)){
+					workingDir = new File(options.get("workingDir").val());
+					if(!workingDir.isAbsolute()){
+						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
+					}
+				}
 			}
 			CommandExecutor cmd = new CommandExecutor(command);
 			final StringBuilder sout = new StringBuilder();

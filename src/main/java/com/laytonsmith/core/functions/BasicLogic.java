@@ -121,7 +121,11 @@ public class BasicLogic {
 			}
 			//Now check for too many/too few arguments
 			if (args.size() == 1) {
-				throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
+				//Can't error for this, because if(..){ } is valid, and at this point, there is no
+				//difference between if(..) and if(..){ }. For now, a warning, but once { } is its
+				//own data structure, this can be revisited.
+				//throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
+				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Empty if statement. This could likely be an error.", t);
 			}
 			if(!allowOverloading && args.size() > 3){
 				throw new ConfigCompileException("if() can only have 3 parameters", t);

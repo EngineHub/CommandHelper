@@ -6,8 +6,8 @@ package com.laytonsmith.PureUtilities;
  * classes. The common Object methods are forwarded to the underlying object,
  * unless it is null, in which case various defaults are returned.
  */
-public final class MutableObject {
-	private Object obj = null;
+public final class MutableObject<T> {
+	private T obj = null;
 	
 	/**
 	 * Constructs a new MutableObject, which is null.
@@ -20,7 +20,7 @@ public final class MutableObject {
 	 * Constructs a new MutableObject, wrapping the specified object.
 	 * @param obj 
 	 */
-	public MutableObject(Object obj){
+	public MutableObject(T obj){
 		setObject(obj);
 	}
 	
@@ -28,7 +28,7 @@ public final class MutableObject {
 	 * Sets the underlying object.
 	 * @param obj 
 	 */
-	public void setObject(Object obj){
+	public void setObject(T obj){
 		this.obj = obj;
 	}
 	
@@ -36,7 +36,7 @@ public final class MutableObject {
 	 * Gets the underlying object.
 	 * @return 
 	 */
-	public Object getObject(){
+	public T getObject(){
 		return obj;
 	}
 

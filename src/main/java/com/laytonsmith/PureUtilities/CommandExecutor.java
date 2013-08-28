@@ -204,6 +204,18 @@ public class CommandExecutor {
 		return this;
 	}
 	
+	public InputStream getSystemIn(){
+		return in;
+	}
+	
+	public OutputStream getSystemOut(){
+		return out;
+	}
+	
+	public OutputStream getSystemErr(){
+		return err;
+	}
+	
 	public CommandExecutor setWorkingDir(File workingDir){
 		if(process != null){
 			throw new RuntimeException("Process is already started! Cannot set a new working directory!");

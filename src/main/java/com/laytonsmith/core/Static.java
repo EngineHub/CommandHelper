@@ -62,6 +62,15 @@ public final class Static {
 		}
 	}
 	
+	/**
+	 * Works like the other get* methods, but works in a more generic way for other types of Constructs.
+	 * @param <T> The type expected.
+	 * @param construct The generic object
+	 * @param t Code target
+	 * @param expectedClassName The expected class type, for use in the error message if the construct is the wrong type.
+	 * @param clazz The type expected.
+	 * @return The properly cast object.
+	 */
 	public static <T extends Construct> T getObject(Construct construct, Target t, String expectedClassName, Class<T> clazz){
 		if(clazz.isAssignableFrom(construct.getClass())){
 			return (T)construct;
