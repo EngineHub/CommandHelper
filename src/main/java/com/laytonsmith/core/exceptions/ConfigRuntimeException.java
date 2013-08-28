@@ -342,8 +342,8 @@ public class ConfigRuntimeException extends RuntimeException {
     private Environment env;
     private Target target;
     /**
-     * Creates a new ConfigRuntimeException. If ex is not null, this exception can be caught
-     * by user level code. Otherwise, it will be ignored by the try() function.
+     * Creates a new ConfigRuntimeException. If the exception is intended to be uncatchable,
+	 * use {@link #CreateUncatchableException} instead.
      * @param msg The message to be displayed
      * @param ex The type of exception this is, as seen by user level code
      * @param line_num The line this exception is being thrown from
@@ -356,7 +356,7 @@ public class ConfigRuntimeException extends RuntimeException {
     public ConfigRuntimeException(String msg, ExceptionType ex, Target t, Throwable cause){
         super(msg, cause);
 		if(ex == null){
-			throw new NullPointerException();
+			throw new NullPointerException("Use CreateUncatchableException instead.");
 		}
         createException(ex, t);
     }

@@ -127,9 +127,8 @@ public class Script {
                     //Oh well, we tried to get more information
                 }
             }
-            throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command."
-                    + " To see the compile error, run /reloadaliases",
-                    null, target);
+            throw ConfigRuntimeException.CreateUncatchableException("Unable to run command, script not yet compiled, or a compiler error occured for that command."
+                    + " To see the compile error, run /reloadaliases", target);
         }
         if (p instanceof MCPlayer) {
             if (CurrentEnv.getEnv(GlobalEnv.class).GetLabel() != null) {
