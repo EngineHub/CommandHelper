@@ -681,7 +681,8 @@ public class Minecraft {
 					+ "</li><li>6 - World container; The path to the world container.</li><li>7 - "
 					+ "Max player limit; returns the player limit.</li><li>8 - Operators; An array of operators on the server.</li>"
 					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li>"
-					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li></ul>";
+					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li>"
+					+ "<li>11 - Server port; Get the game port that the server runs on</li></ul>";
 		}
 
 		public ExceptionType[] thrown() {
@@ -709,12 +710,12 @@ public class Minecraft {
 				index = Static.getInt32(args[0], t);
 			}
 
-			if (index < -1 || index > 10) {
-				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 10 (inclusive)",
+			if (index < -1 || index > 11) {
+				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 11 (inclusive)",
 						ExceptionType.RangeException, t);
 			}
 
-			assert index >= -1 && index <= 10; // Is this needed? Above statement should cause this to never be true. - entityreborn
+			assert index >= -1 && index <= 11; // Is this needed? Above statement should cause this to never be true. - entityreborn
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 
 			if (index == 0 || index == -1) {
@@ -782,6 +783,10 @@ public class Minecraft {
 			if (index == 10 || index == -1) {
 				//Online Mode
 				retVals.add(new CBoolean(server.getOnlineMode(), t));
+			}
+			if (index == 11 || index == -1) {
+				//Server port
+				retVals.add(new CInt(server.getPort(), t));
 			}
 
 			if (retVals.size() == 1) {

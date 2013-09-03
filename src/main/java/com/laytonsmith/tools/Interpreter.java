@@ -19,9 +19,11 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPluginMeta;
+import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -491,6 +493,15 @@ public class Interpreter {
 		public List<MCEntity> GetEntitiesAt(MCLocation loc, double radius) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
-		
+
+		@Override
+		public MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCRecipe GetRecipe(MCRecipe unspecific) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
 	}
 }

@@ -597,10 +597,10 @@ public final class Static {
             return "0";
         }
         String append = null;
-        if (is.getData() != null) {
-            append = Integer.toString(is.getData().getData());
-        } else if (is.getDurability() != 0) {
+        if (is.getDurability() != 0) {
             append = Short.toString(is.getDurability());
+        } else if (is.getData() != null) {
+            append = Integer.toString(is.getData().getData());
         }
         return is.getTypeId() + (append == null ? "" : ":" + append);
     }

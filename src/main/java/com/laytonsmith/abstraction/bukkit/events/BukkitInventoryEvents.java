@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.abstraction.MCCraftingInventory;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
@@ -8,6 +9,9 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantment;
+import com.laytonsmith.abstraction.MCRecipe;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCCraftingInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
@@ -29,6 +33,7 @@ import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryEvent;
 import com.laytonsmith.abstraction.events.MCInventoryInteractEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
+import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +51,8 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -346,6 +353,58 @@ public class BukkitInventoryEvents {
 		
 		public int whichButton() {
 			return ei.whichButton();
+		}
+	}
+	
+	public static class BukkitMCItemHeldEvent implements MCItemHeldEvent {
+
+		PlayerItemHeldEvent ih;
+		public BukkitMCItemHeldEvent(PlayerItemHeldEvent event) {
+			ih = event;
+		}
+		
+		@Override
+		public MCPlayer getPlayer() {
+			return new com.laytonsmith.abstraction.bukkit.BukkitMCPlayer(ih.getPlayer());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return ih;
+		}
+
+		@Override
+		public int getNewSlot() {
+			return ih.getNewSlot();
+		}
+
+		@Override
+		public int getPreviousSlot() {
+			return ih.getPreviousSlot();
+		}
+	}
+	
+	public static class BukkitMCPrepareItemCraftEvent extends BukkitMCInventoryEvent implements MCPrepareItemCraftEvent {
+
+		PrepareItemCraftEvent e;
+		public BukkitMCPrepareItemCraftEvent(PrepareItemCraftEvent event) {
+			super(event);
+			e = event;
+		}
+
+		@Override
+		public MCRecipe getRecipe() {
+			return BukkitConvertor.BukkitGetRecipe(e.getRecipe());
+		}
+
+		@Override
+		public boolean isRepair() {
+			return e.isRepair();
+		}
+		
+		@Override
+		public MCCraftingInventory getInventory() {
+			return new BukkitMCCraftingInventory(e.getInventory());
 		}
 	}
 }

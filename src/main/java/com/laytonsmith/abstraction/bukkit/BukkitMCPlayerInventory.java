@@ -76,4 +76,8 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 	public int getHeldItemSlot() {
 		return i.getHeldItemSlot();
 	}
+	
+	public void setHeldItemSlot(int slot) {
+		i.setHeldItemSlot(slot);
+	}
 }

@@ -151,6 +151,10 @@ public class BukkitMCServer implements MCServer {
         return s.getVersion();
     }
 
+    public int getPort() {
+        return s.getPort();
+    }
+
     public Boolean getAllowEnd() {
         return s.getAllowEnd();
     }
