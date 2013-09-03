@@ -733,8 +733,13 @@ public class Cmdline {
 
 		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!inCmdLine(environment) && !Prefs.AllowShellCommands()){
-				throw new ConfigRuntimeException("Shell commands are not allowed.", ExceptionType.InsufficientPermissionException, t);
+			if(!inCmdLine(environment)){
+				if(!Prefs.AllowShellCommands()){
+					throw new ConfigRuntimeException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
+				}
+				if(environment.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()){
+					throw new ConfigRuntimeException("Shell commands are disabled from dynamic sources.", ExceptionType.InsufficientPermissionException, t);
+				}
 			}
 			String[] command;
 			File workingDir = null;
@@ -947,8 +952,13 @@ public class Cmdline {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!inCmdLine(environment) && !Prefs.AllowShellCommands()){
-				throw new ConfigRuntimeException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
+			if(!inCmdLine(environment)){
+				if(!Prefs.AllowShellCommands()){
+					throw new ConfigRuntimeException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
+				}
+				if(environment.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()){
+					throw new ConfigRuntimeException("Shell commands are disabled from dynamic sources.", ExceptionType.InsufficientPermissionException, t);
+				}
 			}
 			String[] command;
 			int expectedExitCode = 0;

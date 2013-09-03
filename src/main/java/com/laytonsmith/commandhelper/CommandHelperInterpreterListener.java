@@ -126,6 +126,7 @@ public class CommandHelperInterpreterListener implements Listener {
 		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler,
 				plugin.persistanceNetwork, plugin.permissionsResolver,
 				CommandHelperFileLocations.getDefault().getConfigDirectory());
+		gEnv.SetDynamicScriptingMode(true);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
         cEnv.SetPlayer(p);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);

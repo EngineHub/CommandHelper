@@ -42,6 +42,7 @@ public final class Prefs {
         HALT_ON_FAILURE("halt-on-failure"),
 		USE_SUDO_FALLBACK("use-sudo-fallback"),
 		ALLOW_SHELL_COMMANDS("allow-shell-commands"),
+		ALLOW_DYNAMIC_SHELL("allow-dynamic-shell"),
 		SCREAM_ERRORS("scream-errors");
         String name;
         private PNames(String name){
@@ -78,6 +79,9 @@ public final class Prefs {
 		a.add(new Preference(PNames.USE_SUDO_FALLBACK.config(), "false", Preferences.Type.BOOLEAN, "If true, sudo() will use a less safe fallback method if it fails. See the documentation on the sudo function for more details. If this is true, a warning is issued at startup."));
 		a.add(new Preference(PNames.ALLOW_SHELL_COMMANDS.config(), "false", Preferences.Type.BOOLEAN, "If true, allows for the shell functions to be used from outside of cmdline mode. WARNING: Enabling these functions can be extremely dangerous if you accidentally allow uncontrolled access to them, and can"
 				+ " grant full control of your server if not careful. Leave this set to false unless you really know what you're doing."));
+		a.add(new Preference(PNames.ALLOW_DYNAMIC_SHELL.config(), "false", Preferences.Type.BOOLEAN, "If true, allows use of the shell() functions from dynamic code sources, i.e"
+				+ " interpreter or eval(). This almost certainly should always remain false, and if enabled, enabled only temporarily. If this is true, if an account with"
+				+ " interpreter mode is compromised, the attacker could gain access to your entire server, under the user running minecraft, not just the game server."));
 		a.add(new Preference(PNames.SCREAM_ERRORS.config(), "false", Preferences.Type.BOOLEAN, "Setting this to true allows you to scream errors. Regardless of other settings"
 				+ " that you may have unintentionally configured, this will override all ways of suppressing fatal errors, including uncaught exception"
 				+ " handlers, error logging turned off, etc. This is meant as a last ditch effort to diagnosing an error. This implicitely turns debug mode"
@@ -175,6 +179,10 @@ public final class Prefs {
 	
 	public static Boolean AllowShellCommands(){
 		return (Boolean)pref(PNames.ALLOW_SHELL_COMMANDS);
+	}
+	
+	public static Boolean AllowDynamicShell(){
+		return (Boolean)pref(PNames.ALLOW_DYNAMIC_SHELL);
 	}
 	
 	public static Boolean ScreamErrors(){

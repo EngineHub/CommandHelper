@@ -38,6 +38,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private IVariableList iVariableList = null;
 	private String label = null;
 	private DaemonManager daemonManager = new DaemonManager();
+	private boolean dynamicScriptingMode = false;
 
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistanceNetwork network, PermissionsResolver resolver, File root) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
@@ -216,5 +217,25 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	
 	public DaemonManager GetDaemonManager(){
 		return daemonManager;
+	}
+	
+	/**
+	 * Turns dynamic scripting mode on or off. If this is true, that means
+	 * that the script came from a dynamic source, such as eval, or other sources
+	 * other than the file system.
+	 * @param dynamicScriptingMode 
+	 */
+	public void SetDynamicScriptingMode(boolean dynamicScriptingMode){
+		this.dynamicScriptingMode = dynamicScriptingMode;
+	}
+	
+	/**
+	 * Returns whether or not dynamic script mode is on or off. If this is true, that means
+	 * that the script came from a dynamic source, such as eval, or other sources
+	 * other than the file system.
+	 * @return 
+	 */
+	public boolean GetDynamicScriptingMode(){
+		return this.dynamicScriptingMode;
 	}
 }

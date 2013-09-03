@@ -401,8 +401,10 @@ public class Meta {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			boolean oldDynamicScriptMode = env.getEnv(GlobalEnv.class).GetDynamicScriptingMode();
 			ParseTree node = nodes[0];
 			try {
+				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
 				Construct script = parent.seval(node, env);
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
 				StringBuilder b = new StringBuilder();
@@ -420,6 +422,8 @@ public class Meta {
 				return new CString(b.toString(), t);
 			} catch (ConfigCompileException e) {
 				throw new ConfigRuntimeException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
+			} finally {
+				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(oldDynamicScriptMode);
 			}
 		}
 

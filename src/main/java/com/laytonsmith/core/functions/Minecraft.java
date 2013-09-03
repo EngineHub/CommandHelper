@@ -1335,4 +1335,77 @@ public class Minecraft {
 			return CHVersion.V3_3_1;
 		}
 	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+    public static class drop_item extends AbstractFunction {
+
+        public String getName() {
+            return "drop_item";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3};
+        }
+
+        public String docs() {
+            return "int {[player/LocationArray], item} Drops the specified item at the specified quantity at the specified player's feet (or "
+                    + " at an arbitrary Location, if an array is given),"
+                    + " like the vanilla /give command. player defaults to the current player, and qty defaults to 1. item follows the"
+                    + " same type[:data] format used elsewhere. Returns the entity id of the item stack dropped.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+
+            MCLocation l = null;
+            int qty = 1;
+            MCItemStack is = null;
+			MCItem item = null;
+            boolean natural = false;
+            if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
+            }
+			if(args.length == 1){
+				is = ObjectGenerator.GetGenerator().item(args[0], t);
+				natural = true;
+			} else if(args.length == 2){
+				if(args[0] instanceof CString){
+					l = Static.GetPlayer(args[0], t).getEyeLocation();
+					natural = false;
+				} else {
+					l = ObjectGenerator.GetGenerator().location(args[0], l==null?null:l.getWorld(), t);
+					natural = true;
+				}
+				is = ObjectGenerator.GetGenerator().item(args[1], t);
+			}
+            if (l.getWorld() != null) {
+                if (natural) {
+                    item = l.getWorld().dropItemNaturally(l, is);
+                } else {
+                    item = l.getWorld().dropItem(l, is);
+                }
+            } else {
+                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
+            }
+
+			if(item != null){
+				return new CInt(item.getEntityId(), t);
+			}
+            return new CNull(t);
+        }
+    }
 }
