@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.List;
@@ -169,4 +170,20 @@ public interface Convertor {
 	
 	public MCPluginMeta GetPluginMeta();
 	
+	/**
+	 * Creates a new properly typed recipe instance
+	 * 
+	 * @param type the type of recipe
+	 * @param result the itemstack the recipe will result in
+	 * @return
+	 */
+	public MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result);
+	
+	/**
+	 * Used to convert a generic recipe into the correct type
+	 * 
+	 * @param unspecific type
+	 * @return specific type
+	 */
+	public MCRecipe GetRecipe(MCRecipe unspecific);
 }

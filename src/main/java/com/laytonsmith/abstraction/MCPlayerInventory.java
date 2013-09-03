@@ -15,4 +15,5 @@ public interface MCPlayerInventory extends MCInventory {
     public MCItemStack getLeggings();
     public MCItemStack getBoots();
 	public int getHeldItemSlot();
+	public void setHeldItemSlot(int slot);
 }
