@@ -596,11 +596,9 @@ public class InventoryManagement {
                     + " in the player's inventory, first filling up slots that have the same item"
                     + " type, up to the max stack size, then fills up empty slots, until either"
                     + " the entire inventory is filled, or the entire amount has been given."
-                    + " The number of items actually given is returned, which will be less than"
-                    + " or equal to the quantity provided. This function will not touch the player's"
-                    + " armor slots however. Supports 'infinite' stacks by providing a negative number."
-					+ " If the player's inv is full, 0 is returned in this case instead of the amount"
-					+ " given.";
+                    + " If the player's inv is full, number of items that were not added is returned, which will be less than"
+                    + " or equal to the quantity provided. Otherwise, returns 0. This function will not touch the player's"
+                    + " armor slots however. Supports 'infinite' stacks by providing a negative number.";
         }
 
         public Exceptions.ExceptionType[] thrown() {
@@ -645,7 +643,9 @@ public class InventoryManagement {
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = p.getInventory().addItem(is);
-			
+
+			p.updateInventory();
+
 			if (h.isEmpty()) {
 				return new CInt(0, t);
 			} else {
@@ -730,6 +730,157 @@ public class InventoryManagement {
             return CHVersion.V3_3_0;
         }
     }
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pgive_enderchest_item extends AbstractFunction {
+
+		public String getName() {
+			return "pgive_enderchest_item";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3, 4};
+		}
+
+		public String docs() {
+			return "int {[player], itemID, qty, [meta]} Add to a player ender chest the specified item * qty. The meta argument uses the"
+					+ " same format as set_itemmeta. Unlike set_penderchest(), this does not specify a slot. The qty is distributed"
+					+ " in the player's inventory, first filling up slots that have the same item"
+					+ " type, up to the max stack size, then fills up empty slots, until either"
+					+ " the entire inventory is filled, or the entire amount has been given."
+					+ " If the player's inv is full, number of items that were not added is returned, which will be less than"
+					+ " or equal to the quantity provided. Otherwise, returns 0."
+					+ " Supports 'infinite' stacks by providing a negative number.";
+		}
+
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
+				Exceptions.ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCItemStack is;
+			Construct m = null;
+
+			if (args.length == 2) {
+				is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
+			} else if (args.length == 3) {
+				if (args[0] instanceof CString) {
+					p = Static.GetPlayer(args[0], t);
+					is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+				} else {
+					is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
+					m = args[2];
+				}
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+				m = args[3];
+			}
+			Static.AssertPlayerNonNull(p, t);
+
+			MCItemMeta meta;
+			if (m != null) {
+				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
+			} else {
+				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+			}
+			is.setItemMeta(meta);
+			Map<Integer, MCItemStack> h = p.getEnderChest().addItem(is);
+
+			if (h.isEmpty()) {
+				return new CInt(0, t);
+			} else {
+				return new CInt(h.get(0).getAmount(), t);
+			}
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class ptake_enderchest_item extends AbstractFunction {
+
+		public String getName() {
+			return "ptake_enderchest_item";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "int {[player], itemID, qty} Works in reverse of pgive_enderchest_item(), but"
+					+ " returns the number of items actually taken, which will be"
+					+ " from 0 to qty.";
+		}
+
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
+				Exceptions.ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCItemStack is;
+			if (args.length == 2) {
+				is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+			}
+			int total = is.getAmount();
+			int remaining = is.getAmount();
+			Static.AssertPlayerNonNull(p, t);
+			MCInventory inv = p.getEnderChest();
+			for (int i = 26; i >= 0; i--) {
+				MCItemStack iis = inv.getItem(i);
+				if (remaining <= 0) {
+					break;
+				}
+				if (match(is, iis)) {
+					//Take the minimum of either: remaining, or iis.getAmount()
+					int toTake = java.lang.Math.min(remaining, iis.getAmount());
+					remaining -= toTake;
+					int replace = iis.getAmount() - toTake;
+					if (replace == 0) {
+						inv.setItem(i, StaticLayer.GetItemStack(0, 0));
+					} else {
+						inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
+					}
+				}
+			}
+			return new CInt(total - remaining, t);
+
+		}
+
+		private boolean match(MCItemStack is, MCItemStack iis) {
+			return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 	
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_penderchest extends AbstractFunction {
@@ -1124,22 +1275,6 @@ public class InventoryManagement {
 		
 	}
 	
-	private static MCInventory GetInventory(Construct specifier, MCWorld w, Target t){
-		MCInventory inv;
-		if(specifier instanceof CArray){
-			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
-			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
-		} else {
-			int entityID = Static.getInt32(specifier, t);
-			inv = StaticLayer.GetConvertor().GetEntityInventory(entityID);
-		}
-		if(inv == null){
-			throw new Exceptions.FormatException("The entity or location specified is not capable of having an inventory.", t);
-		} else {
-			return inv;
-		}
-	}
-	
 	@api(environments={CommandHelperEnvironment.class})
 	public static class pinv_open extends AbstractFunction{
 
@@ -1186,7 +1321,315 @@ public class InventoryManagement {
 		}
 		
 	}
-    
+
+    @api(environments = {CommandHelperEnvironment.class})
+	public static class get_inventory extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_inventory";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {entityID, [index] | locationArray, [index]} Gets the inventory information for the specified block or entity."
+					+ " If the block or entity can't have an inventory, a FormatException is thrown. If the index is specified,"
+					+ " only the slot given will be returned. The max index of the array in the array is different for different types"
+					+ " of inventories. If there is no item at the slot specified, null is returned."
+					+ " ---- If all slots are requested, an associative array of item objects is returned, and if"
+					+ " only one item is requested, just that single item object is returned. An item object"
+					+ " consists of the following associative array(type: The id of the item, data: The data value of the item,"
+					+ " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
+					+ " of enchant objects, with 0 or more associative arrays which look like:"
+					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
+		}
+
+		@Override
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException,
+				Exceptions.ExceptionType.RangeException, Exceptions.ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+
+			Integer size = inventory.getSize();
+			Integer index = -1;
+
+			if (args.length == 2) {
+				index = Static.getInt32(args[1], t);
+
+				if (index < 0 || index >= size) {
+					throw new ConfigRuntimeException("Slot index must be 0-" + (size - 1), Exceptions.ExceptionType.RangeException, t);
+				}
+			}
+
+			if (index == -1) {
+				CArray ret = CArray.GetAssociativeArray(t);
+				for (int i = 0; i < size; i++) {
+					ret.set(i, ObjectGenerator.GetGenerator().item(inventory.getItem(i), t), t);
+				}
+
+				return ret;
+			} else {
+				return ObjectGenerator.GetGenerator().item(inventory.getItem(index), t);
+			}
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_inventory extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_inventory";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityID, pinvArray | locationArray, pinvArray} Sets a block or entity inventory to the specified"
+					+ " inventory object. If the block or entity can't have an inventory, a FormatException is thrown."
+					+ " An inventory object pinvArray is one that matches what is returned by get_inventory(), so"
+					+ " set_inventory(123, get_inventory(123)) while pointless, would be a correct call."
+					+ " ---- The array must be associative, however, it may skip items, in which case, only the specified"
+					+ " values will be changed. If a key is out of range, or otherwise improper, a warning is emitted,"
+					+ " and it is skipped, but the function will not fail as a whole. A simple way to set one item would be:"
+					+ " set_inventory(123, array(2: array(type: 1, qty: 64))) This sets the inventory second slot"
+					+ " to be a stack of stone for entity with ID = 123. Note that this uses the unsafe"
+					+ " enchantment mechanism to add enchantments, so any enchantment value will work. If"
+					+ " type uses the old format (for instance, \"35:11\"), then the second number is taken"
+					+ " to be the data, making this backwards compatible (and sometimes more convenient).";
+
+		}
+
+		@Override
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+			Integer size = inventory.getSize();
+
+			if (!(args[1] instanceof CArray)) {
+				throw new ConfigRuntimeException("Expecting an array as argument 2", Exceptions.ExceptionType.CastException, t);
+			}
+
+			CArray array = (CArray) args[1];
+
+			for (String key : array.keySet()) {
+				try {
+					int index;
+					try {
+						index = Integer.parseInt(key);
+					} catch (NumberFormatException e) {
+						throw e;
+					}
+					if (index < 0 || index >= size) {
+						ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_inventory(), so ignoring.");
+					} else {
+						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), t);
+						inventory.setItem(index, is);
+					}
+				} catch (NumberFormatException e) {
+					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_inventory(), but \"" + key + "\" was found. Ignoring.");
+				}
+			}
+			return new CVoid(t);
+		}
+	}
+
+    @api(environments = {CommandHelperEnvironment.class})
+	public static class add_to_inventory extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "add_to_inventory";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{3, 4};
+		}
+
+		@Override
+		public String docs() {
+			return "int {entityID, itemID, qty, [meta] | locationArray, itemID, qty, [meta]} Add to block or entity inventory"
+					+ " the specified item * qty. The meta argument uses the same format as set_itemmeta. Unlike set_inventory(),"
+					+ " this does not specify a slot. The qty is distributed in the inventory, first filling up slots"
+					+ " that have the same item type, up to the max stack size, then fills up empty slots, until either"
+					+ " the entire inventory is filled, or the entire amount has been given."
+					+ " If the inventory is full, number of items that were not added is returned, which will be less than"
+					+ " or equal to the quantity provided. Otherwise, returns 0. Supports 'infinite' stacks by providing"
+					+ " a negative number.";
+		}
+
+		@Override
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+			MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+
+			Construct m = null;
+
+			if (args.length == 4) {
+				m = args[3];
+			}
+
+			MCItemMeta meta;
+			if (m != null) {
+				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
+			} else {
+				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+			}
+			is.setItemMeta(meta);
+			Map<Integer, MCItemStack> h = inventory.addItem(is);
+
+			if (h.isEmpty()) {
+				return new CInt(0, t);
+			} else {
+				return new CInt(h.get(0).getAmount(), t);
+			}
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class take_from_inventory extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "take_from_inventory";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{3};
+		}
+
+		@Override
+		public String docs() {
+			return "int {entityID, itemID, qty | locationArray, itemID, qty} Works in reverse of add_to_inventory(), but"
+					+ " returns the number of items actually taken, which will be from 0 to qty.";
+		}
+
+		@Override
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
+			Integer size = inventory.getSize();
+			MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+
+			int total = is.getAmount();
+			int remaining = is.getAmount();
+			for (int i = size; i >= 0; i--) {
+				MCItemStack iis = inventory.getItem(i);
+				if (remaining <= 0) {
+					break;
+				}
+				if (match(is, iis)) {
+					//Take the minimum of either: remaining, or iis.getAmount()
+					int toTake = java.lang.Math.min(remaining, iis.getAmount());
+					remaining -= toTake;
+					int replace = iis.getAmount() - toTake;
+					if (replace == 0) {
+						inventory.setItem(i, StaticLayer.GetItemStack(0, 0));
+					} else {
+						inventory.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
+					}
+				}
+			}
+			return new CInt(total - remaining, t);
+
+		}
+
+		private boolean match(MCItemStack is, MCItemStack iis) {
+			return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 //    @api
 //    public static class pinv_consolidate extends AbstractFunction {
 //        
@@ -1242,4 +1685,20 @@ public class InventoryManagement {
 //            return CHVersion.V3_3_1;
 //        }
 //    }
+
+	private static MCInventory GetInventory(Construct specifier, MCWorld w, Target t){
+		MCInventory inv;
+		if(specifier instanceof CArray){
+			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
+			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
+		} else {
+			int entityID = Static.getInt32(specifier, t);
+			inv = StaticLayer.GetConvertor().GetEntityInventory(entityID);
+		}
+		if(inv == null){
+			throw new Exceptions.FormatException("The entity or location specified is not capable of having an inventory.", t);
+		} else {
+			return inv;
+		}
+	}
 }

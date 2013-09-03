@@ -480,10 +480,10 @@ public class EntityEvents {
 		}
 
 		public String docs() {
-			return "{type: <macro> The type of entity being damaged | cause: <macro>}"
+			return "{type: <macro> The type of entity being damaged | cause: <macro> | world: <string match>}"
 				+ " Fires when any loaded entity takes damage."
 				+ " {type: The type of entity the got damaged | id: The entityID of the victim"
-				+ " | player: the player who got damaged (only present if type is PLAYER)" 
+				+ " | player: the player who got damaged (only present if type is PLAYER) | world"
 				+ " | cause: The type of damage | amount | damager: If the source of damage is a player this will"
 				+ " contain their name, otherwise it will be the entityID of the damager (only available when"
 				+ " an entity causes damage) | shooter: The name of the player who shot, otherwise the entityID"
@@ -498,6 +498,7 @@ public class EntityEvents {
 				MCEntityDamageEvent e = (MCEntityDamageEvent) event;
 				Prefilters.match(prefilter, "type", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "cause", e.getCause().name(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world", e.getEntity().getWorld().getName(), Prefilters.PrefilterType.STRING_MATCH);
 				
 				return true;
 			}
@@ -1086,6 +1087,7 @@ public class EntityEvents {
 			map.put("id", new CInt(victim.getEntityId(), Target.UNKNOWN));
 			map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
 			map.put("amount", new CDouble(event.getDamage(), Target.UNKNOWN));
+			map.put("world", new CString(event.getEntity().getWorld().getName(), Target.UNKNOWN));
 
 			if (event instanceof MCEntityDamageByEntityEvent) {
 				MCEntity damager = ((MCEntityDamageByEntityEvent) event).getDamager();
