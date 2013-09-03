@@ -170,10 +170,10 @@ public class InventoryEvents {
 		}
 
 		public String docs() {
-			return "{world: <string match> World name | type: <macro> Can be " + StringUtils.Join(MCDragType.values(), ", ", ", or ") + " } "
-					+ " | cursoritem: <item match> item in hand, before event starts"
+			return "{world: <string match> World name | type: <macro> Can be " + StringUtils.Join(MCDragType.values(), ", ", ", or ")
+					+ " | cursoritem: <item match> item in hand, before event starts}"
 					+ "Fired when a player clicks (by left or right mouse button) a slot in inventory and drag mouse across slots. "
-					+ "{player: The player who clicked | newcursoritem: item on cursro, after event | oldcursoritem: item on cursor,"
+					+ "{player: The player who clicked | newcursoritem: item on cursor, after event | oldcursoritem: item on cursor,"
 					+ " before event | slots: used slots | rawslots: used slots, as the numbers of the slots in whole inventory window"
 					+ " | newitems: array of items which are dropped in selected slots | inventorytype | inventorysize: number of slots in"
 					+ " opened inventory} {cursoritem: the item on the cursor, after event} "
