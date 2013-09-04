@@ -37,7 +37,6 @@ import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.ReadOnlyException;
-import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
@@ -85,6 +84,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public PermissionsResolver permissionsResolver;
 	public PersistanceNetwork persistanceNetwork;
 	public boolean firstLoad = true;
+	public long interpreterUnlockedUntil = 0;
 	/**
 	 * Listener for the plugin system.
 	 */
@@ -347,6 +347,17 @@ public class CommandHelperPlugin extends JavaPlugin {
 				Static.getAliasCore().alias(cmd2, s, new ArrayList<Script>());
 			}
 			return true;
+		} else if(cmd.getName().equalsIgnoreCase("interpreter-on")){
+			if(sender instanceof ConsoleCommandSender){
+				int interpreterTimeout = Prefs.InterpreterTimeout();
+				if(interpreterTimeout != 0){
+					interpreterUnlockedUntil = (interpreterTimeout * 60 * 1000) + System.currentTimeMillis();
+					sender.sendMessage("Inpterpreter mode unlocked for " + interpreterTimeout + " minute" + (interpreterTimeout==1?"":"s"));
+				}
+			} else {
+				sender.sendMessage("This command can only be run from console.");
+			}
+			return true;
 		} else if (sender instanceof Player) {
 			try {
 				return runCommand(new BukkitMCPlayer((Player) sender), cmd.getName(), args);
@@ -472,6 +483,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} else if (cmd.equalsIgnoreCase("interpreter")) {
 			if (permissionsResolver.hasPermission(player.getName(), "commandhelper.interpreter")) {
 				if (Prefs.EnableInterpreter()) {
+					if(Prefs.InterpreterTimeout() != 0){
+						if(interpreterUnlockedUntil < System.currentTimeMillis()){
+							player.sendMessage(MCChatColor.RED + "Interpreter mode is currently locked. Run \"interpreter-on\" from console to unlock it."
+									+ " If you want to turn this off entirely, set the interpreter-timeout option to 0 in " 
+									+ CommandHelperFileLocations.getDefault().getPreferencesFile().getName());
+							commandRunning.remove(player); 
+							return true;
+						}
+					}
 					interpreterListener.startInterpret(player.getName());
 					Static.SendMessage(player, MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
 							+ " multiline mode.");
@@ -483,7 +503,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			}
 			commandRunning.remove(player);
 			return true;
-		}
+		} 
 		commandRunning.remove(player);
 		return false;
 	}

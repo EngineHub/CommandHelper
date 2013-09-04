@@ -30,3 +30,6 @@ commands:
     runalias:
         description: If another plugin wants to run a CommandHelper command, it isn't always straightforward to do that, because of the way bukkit works. To get around this, you may use this command. "/runalias /command to run" will fire off the alias "/command to run"
         usage: /<command> <otherCommand>
+    interpreter-on:
+        description: Turns on the interpreter for however long is specified in the preferences option "interpreter-timeout". This only does something if run from console.
+        usage: /<command>
