@@ -34,6 +34,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -52,8 +53,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -311,6 +310,21 @@ public class Web {
 					SocketAddress addr = new InetSocketAddress(proxyURL, port);
 					Proxy proxy = new Proxy(type, addr);
 					settings.setProxy(proxy);
+				}
+				if(csettings.containsKey("download")){
+					Construct download = csettings.get("download");
+					if(download instanceof CNull){
+						settings.setDownloadTo(null);
+					} else {
+						//TODO: Remove this check and tie into the VFS once that is complete.
+						if(Cmdline.inCmdLine(environment)){
+							File file = new File(download.val());
+							if(!file.isAbsolute()){
+								file = new File(t.file(), file.getPath());
+							}
+							settings.setDownloadTo(file);
+						}
+					}
 				}
 				settings.setAuthenticationDetails(username, password);
 			}

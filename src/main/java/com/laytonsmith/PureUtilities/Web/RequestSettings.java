@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import java.io.File;
 import java.net.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ public class RequestSettings {
 	private String password = null;
 	private Proxy proxy = null;
 	private String rawParameter;
+	private File downloadTo;
 	
 	/**
 	 * 
@@ -223,6 +225,26 @@ public class RequestSettings {
 	public RequestSettings setRawParameter(String rawParamter) {
 		this.rawParameter = rawParamter;
 		return this;
+	}
+	
+	/**
+	 * If this is not null, the resulting page will be downloaded to the
+	 * specified file location.
+	 * @param downloadTo The file location to download to, or null.
+	 * @return 
+	 */
+	public RequestSettings setDownloadTo(File downloadTo){
+		this.downloadTo = downloadTo;
+		return this;
+	}
+	
+	/**
+	 * 
+	 * @return The file location to download to, or null if this shouldn't save the
+	 * request as a file.
+	 */
+	public File getDownloadTo(){
+		return this.downloadTo;
 	}
 	
 }

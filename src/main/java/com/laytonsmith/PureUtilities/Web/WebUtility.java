@@ -3,6 +3,7 @@ package com.laytonsmith.PureUtilities.Web;
 import com.laytonsmith.PureUtilities.StringUtils;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -99,13 +100,27 @@ public final class WebUtility {
 	public static HTTPResponse GetPage(URL url, RequestSettings settings) throws SocketTimeoutException, IOException {
 		CookieJar cookieStash = settings.getCookieJar();
 		RawHTTPResponse response = getWebStream(url, settings);
+		StringBuilder b = null;
 		BufferedReader in = new BufferedReader(new InputStreamReader(response.getStream()));
-		String line;
-		StringBuilder b = new StringBuilder();
-		while ((line = in.readLine()) != null) {
-			b.append(line).append("\n");
+		if(settings.getDownloadTo() == null){
+			b = new StringBuilder();
+			String line;
+			while ((line = in.readLine()) != null) {
+				b.append(line).append("\n");
+			}
+			in.close();
+		} else {
+			int r;
+			OutputStream out = new BufferedOutputStream(new FileOutputStream(settings.getDownloadTo()));
+			while((r = in.read()) != -1){
+				out.write(r);
+			}
+			try{
+				out.close();
+			} finally {
+				in.close();
+			}
 		}
-		in.close();
 		//Assume 1.0 if something breaks
 		String httpVersion = "1.0";
 		Matcher m = Pattern.compile("HTTP/(\\d\\+.\\d+).*").matcher(response.getConnection().getHeaderField(0));
@@ -113,7 +128,7 @@ public final class WebUtility {
 			httpVersion = m.group(1);
 		}
 		HTTPResponse resp = new HTTPResponse(response.getConnection().getResponseMessage(), 
-				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b.toString(), httpVersion);
+				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b==null?null:b.toString(), httpVersion);
 		if (cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
 			//We need to add the cookie to the stash
 			for (String h : resp.getHeaders("Set-Cookie")) {

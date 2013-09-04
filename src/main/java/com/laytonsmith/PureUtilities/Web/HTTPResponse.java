@@ -42,7 +42,8 @@ public final class HTTPResponse {
 	}
 
 	/**
-	 * Gets the contents of this HTTP request.
+	 * Gets the contents of this HTTP request. If this request was a
+	 * download request, this will be null.
 	 *
 	 * @return
 	 */
