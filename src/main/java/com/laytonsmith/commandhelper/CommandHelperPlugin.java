@@ -481,15 +481,17 @@ public class CommandHelperPlugin extends JavaPlugin {
 			return true;
 
 		} else if (cmd.equalsIgnoreCase("interpreter")) {
-			if(Prefs.InterpreterTimeout() != 0){
-				if(interpreterUnlockedUntil < System.currentTimeMillis()){
-					player.sendMessage(MCChatColor.RED + "Interpreter mode is currently locked. Run \"interpreter-on\" from console to unlock it.");
-					commandRunning.remove(player); 
-					return true;
-				}
-			}
 			if (permissionsResolver.hasPermission(player.getName(), "commandhelper.interpreter")) {
 				if (Prefs.EnableInterpreter()) {
+					if(Prefs.InterpreterTimeout() != 0){
+						if(interpreterUnlockedUntil < System.currentTimeMillis()){
+							player.sendMessage(MCChatColor.RED + "Interpreter mode is currently locked. Run \"interpreter-on\" from console to unlock it."
+									+ " If you want to turn this off entirely, set the interpreter-timeout option to 0 in " 
+									+ CommandHelperFileLocations.getDefault().getPreferencesFile().getName());
+							commandRunning.remove(player); 
+							return true;
+						}
+					}
 					interpreterListener.startInterpret(player.getName());
 					Static.SendMessage(player, MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
 							+ " multiline mode.");
