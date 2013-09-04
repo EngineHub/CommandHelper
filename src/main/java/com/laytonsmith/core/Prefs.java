@@ -43,7 +43,8 @@ public final class Prefs {
 		USE_SUDO_FALLBACK("use-sudo-fallback"),
 		ALLOW_SHELL_COMMANDS("allow-shell-commands"),
 		ALLOW_DYNAMIC_SHELL("allow-dynamic-shell"),
-		SCREAM_ERRORS("scream-errors");
+		SCREAM_ERRORS("scream-errors"),
+		INTERPRETER_TIMEOUT("interpreter-timeout");
         String name;
         private PNames(String name){
             this.name = name;
@@ -86,6 +87,9 @@ public final class Prefs {
 				+ " that you may have unintentionally configured, this will override all ways of suppressing fatal errors, including uncaught exception"
 				+ " handlers, error logging turned off, etc. This is meant as a last ditch effort to diagnosing an error. This implicitely turns debug mode"
 				+ " on as well, which will cause even more error logging to occur."));
+		a.add(new Preference(PNames.INTERPRETER_TIMEOUT.config(), "15", Preferences.Type.INT, "Sets the time (in minutes) that interpreter mode is unlocked for when /interpreter-on is run from console. Set to 0 (or a negative number)"
+				+ " to disable this feature, and allow interpreter mode all the time. It is highly recommended that you leave this set to some number greater than 0, to enahnce"
+				+ " server security, and require a \"two step\" authentication for interpreter mode."));
         prefs = new Preferences("CommandHelper", Static.getLogger(), a);
         prefs.init(f);
     }
@@ -187,5 +191,13 @@ public final class Prefs {
 	
 	public static Boolean ScreamErrors(){
 		return (Boolean)pref(PNames.SCREAM_ERRORS);
+	}
+	
+	public static Integer InterpreterTimeout(){
+		Integer i = (Integer)pref(PNames.INTERPRETER_TIMEOUT);
+		if(i < 0){
+			i = 0;
+		}
+		return i;
 	}
 }
