@@ -64,6 +64,7 @@ public class DynamicClassLoader extends ClassLoader {
 	 * future use. If any method (other than destroy) is attempted to be
 	 * called in this instance after this method is called, it will throw
 	 * a runtime exception, which should hopefully help catch errors faster.
+	 * TODO: Use this in the code!
 	 */
 	public synchronized void destroy(){
 		destroyed = true;

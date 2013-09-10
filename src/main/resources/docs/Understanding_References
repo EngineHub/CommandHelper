@@ -155,4 +155,47 @@ msg(array_implode(@myB, ', ')) # msg's 4, 5, 6
 
 %%
 
+== Why the differences? ==
+
+An array could be quite large, so copying it around each time it is assigned could severely impact
+performance and memory usage. So by default, it copies the reference instead of the value (which is constant
+sized and much smaller typically), however, the easy
+clone operator means that you can quickly copy the value, without much hassle, if that's truly
+what you need.
+
+%%CODE|
+# Copy by reference
+@array1 = array(1, 2, 3)
+@array2 = @array1
+@array1[0] = 'a'
+msg(@array1) # msg's a, 2, 3
+msg(@array2) # msg's a, 2, 3
+%%
+
+The above example copied by reference, as was explained in the earlier section. Changes
+to @array1 are reflected in @array2, because they both "point" to the same array. The
+variable itself only contains a reference to the array, not the value of the array itself.
+Contrast this to a cloned array, which copies the value over:
+
+%%CODE|
+#Copy by value
+@array1 = array(1, 2, 3)
+@array2 = @array1[] #Note the clone operation here
+@array1[0] = 'a'
+msg(@array1) # msg's a, 2, 3
+msg(@array2) # msg's 1, 2, 3
+%%
+
+In this example, the value wasn't changed in array2. However, this comes at a cost.
+For large arrays, we now have two mostly identical copies of the array in memory. Sometimes
+this is required, and if so, there's nothing that can be done. But since most often this
+isn't strictly required, there's no point in eating up more memory than we actually
+need. Why aren't primitives handled the same way then? Well, actually, strings are
+reference based, thanks to the way the JVM works, but since they aren't modifiable,
+assigning by reference or value doesn't make a difference. But for other primitives,
+passing by value is done because there is no memory hit for reference vs value, because
+in general, the memory used to "point" to an int will be the same as just keeping the
+value of the int itself, but the extra layer of abstraction would slow down accesses.
+So passing by value makes more sense for primitives. 
+
 {{LearningTrail}}

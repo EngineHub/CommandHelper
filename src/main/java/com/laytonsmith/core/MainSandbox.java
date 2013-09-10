@@ -3,9 +3,13 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassDiscoveryURLCache;
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.database.DB;
+import com.laytonsmith.database.MySQL;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -15,24 +19,24 @@ import java.util.zip.ZipOutputStream;
 public class MainSandbox {
 
 	public static void main(String[] argv) throws Exception {
-		URL url = ClassDiscovery.GetClassContainer(MainSandbox.class);
-		long start;
-		start = System.currentTimeMillis();
-		ClassDiscoveryURLCache cdc = new ClassDiscoveryURLCache(url);
-		System.out.println((System.currentTimeMillis() - start) + "ms for first one");
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		cdc.writeDescriptor(baos);
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		start = System.currentTimeMillis();
-		cdc = new ClassDiscoveryURLCache(url, bais);
-		System.out.println((System.currentTimeMillis() - start) + "ms for second one");
-		System.out.println(StringUtils.HumanReadableByteCount(baos.size()));
-		baos = new ByteArrayOutputStream();
-		ZipOutputStream zip = new ZipOutputStream(baos);
-		zip.putNextEntry(new ZipEntry("root"));
-		cdc.writeDescriptor(zip);
-		zip.close();
-		System.out.println(StringUtils.HumanReadableByteCount(baos.toByteArray().length));
+//		URL url = ClassDiscovery.GetClassContainer(MainSandbox.class);
+//		long start;
+//		start = System.currentTimeMillis();
+//		ClassDiscoveryURLCache cdc = new ClassDiscoveryURLCache(url);
+//		System.out.println((System.currentTimeMillis() - start) + "ms for first one");
+//		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//		cdc.writeDescriptor(baos);
+//		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+//		start = System.currentTimeMillis();
+//		cdc = new ClassDiscoveryURLCache(url, bais);
+//		System.out.println((System.currentTimeMillis() - start) + "ms for second one");
+//		System.out.println(StringUtils.HumanReadableByteCount(baos.size()));
+//		baos = new ByteArrayOutputStream();
+//		ZipOutputStream zip = new ZipOutputStream(baos);
+//		zip.putNextEntry(new ZipEntry("root"));
+//		cdc.writeDescriptor(zip);
+//		zip.close();
+//		System.out.println(StringUtils.HumanReadableByteCount(baos.toByteArray().length));
 		
 //		//URI information
 //		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
@@ -131,14 +135,20 @@ public class MainSandbox {
 //		System.out.println("i2.toString(): " + i2.toString());
 //		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
 		
-//		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
-//		DB db = new MySQL();
-//		db.connect(conn);
-//		Object o = db.query("SHOW TABLES;");
-//		if(o instanceof ResultSet){
-//			ResultSet rs = (ResultSet)o;
-//		}
-//		System.out.println(o);
+		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
+		DB db = new MySQL();
+		db.connect(conn);
+		Object o = db.query("SELECT * FROM test;");
+		if(o instanceof ResultSet){
+			ResultSet rs = (ResultSet)o;
+			while(rs.next()){
+				ResultSetMetaData rsmd = rs.getMetaData();
+				System.out.println(rsmd.getColumnCount());
+				for(int i = 1; i <= rsmd.getColumnCount(); i++){
+					System.out.println(rsmd.getColumnName(i));
+				}
+			}
+		}
 	}
 	
 	
