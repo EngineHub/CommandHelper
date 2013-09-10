@@ -232,6 +232,9 @@ public final class WebUtility {
 		} else if("identity".equals(conn.getContentEncoding())){
 			//This is the default, meaning no transformation is needed.
 		}
+		if(is == null){
+			throw new IOException("Could not connnect to " + url);
+		}
 		return new RawHTTPResponse(conn, is);
 	}
 

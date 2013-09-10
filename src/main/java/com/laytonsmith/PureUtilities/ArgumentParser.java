@@ -1035,6 +1035,9 @@ public class ArgumentParser {
                 for (int i = 1; i < arg.length(); i++) {
                     Character c = arg.charAt(i);
                     Argument vArg = getArgument(c);
+					if(vArg == null){
+						throw new ValidationException("Unrecognized flag: " + c);
+					}
                     if (!vArg.isFlag() && hasNonFlagArg) {
                         //We have already come across a non-flag argument, and since this one isn't
                         //a flag, we need to throw an exception.
