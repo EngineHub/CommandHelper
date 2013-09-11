@@ -242,7 +242,7 @@ public class PlayerEvents {
 
 				if(prefilter.containsKey("to")){
 					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getPlayer().getWorld(), Target.UNKNOWN);
-					MCLocation loc = event.getFrom();
+					MCLocation loc = event.getTo();
 
 					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
 						return false;
