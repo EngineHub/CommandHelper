@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Geometry.Point3D;
@@ -628,14 +626,14 @@ public class PlayerEvents {
         }
 
         public String docs() {
-            return "{player: <string match> |"
+            return "{player: <string match> | world: <string match> |"
                     + "join_message: <regex>} This event is called when a player logs in. "
                     + "Setting join_message to null causes it to not be displayed at all. Cancelling "
                     + "the event does not prevent them from logging in. Instead, you should just kick() them."
-                    + "{player: The player's name | join_message: The default join message | first_login: True if this is the first time"
+                    + "{player: The player's name | world | join_message: The default join message | first_login: True if this is the first time"
                     + " the player has logged in.}"
                     + "{join_message}"
-                    + "{player|join_message}";
+                    + "{player|world|join_message}";
         }
 
         public CHVersion since() {
@@ -655,6 +653,7 @@ public class PlayerEvents {
                     }
                 }
                 Prefilters.match(prefilter, "join_message", ple.getJoinMessage(), Prefilters.PrefilterType.REGEX);
+				Prefilters.match(prefilter, "world", ple.getPlayer().getWorld().getName(), PrefilterType.STRING_MATCH);
                 return true;
             }
             return false;
@@ -665,6 +664,7 @@ public class PlayerEvents {
                 MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
                 //map.put("player", new CString(ple.getPlayer().getName(), Target.UNKNOWN));
+				map.put("world", new CString(ple.getPlayer().getWorld().getName(), Target.UNKNOWN));
                 map.put("join_message", new CString(ple.getJoinMessage(), Target.UNKNOWN));
                 map.put("first_login", new CBoolean(ple.getPlayer().isNewPlayer(), Target.UNKNOWN));
                 return map;
@@ -1807,8 +1807,8 @@ public class PlayerEvents {
 	
 		public String docs() {
 			return "{state: <macro> Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
-					+ " | player: <macro> The player who is fishing}"
-					+ " Fires when a player casts or reels a fishing rod {player | state | chance | xp"
+					+ " | player: <macro> The player who is fishing | world: <string match>}"
+					+ " Fires when a player casts or reels a fishing rod {player | world | state | chance | xp"
 					+ " | hook: the fishhook entity | caught: the id of the snared entity, can be a fish item}"
 					+ " {chance: the chance of catching a fish from pulling the bobber at random"
 					+ " | xp: the exp the player will get from catching a fish}"
@@ -1821,6 +1821,7 @@ public class PlayerEvents {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
 				Prefilters.match(prefilter, "state", event.getState().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world", event.getPlayer().getWorld().getName(), PrefilterType.STRING_MATCH);
 				return true;
 			}
 			return false;
@@ -1836,6 +1837,7 @@ public class PlayerEvents {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("world", new CString(event.getPlayer().getWorld().getName(), t));
 				ret.put("state", new CString(event.getState().name(), t));
 				ret.put("hook", new CInt(event.getHook().getEntityId(), t));
 				ret.put("xp", new CInt(event.getExpToDrop(), t));
