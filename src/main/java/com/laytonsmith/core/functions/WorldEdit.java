@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -18,11 +19,19 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.EmptyClipboardException;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.LocalWorld;
+import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitUtil;
+import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.RegionSelector;
+import com.sk89q.worldedit.schematic.SchematicFormat;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 import com.sk89q.worldguard.protection.databases.RegionDBUtil;
@@ -36,6 +45,9 @@ import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -2120,6 +2132,11 @@ public class WorldEdit {
 			return "boolean {[player,] locationArray} Returns whether or not player can build at the location,"
 					+ " according to WorldGuard. If player is not given, the current player is used.";
 		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
     public static abstract class SKFunction extends AbstractFunction {
@@ -2128,7 +2145,7 @@ public class WorldEdit {
             return true;
         }
 
-        public CHVersion since() {
+        public Version since() {
             return CHVersion.V3_2_0;
         }
 
@@ -2136,4 +2153,224 @@ public class WorldEdit {
             return false;
         }
     }
+
+    /* **************************** Clipboard functions below this line ****************************** */
+    
+	// Class required for working with loggers
+	public static class CHCommandSender extends com.sk89q.worldedit.bukkit.BukkitCommandSender {
+
+		public CHCommandSender(com.sk89q.worldedit.bukkit.WorldEditPlugin wep) {
+			super(wep, wep.getServerInterface(), wep.getServer().getConsoleSender());
+		}
+		
+		public CHCommandSender(Target t) {
+			this(Static.getWorldEditPlugin(t));
+		}
+		
+		private LocalWorld world;
+
+		@Override
+		public LocalWorld getWorld() {
+			return world;
+		}
+		
+		public void setWorld(LocalWorld w) {
+			world = w;
+		}
+	}
+	
+	// CH's local player, based from console
+	private static CHCommandSender player;
+	// CH's console-based session
+	private static LocalSession session;
+	
+	public static CHCommandSender getLocalPlayer(Target t) {
+		if (player == null) {
+			player = new CHCommandSender(t);
+		}
+		return player;
+	}
+	
+	public static LocalSession getLocalSession(Target t) {
+		if (session == null) {
+			session = Static.getWorldEditPlugin(t).getWorldEdit().getSession(getLocalPlayer(t));
+		}
+		return session;
+	}
+
+	public static LocalWorld getLocalWorld(String name, Target t) {
+		for (LocalWorld w : Static.getWorldEditPlugin(t).getWorldEdit().getServer().getWorlds()) {
+			if (w.getName().equals(name)) {
+				return w;
+			}
+		}
+		return null;
+	}
+	
+	// modified from com.sk89q.worldedit.LocalSession.createEditSession
+	public static EditSession createEditSession(CHCommandSender player, String world, boolean fastMode, Target t) {
+		LocalWorld w = getLocalWorld(world, t);
+		player.setWorld(w);
+		EditSession editSession = Static.getWorldEditPlugin(t).getWorldEdit().getEditSessionFactory()
+				.getEditSession(getLocalWorld(world, t), -1, null, player);
+		editSession.setFastMode(fastMode);
+
+		return editSession;
+	}
+	
+	@api
+	public static class skcb_load extends SKFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.IOException,
+					ExceptionType.InvalidPluginException};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.checkPlugin("WorldEdit", t);
+			// Based on: com.sk89q.worldedit.commands.SchematicCommands.load
+			String filename = args[0].val();
+			File savedir = Static.getWorldEditPlugin(t).getWorldEdit().getWorkingDirectoryFile(
+					Static.getWorldEditPlugin(t).getWorldEdit().getConfiguration().saveDir);
+			try {
+				File schematic = Static.getWorldEditPlugin(t).getWorldEdit().getSafeOpenFile(
+						getLocalPlayer(t), savedir, filename, "schematic", "schematic");
+				if (!schematic.exists()) {
+					throw new IOException("Schematic " + filename + " could not be found.");
+				}
+				getLocalSession(t).setClipboard(SchematicFormat.getFormat(schematic).load(schematic));
+			} catch (WorldEditException e) {
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.PluginInternalException, t);
+			} catch (IOException e) {
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.IOException, t);
+			} catch (DataException e) {
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.IOException, t);
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "skcb_load";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {filename} Loads a schematic into the clipboard from file."
+					+ " It will use the directory specified in WorldEdit's config.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class skcb_rotate extends SKFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.NotFoundException,
+					ExceptionType.InvalidPluginException, ExceptionType.CastException};
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.checkPlugin("WorldEdit", t);
+			int angle = Static.getInt32(args[0], t);
+			if (angle % 90 != 0) {
+				throw new ConfigRuntimeException("Expected rotation angle to be a multiple of 90",
+						ExceptionType.RangeException, t);
+			}
+			try {
+				getLocalSession(t).getClipboard().rotate2D(angle);
+			} catch (EmptyClipboardException e) {
+				throw new ConfigRuntimeException("The clipboard is empty, copy something to it first!",
+						ExceptionType.NotFoundException, t);
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "skcb_rotate";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {int} Given a multiple of 90, rotates the clipboard by that number.";
+		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class skcb_paste extends SKFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.InvalidPluginException,
+					ExceptionType.NotFoundException, ExceptionType.RangeException, ExceptionType.CastException};
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.checkPlugin("WorldEdit", t);
+			boolean noAir = false;
+			boolean fastmode = false;
+			boolean entities = false;
+			if (args.length >= 2) {
+				noAir = Static.getBoolean(args[1]);
+			}
+			if (args.length >= 3) {
+				fastmode = Static.getBoolean(args[2]);
+			}
+			if (args.length == 4) {
+				entities = Static.getBoolean(args[3]);
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			Vector vec = new Vector(loc.getX(), loc.getY(), loc.getZ());
+			EditSession editor = createEditSession(getLocalPlayer(t), loc.getWorld().getName(), fastmode, t);
+			
+			try {
+				getLocalSession(t).getClipboard().paste(editor, vec, noAir, entities);
+			} catch (MaxChangedBlocksException e) {
+				throw new ConfigRuntimeException("Attempted to change more blocks than allowed.",
+						ExceptionType.RangeException, t);
+			} catch (EmptyClipboardException e) {
+				throw new ConfigRuntimeException("The clipboard is empty, copy something to it first!",
+						ExceptionType.NotFoundException, t);
+			}
+			
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "skcb_paste";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3, 4};
+		}
+
+		public String docs() {
+			return "void {location, [ignoreAir], [fastmode], [entities]} Pastes a schematic from the clipboard"
+					+ " as if a player was standing at the location. If ignoreAir is true,"
+					+ " air blocks from the schematic will not replace blocks in the world."
+					+ " If fastmode is true, the function will use WorldEdit's 'fastmode' to paste."
+					+ " If entities is true, any entities stored in the clipboard will be pasted as well."
+					+ " Both ignoreAir and entities default to false.";
+		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 }
