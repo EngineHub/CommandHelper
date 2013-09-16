@@ -19,11 +19,21 @@ public class ModifierMirror implements Serializable {
 	 * This is the canonical order of modifiers, used in the toString method.
 	 */
 	private static transient final Object[] order = new Object[]{Modifier.PUBLIC, "public", Modifier.PRIVATE, "private", Modifier.PROTECTED, "protected", Modifier.STATIC, "static", Modifier.FINAL, "final", Modifier.SYNCHRONIZED, "synchronized", Modifier.VOLATILE, "volatile", Modifier.TRANSIENT, "transient", Modifier.NATIVE, "native", Modifier.INTERFACE, "interface", Modifier.ABSTRACT, "abstract", Modifier.STRICT, "strict"};
+	
+	/**
+	 * This constructor is used when mirroring an already loaded class. The modifier
+	 * is just the modifier returned by Class.
+	 * @param modifier 
+	 */
+	public ModifierMirror(int modifier){
+		this.access = 0;
+		this.modifiers = modifier;
+	}
 
 	/**
 	 * Creates a new ModifierMirror. Type is needed to determine which flags are applicable, and access
 	 * is the access modifier stored with the class file.
-	 * @param type
+	 * @param type Since asm encodes the parameters slightly differently for various types, the type must also be provided.
 	 * @param access 
 	 */
 	public ModifierMirror(Type type, int access) {

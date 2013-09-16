@@ -8,6 +8,9 @@ import com.laytonsmith.database.MySQL;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.zip.ZipEntry;
@@ -135,20 +138,24 @@ public class MainSandbox {
 //		System.out.println("i2.toString(): " + i2.toString());
 //		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
 		
-		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
-		DB db = new MySQL();
-		db.connect(conn);
-		Object o = db.query("SELECT * FROM test;");
-		if(o instanceof ResultSet){
-			ResultSet rs = (ResultSet)o;
-			while(rs.next()){
-				ResultSetMetaData rsmd = rs.getMetaData();
-				System.out.println(rsmd.getColumnCount());
-				for(int i = 1; i <= rsmd.getColumnCount(); i++){
-					System.out.println(rsmd.getColumnName(i));
-				}
-			}
-		}
+//		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
+//		DB db = new MySQL();
+//		db.connect(conn);
+//		Object o = db.query("SELECT * FROM test;");
+		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/test?generateSimpleParameterMetadata=true");
+		PreparedStatement ps = conn.prepareStatement("SELECT * FROM test WHERE c1=?");
+		System.out.println(ps.getParameterMetaData().getParameterType(1));
+		System.exit(0);
+//		if(o instanceof ResultSet){
+//			ResultSet rs = (ResultSet)o;
+//			while(rs.next()){
+//				ResultSetMetaData rsmd = rs.getMetaData();
+//				System.out.println(rsmd.getColumnCount());
+//				for(int i = 1; i <= rsmd.getColumnCount(); i++){
+//					System.out.println(rsmd.getColumnName(i));
+//				}
+//			}
+//		}
 	}
 	
 	

@@ -457,10 +457,26 @@ public class ClassDiscovery {
 		Set<ClassMirror<T>> knownClasses = (Set) getKnownClasses();
 		outer:
 		for (ClassMirror m : knownClasses) {
-			if (m.directlyExtendsFrom(superType)) {
-				//Trivial case, so just add this now, then continue.
+			if(doesClassExtend(m, superType)){
 				mirrors.add(m);
-				continue;
+			}
+		}
+		classSubtypeCache.put(superType, mirrors);
+		return (Set) mirrors;
+	}
+	
+	/**
+	 * Returns true iff subClass extends, implements, or is superClass.
+	 * This searches the entire known class ecosystem, including the known ClassMirrors
+	 * for this information.
+	 * @param subClass
+	 * @param superClass
+	 * @return 
+	 */
+	public boolean doesClassExtend(ClassMirror subClass, Class superClass){
+		if (subClass.directlyExtendsFrom(superClass)) {
+				//Trivial case, so just add this now, then continue.
+				return true;
 			}
 			//Well, crap, more complicated. Ok, so, the list of supers
 			//can probably be walked up even further, so we need to find
@@ -471,7 +487,7 @@ public class ClassDiscovery {
 			//can't be found in the mirrors pool.
 			Set<ClassReferenceMirror> supers = new HashSet<ClassReferenceMirror>();
 			//Get the superclass. If it's java.lang.Object, we're done.
-			ClassReferenceMirror su = m.getSuperClass();
+			ClassReferenceMirror su = subClass.getSuperClass();
 			while (!su.getJVMName().equals("Ljava/lang/Object;")) {
 				supers.add(su);
 				ClassMirror find = getClassMirrorFromJVMName(su.getJVMName());
@@ -480,9 +496,8 @@ public class ClassDiscovery {
 						//Ok, have to Class.forName this one
 						Class clazz = ClassUtils.forCanonicalName(su.toString());
 						//We can just use isAssignableFrom now
-						if (superType.isAssignableFrom(clazz)) {
-							mirrors.add(m);
-							continue outer;
+						if (superClass.isAssignableFrom(clazz)) {
+							return true;
 						} else {
 							//We need to add change the reference to su
 							su = new ClassReferenceMirror("L" + clazz.getSuperclass().getName().replace(".", "/") + ";");
@@ -490,7 +505,7 @@ public class ClassDiscovery {
 					} catch (ClassNotFoundException ex) {
 						//Hmm, ok? I guess something bad happened, so let's break
 						//the loop and give up on this class.
-						continue outer;
+						return false;
 					}
 				} else {
 					su = find.getSuperClass();
@@ -499,7 +514,7 @@ public class ClassDiscovery {
 			//Same thing now, but for interfaces
 			Deque<ClassReferenceMirror> interfaces = new ArrayDeque<ClassReferenceMirror>();
 			Set<ClassReferenceMirror> handled = new HashSet<ClassReferenceMirror>();
-			interfaces.addAll(m.getInterfaces());
+			interfaces.addAll(subClass.getInterfaces());
 			//Also have to add all the supers' interfaces too
 			for (ClassReferenceMirror r : supers) {
 				ClassMirror find = getClassMirrorFromJVMName(r.getJVMName());
@@ -510,7 +525,7 @@ public class ClassDiscovery {
 							interfaces.add(new ClassReferenceMirror("L" + c.getName().replace(".", "/") + ";"));
 						}
 					} catch (ClassNotFoundException ex) {
-						continue outer;
+						return false;
 					}
 				} else {
 					interfaces.addAll(find.getInterfaces());
@@ -530,18 +545,16 @@ public class ClassDiscovery {
 					try {
 						//Again, have to check Class.forName
 						Class clazz = ClassUtils.forCanonicalName(in.toString());
-						if (superType.isAssignableFrom(clazz)) {
-							mirrors.add(m);
-							continue outer;
+						if (superClass.isAssignableFrom(clazz)) {
+							return true;
 						}
 					} catch (ClassNotFoundException ex) {
-						continue outer;
+						return false;
 					}
 				}
 			}
-		}
-		classSubtypeCache.put(superType, mirrors);
-		return (Set) mirrors;
+			//Nope.
+			return false;
 	}
 
 	/**
@@ -614,6 +627,62 @@ public class ClassDiscovery {
 		}
 		classAnnotationCache.put(annotation, mirrors);
 		return mirrors;
+	}
+	
+	/**
+	 * Combines finding classes with a specified annotation, and classes that extend a certain type.
+	 * @param <T> The type that will be returned, based on superClass
+	 * @param annotation The annotation that the classes should be tagged with
+	 * @param superClass The super class that the classes should extend
+	 * @return A set of class mirrors that match the criteria
+	 */
+	public <T> Set<ClassMirror<T>> getClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass){
+		Set<ClassMirror<T>> mirrors = new HashSet<ClassMirror<T>>();
+		for(ClassMirror<?> c : getClassesWithAnnotation(annotation)){
+			if(doesClassExtend(c, superClass)){
+				mirrors.add((ClassMirror<T>)c);
+			}
+		}
+		return mirrors;
+	}
+	
+	/**
+	 * Unlike {@link #getClassesWithAnnotationThatExtend(java.lang.Class, java.lang.Class)}, this actually 
+	 * loads the matching classes into PermGen, and returns a Set of these classes.
+	 * This is useful if you are for sure going to use these classes immediately, and don't want to have
+	 * to lazy load them individually.
+	 * @param <T> The type that will be returned, based on superClass
+	 * @param annotation The annotation that the classes should be tagged with
+	 * @param superClass The super class that the classes should extend
+	 * @return A set of classes that match the criteria
+	 */
+	public <T> Set<Class<T>> loadClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass){
+		return loadClassesWithAnnotationThatExtend(annotation, superClass, getDefaultClassLoader(), true);
+	}
+	
+	/**
+	 * Unlike {@link #getClassesWithAnnotationThatExtend(java.lang.Class, java.lang.Class)}, this actually 
+	 * loads the matching classes into PermGen, and returns a Set of these classes.
+	 * This is useful if you are for sure going to use these classes immediately, and don't want to have
+	 * to lazy load them individually.
+	 * @param <T> The type that will be returned, based on superClass
+	 * @param annotation The annotation that the classes should be tagged with
+	 * @param superClass The super class that the classes should extend
+	 * @param loader
+	 * @param initialize
+	 * @return A set of classes that match the criteria
+	 */
+	public <T> Set<Class<T>> loadClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass, ClassLoader loader, boolean initialize){
+		Set<Class<T>> set = new HashSet<Class<T>>();
+		for (ClassMirror<T> cm : getClassesWithAnnotationThatExtend(annotation, superClass)) {
+			try {
+				set.add(cm.loadClass(loader, initialize));
+			} catch (NoClassDefFoundError e) {
+				//Ignore this for now?
+				//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
+			}
+		}
+		return set;
 	}
 
 	/**
