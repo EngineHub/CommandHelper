@@ -581,19 +581,32 @@ public class DocGen {
             return b.toString();
         }
     }
-    
-    private static class ManualTriggerData{
-        public static String Get(String[] data, String type){
-            throw new UnsupportedOperationException("FIXME");
-        }
-    }
 	
 	public static class DocInfo{
+		/**
+		 * The return type
+		 */
 		public String ret;
+		/**
+		 * The args, with html styling in place
+		 */
 		public String args;
+		/**
+		 * The args, without html styling in place (but with [ brackets ] to denote optional arguments
+		 */
 		public String originalArgs;		
+		/**
+		 * The full description, if the ---- separator isn't present, or
+		 * the top description if not present.
+		 */
 		public String desc;
+		/**
+		 * The top description, or null if the ---- separator isn't present.
+		 */
 		public String topDesc = null;
+		/**
+		 * The extended description, or null if the ---- separator isn't present.
+		 */
 		public String extendedDesc = null;
 		public DocInfo(String doc){
 			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
