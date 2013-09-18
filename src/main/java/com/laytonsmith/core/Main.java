@@ -15,16 +15,16 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.*;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
-import com.sun.corba.se.spi.activation._ActivatorImplBase;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -136,7 +136,7 @@ public class Main {
 		extensionDocsMode = ArgumentParser.GetParser()
 				.addDescription("Generates markdown documentation for the specified extension utilizing its code, to be used most likely on the extensions github page.")
 				.addArgument('i', "input-jar", ArgumentParser.Type.STRING, "The extension jar to generate doucmenation for.", "input-jar", true)
-				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated documentation to.", "output-file", true);
+				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated documentation to.", "output-file", false);
 		suite.addMode("extension-docs", extensionDocsMode);
 
 		ARGUMENT_SUITE = suite;
@@ -331,10 +331,18 @@ public class Main {
 				Interpreter.startWithTTY(fileName, allArgs);
 				System.exit(0);
 			} else if(mode == extensionDocsMode){
-				File inputJar = new File(parsedArgs.getStringArgument("input-jar"));
-				File outputFile = new File(parsedArgs.getStringArgument("output-file"));
+				String inputJarS = parsedArgs.getStringArgument("input-jar");
+				String outputFileS = parsedArgs.getStringArgument("output-file");
+				if(inputJarS == null){
+					System.out.println("Usage: --input-jar extension-docs path/to/extension.jar [--output-file path/to/output.md]\n\tIf the output is blank, it is printed to stdout.");
+					System.exit(1);
+				}
+				File inputJar = new File(inputJarS);
+				OutputStream outputFile = System.out;
+				if(outputFileS != null){
+					outputFile = new FileOutputStream(new File(outputFileS));
+				}
 				ExtensionDocGen.generate(inputJar, outputFile);
-				System.out.println("Documentation created for " + inputJar.getName() + " at " + outputFile.getPath());
 			} else {
 				throw new Error("Should not have gotten here");
 			}
