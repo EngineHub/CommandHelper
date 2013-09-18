@@ -156,7 +156,7 @@ public class DocGenUIHandler {
 	}
 	
 	private void doFunctions() throws XPathExpressionException, ConfigCompileException{
-		doUpload(DocGen.functions("wiki", api.Platforms.INTERPRETER_JAVA, isStaged), "/API", true);
+		doUpload(DocGen.functions(DocGen.MarkupType.WIKI, api.Platforms.INTERPRETER_JAVA, isStaged), "/API", true);
 	}
 	
 	private void doExamples() throws ConfigCompileException, XPathExpressionException, IOException, DataSourceException, Exception{
@@ -176,7 +176,7 @@ public class DocGenUIHandler {
 	}
 	
 	private void doEvents() throws XPathExpressionException{
-		doUpload(DocGen.events("wiki"), "/Event_API", true);
+		doUpload(DocGen.events(DocGen.MarkupType.WIKI), "/Event_API", true);
 	}
 	
 	private void doTemplates() throws IOException, XPathExpressionException{
