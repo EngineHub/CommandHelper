@@ -38,8 +38,6 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class Main {
 
-	static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
-
 	public static final ArgumentSuite ARGUMENT_SUITE;
 	private static final ArgumentParser helpMode;
 	private static final ArgumentParser managerMode;
@@ -95,7 +93,7 @@ public class Main {
 		suite.addMode("print-db", printDBMode);
 		docsMode = ArgumentParser.GetParser()
 				.addDescription("Prints documentation for the functions that CommandHelper knows about, then exits.")
-				.addArgument("html", "The type of the documentation, defaulting to html. It may be one of the following: " + doctypes.toString(), "type", false);
+				.addArgument("html", "The type of the documentation, defaulting to html. It may be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "), "type", false);
 		suite.addMode("docs", docsMode);
 		verifyMode = ArgumentParser.GetParser()
 				.addDescription("Compiles all the files in the system, simply checking for compile errors, then exits.");
@@ -231,15 +229,14 @@ public class Main {
 				//new SerializedPersistance(new File("CommandHelper/persistance.ser")).printValues(System.out);
 				System.exit(0);
 			} else if (mode == docsMode) {
-				String docs = parsedArgs.getStringArgument();
+				DocGen.MarkupType docs = null;
+				try {
+					docs = DocGen.MarkupType.valueOf(parsedArgs.getStringArgument().toUpperCase());
+				} catch(IllegalArgumentException e){
+					System.out.println("The type of documentation must be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "));
+					System.exit(1);
+				}
 				//Documentation generator
-				if (docs.isEmpty()) {
-					docs = "html";
-				}
-				if (!doctypes.contains(docs)) {
-					System.out.println("The type of documentation must be one of the following: " + doctypes.toString());
-					return;
-				}
 				System.err.print("Creating " + docs + " documentation...");
 				DocGen.functions(docs, api.Platforms.INTERPRETER_JAVA, true);
 				System.err.println("Done.");
