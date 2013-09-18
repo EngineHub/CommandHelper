@@ -6,10 +6,13 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
+import com.laytonsmith.abstraction.enums.MCIgniteCause;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
@@ -19,6 +22,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.util.Vector;
@@ -114,6 +118,50 @@ public class BukkitBlockEvents {
             return new BukkitMCBlock(event.getBlock());
         }
     }
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockIgniteEvent extends BukkitMCBlockEvent
+			implements MCBlockIgniteEvent {
+
+		BlockIgniteEvent event;
+
+		public BukkitMCBlockIgniteEvent(BlockIgniteEvent e) {
+			super(e);
+			event = e;
+		}
+
+		@Override
+		public MCIgniteCause getCause() {
+			return BukkitMCIgniteCause.getConvertor().getAbstractedEnum(event.getCause());
+		}
+
+		@Override
+		public MCEntity getIgnitingEntity() {
+			if (event.getIgnitingEntity() != null) {
+				return new BukkitMCEntity(event.getIgnitingEntity());
+			}
+
+			return null;
+		}
+
+		@Override
+		public MCBlock getIgnitingBlock() {
+			if (event.getIgnitingBlock() != null) {
+				return new BukkitMCBlock(event.getIgnitingBlock());
+			}
+
+			return null;
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			if (event.getPlayer() != null) {
+				return new BukkitMCPlayer(event.getPlayer());
+			}
+
+			return null;
+		}
+	}
 
     @abstraction(type = Implementation.Type.BUKKIT)
     public static class BukkitMCSignChangeEvent implements MCSignChangeEvent {

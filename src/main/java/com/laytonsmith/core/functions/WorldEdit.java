@@ -35,11 +35,7 @@ import com.sk89q.worldedit.schematic.SchematicFormat;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 import com.sk89q.worldguard.protection.databases.RegionDBUtil;
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
-import com.sk89q.worldguard.protection.flags.Flag;
-import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
-import com.sk89q.worldguard.protection.flags.RegionGroup;
-import com.sk89q.worldguard.protection.flags.RegionGroupFlag;
+import com.sk89q.worldguard.protection.flags.*;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
@@ -53,6 +49,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 
 /**
  *
@@ -1930,6 +1927,177 @@ public class WorldEdit {
     }
 
     @api
+	public static class sk_region_check_flag extends SKFunction {
+
+		@Override
+		public String getName() {
+			return "sk_region_check_flag";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {locationArray, flagName, [player]} Check state of selected flag in defined location."
+					+ " FlagName should be any supported flag from [http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags this list]."
+					+ " Player defaults to the current player.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException,
+				ExceptionType.PluginInternalException, ExceptionType.NotFoundException};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			Static.checkPlugin("WorldGuard", t);
+
+			if ("build".equalsIgnoreCase(args[1].val())) {
+				throw new ConfigRuntimeException(String.format("Can't use build flag with %s method. This is an limitation of WorldGuard.", this.getName()), ExceptionType.PluginInternalException, t);
+			}
+
+			MCPlayer p = null;
+			MCWorld w = null;
+
+			if (args.length == 2) {
+				if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				}
+			} else {
+				p = Static.GetPlayer(args[2].val(), t);
+			}
+
+			if (p != null) {
+				w = p.getWorld();
+			}
+
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
+
+			Flag<?> foundFlag = null;
+
+			for (Flag<?> flag : DefaultFlag.getFlags()) {
+				if (flag.getName().replace("-", "").equalsIgnoreCase(args[1].val().replace("-", ""))) {
+					foundFlag = flag;
+					break;
+				}
+			}
+
+			if (foundFlag == null) {
+				throw new ConfigRuntimeException(String.format("Unknown flag specified: (%s).", args[1].val()), ExceptionType.PluginInternalException, t);
+			}
+
+			RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(Bukkit.getServer().getWorld(l.getWorld().getName()));
+
+			ApplicableRegionSet set = mgr.getApplicableRegions(((BukkitMCLocation) l)._Location());
+
+			if (foundFlag instanceof StateFlag) {
+				if (p == null) {
+					return new CBoolean(set.allows((StateFlag) foundFlag), t);
+				} else {
+					return new CBoolean(set.allows((StateFlag) foundFlag, Static.getWorldGuardPlugin(t).wrapPlayer(((BukkitMCPlayer) p)._Player())), t);
+				}
+			} else {
+				Object getFlag;
+
+				if (p == null) {
+					getFlag = set.getFlag((Flag) foundFlag);
+				} else {
+					getFlag = set.getFlag((Flag) foundFlag, Static.getWorldGuardPlugin(t).wrapPlayer(((BukkitMCPlayer) p)._Player()));
+				}
+
+				if (foundFlag instanceof BooleanFlag) {
+					Boolean value = ((BooleanFlag) foundFlag).unmarshal(getFlag);
+					if (value != null) {
+						return new CBoolean(value, t);
+					} else {
+						return new CNull(t);
+					}
+				} else if (foundFlag instanceof DoubleFlag) {
+					Double value = ((DoubleFlag) foundFlag).unmarshal(getFlag);
+					if (value != null) {
+						return new CDouble(value, t);
+					} else {
+						return new CNull(t);
+					}
+				} else if (foundFlag instanceof EnumFlag) {
+					String value = ((EnumFlag) foundFlag).unmarshal(getFlag).name();
+					if (value != null) {
+						return new CString(value, t);
+					} else {
+						return new CNull(t);
+					}
+				} else if (foundFlag instanceof IntegerFlag) {
+					Integer value = ((IntegerFlag) foundFlag).unmarshal(getFlag);
+					if (value != null) {
+						return new CInt(value, t);
+					} else {
+						return new CNull(t);
+					}
+				} else if (foundFlag instanceof LocationFlag) {
+					com.sk89q.worldedit.Location value = ((LocationFlag) foundFlag).unmarshal(getFlag);
+					if (value != null) {
+						return new CArray(t,
+								new CDouble(value.getPosition().getX(), t),
+								new CDouble(value.getPosition().getY(), t),
+								new CDouble(value.getPosition().getZ(), t),
+								new CString(l.getWorld().getName(), t));
+					} else {
+						return new CNull(t);
+					}
+				} else if (foundFlag instanceof RegionGroupFlag) {
+					String value = ((RegionGroupFlag) foundFlag).unmarshal(getFlag).name();
+					if (value != null) {
+						return new CString(value, t);
+					} else {
+						return new CNull(t);
+					}
+				} else if (foundFlag instanceof SetFlag) {
+
+					CArray values = new CArray(t);
+
+					Set setValue = ((SetFlag) foundFlag).unmarshal(getFlag);
+
+					if (setValue != null) {
+						for (Object setFlag : setValue) {
+							if (setFlag instanceof String) {
+								String value = (String) setFlag;
+								values.push(new CString(value, t));
+							} else if (setFlag instanceof EntityType) {
+								String value = ((EntityType) setFlag).getName();
+								values.push(new CString(value, t));
+							} else {
+								ConfigRuntimeException.DoWarning("One of the element of flag has unknown type. This is a developer mistake, please file a ticket.");
+							}
+						}
+					}
+
+					return values;
+
+				} else if (foundFlag instanceof StringFlag) {
+					String value = ((StringFlag) foundFlag).unmarshal(getFlag);
+					if (value != null) {
+						return new CString(value, t);
+					} else {
+						return new CNull(t);
+					}
+				}
+
+				throw new ConfigRuntimeException("The flag type is unknown. This is a developer mistake, please file a ticket.", ExceptionType.NotFoundException, t);
+			}
+
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+    @api
     public static class sk_region_setpriority extends SKFunction {
 
         public String getName() {
@@ -1983,7 +2151,7 @@ public class WorldEdit {
             }
 
 			if ("__global__".equalsIgnoreCase(region)) {
-				throw new ConfigRuntimeException(String.format("The region cannot be named __global__.", region), ExceptionType.PluginInternalException, t);
+				throw new ConfigRuntimeException("The region cannot be named __global__.", ExceptionType.PluginInternalException, t);
 			}
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
@@ -2046,7 +2214,7 @@ public class WorldEdit {
 			regionName = args[1].val();
 
 			if ("__global__".equalsIgnoreCase(regionName)) {
-				throw new ConfigRuntimeException(String.format("You cannot set parents for a __global__ cuboid.", regionName), ExceptionType.PluginInternalException, t);
+				throw new ConfigRuntimeException("You cannot set parents for a __global__ cuboid.", ExceptionType.PluginInternalException, t);
 			}
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
