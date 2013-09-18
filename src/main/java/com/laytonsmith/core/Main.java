@@ -20,6 +20,8 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.*;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenUI;
+import com.laytonsmith.tools.docgen.ExtensionDocGen;
+import com.sun.corba.se.spi.activation._ActivatorImplBase;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -56,6 +58,7 @@ public class Main {
 	private static final ArgumentParser examplesMode;
 	private static final ArgumentParser optimizerTestMode;
 	private static final ArgumentParser cmdlineMode;
+	private static final ArgumentParser extensionDocsMode;
 
 	static {
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -130,6 +133,11 @@ public class Main {
 				+ " file is known.")
 				.addArgument("File path/arguments", "fileAndArgs", true);
 		suite.addMode("cmdline", cmdlineMode);
+		extensionDocsMode = ArgumentParser.GetParser()
+				.addDescription("Generates markdown documentation for the specified extension utilizing its code, to be used most likely on the extensions github page.")
+				.addArgument('i', "input-jar", ArgumentParser.Type.STRING, "The extension jar to generate doucmenation for.", "input-jar", true)
+				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated documentation to.", "output-file", true);
+		suite.addMode("extension-docs", extensionDocsMode);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -322,6 +330,11 @@ public class Main {
 				allArgs.remove(0);
 				Interpreter.startWithTTY(fileName, allArgs);
 				System.exit(0);
+			} else if(mode == extensionDocsMode){
+				File inputJar = new File(parsedArgs.getStringArgument("input-jar"));
+				File outputFile = new File(parsedArgs.getStringArgument("output-file"));
+				ExtensionDocGen.generate(inputJar, outputFile);
+				System.out.println("Documentation created for " + inputJar.getName() + " at " + outputFile.getPath());
 			} else {
 				throw new Error("Should not have gotten here");
 			}
