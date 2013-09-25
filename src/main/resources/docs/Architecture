@@ -139,6 +139,28 @@ checked, it will in fact always be 1, so we could optimize this to
 msg('Var is 1')
 %%
 
+===Annotation Processor and meta programming===
+CommandHelper makes heavy use of annotations to provide functionality. Annotations are
+a [http://docs.oracle.com/javase/1.5.0/docs/guide/language/annotations.html Java feature]
+that provides a way to "meta program" in Java. An annotation is a "tag" that can be
+use to mark various methods, fields, classes, or other constructs in that Java language.
+This meta programming allows for several different advantages, the main one in CommandHelper
+being the ability to maintain all information about classes in one place, instead of
+spreading the information around several different files. In general, when adding a new
+class, it is customary to copy paste another class, then modify it. The ability to do
+this in one place, instead of having to modify an existing list manually is following
+a principal known as the [https://en.wikipedia.org/wiki/Open/closed_principle open/closed]
+principal, and is one of the key components of a [https://en.wikipedia.org/wiki/SOLID_%28object-oriented_design%29 SOLID]
+architecture. It also enables easier Dependency Injection, one of the other heavily followed
+design principles. In general, CommandHelper uses annotations to mark events, functions,
+and other resources for addition to the api, and inherently allows for one-to-many relationships
+between code. An additional feature that CommandHelper includes is a 
+%%GET_SIMPLE_CLASS|.*|ClassDiscovery%% utility class, which provides the means
+to dynamically discover the constructs that are tagged with the various annotations,
+as well as providing other methods for meta class discovery for java sources that
+aren't aware of CommandHelper.
+
+
 ===Abstraction Layer===
 The abstraction layer handles all communication between CommandHelper and Bukkit. 
 It is the only place in the code that should directly reference bukkit. All methods 
