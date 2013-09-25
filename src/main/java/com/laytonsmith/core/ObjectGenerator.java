@@ -554,27 +554,31 @@ public class ObjectGenerator {
 		int green;
 		int blue;
 		if(color.containsKey("r")){
-			red = Static.getInt8(color.get("r"), t);
+			red = Static.getInt32(color.get("r"), t);
 		} else if(color.containsKey("red")){
-			red = Static.getInt8(color.get("red"), t);
+			red = Static.getInt32(color.get("red"), t);
 		} else {
-			red = Static.getInt8(color.get(0), t);
+			red = Static.getInt32(color.get(0), t);
 		}
 		if(color.containsKey("g")){
-			green = Static.getInt8(color.get("g"), t);
+			green = Static.getInt32(color.get("g"), t);
 		} else if(color.containsKey("green")){
-			green = Static.getInt8(color.get("green"), t);
+			green = Static.getInt32(color.get("green"), t);
 		} else {
-			green = Static.getInt8(color.get(1), t);
+			green = Static.getInt32(color.get(1), t);
 		}
 		if(color.containsKey("b")){
-			blue = Static.getInt8(color.get("b"), t);
+			blue = Static.getInt32(color.get("b"), t);
 		} else if(color.containsKey("blue")){
-			blue = Static.getInt8(color.get("blue"), t);
+			blue = Static.getInt32(color.get("blue"), t);
 		} else {
-			blue = Static.getInt8(color.get(2), t);
+			blue = Static.getInt32(color.get(2), t);
 		}
-		return StaticLayer.GetConvertor().GetColor(red, green, blue);
+		try {
+			return StaticLayer.GetConvertor().GetColor(red, green, blue);
+		} catch(IllegalArgumentException ex){
+			throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.RangeException, t, ex);
+		}
 	}
 	
 	public CArray velocity(MCEntity.Velocity v, Target t) {
