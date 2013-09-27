@@ -422,16 +422,16 @@ public class InventoryEvents {
 			return "{} "
 					+ "Fired when a player enchants an item. "
 					+ "{player: The player that enchanted the item | "
-					+ "item: The enchanted item PRE-ENCHANT | "
+					+ "item: The item to be enchanted | "
 					+ "inventorytype: type of inventory | "
 					+ "levels: The amount of levels the player used | "
 					+ "enchants: Array of added enchantments | "
 					+ "location: Location of the used enchantment table | "
-					+ "option: The enchantment option the player clicke})"
+					+ "option: The enchantment option the player clicked}"
 					+ "{levels: The amount of levels to use | "
-					+ "item: The item to be enchanted. this is still PRE-ENCHANT | "
+					+ "item: The item to be enchanted | "
 					+ "enchants: The enchants to add to the item}"
-					+ "{player|item|inventorytype|levels|enchants|location|option} ";
+					+ "{}";
 		}
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
