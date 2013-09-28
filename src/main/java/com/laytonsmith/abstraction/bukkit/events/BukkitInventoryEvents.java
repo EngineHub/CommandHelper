@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCCraftingInventory;
 import com.laytonsmith.abstraction.MCHumanEntity;
@@ -34,6 +35,7 @@ import com.laytonsmith.abstraction.events.MCInventoryEvent;
 import com.laytonsmith.abstraction.events.MCInventoryInteractEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
+import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +47,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -353,6 +356,46 @@ public class BukkitInventoryEvents {
 		
 		public int whichButton() {
 			return ei.whichButton();
+		}
+	}
+	
+	public static class BukkitMCPrepareItemEnchantEvent extends BukkitMCInventoryEvent implements MCPrepareItemEnchantEvent {
+		PrepareItemEnchantEvent pie;
+
+		public BukkitMCPrepareItemEnchantEvent(PrepareItemEnchantEvent e) {
+			super(e);
+			this.pie = e;
+		}
+		
+		public MCBlock getEnchantBlock() {
+			return new BukkitMCBlock(pie.getEnchantBlock());
+		}
+		
+		public MCPlayer GetEnchanter() {
+			return new BukkitMCPlayer(pie.getEnchanter());
+		}
+		
+		public int getEnchantmentBonus() {
+			return pie.getEnchantmentBonus();
+		}
+		
+		public int[] getExpLevelCostsOffered() {
+			return pie.getExpLevelCostsOffered();
+		}
+		
+		public MCItemStack getItem() {
+			return new BukkitMCItemStack(pie.getItem());
+		}
+		
+		public void setItem(MCItemStack i) {
+			ItemStack item = pie.getItem();
+			ItemStack is = ((BukkitMCItemStack) i).asItemStack();
+			
+			item.setAmount(is.getAmount());
+			item.setData(is.getData());
+			item.setDurability(is.getDurability());
+			item.setItemMeta(is.getItemMeta());
+			item.setType(is.getType());
 		}
 	}
 	
