@@ -8,12 +8,14 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCI
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCInventoryOpenEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCItemHeldEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCPrepareItemCraftEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCPrepareItemEnchantEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -60,6 +62,13 @@ public class BukkitInventoryListener implements Listener{
 		BukkitMCEnchantItemEvent eie = new BukkitInventoryEvents.BukkitMCEnchantItemEvent(event);
 		EventUtils.TriggerExternal(eie);
 		EventUtils.TriggerListener(Driver.ITEM_ENCHANT, "item_enchant", eie);
+	}
+	
+	@EventHandler(priority= EventPriority.LOWEST)
+	public void onPreEnchant(PrepareItemEnchantEvent event) {
+		BukkitMCPrepareItemEnchantEvent pie = new BukkitInventoryEvents.BukkitMCPrepareItemEnchantEvent(event);
+		EventUtils.TriggerExternal(pie);
+		EventUtils.TriggerListener(Driver.ITEM_PRE_ENCHANT, "item_pre_enchant", pie);
 	}
 	
 	@EventHandler(priority=EventPriority.LOWEST)
