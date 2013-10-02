@@ -1,18 +1,17 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
-import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCCraftingInventory;
+import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.MCRecipe;
+import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCraftingInventory;
+import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
@@ -35,6 +34,7 @@ import com.laytonsmith.abstraction.events.MCInventoryEvent;
 import com.laytonsmith.abstraction.events.MCInventoryInteractEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
+import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 
 import java.util.ArrayList;
@@ -371,7 +371,7 @@ public class BukkitInventoryEvents {
 			return new BukkitMCBlock(pie.getEnchantBlock());
 		}
 		
-		public MCPlayer GetEnchanter() {
+		public MCPlayer getEnchanter() {
 			return new BukkitMCPlayer(pie.getEnchanter());
 		}
 		

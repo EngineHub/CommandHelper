@@ -540,7 +540,7 @@ public class InventoryEvents {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
 				
-				map.put("player", new CString(e.GetEnchanter().getName(), Target.UNKNOWN));
+				map.put("player", new CString(e.getEnchanter().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), Target.UNKNOWN));

@@ -14,7 +14,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
  */
 public interface MCPrepareItemEnchantEvent extends MCInventoryEvent {
 	public MCBlock getEnchantBlock();
-	public MCPlayer GetEnchanter();
+	public MCPlayer getEnchanter();
 	public int getEnchantmentBonus();
 	public int[] getExpLevelCostsOffered();
 	public MCItemStack getItem();
