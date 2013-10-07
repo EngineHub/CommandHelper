@@ -248,7 +248,7 @@ public class AliasCore {
 	private static final ArgumentParser reloadOptions;
 	
 	static {
-		reloadOptions = ArgumentParser.GetParser().addFlag("--blacklist", "Sets the list of arguments to be a blacklist, that is,"
+		reloadOptions = ArgumentParser.GetParser().addFlag("--whitelist", "Sets the list of arguments to be a whitelist, that is,"
 				+ " only the specified modules get reloaded, the rest will be skipped. Without this option, the specified modules"
 				+ " don't get reloaded.")
 				.addFlag('g', "globals", "Specifies the globals memory. (Values stored with export/import.)")
@@ -296,7 +296,7 @@ public class AliasCore {
 				}
 				return;
 			}
-			if(results.isFlagSet("blacklist")){
+			if(results.isFlagSet("whitelist")){
 				//Invert the results
 				reloadGlobals = false;
 				reloadTimeouts = false;
