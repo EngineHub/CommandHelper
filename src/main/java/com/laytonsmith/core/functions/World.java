@@ -218,7 +218,7 @@ public class World {
 			return new CVoid(t);
 		}
 	}
-	
+
 	@api(environments=CommandHelperEnvironment.class)
 	public static class regen_chunk extends AbstractFunction {
 
@@ -256,11 +256,11 @@ public class World {
 			MCWorld world;
 			int x;
 			int z;
-			
+
 			if (args.length == 1) {
 				//Location array provided                
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
-				
+
 				world = l.getWorld();
 				x = l.getChunk().getX();
 				z = l.getChunk().getZ();
@@ -269,14 +269,14 @@ public class World {
 				if (args[0] instanceof CArray) {
 					world = Static.getServer().getWorld(args[1].val());
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
-					
+
 					x = l.getChunk().getX();
 					z = l.getChunk().getZ();
 				} else {
 					if (m == null) {
 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
 					}
-					
+
 					world = m.getWorld();
 					x = Static.getInt32(args[0], t);
 					z = Static.getInt32(args[1], t);
@@ -287,11 +287,11 @@ public class World {
 				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
 			}
-			
+
 			return new CBoolean(world.regenerateChunk(x, z), t);
 		}
 	}
-	
+
 	private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
 
 	static {
@@ -453,7 +453,7 @@ public class World {
 			return new CInt(w.getTime(), t);
 		}
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class create_world extends AbstractFunction{
 
@@ -471,23 +471,27 @@ public class World {
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCWorldCreator creator = StaticLayer.GetConvertor().getWorldCreator(args[0].val());
-			if(args.length >= 4){
+			if (args.length >= 3) {
 				MCWorldType type;
-				MCWorldEnvironment environment;
-				long seed = Static.getInt(args[3], t);
-				try{
+				try {
 					type = MCWorldType.valueOf(args[1].val().toUpperCase());
-				} catch(IllegalArgumentException e){
-					throw new ConfigRuntimeException(args[1].val() + " is not a valid world type. Must be one of: "
-							+ StringUtils.Join(MCWorldType.values(), ", "), ExceptionType.FormatException, t);
+				} catch (IllegalArgumentException e) {
+					throw new ConfigRuntimeException(args[1].val() + " is not a valid world type. Must be one of: " + StringUtils.Join(MCWorldType.values(), ", "), ExceptionType.FormatException, t);
 				}
-				try{
+				MCWorldEnvironment environment;
+				try {
 					environment = MCWorldEnvironment.valueOf(args[2].val().toUpperCase());
-				} catch(IllegalArgumentException e){
-					throw new ConfigRuntimeException(args[2].val() + " is not a valid environment type. Must be one of: "
-							+ StringUtils.Join(MCWorldEnvironment.values(), ", "), ExceptionType.FormatException, t);
+				} catch (IllegalArgumentException e) {
+					throw new ConfigRuntimeException(args[2].val() + " is not a valid environment type. Must be one of: " + StringUtils.Join(MCWorldEnvironment.values(), ", "), ExceptionType.FormatException, t);
 				}
-				creator.type(type).environment(environment).seed(seed);
+				creator.type(type).environment(environment);
+			}
+			if ((args.length >= 4) && !(args[3] instanceof CNull)) {
+				if (args[3] instanceof CInt) {
+					creator.seed(Static.getInt(args[3], t));
+				} else {
+					creator.seed(args[3].val().hashCode());
+				}
 			}
 			if (args.length == 5) {
 				creator.generator(args[4].val());
@@ -501,24 +505,23 @@ public class World {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 4, 5};
+			return new Integer[]{1, 3, 4, 5};
 		}
 
 		public String docs() {
-			return "void {name, [type, environment, seed,] [generator]} Creates a new world with the specified options."
+			return "void {name, [type, environment, [seed, [generator]]]} Creates a new world with the specified options."
 					+ " If the world already exists, it will be loaded from disk, and the last 3 arguments may be"
 					+ " ignored. name is the name of the world, type is one of " 
-					+ StringUtils.Join(MCWorldType.values(), ", ") + ", environment is one of "
-					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ", and seed is an integer."
+					+ StringUtils.Join(MCWorldType.values(), ", ") + " and environment is one of "
+					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ". The seed can be an integer, a string (will be the hashcode), or null (will be random int)."
 					+ " Generator is the name of a world generator loaded on the server.";
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_worlds extends AbstractFunction{
 
@@ -557,9 +560,8 @@ public class World {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_chunk_loc extends AbstractFunction {
 
@@ -576,14 +578,14 @@ public class World {
 			MCPlayer p = null;
 			MCWorld w = null;
 			MCLocation l = null;
-			
+
 			if (cs instanceof MCPlayer) {
 				p = (MCPlayer)cs;
 				Static.AssertPlayerNonNull(p, t);
 				l = p.getLocation();
 				w = l.getWorld();
 			}
-			
+
 			if (args.length == 1) {
 				if (args[0] instanceof CArray) {
 					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -597,7 +599,7 @@ public class World {
 							, ExceptionType.InsufficientArgumentsException, t);
 				}
 			}
-			
+
 			return new CArray(t,
 				new CInt(l.getChunk().getX(), t),
 				new CInt(l.getChunk().getZ(), t),
@@ -626,7 +628,7 @@ public class World {
 			return false;
 		}
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class spawn_falling_block extends AbstractFunction{
 
@@ -646,9 +648,9 @@ public class World {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null , t);
 			MCItemStack item = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
-			
+
 			CArray vect = null;
-			
+
 			if (args.length == 3) {
 				if (args[2] instanceof CArray) {
 					vect = (CArray)args[2];
@@ -660,16 +662,16 @@ public class World {
 					throw new ConfigRuntimeException("Expected array for argument 3 of spawn_falling_block", ExceptionType.FormatException, t);
 				}
 			}
-			
+
 			MCFallingBlock block = loc.getWorld().spawnFallingBlock(loc, item.getType().getType(), (byte)item.getData().getData());
-			
+
 			if (args.length == 3 && vect != null) {
 				double x = Double.valueOf(vect.get(0).val());
 				double y = Double.valueOf(vect.get(1).val());
 				double z = Double.valueOf(vect.get(2).val());
-				
+
 				Velocity v = new Velocity(x, y, z);
-				
+
 				block.setVelocity(v);
 			}
 
@@ -695,7 +697,7 @@ public class World {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class world_info extends AbstractFunction {
 

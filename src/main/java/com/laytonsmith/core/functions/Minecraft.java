@@ -5,10 +5,12 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
+import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
+import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCPigType;
@@ -293,7 +295,7 @@ public class Minecraft {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException, ExceptionType.InvalidWorldException};
 		}
 
 		public boolean isRestricted() {
@@ -323,27 +325,19 @@ public class Minecraft {
 				throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
 						ExceptionType.RangeException, t);
 			}
-			MCLocation l = null;
-			if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-				l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getLocation();
-			}
-			if (args.length > 2) {
-				if (args[2] instanceof CArray) {
-					CArray ca = (CArray) args[2];
-					l = ObjectGenerator.GetGenerator().location(ca, (l != null ? l.getWorld() : null), t);
-				} else {
-					throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array",
-							ExceptionType.CastException, t);
-				}
-			}
-			if (l.getWorld() != null) {
-				try{
-					return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
-				} catch(IllegalArgumentException e){
-					throw new ConfigRuntimeException("Invalid mob name: " + mob, ExceptionType.FormatException, t);
-				}
+			MCLocation l;
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (args.length == 3) {
+				l = ObjectGenerator.GetGenerator().location(args[2], (p != null ? p.getWorld() : null), t);
+			} else if (p != null) {
+				l = p.getLocation();
 			} else {
-				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
+				throw new ConfigRuntimeException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
+			}
+			try{
+				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
+			} catch(IllegalArgumentException e){
+				throw new ConfigRuntimeException("Invalid mob name: " + mob, ExceptionType.FormatException, t);
 			}
 		}
 	}
@@ -1352,15 +1346,16 @@ public class Minecraft {
             return new Integer[]{1, 2, 3};
         }
 
-        public String docs() {
-            return "int {[player/LocationArray], item} Drops the specified item at the specified quantity at the specified player's feet (or "
-                    + " at an arbitrary Location, if an array is given),"
-                    + " like the vanilla /give command. player defaults to the current player, and qty defaults to 1. item follows the"
-                    + " same type[:data] format used elsewhere. Returns the entity id of the item stack dropped.";
-        }
+		public String docs() {
+			return "int {[player/LocationArray], item, [spwanNaturally]} Drops the specified item stack at the specified player's feet (or "
+					+ " at an arbitrary Location, if an array is given), and returns its entity id"
+					+ " Like the vanilla /give command. player defaults to the current player, and qty defaults to 1."
+					+ " item take an item array."
+					+ " spwanNaturally take a boolean, it force the way the item will be spawned, if true, the item will be dropped with a random offset.";
+		}
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException, ExceptionType.InvalidWorldException};
         }
 
         public boolean isRestricted() {
@@ -1375,42 +1370,385 @@ public class Minecraft {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-
-            MCLocation l = null;
-            int qty = 1;
-            MCItemStack is = null;
-			MCItem item = null;
-            boolean natural = false;
-            if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-                l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
-            }
-			if(args.length == 1){
-				is = ObjectGenerator.GetGenerator().item(args[0], t);
-				natural = true;
-			} else if(args.length == 2){
-				if(args[0] instanceof CString){
-					l = Static.GetPlayer(args[0], t).getEyeLocation();
+			MCLocation l;
+            MCItemStack is;
+            boolean natural;
+			if (args.length == 1) {
+				if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+					l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
 					natural = false;
 				} else {
-					l = ObjectGenerator.GetGenerator().location(args[0], l==null?null:l.getWorld(), t);
+					throw new ConfigRuntimeException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
+				}
+				is = ObjectGenerator.GetGenerator().item(args[0], t);
+			} else {
+				MCPlayer p;
+				if (args[0] instanceof CArray) {
+					p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+					l = ObjectGenerator.GetGenerator().location(args[0], (p != null ? p.getWorld() : null), t);
 					natural = true;
+				} else {
+					p = Static.GetPlayer(args[0].val(), t);
+					Static.AssertPlayerNonNull(p, t);
+					l = p.getEyeLocation();
+					natural = false;
 				}
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
 			}
-            if (l.getWorld() != null) {
-                if (natural) {
-                    item = l.getWorld().dropItemNaturally(l, is);
-                } else {
-                    item = l.getWorld().dropItem(l, is);
-                }
-            } else {
-                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
-            }
-
-			if(item != null){
-				return new CInt(item.getEntityId(), t);
+			if (args.length == 3) {
+				natural = Static.getBoolean(args[2]);
 			}
-            return new CNull(t);
+			MCItem item;
+			if (natural) {
+				item = l.getWorld().dropItemNaturally(l, is);
+			} else {
+				item = l.getWorld().dropItem(l, is);
+			}
+			if (item != null) {
+				return new CInt(item.getEntityId(), t);
+			} else {
+				return new CNull(t);
+			}
         }
     }
+
+	@api
+	public static class get_difficulty extends AbstractFunction {
+
+		public String getName() {
+			return "get_difficulty";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "string {world} Returns the difficulty of the world, It will be one of " + StringUtils.Join(MCDifficulty.values(), ", ", ", or ", " or ") + ".";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld world = Static.getServer().getWorld(args[0].val());
+			if (world == null) {
+				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+			}
+			return new CString(world.getDifficulty().toString(), t);
+		}
+	}
+
+	@api
+	public static class set_difficulty extends AbstractFunction {
+
+		public String getName() {
+			return "set_difficulty";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "void {[world], difficulty} Sets the difficulty of the world with the given name, or all worlds if the name is not given."
+					+ " difficulty can be " + StringUtils.Join(MCDifficulty.values(), ", ", ", or ", " or ") + ".";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCDifficulty difficulty;
+			if (args.length == 1) {
+				try {
+					difficulty = MCDifficulty.valueOf(args[0].val().toUpperCase());
+				} catch (IllegalArgumentException exception) {
+					throw new ConfigRuntimeException("The difficulty \"" + args[0].val() + "\" does not exist.", ExceptionType.FormatException, t);
+				}
+				for (MCWorld world : Static.getServer().getWorlds()) {
+					world.setDifficulty(difficulty);
+				}
+			} else {
+				MCWorld world = Static.getServer().getWorld(args[0].val());
+				if (world == null) {
+					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				}
+				try {
+					difficulty = MCDifficulty.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException exception) {
+					throw new ConfigRuntimeException("The difficulty \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+				}
+				world.setDifficulty(difficulty);
+			}
+			return new CVoid(t);
+		}
+	}
+
+	@api
+	public static class get_pvp extends AbstractFunction {
+
+		public String getName() {
+			return "get_pvp";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "boolean {world} Returns if PVP is allowed in the world.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld world = Static.getServer().getWorld(args[0].val());
+			if (world == null) {
+				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+			}
+			return new CBoolean(world.getPVP(), t);
+		}
+	}
+
+	@api
+	public static class set_pvp extends AbstractFunction {
+
+		public String getName() {
+			return "set_pvp";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "void {[world], boolean} Sets if PVP is allowed in the world with the given name, or all worlds if the name is not given.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if (args.length == 1) {
+				boolean pvp = Static.getBoolean(args[0]);
+				for (MCWorld world : Static.getServer().getWorlds()) {
+					world.setPVP(pvp);
+				}
+			} else {
+				MCWorld world = Static.getServer().getWorld(args[0].val());
+				if (world == null) {
+					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				}
+				world.setPVP(Static.getBoolean(args[1]));
+			}
+			return new CVoid(t);
+		}
+	}
+
+	@api
+	public static class get_gamerule extends AbstractFunction {
+
+		public String getName() {
+			return "get_gamerule";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing gamerules for the given world."
+					+ " If gameRule is set, the function only returns the value of the specified gamerule, a boolean."
+					+ "gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld world = Static.getServer().getWorld(args[0].val());
+			if (world == null) {
+				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+			}
+			if (args.length == 1) {
+				CArray gameRules = new CArray(t);
+				for (MCGameRule gameRule : MCGameRule.values()) {
+					gameRules.set(new CString(gameRule.getGameRule(), t), new CBoolean(world.getGameRuleValue(gameRule), t), t);
+				}
+				return gameRules;
+			} else {
+				MCGameRule gameRule;
+				try {
+					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException exception) {
+					throw new ConfigRuntimeException("The gamerule \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+				}
+				return new CBoolean(world.getGameRuleValue(gameRule), t);
+			}
+		}
+	}
+
+	@api
+	public static class set_gamerule extends AbstractFunction {
+
+		public String getName() {
+			return "set_gamerule";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "void {[world], gameRule, value} Sets the value of the gamerule for the specified world, value is a boolean. If world is not given the value is set for all worlds."
+					+ " gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCGameRule gameRule;
+			if (args.length == 2) {
+				try {
+					gameRule = MCGameRule.valueOf(args[0].val().toUpperCase());
+				} catch (IllegalArgumentException exception) {
+					throw new ConfigRuntimeException("The gamerule \"" + args[0].val() + "\" does not exist.", ExceptionType.FormatException, t);
+				}
+				boolean value = Static.getBoolean(args[1]);
+				for (MCWorld world : Static.getServer().getWorlds()) {
+					world.setGameRuleValue(gameRule, value);
+				}
+			} else {
+				try {
+					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException exception) {
+					throw new ConfigRuntimeException("The gamerule \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+				}
+				MCWorld world = Static.getServer().getWorld(args[0].val());
+				if (world == null) {
+					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				}
+				world.setGameRuleValue(gameRule, Static.getBoolean(args[2]));
+			}
+			return new CVoid(t);
+		}
+	}
+
+	@api
+	public static class shutdown_server extends AbstractFunction {
+
+		public String getName() {
+			return "shutdown_server";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "void {} Shutdowns the server.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.getServer().shutdown();
+			return new CVoid(t);
+		}
+	}
 }
