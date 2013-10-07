@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profiles>
+    <!-- SQL Profiles go here. A sample MySQL profile configuration is provided. See the documentation
+		on SQL for more detailed information about this file. -->
+	<!--
+	<profile id="profileName">
+		<type>mysql</type>
+		<database>db_name</database>
+		<host>localhost</host>
+		<port>3306</port>
+		<username>root</username>
+		<password>hunter2</password>
+	</profile>
+	-->
+</profiles>

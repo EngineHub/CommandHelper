@@ -39,7 +39,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * can be done here. By default, an UnsupportedOperationException is thrown,
      * but is caught and ignored.
      */
-    public void bind(Map<String, Construct> prefilters) {
+    public void bind(BoundEvent event) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

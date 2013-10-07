@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -14,7 +15,9 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.database.Profiles;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -123,9 +126,19 @@ public class CommandHelperInterpreterListener implements Listener {
         List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
         ParseTree tree = MethodScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
-		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler,
-				plugin.persistanceNetwork, plugin.permissionsResolver,
-				CommandHelperFileLocations.getDefault().getConfigDirectory());
+		GlobalEnv gEnv;
+		try {
+			gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler,
+					plugin.persistanceNetwork, plugin.permissionsResolver,
+					CommandHelperFileLocations.getDefault().getConfigDirectory(),
+					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+		} catch (IOException ex) {
+			CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
+			return;
+		} catch (Profiles.InvalidProfileException ex) {
+			CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
+			return;
+		}
 		gEnv.SetDynamicScriptingMode(true);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
         cEnv.SetPlayer(p);

@@ -57,7 +57,7 @@ public final class EventUtils {
         SortedSet<BoundEvent> set = event_handles.get(event.driver());
         set.add(b);
         try {
-            event.bind(b.getPrefilter());
+            event.bind(b);
         } catch (UnsupportedOperationException e) {
         }
     }

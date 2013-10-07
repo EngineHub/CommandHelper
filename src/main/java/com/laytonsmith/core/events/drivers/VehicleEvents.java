@@ -302,7 +302,8 @@ public class VehicleEvents {
 		private Map<Integer, Map<Integer, MCLocation>> thresholds = new HashMap<Integer, Map<Integer, MCLocation>>();
 
 		@Override
-		public void bind(Map<String, Construct> prefilters) {
+		public void bind(BoundEvent event) {
+			Map<String, Construct> prefilters = event.getPrefilter();
 			if (prefilters.containsKey("threshold")) {
 				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 				thresholdList.add(i);

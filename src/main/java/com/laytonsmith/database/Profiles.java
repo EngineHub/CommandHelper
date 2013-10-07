@@ -4,6 +4,7 @@ package com.laytonsmith.database;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import java.io.File;
 import java.io.IOException;
@@ -117,6 +118,24 @@ public class Profiles {
 	}
 	
 	/**
+	 * Returns the profile associated with this profile set by id.
+	 * @param id
+	 * @return
+	 * @throws com.laytonsmith.database.Profiles.InvalidProfileException If the profile doesn't exist.
+	 */
+	public Profile getProfileById(String id) throws InvalidProfileException {
+		if(!profiles.containsKey(id)){
+			throw new InvalidProfileException("No profile by the name \"" + id + "\" was found.");
+		}
+		return profiles.get(id);
+	}
+	
+	@Override
+	public String toString(){
+		return StringUtils.Join(profileTypes, "=", "; ");
+	}
+	
+	/**
 	 * Private version that allows specifying the id.
 	 * @param id
 	 * @param type
@@ -141,8 +160,24 @@ public class Profiles {
 	}
 	
 	/**
+	 * Utility method for retreiving a Profile object given pre-parsed connection information.
+	 * The type is assumed to be apart of the data provided. No id is required as part of the data.
+	 * @param data
+	 * @return
+	 * @throws com.laytonsmith.database.Profiles.InvalidProfileException 
+	 */
+	public static Profile getProfile(Map<String, String> data) throws InvalidProfileException {
+		if(!data.containsKey("type")){
+			throw new InvalidProfileException("Missing \"type\"");
+		}
+		String type = data.get("type");
+		data.remove("type");
+		return getProfile(type, data);
+	}
+	
+	/**
 	 * Utility method for retrieving a Profile object given pre-parsed connection
-	 * information, including the type.
+	 * information, including the type. No id is required as part of the data.
 	 * @param type
 	 * @param data
 	 * @return
@@ -196,6 +231,12 @@ public class Profiles {
 		 * @return 
 		 */
 		public abstract String getConnectionString();
+
+		//Subclasses are encouraged to override this
+		@Override
+		public String toString(){
+			return (id == null ? "" : "(" + id + ") ") + getType();
+		}
 	}
 	
 	/**

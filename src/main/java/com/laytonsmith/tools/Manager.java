@@ -10,6 +10,7 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
+import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
@@ -19,6 +20,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.database.Profiles;
 import com.laytonsmith.persistance.DataSource;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.DataSourceFactory;
@@ -49,7 +51,7 @@ public class Manager {
 	private static final File chDirectory = new File(jarLocation, "CommandHelper");
 	private static PersistanceNetwork persistanceNetwork;
 
-	public static void start() throws IOException, DataSourceException, URISyntaxException {
+	public static void start() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(chDirectory);
@@ -58,7 +60,8 @@ public class Manager {
 		Installer.Install(chDirectory);
 		CHLog.initialize(chDirectory);
 		profiler = new Profiler(new File(chDirectory, "profiler.config"));
-		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistanceNetwork, new PermissionsResolver.PermissiveResolver(), chDirectory);
+		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistanceNetwork, 
+				new PermissionsResolver.PermissiveResolver(), chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 

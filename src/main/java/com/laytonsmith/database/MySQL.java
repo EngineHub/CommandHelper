@@ -126,6 +126,11 @@ public class MySQL extends DB {
 				throw new Error();
 			}
 		}
+
+		@Override
+		public String toString() {
+			return super.toString() + " " + host + ":" + port + " username=" + username;
+		}
 		
 	}
 	

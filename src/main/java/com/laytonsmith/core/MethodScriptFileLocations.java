@@ -2,7 +2,10 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.FileLocations;
+import com.laytonsmith.PureUtilities.StringUtils;
 import java.io.File;
+import java.net.URL;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -26,7 +29,16 @@ public class MethodScriptFileLocations extends FileLocations {
 	 * @return 
 	 */
 	public File getJarFile(){
-		return new File(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+		if(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation() == null){
+			//This can happen if we're not running from a jar. Instead, we have to get the folder location.
+			URL url = MethodScriptFileLocations.class.getResource("/" + MethodScriptFileLocations.class.getName().replace(".", "/") + ".class");
+			String s = url.toString();
+			s = s.replaceFirst("file:", "");
+			s = StringUtils.replaceLast(s, Pattern.quote(MethodScriptFileLocations.class.getName().replace(".", "/") + ".class"), "");
+			return new File(s);
+		} else {
+			return new File(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+		}
 	}
 	
 	/**
@@ -100,5 +112,13 @@ public class MethodScriptFileLocations extends FileLocations {
 	 */
 	public File getProfilerConfigFile(){
 		return new File(getConfigDirectory(), "profiler.config");
+	}
+	
+	/**
+	 * Returns the SQL profiles config file location.
+	 * @return 
+	 */
+	public File getSQLProfilesFile(){
+		return new File(getConfigDirectory(), "sql-profiles.xml");
 	}
 }
