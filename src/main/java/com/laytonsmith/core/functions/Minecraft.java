@@ -1348,8 +1348,8 @@ public class Minecraft {
 			return "int {[player/LocationArray], item, [spawnNaturally]} Drops the specified item stack at the specified player's feet (or "
 					+ " at an arbitrary Location, if an array is given), and returns its entity id"
 					+ " Like the vanilla /give command. player defaults to the current player, and qty defaults to 1."
-					+ " item take an item array."
-					+ " spawnNaturally take a boolean, it force the way the item will be spawned, if true, the item will be dropped with a random offset.";
+					+ " item takes an item array."
+					+ " spawnNaturally takes a boolean, which forces the way the item will be spawned. If true, the item will be dropped with a random offset.";
 		}
 
         public ExceptionType[] thrown() {
