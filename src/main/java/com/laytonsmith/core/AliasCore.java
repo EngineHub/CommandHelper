@@ -113,9 +113,9 @@ public class AliasCore {
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(player);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
-		
-		if(player instanceof MCBlockCommandSender){
-			cEnv.SetBlockCommandSender((MCBlockCommandSender)player);
+
+		if (player instanceof MCBlockCommandSender) {
+			cEnv.SetBlockCommandSender((MCBlockCommandSender) player);
 		}
 
 		if (scripts == null) {
@@ -149,35 +149,38 @@ public class AliasCore {
 						try {
 							env.getEnv(CommandHelperEnvironment.class).SetCommand(command);
 							ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("Global Alias - \"" + command + "\"", LogLevel.ERROR);
-							s.run(s.getVariables(command), env, new MethodScriptComplete() {
-								public void done(String output) {
-									try {
-										if (output != null) {
-											if (!output.trim().isEmpty() && output.trim().startsWith("/")) {
-												if (Prefs.DebugMode()) {
+							try {
+								s.run(s.getVariables(command), env, new MethodScriptComplete() {
+									public void done(String output) {
+										try {
+											if (output != null) {
+												if (!output.trim().isEmpty() && output.trim().startsWith("/")) {
+													if (Prefs.DebugMode()) {
+														if (player instanceof MCPlayer) {
+															Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer) player).getName() + ": " + output.trim());
+														} else {
+															Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + output.trim());
+														}
+													}
+
 													if (player instanceof MCPlayer) {
-														Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer) player).getName() + ": " + output.trim());
+														((MCPlayer) player).chat(output.trim());
 													} else {
-														Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + output.trim());
+														Static.getServer().dispatchCommand(player, output.trim().substring(1));
 													}
 												}
-
-												if (player instanceof MCPlayer) {
-													((MCPlayer) player).chat(output.trim());
-												} else {
-													Static.getServer().dispatchCommand(player, output.trim().substring(1));
-												}
 											}
+										} catch (Throwable e) {
+											System.err.println(e.getMessage());
+											player.sendMessage(MCChatColor.RED + e.getMessage());
+										} finally {
+											Static.getAliasCore().removePlayerReference(player);
 										}
-									} catch (Throwable e) {
-										System.err.println(e.getMessage());
-										player.sendMessage(MCChatColor.RED + e.getMessage());
-									} finally {
-										Static.getAliasCore().removePlayerReference(player);
 									}
-								}
-							});
-							alias.stop();
+								});
+							} finally {
+								alias.stop();
+							}
 						} catch (ConfigRuntimeException ex) {
 							ex.setEnv(env);
 							ConfigRuntimeException.React(ex, env);
@@ -210,20 +213,23 @@ public class AliasCore {
 							if (ac.match(command)) {
 								Static.getAliasCore().addPlayerReference(player);
 								ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("User Alias (" + player.getName() + ") - \"" + command + "\"", LogLevel.ERROR);
-								ac.run(ac.getVariables(command), env, new MethodScriptComplete() {
-									public void done(String output) {
-										if (output != null) {
-											if (!output.trim().isEmpty() && output.trim().startsWith("/")) {
-												if (Prefs.DebugMode()) {
-													Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer) player).getName() + ": " + output.trim());
+								try {
+									ac.run(ac.getVariables(command), env, new MethodScriptComplete() {
+										public void done(String output) {
+											if (output != null) {
+												if (!output.trim().isEmpty() && output.trim().startsWith("/")) {
+													if (Prefs.DebugMode()) {
+														Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer) player).getName() + ": " + output.trim());
+													}
+													((MCPlayer) player).chat(output.trim());
 												}
-												((MCPlayer) player).chat(output.trim());
 											}
+											Static.getAliasCore().removePlayerReference(player);
 										}
-										Static.getAliasCore().removePlayerReference(player);
-									}
-								});
-								alias.stop();
+									});
+								} finally {
+									alias.stop();
+								}
 								match = true;
 								break;
 							}
@@ -254,9 +260,9 @@ public class AliasCore {
 		}
 		return match;
 	}
-	
+
 	private static final ArgumentParser reloadOptions;
-	
+
 	static {
 		reloadOptions = ArgumentParser.GetParser().addFlag("--whitelist", "Sets the list of arguments to be a whitelist, that is,"
 				+ " only the specified modules get reloaded, the rest will be skipped. Without this option, the specified modules"
@@ -270,14 +276,14 @@ public class AliasCore {
 				.addFlag('f', "profiler", "Specifies the profiler config should not be reloaded.")
 				.addFlag('s', "scripts", "Specifies that the scripts should not be reloaded.")
 				.addFlag('x', "extensions", "Specifies that extensions should be reloaded.")
-				.addFlag('h', "help", "Prints this list and returns. Nothing is reloaded if this option is set.")
-			;
+				.addFlag('h', "help", "Prints this list and returns. Nothing is reloaded if this option is set.");
 	}
 
 	/**
 	 * Loads the global alias file in from the file system. If a player is
 	 * running the command, send a reference to them, and they will see compile
 	 * errors, otherwise, null.
+	 *
 	 * @param player
 	 * @param settings The argument list for the settings.
 	 */
@@ -290,7 +296,7 @@ public class AliasCore {
 		boolean reloadProfiler = true;
 		boolean reloadScripts = true;
 		boolean reloadExtensions = true;
-		if(settings != null){
+		if (settings != null) {
 			ArgumentParser.ArgumentParserResults results;
 			try {
 				results = reloadOptions.match(settings);
@@ -298,15 +304,15 @@ public class AliasCore {
 				Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 				return;
 			}
-			if(results.isFlagSet('h')){
-				if(player != null){
+			if (results.isFlagSet('h')) {
+				if (player != null) {
 					player.sendMessage(reloadOptions.getBuiltDescription());
 				} else {
 					System.out.println(reloadOptions.getBuiltDescription());
 				}
 				return;
 			}
-			if(results.isFlagSet("whitelist")){
+			if (results.isFlagSet("whitelist")) {
 				//Invert the results
 				reloadGlobals = false;
 				reloadTimeouts = false;
@@ -317,48 +323,48 @@ public class AliasCore {
 				reloadScripts = false;
 				reloadExtensions = false;
 			}
-			if(results.isFlagSet('g')){
+			if (results.isFlagSet('g')) {
 				reloadGlobals = !reloadGlobals;
 			}
-			if(results.isFlagSet('t')){
+			if (results.isFlagSet('t')) {
 				reloadTimeouts = !reloadTimeouts;
 			}
-			if(results.isFlagSet('e')){
+			if (results.isFlagSet('e')) {
 				reloadExecutionQueue = !reloadExecutionQueue;
 			}
-			if(results.isFlagSet('r') || results.isFlagSet("persistence-config")){
+			if (results.isFlagSet('r') || results.isFlagSet("persistence-config")) {
 				reloadPersistanceConfig = !reloadPersistanceConfig;
 			}
-			if(results.isFlagSet('p')){
+			if (results.isFlagSet('p')) {
 				reloadPreferences = !reloadPreferences;
 			}
-			if(results.isFlagSet('f')){
+			if (results.isFlagSet('f')) {
 				reloadProfiler = !reloadProfiler;
 			}
-			if(results.isFlagSet('s')){
+			if (results.isFlagSet('s')) {
 				reloadScripts = !reloadScripts;
 			}
-			if(results.isFlagSet('x')){
+			if (results.isFlagSet('x')) {
 				reloadExtensions = !reloadExtensions;
 			}
 		}
 		try {
-			if(Prefs.AllowDynamicShell()){
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in " 
+			if (Prefs.AllowDynamicShell()) {
+				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
 						+ CommandHelperFileLocations.getDefault().getProfilerConfigFile().getName() + " you should set this to false, except during development.", Target.UNKNOWN);
 			}
 			StaticLayer.GetConvertor().runShutdownHooks();
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 			//Install bukkit into the class discovery class
 			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
-			if(reloadExtensions){
+			if (reloadExtensions) {
 				ExtensionManager.Startup();
 			}
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
-			if(parent.profiler == null || reloadProfiler){
+			if (parent.profiler == null || reloadProfiler) {
 				parent.profiler = new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
 			}
-			if(parent.persistanceNetwork == null || reloadPersistanceConfig){
+			if (parent.persistanceNetwork == null || reloadPersistanceConfig) {
 				MemoryDataSource.ClearDatabases();
 				//PacketJumper.startup();
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
@@ -368,23 +374,23 @@ public class AliasCore {
 						.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
 			}
 			GlobalEnv gEnv;
-			try{
+			try {
 				gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver,
 						MethodScriptFileLocations.getDefault().getConfigDirectory(),
 						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
-			} catch(Profiles.InvalidProfileException ex){
+			} catch (Profiles.InvalidProfileException ex) {
 				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;
 			}
-			if(reloadExecutionQueue){
+			if (reloadExecutionQueue) {
 				parent.executionQueue.stopAllNow();
 			}
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 			Environment env = Environment.createEnvironment(gEnv, cEnv);
-			if(reloadGlobals){
+			if (reloadGlobals) {
 				Globals.clear();
 			}
-			if(reloadTimeouts){
+			if (reloadTimeouts) {
 				Scheduling.ClearScheduledRunners();
 			}
 			if (!aliasConfig.exists()) {
@@ -413,11 +419,11 @@ public class AliasCore {
 				}
 			}
 
-			if(!Prefs.isInitialized() || reloadPreferences){
+			if (!Prefs.isInitialized() || reloadPreferences) {
 				Prefs.init(prefFile);
 			}
-			
-			if(reloadScripts){
+
+			if (reloadScripts) {
 				EventUtils.UnregisterAll();
 				EventList.RunHooks();
 				IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
@@ -425,11 +431,9 @@ public class AliasCore {
 
 				LocalPackage localPackages = new LocalPackage();
 
-
 				//Run the main file once           
 				String main = file_get_contents(mainFile.getAbsolutePath());
 				localPackages.appendMS(main, mainFile);
-
 
 				String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
 				localPackages.appendMSA(alias_config, aliasConfig);
@@ -440,11 +444,17 @@ public class AliasCore {
 				autoIncludes = localPackages.getAutoIncludes();
 
 				ProfilePoint compilerMS = parent.profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
-				localPackages.compileMS(player, env);
-				compilerMS.stop();
+				try {
+					localPackages.compileMS(player, env);
+				} finally {
+					compilerMS.stop();
+				}
 				ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
-				localPackages.compileMSA(scripts, player);
-				compilerMSA.stop();
+				try {
+					localPackages.compileMSA(scripts, player);
+				} finally {
+					compilerMSA.stop();
+				}
 			}
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
@@ -666,11 +676,11 @@ public class AliasCore {
 				} catch (ConfigRuntimeException e) {
 					exception = true;
 					ConfigRuntimeException.React(e, env);
-				} catch(CancelCommandException e){
-					if(e.getMessage() != null && !"".equals(e.getMessage().trim())){
+				} catch (CancelCommandException e) {
+					if (e.getMessage() != null && !"".equals(e.getMessage().trim())) {
 						logger.log(Level.INFO, e.getMessage());
 					}
-				} catch(ProgramFlowManipulationException e){
+				} catch (ProgramFlowManipulationException e) {
 					exception = true;
 					ConfigRuntimeException.React(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in main files.", e.getTarget()), env);
 				} finally {

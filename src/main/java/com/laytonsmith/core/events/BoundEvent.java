@@ -258,8 +258,11 @@ public class BoundEvent implements Comparable<BoundEvent> {
             activeEvent.addHistory("Triggering bound event: " + this);
             try{
 				ProfilePoint p = env.getEnv(GlobalEnv.class).GetProfiler().start("Executing event handler for " + this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
-                this.execute(env, activeEvent);
-				p.stop();
+				try {
+					this.execute(env, activeEvent);
+				} finally {
+					p.stop();
+				}
             } catch(ConfigRuntimeException e){
                 //We don't know how to handle this, but we need to set the env,
                 //then pass it up the chain

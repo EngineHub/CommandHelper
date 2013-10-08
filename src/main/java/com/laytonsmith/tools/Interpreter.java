@@ -207,9 +207,13 @@ public class Interpreter {
 			fromFile = new File("Interpreter");
 		}
 		ProfilePoint compile = env.getEnv(GlobalEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
-		List<Token> stream = MethodScriptCompiler.lex(script, fromFile, true);
-		ParseTree tree = MethodScriptCompiler.compile(stream);
-		compile.stop();
+		ParseTree tree;
+		try {
+			List<Token> stream = MethodScriptCompiler.lex(script, fromFile, true);
+			tree = MethodScriptCompiler.compile(stream);
+		} finally {
+			compile.stop();
+		}
 		Environment env = Environment.createEnvironment(Interpreter.env.getEnv(GlobalEnv.class));
 		env.getEnv(GlobalEnv.class).SetCustom("cmdline", true);
 		List<Variable> vars = null;
@@ -243,27 +247,16 @@ public class Interpreter {
 		}
 		try {
 			ProfilePoint p = Interpreter.env.getEnv(GlobalEnv.class).GetProfiler().start("Interpreter Script", LogLevel.ERROR);
-			MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
-				public void done(String output) {
-					//Do nothing
-//					output = output.trim();
-//					if (output.isEmpty()) {
-//						if (System.console() != null) {
-//							pl(":");
-//						}
-//					} else {
-//						if (output.startsWith("/")) {
-//							//Run the command
-//							pl((System.console() != null ? ":" + YELLOW : "") + output);
-//						} else {
-//							//output the results
-//							pl((System.console() != null ? ":" + GREEN : "") + output);
-//						}
-//					}
-				}
-			}, null, vars);
-			env.getEnv(GlobalEnv.class).GetDaemonManager().waitForThreads();
-			p.stop();
+			try {
+				MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
+					public void done(String output) {
+						//Do nothing
+					}
+				}, null, vars);
+				env.getEnv(GlobalEnv.class).GetDaemonManager().waitForThreads();
+			} finally {
+				p.stop();
+			}
 		} catch (CancelCommandException e) {
 			if (System.console() != null) {
 				pl(":");

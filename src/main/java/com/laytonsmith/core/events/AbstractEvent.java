@@ -67,9 +67,12 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		if(env.getEnv(GlobalEnv.class).GetProfiler() != null){
 			event = env.getEnv(GlobalEnv.class).GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
 		}
-        s.run(null, env, null);
-		if(event != null){
-			event.stop();
+		try {
+			s.run(null, env, null);
+		} finally {
+			if(event != null){
+				event.stop();
+			}
 		}
         try{
             this.postExecution(env, activeEvent);
