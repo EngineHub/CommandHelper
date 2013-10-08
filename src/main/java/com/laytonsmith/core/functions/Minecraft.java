@@ -1345,11 +1345,11 @@ public class Minecraft {
         }
 
 		public String docs() {
-			return "int {[player/LocationArray], item, [spwanNaturally]} Drops the specified item stack at the specified player's feet (or "
+			return "int {[player/LocationArray], item, [spawnNaturally]} Drops the specified item stack at the specified player's feet (or "
 					+ " at an arbitrary Location, if an array is given), and returns its entity id"
 					+ " Like the vanilla /give command. player defaults to the current player, and qty defaults to 1."
 					+ " item take an item array."
-					+ " spwanNaturally take a boolean, it force the way the item will be spawned, if true, the item will be dropped with a random offset.";
+					+ " spawnNaturally take a boolean, it force the way the item will be spawned, if true, the item will be dropped with a random offset.";
 		}
 
         public ExceptionType[] thrown() {
@@ -1409,4 +1409,48 @@ public class Minecraft {
 			}
         }
     }
+
+	@api
+	public static class shutdown_server extends AbstractFunction implements Optimizable {
+
+		public String getName() {
+			return "shutdown_server";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "nothing {} Shuts down the server.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException {
+			Static.getServer().shutdown();
+			throw new CancelCommandException("", t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+				OptimizationOption.TERMINAL
+			);
+		}
+	}
 }
