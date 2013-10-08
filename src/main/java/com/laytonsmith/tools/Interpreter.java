@@ -49,6 +49,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.profiler.ProfilePoint;
+import com.laytonsmith.database.Profiles;
 import com.laytonsmith.persistance.DataSourceException;
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class Interpreter {
 	static String script;
 	private static Environment env;
 	
-	public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException{
+	public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException{
 		doStartup();
 		try{
 			File fromFile = new File(file).getCanonicalFile();
@@ -98,7 +99,7 @@ public class Interpreter {
 	 * @throws DataSourceException
 	 * @throws URISyntaxException 
 	 */
-	public static void start(List<String> args) throws IOException, DataSourceException, URISyntaxException {
+	public static void start(List<String> args) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		doStartup();
 		Scanner scanner = new Scanner(System.in);
 		if (System.console() != null) {
@@ -139,7 +140,7 @@ public class Interpreter {
 		}
 	}
 	
-	private static void doStartup() throws IOException, DataSourceException, URISyntaxException{
+	private static void doStartup() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException{
 		MethodScriptFileLocations.getDefault().getCacheDirectory().mkdirs();
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
 		cdc.setLogger(Logger.getLogger(Interpreter.class.getName()));

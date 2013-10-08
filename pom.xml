@@ -626,6 +626,9 @@
 										<include>com/sk89q/worldedit/Vector.*</include>
 										<!-- Expression Parser -->
 										<include>com/sk89q/worldedit/expression/**</include>
+										<!-- General Requirements -->
+										<include>com/sk89q/worldedit/bukkit/BukkitCommandSender.*</include>
+										<include>com/sk89q/worldedit/LocalPlayer.*</include>
 									</includes>
 									<excludes>
 										<exclude>com/sk89q/jchronic/**</exclude>
