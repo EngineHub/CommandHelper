@@ -157,7 +157,8 @@ public class PersistanceNetwork {
 	/**
 	 * This method returns a list of all keys and values that match the
 	 * namespace. If a.b.c is requested, then keys (and values) a.b.c.d and
-	 * a.b.c.e would be returned.
+	 * a.b.c.e would be returned. If the namespace is empty, it will match
+	 * all keys.
 	 *
 	 * @param namespace
 	 * @return

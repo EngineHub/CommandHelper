@@ -24,6 +24,7 @@ import com.laytonsmith.database.Profiles;
 import com.laytonsmith.persistance.DataSource;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.DataSourceFactory;
+import com.laytonsmith.persistance.DataSourceFilter;
 import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.ReadOnlyException;
 import com.laytonsmith.persistance.SerializedPersistance;
@@ -31,6 +32,7 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +43,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author layton
  */
 public class Manager {
 
@@ -83,7 +84,7 @@ public class Manager {
 			if (input.toLowerCase().startsWith("help")) {
 				help(input.replaceFirst("help ?", "").toLowerCase().split(" "));
 			} else if (input.equalsIgnoreCase("refactor")) {
-				pl("refactor - That feature isn't implemented yet :(");
+				refactor();
 			} else if (input.toLowerCase().startsWith("print")) {
 				print(input.replaceFirst("print ?", "").toLowerCase().split(" "));
 			} else if (input.equalsIgnoreCase("cleardb")) {
@@ -288,7 +289,7 @@ public class Manager {
 	public static void help(String[] args) {
 		if (args.length < 1 || args[0].isEmpty()) {
 			pl("Currently, your options are:\n"
-					+ "\t" + BLUE + "refactor" + WHITE + " - Allows you to shuffle data around in the persistance network more granularly than the merge tool.\n"
+					+ "\t" + GREEN + "refactor" + WHITE + " - Allows you to shuffle data around in the persistance network more granularly than the merge tool.\n"
 					+ "\t" + GREEN + "upgrade" + WHITE + " - Runs upgrade scripts on your persisted data\n"
 					+ "\t" + GREEN + "print" + WHITE + " - Prints out the information from your persisted data\n"
 					+ "\t" + GREEN + "cleardb" + WHITE + " - Clears out your database of persisted data\n"
@@ -553,6 +554,133 @@ public class Manager {
 			}
 		} else {
 			pl(RED + "Upgrade Cancelled");
+		}
+	}
+	
+	public static void refactor(){
+		pl("This tool allows you to granularly move individual keys from one datasource to another."
+				+ " Unlike the merge tool, this works with individual keys, not necessarily keys that are"
+				+ " within a particular data source. There are three required inputs, the transfer key pattern,"
+				+ " the input configuration file, and the output configuration file. Data is transferred from"
+				+ " one configuration to the other, that is, it is added in the new place, and removed in the old place."
+				+ " This tool is more complicated"
+				+ " than the merge tool, so consider using the other tool for simple tasks.\n\n");
+		pl("Would you like to continue? [" + GREEN + "Y" + WHITE + "/"
+				+ RED + "N" + WHITE + "]");
+		String choice = prompt();
+		if("Y".equals(choice)){
+			String filter;
+			File input;
+			File output;
+			while(true){
+				while(true){
+					pl("What keys are you interested in transferring? The filter should be in the same format as the persistance.config file, i.e."
+							+ " \"storage.test\" or \"storage.test.**\". If a wildcard is used, multiple keys may be moved, otherwise, only one will"
+							+ " be.");
+					filter = prompt();
+					break;
+				}
+				File def = MethodScriptFileLocations.getDefault().getPersistanceConfig();
+				while(true) {
+					pl("What is the input configuration (where keys will be read in from, then deleted)? Leave blank for the default, which is " + def.toString()
+							+ ". The path should be relative to " + jarLocation.toString());
+					String sinput = prompt();
+					if("".equals(sinput.trim())){
+						input = def;
+					} else {
+						File temp = new File(sinput);
+						if(!temp.isAbsolute()){
+							temp = new File(jarLocation, sinput);
+						}
+						input = temp;
+					}
+					if(!input.exists() || !input.isFile()){
+						pl(RED + input.toString() + " isn't a file. Please enter an existing file.");
+					} else {
+						break;
+					}
+				}
+				while(true){
+					pl("What is the output configuration (where keys will be written to)? The path should be relative to " + jarLocation.toString());
+					String soutput = prompt();
+					if("".equals(soutput.trim())){
+						pl(RED + "The output cannot be empty");
+						continue;
+					} else {
+						File temp = new File(soutput);
+						if(!temp.isAbsolute()){
+							temp = new File(jarLocation, soutput);
+						}
+						output = temp;
+					}
+					if(!output.exists() || !output.isFile()){
+						pl(RED + output.toString() + " isn't a file. Please enter an existing file.");
+					} else {
+						break;
+					}
+				}
+
+				pl("The filter is \"" + MAGENTA + filter + WHITE + "\".");
+				pl("The input configuration is \"" + MAGENTA + input.toString() + WHITE + "\".");
+				pl("The output configuration is \"" + MAGENTA + output.toString() + WHITE + "\".");
+				pl("Is this correct? [" + GREEN + "Y" + WHITE + "/"
+					+ RED + "N" + WHITE + "]");
+				if("Y".equals(prompt())){
+					break;
+				}
+			}
+			pl(YELLOW + "Now beginning transfer...");
+			URI defaultURI;
+			try {
+				defaultURI = new URI("file://persistance.db");
+			} catch (URISyntaxException ex) {
+				throw new Error(ex);
+			}
+			ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
+			try {
+				DaemonManager dm = new DaemonManager();
+				mixinOptions.setWorkingDirectory(chDirectory);
+				PersistanceNetwork pninput = new PersistanceNetwork(input, defaultURI, mixinOptions);
+				PersistanceNetwork pnoutput = new PersistanceNetwork(output, defaultURI, mixinOptions);
+				Pattern p = Pattern.compile(DataSourceFilter.toRegex(filter));
+				Map<String[], String> inputData = pninput.getNamespace(new String[]{});
+				boolean errors = false;
+				for(String [] k : inputData.keySet()){
+					if(p.matcher(StringUtils.Join(k, ".")).matches()){
+						//This key matches, so we need to add it to the output network, and then remove it
+						//from the input network
+						if(pnoutput.getKeySource(k).equals(pninput.getKeySource(k))){
+							continue; //Don't transfer it if it's the same source, otherwise we would
+									  //end up just deleting it.
+						}
+						try {
+							pnoutput.set(dm, k, inputData.get(k));
+						} catch (ReadOnlyException ex) {
+							pl(RED + "Could not write out the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the output"
+									+ " file is set to read only.");
+							errors = true;
+						}
+						try {
+							pninput.clearKey(dm, k);
+						} catch (ReadOnlyException ex) {
+							pl(RED + "Could not clear out original key for the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the input"
+									+ " file is set to read only.");
+							errors = true;
+						}
+					}
+				}
+				if(errors){
+					pl(YELLOW + "Other than the errors listed above, all keys were transferred successfully.");
+				} else {
+					pl(GREEN + "Done!");
+				}
+				pl(GREEN + "If this is being done as part of an entire transfer process, don't forget to set " + output.toString()
+						+ " as your main Persistance Network configuration file.");
+			} catch (IOException ex) {
+				Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (DataSourceException ex) {
+				Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		}
 	}
 }

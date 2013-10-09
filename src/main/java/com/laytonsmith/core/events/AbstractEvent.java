@@ -81,12 +81,28 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         }
     }
     
+	/**
+	 * This method is called before the event handling code is run, and provides a place
+	 * for the event code itself to modify the environment or active event data.
+	 * @param env The environment, at the time just before the event handler is called.
+	 * @param activeEvent The event handler code.
+	 * @throws UnsupportedOperationException If the preExecution isn't supported, this may
+	 * be thrown, and it will be ignored.
+	 */
     public void preExecution(Environment env, BoundEvent.ActiveEvent activeEvent){
-        throw new UnsupportedOperationException();
+        
     }
     
+	/**
+	 * This method is called after the event handling code is run, and provides a place
+	 * for the event code itself to modify or cleanup the environment or active event data.
+	 * @param env The environment, at the time just before the event handler is called.
+	 * @param activeEvent The event handler code.
+	 * @throws UnsupportedOperationException If the preExecution isn't supported, this may
+	 * be thrown, and it will be ignored.
+	 */
     public void postExecution(Environment env, BoundEvent.ActiveEvent activeEvent){
-        throw new UnsupportedOperationException();
+        
     }
 
     /**

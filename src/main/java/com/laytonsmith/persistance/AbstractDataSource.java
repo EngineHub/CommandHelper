@@ -139,7 +139,8 @@ public abstract class AbstractDataSource implements DataSource {
 		Set<String[]> list = new HashSet<String[]>();
 		String ns = StringUtils.Join(namespace, ".");
 		for (String key : stringKeySet()) {
-			if (key.matches(Pattern.quote(ns) + "(?:$|\\..*)")) {
+			if ("".equals(ns) //Blank string; this means they want it to always match.
+					|| key.matches(Pattern.quote(ns) + "(?:$|\\..*)")) {
 				String[] split = key.split("\\.");
 				list.add(split);
 			}
