@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCTone;
+import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
@@ -1078,6 +1079,55 @@ public class Environment {
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			return new CBoolean(loc.getBlock().isBlockPowered(), t);
+		}
+	}
+
+	@api
+	public static class generate_tree extends AbstractFunction {
+
+		public String getName() {
+			return "generate_tree";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "boolean {locationArray, [treeType]} Generates a tree at the given location and returns if the generation succeeded or not."
+					+ " treeType can be " + StringUtils.Join(MCTreeType.values(), ", ", ", or ", " or ") + ", defaulting to TREE.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCTreeType treeType;
+			if (args.length == 1) {
+				treeType = MCTreeType.TREE;
+			} else {
+				try {
+					treeType = MCTreeType.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException exception) {
+					throw new ConfigRuntimeException("The tree type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+				}
+			}
+			MCPlayer psender = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], (psender != null ? psender.getWorld() : null), t);
+			return new CBoolean(location.getWorld().generateTree(location, treeType), t);
 		}
 	}
 }

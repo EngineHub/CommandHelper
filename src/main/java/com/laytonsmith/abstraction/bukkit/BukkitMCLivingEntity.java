@@ -116,6 +116,10 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		return retn;
 	}
 
+	public boolean hasLineOfSight(MCEntity other) {
+		return le.hasLineOfSight(((BukkitMCEntity) other).asEntity());
+	}
+
 	public int getMaximumAir() {
 		return le.getMaximumAir();
 	}

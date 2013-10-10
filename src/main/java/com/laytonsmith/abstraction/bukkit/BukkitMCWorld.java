@@ -11,26 +11,31 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHorse;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
+import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCPigType;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDifficulty;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSkeletonType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
 import com.laytonsmith.core.constructs.*;
@@ -59,7 +64,7 @@ public class BukkitMCWorld implements MCWorld {
     public BukkitMCWorld(World w) {
         this.w = w;
     }
-	
+
 	@Override
 	public boolean equals(Object o) {
 		return o instanceof MCWorld ? this.w.equals(((BukkitMCWorld)o).w) : false;
@@ -69,12 +74,12 @@ public class BukkitMCWorld implements MCWorld {
 	public int hashCode() {
 		return this.w.hashCode();
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.w.toString();
 	}
-    
+
     public BukkitMCWorld(AbstractionObject a){
         this((World)null);
         if(a instanceof MCWorld){
@@ -83,7 +88,7 @@ public class BukkitMCWorld implements MCWorld {
             throw new ClassCastException();
         }
     }
-    
+
     public Object getHandle(){
         return w;
     }
@@ -91,6 +96,17 @@ public class BukkitMCWorld implements MCWorld {
     public World __World() {
         return w;
     }
+
+	public List<MCPlayer> getPlayers() {
+		if (w.getPlayers() == null) {
+			return null;
+		}
+		List<MCPlayer> list = new ArrayList<MCPlayer>();
+		for (Player p : w.getPlayers()) {
+			list.add(new BukkitMCPlayer(p));
+		}
+		return list;
+	}
 
 	public List<MCEntity> getEntities() {
 		if (w.getEntities() == null) {
@@ -122,6 +138,30 @@ public class BukkitMCWorld implements MCWorld {
 		return w.getSeed();
 	}
 
+	public MCDifficulty getDifficulty() {
+		return BukkitMCDifficulty.getConvertor().getAbstractedEnum(w.getDifficulty());
+	}
+
+	public void setDifficulty(MCDifficulty difficulty) {
+		w.setDifficulty(BukkitMCDifficulty.getConvertor().getConcreteEnum(difficulty));
+	}
+
+	public boolean getPVP() {
+		return w.getPVP();
+	}
+
+	public void setPVP(boolean pvp) {
+		w.setPVP(pvp);
+	}
+
+	public boolean getGameRuleValue(MCGameRule gameRule) {
+		return Boolean.valueOf(w.getGameRuleValue(gameRule.getGameRule()));
+	}
+
+	public void setGameRuleValue(MCGameRule gameRule, boolean value) {
+		w.setGameRuleValue(gameRule.getGameRule(), String.valueOf(value));
+	}
+
 	public MCWorldEnvironment getEnvironment() {
 		return BukkitMCWorldEnvironment.getConvertor().getAbstractedEnum(w.getEnvironment());
 	}
@@ -133,7 +173,7 @@ public class BukkitMCWorld implements MCWorld {
 			return "default";
 		}
 	}
-	
+
 	public MCWorldType getWorldType() {
 		return BukkitMCWorldType.getConvertor().getAbstractedEnum(w.getWorldType());
 	}
@@ -153,6 +193,10 @@ public class BukkitMCWorld implements MCWorld {
 		return BukkitConvertor.BukkitGetCorrectEntity(w.spawnEntity(
 				((BukkitMCLocation) l).asLocation(),
 				BukkitMCEntityType.getConvertor().getConcreteEnum(MCEntityType.valueOf(entType.name()))));
+	}
+
+	public boolean generateTree(MCLocation l, MCTreeType treeType) {
+		return w.generateTree(((BukkitMCLocation) l).asLocation(), BukkitMCTreeType.getConvertor().getConcreteEnum(treeType));
 	}
 
     public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data) {
@@ -550,11 +594,11 @@ public class BukkitMCWorld implements MCWorld {
 	public MCChunk getChunkAt(int x, int z) {
 		return new BukkitMCChunk(w.getChunkAt(x, z));
 	}
-	
+
 	public MCChunk getChunkAt(MCBlock b) {
 		return new BukkitMCChunk(w.getChunkAt(((BukkitMCBlock) b).__Block()));
 	}
-	
+
 	public MCChunk getChunkAt(MCLocation l) {
 		return new BukkitMCChunk(w.getChunkAt(((BukkitMCLocation) l).asLocation()));
 	}
@@ -562,7 +606,7 @@ public class BukkitMCWorld implements MCWorld {
 	public void setThundering(boolean b) {
 		w.setThundering(b);
 	}
-	
+
 	public void setWeatherDuration(int time) {
 		w.setWeatherDuration(time);
 	}
@@ -570,11 +614,11 @@ public class BukkitMCWorld implements MCWorld {
 	public void setThunderDuration(int time) {
 		w.setThunderDuration(time);
 	}
-	
+
 	public boolean isStorming() {
 		return w.hasStorm();
 	}
-	
+
 	public boolean isThundering() {
 		return w.isThundering();
 	}

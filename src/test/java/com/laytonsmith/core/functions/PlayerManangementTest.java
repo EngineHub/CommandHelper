@@ -93,7 +93,7 @@ public class PlayerManangementTest {
         when(fakePlayer.getLocation()).thenReturn(loc);
         when(fakePlayer.getWorld()).thenReturn(w);
         SRun(script, fakePlayer);
-        verify(fakePlayer).sendMessage("{0.0, 0.0, 0.0, world}");
+        verify(fakePlayer).sendMessage("{0: 0.0, 1: 1.0, 2: 0.0, 3: world, 4: 0.0, 5: 0.0, pitch: 0.0, world: world, x: 0.0, y: 1.0, yaw: 0.0, z: 0.0}");
     }
 
     public void testSetPloc() throws ConfigCompileException, Exception {
