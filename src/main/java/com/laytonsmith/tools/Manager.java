@@ -645,8 +645,12 @@ public class Manager {
 				Pattern p = Pattern.compile(DataSourceFilter.toRegex(filter));
 				Map<String[], String> inputData = pninput.getNamespace(new String[]{});
 				boolean errors = false;
+				int transferred = 0;
+				int skipped = 0;
 				for(String [] k : inputData.keySet()){
-					if(p.matcher(StringUtils.Join(k, ".")).matches()){
+					String key = StringUtils.Join(k, ".");
+					if(p.matcher(key).matches()){
+						pl(GREEN + "transferring " + YELLOW + key);
 						//This key matches, so we need to add it to the output network, and then remove it
 						//from the input network
 						if(pnoutput.getKeySource(k).equals(pninput.getKeySource(k))){
@@ -655,20 +659,25 @@ public class Manager {
 						}
 						try {
 							pnoutput.set(dm, k, inputData.get(k));
+							transferred++;
+							try {
+								pninput.clearKey(dm, k);
+							} catch (ReadOnlyException ex) {
+								pl(RED + "Could not clear out original key for the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the input"
+										+ " file is set to read only.");
+								errors = true;
+							}
 						} catch (ReadOnlyException ex) {
 							pl(RED + "Could not write out the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the output"
 									+ " file is set to read only.");
 							errors = true;
 						}
-						try {
-							pninput.clearKey(dm, k);
-						} catch (ReadOnlyException ex) {
-							pl(RED + "Could not clear out original key for the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the input"
-									+ " file is set to read only.");
-							errors = true;
-						}
+					} else {
+						skipped++;
 					}
 				}
+				pl(YELLOW + StringUtils.PluralTemplateHelper(transferred, "%d key was", "%d keys were") + " transferred.");
+				pl(YELLOW + StringUtils.PluralTemplateHelper(skipped, "%d key was", "%d keys were") + " skipped.");
 				if(errors){
 					pl(YELLOW + "Other than the errors listed above, all keys were transferred successfully.");
 				} else {
