@@ -145,6 +145,7 @@ public class BukkitPlayerListener implements Listener {
 					copy.setFormat(event.getFormat());
 					//event.setCancelled(true);
 					Future f = Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable() {
+						@Override
 						public Object call() throws Exception {
 							onPlayerChat(copy);
 							return null;

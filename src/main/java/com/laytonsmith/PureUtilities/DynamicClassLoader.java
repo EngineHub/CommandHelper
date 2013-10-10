@@ -3,8 +3,11 @@ package com.laytonsmith.PureUtilities;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,6 +36,27 @@ public class DynamicClassLoader extends ClassLoader {
 		urls.add(url);
 		classLoaders.add(new URLClassLoader(new URL[]{url}, DynamicClassLoader.class.getClassLoader()));
 	}
+
+	@Override
+	protected synchronized Package getPackage(String name) {
+		for(ClassLoader c : classLoaders){
+			Package p = (Package) ReflectionUtils.invokeMethod(c.getClass(), c, "getPackage", new Class[]{String.class}, new Object[]{name});
+			if(p != null){
+				return p;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	protected synchronized Package[] getPackages() {
+		List<Package> packages = new ArrayList<Package>();
+		for(ClassLoader c : classLoaders){
+			packages.addAll(Arrays.asList((Package[])ReflectionUtils.invokeMethod(c.getClass(), c, "getPackages")));
+		}
+		return packages.toArray(new Package[packages.size()]);
+	}
+	
 
 	@Override
 	protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {

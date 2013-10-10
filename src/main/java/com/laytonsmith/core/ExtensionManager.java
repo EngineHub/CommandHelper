@@ -55,11 +55,14 @@ public class ExtensionManager {
 				//Error, but skip this one, don't throw an exception ourselves, just log it.
 				Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, "Method annotated with @" + startup.class.getSimpleName() 
 						+ " takes parameters; it should not.");
+			} else if(!mm.getModifiers().isStatic()){
+				CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + mm.getDeclaringClass() + "#" + mm.getName() + " is not static,"
+						+ " but it should be.", Target.UNKNOWN);
 			} else {
 				try{
 					Method m = mm.loadMethod(ClassDiscovery.getDefaultInstance().getDefaultClassLoader(), true);
 					m.setAccessible(true);
-					m.invoke(null);
+					m.invoke(null, (Object[])null);
 				} catch(Exception e){
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + mm.getDeclaringClass() + "#" + mm.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
 				}
