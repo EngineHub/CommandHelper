@@ -27,9 +27,11 @@ configuration information for each supported server type. In general, the config
 is as follows:
 
 <pre>
+<?xml version="1.0" encoding="UTF-8" ?>
 <profiles>
-	<profile id="profileName">
-		<type>mysql</type>
+	<profile id="profileName" type="mysql">
+		<host>localhost</host>
+		<port>3306</port>
 		<database>db_name</database>
 		<username>username</username>
 		<password>password</password>
@@ -42,8 +44,8 @@ connections can be referenced by id. In the following tables, the Tag column
 is the xml tag in the profile (in the above example, the username and password
 tags) and the status column tells you if the tag is required or optional. In all
 profiles, the id attribute is required, as is the type element. At startup, the xml is validated,
-and errors are reported, though it will skip improperly formatted elements, and
-attempt to carry on. The XML must be valid, however. If these attributes are hard
+and errors are reported, and must be corrected before continuing. 
+The XML must be valid. If these attributes are hard
 coded, then the connection information specified should be specified as an associative
 array, subject to the same policies as the xml for required tags.. For instance,
 

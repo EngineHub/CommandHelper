@@ -199,6 +199,7 @@
 			<groupId>net.milkbowl</groupId>
 			<artifactId>vault</artifactId>
 			<version>1.2.12</version>
+			<type>jar</type>
 		</dependency>
         
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
@@ -625,6 +626,9 @@
 										<include>com/sk89q/worldedit/Vector.*</include>
 										<!-- Expression Parser -->
 										<include>com/sk89q/worldedit/expression/**</include>
+										<!-- General Requirements -->
+										<include>com/sk89q/worldedit/bukkit/BukkitCommandSender.*</include>
+										<include>com/sk89q/worldedit/LocalPlayer.*</include>
 									</includes>
 									<excludes>
 										<exclude>com/sk89q/jchronic/**</exclude>

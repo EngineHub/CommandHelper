@@ -1552,7 +1552,8 @@ public class PlayerEvents {
 		private Map<Integer, Map<String, MCLocation>> thresholds = new HashMap<Integer, Map<String, MCLocation>>();
 
 		@Override
-		public void bind(Map<String, Construct> prefilters) {
+		public void bind(BoundEvent event) {
+			Map<String, Construct> prefilters = event.getPrefilter();
 			if(prefilters.containsKey("threshold")){
 				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 				thresholdList.add(i);

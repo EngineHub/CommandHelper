@@ -574,7 +574,11 @@ public class ObjectGenerator {
 		} else {
 			blue = Static.getInt32(color.get(2), t);
 		}
-		return StaticLayer.GetConvertor().GetColor(red, green, blue);
+		try {
+			return StaticLayer.GetConvertor().GetColor(red, green, blue);
+		} catch(IllegalArgumentException ex){
+			throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.RangeException, t, ex);
+		}
 	}
 	
 	public CArray velocity(MCEntity.Velocity v, Target t) {

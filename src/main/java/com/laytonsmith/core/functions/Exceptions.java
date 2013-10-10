@@ -236,7 +236,12 @@ public class Exceptions {
 		/**
 		 * Thrown if a shell exception occurs.
 		 */
-		ShellException("Thrown if a shell exception occurs.", CHVersion.V3_3_1)
+		ShellException("Thrown if a shell exception occurs.", CHVersion.V3_3_1),
+		
+		/**
+		 * Thrown if an SQL related exception occurs.
+		 */
+		SQLException("Thrown if an SQL related exception occurs.", CHVersion.V3_3_1)
 
 		;
 		

@@ -15,6 +15,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.database.Profiles;
 import com.laytonsmith.persistance.DataSourceException;
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +25,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -208,7 +211,12 @@ public class ExampleScript {
 			return output;
 		}
 		Script s = Script.GenerateScript(script, PermissionsResolver.GLOBAL_PERMISSION);
-		Environment env = Static.GenerateStandaloneEnvironment();
+		Environment env;
+		try {
+			env = Static.GenerateStandaloneEnvironment();
+		} catch (Profiles.InvalidProfileException ex) {
+			throw new RuntimeException(ex);
+		}
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 		final StringBuilder finalOutput = new StringBuilder();
 		String thrown = null;

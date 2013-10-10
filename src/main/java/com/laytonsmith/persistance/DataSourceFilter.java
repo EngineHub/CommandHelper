@@ -172,7 +172,13 @@ public class DataSourceFilter {
 		}
 	}
 	
-	private String toRegex(String key){
+	/**
+	 * Given a key filter, returns a regex pattern that is suitable for
+	 * matching against actual keys.
+	 * @param key
+	 * @return 
+	 */
+	public static String toRegex(String key){
 		//We need to change * into [^\.]*? and ** into .*? and . into \.
 		//Parenthesis are kept as is.
 		String newKey = key.replaceAll("\\.", "\\\\.");

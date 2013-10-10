@@ -67,6 +67,17 @@ public class PersistanceNetwork {
 		this.options = options;
 		//Data sources are lazily loaded, so we don't need to do anything right now to load them.
 	}
+	
+	/**
+	 * Returns the URI describing where this key currently lives, given the filter
+	 * configuration. This is meant for debug purposes only, and not for general use,
+	 * as it breaks the transparency of the PersistanceNetwork.
+	 * @param key
+	 * @return 
+	 */
+	public URI getKeySource(String [] key){
+		return filter.getConnection(key);
+	}
 
 	/**
 	 * Returns the data source object for this URI.
@@ -146,7 +157,8 @@ public class PersistanceNetwork {
 	/**
 	 * This method returns a list of all keys and values that match the
 	 * namespace. If a.b.c is requested, then keys (and values) a.b.c.d and
-	 * a.b.c.e would be returned.
+	 * a.b.c.e would be returned. If the namespace is empty, it will match
+	 * all keys.
 	 *
 	 * @param namespace
 	 * @return

@@ -88,10 +88,12 @@ public interface Event extends Comparable<Event>, Documentation{
      * this event type a chance to "activate" if needed. It may throw an 
      * UnsupportedOperationException if it is not needed. The listener
      * is automatically registered, based on the driver returned.
-	 * The prefilters are also sent, in case the event can do some further optimization
-	 * based on them.
+	 * The BoundEvent is also sent, in case the event can do some further optimization
+	 * based on it.
+	 * @param event The event that is triggering bind. Things like the prefilters and
+	 * environment are available with the event.
      */
-    public void bind(Map<String, Construct> prefilters);
+    public void bind(BoundEvent event);
     
     /**
      * This function is called once when the plugin starts up, to give this

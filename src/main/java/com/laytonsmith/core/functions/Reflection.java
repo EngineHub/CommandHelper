@@ -16,6 +16,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistance.DataSourceFactory;
+import com.laytonsmith.persistance.PersistanceNetwork;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -419,5 +420,54 @@ public class Reflection {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+	
+	@api
+	public static class reflect_value_source extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			PersistanceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistanceNetwork();
+			return new CString(pn.getKeySource(args[0].val().split("\\.")).toString(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "reflect_value_source";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {persistanceKey} Returns the source file that this key will store a value to in the Persistance Network."
+					+ " For instance, in your persistance.config file, if you have the entry \"storage.test.**=json:///path/to/file.json\","
+					+ " then reflect_value_source('storage.test.testing') would return 'json:///path/to/file.json'. This is useful for"
+					+ " debugging, as it will definitively trace back the source/destination of a value.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }

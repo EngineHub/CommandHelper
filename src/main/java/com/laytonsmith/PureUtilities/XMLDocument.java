@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -21,6 +23,7 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -329,7 +332,33 @@ public class XMLDocument {
 	 * @throws XPathExpressionException 
 	 */
 	public int countNodes(String xpath) throws XPathExpressionException {
-		return ((Double)(getXPath("count(" + xpath + ")").evaluate(doc, XPathConstants.NUMBER))).intValue();
+		return ((Number)(getXPath("count(" + xpath + ")").evaluate(doc, XPathConstants.NUMBER))).intValue();
+	}
+	
+	/**
+	 * Returns a list of all the child element names at the specified location. For instance, in
+	 * <pre>
+	 * &lt;root&gt;
+	 *  &lt;elem /&gt;
+	 *  &lt;elem /&gt;
+	 *  &lt;elem2 /&gt;
+	 * &lt;/root&gt;
+	 * </pre>
+	 * The list for "/root" would contain [elem, elem, elem2]. This is useful for examining undefined or variable xml
+	 * elements. If this is a text node or has no children, an empty list is returned. The elements
+	 * will be listed in the order they are defined in the xml.
+	 * @param xpath
+	 * @return
+	 * @throws XPathExpressionException 
+	 */
+	public List<String> getChildren(String xpath) throws XPathExpressionException {
+		List<String> list = new ArrayList<String>();
+		NodeList o = (NodeList)getXPath(xpath + "/child::*").evaluate(doc, XPathConstants.NODESET);
+		for(int i = 0; i < o.getLength(); i++){
+			Node n = o.item(i);
+			list.add(n.getNodeName());
+		}
+		return list;
 	}
 	
 	/**

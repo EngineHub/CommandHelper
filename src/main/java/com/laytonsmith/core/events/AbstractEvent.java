@@ -39,7 +39,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * can be done here. By default, an UnsupportedOperationException is thrown,
      * but is caught and ignored.
      */
-    public void bind(Map<String, Construct> prefilters) {
+    public void bind(BoundEvent event) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -67,9 +67,12 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		if(env.getEnv(GlobalEnv.class).GetProfiler() != null){
 			event = env.getEnv(GlobalEnv.class).GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
 		}
-        s.run(null, env, null);
-		if(event != null){
-			event.stop();
+		try {
+			s.run(null, env, null);
+		} finally {
+			if(event != null){
+				event.stop();
+			}
 		}
         try{
             this.postExecution(env, activeEvent);
@@ -78,12 +81,28 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         }
     }
     
+	/**
+	 * This method is called before the event handling code is run, and provides a place
+	 * for the event code itself to modify the environment or active event data.
+	 * @param env The environment, at the time just before the event handler is called.
+	 * @param activeEvent The event handler code.
+	 * @throws UnsupportedOperationException If the preExecution isn't supported, this may
+	 * be thrown, and it will be ignored.
+	 */
     public void preExecution(Environment env, BoundEvent.ActiveEvent activeEvent){
-        throw new UnsupportedOperationException();
+        
     }
     
+	/**
+	 * This method is called after the event handling code is run, and provides a place
+	 * for the event code itself to modify or cleanup the environment or active event data.
+	 * @param env The environment, at the time just before the event handler is called.
+	 * @param activeEvent The event handler code.
+	 * @throws UnsupportedOperationException If the preExecution isn't supported, this may
+	 * be thrown, and it will be ignored.
+	 */
     public void postExecution(Environment env, BoundEvent.ActiveEvent activeEvent){
-        throw new UnsupportedOperationException();
+        
     }
 
     /**

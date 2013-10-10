@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,6 +51,14 @@ public final class Installer {
 		if(!persistanceNetwork.exists()){
 			try {
 				FileUtility.write(StreamUtils.GetString(Installer.class.getResourceAsStream("/samp_persistance_network.txt"), "UTF-8"), persistanceNetwork, true);
+			} catch (IOException ex) {
+				Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		
+		if(!MethodScriptFileLocations.getDefault().getSQLProfilesFile().exists()){
+			try {
+				FileUtility.write(StreamUtils.GetString(Installer.class.getResourceAsStream("/samp_sql-profiles.xml"), "UTF-8"), MethodScriptFileLocations.getDefault().getSQLProfilesFile(), true);
 			} catch (IOException ex) {
 				Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
 			}

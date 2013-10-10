@@ -1,4 +1,4 @@
-package com.laytonsmith.abstraction.bukkit.events;
+package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCCraftingInventory;
 import com.laytonsmith.abstraction.MCRecipe;

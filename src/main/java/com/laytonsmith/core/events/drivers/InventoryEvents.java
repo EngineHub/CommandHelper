@@ -8,7 +8,7 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.bukkit.events.MCPrepareItemCraftEvent;
+import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
 import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
+import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -422,16 +423,16 @@ public class InventoryEvents {
 			return "{} "
 					+ "Fired when a player enchants an item. "
 					+ "{player: The player that enchanted the item | "
-					+ "item: The enchanted item PRE-ENCHANT | "
+					+ "item: The item to be enchanted | "
 					+ "inventorytype: type of inventory | "
 					+ "levels: The amount of levels the player used | "
 					+ "enchants: Array of added enchantments | "
 					+ "location: Location of the used enchantment table | "
-					+ "option: The enchantment option the player clicke})"
+					+ "option: The enchantment option the player clicked}"
 					+ "{levels: The amount of levels to use | "
-					+ "item: The item to be enchanted. this is still PRE-ENCHANT | "
+					+ "item: The item to be enchanted | "
 					+ "enchants: The enchants to add to the item}"
-					+ "{player|item|inventorytype|levels|enchants|location|option} ";
+					+ "{}";
 		}
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
@@ -499,6 +500,120 @@ public class InventoryEvents {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+	
+	@api
+	public static class item_pre_enchant extends AbstractEvent {
+
+		public String getName() {
+			return "item_pre_enchant";
+		}
+
+		@Override
+		public String docs() {
+			return "{} "
+					+ "Fired when a player places an item in an enchantment table "
+					+ "{player: The player that placed the item | "
+					+ "item: The item to be enchanted | "
+					+ "inventorytype: Type of inventory | "
+					+ "enchantmentbonus: the amount of bookshelves influencing the enchantment table | "
+					+ "expcosts: The offered costs of the 3 options | "
+					+ "location: Location of the used enchantment table}"
+					+ "{item: The item to be enchanted | "
+					+ "expcosts: The costs of the 3 options on the enchantment table}"
+					+ "{}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPrepareItemEnchantEvent) {
+				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
+				Map<String, Construct> map = evaluate_helper(event);
+				
+				map.put("player", new CString(e.getEnchanter().getName(), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
+				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
+				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), Target.UNKNOWN));
+				
+				int[] expCosts = e.getExpLevelCostsOffered();
+				CArray expCostsCArray = new CArray(Target.UNKNOWN);
+				
+				for (int i = 0; i < expCosts.length; i++) {
+					int j = expCosts[i];
+					expCostsCArray.push(new CInt(j, Target.UNKNOWN), i);
+				}
+				
+				map.put("expcosts", expCostsCArray);
+				
+				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
+					
+				loc.remove(new CString("yaw", Target.UNKNOWN));
+				loc.remove(new CString("pitch", Target.UNKNOWN));
+				loc.remove(new CString("4", Target.UNKNOWN));
+				loc.remove(new CString("5", Target.UNKNOWN));
+
+				map.put("location", loc);
+				
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to MCPrepareItemEnchantEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_PRE_ENCHANT;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCPrepareItemEnchantEvent) {
+				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
+				
+				if (key.equalsIgnoreCase("item")) {
+					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+				
+				if (key.equalsIgnoreCase("expcosts")) {
+					if (value instanceof CArray) {
+						CArray CexpCosts = (CArray) value;
+						if (!CexpCosts.inAssociativeMode()) {
+							int[] ExpCosts = e.getExpLevelCostsOffered();
+							
+							for (int i = 0; i <= 2; i++) {
+								if (CexpCosts.get(i) instanceof CInt) {
+									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i)).getInt();
+								} else {
+									throw new ConfigRuntimeException("Expected an intger at index " + i + "!", ExceptionType.FormatException, Target.UNKNOWN);
+								}
+							}
+						} else {
+							throw new ConfigRuntimeException("Expected a normal array!", ExceptionType.FormatException, Target.UNKNOWN);
+						}
+					} else {
+						throw new ConfigRuntimeException("Expected an array!", ExceptionType.FormatException, Target.UNKNOWN);
+					}
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 	
 	@api

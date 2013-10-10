@@ -218,8 +218,11 @@ public class Scheduling {
 					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 					try {
 						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
-						c.execute(null);
-						p.stop();
+						try {
+							c.execute(null);
+						} finally {
+							p.stop();
+						}
 					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.React(e, environment);
 					} catch (CancelCommandException e) {
@@ -279,8 +282,11 @@ public class Scheduling {
 					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 					try {
 						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
-						c.execute(null);
-						p.stop();
+						try {
+							c.execute(null);
+						} finally {
+							p.stop();
+						}
 					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.React(e, environment);
 					} catch (CancelCommandException e) {
