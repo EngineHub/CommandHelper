@@ -57,6 +57,8 @@ public interface MCServer extends AbstractionObject{
 
     public void runasConsole(String cmd);
 	public MCMessenger getMessenger();
-	
+
 	public boolean unloadWorld(MCWorld world, boolean save);
+
+	public void shutdown();
 }

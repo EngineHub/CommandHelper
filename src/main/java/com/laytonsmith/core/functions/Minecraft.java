@@ -293,7 +293,7 @@ public class Minecraft {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException, ExceptionType.InvalidWorldException};
 		}
 
 		public boolean isRestricted() {
@@ -323,27 +323,19 @@ public class Minecraft {
 				throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
 						ExceptionType.RangeException, t);
 			}
-			MCLocation l = null;
-			if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-				l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getLocation();
-			}
-			if (args.length > 2) {
-				if (args[2] instanceof CArray) {
-					CArray ca = (CArray) args[2];
-					l = ObjectGenerator.GetGenerator().location(ca, (l != null ? l.getWorld() : null), t);
-				} else {
-					throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array",
-							ExceptionType.CastException, t);
-				}
-			}
-			if (l.getWorld() != null) {
-				try{
-					return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
-				} catch(IllegalArgumentException e){
-					throw new ConfigRuntimeException("Invalid mob name: " + mob, ExceptionType.FormatException, t);
-				}
+			MCLocation l;
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (args.length == 3) {
+				l = ObjectGenerator.GetGenerator().location(args[2], (p != null ? p.getWorld() : null), t);
+			} else if (p != null) {
+				l = p.getLocation();
 			} else {
-				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
+				throw new ConfigRuntimeException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
+			}
+			try{
+				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
+			} catch(IllegalArgumentException e){
+				throw new ConfigRuntimeException("Invalid mob name: " + mob, ExceptionType.FormatException, t);
 			}
 		}
 	}
@@ -1352,15 +1344,16 @@ public class Minecraft {
             return new Integer[]{1, 2, 3};
         }
 
-        public String docs() {
-            return "int {[player/LocationArray], item} Drops the specified item at the specified quantity at the specified player's feet (or "
-                    + " at an arbitrary Location, if an array is given),"
-                    + " like the vanilla /give command. player defaults to the current player, and qty defaults to 1. item follows the"
-                    + " same type[:data] format used elsewhere. Returns the entity id of the item stack dropped.";
-        }
+		public String docs() {
+			return "int {[player/LocationArray], item, [spawnNaturally]} Drops the specified item stack at the specified player's feet (or "
+					+ " at an arbitrary Location, if an array is given), and returns its entity id"
+					+ " Like the vanilla /give command. player defaults to the current player, and qty defaults to 1."
+					+ " item takes an item array."
+					+ " spawnNaturally takes a boolean, which forces the way the item will be spawned. If true, the item will be dropped with a random offset.";
+		}
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException, ExceptionType.InvalidWorldException};
         }
 
         public boolean isRestricted() {
@@ -1375,42 +1368,89 @@ public class Minecraft {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-
-            MCLocation l = null;
-            int qty = 1;
-            MCItemStack is = null;
-			MCItem item = null;
-            boolean natural = false;
-            if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-                l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
-            }
-			if(args.length == 1){
-				is = ObjectGenerator.GetGenerator().item(args[0], t);
-				natural = true;
-			} else if(args.length == 2){
-				if(args[0] instanceof CString){
-					l = Static.GetPlayer(args[0], t).getEyeLocation();
+			MCLocation l;
+            MCItemStack is;
+            boolean natural;
+			if (args.length == 1) {
+				if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+					l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
 					natural = false;
 				} else {
-					l = ObjectGenerator.GetGenerator().location(args[0], l==null?null:l.getWorld(), t);
+					throw new ConfigRuntimeException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
+				}
+				is = ObjectGenerator.GetGenerator().item(args[0], t);
+			} else {
+				MCPlayer p;
+				if (args[0] instanceof CArray) {
+					p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+					l = ObjectGenerator.GetGenerator().location(args[0], (p != null ? p.getWorld() : null), t);
 					natural = true;
+				} else {
+					p = Static.GetPlayer(args[0].val(), t);
+					Static.AssertPlayerNonNull(p, t);
+					l = p.getEyeLocation();
+					natural = false;
 				}
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
 			}
-            if (l.getWorld() != null) {
-                if (natural) {
-                    item = l.getWorld().dropItemNaturally(l, is);
-                } else {
-                    item = l.getWorld().dropItem(l, is);
-                }
-            } else {
-                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
-            }
-
-			if(item != null){
-				return new CInt(item.getEntityId(), t);
+			if (args.length == 3) {
+				natural = Static.getBoolean(args[2]);
 			}
-            return new CNull(t);
+			MCItem item;
+			if (natural) {
+				item = l.getWorld().dropItemNaturally(l, is);
+			} else {
+				item = l.getWorld().dropItem(l, is);
+			}
+			if (item != null) {
+				return new CInt(item.getEntityId(), t);
+			} else {
+				return new CNull(t);
+			}
         }
     }
+
+	@api
+	public static class shutdown_server extends AbstractFunction implements Optimizable {
+
+		public String getName() {
+			return "shutdown_server";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "nothing {} Shuts down the server.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException {
+			Static.getServer().shutdown();
+			throw new CancelCommandException("", t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+				OptimizationOption.TERMINAL
+			);
+		}
+	}
 }

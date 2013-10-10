@@ -104,24 +104,33 @@ public class PlayerManagement {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{0};
+			return new Integer[]{0, 1};
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCPlayer[] pa = Static.getServer().getOnlinePlayers();
-			CString[] sa = new CString[pa.length];
-			for (int i = 0; i < pa.length; i++) {
-				sa[i] = new CString(pa[i].getName(), t);
+			CArray players = new CArray(t);
+			if (args.length == 0) {
+				for (MCPlayer player : Static.getServer().getOnlinePlayers()) {
+					players.push(new CString(player.getName(), t));
+				}
+			} else {
+				MCWorld world = Static.getServer().getWorld(args[0].val());
+				if (world == null) {
+					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				}
+				for (MCPlayer player : world.getPlayers()) {
+					players.push(new CString(player.getName(), t));
+				}
 			}
-			return new CArray(t, sa);
+			return players;
 		}
 
 		public String docs() {
-			return "array {} Returns an array of all the player names of all the online players on the server";
+			return "array {[world]} Returns an array of all the player names of all the online players on the server, if world is given only the name of the players in this world will be returned.";
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
 		public boolean isRestricted() {
@@ -238,27 +247,19 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer m = null;
-			if (p instanceof MCPlayer) {
-				m = (MCPlayer) p;
+			MCPlayer p;
+			if (args.length == 0) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
 			}
-			if (args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
-			}
-			Static.AssertPlayerNonNull(m, t);
-			MCLocation l = m.getLocation();
-			MCWorld w = m.getWorld();
-			return new CArray(t,
-					new CDouble(l.getX(), t),
-					new CDouble(l.getY() - 1, t),
-					new CDouble(l.getZ(), t),
-					new CString(w.getName(), t));
+			return ObjectGenerator.GetGenerator().location(p.getLocation());
 		}
 
 		public String docs() {
 			return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise. Note that the y coordinate is"
-					+ " in relation to the block the player is standing on. The array returned will also include the player's world in index 3 of the array.";
+					+ " in relation to the block the player is standing on. The array returned will also include the player's world.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -1194,7 +1195,7 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "string {[player]} Returns the player's game mode. It will be one of \"CREATIVE\" or \"SURVIVAL\".";
+			return "string {[player]} Returns the player's game mode. It will be one of " + StringUtils.Join(MCGameMode.values(), ", ", ", or ") + ".";
 		}
 
 		public ExceptionType[] thrown() {
@@ -1278,7 +1279,7 @@ public class PlayerManagement {
 			try {
 				gm = MCGameMode.valueOf(mode.toUpperCase());
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException("Mode must be either 'CREATIVE', 'SURVIVAL', or 'ADVENTURE'", ExceptionType.FormatException, t);
+				throw new ConfigRuntimeException("Mode must be either " + StringUtils.Join(MCGameMode.values(), ", ", ", or "), ExceptionType.FormatException, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setGameMode(gm);
@@ -3813,7 +3814,6 @@ public class PlayerManagement {
 					new ExampleScript("Demonstrates a player that has not played", "plast_played('Herobrine')", ":0")
 			};
 		}
-
 	}
 	
 	@api
@@ -3833,12 +3833,11 @@ public class PlayerManagement {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
-			for(MCPlayer p : StaticLayer.GetConvertor().GetServer().getOnlinePlayers()){
-				if(p.getEntityId() == id){
-					return new CString(p.getName(), t);
-				}
+			try {
+				return new CString(((MCPlayer) Static.getLivingEntity(id, t)).getName(), t);
+			} catch (Exception exception) {
+				return new CNull(t);
 			}
-			return new CNull();
 		}
 
 		public String getName() {
@@ -3857,6 +3856,5 @@ public class PlayerManagement {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
 }

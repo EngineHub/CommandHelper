@@ -305,7 +305,7 @@ public class BukkitMCServer implements MCServer {
 	
 	public MCMessenger getMessenger() {
 		return new BukkitMCMessenger(s.getMessenger());
-}
+	}
 
 	public MCScoreboard getMainScoreboard() {
 		return new BukkitMCScoreboard(s.getScoreboardManager().getMainScoreboard());
@@ -317,5 +317,9 @@ public class BukkitMCServer implements MCServer {
 	
 	public boolean unloadWorld(MCWorld world, boolean save) {
 		return s.unloadWorld(((BukkitMCWorld) world).__World(), save);
+	}
+
+	public void shutdown() {
+		s.shutdown();
 	}
 }
