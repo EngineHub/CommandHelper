@@ -23,6 +23,9 @@ public interface MCLocation extends AbstractionObject{
 	public MCChunk getChunk();
     public MCBlock getBlock();
 
+	public void setX(double x);
+	public void setY(double y);
+	public void setZ(double z);
     public void setPitch(float p);
     public void setYaw(float y);
 	public void breakBlock();
