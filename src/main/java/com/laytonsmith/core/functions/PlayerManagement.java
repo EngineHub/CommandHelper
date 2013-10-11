@@ -254,7 +254,9 @@ public class PlayerManagement {
 			} else {
 				p = Static.GetPlayer(args[0], t);
 			}
-			return ObjectGenerator.GetGenerator().location(p.getLocation());
+			MCLocation location = p.getLocation();
+			location.setY(location.getY() - 1);
+			return ObjectGenerator.GetGenerator().location(location);
 		}
 
 		public String docs() {
