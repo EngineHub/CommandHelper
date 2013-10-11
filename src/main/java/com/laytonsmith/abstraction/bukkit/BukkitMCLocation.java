@@ -91,6 +91,18 @@ public class BukkitMCLocation implements MCLocation {
         return l;
     }
 
+	public void setX(double x) {
+		l.setX(x);
+	}
+
+	public void setY(double y) {
+		l.setY(y);
+	}
+
+	public void setZ(double z) {
+		l.setZ(z);
+	}
+
     public void setPitch(float p) {
         l.setPitch(p);
     }
