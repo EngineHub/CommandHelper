@@ -440,7 +440,7 @@ public class Web {
 					+ "))\n", "gws"),
 				new ExampleScript("Using a cookie jar", "@cookiejar = array()\n"
 					+ "http_request('http://www.google.com', array(\n"
-					+ "\tsuccess: closure(@resp,\n"
+					+ "\tcookiejar: @cookiejar, success: closure(@resp,\n"
 					+ "\t\tmsg(@cookiejar)\n"
 					+ "\t)\n"
 					+ "))\n", "<cookie jar would now have cookies in it>")
