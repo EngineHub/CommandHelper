@@ -358,9 +358,9 @@ public class BlockEvents {
 					+ "{block: An array with "
                     + "keys 'type' (int), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int) "
                     + "and 'world' (string) for the physical location of the block | "
-                    + "location: the locationArray of this block | drops | xp} "
+                    + "location: the locationArray of this block} "
 					+ "{block}"
-					+ "{block|location|drops|xp}";
+					+ "{block|location}";
         }
 
         public CHVersion since() {
@@ -734,6 +734,140 @@ public class BlockEvents {
 					return true;
 				}
 			}
+			return false;
+		}
+	}
+
+	@api
+	public static class block_grow extends AbstractEvent {
+
+		public String getName() {
+			return "block_grow";
+		}
+
+		public Driver driver() {
+			return Driver.BLOCK_GROW;
+		}
+
+		public String docs() {
+			return "{oldtype: <string match> The block type before the growth | olddata: <string match> The block data before the growth |"
+					+ " newtype: <string match> The block type after the growth | newdata: <string match> The block data after the growth |"
+					+ " world: <macro>}"
+					+ " This event is called when a block grows naturally. If the event is cancelled, the block will not grow."
+					+ " {oldblock: The block before the growth (an array with keys 'type' and 'data') | newblock: The block after the growth (an array with keys 'type' and 'data') |"
+					+ " location: the location of the block that will grow}"
+					+ " {}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCBlockGrowEvent) {
+				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
+				Prefilters.match(prefilter, "oldtype", blockGrowEvent.getBlock().getTypeId(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "olddata", blockGrowEvent.getBlock().getData(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "newtype", blockGrowEvent.getNewState().getTypeId(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "newdata", blockGrowEvent.getNewState().getData().getData(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "world", blockGrowEvent.getBlock().getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCBlockGrowEvent) {
+				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				CArray oldBlock = new CArray(Target.UNKNOWN);
+				oldBlock.set("type", new CInt(blockGrowEvent.getBlock().getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+				oldBlock.set("data", new CInt(blockGrowEvent.getBlock().getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("oldblock", oldBlock);
+				CArray newBlock = new CArray(Target.UNKNOWN);
+				newBlock.set("type", new CInt(blockGrowEvent.getNewState().getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+				newBlock.set("data", new CInt(blockGrowEvent.getNewState().getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("newblock", newBlock);
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(blockGrowEvent.getBlock().getLocation(), false));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to BlockGrowEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+			return false;
+		}
+	}
+
+	@api
+	public static class block_physics extends AbstractEvent {
+
+		public String getName() {
+			return "block_physics";
+		}
+
+		public Driver driver() {
+			return Driver.BLOCK_PHYSICS;
+		}
+
+		public String docs() {
+			return "{type: <string match> The type of the checked block | data: <string match> The data of the checked block | world: <macro>}"
+					+ " This event is called when a block physics is checked, due to the modification of a nearby block."
+					+ " Cancelling the event cancels the change which could occur due to the verification (e.g. the fall of a sand block if an air block has appeared below)."
+					+ " {block: the checked block (an array with keys 'type' and 'data') |"
+					+ " blockchanged: the block which has been modified and which has triggered the event (an array with keys 'type' and 'data') |"
+					+ " location: the location of the checked block}"
+					+ " {}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCBlockPhysicsEvent) {
+				MCBlockPhysicsEvent blockPhysicsEvent = (MCBlockPhysicsEvent) event;
+				Prefilters.match(prefilter, "type", blockPhysicsEvent.getBlock().getTypeId(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "data", blockPhysicsEvent.getBlock().getData(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "world", blockPhysicsEvent.getBlock().getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCBlockPhysicsEvent) {
+				MCBlockPhysicsEvent blockPhysicsEvent = (MCBlockPhysicsEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				CArray block = new CArray(Target.UNKNOWN);
+				block.set("type", new CInt(blockPhysicsEvent.getBlock().getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+				block.set("data", new CInt(blockPhysicsEvent.getBlock().getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("block", block);
+				CArray blockChanged = new CArray(Target.UNKNOWN);
+				blockChanged.set("type", new CInt(blockPhysicsEvent.getChangedType().getType(), Target.UNKNOWN), Target.UNKNOWN);
+				blockChanged.set("data", new CInt(blockPhysicsEvent.getChangedType().getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("blockchanged", blockChanged);
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(blockPhysicsEvent.getBlock().getLocation(), false));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to BlockPhysicsEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
 			return false;
 		}
 	}

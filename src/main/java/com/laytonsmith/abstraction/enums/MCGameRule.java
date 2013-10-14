@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.enums;
 
-/*
+/**
  * Gamerule names
  *
  * @author Hekta

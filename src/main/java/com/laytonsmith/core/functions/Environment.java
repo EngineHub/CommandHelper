@@ -622,7 +622,6 @@ public class Environment {
 
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double x = 0;
-			double y = 0;
 			double z = 0;
 			MCWorld w = null;
 			String world = null;
@@ -646,22 +645,13 @@ public class Environment {
 					world = args[2].val();
 				}
 			}
-
-
 			if (world != null) {
 				w = Static.getServer().getWorld(world);
 			}
 			if (w == null) {
 				throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
 			}
-			x = java.lang.Math.floor(x);
-			y = java.lang.Math.floor(y) - 1;
-			z = java.lang.Math.floor(z);
-			MCBlock b = w.getHighestBlockAt((int) x, (int) z);
-			return new CArray(t,
-					new CInt(b.getX(), t),
-					new CInt(b.getY(), t),
-					new CInt(b.getZ(), t));
+			return ObjectGenerator.GetGenerator().location(w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z)).getLocation(), false);
 		}
 
 		public Boolean runAsync() {

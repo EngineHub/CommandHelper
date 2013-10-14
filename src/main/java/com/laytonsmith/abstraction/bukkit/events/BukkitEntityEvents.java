@@ -41,6 +41,7 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -145,7 +146,29 @@ public class BukkitEntityEvents {
 		}
 		
 	}
-	
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCProjectileLaunchEvent implements MCProjectileLaunchEvent {
+
+		ProjectileLaunchEvent ple;
+
+		public BukkitMCProjectileLaunchEvent(ProjectileLaunchEvent event) {
+			ple = event;
+		}
+
+		public Object _GetObject() {
+			return ple;
+		}
+
+		public MCProjectile getEntity() {
+			return new BukkitMCProjectile(ple.getEntity());
+		}
+
+		public MCEntityType getEntityType() {
+			return MCEntityType.valueOf(ple.getEntityType().name());
+		}
+	}
+
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPotionSplashEvent extends BukkitMCProjectileHitEvent
 			implements MCPotionSplashEvent {
