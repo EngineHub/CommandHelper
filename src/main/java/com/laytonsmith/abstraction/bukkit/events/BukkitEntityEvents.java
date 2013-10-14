@@ -19,6 +19,8 @@ import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
@@ -136,7 +138,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCEntityType getEntityType() {
-			return MCEntityType.valueOf(phe.getEntityType().name());
+			return BukkitMCEntityType.getConvertor().getAbstractedEnum(phe.getEntityType());
 		}
 		
 		public static BukkitMCProjectileHitEvent _instantiate(MCProjectile p) {
@@ -165,7 +167,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCEntityType getEntityType() {
-			return MCEntityType.valueOf(ple.getEntityType().name());
+			return BukkitMCEntityType.getConvertor().getAbstractedEnum(ple.getEntityType());
 		}
 	}
 
@@ -405,7 +407,7 @@ public class BukkitEntityEvents {
         }
 
         public MCDamageCause getCause() {
-            return MCDamageCause.valueOf(event.getCause().name());
+            return BukkitMCDamageCause.getConvertor().getAbstractedEnum(event.getCause());
         }
 
         public MCEntity getEntity() {
