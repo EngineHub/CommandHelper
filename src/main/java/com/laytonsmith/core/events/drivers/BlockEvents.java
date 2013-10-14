@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.events.*;
@@ -767,11 +768,13 @@ public class BlockEvents {
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCBlockGrowEvent) {
 				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
-				Prefilters.match(prefilter, "oldtype", blockGrowEvent.getBlock().getTypeId(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "olddata", blockGrowEvent.getBlock().getData(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "newtype", blockGrowEvent.getNewState().getTypeId(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "newdata", blockGrowEvent.getNewState().getData().getData(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "world", blockGrowEvent.getBlock().getWorld().getName(), PrefilterType.MACRO);
+				MCBlock oldBlock = blockGrowEvent.getBlock();
+				Prefilters.match(prefilter, "oldtype", oldBlock.getTypeId(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "olddata", oldBlock.getData(), PrefilterType.STRING_MATCH);
+				MCBlockState newBlock = blockGrowEvent.getNewState();
+				Prefilters.match(prefilter, "newtype", newBlock.getTypeId(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "newdata", newBlock.getData().getData(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "world", oldBlock.getWorld().getName(), PrefilterType.MACRO);
 				return true;
 			} else {
 				return false;
@@ -786,15 +789,17 @@ public class BlockEvents {
 			if (event instanceof MCBlockGrowEvent) {
 				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
-				CArray oldBlock = new CArray(Target.UNKNOWN);
-				oldBlock.set("type", new CInt(blockGrowEvent.getBlock().getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
-				oldBlock.set("data", new CInt(blockGrowEvent.getBlock().getData(), Target.UNKNOWN), Target.UNKNOWN);
-				mapEvent.put("oldblock", oldBlock);
-				CArray newBlock = new CArray(Target.UNKNOWN);
-				newBlock.set("type", new CInt(blockGrowEvent.getNewState().getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
-				newBlock.set("data", new CInt(blockGrowEvent.getNewState().getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
-				mapEvent.put("newblock", newBlock);
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(blockGrowEvent.getBlock().getLocation(), false));
+				MCBlock oldBlock = blockGrowEvent.getBlock();
+				CArray oldBlockArray = new CArray(Target.UNKNOWN);
+				oldBlockArray.set("type", new CInt(oldBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+				oldBlockArray.set("data", new CInt(oldBlock.getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("oldblock", oldBlockArray);
+				MCBlockState newBlock = blockGrowEvent.getNewState();
+				CArray newBlockArray = new CArray(Target.UNKNOWN);
+				newBlockArray.set("type", new CInt(newBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+				newBlockArray.set("data", new CInt(newBlock.getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("newblock", newBlockArray);
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(oldBlock.getLocation(), false));
 				return mapEvent;
 			} else {
 				throw new EventException("Cannot convert event to BlockGrowEvent");
@@ -835,9 +840,10 @@ public class BlockEvents {
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCBlockPhysicsEvent) {
 				MCBlockPhysicsEvent blockPhysicsEvent = (MCBlockPhysicsEvent) event;
-				Prefilters.match(prefilter, "type", blockPhysicsEvent.getBlock().getTypeId(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "data", blockPhysicsEvent.getBlock().getData(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "world", blockPhysicsEvent.getBlock().getWorld().getName(), PrefilterType.MACRO);
+				MCBlock block = blockPhysicsEvent.getBlock();
+				Prefilters.match(prefilter, "type", block.getTypeId(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "data", block.getData(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "world", block.getWorld().getName(), PrefilterType.MACRO);
 				return true;
 			} else {
 				return false;
@@ -852,15 +858,17 @@ public class BlockEvents {
 			if (event instanceof MCBlockPhysicsEvent) {
 				MCBlockPhysicsEvent blockPhysicsEvent = (MCBlockPhysicsEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
-				CArray block = new CArray(Target.UNKNOWN);
-				block.set("type", new CInt(blockPhysicsEvent.getBlock().getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
-				block.set("data", new CInt(blockPhysicsEvent.getBlock().getData(), Target.UNKNOWN), Target.UNKNOWN);
-				mapEvent.put("block", block);
-				CArray blockChanged = new CArray(Target.UNKNOWN);
-				blockChanged.set("type", new CInt(blockPhysicsEvent.getChangedType().getType(), Target.UNKNOWN), Target.UNKNOWN);
-				blockChanged.set("data", new CInt(blockPhysicsEvent.getChangedType().getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
-				mapEvent.put("blockchanged", blockChanged);
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(blockPhysicsEvent.getBlock().getLocation(), false));
+				MCBlock block = blockPhysicsEvent.getBlock();
+				CArray blockArray = new CArray(Target.UNKNOWN);
+				blockArray.set("type", new CInt(block.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+				blockArray.set("data", new CInt(block.getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("block", blockArray);
+				MCMaterial blockChanged = blockPhysicsEvent.getChangedType();
+				CArray blockChangedArray = new CArray(Target.UNKNOWN);
+				blockChangedArray.set("type", new CInt(blockChanged.getType(), Target.UNKNOWN), Target.UNKNOWN);
+				blockChangedArray.set("data", new CInt(blockChanged.getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("blockchanged", blockChangedArray);
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 				return mapEvent;
 			} else {
 				throw new EventException("Cannot convert event to BlockPhysicsEvent");
