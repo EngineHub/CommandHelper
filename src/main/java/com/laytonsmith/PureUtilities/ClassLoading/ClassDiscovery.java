@@ -263,7 +263,11 @@ public class ClassDiscovery {
 			if(debug){
 				System.out.println("Precache does not contain data for this URL, so scanning now.");
 			}
-			if (url.startsWith("file:")) {
+			url = url.replaceFirst("^jar:", "");
+			if (url.endsWith("!/")) {
+				url = StringUtils.replaceLast(url, "!/", "");
+			}
+			if (url.startsWith("file:") && !url.endsWith(".jar")) {
 				final AtomicInteger id = new AtomicInteger(0);
 				ExecutorService service = Executors.newFixedThreadPool(10, new ThreadFactory() {
 					public Thread newThread(Runnable r) {
@@ -308,12 +312,8 @@ public class ClassDiscovery {
 				} catch (InterruptedException ex) {
 					Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 				}
-			} else if (url.startsWith("jar:")) {
+			} else if (url.startsWith("file:") && url.endsWith(".jar")) {
 				//We are running from a jar
-				if (url.endsWith("!/")) {
-					url = StringUtils.replaceLast(url, "!/", "");
-				}
-				url = url.replaceFirst("jar:", "");
 				url = url.replaceFirst("file:", "");
 				rootLocationFile = new File(url);
 				ZipIterator zi = new ZipIterator(rootLocationFile);

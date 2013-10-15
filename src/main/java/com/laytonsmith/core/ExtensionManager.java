@@ -32,7 +32,7 @@ public class ExtensionManager {
 			if(f.getName().endsWith(".jar")){
 				try {
 					//First, load it with our custom class loader
-					URL jar = new URL("jar:" + f.toURI().toURL() + "!/");
+					URL jar = f.toURI().toURL();
 					dcl.addJar(jar);
 					cd.addDiscoveryLocation(jar);
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);

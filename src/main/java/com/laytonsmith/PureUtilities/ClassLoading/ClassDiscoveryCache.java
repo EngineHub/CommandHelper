@@ -74,14 +74,8 @@ public class ClassDiscoveryCache {
 	 * @return 
 	 */
 	public ClassDiscoveryURLCache getURLCache(URL fromClassLocation){
-		URL classLocation;
-		try {
-			classLocation = new URL(StringUtils.replaceLast(fromClassLocation.getFile(), "!/", ""));
-		} catch (MalformedURLException ex) {
-			throw new Error();
-		}
-		if(classLocation.toString().endsWith(".jar")){
-			File location = new File(classLocation.getFile() + "/" + ClassDiscoveryCache.OUTPUT_FILENAME);
+		if(fromClassLocation.toString().endsWith(".jar")){
+			File location = new File(fromClassLocation.getFile(), ClassDiscoveryCache.OUTPUT_FILENAME);
 			ZipReader reader = new ZipReader(location);
 			if(reader.exists()){
 				try {
@@ -92,7 +86,7 @@ public class ClassDiscoveryCache {
 			}
 			File cacheOutputName = null;
 			try {
-				File jarFile = new File(classLocation.getFile());
+				File jarFile = new File(fromClassLocation.getFile());
 				FileInputStream fis = new FileInputStream(jarFile);
 				byte[] data = new byte[READ_SIZE];
 				fis.read(data);
@@ -115,7 +109,7 @@ public class ClassDiscoveryCache {
 				//Hmm. Ok, well, we'll just regenerate.
 			}
 			if(logger != null){
-				logger.log(Level.INFO, "Performing one time scans of {0}, this may take a few moments.", fromClassLocation);
+				logger.log(Level.INFO, "Performing one time scan of {0}, this may take a few moments.", fromClassLocation);
 			}
 			ClassDiscoveryURLCache cache = new ClassDiscoveryURLCache(fromClassLocation, progress);
 			if(cacheOutputName != null){
