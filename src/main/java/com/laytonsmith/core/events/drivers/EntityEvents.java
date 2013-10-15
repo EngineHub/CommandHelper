@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.StringUtils;
@@ -317,7 +316,7 @@ public class EntityEvents {
 			return "{type: <macro> The entity type of the projectile | shootertype: <macro> The entity type of the shooter | world: <macro>}"
 					+ " This event is called when a projectile is launched."
 					+ " Cancelling the event will only cancel the launching of the projectile."
-					+ " For instance if a player shoot an arrow with a bow, the damages taken by its bow will not be cancelled."
+					+ " For instance when a player shoot an arrow with a bow, if the event is cancelled the bow will still take damage from use."
 					+ " {id: The entityID of the projectile | type: The entity type of the projectile |"
 					+ " shooter: The entityID of the shooter (null if the projectile is launched by a dispenser) |"
 					+ " shootertype: The entity type of the shooter (null if the projectile is launched by a dispenser) |"
