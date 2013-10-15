@@ -71,11 +71,4 @@ public class BukkitBlockListener implements Listener{
 		EventUtils.TriggerExternal(bge);
 		EventUtils.TriggerListener(Driver.BLOCK_GROW, "block_grow", bge);
 	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockPhysics(BlockPhysicsEvent e) {
-		BukkitBlockEvents.BukkitMCBlockPhysicsEvent bpe = new BukkitBlockEvents.BukkitMCBlockPhysicsEvent(e);
-		EventUtils.TriggerExternal(bpe);
-		EventUtils.TriggerListener(Driver.BLOCK_PHYSICS, "block_physics", bpe);
-	}
 }

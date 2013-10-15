@@ -299,26 +299,4 @@ public class BukkitBlockEvents {
 			return new BukkitMCBlockState(bge.getNewState());
 		}
 	}
-
-	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCBlockPhysicsEvent implements MCBlockPhysicsEvent {
-
-		BlockPhysicsEvent bpe;
-
-		public BukkitMCBlockPhysicsEvent(BlockPhysicsEvent event) {
-			bpe = event;
-		}
-
-		public Object _GetObject() {
-			return bpe;
-		}
-
-		public MCBlock getBlock() {
-			return new BukkitMCBlock(bpe.getBlock());
-		}
-
-		public MCMaterial getChangedType() {
-			return new BukkitMCMaterial(bpe.getChangedType());
-		}
-	}
 }
