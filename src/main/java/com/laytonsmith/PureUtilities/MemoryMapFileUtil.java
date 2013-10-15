@@ -1,6 +1,7 @@
 
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -84,7 +85,7 @@ public class MemoryMapFileUtil {
 					}
 					
 					synchronized(this){
-						FileUtility.write(data, permanent, FileUtility.OVERWRITE, true);
+						FileUtil.write(data, permanent, FileUtil.OVERWRITE, true);
 						fileDirty = false;
 					}
 //					synchronized(this){

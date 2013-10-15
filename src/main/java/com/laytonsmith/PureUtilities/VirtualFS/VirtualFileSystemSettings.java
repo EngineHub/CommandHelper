@@ -1,8 +1,8 @@
 package com.laytonsmith.PureUtilities.VirtualFS;
 
-import com.laytonsmith.PureUtilities.FileUtility;
-import com.laytonsmith.PureUtilities.StreamUtils;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -179,10 +179,10 @@ public class VirtualFileSystemSettings {
 	private boolean cordonedOff = false;
 	
 	public VirtualFileSystemSettings(File settingsFile) throws IOException{
-		this(settingsFile.exists()?FileUtility.read(settingsFile):"");
+		this(settingsFile.exists()?FileUtil.read(settingsFile):"");
 		//Here, we will also output the serialized file, with the comment
 		//block at top
-		FileUtility.write(getDefaultSettingsString() + serialize(settings), settingsFile);
+		FileUtil.write(getDefaultSettingsString() + serialize(settings), settingsFile);
 	}
 	public VirtualFileSystemSettings(String unparsedSettings){
 		settings = (HashMap<VirtualGlob, SettingGroup>) deserialize(unparsedSettings);

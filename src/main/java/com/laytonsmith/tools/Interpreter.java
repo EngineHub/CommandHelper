@@ -1,9 +1,9 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassDiscoveryCache;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
@@ -84,7 +84,7 @@ public class Interpreter {
 		doStartup();
 		try{
 			File fromFile = new File(file).getCanonicalFile();
-			execute(FileUtility.read(fromFile), args, fromFile);
+			execute(FileUtil.read(fromFile), args, fromFile);
 		} catch(ConfigCompileException ex){
 			ConfigRuntimeException.React(ex, null, null);
 			System.out.println(TermColors.reset());
@@ -299,7 +299,7 @@ public class Interpreter {
 				if (!exe.canWrite()) {
 					throw new IOException();
 				}
-				FileUtility.write(bashScript, exe);
+				FileUtil.write(bashScript, exe);
 				exe.setExecutable(true, false);
 			} catch (IOException e) {
 				System.err.println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");

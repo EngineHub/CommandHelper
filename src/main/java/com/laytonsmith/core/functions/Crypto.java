@@ -2,7 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;

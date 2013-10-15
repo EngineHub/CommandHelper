@@ -1,7 +1,7 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.StackTraceUtils;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.Web.Cookie;
 import com.laytonsmith.PureUtilities.Web.CookieJar;

@@ -1,6 +1,6 @@
 package com.laytonsmith.database;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import java.util.HashMap;
 import java.util.Map;
 

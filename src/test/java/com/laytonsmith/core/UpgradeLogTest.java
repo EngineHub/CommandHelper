@@ -1,6 +1,6 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
@@ -37,7 +37,7 @@ public class UpgradeLogTest {
 	@Test
 	public void testOldTasksArentRun() throws Exception {
 		File log = new File("upgradeLogTestOldTasksArentRun");
-		FileUtility.write("[{\"upgradeTime\":\"1234\",\"breadcrumb\":\"task\"}]", log);
+		FileUtil.write("[{\"upgradeTime\":\"1234\",\"breadcrumb\":\"task\"}]", log);
 		try{
 			UpgradeLog l = new UpgradeLog(log);
 			final AtomicInteger i = new AtomicInteger(0);
@@ -105,7 +105,7 @@ public class UpgradeLogTest {
 				}
 			});
 			l.runTasks();
-			assertTrue(FileUtility.read(log).contains("task2"));
+			assertTrue(FileUtil.read(log).contains("task2"));
 			assertEquals(2, i.get());
 		} finally {
 			log.delete();
