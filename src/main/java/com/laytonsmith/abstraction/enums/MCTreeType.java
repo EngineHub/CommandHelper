@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.enums;
 
-/*
+/**
  *
  * @author Hekta
  */

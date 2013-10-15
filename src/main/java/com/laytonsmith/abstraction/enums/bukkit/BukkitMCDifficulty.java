@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.Difficulty;
 
-/*
+/**
  *
  * @author Hekta
  */

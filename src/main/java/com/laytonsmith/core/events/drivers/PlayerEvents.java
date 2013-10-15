@@ -206,7 +206,7 @@ public class PlayerEvents {
 				+ "| from: <custom> This should be a location array (x, y, z, world)."
 				+ " The location is matched via block matching, so if the array's x parameter were 1, if the player"
 				+ "moved from 1.3, that parameter would match."
-				+ "| to: <custom> The location the player is now in. This should be a location array as well. "
+				+ "| to: <custom> The location the player is now in. This should be a location array as well.} "
 				+ "{player | from: The location the player is coming from | to: The location the player is now in | "
 				+ "type: the type of teleport occuring, one of: " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 				+ "{to}"
@@ -771,10 +771,7 @@ public class PlayerEvents {
                 }
                 if(a == MCAction.LEFT_CLICK_BLOCK || a == MCAction.RIGHT_CLICK_BLOCK){
                     map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), Target.UNKNOWN));
-                    MCBlock b = pie.getClickedBlock();
-                    map.put("location", new CArray(Target.UNKNOWN, new CInt(b.getX(), Target.UNKNOWN),
-                            new CInt(b.getY(), Target.UNKNOWN), new CInt(b.getZ(), Target.UNKNOWN),
-                            new CString(b.getWorld().getName(), Target.UNKNOWN)));
+                    map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(), false));
                 }
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
                 map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
@@ -838,7 +835,7 @@ public class PlayerEvents {
                 MCPlayerBedEvent bee = (MCPlayerBedEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
 				
-                map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation()));
+                map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation(), false));
 				map.put("player", new CString(bee.getPlayer().getName(), Target.UNKNOWN));
 				
 				return map;
@@ -945,7 +942,7 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-                map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation()));
+                map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(), false));
 				//TODO: Once activation is supported, set that appropriately here.
 				map.put("activated", new CBoolean(true, Target.UNKNOWN));
 				return map;

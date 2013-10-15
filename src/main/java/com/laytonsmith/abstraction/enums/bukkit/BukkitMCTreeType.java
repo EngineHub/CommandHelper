@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.TreeType;
 
-/*
+/**
  *
  * @author Hekta
  */

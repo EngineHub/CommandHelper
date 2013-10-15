@@ -1626,34 +1626,14 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_air extends AbstractFunction {
+	public static class entity_air extends EntityGetterFunction {
 
 		public String getName() {
 			return "entity_air";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-
 		public String docs() {
 			return "int {entityID} Returns the amount of air the specified living entity has remaining.";
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_1;
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -1662,34 +1642,14 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class set_entity_air extends AbstractFunction {
+	public static class set_entity_air extends EntitySetterFunction {
 
 		public String getName() {
 			return "set_entity_air";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-
 		public String docs() {
 			return "void {entityID, int} Sets the amount of air the specified living entity has remaining.";
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_1;
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -1699,34 +1659,14 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_max_air extends AbstractFunction {
+	public static class entity_max_air extends EntityGetterFunction {
 
 		public String getName() {
 			return "entity_max_air";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-
 		public String docs() {
 			return "int {entityID} Returns the maximum amount of air the specified living entity can have.";
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_1;
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -1735,34 +1675,14 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class set_entity_max_air extends AbstractFunction {
+	public static class set_entity_max_air extends EntitySetterFunction {
 
 		public String getName() {
 			return "set_entity_max_air";
 		}
 
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-
 		public String docs() {
 			return "void {entityID, int} Sets the maximum amount of air the specified living entity can have.";
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_1;
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -1772,7 +1692,7 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class entity_line_of_sight extends AbstractFunction {
+	public static class entity_line_of_sight extends EntityFunction {
 
 		public String getName() {
 			return "entity_line_of_sight";
@@ -1786,22 +1706,10 @@ public class EntityManagement {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-
 		public String docs() {
 			return "array {entityID, [transparents, [maxDistance]]} Returns an array containg all blocks along the living entity's line of sight."
 					+ " transparents is an array of block IDs, only air by default."
 					+ " maxDistance represent the maximum distance to scan, it may be limited by the server by at least 100 blocks, no less.";
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_1;
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -1822,21 +1730,15 @@ public class EntityManagement {
 				maxDistance = Static.getInt32(args[2], t);
 			}
 			CArray lineOfSight = new CArray(t);
-			CArray l;
 			for (MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
-				l = ObjectGenerator.GetGenerator().location(block.getLocation());
-				l.remove(new CString("4", t));
-				l.remove(new CString("5", t));
-				l.remove(new CString("yaw", t));
-				l.remove(new CString("pitch", t));
-				lineOfSight.push(l);
+				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 			}
 			return lineOfSight;
 		}
 	}
 
 	@api
-	public static class entity_can_see extends AbstractFunction {
+	public static class entity_can_see extends EntityFunction {
 
 		public String getName() {
 			return "entity_can_see";
@@ -1850,22 +1752,10 @@ public class EntityManagement {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-
 		public String docs() {
 			return "boolean {entityID, otherEntityID} Returns if the entity can have the other entity in his line of sight."
 					+ " For instance for players this mean that it can have the other entity on its screen and that this one is not hidden by opaque blocks."
 					+ " This uses the same algorithm that hostile mobs use to find the closest player.";
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_1;
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
