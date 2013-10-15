@@ -1,9 +1,9 @@
 package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.FileUtility;
-import com.laytonsmith.PureUtilities.StringUtils;
-import com.laytonsmith.PureUtilities.Util;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.laytonsmith.persistance.io.ReadWriteFileConnection;
@@ -158,7 +158,7 @@ public class TestPersistance {
 		network.clearKey(dm, new String[]{"key"});
 		dm.waitForThreads();
 		assertFalse(network.hasKey(new String[]{"key"}));
-		assertEquals("{\"key2\":\"value\"}", FileUtility.read(new File("folder/default.json")));
+		assertEquals("{\"key2\":\"value\"}", FileUtil.read(new File("folder/default.json")));
 		deleteFiles("folder/");
 	}
 	
@@ -168,7 +168,7 @@ public class TestPersistance {
 		network.set(dm, new String[]{"key"}, "value");
 		dm.waitForThreads();
 		assertEquals("value", network.get(new String[]{"key"}));
-		FileUtility.write("{\"key\":\"nope\"}", new File("folder/default.json"));
+		FileUtil.write("{\"key\":\"nope\"}", new File("folder/default.json"));
 		//This should be cached in memory
 		assertEquals("value", network.get(new String[]{"key"}));
 		deleteFiles("folder/");
@@ -180,7 +180,7 @@ public class TestPersistance {
 		network.set(dm, new String[]{"key"}, "value1");
 		dm.waitForThreads();
 		assertEquals("value1", network.get(new String[]{"key"}));
-		FileUtility.write("{\"key\":\"value2\"}", new File("folder/default.json"));
+		FileUtil.write("{\"key\":\"value2\"}", new File("folder/default.json"));
 		//This should not be cached in memory
 		assertEquals("value2", network.get(new String[]{"key"}));
 		deleteFiles("folder/");
@@ -193,7 +193,7 @@ public class TestPersistance {
 		PersistanceNetwork network = new PersistanceNetwork("**=ser://folder/default.ser", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value");
 		dm.waitForThreads();
-		String contents = FileUtility.read(new File("folder/default.ser"));
+		String contents = FileUtil.read(new File("folder/default.ser"));
 		assertTrue(contents.contains("value") && contents.contains("key") && contents.contains("java.util.HashMap"));
 		deleteFiles("folder/");
 	}
@@ -202,8 +202,8 @@ public class TestPersistance {
 	public void testConflictingKeys() throws Exception{
 		//If two data sources have the same key, only one should be currently operated on.
 		PersistanceNetwork network = new PersistanceNetwork("**=transient:json://folder/default.json\nkey.*=transient:json://folder/other.json\n", new URI("default"), options);
-		FileUtility.write("{\"key\":{\"key\":\"value1\"}}", new File("folder/other.json"), true);
-		FileUtility.write("{\"key\":{\"key\":\"nope\"}}", new File("folder/default.json"), true);
+		FileUtil.write("{\"key\":{\"key\":\"value1\"}}", new File("folder/other.json"), true);
+		FileUtil.write("{\"key\":{\"key\":\"nope\"}}", new File("folder/default.json"), true);
 		assertEquals("value1", network.get(new String[]{"key", "key"}));
 		deleteFiles("folder/");
 	}
@@ -282,7 +282,7 @@ public class TestPersistance {
 					}
 					dm.waitForThreads();
 					File output = GetPrivate(sdc.getConnectionMixin(), "file", File.class);
-					String out = FileUtility.read(output);
+					String out = FileUtil.read(output);
 					output.delete();
 					return out;
 				} else {
@@ -294,7 +294,7 @@ public class TestPersistance {
 				return null;
 			}
 		} catch (Exception ex) {
-			fail(Util.GetStacktrace(ex));
+			fail(Misc.GetStacktrace(ex));
 			return null;
 		}
 	}
@@ -313,7 +313,7 @@ public class TestPersistance {
 
 	public static void deleteFiles(String... files) {
 		for (String f : files) {
-			FileUtility.recursiveDelete(new File(f));
+			FileUtil.recursiveDelete(new File(f));
 		}
 	}
 

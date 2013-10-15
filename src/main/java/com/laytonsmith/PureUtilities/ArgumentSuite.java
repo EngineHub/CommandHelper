@@ -1,5 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentParserResults;
 import com.laytonsmith.PureUtilities.ArgumentParser.ResultUseException;
 import com.laytonsmith.PureUtilities.ArgumentParser.ValidationException;

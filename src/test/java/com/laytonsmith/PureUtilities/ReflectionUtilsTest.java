@@ -1,5 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.testing.StaticTest;
 import static org.junit.Assert.*;
 import org.junit.Before;

@@ -1,7 +1,7 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class UpgradeLog {
 	 */
 	public void runTasks() throws IOException{
 		if(logFile.exists()){
-			List<Map<String, String>> jsonUpgrades = (List<Map<String, String>>)JSONValue.parse(FileUtility.read(logFile));
+			List<Map<String, String>> jsonUpgrades = (List<Map<String, String>>)JSONValue.parse(FileUtil.read(logFile));
 			for(Map<String, String> m : jsonUpgrades){
 				upgrades.add(Upgrade.fromMap(m));
 			}
@@ -69,7 +69,7 @@ public class UpgradeLog {
 			jsonUpgrades.add(u.toMap());
 		}
 		String newJSON = JSONValue.toJSONString(jsonUpgrades);
-		FileUtility.write(newJSON, logFile);
+		FileUtil.write(newJSON, logFile);
 	}
 	
 	public static abstract class UpgradeTask implements Runnable {

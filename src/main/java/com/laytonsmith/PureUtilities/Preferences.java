@@ -1,6 +1,7 @@
 
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -252,7 +253,7 @@ public class Preferences {
                 prefFile.createNewFile();
             }
 			if(prefFile != null){
-				FileUtility.write(b.toString(), prefFile);
+				FileUtil.write(b.toString(), prefFile);
 			}
         } catch (Exception ex) {
             logger.log(Level.WARNING, "[" + appName + "] Could not write out preferences file: " + (prefFile!=null?prefFile.getAbsolutePath():"null"), ex);

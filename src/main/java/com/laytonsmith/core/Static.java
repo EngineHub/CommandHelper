@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.*;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -354,7 +355,7 @@ public final class Static {
      * @return 
      */
     public static FileWriter debugLogFile(File root) throws IOException {
-        String currentFileName = root.getPath() + "/" + DateUtil.ParseCalendarNotation(Prefs.DebugLogFile());
+        String currentFileName = root.getPath() + "/" + DateUtils.ParseCalendarNotation(Prefs.DebugLogFile());
         if (!currentFileName.equals(debugLogFileCurrent)) {
             if (debugLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -373,7 +374,7 @@ public final class Static {
     private static FileWriter standardLogFileHandle = null;
 
     public static FileWriter standardLogFile(File root) throws IOException {
-        String currentFileName = root.getPath() + DateUtil.ParseCalendarNotation(Prefs.StandardLogFile());
+        String currentFileName = root.getPath() + DateUtils.ParseCalendarNotation(Prefs.StandardLogFile());
         if (!currentFileName.equals(standardLogFileCurrent)) {
             if (standardLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -389,7 +390,7 @@ public final class Static {
     private static FileWriter profilingLogFileHandle = null;
 
     public static FileWriter profilingLogFile(File root) throws IOException {
-        String currentFileName = root.getPath() + DateUtil.ParseCalendarNotation(Prefs.ProfilingFile());
+        String currentFileName = root.getPath() + DateUtils.ParseCalendarNotation(Prefs.ProfilingFile());
         if (!currentFileName.equals(profilingLogFileCurrent)) {
             if (profilingLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -800,7 +801,7 @@ public final class Static {
 				Static.getLogger().log(lev, color + message + TermColors.reset());
 			}
         }
-        String timestamp = DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
+        String timestamp = DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
         QuickAppend(Static.debugLogFile(root), timestamp + message + Static.LF());
     }
 

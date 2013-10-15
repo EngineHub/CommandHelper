@@ -1,5 +1,9 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
@@ -294,7 +298,7 @@ public class ZipReader {
      */
     public String getFileContents() throws FileNotFoundException, IOException {
         if (!isZipped) {
-            return FileUtility.read(file);
+            return FileUtil.read(file);
         } else {            
             return StreamUtils.GetString(getInputStream());
         }

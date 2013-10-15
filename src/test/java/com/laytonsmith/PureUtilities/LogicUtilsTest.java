@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.LogicUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
