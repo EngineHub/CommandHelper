@@ -2,7 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.api.Platforms;

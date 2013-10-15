@@ -1,8 +1,8 @@
 package com.laytonsmith.PureUtilities.VirtualFS;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassMirror.ClassMirror;
-import com.laytonsmith.PureUtilities.StreamUtils;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.VirtualFS.VirtualFileSystemSettings.VirtualFileSystemSetting;
 import java.io.File;
 import java.io.IOException;

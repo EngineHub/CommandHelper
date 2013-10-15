@@ -1,5 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

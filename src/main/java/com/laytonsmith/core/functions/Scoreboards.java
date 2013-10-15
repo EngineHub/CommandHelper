@@ -1,6 +1,6 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;

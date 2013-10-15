@@ -1,6 +1,6 @@
 package com.laytonsmith.tools.docgen;
 
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Web.CookieJar;
 import com.laytonsmith.PureUtilities.Web.HTTPMethod;
 import com.laytonsmith.PureUtilities.Web.HTTPResponse;

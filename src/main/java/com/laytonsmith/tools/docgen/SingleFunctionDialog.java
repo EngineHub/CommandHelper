@@ -1,6 +1,6 @@
 package com.laytonsmith.tools.docgen;
 
-import com.laytonsmith.PureUtilities.UIUtils;
+import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;

@@ -1,8 +1,8 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassDiscoveryURLCache;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryURLCache;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.database.DB;
 import com.laytonsmith.database.MySQL;
 import java.io.ByteArrayInputStream;

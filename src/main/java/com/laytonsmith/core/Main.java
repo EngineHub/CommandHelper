@@ -2,11 +2,11 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ArgumentSuite;
-import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.FileUtility;
-import com.laytonsmith.PureUtilities.StringUtils;
-import com.laytonsmith.PureUtilities.Util;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
@@ -298,7 +298,7 @@ public class Main {
 				CHLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 				String path = parsedArgs.getStringArgument();
 				File source = new File(path);
-				String plain = FileUtility.read(source);
+				String plain = FileUtil.read(source);
 				Security.setSecurityEnabled(false);
 				String optimized = OptimizationUtilities.optimize(plain, source);
 				System.out.println(optimized);
@@ -356,7 +356,7 @@ public class Main {
 				+ " and put it in the CommandHelper directory.";
 		if (Prefs.DebugMode()) {
 			ret += " If you're dying for more details, here:\n";
-			ret += Util.GetStacktrace(error);
+			ret += Misc.GetStacktrace(error);
 		}
 		return ret;
 	}

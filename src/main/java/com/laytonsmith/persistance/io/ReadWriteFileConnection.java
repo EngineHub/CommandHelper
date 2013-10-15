@@ -1,7 +1,7 @@
 package com.laytonsmith.persistance.io;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistance.ReadOnlyException;
@@ -63,7 +63,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 			}
 		}
 		if(file.exists()){
-			encoding = FileUtility.getFileCharset(file);
+			encoding = FileUtil.getFileCharset(file);
 		}
 		reader = new ZipReader(file);
 		if(!reader.isZipped()){
@@ -86,7 +86,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 			//without worrying about corruption from a write operation.
 			return reader.getFileContents();
 		}
-		this.data = StreamUtils.getBytes(FileUtility.readAsStream(file));
+		this.data = StreamUtils.getBytes(FileUtil.readAsStream(file));
 		return new String(this.data, encoding);
 	}
 

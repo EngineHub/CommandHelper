@@ -2,7 +2,7 @@
 
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.PureUtilities.DateUtil;
+import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.*;
@@ -365,7 +365,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         
         public void addHistory(String history){
             if(Prefs.DebugMode()){
-                this.history.add(DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ") + history);
+                this.history.add(DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ") + history);
             }
         }
         

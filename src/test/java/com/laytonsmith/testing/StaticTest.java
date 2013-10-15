@@ -2,7 +2,7 @@
 
 package com.laytonsmith.testing;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.*;
