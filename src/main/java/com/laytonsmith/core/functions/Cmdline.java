@@ -1,8 +1,8 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
-import com.laytonsmith.PureUtilities.MutableObject;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.MutableObject;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;

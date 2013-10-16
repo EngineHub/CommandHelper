@@ -1,6 +1,6 @@
 package com.laytonsmith.PureUtilities.VirtualFS;
 
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import java.io.File;
 import java.io.IOException;
 import org.junit.After;
@@ -27,7 +27,7 @@ public class VirtualFSTest {
 	
 	@AfterClass
 	public static void tearDownClass() {
-		FileUtility.recursiveDelete(root);
+		FileUtil.recursiveDelete(root);
 		assertFalse(root.exists());
 	}
 	
@@ -44,7 +44,7 @@ public class VirtualFSTest {
 	 * @param settings 
 	 */
 	private void writeSettings(String settings) throws IOException{
-		FileUtility.write(settings, settingsFile);
+		FileUtil.write(settings, settingsFile);
 	}
 	
 	/**
@@ -62,8 +62,8 @@ public class VirtualFSTest {
 				+ "}\n";
 		writeSettings(settingsString);
 		new VirtualFileSystem(root, new VirtualFileSystemSettings(settingsFile));
-		assertTrue(FileUtility.read(settingsFile).contains(VirtualFileSystemSettings.getDefaultSettingsString()));
-		assertTrue(FileUtility.read(settingsFile).contains(settingsString));
+		assertTrue(FileUtil.read(settingsFile).contains(VirtualFileSystemSettings.getDefaultSettingsString()));
+		assertTrue(FileUtil.read(settingsFile).contains(settingsString));
 	}
 	
 	/**
@@ -79,7 +79,7 @@ public class VirtualFSTest {
 		VirtualFile vf = new VirtualFile("/" + fname);
 		File realFile = new File(root, fname);
 		vfs.writeUTFString(vf, fileText);
-		assertEquals(fileText, FileUtility.read(realFile));
+		assertEquals(fileText, FileUtil.read(realFile));
 		assertEquals(fileText, vfs.readUTFString(vf));
 	}
 	

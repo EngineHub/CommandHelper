@@ -18,12 +18,12 @@
  */
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassDiscoveryCache;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.SimpleVersion;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
@@ -149,7 +149,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 					Prefs.SetColors();
 					Logger.getLogger("Minecraft").log(Level.INFO, 
 							TermColors.YELLOW + "[" + Implementation.GetServerType().getBranding() + "] Old preferences.txt file detected. Moving preferences.txt to preferences.ini." + TermColors.reset());
-					FileUtility.copy(oldPreferences, CommandHelperFileLocations.getDefault().getPreferencesFile(), true);
+					FileUtil.copy(oldPreferences, CommandHelperFileLocations.getDefault().getPreferencesFile(), true);
 					oldPreferences.deleteOnExit();
 				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);

@@ -1,8 +1,8 @@
 package com.laytonsmith.core.profiler;
 
-import com.laytonsmith.PureUtilities.DateUtil;
+import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.core.LogLevel;
@@ -220,11 +220,11 @@ public final class Profiler {
 					System.out.println(message);
 				}
 				if (writeToFile) {
-					File file = new File(initFile.getParentFile(), DateUtil.ParseCalendarNotation(logFile));
+					File file = new File(initFile.getParentFile(), DateUtils.ParseCalendarNotation(logFile));
 					try {
-						FileUtility.write(DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s") + ": " + message + Static.LF(), //Message to log
+						FileUtil.write(DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s") + ": " + message + Static.LF(), //Message to log
 								file, //File to output to
-								FileUtility.APPEND, //We want to append
+								FileUtil.APPEND, //We want to append
 								true); //Create it for us if it doesn't exist
 					} catch (IOException ex) {
 						System.err.println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());

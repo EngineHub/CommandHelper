@@ -1,8 +1,8 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.FileUtility;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.abstraction.Implementation;
@@ -477,7 +477,7 @@ public class Manager {
 						pl("Looks like you haven't used your persistance file yet.");
 						return;
 					}
-					FileUtility.copy(db, new File("CommandHelper/persistance.ser.bak"), null);
+					FileUtil.copy(db, new File("CommandHelper/persistance.ser.bak"), null);
 					//Now, load in all the data
 					SerializedPersistance sp;
 					try {
