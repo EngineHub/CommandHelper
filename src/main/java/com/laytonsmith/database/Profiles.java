@@ -13,6 +13,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,10 +228,12 @@ public class Profiles {
 		/**
 		 * Given the connection details, this should return the proper 
 		 * connection string that the actual database connector will use
-		 * to create a connection with this profile.
+		 * to create a connection with this profile. Additionally, during this
+		 * step, it should be verified that the SQL driver is present.
 		 * @return 
+		 * @throws SQLException If the database driver doesn't exist.
 		 */
-		public abstract String getConnectionString();
+		public abstract String getConnectionString() throws SQLException;
 
 		//Subclasses are encouraged to override this
 		@Override

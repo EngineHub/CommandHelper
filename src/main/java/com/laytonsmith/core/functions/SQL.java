@@ -18,10 +18,16 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.database.Profiles;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -84,9 +90,69 @@ public class SQL {
 					}
 				}
 				//Parameters are now all parsed into java objects.
-				//////////////TODO Finish starting here
-				return null;
+				Connection conn = DriverManager.getConnection(profile.getConnectionString());
+				PreparedStatement ps = conn.prepareStatement(query);
+				for(int i = 0; i < params.length; i++){
+					int type = ps.getParameterMetaData().getParameterType(i + 1);
+					if(params[i] == null){
+						if(ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls){
+							throw new ConfigRuntimeException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
+						} else {
+							ps.setNull(i + 1, type);
+							continue;
+						}
+					}
+					try {
+						if(type == Types.INTEGER){
+							ps.setInt(i + 1, (Integer)params[i]);
+						} else if(type == Types.DOUBLE){
+							ps.setDouble(i + 1, (Double)params[i]);
+						} else if(type == Types.VARCHAR || type == Types.CHAR){
+							ps.setString(i + 1, (String)params[i]);
+						} else if(type == Types.BOOLEAN){
+							ps.setBoolean(i + 1, (Boolean)params[i]);
+						}
+					} catch(ClassCastException ex){
+						throw new ConfigRuntimeException("Could not cast parameter " + (i + 1) + " to "
+								+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from " + params[i].getClass().getSimpleName(), 
+								ExceptionType.CastException, t, ex);
+					}
+				}
+				boolean isResultSet = ps.execute();
+				if(isResultSet){
+					//Result set
+					CArray ret = new CArray(t);
+					ResultSetMetaData md = ps.getMetaData();
+					ResultSet rs = ps.getResultSet();
+					while(rs.next()){
+						CArray row = new CArray(t);
+						for(int i = 1; i <= md.getColumnCount(); i++){
+							Construct value;
+							int columnType = md.getColumnType(i);
+							if(columnType == Types.INTEGER){
+								value = new CInt(rs.getInt(i), t);
+							} else if(columnType == Types.DOUBLE){
+								value = new CDouble(rs.getDouble(i), t);
+							} else if(columnType == Types.VARCHAR || columnType == Types.CHAR){
+								value = new CString(rs.getString(i), t);
+							} else if(columnType == Types.BOOLEAN){
+								value = new CBoolean(rs.getBoolean(i), t);
+							} else {
+								//For now, continue. Perhaps later, we can do something different.
+								continue;
+							}
+							row.set(md.getColumnName(i), value, t);
+						}
+						ret.push(row);
+					}
+					return ret;
+				} else {
+					//Update count. Just return null.
+					return new CNull(t);
+				}
 			} catch (Profiles.InvalidProfileException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
+			} catch (SQLException ex){
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
 			}
 		}
@@ -113,7 +179,7 @@ public class SQL {
 					+ " For SELECT queries, an array of associative arrays is returned. It is not guaranteed that the arrays themselves are edittable, so this"
 					+ " returned array should be considerd \"read-only\". Optimizations will be added later to make this more efficient. For INSERT queries,"
 					+ " either null or an integer is returned. If the insert caused an auto-increment to occur, that auto-increment ID is returned. Otherwise,"
-					+ " null is returned. For UPDATE, DELETE, or schema changing queries, null is always returned. In the event that n SQL query is incorrect"
+					+ " null is returned. For UPDATE, DELETE, or schema changing queries, null is always returned. In the event that an SQL query is incorrect"
 					+ " or otherwise causes an error, an SQLException is thrown. Only primitive data types are supported for the parameters, arrays are not.";
 		}
 
