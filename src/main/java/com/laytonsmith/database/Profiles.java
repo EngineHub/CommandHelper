@@ -1,10 +1,10 @@
 
 package com.laytonsmith.database;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.FileUtility;
-import com.laytonsmith.PureUtilities.ReflectionUtils;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class Profiles {
 	 * @throws com.laytonsmith.database.Profiles.InvalidProfileException 
 	 */
 	public Profiles(File profileFile) throws IOException, InvalidProfileException{
-		this(FileUtility.readAsStream(profileFile));
+		this(FileUtil.readAsStream(profileFile));
 	}
 	
 	/**
