@@ -1,6 +1,5 @@
 package com.laytonsmith.database;
 
-import com.laytonsmith.PureUtilities.HTMLUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
