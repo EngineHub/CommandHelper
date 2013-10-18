@@ -1621,7 +1621,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {entityID} retruns whether the entity is touching the ground";
+			return "boolean {entityID} returns whether the entity is touching the ground";
 		}
 	}
 
@@ -1886,7 +1886,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "string {entityID} retruns the persistent unique id of the entity";
+			return "string {entityID} returns the persistent unique id of the entity";
 		}
 		
 	}
