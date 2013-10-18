@@ -25,6 +25,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,7 +92,7 @@ public class SQL {
 				}
 				//Parameters are now all parsed into java objects.
 				Connection conn = DriverManager.getConnection(profile.getConnectionString());
-				PreparedStatement ps = conn.prepareStatement(query);
+				PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 				for(int i = 0; i < params.length; i++){
 					int type = ps.getParameterMetaData().getParameterType(i + 1);
 					if(params[i] == null){
@@ -147,6 +148,12 @@ public class SQL {
 					}
 					return ret;
 				} else {
+					ResultSet rs = ps.getGeneratedKeys();
+					if(rs.next()){
+						//This was an insert or something that returned generated keys. So we return
+						//that here.
+						return new CInt(rs.getInt(1), t);
+					}
 					//Update count. Just return null.
 					return new CNull(t);
 				}
