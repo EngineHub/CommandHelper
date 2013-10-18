@@ -1872,4 +1872,22 @@ public class EntityManagement {
 			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).hasLineOfSight(Static.getEntity(Static.getInt32(args[1], t), t)), t);
 		}
 	}
+	
+	@api
+	public static class entity_uuid extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(Static.getInt32(args[0], t), t);
+			return new CString(entity.getUniqueId().toString(), t);
+		}
+
+		public String getName() {
+			return "entity_uuid";
+		}
+
+		public String docs() {
+			return "string {entityID} retruns the persistent unique id of the entity";
+		}
+		
+	}
 }
