@@ -2,7 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
-import com.laytonsmith.PureUtilities.StackTraceUtils;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.constructs.Target;
 import java.io.File;

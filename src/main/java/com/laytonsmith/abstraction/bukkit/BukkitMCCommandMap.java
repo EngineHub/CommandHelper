@@ -7,7 +7,7 @@ import java.util.Map;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
 
-import com.laytonsmith.PureUtilities.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandMap;
 

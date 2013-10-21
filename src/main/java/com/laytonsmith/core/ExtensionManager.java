@@ -1,9 +1,9 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassMirror.MethodMirror;
-import com.laytonsmith.PureUtilities.DynamicClassLoader;
-import com.laytonsmith.PureUtilities.StackTraceUtils;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.shutdown;
 import com.laytonsmith.annotations.startup;
@@ -32,7 +32,7 @@ public class ExtensionManager {
 			if(f.getName().endsWith(".jar")){
 				try {
 					//First, load it with our custom class loader
-					URL jar = new URL("jar:" + f.toURI().toURL() + "!/");
+					URL jar = f.toURI().toURL();
 					dcl.addJar(jar);
 					cd.addDiscoveryLocation(jar);
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);

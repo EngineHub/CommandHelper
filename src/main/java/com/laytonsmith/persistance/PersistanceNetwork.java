@@ -1,7 +1,7 @@
 package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class PersistanceNetwork {
 	 * @param defaultURI
 	 */
 	public PersistanceNetwork(File configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws IOException, DataSourceException {
-		this(FileUtility.read(ensureCreated(configuration)), defaultURI, options);
+		this(FileUtil.read(ensureCreated(configuration)), defaultURI, options);
 	}
 
 	private static File ensureCreated(File f) throws IOException {

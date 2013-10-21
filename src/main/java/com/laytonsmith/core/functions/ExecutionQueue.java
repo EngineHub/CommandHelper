@@ -61,8 +61,12 @@ public class ExecutionQueue {
 				public void run() {
 					StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), 0, new Runnable() {
 
-						public void run() {							
-							c.execute(null);
+						public void run() {
+							try {
+								c.execute();
+							} catch(ConfigRuntimeException ex){
+								ConfigRuntimeException.React(ex, environment);
+							}
 						}
 					});
 				}
@@ -120,8 +124,12 @@ public class ExecutionQueue {
 				public void run() {
 					StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), 0, new Runnable() {
 
-						public void run() {							
-							c.execute(null);
+						public void run() {
+							try {
+								c.execute();
+							} catch(ConfigRuntimeException ex){
+								ConfigRuntimeException.React(ex, environment);
+							}
 						}
 					});
 				}

@@ -1,8 +1,8 @@
 package com.laytonsmith.persistance;
 
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.PropertiesManager;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public class DataSourceFilter {
 	 */
 	public DataSourceFilter(File file, URI defaultURI) throws IOException, DataSourceException {
 		try {
-			process(FileUtility.read(file), defaultURI);
+			process(FileUtil.read(file), defaultURI);
 		} catch (DataSourceException e) {
 			throw new DataSourceException("Could not process filter file located at " + file.getAbsolutePath() + ": " + e.getMessage());
 		}

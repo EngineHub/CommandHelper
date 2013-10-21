@@ -1,6 +1,6 @@
 package com.laytonsmith.database;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

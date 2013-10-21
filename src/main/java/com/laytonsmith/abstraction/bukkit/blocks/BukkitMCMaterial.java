@@ -1,4 +1,5 @@
 
+
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.MCMaterialData;
@@ -26,9 +27,9 @@ public class BukkitMCMaterial implements MCMaterial {
         return m.getId();
     }
 
-    public MCMaterialData getData() {
-        return new BukkitMCMaterialData(new MaterialData(m));
-    }
+	public MCMaterialData getData() {
+		return new BukkitMCMaterialData(new MaterialData(m));
+	}
 
     public int getMaxStackSize() {
         return m.getMaxStackSize();

@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.MutableObject;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;

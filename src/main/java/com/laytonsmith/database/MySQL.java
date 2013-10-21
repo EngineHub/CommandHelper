@@ -1,6 +1,5 @@
 package com.laytonsmith.database;
 
-import com.laytonsmith.PureUtilities.HTMLUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -117,7 +116,13 @@ public class MySQL extends DB {
 		}
 
 		@Override
-		public String getConnectionString() {
+		public String getConnectionString() throws SQLException {
+			try {
+				Class.forName(com.mysql.jdbc.Driver.class.getName());
+			}
+			catch (ClassNotFoundException ex) {
+				throw new SQLException("Cannot load MySQL. Check your installation and try again");
+			}
 			try {
 				return "jdbc:mysql://" + host + ":" + port + "/" + database + "?generateSimpleParameterMetadata=true"
 						+ (username==null?"":"&user=" + URLEncoder.encode(username, "UTF-8"))

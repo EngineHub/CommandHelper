@@ -1,6 +1,6 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.SSHWrapper;
 import com.laytonsmith.PureUtilities.Version;
@@ -171,7 +171,7 @@ public class FileHandling {
 					} else {
 						try {
 							//It's a local file read
-							returnString = FileUtility.read(new File(t.file().getParentFile(), file));
+							returnString = FileUtil.read(new File(t.file().getParentFile(), file));
 						} catch (IOException ex) {
 							exception = new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 						}

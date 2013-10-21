@@ -1,10 +1,10 @@
 
 package com.laytonsmith.database;
 
-import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.FileUtility;
-import com.laytonsmith.PureUtilities.ReflectionUtils;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +52,7 @@ public class Profiles {
 	 * @throws com.laytonsmith.database.Profiles.InvalidProfileException 
 	 */
 	public Profiles(File profileFile) throws IOException, InvalidProfileException{
-		this(FileUtility.readAsStream(profileFile));
+		this(FileUtil.readAsStream(profileFile));
 	}
 	
 	/**
@@ -160,7 +161,7 @@ public class Profiles {
 	}
 	
 	/**
-	 * Utility method for retreiving a Profile object given pre-parsed connection information.
+	 * Utility method for retrieving a Profile object given pre-parsed connection information.
 	 * The type is assumed to be apart of the data provided. No id is required as part of the data.
 	 * @param data
 	 * @return
@@ -227,10 +228,12 @@ public class Profiles {
 		/**
 		 * Given the connection details, this should return the proper 
 		 * connection string that the actual database connector will use
-		 * to create a connection with this profile.
+		 * to create a connection with this profile. Additionally, during this
+		 * step, it should be verified that the SQL driver is present.
 		 * @return 
+		 * @throws SQLException If the database driver doesn't exist.
 		 */
-		public abstract String getConnectionString();
+		public abstract String getConnectionString() throws SQLException;
 
 		//Subclasses are encouraged to override this
 		@Override

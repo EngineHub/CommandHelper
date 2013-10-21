@@ -1,6 +1,6 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -1621,7 +1621,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {entityID} retruns whether the entity is touching the ground";
+			return "boolean {entityID} returns whether the entity is touching the ground";
 		}
 	}
 
@@ -1760,6 +1760,23 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).hasLineOfSight(Static.getEntity(Static.getInt32(args[1], t), t)), t);
+		}
+	}
+        
+	@api
+	public static class entity_uuid extends EntityGetterFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(Static.getInt32(args[0], t), t);
+			return new CString(entity.getUniqueId().toString(), t);
+		}
+
+		public String getName() {
+			return "entity_uuid";
+		}
+
+		public String docs() {
+			return "string {entityID} returns the persistent unique id of the entity";
 		}
 	}
 }

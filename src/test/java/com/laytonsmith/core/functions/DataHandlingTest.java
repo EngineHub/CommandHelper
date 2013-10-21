@@ -2,7 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -272,7 +272,7 @@ public class DataHandlingTest {
                 "include('unit_test_inc.ms')";
         //Create the test file
         File test = new File("unit_test_inc.ms");
-        FileUtility.write("msg('hello')", test);
+        FileUtil.write("msg('hello')", test);
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("./script.txt"), true)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
         //delete the test file
