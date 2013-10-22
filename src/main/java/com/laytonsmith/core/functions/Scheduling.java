@@ -519,6 +519,7 @@ public class Scheduling {
 
 						@Override
 						public void run() {
+							cronThread = null;
 							stopCron = true;
 							synchronized(cronThreadLock){
 								cronThreadLock.notifyAll();
