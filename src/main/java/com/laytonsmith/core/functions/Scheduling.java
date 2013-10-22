@@ -582,6 +582,7 @@ public class Scheduling {
 			int jobID = jobIDs.getAndIncrement();
 			synchronized(cronJobs){
 				cronJobs.put(jobID, format);
+				format.job.getEnv().getEnv(GlobalEnv.class).SetCustom("cron-task-id", jobID);
 			}
 			return new CInt(jobID, t);
 		}
