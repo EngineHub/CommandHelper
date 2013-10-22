@@ -443,13 +443,10 @@ public class PlayerManagement {
 						ExceptionType.PluginInternalException, t);
 			}
 			if (b == null) {
-				throw new ConfigRuntimeException("No block in sight, or block too far",
-						ExceptionType.RangeException, t);
+				throw new ConfigRuntimeException("No block in sight, or block too far", ExceptionType.RangeException, t);
+			} else {
+				return ObjectGenerator.GetGenerator().location(b.getLocation(), false);
 			}
-			return new CArray(t, new CInt(b.getX(), t),
-					new CInt(b.getY(), t),
-					new CInt(b.getZ(), t),
-					new CString(b.getWorld().getName(), t));
 		}
 
 		public Boolean runAsync() {
@@ -459,13 +456,13 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates finding a non-air block", "msg(pcursor())", "{-127, 75, 798, world}"),
+					new ExampleScript("Demonstrates finding a non-air block", "msg(pcursor())", "{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
 					new ExampleScript("Demonstrates looking above the skyline", "msg(pcursor())",
 							"(Throws RangeException: No block in sight, or block too far)"),
 					new ExampleScript("Demonstrates getting your target while ignoring torches and bedrock",
-							"msg(pcursor(array(50, 7)))", "{-127, 75, 798, world}"),
+							"msg(pcursor(array(50, 7)))", "{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
 					new ExampleScript("Demonstrates getting Notch's target while ignoring air, water, and lava",
-							"msg(pcursor('Notch', array(0, 8, 9, 10, 11)))", "{-127, 75, 798, world}")
+							"msg(pcursor('Notch', array(0, 8, 9, 10, 11)))", "{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}")
 			};
 		}
 	}
@@ -491,8 +488,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
-			List<MCBlock> blocks = p.getLastTwoTargetBlocks(null, 10000);
-			return ObjectGenerator.GetGenerator().location(blocks.get(0).getLocation());
+			return ObjectGenerator.GetGenerator().location(p.getLastTwoTargetBlocks(null, 10000).get(0).getLocation(), false);
 		}
 
 		public String getName() {
@@ -2469,7 +2465,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return ObjectGenerator.GetGenerator().location(m.getCompassTarget());
+			return ObjectGenerator.GetGenerator().location(m.getCompassTarget(), false);
 		}
 	}
 
@@ -3391,21 +3387,11 @@ public class PlayerManagement {
 				player = Static.getServer().getOfflinePlayer(args[0].val());
 			}
 			MCLocation loc = player.getBedSpawnLocation();
-			MCWorld w;
-			try {
-				w = loc.getWorld();
-			} catch (Exception e) {
+			if (loc == null) {
 				return new CNull(t);
+			} else {
+				return ObjectGenerator.GetGenerator().location(loc, false);
 			}
-//			if (loc == null) {
-//				return new CNull(t);
-//			}
-//			MCWorld w = loc.getWorld();
-			return new CArray(t,
-					new CDouble(loc.getX(), t),
-					new CDouble(loc.getY(), t),
-					new CDouble(loc.getZ(), t),
-					new CString(w.getName(), t));
 		}
 
 		public String docs() {

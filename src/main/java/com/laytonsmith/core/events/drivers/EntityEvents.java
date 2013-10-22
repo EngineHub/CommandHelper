@@ -27,6 +27,7 @@ import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
+import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -301,7 +302,98 @@ public class EntityEvents {
 		}
     	
     }
-    
+
+	@api
+	public static class projectile_launch extends AbstractEvent {
+
+		public String getName() {
+			return "projectile_launch";
+		}
+
+		public Driver driver() {
+			return Driver.PROJECTILE_LAUNCH;
+		}
+
+		public String docs() {
+			return "{type: <macro> The entity type of the projectile | shootertype: <macro> The entity type of the shooter | world: <macro>}"
+					+ " This event is called when a projectile is launched."
+					+ " Cancelling the event will only cancel the launching of the projectile."
+					+ " For instance when a player shoots an arrow with a bow, if the event is cancelled the bow will still take damage from use."
+					+ " {id: The entityID of the projectile | type: The entity type of the projectile |"
+					+ " shooter: The entityID of the shooter (null if the projectile is launched by a dispenser) |"
+					+ " shootertype: The entity type of the shooter (null if the projectile is launched by a dispenser) |"
+					+ " player: the player which has launched the projectile (null if the shooter is not a player) |"
+					+ " location: from where the projectile is launched | velocity: the velocity of the projectile}"
+					+ " {velocity}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCProjectileLaunchEvent) {
+				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
+				Prefilters.match(prefilter, "type", projectileLaunchEvent.getEntityType().name(), PrefilterType.MACRO);
+				MCLivingEntity shooter = projectileLaunchEvent.getEntity().getShooter();
+				if (shooter != null) {
+					Prefilters.match(prefilter, "shootertype", shooter.getType().name(), PrefilterType.MACRO);
+				} else {
+					Prefilters.match(prefilter, "shootertype", "null", PrefilterType.MACRO);
+				}
+				Prefilters.match(prefilter, "world", projectileLaunchEvent.getEntity().getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCProjectileLaunchEvent) {
+				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCProjectile projectile = projectileLaunchEvent.getEntity();
+				mapEvent.put("id", new CInt(projectile.getEntityId(), Target.UNKNOWN));
+				mapEvent.put("type", new CString(projectileLaunchEvent.getEntityType().name(), Target.UNKNOWN));
+				MCLivingEntity shooter = projectile.getShooter();
+				if (shooter != null) {
+					mapEvent.put("shooter", new CInt(shooter.getEntityId(), Target.UNKNOWN));
+					mapEvent.put("shootertype", new CString(shooter.getType().name(), Target.UNKNOWN));
+					if (shooter instanceof MCPlayer) {
+						mapEvent.put("player", new CString(((MCPlayer) shooter).getName(), Target.UNKNOWN));
+					} else {
+						mapEvent.put("player", new CNull(Target.UNKNOWN));
+					}
+				} else {
+					mapEvent.put("shooter", new CNull(Target.UNKNOWN));
+					mapEvent.put("shootertype", new CNull(Target.UNKNOWN));
+					mapEvent.put("player", new CNull(Target.UNKNOWN));
+				}
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(projectile.getLocation()));
+				mapEvent.put("velocity", ObjectGenerator.GetGenerator().velocity(projectile.getVelocity(), Target.UNKNOWN));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to ProjectileLaunchEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCProjectileLaunchEvent) {
+				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
+				if (key.equals("velocity")) {
+					projectileLaunchEvent.getEntity().setVelocity(ObjectGenerator.GetGenerator().velocity(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
 	@api
 	public static class entity_death extends AbstractEvent {
 
@@ -987,7 +1079,7 @@ public class EntityEvents {
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
 				ret.put("type", new CString(event.getEntity().getType().name(), t));
-				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation()));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("block", new CInt(event.getLocation().getBlock().getTypeId(), t));
 				return ret;
 			} else {
@@ -1058,7 +1150,7 @@ public class EntityEvents {
 				ret.put("from", new CInt(event.getBlock().getTypeId(), t));
 				ret.put("data", new CInt(event.getData(), t));
 				ret.put("to", new CInt(event.getTo().getType(), t));
-				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation()));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCEntityChangeBlockEvent");

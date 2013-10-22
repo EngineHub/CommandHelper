@@ -19,6 +19,8 @@ import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -135,7 +138,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCEntityType getEntityType() {
-			return MCEntityType.valueOf(phe.getEntityType().name());
+			return BukkitMCEntityType.getConvertor().getAbstractedEnum(phe.getEntityType());
 		}
 		
 		public static BukkitMCProjectileHitEvent _instantiate(MCProjectile p) {
@@ -145,7 +148,29 @@ public class BukkitEntityEvents {
 		}
 		
 	}
-	
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCProjectileLaunchEvent implements MCProjectileLaunchEvent {
+
+		ProjectileLaunchEvent ple;
+
+		public BukkitMCProjectileLaunchEvent(ProjectileLaunchEvent event) {
+			ple = event;
+		}
+
+		public Object _GetObject() {
+			return ple;
+		}
+
+		public MCProjectile getEntity() {
+			return new BukkitMCProjectile(ple.getEntity());
+		}
+
+		public MCEntityType getEntityType() {
+			return BukkitMCEntityType.getConvertor().getAbstractedEnum(ple.getEntityType());
+		}
+	}
+
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPotionSplashEvent extends BukkitMCProjectileHitEvent
 			implements MCPotionSplashEvent {
@@ -382,7 +407,7 @@ public class BukkitEntityEvents {
         }
 
         public MCDamageCause getCause() {
-            return MCDamageCause.valueOf(event.getCause().name());
+            return BukkitMCDamageCause.getConvertor().getAbstractedEnum(event.getCause());
         }
 
         public MCEntity getEntity() {

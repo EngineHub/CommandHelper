@@ -85,7 +85,7 @@ public class World {
 			if (w == null) {
 				throw new ConfigRuntimeException("The specified world \"" + world + "\" is not a valid world.", ExceptionType.InvalidWorldException, t);
 			}
-			return ObjectGenerator.GetGenerator().location(w.getSpawnLocation());
+			return ObjectGenerator.GetGenerator().location(w.getSpawnLocation(), false);
 		}
 	}
 

@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEffect;
@@ -276,8 +277,9 @@ public class Minecraft {
 
 		public String docs() {
 			return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
-					+ " to the location of the player. ---- mobType can be one of: " + StringUtils.Join(MCMobs.values(), ", ", ", or ", " or ") 
-					+ ". Spelling matters, but capitalization doesn't. At this time, the function is limited to spawning a maximum of 50 at a time."
+					+ " to the location of the player. An array of the entity IDs spawned is returned."
+					+ " ---- mobType can be one of: " + StringUtils.Join(MCMobs.values(), ", ", ", or ", " or ") + "."
+					+ " Spelling matters, but capitalization doesn't. At this time, the function is limited to spawning a maximum of 50 at a time."
 					+ " Further, subtypes can be applied by specifying MOBTYPE:SUBTYPE, for example the sheep subtype can be any of the dye colors: " 
 					+ StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or ") + ". COLOR defaults to white if not specified. For mobs with multiple"
 					+ " subtypes, separate each type with a \"-\", currently only zombies which, using ZOMBIE:TYPE1-TYPE2 can be any non-conflicting two of: "
@@ -289,7 +291,10 @@ public class Minecraft {
 					+ " and MagmaCube size can be set by integer, otherwise will be a random natural size. If a material is specified as the subtype"
 					+ " for Endermen, they will hold that material, otherwise they will hold nothing. Creepers can be set to " 
 					+ StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + ", wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ") 
-					+ ", and pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + ". An array of the entity IDs spawned is returned.";
+					+ ", and pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + "."
+					+ " Horses can have three different subTypes, the variant: " + StringUtils.Join(MCHorse.MCHorseVariant.values(), ", ", ", or ", " or ") + ","
+					+ " the color: " + StringUtils.Join(MCHorse.MCHorseColor.values(), ", ", ", or ", " or ") + ","
+					+ " and the pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		public ExceptionType[] thrown() {

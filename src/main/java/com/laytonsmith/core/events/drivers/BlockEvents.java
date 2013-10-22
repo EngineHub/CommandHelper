@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.events.*;
@@ -358,9 +359,9 @@ public class BlockEvents {
 					+ "{block: An array with "
                     + "keys 'type' (int), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int) "
                     + "and 'world' (string) for the physical location of the block | "
-                    + "location: the locationArray of this block | drops | xp} "
+                    + "location: the locationArray of this block} "
 					+ "{block}"
-					+ "{block|location|drops|xp}";
+					+ "{block|location}";
         }
 
         public CHVersion since() {
@@ -734,6 +735,78 @@ public class BlockEvents {
 					return true;
 				}
 			}
+			return false;
+		}
+	}
+
+	@api
+	public static class block_grow extends AbstractEvent {
+
+		public String getName() {
+			return "block_grow";
+		}
+
+		public Driver driver() {
+			return Driver.BLOCK_GROW;
+		}
+
+		public String docs() {
+			return "{oldtype: <string match> The block type before the growth | olddata: <string match> The block data before the growth |"
+					+ " newtype: <string match> The block type after the growth | newdata: <string match> The block data after the growth |"
+					+ " world: <macro>}"
+					+ " This event is called when a block grows naturally. If the event is cancelled, the block will not grow."
+					+ " {oldblock: The block before the growth (an array with keys 'type' and 'data') | newblock: The block after the growth (an array with keys 'type' and 'data') |"
+					+ " location: the location of the block that will grow}"
+					+ " {}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCBlockGrowEvent) {
+				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
+				MCBlock oldBlock = blockGrowEvent.getBlock();
+				Prefilters.match(prefilter, "oldtype", oldBlock.getTypeId(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "olddata", oldBlock.getData(), PrefilterType.STRING_MATCH);
+				MCBlockState newBlock = blockGrowEvent.getNewState();
+				Prefilters.match(prefilter, "newtype", newBlock.getTypeId(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "newdata", newBlock.getData().getData(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "world", oldBlock.getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCBlockGrowEvent) {
+				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCBlock oldBlock = blockGrowEvent.getBlock();
+				CArray oldBlockArray = new CArray(Target.UNKNOWN);
+				oldBlockArray.set("type", new CInt(oldBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+				oldBlockArray.set("data", new CInt(oldBlock.getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("oldblock", oldBlockArray);
+				MCBlockState newBlock = blockGrowEvent.getNewState();
+				CArray newBlockArray = new CArray(Target.UNKNOWN);
+				newBlockArray.set("type", new CInt(newBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+				newBlockArray.set("data", new CInt(newBlock.getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("newblock", newBlockArray);
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(oldBlock.getLocation(), false));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to BlockGrowEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
 			return false;
 		}
 	}

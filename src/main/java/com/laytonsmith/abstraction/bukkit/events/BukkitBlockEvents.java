@@ -6,11 +6,13 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
 import com.laytonsmith.abstraction.events.*;
@@ -21,6 +23,7 @@ import com.laytonsmith.core.constructs.Target;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -271,6 +274,28 @@ public class BukkitBlockEvents {
 
 		public void setCancelled(boolean cancel) {
 			bde.setCancelled(cancel);
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockGrowEvent implements MCBlockGrowEvent {
+
+		BlockGrowEvent bge;
+
+		public BukkitMCBlockGrowEvent(BlockGrowEvent event) {
+			bge = event;
+		}
+
+		public Object _GetObject() {
+			return bge;
+		}
+
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(bge.getBlock());
+		}
+
+		public MCBlockState getNewState() {
+			return new BukkitMCBlockState(bge.getNewState());
 		}
 	}
 }
