@@ -1,0 +1,88 @@
+int {cronFormat, closure} Sets a task to occur at a regular interval, given a cron style interval. This allows for an
+easier way to specify that a task should happen, for instance, every hour on the hour. Unlike set_interval, this uses
+absolute wall clock time, not relative times. The task id is returned, so it can be cleared
+later with clear_cron if needed. If clear_cron is run from within
+the task itself, the id is optional. See more information for a detailed description of cron format. ----
+
+Upon restart of the server (or reload) all cron jobs will be cleared out, so all tasks should be declared in a main file
+at startup, and probably not declared dynamically (though that is allowed). The closure will then be run at the specified
+interval. Just like with the actual unix program, if the server isn't running when a task "activates", it will not
+be activated when the next startup occurs. The process that calls set_cron must continually be running for it to activate
+properly.
+
+The format used here is very similar to the Unix program cron, however, a few features are missing, as they aren't
+useful in the context of this function. For a brief overview of the Unix tool cron, see
+here: http://en.wikipedia.org/wiki/Cron However, information for this function specifically is below.
+
+Barring predefined special schedule definitions, a cronFormat is specified with 5 "sections", each separated by one
+or more space (or tabs).
+
+ # *    *    *    *    *
+ # ┬    ┬    ┬    ┬    ┬
+ # │    │    │    │    │
+ # │    │    │    │    │
+ # │    │    │    │    └───── day of week (0 - 6) (0 to 6 are Sunday to Saturday, or use names)
+ # │    │    │    └────────── month (1 - 12) (month names are also acceptable, Jan or January for instance)
+ # │    │    └─────────────── day of month (1 - 31)
+ # │    └──────────────────── hour (0 - 23) (The strings "noon" (12) and "midnight" (0) are also acceptable
+ # └───────────────────────── min (0 - 59)
+
+If a star is present in each position, it means that it will trigger regardless of what the current date/time for
+that segment is. For instance:
+
+<pre>
+1 0 * * *
+</pre>
+
+Means run at one minute past midnight, every day of the month, every month of the year, and every day of the week.
+In addition to single numbers, comma separated numbers may be used, as well as ranges.
+
+<pre>
+0,30 * * * *
+</pre>
+
+means to run on the hour, and on the half hour.
+
+<pre>
+1-5 * * * *
+</pre>
+
+means the same as
+
+<pre>
+1,2,3,4,5 * * * *
+</pre>
+
+(The values are inclusive.)
+
+Additionally, when using the asterisk, you may use the format "*/X" character to mean "every X <time unit>" where
+X is some integer. For instance:
+
+<pre>
+*/30 * * * *
+</pre>
+
+means to run the task every 30 minutes.
+
+There are a few special predefined schedules, for very common cases:
+
+
+{| class="wikitable"
+|-
+!Entry                   !!Description                    !!Equivalent To
+|-
+|<code>@yearly (or @annually)</code>    ||Run once a year at midnight in the morning of January 1              ||<code>0 0 1 1  *</code>
+|-
+|<code>@monthly</code>   ||Run once a month at midnight in the morning of the first of the month               ||<code>0 0 1 * * </code>
+|-
+|<code>@weekly</code>    ||Run once a week at midnight in the morning of Sunday             ||<code>0 0 * * 0 </code>
+|-
+|<code>@daily</code>     ||Run once a day at midnight                 ||<code>0 0 * * *</code>
+|-
+|<code>@hourly</code>    ||Run once an hour at the beginning of the hour               ||<code>0 * * * *</code>
+|}
+
+Caveats:
+
+Unlike the actual cron task, @reboot is not available. Simply run the code in a main file for similar behavior. Additionally,
+the slash "/" is only available for use with the asterisk (*/X). The L, W, ? and # characters in day of week are not supported.

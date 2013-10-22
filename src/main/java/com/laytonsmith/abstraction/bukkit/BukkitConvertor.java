@@ -140,7 +140,7 @@ public class BukkitConvertor extends AbstractConvertor {
      * on accident, so only ids registered through our interface
      * can also be cancelled.
      */
-    private static Set<Integer> validIDs = new TreeSet<Integer>();
+    private static final Set<Integer> validIDs = new TreeSet<Integer>();
 
     public synchronized int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
         int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));

@@ -163,7 +163,7 @@ public final class Static {
             try {
                 i = Long.parseLong(c.val());
             } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Expecting an integer, but received " + c.val() + " instead",
+                throw new ConfigRuntimeException("Expecting an integer, but received \"" + c.val() + "\" instead",
                         ExceptionType.CastException, t);
             }
         }

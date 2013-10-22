@@ -543,7 +543,7 @@ public class CArray extends Construct implements ArrayAccess{
                 ret = array.remove(Integer.parseInt(c));
 				next_index--;
             } catch(NumberFormatException e){ 
-                throw new ConfigRuntimeException("Expecting an integer, but received " + c + " (were you expecting an associative array? This array is a normal array.)", ExceptionType.CastException, construct.getTarget());
+                throw new ConfigRuntimeException("Expecting an integer, but received \"" + c + "\" (were you expecting an associative array? This array is a normal array.)", ExceptionType.CastException, construct.getTarget());
             } catch(IndexOutOfBoundsException e){
                 throw new ConfigRuntimeException("Cannot remove the value at '" + c + "', as no such index exists in the array", ExceptionType.RangeException, construct.getTarget());
             }
