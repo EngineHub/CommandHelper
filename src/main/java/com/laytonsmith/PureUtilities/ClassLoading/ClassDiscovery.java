@@ -923,19 +923,19 @@ public class ClassDiscovery {
 		if (c == null) {
 			throw new NullPointerException("The Class passed to this method may not be null");
 		}
+		while (c.isMemberClass() || c.isAnonymousClass()) {
+			c = c.getEnclosingClass(); //Get the actual enclosing file
+		}
+		if (c.getProtectionDomain().getCodeSource() == null) {
+			//This is a proxy or other dynamically generated class, and has no physical container,
+			//so just return null.
+			return null;
+		}
+		String packageRoot = null;
+		//This is the full path to THIS file, but we need to get the package root below.
+		String thisClass = c.getResource(c.getSimpleName() + ".class").toString();
 		try {
-			while (c.isMemberClass() || c.isAnonymousClass()) {
-				c = c.getEnclosingClass(); //Get the actual enclosing file
-			}
-			if (c.getProtectionDomain().getCodeSource() == null) {
-				//This is a proxy or other dynamically generated class, and has no physical container,
-				//so just return null.
-				return null;
-			}
-			String packageRoot;
 			try {
-				//This is the full path to THIS file, but we need to get the package root.
-				String thisClass = c.getResource(c.getSimpleName() + ".class").toString();
 				packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(c.getName().replaceAll("\\.", "/") + ".class"), "");
 			} catch (Exception e) {
 				//Hmm, ok, try this then
@@ -946,7 +946,7 @@ public class ClassDiscovery {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);
 		} catch (MalformedURLException e) {
-			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);
+			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown for potential URL: \"" + packageRoot + "\"", e);
 		}
 	}
 }
