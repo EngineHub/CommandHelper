@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 public class SyntaxHighlighters {
 
     public static String generate(String type, String theme) {
+		Implementation.useAbstractEnumThread(false);
 		Implementation.setServerType(Implementation.Type.BUKKIT);
         if("npp".equals(type) || "notepad++".equals(type)){
 
@@ -180,9 +181,9 @@ public class SyntaxHighlighters {
     
     private static List<Documentation> GetEvents(){
         List<Documentation> l = new ArrayList<Documentation>();
-        Set<Class<Event>> classes = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Event.class);
-        for(Class<Event> c : classes){
-            if (Documentation.class.isAssignableFrom(c)) {
+        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
+        for(Class c : classes){
+            if (Event.class.isAssignableFrom(c) && Documentation.class.isAssignableFrom(c)) {
                 try {
                     Constructor m = c.getConstructor();
                     Documentation e = (Documentation)m.newInstance();
