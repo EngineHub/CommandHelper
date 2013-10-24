@@ -216,17 +216,14 @@ public class Main {
 						+ "CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
 				System.exit(0);
 			} else if (mode == printDBMode) {
-				//FIXME: This is using the wrong thing.
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-				PersistanceNetwork pn = new PersistanceNetwork(new File(MethodScriptFileLocations.getDefault().getConfigDirectory(),
-						"persistance.config"), new URI("sqlite://" + new File(MethodScriptFileLocations.getDefault().getConfigDirectory(),
-						"persistance.db").getCanonicalPath()), options);
+				PersistanceNetwork pn = new PersistanceNetwork(MethodScriptFileLocations.getDefault().getPersistanceConfig(),
+						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistanceDBFile().getCanonicalPath()), options);
 				Map<String[], String> values = pn.getNamespace(new String[]{});
 				for(String [] s : values.keySet()){
-					System.out.println(Arrays.toString(s));
+					System.out.println(StringUtils.Join(s, ".") + "=" + values.get(s));
 				}
-				//new SerializedPersistance(new File("CommandHelper/persistance.ser")).printValues(System.out);
 				System.exit(0);
 			} else if (mode == docsMode) {
 				DocGen.MarkupType docs = null;

@@ -53,6 +53,7 @@ public class Manager {
 	private static PersistanceNetwork persistanceNetwork;
 
 	public static void start() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		Implementation.useAbstractEnumThread(false);
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(chDirectory);
