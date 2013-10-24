@@ -566,7 +566,7 @@ public class BukkitEntityEvents {
 
 		public MCEntity getRemover() {
 			if (hbe instanceof HangingBreakByEntityEvent) {
-				return new BukkitMCEntity(((HangingBreakByEntityEvent) hbe).getRemover());
+				return BukkitConvertor.BukkitGetCorrectEntity(((HangingBreakByEntityEvent) hbe).getRemover());
 			} else {
 				return null;
 			}
