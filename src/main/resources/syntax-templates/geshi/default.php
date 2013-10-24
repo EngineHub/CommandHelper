@@ -88,8 +88,8 @@ $language_data = array(
         )
     ),
     'URLS' => array(
-        1 => 'http://wiki.sk89q.com/wiki/CommandHelper/API/{FNAMEL}',
-        2 => 'http://wiki.sk89q.com/wiki/CommandHelper/API/{FNAMEL}'
+        1 => 'http://wiki.sk89q.com/wiki/CommandHelper/Staged/API/{FNAMEL}',
+        2 => 'http://wiki.sk89q.com/wiki/CommandHelper/Staged/API/{FNAMEL}'
     ),
     'OOLANG' => false,
     'REGEXPS' => array(
