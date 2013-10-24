@@ -77,14 +77,15 @@ public final class Cookie implements Comparable<Cookie> {
 	}
 	
 	/**
-	 * Creates a cookie with only the required parameters set.
+	 * Creates a cookie with only the required parameters set. That is, it creates
+	 * a session cookie with httpOnly and secure set to false.
 	 * @param domain The domain under which this cookie applies
 	 * @param name The name of this cookie
 	 * @param value The value of this cookie
 	 * @param path The path under which this cookie applies in the domain
 	 */
 	public Cookie(String name, String value, String domain, String path){
-		this(name, value, domain, path, 0, null);
+		this(name, value, domain, path, 0, false, false);
 	}
 
 	/**
@@ -94,27 +95,20 @@ public final class Cookie implements Comparable<Cookie> {
 	 * @param value The value of this cookie
 	 * @param path The path under which this cookie applies in the domain
 	 * @param expiration Sets the expiration date of the cookie. 0 indicates a session cookie.
-	 * @param httpOnly Sets whether or not this cookie should be usable in http or https. Null
-	 * means either. true means http only, and false means https only.
+	 * @param httpOnly Sets whether or not this cookie is httpOnly. Generally, this is an unused field
+	 * @param secureOnly Sets whether or not this cookie should only be send via https.
 	 */
-	public Cookie(String name, String value, String domain, String path, long expiration, Boolean httpOnly) {
+	public Cookie(String name, String value, String domain, String path, long expiration, boolean httpOnly, boolean secureOnly) {
 		this.name = name;
 		this.value = value;
 		this.domain = domain;
 		this.path = path;
 		this.expiration = expiration;
-		if (httpOnly == null) {
-			this.httpOnly = false;
-			this.secureOnly = false;
-		} else if (httpOnly) {
-			this.httpOnly = true;
-			this.secureOnly = false;
-		} else {
-			this.httpOnly = false;
-			this.secureOnly = true;
-		}
+		this.httpOnly = httpOnly;
+		this.secureOnly = secureOnly;
 	}
 
+	@Override
 	public int compareTo(Cookie o) {
 		return (this.domain + this.name + this.path).compareTo(o.domain + o.name + o.path);
 	}

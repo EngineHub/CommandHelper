@@ -73,10 +73,6 @@ public final class CookieJar {
 				i--;
 				continue;
 			}
-			//If it's http only, and we aren't in http, continue.
-			if (cookie.isHttpOnly() && !url.getProtocol().equals("http")) {
-				continue;
-			}
 			//Or it's secure only, and we aren't in https, continue.
 			if (cookie.isSecureOnly() && !url.getProtocol().equals("https")) {
 				continue;
@@ -90,7 +86,7 @@ public final class CookieJar {
 				continue;
 			}
 			//Or if we aren't in the right path
-			String path = "/" + url.getPath();
+			String path = (url.getPath().startsWith("/")?"":"/") + url.getPath();
 			if (!path.startsWith(cookie.getPath())) {
 				continue;
 			}
@@ -106,7 +102,7 @@ public final class CookieJar {
 				b.append("; ");
 			}
 			try {
-				b.append(URLEncoder.encode(cookie.getName(), "UTF-8")).append("=").append(URLEncoder.encode(cookie.getValue(), "UTF-8"));
+				b.append(URLEncoder.encode(cookie.getName(), "UTF-8")).append("=").append(cookie.getValue());
 			} catch (UnsupportedEncodingException ex) {
 				Logger.getLogger(WebUtility.class.getName()).log(Level.SEVERE, null, ex);
 			}

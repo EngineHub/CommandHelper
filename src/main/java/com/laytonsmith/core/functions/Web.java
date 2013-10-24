@@ -88,11 +88,8 @@ public class Web {
 			c.set("domain", cookie.getDomain());
 			c.set("path", cookie.getPath());
 			c.set("expiration", new CInt(cookie.getExpiration(), t), t);
-			if(!cookie.isHttpOnly() && !cookie.isSecureOnly()){
-				c.set("httpOnly", new CNull(t), t);
-			} else {
-				c.set("httpOnly", new CBoolean(cookie.isHttpOnly(), t), t);
-			}
+			c.set("httpOnly", new CBoolean(cookie.isHttpOnly(), t), t);
+			c.set("secureOnly", new CBoolean(cookie.isSecureOnly(), t), t);
 			if(!update){
 				ret.push(c);
 			}
@@ -108,7 +105,8 @@ public class Web {
 			String domain;
 			String path;
 			long expiration = 0;
-			Boolean httpOnly = null;
+			boolean httpOnly = false;
+			boolean secureOnly = false;
 			if(cookie.containsKey("name") && cookie.containsKey("value")
 					&& cookie.containsKey("domain") && cookie.containsKey("path")){
 				name = cookie.get("name").val();
@@ -123,13 +121,12 @@ public class Web {
 				expiration = Static.getInt(cookie.get("expiration"), t);
 			}
 			if(cookie.containsKey("httpOnly")){
-				if(cookie.get("expiration") instanceof CNull){
-					httpOnly = null;
-				} else {
-					httpOnly = Static.getBoolean(cookie.get("expiration"));
-				}
+				httpOnly = Static.getBoolean(cookie.get("httpOnly"));
 			}
-			Cookie c = new Cookie(name, value, domain, path, expiration, httpOnly);
+			if(cookie.containsKey("secureOnly")){
+				secureOnly = Static.getBoolean(cookie.get("secureOnly"));
+			}
+			Cookie c = new Cookie(name, value, domain, path, expiration, httpOnly, secureOnly);
 			ret.addCookie(c);
 		}
 		return ret;

@@ -119,14 +119,16 @@ of web requests that can be running concurrently.
 | true
 | Automatically adds the default headers to this request, unless specifically overridden. Note that some headers
 simply cannot be overridden, for instance Host and User-Agent will ALWAYS be set. 
-|- download
+|- 
+| download
 | string
 | null
 | If this is not null, the file will be downloaded instead of returned, and saved to the specified location on
 disk. Note that this is currently only enabled from cmdline mode, but will be added in general at a later date.
 If this setting is set from non-cdmline mode, it is silently ignored.
 |}
-<!-- TODO: This isn't working yet, so just leave it off |-
+<!-- TODO: This isn't working yet, so just leave it off 
+|-
 | proxy
 | array
 | null
