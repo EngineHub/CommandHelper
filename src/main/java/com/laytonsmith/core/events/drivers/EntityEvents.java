@@ -1,10 +1,9 @@
-
-
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCHanging;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
@@ -13,6 +12,7 @@ import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
@@ -22,6 +22,7 @@ import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
+import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
@@ -499,7 +500,7 @@ public class EntityEvents {
 		}
 
 		public String docs() {
-			return "{type | reason: One of " + StringUtils.Join(MCSpawnReason.values(), ", ", ", or ", " or ") + "}"
+			return "{type: <macro> | reason: <macro> One of " + StringUtils.Join(MCSpawnReason.values(), ", ", ", or ", " or ") + "}"
 				+ " Fired when a living entity spawns on the server."
 				+ " {type: the type of creature spawning | id: the entityID of the creature"
 				+ " | reason: the reason this creature is spawning | location: locationArray of the event}"
@@ -861,7 +862,7 @@ public class EntityEvents {
 		}
 
 		public String docs() {
-			return "{damager <string match>} "
+			return "{damager: <string match>} "
             		+ "This event is called when a player is damaged by another entity."
                     + "{player: The player being damaged | damager: The type of entity causing damage | "
             		+ "amount: amount of damage caused | cause: the cause of damage | "
@@ -1110,7 +1111,7 @@ public class EntityEvents {
 
 		public String docs() {
 			return "{from: <math match> the block ID before the change | to: <math match> the block ID after change"
-					+ " | location: the location of the block changed}"
+					+ " | location: <location match> the location of the block changed}"
 					+ " Fires when an entity change block in some way."
 					+ " {entity: the entity ID of the entity which changed block | from: the block ID before the change"
 					+ " | data: the data value for the block being changed | to: the block ID after change"
@@ -1125,12 +1126,7 @@ public class EntityEvents {
 				MCEntityChangeBlockEvent event = (MCEntityChangeBlockEvent) e;
 				Prefilters.match(prefilter, "from", event.getBlock().getTypeId(), PrefilterType.MATH_MATCH);
 				Prefilters.match(prefilter, "to", event.getTo().getType(), PrefilterType.MATH_MATCH);
-				if (prefilter.containsKey("location")) {
-					MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, Target.UNKNOWN);
-					if (!event.getBlock().getLocation().equals(loc)) {
-						return false;
-					}
-				}
+				Prefilters.match(prefilter, "location", event.getBlock().getLocation(), PrefilterType.LOCATION_MATCH);
 				return true;
 			}
 			return false;
@@ -1199,5 +1195,81 @@ public class EntityEvents {
 			}
 		}
 		return map;
+	}
+
+	@api
+	public static class hanging_break extends AbstractEvent {
+
+		public String getName() {
+			return "hanging_break";
+		}
+
+		public Driver driver() {
+			return Driver.HANGING_BREAK;
+		}
+
+		public String docs() {
+			return "{type: <macro> The entity type of the hanging entity | cause: <macro> The cause of the removing | world: <macro>}"
+					+ " This event is called when a hanged entity is broken."
+					+ " {id: The entityID of the hanging entity | type: The entity type of the hanging entity, can be ITEM_FRAME, PAINTING or LEASH_HITCH |"
+					+ " cause: The cause of the removing, can be " + StringUtils.Join(MCRemoveCause.values(), ", ", ", or ", " or ")
+					+ " | location: Where was the hanging entity before the removing |"
+					+ " remover: If the hanging entity has been removed by an other entity, this will contain its entityID, otherwise null |"
+					+ " player: If the hanging entity has been removed by a player, this will contain their name, otherwise null}"
+					+ " {}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCHangingBreakEvent) {
+				MCHangingBreakEvent hangingBreakEvent = (MCHangingBreakEvent) event;
+				MCHanging hanging = hangingBreakEvent.getEntity();
+				Prefilters.match(prefilter, "type", hanging.getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "cause", hangingBreakEvent.getCause().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world", hanging.getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCHangingBreakEvent) {
+				MCHangingBreakEvent hangingBreakEvent = (MCHangingBreakEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCHanging hanging = hangingBreakEvent.getEntity();
+				mapEvent.put("id", new CInt(hanging.getEntityId(), Target.UNKNOWN));
+				mapEvent.put("type", new CString(hanging.getType().name(), Target.UNKNOWN));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation()));
+				mapEvent.put("cause", new CString(hangingBreakEvent.getCause().name(), Target.UNKNOWN));
+				MCEntity remover = hangingBreakEvent.getRemover();
+				if (remover != null) {
+					mapEvent.put("remover", new CInt(remover.getEntityId(), Target.UNKNOWN));
+					if (remover instanceof MCPlayer) {
+						mapEvent.put("player", new CString(((MCPlayer) remover).getName(), Target.UNKNOWN));
+					} else {
+						mapEvent.put("player", new CNull(Target.UNKNOWN));
+					}
+				} else {
+					mapEvent.put("remover", new CNull(Target.UNKNOWN));
+					mapEvent.put("player", new CNull(Target.UNKNOWN));
+				}
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to HangingBreakEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
 	}
 }

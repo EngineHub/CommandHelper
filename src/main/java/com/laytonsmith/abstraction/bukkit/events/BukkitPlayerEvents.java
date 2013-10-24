@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit.events;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -78,7 +79,7 @@ public class BukkitPlayerEvents {
         }
 		
 	}
-	
+
 	public static class BukkitMCPlayerBedEvent implements MCPlayerBedEvent {
 		MCBlock block;
 		PlayerEvent event;
@@ -105,7 +106,7 @@ public class BukkitPlayerEvents {
 			return event;
 		}
 	}
-		
+
     public static class BukkitMCPlayerKickEvent implements MCPlayerKickEvent {
         PlayerKickEvent e;
 
@@ -773,7 +774,7 @@ public class BukkitPlayerEvents {
 			return new BukkitMCPlayer(tc.getPlayer());
 		}
 	}
-	
+
 	public static class BukkitMCExpChangeEvent implements MCExpChangeEvent {
 
 		PlayerExpChangeEvent ec;
@@ -799,6 +800,48 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setAmount(int amount) {
 			ec.setAmount(amount);
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerEditBookEvent implements MCPlayerEditBookEvent {
+
+		PlayerEditBookEvent pebe;
+
+		public BukkitMCPlayerEditBookEvent(PlayerEditBookEvent event) {
+			pebe = event;
+		}
+
+		public Object _GetObject() {
+			return pebe;
+		}
+
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pebe.getPlayer());
+		}
+
+		public MCBookMeta getNewBookMeta() {
+			return new BukkitMCBookMeta(pebe.getNewBookMeta());
+		}
+
+		public MCBookMeta getPreviousBookMeta() {
+			return new BukkitMCBookMeta(pebe.getPreviousBookMeta());
+		}
+
+		public void setNewBookMeta(MCBookMeta bookMeta) {
+			pebe.setNewBookMeta(((BukkitMCBookMeta) bookMeta).getBookMeta());
+		}
+
+		public int getSlot() {
+			return pebe.getSlot();
+		}
+
+		public boolean isSigning() {
+			return pebe.isSigning();
+		}
+
+		public void setSigning(boolean isSigning) {
+			pebe.setSigning(isSigning);
 		}
 	}
 }

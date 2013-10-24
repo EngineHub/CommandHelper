@@ -203,10 +203,8 @@ public class PlayerEvents {
 		public String docs() {
 			return "{player: <macro> The player that teleport. Switching worlds will trigger this event, but world_changed is called "
 				+ "after, only if this isn't cancelled first."
-				+ "| from: <custom> This should be a location array (x, y, z, world)."
-				+ " The location is matched via block matching, so if the array's x parameter were 1, if the player"
-				+ "moved from 1.3, that parameter would match."
-				+ "| to: <custom> The location the player is now in. This should be a location array as well.} "
+				+ "| from: <location match> This should be a location array (x, y, z, world)."
+				+ "| to: <location match> The location the player is now in. This should be a location array as well.} "
 				+ "{player | from: The location the player is coming from | to: The location the player is now in | "
 				+ "type: the type of teleport occuring, one of: " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 				+ "{to}"
@@ -229,23 +227,8 @@ public class PlayerEvents {
 					}
 				}
 
-				if (prefilter.containsKey("from")){
-					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getPlayer().getWorld(), Target.UNKNOWN);
-					MCLocation loc = event.getFrom();
-
-					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
-						return false;
-					}
-				}
-
-				if(prefilter.containsKey("to")){
-					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getPlayer().getWorld(), Target.UNKNOWN);
-					MCLocation loc = event.getTo();
-
-					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
-						return false;
-					}
-				}
+				Prefilters.match(prefilter, "from", event.getFrom(), PrefilterType.LOCATION_MATCH);
+				Prefilters.match(prefilter, "to", event.getTo(), PrefilterType.LOCATION_MATCH);
 
 				return true;
 
@@ -312,10 +295,8 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> | from: <custom> This should be a location array (x, y, z, world)."
-					+ " The location is matched via block matching, so if the array's x parameter were 1, if the player"
-					+ "moved from 1.3, that parameter would match."
-                    + " | to: <custom> The location the player is coming to. This should be a location array as well."
+			return "{player: <macro> | from: <location match> This should be a location array (x, y, z, world)."
+					+ " | to: <location match> The location the player is coming to. This should be a location array as well."
 					+ " | type: the type of portal occuring, one of: " +  StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 					+ "Fired when a player collides with portal."
 					+ "{player: The player that teleport | from: The location the player is coming from"
@@ -333,28 +314,10 @@ public class PlayerEvents {
 
 			if(e instanceof MCPlayerPortalEvent) {
 				MCPlayerPortalEvent event = (MCPlayerPortalEvent)e;
-
 				Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", event.getCause().toString(), PrefilterType.MACRO);
-
-				if (prefilter.containsKey("from")) {
-					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getPlayer().getWorld(), Target.UNKNOWN);
-					MCLocation loc = event.getFrom();
-
-					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
-						return false;
-					}
-				}
-
-				if (prefilter.containsKey("to")) {
-					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getPlayer().getWorld(), Target.UNKNOWN);
-					MCLocation loc = event.getTo();
-
-					if(loc == null || loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
-						return false;
-					}
-				}
-
+				Prefilters.match(prefilter, "from", event.getFrom(), PrefilterType.LOCATION_MATCH);
+				Prefilters.match(prefilter, "to", event.getTo(), PrefilterType.LOCATION_MATCH);
 				return true;
 
 			}
@@ -899,7 +862,7 @@ public class PlayerEvents {
 		}
 
 		public String docs() {
-			return "{location: The location of the pressure plate | activated: If true, only will trigger when the plate is stepped on. Currently,"
+			return "{location: <location match> The location of the pressure plate | activated: <boolean match> If true, only will trigger when the plate is stepped on. Currently,"
 					+ " this will only be true, since the event is only triggered on activations, not deactivations, but is reserved for future use.} "
                     + "Fires when a player steps on a pressure plate"
                     + "{location: The location of the pressure plate |"
@@ -917,12 +880,7 @@ public class PlayerEvents {
                 if(!((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
                     return false;
                 }
-				if(prefilter.containsKey("location")){
-					MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, Target.UNKNOWN);
-					if(!pie.getClickedBlock().getLocation().equals(loc)){
-						return false;
-					}
-				}
+				Prefilters.match(prefilter, "location", pie.getClickedBlock().getLocation(), PrefilterType.LOCATION_MATCH);
 				if(prefilter.containsKey("activated")){
 					//TODO: Once activation is supported, check for that here
 				}
@@ -1678,10 +1636,8 @@ public class PlayerEvents {
 
 		public String docs() {
 			return "{player: <macro> The player that moved. Switching worlds does not trigger this event. "
-					+ "| from: <custom> This should be a location array (x, y, z, world)."
-					+ " The location is matched via block matching, so if the array's x parameter were 1, if the player"
-					+ "moved from 1.3, that parameter would match."
-                    + "| to: <custom> The location the player is now in. This should be a location array as well."
+					+ "| from: <location match> This should be a location array (x, y, z, world)."
+					+ "| to: <location match> The location the player is now in. This should be a location array as well."
 					+ "| threshold: <custom> The minimum distance the player must have travelled before the event"
 					+ " will be triggered. This is based on the 3D distance, and is measured in block units.}"
                     + " This event is fired off AFTER a player has moved. This is a read only event because of this,"
@@ -1739,20 +1695,8 @@ public class PlayerEvents {
 						return false;
 					}
 				}
-				if(prefilter.containsKey("from")){
-					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getPlayer().getWorld(), Target.UNKNOWN);
-					MCLocation loc = event.getFrom();
-					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
-						return false;
-					}
-				}
-				if(prefilter.containsKey("to")){
-					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getPlayer().getWorld(), Target.UNKNOWN);
-					MCLocation loc = event.getFrom();
-					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
-						return false;
-					}
-				}
+				Prefilters.match(prefilter, "from", event.getFrom(), PrefilterType.LOCATION_MATCH);
+				Prefilters.match(prefilter, "to", event.getTo(), PrefilterType.LOCATION_MATCH);
 				Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
 				return true;
 			}
@@ -2016,7 +1960,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player <macro>}"
+			return "{player: <macro>}"
 					+ " Fired when a player's experience changes naturally."
 					+ " {player | amount}"
 					+ " {amount: the amount of exp the player will recieve}"
@@ -2070,6 +2014,144 @@ public class PlayerEvents {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class book_edited extends AbstractEvent {
+
+		public String getName() {
+			return "book_edited";
+		}
+
+		public Driver driver() {
+			return Driver.BOOK_EDITED;
+		}
+
+		public String docs() {
+			return "{player: <macro> The player which edited the book | signing: <boolean match> Whether or not the book is being signed}"
+					+ " This event is called when a player edit a book."
+					+ " {player: The player which edited the book | slot: The inventory slot number where the book is |"
+					+ " oldbook: The book before the editing (an array with keys title, author and pages) |"
+					+ " newbook: The book after the editing (an array with keys title, author and pages) |"
+					+ " signing: Whether or not the book is being signed}"
+					+ " {title | author | pages | signing}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPlayerEditBookEvent) {
+				MCPlayerEditBookEvent playerEditBookEvent = (MCPlayerEditBookEvent) event;
+				Prefilters.match(prefilter, "player", playerEditBookEvent.getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "signing", playerEditBookEvent.isSigning(), PrefilterType.BOOLEAN_MATCH);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPlayerEditBookEvent) {
+				MCPlayerEditBookEvent playerEditBookEvent = (MCPlayerEditBookEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCBookMeta oldBookMeta = playerEditBookEvent.getPreviousBookMeta();
+				CArray oldBookArray = new CArray(Target.UNKNOWN);
+				if (oldBookMeta.hasTitle()) {
+					oldBookArray.set("title", new CString(oldBookMeta.getTitle(), Target.UNKNOWN), Target.UNKNOWN);
+				} else {
+					oldBookArray.set("title", new CNull(Target.UNKNOWN), Target.UNKNOWN);
+				}
+				if (oldBookMeta.hasAuthor()) {
+					oldBookArray.set("author", new CString(oldBookMeta.getAuthor(), Target.UNKNOWN), Target.UNKNOWN);
+				} else {
+					oldBookArray.set("author", new CNull(Target.UNKNOWN), Target.UNKNOWN);
+				}
+				if (oldBookMeta.hasPages()) {
+					CArray pages = new CArray(Target.UNKNOWN);
+					for (String page : oldBookMeta.getPages()) {
+						pages.push(new CString(page, Target.UNKNOWN));
+					}
+					oldBookArray.set("author", pages, Target.UNKNOWN);
+				} else {
+					oldBookArray.set("pages", new CArray(Target.UNKNOWN), Target.UNKNOWN);
+				}
+				mapEvent.put("oldbook", oldBookArray);
+				MCBookMeta newBookMeta = playerEditBookEvent.getNewBookMeta();
+				CArray newBookArray = new CArray(Target.UNKNOWN);
+				if (newBookMeta.hasTitle()) {
+					newBookArray.set("title", new CString(newBookMeta.getTitle(), Target.UNKNOWN), Target.UNKNOWN);
+				} else {
+					newBookArray.set("title", new CNull(Target.UNKNOWN), Target.UNKNOWN);
+				}
+				if (newBookMeta.hasAuthor()) {
+					newBookArray.set("author", new CString(newBookMeta.getAuthor(), Target.UNKNOWN), Target.UNKNOWN);
+				} else {
+					newBookArray.set("author", new CNull(Target.UNKNOWN), Target.UNKNOWN);
+				}
+				if (newBookMeta.hasPages()) {
+					CArray pages = new CArray(Target.UNKNOWN);
+					for (String page : newBookMeta.getPages()) {
+						pages.push(new CString(page, Target.UNKNOWN));
+					}
+					newBookArray.set("pages", pages, Target.UNKNOWN);
+				} else {
+					newBookArray.set("pages", new CArray(Target.UNKNOWN), Target.UNKNOWN);
+				}
+				mapEvent.put("newbook", newBookArray);
+				mapEvent.put("slot", new CInt(playerEditBookEvent.getSlot(), Target.UNKNOWN));
+				mapEvent.put("signing", new CBoolean(playerEditBookEvent.isSigning(), Target.UNKNOWN));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to PlayerEditBookEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCPlayerEditBookEvent) {
+				if (key.equalsIgnoreCase("title")) {
+					MCPlayerEditBookEvent e = ((MCPlayerEditBookEvent) event);
+					MCBookMeta bookMeta = e.getNewBookMeta();
+					bookMeta.setTitle(value.val());
+					e.setNewBookMeta(bookMeta);
+					return true;
+				} else if (key.equalsIgnoreCase("author")) {
+					MCPlayerEditBookEvent e = ((MCPlayerEditBookEvent) event);
+					MCBookMeta bookMeta = e.getNewBookMeta();
+					bookMeta.setAuthor(value.val());
+					e.setNewBookMeta(bookMeta);
+					return true;
+				} else if (key.equalsIgnoreCase("pages")) {
+					CArray pageArray = Static.getArray(value, value.getTarget());
+					if (pageArray.inAssociativeMode()) {
+						throw new ConfigRuntimeException("The page array must not be associative.", ExceptionType.CastException, pageArray.getTarget());
+					} else {
+						List<String> pages = new ArrayList<String>();
+						for (Construct page : pageArray.asList()) {
+							pages.add(page.val());
+						}
+						MCPlayerEditBookEvent e = ((MCPlayerEditBookEvent) event);
+						MCBookMeta bookMeta = e.getNewBookMeta();
+						bookMeta.setPages(pages);
+						e.setNewBookMeta(bookMeta);
+						return true;
+					}
+				} else if (key.equalsIgnoreCase("signing")) {
+					((MCPlayerEditBookEvent) event).setSigning(Static.getBoolean(value));
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
 		}
 	}
 }

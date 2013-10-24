@@ -251,4 +251,11 @@ public class BukkitPlayerListener implements Listener {
 		EventUtils.TriggerExternal(e);
 		EventUtils.TriggerListener(Driver.EXP_CHANGE, "exp_change", e);
 	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerEditBook(PlayerEditBookEvent event) {
+		BukkitPlayerEvents.BukkitMCPlayerEditBookEvent pebe = new BukkitPlayerEvents.BukkitMCPlayerEditBookEvent(event);
+		EventUtils.TriggerExternal(pebe);
+		EventUtils.TriggerListener(Driver.BOOK_EDITED, "book_edited", pebe);
+	}
 }
