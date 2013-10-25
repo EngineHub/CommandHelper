@@ -15,6 +15,7 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -30,7 +31,9 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -447,6 +450,7 @@ public class Cmdline {
 			jline.console.ConsoleReader reader = null;
 			try {
 				reader = new jline.console.ConsoleReader();
+				reader.setExpandEvents(false);
 				return new CString(reader.readLine(Static.MCToANSIColors(prompt), cha), t);
 			} catch (IOException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
@@ -513,6 +517,7 @@ public class Cmdline {
 			jline.console.ConsoleReader reader = null;
 			try {
 				reader = new jline.console.ConsoleReader();
+				reader.setExpandEvents(false);
 				char c = (char)reader.readCharacter();
 				System.out.println(c);
 				return new CString(c, t);
@@ -578,6 +583,7 @@ public class Cmdline {
 			jline.console.ConsoleReader reader = null;
 			try {
 				reader = new jline.console.ConsoleReader();
+				reader.setExpandEvents(false);
 				String line = reader.readLine(Static.MCToANSIColors(prompt));
 				return new CString(line, t);
 			} catch (IOException ex) {
@@ -1061,6 +1067,90 @@ public class Cmdline {
 				new com.laytonsmith.core.functions.ExampleScript("Basic usage with string", "shell('grep -r \"search content\" *')", "<output of command>"),
 				new com.laytonsmith.core.functions.ExampleScript("Changing the working directory", "shell('grep -r \"search content\" *', array(workingDir: '/'))", "<output of command>"),
 			};
+		}
+		
+	}
+	
+	@api
+	public static class read_pipe_input extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(!inCmdLine(environment)){
+				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+			}
+			if(System.console() != null){
+				throw new ConfigRuntimeException(getName() + " can only be used in TTY mode.", ExceptionType.IOException, t);
+			}
+			boolean binary = false;
+			if(args.length > 0){
+				binary = Static.getBoolean(args[0]);
+			}
+			try {
+				if (binary) {
+					CByteArray ba = new CByteArray(t);
+					while (true) {
+						int b = System.in.read();
+						if (b < 0) {
+							break;
+						}
+						ba.putByte((byte) b, null);
+					}
+					return ba;
+				} else {
+					Reader r = new InputStreamReader(System.in);
+					StringBuilder b = new StringBuilder();
+					while (true) {
+						int ch;
+						ch = r.read();
+						if (ch < 0) {
+							break;
+						}
+						b.append((char) ch);
+					}
+					return new CString(b.toString(), t);
+				}
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "read_pipe_input";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {[binary]} Reads the input from a process that is piped to this script. It is assumed that the"
+					+ " data piped to the script will come all at once, and it will be returned as a string (or byte_array if binary is true)."
+					+ " This can only be used in cmdline mode, and binary defaults to false. If the script isn't started in TTY mode,"
+					+ " an IOException is thrown.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 		
 	}

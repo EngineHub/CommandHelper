@@ -225,19 +225,24 @@ public class Interpreter {
 			//uncommon use of it.
 			StringBuilder finalArgument = new StringBuilder();
 			CArray arguments = new CArray(Target.UNKNOWN);
+			{
+				//Set the $0 argument
+				Variable v = new Variable("$0", "", Target.UNKNOWN);
+				v.setVal(fromFile.toString());
+				v.setDefault(fromFile.toString());
+				vars.add(v);
+			}
 			for (int i = 0; i < args.size(); i++) {
 				String arg = args.get(i);
 				if (i > 1) {
 					finalArgument.append(" ");
 				}
-				Variable v = new Variable("$" + Integer.toString(i), "", Target.UNKNOWN);
+				Variable v = new Variable("$" + Integer.toString(i + 1), "", Target.UNKNOWN);
 				v.setVal(new CString(arg, Target.UNKNOWN));
 				v.setDefault(arg);
 				vars.add(v);
-				if (i != 0) {
-					finalArgument.append(arg);
-					arguments.push(new CString(arg, Target.UNKNOWN));
-				}
+				finalArgument.append(arg);
+				arguments.push(new CString(arg, Target.UNKNOWN));
 			}
 			Variable v = new Variable("$", "", false, true, Target.UNKNOWN);
 			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));

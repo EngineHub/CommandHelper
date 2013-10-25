@@ -1477,8 +1477,13 @@ public final class MethodScriptCompiler {
 			}
 			for (Construct tempNode : root.getAllData()) {
 				if (tempNode instanceof Variable) {
-					((Variable) tempNode).setVal(
-							varMap.get(((Variable) tempNode).getName()).getDefault());
+					Variable vv = varMap.get(((Variable) tempNode).getName());
+					if(vv != null){
+						((Variable) tempNode).setVal(vv.getDefault());
+					} else {
+						//The variable is unset. I'm not quite sure what cases would cause this
+						((Variable) tempNode).setVal("");
+					}
 				}
 			}
 		}

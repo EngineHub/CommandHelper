@@ -315,7 +315,12 @@ public class Main {
 					System.out.println(ARGUMENT_SUITE.getModeFromName(modeForHelp).getBuiltDescription());
 				}
 			} else if(mode == cmdlineMode){
-				List<String> allArgs = parsedArgs.getStringListArgument();
+				//We actually can't use the parsedArgs, because there may be cmdline switches in
+				//the arguments that we want to ignore here, but otherwise pass through. parsedArgs
+				//will prevent us from seeing those, however.
+				List<String> allArgs = new ArrayList<String>(Arrays.asList(args));
+				//The 0th arg is the cmdline verb though, so remove that.
+				allArgs.remove(0);
 				if(allArgs.isEmpty()){
 					System.err.println("Usage: path/to/file.ms [arg1 arg2]");
 					System.exit(1);

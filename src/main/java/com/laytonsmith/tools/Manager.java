@@ -303,7 +303,13 @@ public class Manager {
 			pl("Type " + MAGENTA + "help <command>" + WHITE + " for more details about a specific command");
 		} else {
 			if("refactor".equals(args[0])){
-				pl("Not yet implemented");
+				pl("This tool allows you to granularly move individual keys from one datasource to another."
+					+ " Unlike the merge tool, this works with individual keys, not necessarily keys that are"
+					+ " within a particular data source. There are three required inputs, the transfer key pattern,"
+					+ " the input configuration file, and the output configuration file. Data is transferred from"
+					+ " one configuration to the other, that is, it is added in the new place, and removed in the old place."
+					+ " This tool is more complicated"
+					+ " than the merge tool, so consider using the other tool for simple tasks.");
 			} else if ("upgrade".equals(args[0])) {
 				pl("Converts any old formatted data into the new format. Any data that doesn't explicitely"
 						+ " match the old format is not touched. Do not use this utility unless specifically"
