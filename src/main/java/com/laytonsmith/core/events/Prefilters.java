@@ -2,6 +2,8 @@
 
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -25,9 +27,18 @@ public final class Prefilters {
          * will match. Essentially, this match ignores the item's data value when
          * comparing.
          */
-        ITEM_MATCH,
+		ITEM_MATCH,
+		/**
+		 * Checks if indexes 'x', 'y', 'z' and 'world' (or 0, 1, 2, 3) of a location array match.
+		 * The location is matched via block matching, for instance if the array's x parameter is 1, 1.3 will match.
+		 */
+		LOCATION_MATCH,
+		/**
+		 * Simple boolean match.
+		 */
+		BOOLEAN_MATCH,
         /**
-         * String matches are just exact string matches
+         * String matches are just exact string matches.
          */
         STRING_MATCH,
         /**
@@ -69,6 +80,16 @@ public final class Prefilters {
         match(map, key, new CDouble(actualValue, Target.UNKNOWN), type);
     }
     
+	public static void match(Map<String, Construct> map, String key,
+			boolean actualValue, PrefilterType type) throws PrefilterNonMatchException {
+		match(map, key, new CBoolean(actualValue, Target.UNKNOWN), type);
+	}
+    
+	public static void match(Map<String, Construct> map, String key,
+			MCLocation actualValue, PrefilterType type) throws PrefilterNonMatchException {
+		match(map, key, ObjectGenerator.GetGenerator().location(actualValue, false), type);
+	}
+    
     /**
      * Given a prototype and the actual user provided value, determines if it matches.
      * If it doesn't, it throws an exception. If the value is not provided, or it does
@@ -95,6 +116,13 @@ public final class Prefilters {
                     break;
                 case MACRO:
                     MacroMatch(key, map.get(key), actualValue);
+					break;
+				case BOOLEAN_MATCH:
+					BooleanMatch(map.get(key), actualValue);
+					break;
+				case LOCATION_MATCH:
+					LocationMatch(map.get(key), actualValue);
+					break;
             }
         }
     }
@@ -114,7 +142,21 @@ public final class Prefilters {
             throw new PrefilterNonMatchException();
         }
     }
-    
+
+	private static void BooleanMatch(Construct bool1, Construct bool2) throws PrefilterNonMatchException {
+		if (Static.getBoolean(bool1) != Static.getBoolean(bool2)) {
+			throw new PrefilterNonMatchException();
+		}
+	}
+
+	private static void LocationMatch(Construct location1, Construct location2) throws PrefilterNonMatchException {
+		MCLocation l1 = ObjectGenerator.GetGenerator().location(location1, null, location1.getTarget());
+		MCLocation l2 = ObjectGenerator.GetGenerator().location(location2, null, Target.UNKNOWN);
+		if ((!l1.getWorld().equals(l2.getWorld())) || (l1.getBlockX() != l2.getBlockX()) || (l1.getBlockY() != l2.getBlockY()) || (l1.getBlockZ() != l2.getBlockZ())) {
+			throw new PrefilterNonMatchException();
+		}
+	}
+
     private static void StringMatch(String string1, String string2) throws PrefilterNonMatchException{
         if(!string1.equals(string2)){
             throw new PrefilterNonMatchException();

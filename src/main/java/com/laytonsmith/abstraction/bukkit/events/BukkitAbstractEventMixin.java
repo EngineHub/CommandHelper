@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.entity.EntityEvent;
+import org.bukkit.event.hanging.HangingEvent;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.event.inventory.InventoryEvent;
@@ -60,6 +61,8 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
                 Entity entity = ((EntityEvent)e).getEntity();
                 map.put("player", new CString(((Player)entity).getName(), Target.UNKNOWN));
             }
+        } else if (e instanceof HangingEvent) {
+            macro = "entity";
         } else if(e instanceof InventoryEvent || e instanceof FurnaceBurnEvent || e instanceof FurnaceSmeltEvent){
             macro = "inventory";
         } else if(e instanceof PlayerEvent){

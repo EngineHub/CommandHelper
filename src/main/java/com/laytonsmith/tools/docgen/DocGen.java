@@ -488,24 +488,30 @@ public class DocGen {
             if (type == MarkupType.HTML) {
                 return "<em>" + macro
                     .replaceAll("<string match>", "&lt;String Match&gt;")
+                    .replaceAll("<boolean match>", "&lt;Boolean Match&gt;")
                     .replaceAll("<regex>", "&lt;Regex&gt;")
                     .replaceAll("<item match>", "&lt;Item Match&gt;")
+                    .replaceAll("<location match>", "&lt;Location Match&gt;")
                     .replaceAll("<math match>", "&lt;Math Match&gt;")
                     .replaceAll("<macro>", "&lt;Macro&gt;")
                     .replaceAll("<expression>", "&lt;Expression&gt;") + "</em>";
             } else if (type == MarkupType.WIKI) {
                 return macro
                     .replaceAll("<string match>", "[[CommandHelper/Events/Prefilters#String Match|String Match]]")
+                    .replaceAll("<boolean match>", "[[CommandHelper/Events/Prefilters#Boolean Match|Boolean Match]]")
                     .replaceAll("<regex>", "[[CommandHelper/Events/Prefilters#Regex|Regex]]")
                     .replaceAll("<item match>", "[[CommandHelper/Events/Prefilters#Item Match|Item Match]]")
+                    .replaceAll("<location match>", "[[CommandHelper/Events/Prefilters#Location Match|Location Match]]")
                     .replaceAll("<math match>", "[[CommandHelper/Events/Prefilters#Math Match|Math Match]]")
                     .replaceAll("<macro>", "[[CommandHelper/Events/Prefilters#Macro|Macro]]")
                     .replaceAll("<expression>", "[[CommandHelper/Events/Prefilters#Expression|Expression]]");                
             } else if (type == MarkupType.TEXT || type == MarkupType.MARKDOWN) {
                 return macro
                     .replaceAll("<string match>", "<String Match>")
+                    .replaceAll("<boolean match>", "<Boolean Match>")
                     .replaceAll("<regex>", "<Regex>")
                     .replaceAll("<item match>", "<Item Match>")
+                    .replaceAll("<location match>", "<Location Match>")
                     .replaceAll("<math match>", "<Math Match>")
                     .replaceAll("<macro>", "<Macro>")
                     .replaceAll("<expression>", "<Expression>");

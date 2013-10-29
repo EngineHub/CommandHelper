@@ -823,17 +823,17 @@ public class Meta {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Static.AssertPlayerNonNull(p, t);
-			boolean state = false;
-			if(args.length == 2) {
-				p = Static.GetPlayer(args[0].val(), t);
-				state = Static.getBoolean(args[1]);
-			} else if(args.length == 1) {
+			MCPlayer player;
+			boolean state;
+			if (args.length == 1) {
+				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
 				state = Static.getBoolean(args[0]);
+			} else {
+				player = Static.GetPlayer(args[0].val(), t);
+				state = Static.getBoolean(args[1]);
 			}
-			
-			p.setOp(state);
+			player.setOp(state);
 			return new CVoid(t);
 		}
 

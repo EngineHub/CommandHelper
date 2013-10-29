@@ -20,6 +20,7 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -138,5 +139,12 @@ public class BukkitEntityListener implements Listener{
 		BukkitEntityEvents.BukkitMCEntityChangeBlockEvent ecbe = new BukkitEntityEvents.BukkitMCEntityChangeBlockEvent(event);
 		EventUtils.TriggerExternal(ecbe);
 		EventUtils.TriggerListener(Driver.ENTITY_CHANGE_BLOCK, "entity_change_block", ecbe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onHangingBreak(HangingBreakEvent event) {
+		BukkitEntityEvents.BukkitMCHangingBreakEvent hbe = new BukkitEntityEvents.BukkitMCHangingBreakEvent(event);
+		EventUtils.TriggerExternal(hbe);
+		EventUtils.TriggerListener(Driver.HANGING_BREAK, "hanging_break", hbe);
 	}
 }

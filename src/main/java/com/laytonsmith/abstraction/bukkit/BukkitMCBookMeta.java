@@ -18,6 +18,10 @@ public class BukkitMCBookMeta extends BukkitMCItemMeta implements MCBookMeta {
 		this.bm = (BookMeta) o;
 	}
 
+	public BookMeta getBookMeta() {
+		return bm;
+	}
+
 	public boolean hasTitle() {
 		return bm.hasTitle();
 	}
