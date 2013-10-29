@@ -2,18 +2,22 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
-import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Function;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,42 +37,119 @@ public class ExtensionDocGen {
 		StringBuilder fdocs = new StringBuilder();
 		DynamicClassLoader classloader = new DynamicClassLoader();
 		classloader.addJar(url);
-		Set<Class<Function>> functions = customDiscovery.loadClassesWithAnnotationThatExtend(api.class, Function.class, classloader, true);
-		if(!functions.isEmpty()){
+		//functions
+		HashMap<Class, ArrayList<Class<Function>>> functionMap = new HashMap<Class, ArrayList<Class<Function>>>();
+		for (Class<Function> cf : customDiscovery.loadClassesWithAnnotationThatExtend(api.class, Function.class, classloader, true)) {
+			Class enclosing = cf.getEnclosingClass();
+			if (functionMap.containsKey(enclosing)) {
+				functionMap.get(enclosing).add(cf);
+			} else {
+				functionMap.put(enclosing, new ArrayList<Class<Function>>());
+				functionMap.get(enclosing).add(cf);
+			}
+		}
+		ArrayList<Entry<Class, ArrayList<Class<Function>>>> functionEntryList = new ArrayList<Entry<Class, ArrayList<Class<Function>>>>(functionMap.entrySet());
+		Collections.sort(functionEntryList, new Comparator<Entry<Class, ArrayList<Class<Function>>>>() {
+			public int compare(Entry<Class, ArrayList<Class<Function>>> o1, Entry<Class, ArrayList<Class<Function>>> o2) {
+				return o1.getKey().getName().compareTo(o2.getKey().getName());
+			}
+		});
+		for (Entry<Class, ArrayList<Class<Function>>> e : functionEntryList) {
+			Collections.sort(e.getValue(), new Comparator<Class<Function>>() {
+				public int compare(Class<Function> o1, Class<Function> o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+		}
+		if(!functionEntryList.isEmpty()){
 			fdocs.append("# Functions").append(nl);
 		}
-		for(Class<Function> cmf : functions) {
-			Function f = cmf.newInstance();
-			if(!f.appearInDocumentation()){
-				continue;
+		for (Entry<Class, ArrayList<Class<Function>>> entry : functionEntryList) {
+			Class enclosingClass = entry.getKey();
+			String[] split = enclosingClass.getName().split("\\.");
+			fdocs.append("## ").append(split[split.length - 1]).append(nl);
+			try {
+				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
+				Object o = enclosingClass.newInstance();
+				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
+			} catch (NoSuchMethodException exception) {
+			} catch (SecurityException exception) {
+			} catch (InstantiationException exception) {
+			} catch (IllegalAccessException exception) {
+			} catch (IllegalArgumentException exception) {
+			} catch (InvocationTargetException exception) {
 			}
-			DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
-			String d = "## " + markdownEscape(di.ret) + " " + markdownEscape(f.getName()) + "(" + markdownEscape(di.originalArgs) + "):" + nl
-					+ convertWiki(di.topDesc != null?di.topDesc:di.desc) + nl
-					+ convertWiki(di.extendedDesc != null?nl + di.extendedDesc + nl:"");
-			fdocs.append(d);
+			for (Class<Function> cf : entry.getValue()) {
+				Function f = cf.newInstance();
+				if (f.appearInDocumentation()) {
+					DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
+					String d = "### " + markdownEscape(di.ret) + " " + markdownEscape(f.getName()) + "(" + markdownEscape(di.originalArgs) + "):" + nl
+							+ convertWiki(di.topDesc != null?di.topDesc:di.desc) + nl
+							+ convertWiki(di.extendedDesc != null?nl + di.extendedDesc + nl:"");
+					fdocs.append(d).append(nl);
+				}
+			}
 		}
-		Set<Class<Event>> events = customDiscovery.loadClassesWithAnnotationThatExtend(api.class, Event.class, classloader, true);
-		if(!events.isEmpty()){
+		//events
+		HashMap<Class, ArrayList<Class<Event>>> eventMap = new HashMap<Class, ArrayList<Class<Event>>>();
+		for (Class<Event> ce : customDiscovery.loadClassesWithAnnotationThatExtend(api.class, Event.class, classloader, true)) {
+			Class enclosing = ce.getEnclosingClass();
+			if (eventMap.containsKey(enclosing)) {
+				eventMap.get(enclosing).add(ce);
+			} else {
+				eventMap.put(enclosing, new ArrayList<Class<Event>>());
+				eventMap.get(enclosing).add(ce);
+			}
+		}
+		ArrayList<Entry<Class, ArrayList<Class<Event>>>> eventEntryList = new ArrayList<Entry<Class, ArrayList<Class<Event>>>>(eventMap.entrySet());
+		Collections.sort(eventEntryList, new Comparator<Entry<Class, ArrayList<Class<Event>>>>() {
+			public int compare(Entry<Class, ArrayList<Class<Event>>> o1, Entry<Class, ArrayList<Class<Event>>> o2) {
+				return o1.getKey().getName().compareTo(o2.getKey().getName());
+			}
+		});
+		for (Entry<Class, ArrayList<Class<Event>>> e : eventEntryList) {
+			Collections.sort(e.getValue(), new Comparator<Class<Event>>() {
+				public int compare(Class<Event> o1, Class<Event> o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+		}
+		if(!eventEntryList.isEmpty()){
 			fdocs.append("# Events").append(nl);
 		}
-		for(Class<Event> cme : events){
-			Event e = cme.newInstance();
-			Pattern p = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
-            Matcher m = p.matcher(e.docs());
-            if (m.find()) {
-                String name = e.getName();
-                String description = m.group(2).trim();
-                String prefilter = DocGen.PrefilterData.Get(m.group(1).split("\\|"), DocGen.MarkupType.MARKDOWN);
-                String eventData = DocGen.EventData.Get(m.group(3).split("\\|"), DocGen.MarkupType.MARKDOWN);
-                String mutability = DocGen.MutabilityData.Get(m.group(4).split("\\|"), DocGen.MarkupType.MARKDOWN);
-                //String manualTrigger = ManualTriggerData.Get(m.group(5).split("\\|"), DocGen.MarkupType.MARKDOWN);
-                //String since = e.since().toString();
-				fdocs.append("## ").append(markdownEscape(name)).append(nl);
-				fdocs.append(description).append(nl);
-				fdocs.append("### Prefilters").append(nl).append(prefilter).append(nl);
-				fdocs.append("### Event Data").append(nl).append(eventData).append(nl);
-				fdocs.append("### Mutable Fields").append(nl).append(mutability).append(nl);
+		for (Entry<Class, ArrayList<Class<Event>>> entry : eventEntryList) {
+			Class enclosingClass = entry.getKey();
+			String[] split = enclosingClass.getName().split("\\.");
+			fdocs.append("## ").append(split[split.length - 1]).append(nl);
+			try {
+				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
+				Object o = enclosingClass.newInstance();
+				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
+			} catch (NoSuchMethodException exception) {
+			} catch (SecurityException exception) {
+			} catch (InstantiationException exception) {
+			} catch (IllegalAccessException exception) {
+			} catch (IllegalArgumentException exception) {
+			} catch (InvocationTargetException exception) {
+			}
+			for (Class<Event> ce : entry.getValue()) {
+				Event e = ce.newInstance();
+				Pattern p = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
+				Matcher m = p.matcher(e.docs());
+				if (m.find()) {
+					String name = e.getName();
+					String description = m.group(2).trim();
+					String prefilter = DocGen.PrefilterData.Get(m.group(1).split("\\|"), DocGen.MarkupType.MARKDOWN);
+					String eventData = DocGen.EventData.Get(m.group(3).split("\\|"), DocGen.MarkupType.MARKDOWN);
+					String mutability = DocGen.MutabilityData.Get(m.group(4).split("\\|"), DocGen.MarkupType.MARKDOWN);
+					//String manualTrigger = ManualTriggerData.Get(m.group(5).split("\\|"), DocGen.MarkupType.MARKDOWN);
+					//String since = e.since().toString();
+					fdocs.append("### ").append(markdownEscape(name)).append(nl);
+					fdocs.append(description).append(nl);
+					fdocs.append("#### Prefilters").append(nl).append(prefilter).append(nl);
+					fdocs.append("#### Event Data").append(nl).append(eventData).append(nl);
+					fdocs.append("#### Mutable Fields").append(nl).append(mutability).append(nl);
+				}
 			}
 		}
 		outputStream.write(fdocs.toString().getBytes("UTF-8"));
