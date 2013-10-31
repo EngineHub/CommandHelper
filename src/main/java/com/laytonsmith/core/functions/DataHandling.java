@@ -1675,6 +1675,7 @@ public class DataHandling {
 				return null;
 			}
 		}
+
 //        @Override
 //        public boolean canOptimizeDynamic() {
 //            return true;
@@ -1686,7 +1687,12 @@ public class DataHandling {
 //            //if we are assigning a dynamic value as a default, but we have to check
 //            //that here. If we don't, we lose the information
 //            return ;
-//        }                
+//        }        
+		@Override
+		public boolean allowBraces() {
+			return true;
+		}
+		
 	}
 
 	@api
