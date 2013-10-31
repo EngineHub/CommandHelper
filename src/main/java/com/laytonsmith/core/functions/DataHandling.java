@@ -1559,13 +1559,16 @@ public class DataHandling {
 			String name = "";
 			List<IVariable> vars = new ArrayList<IVariable>();
 			ParseTree tree = null;
+			List<String> varNames = new ArrayList<String>();
 			boolean usesAssign = false;
 			for (int i = 0; i < nodes.length; i++) {
 				if (i == nodes.length - 1) {
 					tree = nodes[i];
 				} else {
+					boolean thisNodeIsAssign = false;
 					if (nodes[i].getData() instanceof CFunction) {
 						if (((CFunction) nodes[i].getData()).getValue().equals("assign")) {
+							thisNodeIsAssign = true;
 							if (nodes[i].getChildAt(1).getData().isDynamic()) {
 								usesAssign = true;
 							}
@@ -1584,8 +1587,21 @@ public class DataHandling {
 								IVariable ivar = null;
 								try {
 									Construct c = cons;
+									if(c instanceof IVariable){
+										String varName = ((IVariable)c).getName();
+										if(varNames.contains(varName)){
+											throw new ConfigRuntimeException("Same variable name defined twice in " + name, ExceptionType.InvalidProcedureException, t);
+										}
+										varNames.add(varName);
+									}
 									while (c instanceof IVariable) {
 										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
+									}
+									if(!thisNodeIsAssign){
+										//This is required because otherwise a default value that's already in the environment
+										//would end up getting set to the existing value, thereby leaking in the global env
+										//into this proc, if the call to the proc didn't have a value in this slot.
+										c = new CString("", t);
 									}
 									ivar = new IVariable(((IVariable) cons).getName(), c.clone(), t);
 								} catch (CloneNotSupportedException ex) {

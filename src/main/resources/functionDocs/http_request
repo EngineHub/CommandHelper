@@ -61,7 +61,7 @@ following fields set:
 The function will not send expired cookies, and will remove them from the cookie jar automatically. 
 Session cookies cannot technically expire, and must be removed manually by you, if you are storing cookies
 for a long period of time.
-* boolean httpOnly - If true, this cookie only applies in http, not https requests.
+* boolean httpOnly - If true, this cookie shouldn't be provided to clients. In practice, this isn't very useful however.
 * boolean secureOnly - If true, this cookie only applies in https, not http.
 |-
 | followRedirects
