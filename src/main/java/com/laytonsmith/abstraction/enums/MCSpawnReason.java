@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.enums;
  * @author jb_aero
  */
 public enum MCSpawnReason {
+	BED,
 	BREEDING,
 	BUILD_IRONGOLEM,
 	BUILD_SNOWMAN,
@@ -25,10 +26,10 @@ public enum MCSpawnReason {
 	JOCKEY,
 	LIGHTNING,
 	NATURAL,
+	REINFORCEMENTS,
 	SLIME_SPLIT,
 	SPAWNER,
 	SPAWNER_EGG,
 	VILLAGE_DEFENSE,
-	VILLAGE_INVASION,
-	BED
+	VILLAGE_INVASION
 }

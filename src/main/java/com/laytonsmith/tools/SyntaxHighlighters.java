@@ -36,10 +36,16 @@ public class SyntaxHighlighters {
                 return template("/syntax-templates/notepad++/default.xml");
             }
             if("obsidian".equals(theme)){
-                return template("/syntax-templates/notepad++/obsidian.xml");                
+                return template("/syntax-templates/notepad++/obsidian.xml");
+            }
+            if("solarized-dark".equals(theme)){
+                return template("/syntax-templates/notepad++/solarized_dark.xml");
+            }
+            if("solarized-light".equals(theme)){
+                return template("/syntax-templates/notepad++/solarized_light.xml");
             }
 
-            return "Available themes for Notepad++: default, obsidian";            
+            return "Available themes for Notepad++: default, obsidian, solarized-dark, solarized-light";            
         }
         if("textwrangler".equals(type)){
             return template("/syntax-templates/text-wrangler/default.plist");
