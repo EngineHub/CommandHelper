@@ -253,7 +253,7 @@ public class Meta {
 			MCPlayer p = (MCPlayer) player;
 			try {
 				p.setTempOp(value);
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				if(Prefs.UseSudoFallback()){
 					p.setOp(value);
 				} else {
