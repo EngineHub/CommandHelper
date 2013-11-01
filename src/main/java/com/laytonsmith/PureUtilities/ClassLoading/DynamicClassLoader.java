@@ -2,13 +2,15 @@
 package com.laytonsmith.PureUtilities.ClassLoading;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,15 +20,15 @@ import java.util.Set;
  */
 public class DynamicClassLoader extends ClassLoader {
 	
-	private final Set<URLClassLoader> classLoaders = new LinkedHashSet<URLClassLoader>();
+	private final Map<URL, URLClassLoader> classLoaders = new LinkedHashMap<URL, URLClassLoader>();
 	private final Set<URL> urls = new HashSet<URL>();
 	private boolean destroyed = false;
 	
 	/**
 	 * Adds a jar to this class loader instance. This can be done at runtime,
-	 * however note that jars cannot be removed, and if a jar already defines
-	 * a class (or the class has already been loaded) it cannot be changed inside this
-	 * instance. Adding the same URL twice has no effect.
+	 * and if a jar already defines a class (or the class has already been loaded) 
+	 * it cannot be changed inside this instance. Adding the same URL twice has 
+	 * no effect.
 	 * @param url The url to the jar.
 	 */
 	public synchronized void addJar(URL url){
@@ -35,12 +37,35 @@ public class DynamicClassLoader extends ClassLoader {
 			return;
 		}
 		urls.add(url);
-		classLoaders.add(new URLClassLoader(new URL[]{url}, DynamicClassLoader.class.getClassLoader()));
+		classLoaders.put(url, new URLClassLoader(new URL[]{url}, DynamicClassLoader.class.getClassLoader()));
 	}
+	
+	/**
+	 * Remove a jar from this class loader instance. Adding the same URL twice has 
+	 * no effect.
+	 * 
+	 * @param url 
+	 */
+	public synchronized void removeJar(URL url) {
+        checkDestroy();
+                
+		if(!urls.contains(url)){
+			return;
+		}
+                
+		urls.remove(url);
+		URLClassLoader l = classLoaders.remove(url);
+                
+		try {
+			l.close();
+		} catch (IOException ex) {
+			// Whatever.
+		}
+    }
 
 	@Override
 	protected synchronized Package getPackage(String name) {
-		for(ClassLoader c : classLoaders){
+		for(ClassLoader c : classLoaders.values()){
 			Package p = (Package) ReflectionUtils.invokeMethod(c.getClass(), c, "getPackage", new Class[]{String.class}, new Object[]{name});
 			if(p != null){
 				return p;
@@ -52,7 +77,7 @@ public class DynamicClassLoader extends ClassLoader {
 	@Override
 	protected synchronized Package[] getPackages() {
 		List<Package> packages = new ArrayList<Package>();
-		for(ClassLoader c : classLoaders){
+		for(ClassLoader c : classLoaders.values()){
 			packages.addAll(Arrays.asList((Package[])ReflectionUtils.invokeMethod(c.getClass(), c, "getPackages")));
 		}
 		return packages.toArray(new Package[packages.size()]);
@@ -68,7 +93,7 @@ public class DynamicClassLoader extends ClassLoader {
 			return c;
 		} catch(ClassNotFoundException ex){
 			//Otherwise we need to find the class ourselves.
-			for(URLClassLoader url : classLoaders){
+			for(URLClassLoader url : classLoaders.values()){
 				try{
 					Class c = url.loadClass(name);
 					if(resolve){

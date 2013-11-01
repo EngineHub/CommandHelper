@@ -176,6 +176,9 @@ public class ClassDiscovery {
 	 * @param url
 	 */
 	public void removePreCache(URL url) {
+		if (url == null) {
+			throw new NullPointerException("url cannot be null");
+		}
 		preCaches.remove(url);
 	}
 
@@ -186,6 +189,9 @@ public class ClassDiscovery {
 	 * @param cache
 	 */
 	public void addPreCache(URL url, ClassDiscoveryURLCache cache) {
+		if (url == null) {
+			throw new NullPointerException("url cannot be null");
+		}
 		if(debug){
 			System.out.println("Adding precache for " + url);
 		}
@@ -377,16 +383,38 @@ public class ClassDiscovery {
 	 * @param url
 	 */
 	public synchronized void addDiscoveryLocation(URL url) {
+		if (url == null) {
+			throw new NullPointerException("url cannot be null");
+		}
 		if (urlCache.contains(url)) {
 			//Already here, so just return.
 			return;
 		}
-		if (url == null) {
-			throw new NullPointerException("url cannot be null");
-		}
 		urlCache.add(url);
 		dirtyURLs.add(url);
 		classCache.put(url, new HashSet<ClassMirror<?>>());
+	}
+	
+	/**
+	 * Remove a discovery URL. Will invalidate caches.
+	 * 
+	 * @param url
+	 */
+	public synchronized void removeDiscoveryLocation(URL url) {
+		if (url == null) {
+			throw new NullPointerException("url cannot be null");
+		}
+		
+		if (!urlCache.contains(url)) {
+			//Not here, so just return.
+			return;
+		}
+
+		urlCache.remove(url);
+		dirtyURLs.remove(url);
+		preCaches.remove(url);
+
+		invalidateCaches();
 	}
 
 	/**
@@ -433,6 +461,9 @@ public class ClassDiscovery {
 	 * @return
 	 */
 	public List<ClassMirror<?>> getKnownClasses(URL url) {
+		if (url == null) {
+			throw new NullPointerException("url cannot be null");
+		}
 		if (!classCache.containsKey(url)) {
 			addDiscoveryLocation(url);
 		}
