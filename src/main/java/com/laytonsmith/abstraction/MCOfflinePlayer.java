@@ -1,6 +1,8 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.entities.MCPlayer;
+
 /**
  *
  * @author layton

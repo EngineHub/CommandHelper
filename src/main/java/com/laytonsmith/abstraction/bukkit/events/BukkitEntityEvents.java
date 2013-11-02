@@ -1,19 +1,25 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.entities.MCItem;
+import com.laytonsmith.abstraction.entities.MCHanging;
+import com.laytonsmith.abstraction.entities.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCProjectile;
+import com.laytonsmith.abstraction.entities.MCLivingEntity;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
-import com.laytonsmith.abstraction.bukkit.BukkitMCHanging;
-import com.laytonsmith.abstraction.bukkit.BukkitMCItem;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHanging;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
-import com.laytonsmith.abstraction.bukkit.BukkitMCProjectile;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCProjectile;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.BukkitMCMaterial;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -24,6 +30,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTargetReason;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
@@ -35,6 +42,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -139,7 +147,7 @@ public class BukkitEntityEvents {
 		}
 		
 		public MCProjectile getEntity() {
-			return new BukkitMCProjectile(phe.getEntity());
+			return (MCProjectile) BukkitConvertor.BukkitGetCorrectEntity(phe.getEntity());
 		}
 
 		public MCEntityType getEntityType() {
@@ -147,9 +155,7 @@ public class BukkitEntityEvents {
 		}
 		
 		public static BukkitMCProjectileHitEvent _instantiate(MCProjectile p) {
-			return new BukkitMCProjectileHitEvent(
-					new ProjectileHitEvent(
-							((BukkitMCProjectile) p).asProjectile()));
+			return new BukkitMCProjectileHitEvent(new ProjectileHitEvent((Projectile) p.getHandle()));
 		}
 		
 	}
@@ -168,7 +174,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCProjectile getEntity() {
-			return new BukkitMCProjectile(ple.getEntity());
+			return (MCProjectile) BukkitConvertor.BukkitGetCorrectEntity(ple.getEntity());
 		}
 
 		public MCEntityType getEntityType() {
@@ -200,11 +206,11 @@ public class BukkitEntityEvents {
 		}
 
 		public double getIntensity(MCLivingEntity le) {
-			return pse.getIntensity(((BukkitMCLivingEntity) le).asLivingEntity());
+			return pse.getIntensity((LivingEntity) le.getHandle());
 		}
 
 		public void setIntensity(MCLivingEntity le, double intensity) {
-			pse.setIntensity(((BukkitMCLivingEntity) le).asLivingEntity(), intensity);
+			pse.setIntensity((LivingEntity) le.getHandle(), intensity);
 		}
 		
 	}
@@ -245,7 +251,7 @@ public class BukkitEntityEvents {
         }
 
 		public MCLivingEntity getEntity() {
-			return new BukkitMCLivingEntity(e.getEntity());
+			return (MCLivingEntity) BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
 		}
 
 		public void setDroppedExp(int exp) {
@@ -452,9 +458,8 @@ public class BukkitEntityEvents {
             pie = e;
         }
 
-        public static BukkitMCTargetEvent _instantiate(Entity entity, LivingEntity target, EntityTargetEvent.TargetReason reason) {
-            return new BukkitMCTargetEvent(new EntityTargetEvent(( (BukkitMCEntity) entity ).asEntity(),
-                    (LivingEntity) ( (BukkitMCLivingEntity) target ).getLivingEntity(), reason));
+        public static BukkitMCTargetEvent _instantiate(MCEntity entity, MCLivingEntity target, MCTargetReason reason) {
+            return new BukkitMCTargetEvent(new EntityTargetEvent((Entity) entity.getHandle(), (LivingEntity) target.getHandle(), BukkitMCTargetReason.getConvertor().getConcreteEnum(reason)));
         }
 
         public Object _GetObject() {
@@ -469,7 +474,7 @@ public class BukkitEntityEvents {
         	if (target == null) {
         		pie.setTarget(null);
         	} else {
-        		pie.setTarget(((BukkitMCEntity)target).asEntity());
+        		pie.setTarget((Entity) target.getHandle());
         	}
         }
 
@@ -498,7 +503,7 @@ public class BukkitEntityEvents {
 		}
 	
 		public MCEntity getEntity() {
-			return new BukkitMCEntity(epe.getEntity());
+			return BukkitConvertor.BukkitGetCorrectEntity(epe.getEntity());
 		}
 	
 		public MCLocation getLocation() {
@@ -515,7 +520,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCEntity getEntity() {
-			return new BukkitMCEntity(ecb.getEntity());
+			return BukkitConvertor.BukkitGetCorrectEntity(ecb.getEntity());
 		}
 
 		public MCBlock getBlock() {
@@ -557,7 +562,7 @@ public class BukkitEntityEvents {
 		}
 
 		public MCHanging getEntity() {
-			return new BukkitMCHanging(hbe.getEntity());
+			return (MCHanging) BukkitConvertor.BukkitGetCorrectEntity(hbe.getEntity());
 		}
 
 		public MCRemoveCause getCause() {

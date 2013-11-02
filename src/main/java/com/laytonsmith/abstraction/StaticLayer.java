@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.convert;
@@ -61,19 +62,27 @@ public final class StaticLayer {
     public static MCLocation GetLocation(MCWorld w, double x, double y, double z){
         return GetLocation(w, x, y, z, 0, 0);
     }
+    
+	public static MCVector GetVelocity(double x, double y, double z) {
+		return convertor.GetVelocity(x, y, z);
+	}
 
     public static MCItemStack GetItemStack(int type, int qty) {
         return convertor.GetItemStack(type, qty);
     }
-    
+
     public static MCItemStack GetItemStack(int type, int data, int qty){
         return convertor.GetItemStack(type, data, qty);
     }
-    
+
+	public static MCMaterial GetMaterial(String name) {
+		return convertor.GetMaterial(name);
+	}
+
     public static MCServer GetServer(){
         return convertor.GetServer();
     }
-    
+
     public static MCEnchantment GetEnchantmentByName(String name){
         return convertor.GetEnchantmentByName(name);
     }

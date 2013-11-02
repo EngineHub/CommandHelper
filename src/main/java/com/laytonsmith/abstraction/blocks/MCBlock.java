@@ -2,6 +2,8 @@
 
 package com.laytonsmith.abstraction.blocks;
 
+import com.laytonsmith.abstraction.enums.MCBlockFace;
+import com.laytonsmith.abstraction.MCMaterial;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;

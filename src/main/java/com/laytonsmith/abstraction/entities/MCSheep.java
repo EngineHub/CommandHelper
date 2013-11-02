@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCAgeable;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 
 public interface MCSheep extends MCAgeable {

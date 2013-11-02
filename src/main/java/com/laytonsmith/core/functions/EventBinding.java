@@ -258,7 +258,7 @@ public class EventBinding {
 
 			BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
 			if (original == null) {
-				throw new ConfigRuntimeException("cancel cannot be called outside an event handler", ExceptionType.BindException, t);
+				throw new ConfigRuntimeException(getName() + " cannot be called outside an event handler", ExceptionType.BindException, t);
 			}
 			if (original.getUnderlyingEvent() != null && original.isCancellable()) {
 				original.setCancelled(cancelled);
@@ -302,7 +302,7 @@ public class EventBinding {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
 			if (original == null) {
-				throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
+				throw new ConfigRuntimeException(getName() + " cannot be called outside an event handler", ExceptionType.BindException, t);
 			}
 			boolean result = false;
 			if (original.getUnderlyingEvent() != null && original.isCancellable()) {

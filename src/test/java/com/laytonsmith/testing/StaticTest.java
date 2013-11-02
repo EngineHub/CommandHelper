@@ -1,14 +1,15 @@
-
-
 package com.laytonsmith.testing;
 
+import com.laytonsmith.abstraction.entities.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.*;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCVector;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
@@ -414,6 +415,14 @@ public class StaticTest {
         return loc;
     }
     
+	public static MCVector GetFakeVelocity(double x, double y, double z) {
+		MCVector velocity = mock(BukkitMCVector.class);
+		when(velocity.getX()).thenReturn(x);
+		when(velocity.getY()).thenReturn(y);
+		when(velocity.getZ()).thenReturn(z);
+		return velocity;
+	}
+    
     public static Object GetVariable(Object instance, String var) throws Exception{
         return GetVariable(instance.getClass(), var, instance);
     }
@@ -576,6 +585,10 @@ public class StaticTest {
         public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
              return StaticTest.GetFakeLocation(w, x, y + 1, z);
         }
+	
+		public MCVector GetVelocity(double x, double y, double z) {
+			return StaticTest.GetFakeVelocity(x, y, z);
+		}
 
         public Class GetServerEventMixin() {
             return FakeServerMixin.class;
@@ -615,6 +628,11 @@ public class StaticTest {
         public MCItemStack GetItemStack(int type, int data, int qty) {
             Convertor c = new BukkitConvertor();
             return c.GetItemStack(type, data, qty);
+        }
+
+        public MCMaterial GetMaterial(String name) {
+            Convertor c = new BukkitConvertor();
+            return c.GetMaterial(name);
         }
 
         public int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
@@ -692,7 +710,7 @@ public class StaticTest {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
-		public MCMaterial getMaterial(int id) {
+		public MCMaterial GetMaterial(int id) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

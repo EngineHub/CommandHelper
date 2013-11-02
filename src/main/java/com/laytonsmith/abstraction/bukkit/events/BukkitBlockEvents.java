@@ -1,18 +1,16 @@
-
-
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.entities.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.abstraction.*;
-import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCVector;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
 import com.laytonsmith.abstraction.events.*;
@@ -20,6 +18,7 @@ import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
@@ -141,7 +140,7 @@ public class BukkitBlockEvents {
 		@Override
 		public MCEntity getIgnitingEntity() {
 			if (event.getIgnitingEntity() != null) {
-				return new BukkitMCEntity(event.getIgnitingEntity());
+				return BukkitConvertor.BukkitGetCorrectEntity(event.getIgnitingEntity());
 			}
 
 			return null;
@@ -180,8 +179,7 @@ public class BukkitBlockEvents {
             for (int i = 0; i < signtext.size(); i++) {
                 text[i] = signtext.get(i).toString();
             }
-            return new BukkitMCSignChangeEvent(new SignChangeEvent(( (BukkitMCBlock) sign ).__Block(), ( (BukkitMCPlayer) player )._Player(),
-                    text));
+            return new BukkitMCSignChangeEvent(new SignChangeEvent(( (BukkitMCBlock) sign ).__Block(), (Player) player.getHandle(), text));
         }
 
         public MCPlayer getPlayer() {
@@ -258,14 +256,12 @@ public class BukkitBlockEvents {
 			bde.setItem(((BukkitMCItemStack) item).asItemStack());
 		}
 
-		public Velocity getVelocity() {
-			Vector v = bde.getVelocity();
-			return new Velocity(v.length(), v.getX(), v.getY(), v.getZ());
+		public MCVector getVelocity() {
+			return new BukkitMCVector(bde.getVelocity());
 		}
 
-		public void setVelocity(MCEntity.Velocity vel) {
-			Vector v = new Vector(vel.x, vel.y, vel.z);
-			bde.setVelocity(v);
+		public void setVelocity(MCVector vel) {
+			bde.setVelocity((Vector) vel.getHandle());
 		}
 
 		public boolean isCancelled() {

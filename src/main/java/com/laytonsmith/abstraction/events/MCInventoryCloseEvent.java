@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCHumanEntity;
+import com.laytonsmith.abstraction.entities.MCHumanEntity;
 
 /**
  *

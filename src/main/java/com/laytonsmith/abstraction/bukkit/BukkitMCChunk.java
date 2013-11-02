@@ -1,10 +1,14 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.MCChunk;
-import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.abstraction.MCWorld;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Chunk;
+import org.bukkit.entity.Entity;
 
 /**
  *
@@ -25,12 +29,12 @@ public class BukkitMCChunk implements MCChunk {
 		return c.getZ();
 	}
 
-	public MCEntity[] getEntities() {
-		MCEntity[] ret = new MCEntity[c.getEntities().length];
-		for (int i=0; i < c.getEntities().length; i++) {
-			ret[i] = new BukkitMCEntity(c.getEntities()[i]);
+	public List<MCEntity> getEntities() {
+		List<MCEntity> entities = new ArrayList<MCEntity>();
+		for (Entity entity : c.getEntities()) {
+			entities.add(BukkitConvertor.BukkitGetCorrectEntity(entity));
 		}
-		return ret;
+		return entities;
 	}
 
 	public MCWorld getWorld() {

@@ -1,37 +1,32 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCMaterialData;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
 import com.laytonsmith.abstraction.entities.MCEnderman;
 import org.bukkit.entity.Enderman;
 import org.bukkit.material.MaterialData;
 
-public class BukkitMCEnderman extends BukkitMCLivingEntity implements
-		MCEnderman {
-	Enderman e;
-	public BukkitMCEnderman(Enderman ent) {
-		super(ent);
-		e = ent;
+public class BukkitMCEnderman extends BukkitMCCreature implements MCEnderman {
+
+	public BukkitMCEnderman(Enderman enderman) {
+		super(enderman);
+	}
+
+	public BukkitMCEnderman(AbstractionObject ao) {
+		this((Enderman) ao.getHandle());
+	}
+
+	@Override
+	public Enderman getHandle() {
+		return (Enderman) metadatable;
 	}
 
 	public MCMaterialData getCarriedMaterial() {
-		return new BukkitMCMaterialData(e.getCarriedMaterial());
-	}
-	
-	public int getCarriedType() {
-		return e.getCarriedMaterial().getItemTypeId();
-	}
-	
-	public byte getCarriedData() {
-		return e.getCarriedMaterial().getData();
+		return new BukkitMCMaterialData(getHandle().getCarriedMaterial());
 	}
 
 	public void setCarriedMaterial(MCMaterialData held) {
-		e.setCarriedMaterial((MaterialData) held.getHandle());
-	}
-	
-	public void setCarriedMaterial(int type, byte data) {
-		e.setCarriedMaterial(new MaterialData(type, data));
+		getHandle().setCarriedMaterial((MaterialData) held.getHandle());
 	}
 }

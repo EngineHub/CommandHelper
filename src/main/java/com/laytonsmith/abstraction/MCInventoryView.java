@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.entities.MCHumanEntity;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 
 /**

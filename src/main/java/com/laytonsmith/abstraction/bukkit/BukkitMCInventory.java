@@ -1,7 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.MCHumanEntity;
+import com.laytonsmith.abstraction.entities.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemStack;

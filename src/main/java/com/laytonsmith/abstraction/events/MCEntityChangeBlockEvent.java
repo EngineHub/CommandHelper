@@ -1,8 +1,8 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.MCMaterial;
 import com.laytonsmith.core.events.BindableEvent;
 
 /**

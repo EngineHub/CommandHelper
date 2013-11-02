@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.events;
 
 import java.util.Collection;
 
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCChatTabCompleteEvent extends BindableEvent {

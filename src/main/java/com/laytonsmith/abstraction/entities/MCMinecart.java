@@ -1,7 +1,5 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCVehicle;
-
 public interface MCMinecart extends MCVehicle {
 	public void setDamage(double damage);
 	public double getDamage();

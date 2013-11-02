@@ -5,7 +5,7 @@ package com.laytonsmith.commandhelper;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
-import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents;
+import com.laytonsmith.abstraction.bukkit.events.BukkitServerEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Script;
@@ -29,7 +29,7 @@ public class CommandHelperServerListener implements Listener{
     @EventHandler(priority= EventPriority.LOWEST)
     public void onServerCommand(ServerCommandEvent event){
 		//Run this first, so external events can intercept it.
-		BukkitMiscEvents.BukkitMCConsoleCommandEvent cce = new BukkitMiscEvents.BukkitMCConsoleCommandEvent(event);
+		BukkitServerEvents.BukkitMCConsoleCommandEvent cce = new BukkitServerEvents.BukkitMCConsoleCommandEvent(event);
 		EventUtils.TriggerExternal(cce);
         MCCommandSender player = new BukkitMCCommandSender(event.getSender());
         if(event.getSender() instanceof ConsoleCommandSender){

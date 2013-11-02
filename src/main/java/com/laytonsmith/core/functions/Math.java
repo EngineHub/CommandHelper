@@ -1948,7 +1948,7 @@ public class Math {
 				new ExampleScript("Error condition", "logarithm(0)"),
 				new ExampleScript("Error condition", "logarithm(-1)"),
 			};
-		}		
+		}
 		
 	}
 }

@@ -2,21 +2,21 @@ package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.MCCraftingInventory;
 import com.laytonsmith.abstraction.MCEnchantment;
-import com.laytonsmith.abstraction.MCHumanEntity;
+import com.laytonsmith.abstraction.entities.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCraftingInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantment;
-import com.laytonsmith.abstraction.bukkit.BukkitMCHumanEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
@@ -408,7 +408,7 @@ public class BukkitInventoryEvents {
 		
 		@Override
 		public MCPlayer getPlayer() {
-			return new com.laytonsmith.abstraction.bukkit.BukkitMCPlayer(ih.getPlayer());
+			return new BukkitMCPlayer(ih.getPlayer());
 		}
 
 		@Override

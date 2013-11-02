@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -31,8 +32,7 @@ public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageLis
 
 	@Override
 	protected void sendIncomingMessage0(MCPlayer player, String channel, byte[] message) {
-		Player p = ((BukkitMCPlayer)player)._Player();
-		Bukkit.getMessenger().dispatchIncomingMessage(p, channel, message);
+		Bukkit.getMessenger().dispatchIncomingMessage((Player) player.getHandle(), channel, message);
 	}
 
 	@Override

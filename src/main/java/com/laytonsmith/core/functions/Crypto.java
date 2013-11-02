@@ -474,7 +474,5 @@ public class Crypto {
 				new ExampleScript("Basic usage", "string_from_bytes(base64_decode(string_get_bytes('QSBzdHJpbmc=')))")
 			};
 		}
-		
 	}
-
 }

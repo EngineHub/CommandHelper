@@ -2,7 +2,7 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.enums.MCBlockFace;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.block.BlockFace;

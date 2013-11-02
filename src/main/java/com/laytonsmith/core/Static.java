@@ -1,5 +1,9 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.abstraction.entities.MCVehicle;
+import com.laytonsmith.abstraction.entities.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCEntity;
+import com.laytonsmith.abstraction.entities.MCLivingEntity;
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.*;
 import com.laytonsmith.abstraction.*;
@@ -637,6 +641,15 @@ public final class Static {
         return GetPlayer(player.val(), t);
     }
 
+    public static MCPlayer GetPlayer(Environment environment, Target t) throws ConfigRuntimeException {
+		MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+        if (player != null) {
+			return player;
+		} else {
+			throw new ConfigRuntimeException("The number or the type of arguments involves that the function have to be run from a player.", ExceptionType.PlayerOfflineException, t);
+		}
+    }
+
     public static boolean isNull(Construct construct) {
         return construct instanceof CNull;
     }
@@ -655,11 +668,15 @@ public final class Static {
 		for (MCWorld w : Static.getServer().getWorlds()) {
 			for (MCEntity e : w.getEntities()) {
 				if (e.getEntityId() == id) {
-					return StaticLayer.GetCorrectEntity(e);
+					return e;
 				}
 			}
 		}
 		throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
+	}
+
+	public static MCEntity getEntity(Construct id, Target t) {
+		return getEntity(getInt32(id, t), t);
 	}
 	
 	/**
@@ -672,16 +689,15 @@ public final class Static {
         for (MCWorld w : Static.getServer().getWorlds()) {
             for (MCLivingEntity e : w.getLivingEntities()) {
                 if (e.getEntityId() == id) {
-                	try {
-                		return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
-                	} catch (ClassCastException cce) {
-                		throw new ConfigRuntimeException("The entity found was misinterpreted by the converter, this is"
-                				+ " a developer mistake, please file a ticket.", ExceptionType.BadEntityException, t);
-                	}
+					return e;
                 }
             }
         }
         throw new ConfigRuntimeException("That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
+    }
+
+	public static MCLivingEntity getLivingEntity(Construct id, Target t) {
+		return getLivingEntity(getInt32(id, t), t);
     }
 
 	/**
@@ -703,6 +719,25 @@ public final class Static {
 		}
 		return vehicles;
 	}
+	
+	/**
+	 * Returns the world with the specified name. If it doesn't exist,
+	 * a ConfigRuntimeException is thrown.
+	 * @param name
+	 * @return
+	 */
+	public static MCWorld getWorld(String name, Target t) {
+		MCWorld world = getServer().getWorld(name);
+		if (world != null) {
+			return world;
+		} else {
+			throw new ConfigRuntimeException("The world " + name + " does not exist.", ExceptionType.InvalidWorldException, t);
+		}
+    }
+
+	public static MCWorld getWorld(Construct name, Target t) {
+		return getWorld(name.val(), t);
+    }
 
     public static String strJoin(Collection c, String inner) {
         StringBuilder b = new StringBuilder();

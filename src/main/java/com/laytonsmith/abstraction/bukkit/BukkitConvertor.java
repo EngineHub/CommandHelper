@@ -1,21 +1,5 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.abstraction.*;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
-import com.laytonsmith.abstraction.bukkit.entities.*;
-import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
-import com.laytonsmith.abstraction.bukkit.events.drivers.*;
-import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCRecipeType;
-import com.laytonsmith.abstraction.enums.MCTone;
-import com.laytonsmith.annotations.convert;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Static;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +7,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
+
 import org.apache.log4j.Logger;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -42,6 +28,21 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.material.MaterialData;
+import org.bukkit.util.Vector;
+
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
+import com.laytonsmith.abstraction.entities.MCEntity;
+import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCMaterial;
+import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
+import com.laytonsmith.abstraction.bukkit.events.drivers.*;
+import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCRecipeType;
+import com.laytonsmith.abstraction.enums.MCTone;
+import com.laytonsmith.annotations.convert;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.Static;
 
 /**
  *
@@ -59,6 +60,10 @@ public class BukkitConvertor extends AbstractConvertor {
         }
         return new BukkitMCLocation(new Location(w2, x, y, z, yaw, pitch));
     }
+
+	public MCVector GetVelocity(double x, double y, double z) {
+		return new BukkitMCVector(new Vector(x, y, z));
+	}
 
     public Class GetServerEventMixin() {
         return BukkitAbstractEventMixin.class;
@@ -92,8 +97,12 @@ public class BukkitConvertor extends AbstractConvertor {
         return BukkitMCServer.Get();
     }
 
-	public MCMaterial getMaterial(int id) {
+	public MCMaterial GetMaterial(int id) {
 		return new BukkitMCMaterial(Material.getMaterial(id));
+	}
+
+	public MCMaterial GetMaterial(String name) {
+		return new BukkitMCMaterial(Material.valueOf(name));
 	}
 
     public MCItemStack GetItemStack(int type, int qty) {
@@ -175,126 +184,38 @@ public class BukkitConvertor extends AbstractConvertor {
             validIDs.remove(id);
         }
     }
-    
-    public static MCEntity BukkitGetCorrectEntity(Entity be){
-    	if (be == null) {
-    		return null;
-    	}
-    	//TODO: Change this to a reflection mechanism, this is getting tiresome to do.
-		//truth.
-    	if (be instanceof EnderSignal) {
-    		return new BukkitMCEnderSignal((EnderSignal) be);
-    	}
-    	
-		if (be instanceof Firework) {
-			return new BukkitMCFirework((Firework) be);
-		}
-		
-		if(be instanceof FallingBlock){
-			return new BukkitMCFallingBlock((FallingBlock) be);
-		}
-		
-		if(be instanceof Item){
-			return new BukkitMCItem((Item)be);
-		}
-		
-		if(be instanceof LightningStrike){
-			return new BukkitMCLightningStrike((LightningStrike)be);
-		}
-		
-		if(be instanceof ExperienceOrb){
-			return new BukkitMCExperienceOrb((ExperienceOrb)be);
-		}
-		
-		if(be instanceof EnderCrystal){
-			return new BukkitMCEnderCrystal((EnderCrystal)be);
-		}
-		
-		if(be instanceof TNTPrimed){
-			return new BukkitMCTNT((TNTPrimed)be);
-		}
-		
-		if (be instanceof Fish) {
-			return new BukkitMCFishHook((Fish) be);
-		}
-		
-		if (be instanceof Fireball) {
-			return new BukkitMCFireball((Fireball) be);
-		}
-		
-    	if(be instanceof Projectile){
-            return new BukkitMCProjectile((Projectile)be);
-        }
-    	
-		if(be instanceof Painting){
-			return new BukkitMCPainting((Painting)be);
-		}
-		
-    	if(be instanceof Hanging){
-    		return new BukkitMCHanging(be);
-    	}
-    	
-    	if(be instanceof Wolf){
-            return new BukkitMCWolf(be);
-        }
-    	
-    	if(be instanceof Ocelot){
-            return new BukkitMCOcelot(be);
-        }
-    	
-		if (be instanceof Enderman) {
-			return new BukkitMCEnderman((Enderman) be);
-		}
-		
-		if (be instanceof Sheep) {
-			return new BukkitMCSheep((Sheep) be);
-		}
-		
-		if (be instanceof Horse) {
-			return new BukkitMCHorse((Horse) be);
-		}
-		
-		if (be instanceof Pig) {
-			return new BukkitMCPig((Pig) be);
-		}
-		
-    	if(be instanceof Ageable){
-    		return new BukkitMCAgeable(be);
-    	}
-    	
-    	if(be instanceof Boat) {
-			return new BukkitMCBoat((Boat)be);
-    	}
 
-    	if(be instanceof Minecart) {
-    		return new BukkitMCMinecart((Minecart)be);
-    	}
+	public static MCEntity BukkitGetCorrectEntity(Entity concreteEntity) {
+		if (concreteEntity != null) {
+			Class concreteClass = concreteEntity.getClass().getInterfaces()[0];
+			String abstractedClassName = "com.laytonsmith.abstraction.bukkit.entities.BukkitMC" + concreteClass.getSimpleName();
+			Class abstractedClass;
+			try {
+				abstractedClass = Class.forName(abstractedClassName);
+			} catch (ClassNotFoundException exception) {
+				if (concreteClass.getCanonicalName().startsWith("org.bukkit.entity")) {
+					throw new Error("While trying to find the correct entity class for " + concreteClass.getCanonicalName() + ", was unable to find the appropriate implementation (" + abstractedClassName + "). Please alert the developers of this stack trace.");
+				} else {
+					if (concreteEntity instanceof LivingEntity) {
+						return new com.laytonsmith.abstraction.bukkit.entities.BukkitMCUnknownLivingEntity((LivingEntity) concreteEntity);
+					} else {
+						return new com.laytonsmith.abstraction.bukkit.entities.BukkitMCUnknownEntity(concreteEntity);
+					}
+				}
+			}
+			try {
+				return (BukkitMCEntity) abstractedClass.getConstructor(concreteClass).newInstance(concreteEntity);
+			} catch (Exception exception) {
+				throw new Error("While trying to find the correct entity class for " + concreteClass.getCanonicalName() + ", was unable to instanciate or cast to " + abstractedClass.getCanonicalName() + " : " + exception.getMessage().getClass().getCanonicalName() + ", " + exception.getMessage());
+			}
+		} else {
+			return null;
+		}
+	}
 
-    	if(be instanceof Vehicle){
-    		return new BukkitMCVehicle(be);
-    	}
-        
-        if(be instanceof Player){
-            return new BukkitMCPlayer((Player)be);
-        }
-        
-        if(be instanceof HumanEntity){
-            return new BukkitMCHumanEntity((HumanEntity)be);
-        }
-        
-        if(be instanceof LivingEntity){
-            return new BukkitMCLivingEntity(((LivingEntity)be));
-        }
-        
-        throw new Error("While trying to find the correct entity type for " + be.getClass().getName() + ", was unable"
-                + " to find the appropriate implementation. Please alert the developers of this stack trace.");
-    }
-
-    public MCEntity GetCorrectEntity(MCEntity e) {
-
-        Entity be = ((BukkitMCEntity)e).asEntity();
-        return BukkitConvertor.BukkitGetCorrectEntity(be);
-    }
+	public MCEntity GetCorrectEntity(MCEntity entity) {
+		return BukkitGetCorrectEntity((Entity) entity.getHandle());
+	}
 
 	public MCItemMeta GetCorrectMeta(MCItemMeta im) {
 		ItemMeta bim = ((BukkitMCItemMeta) im).asItemMeta();
@@ -308,7 +229,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(radius <= 0){
 			radius = 1;
 		}
-		Entity tempEntity = ((BukkitMCEntity)location.getWorld().spawn(location, MCEntityType.ARROW)).asEntity();
+		Entity tempEntity = (Entity) location.getWorld().spawn(location, MCEntityType.ARROW).getHandle();
 		List<Entity> near = tempEntity.getNearbyEntities(radius, radius, radius);
 		tempEntity.remove();
 		List<MCEntity> entities = new ArrayList<MCEntity>();

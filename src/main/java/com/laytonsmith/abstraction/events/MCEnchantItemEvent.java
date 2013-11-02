@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import java.util.Map;
 
