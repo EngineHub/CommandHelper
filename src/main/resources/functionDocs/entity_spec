@@ -1,4 +1,4 @@
-array {entityID} Returns an associative array which containing all the data of the given entity that are too specific to have its own function. ----
+array {entityID} Returns an associative array containing all the data of the given entity that are too specific to have its own function. ----
 
 {| width="80%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
 |-
