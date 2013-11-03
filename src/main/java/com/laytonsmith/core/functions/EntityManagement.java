@@ -776,7 +776,8 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	//broken
+	//@api
 	public static class set_mob_target extends EntitySetterFunction {
 
 		public String getName() {
@@ -797,7 +798,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			if (le instanceof MCCreature) {
-				if (args[0] instanceof CNull) {
+				if (args[1] instanceof CNull) {
 					((MCCreature) le).setTarget(null);
 				} else {
 					((MCCreature) le).setTarget(Static.getLivingEntity(args[1], t));
