@@ -28,5 +28,5 @@ public enum MCCreatureType {
 	WITCH,
 	WITHER,
 	WOLF,
-	ZOMBiE
+	ZOMBIE
 }
