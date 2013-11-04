@@ -433,6 +433,7 @@ public class ClassDiscovery {
 		classAnnotationCache.clear();
 		fieldAnnotationCache.clear();
 		methodAnnotationCache.clear();
+		dirtyURLs.addAll(urlCache);
 	}
 
 	/**
