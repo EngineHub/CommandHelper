@@ -7,6 +7,7 @@ import com.laytonsmith.database.DB;
 import com.laytonsmith.database.MySQL;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;

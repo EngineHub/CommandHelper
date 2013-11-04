@@ -219,7 +219,9 @@ public class Main {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
 				PersistanceNetwork pn = new PersistanceNetwork(MethodScriptFileLocations.getDefault().getPersistanceConfig(),
-						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistanceDBFile().getCanonicalPath()), options);
+						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistanceDBFile().getCanonicalPath()
+								//This replace is required on Windows.
+								.replace("\\", "/")), options);
 				Map<String[], String> values = pn.getNamespace(new String[]{});
 				for(String [] s : values.keySet()){
 					System.out.println(StringUtils.Join(s, ".") + "=" + values.get(s));
