@@ -4,7 +4,6 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
@@ -13,18 +12,12 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Note;
@@ -33,7 +26,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -322,51 +314,29 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void setRemainingFireTicks(int i) {
         p.setFireTicks(i);
     }
-	
-	private static String versionString = null;
 
     public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-		boolean fallback = false;
-		if(versionString == null){
-			//To prevent us from needing to use the fuzzy name detection in ClassDiscovery,
-			//we can use a heuristic to find the classes we need, and use Class.forName, albeit
-			//dynamically. This prevents us from relying on the ClassDiscovery methods on the
-			//bukkit jar, which may or may not buy us startup time, but is worth a shot.
-			InputStream is = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/org.bukkit/craftbukkit/pom.xml");
-			try {
-				XMLDocument xml = new XMLDocument(is);
-				versionString = xml.getNode("/project/properties/minecraft_version");
-			} catch (Exception ex) {
-				//Hmm. Well, instead of giving up, we'll issue a warning, and let the player know we're
-				//falling back to the old way.
-				ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
-				fallback = true;
-				CHLog.GetLogger().w(CHLog.Tags.META, "Could not use primary method to load dependencies for sudo, falling back now. You may notice some lag. Please report this bug: " + ex.getMessage(), Target.UNKNOWN);
-			}
-			
-		}
         Server server = Bukkit.getServer();
-        Class serverClass;
-		Class nmsMinecraftServerClass;
-		Class playerListClass;
-		if(fallback){
-			serverClass = ClassDiscovery.getDefaultInstance().forFuzzyName("org.bukkit.craftbukkit.*", "CraftServer").loadClass();
-			playerListClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass();
-			nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
-		} else {
-			serverClass = Class.forName("org.bukkit.craftbukkit." + versionString + ".CraftServer");
-			playerListClass = Class.forName("net.minecraft.server." + versionString + ".PlayerList");
-			nmsMinecraftServerClass = Class.forName("net.minecraft.server." + versionString + ".MinecraftServer");
-		}
+
+        Class serverClass = ClassDiscovery.getDefaultInstance().forFuzzyName("org.bukkit.craftbukkit.*", "CraftServer").loadClass();
 
         if (!server.getClass().isAssignableFrom(serverClass)) {
             throw new IllegalStateException("Running server isn't CraftBukkit");
         }
 
-        Set opSet;
-		/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-		opSet = (Set)ReflectionUtils.get(playerListClass, nmsPlayerList, "operators");
+        Set opSet = null;
+		try{
+			//Probably 1.4.5
+			/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
+			/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
+			opSet = (Set) ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "ServerConfigurationManagerAbstract").loadClass(), obcServerConfigurationmanagerAbstract, "operators");
+		} catch(ReflectionUtils.ReflectionException e){
+			//Probably 1.4.6
+			Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
+			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
+			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
+			opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
+		}
 
         // since all Java objects pass by reference, we don't need to set field back to object
         if (value) {

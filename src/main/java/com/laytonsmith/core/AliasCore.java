@@ -355,7 +355,8 @@ public class AliasCore {
 			}
 			StaticLayer.GetConvertor().runShutdownHooks();
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
-			
+			//Install bukkit into the class discovery class
+			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 			if (reloadExtensions) {
 				ExtensionManager.Startup();
 			}

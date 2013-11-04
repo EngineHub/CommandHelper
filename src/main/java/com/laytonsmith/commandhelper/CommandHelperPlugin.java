@@ -110,9 +110,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
-		//This should no longer be needed, since sudo is using a less sophisticated, but hopefully equally
-		//reliable method to find classes. This should shave off a significant amount of time for startup though.
-		//ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 		UpgradeLog upgradeLog = new UpgradeLog(CommandHelperFileLocations.getDefault().getUpgradeLogFile());
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
