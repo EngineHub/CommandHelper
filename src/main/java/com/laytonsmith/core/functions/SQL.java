@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -39,7 +40,6 @@ public class SQL {
 	}
 	
 	@api
-	@hide("Unfinished. Will be unhidden once it is completed.")
 	public static class query extends AbstractFunction {
 
 		@Override
@@ -72,23 +72,10 @@ public class SQL {
 					profile = profiles.getProfileById(args[0].val());
 				}
 				String query = args[1].val();
-				Object[] params = new Object[args.length - 2];
+				Construct[] params = new Construct[args.length - 2];
 				for(int i = 2; i < args.length; i++){
 					int index = i - 2;
-					Construct c = args[i];
-					if(c instanceof CInt){
-						params[index] = ((CInt)c).getInt();
-					} else if(c instanceof CDouble){
-						params[index] = ((CDouble)c).getDouble();
-					} else if(c instanceof CString){
-						params[index] = ((CString)c).val();
-					} else if(c instanceof CNull){
-						params[index] = null;
-					} else if(c instanceof CBoolean){
-						params[index] = ((CBoolean)c).getBoolean();
-					} else {
-						throw new ConfigRuntimeException("Unsupported type passed to " + getName(), ExceptionType.SQLException, t);
-					}
+					params[index] = args[i];
 				}
 				//Parameters are now all parsed into java objects.
 				Connection conn = DriverManager.getConnection(profile.getConnectionString());
@@ -105,13 +92,13 @@ public class SQL {
 					}
 					try {
 						if(type == Types.INTEGER){
-							ps.setInt(i + 1, (Integer)params[i]);
+							ps.setInt(i + 1, (Integer)Static.getInt32(params[i], t));
 						} else if(type == Types.DOUBLE){
-							ps.setDouble(i + 1, (Double)params[i]);
+							ps.setDouble(i + 1, (Double)Static.getDouble(params[i], t));
 						} else if(type == Types.VARCHAR || type == Types.CHAR){
-							ps.setString(i + 1, (String)params[i]);
+							ps.setString(i + 1, (String)params[i].val());
 						} else if(type == Types.BOOLEAN){
-							ps.setBoolean(i + 1, (Boolean)params[i]);
+							ps.setBoolean(i + 1, (Boolean)Static.getBoolean(params[i]));
 						}
 					} catch(ClassCastException ex){
 						throw new ConfigRuntimeException("Could not cast parameter " + (i + 1) + " to "
