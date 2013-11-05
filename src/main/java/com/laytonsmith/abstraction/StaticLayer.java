@@ -4,11 +4,10 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -138,8 +137,11 @@ public final class StaticLayer {
         return convertor.GetCorrectEntity(e);
     }
 	
+	public static MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
+		return convertor.GetNewRecipe(type, result);
+	}
+	
 	public static Convertor GetConvertor(){
 		return convertor;
 	}
-    
 }

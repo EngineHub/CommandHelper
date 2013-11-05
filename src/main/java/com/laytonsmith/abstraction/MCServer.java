@@ -59,6 +59,13 @@ public interface MCServer extends AbstractionObject{
 	public MCMessenger getMessenger();
 
 	public boolean unloadWorld(MCWorld world, boolean save);
+	
+	public boolean addRecipe(MCRecipe recipe);
+	public List<MCRecipe> getRecipesFor(MCItemStack result);
+	public List<MCRecipe> allRecipes();
+	public void clearRecipes();
+	public void resetRecipes();
+	
 
 	public void shutdown();
 }
