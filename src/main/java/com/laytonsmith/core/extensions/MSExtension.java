@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
  *
  * @author Jason Unger <entityreborn@gmail.com>
  */
-public class MSExtension {
+public class MSExtension implements AbstractExtension {
     public MSExtension() {};
         
     // Identity functions
@@ -17,6 +17,7 @@ public class MSExtension {
 	 * Return the identity of this extension.
 	 * @return
 	 */
+	@Override
 	public final String getName() {
         for (Annotation a : getClass().getAnnotations()) {
             if (a instanceof Extension) {
@@ -32,6 +33,7 @@ public class MSExtension {
 	 * Create and return a valid data directory for this extension's use.
 	 * @return
 	 */
+	@Override
 	public File getConfigDir() {
 		File f = new File(CommandHelperFileLocations.getDefault().getExtensionsDirectory(), getName());
 
@@ -47,6 +49,7 @@ public class MSExtension {
 	/**
 	 * Called when server is loading, or during a /reloadaliases call.
 	 */
+	@Override
 	public void onStartup() {};
 
 	/**
@@ -62,6 +65,7 @@ public class MSExtension {
 	 * @param reloadScripts
 	 * @param reloadExtensions
 	 */
+	@Override
 	public void onPreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, 
 					boolean reloadExecutionQueue, boolean reloadPersistanceConfig, 
 					boolean reloadPreferences, boolean reloadProfiler, 
@@ -71,10 +75,12 @@ public class MSExtension {
 	 * Called after the logic in /reloadaliases is called. Won't be called
 	 * if /reloadaliases's help function is called.
 	 */
+	@Override
 	public void onPostReloadAliases() {}
 
 	/**
 	 * Called when server is shutting down, or during a /reloadaliases call.
 	 */
+	@Override
     public void onShutdown() {};
 }

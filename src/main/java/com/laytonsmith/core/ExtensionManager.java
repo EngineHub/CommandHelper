@@ -86,7 +86,7 @@ public class ExtensionManager {
                 for(MSExtension ext : extensions.values()) {
                         try {
                                 ext.onStartup();
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                                 Logger log = Logger.getLogger(ExtensionManager.class.getName());
                                 log.log(Level.SEVERE, ext.getName() + "'s onStartup caused an exception:");
                                 log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
@@ -106,7 +106,7 @@ public class ExtensionManager {
                                         Method m = mm.loadMethod(ClassDiscovery.getDefaultInstance().getDefaultClassLoader(), true);
                                         m.setAccessible(true);
                                         m.invoke(null, (Object[])null);
-                                } catch(Exception e){
+                                } catch(Throwable e){
                                         CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + mm.getDeclaringClass() + "#" + mm.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
                                 }
                         }
@@ -119,7 +119,7 @@ public class ExtensionManager {
                                 for(MSExtension ext : extensions.values()) {
                                         try {
                                                 ext.onShutdown();
-                                        } catch (Exception e) {
+                                        } catch (Throwable e) {
                                                 Logger log = Logger.getLogger(ExtensionManager.class.getName());
                                                 log.log(Level.SEVERE, ext.getName() + "'s onShutdown caused an exception:");
                                                 log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
@@ -136,7 +136,7 @@ public class ExtensionManager {
                                                         Method m = mm.loadMethod(ClassDiscovery.getDefaultInstance().getDefaultClassLoader(), true);
                                                         m.setAccessible(true);
                                                         m.invoke(null);
-                                                } catch(Exception e){
+                                                } catch(Throwable e){
                                                         CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + mm.getDeclaringClass() + "#" + mm.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
                                                 }
                                         }
@@ -154,7 +154,7 @@ public class ExtensionManager {
                                 ext.onPreReloadAliases(reloadGlobals, reloadTimeouts, reloadExecutionQueue, 
                                                 reloadPersistanceConfig, reloadPreferences, 
                                                 reloadProfiler, reloadScripts, reloadExtensions);
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                                 Logger log = Logger.getLogger(ExtensionManager.class.getName());
                                 log.log(Level.SEVERE, ext.getName() + "'s onPreReloadAliases caused an exception:");
                                 log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
@@ -166,7 +166,7 @@ public class ExtensionManager {
                 for(MSExtension ext : extensions.values()) {
                         try {
                                 ext.onPostReloadAliases();
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                                 Logger log = Logger.getLogger(ExtensionManager.class.getName());
                                 log.log(Level.SEVERE, ext.getName() + "'s onPostReloadAliases caused an exception:");
                                 log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
