@@ -11,6 +11,7 @@ import com.laytonsmith.annotations.startup;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.extensions.Extension;
 import com.laytonsmith.core.extensions.MSExtension;
+import com.laytonsmith.core.extensions.AbstractExtension;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -25,7 +26,7 @@ import java.util.logging.Logger;
  * @author Layton
  */
 public class ExtensionManager {
-        private static final Map<String, MSExtension> extensions = new HashMap<String, MSExtension>();
+        private static final Map<String, Extension> extensions = new HashMap<String, Extension>();
 
         /**
          * Initializes the extension manager. This operation is not necessarily required,
@@ -51,25 +52,23 @@ public class ExtensionManager {
                                 }
                         }
                 }
-                
-                for (ClassMirror<MSExtension> extmirror : cd.getClassesWithAnnotationThatExtend(Extension.class, MSExtension.class)) {
-                        MSExtension ext = null;
+				
+                for (ClassMirror<AbstractExtension> extmirror : cd.getClassesWithAnnotationThatExtend(MSExtension.class, AbstractExtension.class)) {			
+                        Extension ext;
                         
-                        Class<MSExtension> extcls = extmirror.loadClass(dcl, true);
+                        Class<AbstractExtension> extcls = extmirror.loadClass(dcl, true);				
                         try {
                                 ext = extcls.newInstance();
                         } catch (InstantiationException ex) {
                                 //Error, but skip this one, don't throw an exception ourselves, just log it.
                                 Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, 
                                                 "Could not instantiate " + extcls.getName() + ": " + ex.getMessage());
+								continue;
                         } catch (IllegalAccessException ex) {
                                 //Error, but skip this one, don't throw an exception ourselves, just log it.
                                 Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, 
                                                 "Could not instantiate " + extcls.getName() + ": " + ex.getMessage());
-                        }
-                        
-                        if (ext == null) {
-                                continue;
+								continue;
                         }
                         
                         extensions.put(ext.getName(), ext);
@@ -83,7 +82,7 @@ public class ExtensionManager {
          * It registers its own shutdown hook.
          */
         public static void Startup(){
-                for(MSExtension ext : extensions.values()) {
+                for(Extension ext : extensions.values()) {
                         try {
                                 ext.onStartup();
                         } catch (Throwable e) {
@@ -116,7 +115,7 @@ public class ExtensionManager {
 
                         @Override
                         public void run() {
-                                for(MSExtension ext : extensions.values()) {
+                                for(Extension ext : extensions.values()) {
                                         try {
                                                 ext.onShutdown();
                                         } catch (Throwable e) {
@@ -149,7 +148,7 @@ public class ExtensionManager {
                         boolean reloadExecutionQueue, boolean reloadPersistanceConfig, 
                         boolean reloadPreferences, boolean reloadProfiler, 
                         boolean reloadScripts, boolean reloadExtensions) {
-                for(MSExtension ext : extensions.values()) {
+                for(Extension ext : extensions.values()) {
                         try {
                                 ext.onPreReloadAliases(reloadGlobals, reloadTimeouts, reloadExecutionQueue, 
                                                 reloadPersistanceConfig, reloadPreferences, 
@@ -163,7 +162,7 @@ public class ExtensionManager {
         }
         
         public static void PostReloadAliases() {
-                for(MSExtension ext : extensions.values()) {
+                for(Extension ext : extensions.values()) {
                         try {
                                 ext.onPostReloadAliases();
                         } catch (Throwable e) {

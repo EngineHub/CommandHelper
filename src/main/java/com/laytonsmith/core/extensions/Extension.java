@@ -1,16 +1,56 @@
 package com.laytonsmith.core.extensions;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.File;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Extension {
+/**
+ *
+ * @author Jason Unger <entityreborn@gmail.com>
+ */
+public interface Extension {
+
 	/**
-	 * The name of the extension.
-	 * @return String
+	 * Create and return a valid data directory for this extension's use.
+	 * @return
 	 */
-	String value();
+	File getConfigDir();
+
+	// Identity functions
+	/**
+	 * Return the identity of this extension.
+	 * @return
+	 */
+	String getName();
+
+	/**
+	 * Called after the logic in /reloadaliases is called. Won't be called
+	 * if /reloadaliases's help function is called.
+	 */
+	void onPostReloadAliases();
+
+	/**
+	 * Called just before the logic in /reloadaliases is called. Won't be called
+	 * if /reloadaliases's help function is called.
+	 *
+	 * @param reloadGlobals
+	 * @param reloadTimeouts
+	 * @param reloadExecutionQueue
+	 * @param reloadPersistanceConfig
+	 * @param reloadPreferences
+	 * @param reloadProfiler
+	 * @param reloadScripts
+	 * @param reloadExtensions
+	 */
+	void onPreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, boolean reloadExecutionQueue, boolean reloadPersistanceConfig, boolean reloadPreferences, boolean reloadProfiler, boolean reloadScripts, boolean reloadExtensions);
+
+	/**
+	 * Called when server is shutting down, or during a /reloadaliases call.
+	 */
+	void onShutdown();
+
+	// Lifetime functions
+	/**
+	 * Called when server is loading, or during a /reloadaliases call.
+	 */
+	void onStartup();
+    
 }

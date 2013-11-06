@@ -1,42 +1,61 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package com.laytonsmith.core.extensions;
 
+import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import java.io.File;
+import java.lang.annotation.Annotation;
 
 /**
  *
  * @author Jason Unger <entityreborn@gmail.com>
  */
-public interface AbstractExtension {
+public abstract class AbstractExtension implements Extension {
+    public AbstractExtension() {};
+        
+    // Identity functions
+
+	/**
+	 * Return the identity of this extension.
+	 * @return
+	 */
+	@Override
+	public final String getName() {
+        for (Annotation a : getClass().getAnnotations()) {
+            if (a instanceof MSExtension) {
+                MSExtension e = (MSExtension)a;
+                return e.value();
+            }
+        }
+        
+        return "<unknown>";
+    }
 
 	/**
 	 * Create and return a valid data directory for this extension's use.
 	 * @return
 	 */
-	File getConfigDir();
+	@Override
+	public File getConfigDir() {
+		File f = new File(CommandHelperFileLocations.getDefault().getExtensionsDirectory(), getName());
 
-	// Identity functions
-	/**
-	 * Return the identity of this extension.
-	 * @return
-	 */
-	String getName();
+		if (!f.exists()) {
+				f.mkdirs();
+		}
+                
+        return f;
+    }
+    
+	// Lifetime functions
 
 	/**
-	 * Called after the logic in /reloadaliases is called. Won't be called
-	 * if /reloadaliases's help function is called.
+	 * Called when server is loading, or during a /reloadaliases call.
 	 */
-	void onPostReloadAliases();
+	@Override
+	public void onStartup() {};
 
 	/**
 	 * Called just before the logic in /reloadaliases is called. Won't be called
 	 * if /reloadaliases's help function is called.
-	 *
+	 * 
 	 * @param reloadGlobals
 	 * @param reloadTimeouts
 	 * @param reloadExecutionQueue
@@ -46,17 +65,22 @@ public interface AbstractExtension {
 	 * @param reloadScripts
 	 * @param reloadExtensions
 	 */
-	void onPreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, boolean reloadExecutionQueue, boolean reloadPersistanceConfig, boolean reloadPreferences, boolean reloadProfiler, boolean reloadScripts, boolean reloadExtensions);
+	@Override
+	public void onPreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, 
+					boolean reloadExecutionQueue, boolean reloadPersistanceConfig, 
+					boolean reloadPreferences, boolean reloadProfiler, 
+					boolean reloadScripts, boolean reloadExtensions) {}
+
+	/**
+	 * Called after the logic in /reloadaliases is called. Won't be called
+	 * if /reloadaliases's help function is called.
+	 */
+	@Override
+	public void onPostReloadAliases() {}
 
 	/**
 	 * Called when server is shutting down, or during a /reloadaliases call.
 	 */
-	void onShutdown();
-
-	// Lifetime functions
-	/**
-	 * Called when server is loading, or during a /reloadaliases call.
-	 */
-	void onStartup();
-    
+	@Override
+    public void onShutdown() {};
 }
