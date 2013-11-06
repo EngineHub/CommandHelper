@@ -1,7 +1,6 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -23,7 +22,6 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
-import com.laytonsmith.core.packetjumper.PacketJumper;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
@@ -39,7 +37,6 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
-import org.bukkit.Server;
 
 /**
  * This class contains all the handling code. It only deals with built-in Java
@@ -296,6 +293,7 @@ public class AliasCore {
 		boolean reloadProfiler = true;
 		boolean reloadScripts = true;
 		boolean reloadExtensions = true;
+		
 		if (settings != null) {
 			ArgumentParser.ArgumentParserResults results;
 			try {
@@ -353,10 +351,15 @@ public class AliasCore {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
 						+ CommandHelperFileLocations.getDefault().getProfilerConfigFile().getName() + " you should set this to false, except during development.", Target.UNKNOWN);
 			}
+			
+			// Allow new-style extensions know we are about to reload aliases.
+			ExtensionManager.PreReloadAliases(reloadGlobals, reloadTimeouts, 
+				reloadExecutionQueue, reloadPersistanceConfig, reloadPreferences,
+				reloadProfiler, reloadScripts, reloadExtensions);
+ 
 			StaticLayer.GetConvertor().runShutdownHooks();
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
-			//Install bukkit into the class discovery class
-			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
+			
 			if (reloadExtensions) {
 				ExtensionManager.Startup();
 			}
@@ -469,6 +472,8 @@ public class AliasCore {
 						+ " errors will occur, unless you try to use an Economy function.");
 			}
 		}
+		
+		ExtensionManager.PostReloadAliases();
 	}
 
 	/**
