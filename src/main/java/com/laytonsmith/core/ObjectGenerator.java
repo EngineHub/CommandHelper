@@ -777,11 +777,11 @@ public class ObjectGenerator {
 				result = item(recipe.get("result"), t);
 				
 				if (recipe.containsKey("type") && (recipe.get("type") instanceof CString)) {
-					String recipeType = recipe.get("type").val();
-					recipeType = recipeType.toUpperCase();
-					
-					if (recipeType.equals("SHAPED")) {
-						MCRecipe ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPED, result);
+					MCRecipeType recipeType = MCRecipeType.valueOf(recipe.get("type").val());
+					MCRecipe ret;
+					switch(recipeType) {
+						case SHAPED:
+						ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPED, result);
 						String[] shape = {"AAA", "AAA", "AAA"};
 						
 						if(recipe.containsKey("shape") && (recipe.get("shape") instanceof CArray)) {
@@ -836,9 +836,9 @@ public class ObjectGenerator {
 							throw new ConfigRuntimeException("Could not find recipe ingredient array.", ExceptionType.FormatException, t);
 						}
 						return ret;
-						
-					} else if(recipeType.equals("SHAPELESS")) {
-						MCRecipe ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPELESS, result);
+							
+						case SHAPELESS:
+						ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPELESS, result);
 						
 						if(recipe.containsKey("ingredients") && (recipe.get("ingredients") instanceof CArray)) {
 							CArray ingredients = (CArray) recipe.get("ingredients");
@@ -867,9 +867,9 @@ public class ObjectGenerator {
 							throw new ConfigRuntimeException("Could not find recipe ingredient array.", ExceptionType.FormatException, t);
 						}
 						return ret;
-						
-					} else if(recipeType.equals("FURNACE")) {
-						MCRecipe ret = StaticLayer.GetNewRecipe(MCRecipeType.FURNACE, result);
+							
+						case FURNACE:
+						ret = StaticLayer.GetNewRecipe(MCRecipeType.FURNACE, result);
 						
 						if (recipe.containsKey("input") && (recipe.get("input") instanceof CArray)) {
 							((MCFurnaceRecipe) ret).setInput(item(recipe.get("input"), t));
@@ -877,7 +877,7 @@ public class ObjectGenerator {
 							throw new ConfigRuntimeException("Could not find input item array.", ExceptionType.FormatException, t);
 						}
 						return ret;
-					} else {
+					default:
 						throw new ConfigRuntimeException("Could not find valid recipe type.", ExceptionType.FormatException, t);
 					}
 				} else {
