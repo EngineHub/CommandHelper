@@ -5,7 +5,6 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.events.*;
@@ -715,7 +714,7 @@ public class BlockEvents {
 
 			map.put("item", ObjectGenerator.GetGenerator().item(event.getItem(), Target.UNKNOWN));
 
-			map.put("velocity", ObjectGenerator.GetGenerator().velocity(event.getVelocity(), Target.UNKNOWN));
+			map.put("velocity", ObjectGenerator.GetGenerator().velocity(event.getVelocity()));
 
 			CArray location = ObjectGenerator.GetGenerator()
 					.location(StaticLayer.GetLocation(blk.getWorld(), blk.getX(), blk.getY(), blk.getZ()));

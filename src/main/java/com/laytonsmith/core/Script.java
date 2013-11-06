@@ -6,7 +6,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Construct.ConstructType;

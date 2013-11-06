@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.abstraction.events.MCPluginDisableEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -105,5 +107,60 @@ public class ServerEvents {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-	}	
+	}
+
+	@api
+	public static class plugin_disable extends AbstractEvent {
+
+		public String getName() {
+			return "plugin_disable";
+		}
+
+		public Driver driver() {
+			return Driver.PLUGIN_DISABLE;
+		}
+
+		public String docs() {
+			return "{plugin: <macro> The plugin which will be disabled}"
+					+ " Called when a plugin is disabled (due to a server reload, server shutdown, or a command)."
+					+ " Note that /reloadalias will not fire this event, because this command does not reload"
+					+ " the entire CommandHelper plugin, but only the script."
+					+ " {plugin: The plugin which will be disabled}"
+					+ " {}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPluginDisableEvent) {
+				MCPluginDisableEvent pde = (MCPluginDisableEvent) event;
+				Prefilters.match(prefilter, "plugin", pde.getPlugin().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPluginDisableEvent) {
+				MCPluginDisableEvent pde = (MCPluginDisableEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				mapEvent.put("plugin", new CString(pde.getPlugin().getName(), Target.UNKNOWN));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to PluginDisableEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
 }

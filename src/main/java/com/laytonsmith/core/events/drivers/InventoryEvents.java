@@ -3,7 +3,7 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEnchantment;
-import com.laytonsmith.abstraction.MCHumanEntity;
+import com.laytonsmith.abstraction.entities.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;

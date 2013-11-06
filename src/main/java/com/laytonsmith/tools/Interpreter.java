@@ -11,7 +11,7 @@ import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEnchantment;
-import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemMeta;
@@ -21,8 +21,9 @@ import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCVector;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
@@ -348,6 +349,10 @@ public class Interpreter {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		public MCVector GetVelocity(double x, double y, double z) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
 		public Class GetServerEventMixin() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
@@ -365,6 +370,10 @@ public class Interpreter {
 		}
 
 		public MCItemStack GetItemStack(int type, int qty) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public MCMaterial GetMaterial(String name) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
@@ -481,7 +490,7 @@ public class Interpreter {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
-		public MCMaterial getMaterial(int id) {
+		public MCMaterial GetMaterial(int id) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 

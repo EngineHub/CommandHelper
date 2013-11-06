@@ -1,7 +1,6 @@
-
-
 package com.laytonsmith.core;
 
+import com.laytonsmith.abstraction.entities.MCLivingEntity;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.core.constructs.*;
@@ -417,7 +416,7 @@ public class ObjectGenerator {
 	}
 	
 	public MCItemMeta itemMeta(Construct c, int i, Target t) {
-		MCItemMeta meta = Static.getServer().getItemFactory().getItemMeta(StaticLayer.GetConvertor().getMaterial(i));
+		MCItemMeta meta = Static.getServer().getItemFactory().getItemMeta(StaticLayer.GetConvertor().GetMaterial(i));
 		if (c instanceof CNull) {
 			return meta;
 		}
@@ -613,27 +612,28 @@ public class ObjectGenerator {
 		}
 	}
 	
-	public CArray velocity(MCEntity.Velocity v, Target t) {
+	public CArray velocity(MCVector v) {
 		double x,y,z,mag;
-		x = y = z = mag = 0;
 		if (v != null) {
-			x = v.x;
-			y = v.y;
-			z = v.z;
-			mag = v.magnitude;
+			x = v.getX();
+			y = v.getY();
+			z = v.getZ();
+			mag = v.length();
+		} else {
+			x = y = z = mag = 0;
 		}
-		CArray ret = CArray.GetAssociativeArray(t);
-		ret.set("magnitude", new CDouble(mag, t), t);
-		ret.set("x", new CDouble(x, t), t);
-		ret.set("y", new CDouble(y, t), t);
-		ret.set("z", new CDouble(z, t), t);
+		CArray ret = CArray.GetAssociativeArray(Target.UNKNOWN);
+		ret.set("magnitude", new CDouble(mag, Target.UNKNOWN), Target.UNKNOWN);
+		ret.set("x", new CDouble(x, Target.UNKNOWN), Target.UNKNOWN);
+		ret.set("y", new CDouble(y, Target.UNKNOWN), Target.UNKNOWN);
+		ret.set("z", new CDouble(z, Target.UNKNOWN), Target.UNKNOWN);
 		return ret;
 	}
 
-	public MCEntity.Velocity velocity(Construct c, Target t) {
+	public MCVector velocity(Construct c, Target t) {
 		CArray va;
-		double x, y, z, mag;
-		x = y = z = mag = 0;
+		double x, y, z;
+		x = y = z = 0;
 		if (c instanceof CArray) {
 			va = (CArray) c;
 			if (va.containsKey("x")) {
@@ -660,7 +660,7 @@ public class ObjectGenerator {
 					x = Static.getDouble(va.get(0), t);
 				}
 			}
-			return new MCEntity.Velocity(mag, x, y, z);
+			return StaticLayer.GetVelocity(x, y, z);
 		} else {
 			throw new Exceptions.FormatException("Expected an array but recieved " + c, t);
 		}
@@ -767,5 +767,17 @@ public class ObjectGenerator {
 			ret.set("ingredients", imap, t);
 		}
 		return ret;
+	}
+
+	public MCMaterial material(String name, Target t) {
+		try {
+			return StaticLayer.GetMaterial(name.toUpperCase());
+		} catch (IllegalArgumentException exception) {
+			throw new ConfigRuntimeException("Unknown material type: " + name, ExceptionType.FormatException, t);
+		}
+	}
+
+	public MCMaterial material(Construct name, Target t) {
+		return material(name.val(), t);
 	}
 }

@@ -206,7 +206,7 @@ public final class EventUtils {
                 } catch (FunctionReturnException ex){
                     //We also know how to deal with this
                 } catch (EventException ex) {
-                    throw new ConfigRuntimeException(ex.getMessage(), null, Target.UNKNOWN);
+                    throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), Target.UNKNOWN);
                 } catch(ConfigRuntimeException ex){
                     //An exception has bubbled all the way up
                     ConfigRuntimeException.React(ex, b.getEnvironment());

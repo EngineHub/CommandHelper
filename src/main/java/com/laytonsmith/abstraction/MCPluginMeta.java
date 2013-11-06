@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import java.util.ArrayList;
 import java.util.List;
 

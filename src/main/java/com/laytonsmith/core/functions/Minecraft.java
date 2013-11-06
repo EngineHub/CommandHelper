@@ -1,15 +1,22 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.entities.MCItem;
+import com.laytonsmith.abstraction.entities.MCTameable;
+import com.laytonsmith.abstraction.MCAnimalTamer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCLivingEntity;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
+import com.laytonsmith.abstraction.enums.MCHorseColor;
+import com.laytonsmith.abstraction.enums.MCHorseStyle;
+import com.laytonsmith.abstraction.enums.MCHorseVariant;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCPigType;
@@ -292,9 +299,9 @@ public class Minecraft {
 					+ " for Endermen, they will hold that material, otherwise they will hold nothing. Creepers can be set to " 
 					+ StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + ", wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ") 
 					+ ", and pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + "."
-					+ " Horses can have three different subTypes, the variant: " + StringUtils.Join(MCHorse.MCHorseVariant.values(), ", ", ", or ", " or ") + ","
-					+ " the color: " + StringUtils.Join(MCHorse.MCHorseColor.values(), ", ", ", or ", " or ") + ","
-					+ " and the pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + ".";
+					+ " Horses can have three different subTypes, the variant: " + StringUtils.Join(MCHorseVariant.values(), ", ", ", or ", " or ") + ","
+					+ " the color: " + StringUtils.Join(MCHorseColor.values(), ", ", ", or ", " or ") + ","
+					+ " and the style: " + StringUtils.Join(MCHorseStyle.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		public ExceptionType[] thrown() {
@@ -1297,7 +1304,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
+			MCMaterial i = StaticLayer.GetConvertor().GetMaterial(Static.getInt32(args[0], t));
 			CArray ret = new CArray(t);
 			ret.set("maxStacksize", new CInt(i.getMaxStackSize(), t), t);
 			ret.set("maxDurability", new CInt(i.getMaxDurability(), t), t);
@@ -1439,7 +1446,7 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "nothing {} Shuts down the server.";
+			return "nothing {} Kills the execution of the script and shuts down the server.";
 		}
 
 		public Version since() {

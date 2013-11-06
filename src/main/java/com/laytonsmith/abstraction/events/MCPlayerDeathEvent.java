@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCEntity;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 
 /**
  *

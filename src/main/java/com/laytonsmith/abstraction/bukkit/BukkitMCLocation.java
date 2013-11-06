@@ -1,11 +1,9 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCChunk;
-import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCVector;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
@@ -16,136 +14,125 @@ import org.bukkit.Location;
  * @author layton
  */
 public class BukkitMCLocation implements MCLocation {
-    Location l;
+
+    protected Location location;
+
     public BukkitMCLocation(Location l) {
-        this.l = l;
+        this.location = l;
     }
 
-    public BukkitMCLocation(AbstractionObject a) {
-        if (a instanceof MCLocation) {
-            this.l = ((Location)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
+    public BukkitMCLocation(AbstractionObject ao) {
+        this((Location) ao.getHandle());
     }
 
-    public Object getHandle() {
-        return l;
+	@Override
+    public Location getHandle() {
+        return location;
     }
 
     public double getX() {
-        return l.getX();
+        return location.getX();
     }
 
     public double getY() {
-        return l.getY();
+        return location.getY();
     }
 
     public double getZ() {
-        return l.getZ();
+        return location.getZ();
     }
 
 	public double distance(MCLocation o) {
-		return l.distance(((BukkitMCLocation)o)._Location());
+		return location.distance((Location) o.getHandle());
 	}
 	
 	public double distanceSquared(MCLocation o) {
-		return l.distanceSquared(((BukkitMCLocation)o)._Location());
+		return location.distanceSquared((Location) o.getHandle());
 	}
 
     public MCWorld getWorld() {
-        if (l.getWorld() == null) {
+        if (location.getWorld() == null) {
             return null;
         }
-        return new BukkitMCWorld(l.getWorld());
+        return new BukkitMCWorld(location.getWorld());
     }
 
     public float getYaw() {
-        return l.getYaw();
+        return location.getYaw();
     }
 
     public float getPitch() {
-        return l.getPitch();
+        return location.getPitch();
     }
 
     public int getBlockX() {
-        return l.getBlockX();
+        return location.getBlockX();
     }
 
     public int getBlockY() {
-        return l.getBlockY();
+        return location.getBlockY();
     }
 
     public int getBlockZ() {
-        return l.getBlockZ();
+        return location.getBlockZ();
     }
 
     public MCBlock getBlock() {
-        if (l == null || l.getBlock() == null) {
+        if (location == null || location.getBlock() == null) {
             return null;
         }
-        return new BukkitMCBlock(l.getBlock());
-    }
-
-    public Location _Location() {
-        return l;
+        return new BukkitMCBlock(location.getBlock());
     }
 
 	public void setX(double x) {
-		l.setX(x);
+		location.setX(x);
 	}
 
 	public void setY(double y) {
-		l.setY(y);
+		location.setY(y);
 	}
 
 	public void setZ(double z) {
-		l.setZ(z);
+		location.setZ(z);
 	}
 
     public void setPitch(float p) {
-        l.setPitch(p);
+        location.setPitch(p);
     }
 
     public void setYaw(float y) {
-        l.setYaw(y);
+        location.setYaw(y);
     }
 
     @Override
     public MCLocation clone() {
-        return new BukkitMCLocation(l.clone());
-    }
-
-    public Location asLocation() {
-        return l;
+        return new BukkitMCLocation(location.clone());
     }
 
 	@Override
 	public String toString() {
-		return l.toString();
+		return location.toString();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCLocation?l.equals(((BukkitMCLocation)obj).l):false);
+		return (obj instanceof BukkitMCLocation?location.equals(((BukkitMCLocation)obj).location):false);
 	}
 
 	@Override
 	public int hashCode() {
-		return l.hashCode();
+		return location.hashCode();
 	}
 
 	public void breakBlock() {
-		l.getBlock().breakNaturally();
+		location.getBlock().breakNaturally();
 	}
 
-	public Velocity getDirection() {
-		return new Velocity(1, l.getDirection().getX(), l.getDirection().getY(), l.getDirection().getZ());
+	public MCVector getDirection() {
+		return new BukkitMCVector(location.getDirection());
 	}
 
 	public MCChunk getChunk() {
-		return new BukkitMCChunk(l.getChunk());
+		return new BukkitMCChunk(location.getChunk());
 	}
-
-
 }

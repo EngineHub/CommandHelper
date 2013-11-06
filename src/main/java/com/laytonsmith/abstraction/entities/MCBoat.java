@@ -1,8 +1,7 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCVehicle;
-
 public interface MCBoat extends MCVehicle {
+
 	public double getMaxSpeed();
 	public void setMaxSpeed(double speed);
 	public double getOccupiedDeclaration();

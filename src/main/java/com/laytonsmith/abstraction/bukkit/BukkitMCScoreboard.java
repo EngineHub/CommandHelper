@@ -18,8 +18,14 @@ import org.bukkit.scoreboard.Team;
 public class BukkitMCScoreboard implements MCScoreboard {
 
 	Scoreboard s;
+
 	public BukkitMCScoreboard(Scoreboard sb) {
 		s = sb;
+	}
+
+	@Override
+	public Scoreboard getHandle() {
+		return s;
 	}
 
 	public void clearSlot(MCDisplaySlot slot) {

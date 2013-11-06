@@ -2,7 +2,7 @@ package com.laytonsmith.core.environments;
 
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.core.events.BoundEvent;
 
 /**

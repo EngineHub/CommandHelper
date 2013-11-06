@@ -66,8 +66,7 @@ public class ExtensionDocGen {
 		}
 		for (Entry<Class, ArrayList<Class<Function>>> entry : functionEntryList) {
 			Class enclosingClass = entry.getKey();
-			String[] split = enclosingClass.getName().split("\\.");
-			fdocs.append("## ").append(split[split.length - 1]).append(nl);
+			fdocs.append("## ").append(enclosingClass.getSimpleName()).append(nl);
 			try {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();
@@ -119,8 +118,7 @@ public class ExtensionDocGen {
 		}
 		for (Entry<Class, ArrayList<Class<Event>>> entry : eventEntryList) {
 			Class enclosingClass = entry.getKey();
-			String[] split = enclosingClass.getName().split("\\.");
-			fdocs.append("## ").append(split[split.length - 1]).append(nl);
+			fdocs.append("## ").append(enclosingClass.getSimpleName()).append(nl);
 			try {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();

@@ -5,7 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -99,10 +99,7 @@ public class Environment {
 				}
 			}
 			if (world != null) {
-				w = Static.getServer().getWorld(world);
-			}
-			if (w == null) {
-				throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
+				w = Static.getWorld(world, t);
 			}
 			x = java.lang.Math.floor(x);
 			y = java.lang.Math.floor(y);
@@ -187,10 +184,7 @@ public class Environment {
 				}
 			}
 			if (world != null) {
-				w = Static.getServer().getWorld(world);
-			}
-			if (w == null) {
-				throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
+				w = Static.getWorld(world, t);
 			}
 			x = java.lang.Math.floor(x);
 			y = java.lang.Math.floor(y);
@@ -509,7 +503,7 @@ public class Environment {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
 				if (args.length != 3) {
-					w = Static.getServer().getWorld(args[2].val());
+					w = Static.getWorld(args[2], t);
 				}
 			}
 			MCBiomeType bt;
@@ -576,7 +570,7 @@ public class Environment {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
 				if (args.length != 2) {
-					w = Static.getServer().getWorld(args[2].val());
+					w = Static.getWorld(args[2], t);
 				}
 			}
 			if (w == null) {
@@ -646,10 +640,7 @@ public class Environment {
 				}
 			}
 			if (world != null) {
-				w = Static.getServer().getWorld(world);
-			}
-			if (w == null) {
-				throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
+				w = Static.getWorld(world, t);
 			}
 			return ObjectGenerator.GetGenerator().location(w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z)).getLocation(), false);
 		}

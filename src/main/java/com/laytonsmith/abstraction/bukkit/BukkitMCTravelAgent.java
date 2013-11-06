@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCTravelAgent;
+import org.bukkit.Location;
 import org.bukkit.TravelAgent;
 
 /**
@@ -37,15 +38,15 @@ public class BukkitMCTravelAgent implements MCTravelAgent {
 	}
 
 	public boolean createPortal(MCLocation location) {
-		return a.createPortal(((BukkitMCLocation)location).asLocation());
+		return a.createPortal((Location) location.getHandle());
 	}
 
 	public MCLocation findOrCreate(MCLocation location) {
-		return new BukkitMCLocation(a.findOrCreate(((BukkitMCLocation)location).asLocation()));
+		return new BukkitMCLocation(a.findOrCreate((Location) location.getHandle()));
 	}
 
 	public MCLocation findPortal(MCLocation location) {
-		return new BukkitMCLocation(a.findPortal(((BukkitMCLocation)location).asLocation()));
+		return new BukkitMCLocation(a.findPortal((Location) location.getHandle()));
 	}
 
 	public boolean getCanCreatePortal() {

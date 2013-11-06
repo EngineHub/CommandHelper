@@ -1,39 +1,41 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.bukkit.BukkitMCVehicle;
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.entities.MCMinecart;
 import org.bukkit.entity.Minecart;
 
-public class BukkitMCMinecart extends BukkitMCVehicle
-		implements MCMinecart {
+public abstract class BukkitMCMinecart extends BukkitMCVehicle implements MCMinecart {
 
-	Minecart m;
-	public BukkitMCMinecart(Minecart e) {
-		super(e);
-		this.m = e;
+	public BukkitMCMinecart(Minecart minecart) {
+		super(minecart);
+	}
+
+	@Override
+	public Minecart getHandle() {
+		return (Minecart) metadatable;
 	}
 
 	public void setDamage(double damage) {
-		m.setDamage(damage);
+		getHandle().setDamage(damage);
 	}
 
 	public double getDamage() {
-		return m.getDamage();
+		return getHandle().getDamage();
 	}
 
 	public double getMaxSpeed() {
-		return m.getMaxSpeed();
+		return getHandle().getMaxSpeed();
 	}
 
 	public void setMaxSpeed(double speed) {
-		m.setMaxSpeed(speed);
+		getHandle().setMaxSpeed(speed);
 	}
 
 	public boolean isSlowWhenEmpty() {
-		return m.isSlowWhenEmpty();
+		return getHandle().isSlowWhenEmpty();
 	}
 
 	public void setSlowWhenEmpty(boolean slow) {
-		m.setSlowWhenEmpty(slow);
+		getHandle().setSlowWhenEmpty(slow);
 	}
 }

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
@@ -114,10 +115,7 @@ public class PlayerManagement {
 					players.push(new CString(player.getName(), t));
 				}
 			} else {
-				MCWorld world = Static.getServer().getWorld(args[0].val());
-				if (world == null) {
-					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
-				}
+				MCWorld world = Static.getWorld(args[0], t);
 				for (MCPlayer player : world.getPlayers()) {
 					players.push(new CString(player.getName(), t));
 				}
@@ -247,14 +245,12 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCPlayer p;
+			MCLocation location;
 			if (args.length == 0) {
-				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				Static.AssertPlayerNonNull(p, t);
+				location = Static.GetPlayer(env, t).getLocation();
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				location = Static.GetPlayer(args[0], t).getLocation();
 			}
-			MCLocation location = p.getLocation();
 			location.setY(location.getY() - 1);
 			return ObjectGenerator.GetGenerator().location(location);
 		}
@@ -316,63 +312,22 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			String MCPlayer = null;
-			double x;
-			double y;
-			double z;
-			MCPlayer m = null;
-			MCLocation l = null;
-			if (args.length == 1) {
-				if (args[0] instanceof CArray) {
-					CArray ca = (CArray) args[0];
-					l = ObjectGenerator.GetGenerator().location(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), t);
-					x = Static.getNumber(ca.get(0, t), t);
-					y = Static.getNumber(ca.get(1, t), t);
-					z = Static.getNumber(ca.get(2, t), t);
-					if (p instanceof MCPlayer) {
-						m = ((MCPlayer) p);
-					}
-
-				} else {
-					throw new ConfigRuntimeException("Expecting an array at parameter 1 of set_ploc",
-							ExceptionType.CastException, t);
-				}
-			} else if (args.length == 2) {
-				if (args[1] instanceof CArray) {
-					CArray ca = (CArray) args[1];
-					MCPlayer = args[0].val();
-					l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(MCPlayer, t).getWorld(), t);
-					x = l.getX();
-					y = l.getY();
-					z = l.getZ();
-				} else {
-					throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_ploc",
-							ExceptionType.CastException, t);
-				}
-			} else if (args.length == 3) {
-				if (p instanceof MCPlayer) {
-					m = (MCPlayer) p;
-				}
-				x = Static.getNumber(args[0], t);
-				y = Static.getNumber(args[1], t);
-				z = Static.getNumber(args[2], t);
-				l = m.getLocation();
+			MCPlayer player;
+			int offset;
+			if (args.length == 2 || args.length == 4) {
+				player = Static.GetPlayer(args[0], t);
+				offset = 1;
 			} else {
-				MCPlayer = args[0].val();
-				x = Static.getNumber(args[1], t);
-				y = Static.getNumber(args[2], t);
-				z = Static.getNumber(args[3], t);
-				l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer, t).getWorld(), x, y, z, 0, 0);
+				player = Static.GetPlayer(env, t);
+				offset = 0;
 			}
-			if (m == null && MCPlayer != null) {
-				m = Static.GetPlayer(MCPlayer, t);
+			MCLocation location;
+			if (args.length == 4) {
+				location = StaticLayer.GetLocation(player.getWorld(), Static.getNumber(args[offset], t), Static.getNumber(args[offset + 1], t), Static.getNumber(args[offset + 2], t));
+			} else {
+				location = ObjectGenerator.GetGenerator().location(args[offset], player.getWorld(), t);
 			}
-			Static.AssertPlayerNonNull(m, t);
-			if (!l.getWorld().exists()) {
-				throw new ConfigRuntimeException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
-			}
-			return new CBoolean(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), t);
+			return new CBoolean(player.teleport(location), t);
 		}
 	}
 
@@ -2335,7 +2290,7 @@ public class PlayerManagement {
 			return new CDouble(((double) m.getFlySpeed()), t);
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pisop extends AbstractFunction {
 
@@ -2375,6 +2330,52 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			return new CBoolean(m.isOp(), t);
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class psetop extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer player;
+			boolean state;
+			if (args.length == 1) {
+				player = Static.GetPlayer(environment, t);
+				state = Static.getBoolean(args[0]);
+			} else {
+				player = Static.GetPlayer(args[0], t);
+				state = Static.getBoolean(args[1]);
+			}
+			player.setOp(state);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "psetop";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "string {[player], status} Sets whether or not a player has operator status. If no player is specified the player running the script is given.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -3049,17 +3050,11 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				return ObjectGenerator.GetGenerator().velocity(Static.GetPlayer(args[0], t).getVelocity());
+			} else {
+				return ObjectGenerator.GetGenerator().velocity(Static.GetPlayer(environment, t).getVelocity());
 			}
-			CArray vector = CArray.GetAssociativeArray(t);
-			MCPlayer.Velocity velocity = p.getVelocity();
-			vector.set("magnitude", new CDouble(velocity.magnitude, t), t);
-			vector.set("x", new CDouble(velocity.x, t), t);
-			vector.set("y", new CDouble(velocity.y, t), t);
-			vector.set("z", new CDouble(velocity.z, t), t);
-			return vector;
 		}
 
 		public CHVersion since() {
@@ -3071,7 +3066,7 @@ public class PlayerManagement {
 	public static class set_pvelocity extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException, ExceptionType.RangeException};
 		}
 
 		public boolean isRestricted() {
@@ -3083,52 +3078,27 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			double x;
-			double y;
-			double z;
-			switch (args.length) {
-				case 1:
-				case 2: {
-					int offset = 0;
-					if (args.length == 2) {
-						offset = 1;
-						p = Static.GetPlayer(args[0], t);
-					}
-					if (args[offset] instanceof CArray) {
-						MCLocation l = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
-						x = l.getX();
-						y = l.getY();
-						z = l.getZ();
-					} else {
-						throw new ConfigRuntimeException("Expecting an array, but \"" + args[offset].val() + "\" was given.", ExceptionType.CastException, t);
-					}
-					break;
-				}
-				case 3:
-				case 4: {
-					int offset = 0;
-					if (args.length == 4) {
-						offset = 1;
-						p = Static.GetPlayer(args[0], t);
-					}
-					x = Static.getDouble(args[offset], t);
-					y = Static.getDouble(args[offset + 1], t);
-					z = Static.getDouble(args[offset + 2], t);
-					break;
-				}
-				default:
-					throw new RuntimeException();
+			MCPlayer player;
+			int offset;
+			if ((args.length == 2) || (args.length == 4)) {
+				player = Static.GetPlayer(args[0], t);
+				offset = 1;
+			} else {
+				player = Static.GetPlayer(environment, t);
+				offset = 0;
 			}
-			MCEntity.Velocity v = new MCEntity.Velocity(x, y, z);
-			if (v.magnitude > 10) {
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
-						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
-						+ " (It was " + v.magnitude + ")", t);
-				return new CBoolean(false, t);
+			MCVector velocity;
+			if (args.length > 2) {
+				velocity = StaticLayer.GetVelocity(Static.getDouble(args[offset], t), Static.getDouble(args[offset + 1], t), Static.getDouble(args[offset + 2], t));
+			} else {
+				velocity = ObjectGenerator.GetGenerator().velocity(args[offset], t);
 			}
-			p.setVelocity(v);
-			return new CBoolean(true, t);
+			if (velocity.length() > 10) {
+				throw new ConfigRuntimeException("The magnitude of the velocity passed to " + getName() + " is greater than 10.", ExceptionType.RangeException, t);
+			} else {
+				player.setVelocity(velocity);
+				return new CVoid(t);
+			}
 		}
 
 		public String getName() {
@@ -3140,12 +3110,10 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "boolean {[player], vector | [player], x, y, z} Sets a player's velocity. vector must be an"
+			return "void {[player], vector | [player], x, y, z} Sets a player's velocity. vector must be an"
 					+ " associative array with x, y, and z keys defined (if magnitude is set, it is ignored)."
-					+ " If the vector's magnitude is greater than 10, the command is cancelled, because the"
-					+ " server won't allow the player to move faster than that. A warning is issued, and false"
-					+ " is returned if this"
-					+ " happens, otherwise, true is returned.";
+					+ " If the vector's magnitude is greater than 10, a RangeException is thrown, because the"
+					+ " server don't allow the player to move faster than that.";
 		}
 
 		public CHVersion since() {

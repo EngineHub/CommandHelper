@@ -2,7 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;

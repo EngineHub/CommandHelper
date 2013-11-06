@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
@@ -806,54 +806,7 @@ public class Meta {
 			return CHVersion.V3_3_1;
 		}
 	}
-		
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class psetop extends AbstractFunction {
 
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer player;
-			boolean state;
-			if (args.length == 1) {
-				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				Static.AssertPlayerNonNull(player, t);
-				state = Static.getBoolean(args[0]);
-			} else {
-				player = Static.GetPlayer(args[0].val(), t);
-				state = Static.getBoolean(args[1]);
-			}
-			player.setOp(state);
-			return new CVoid(t);
-		}
-
-		public String getName() {
-			return "psetop";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
-		}
-
-		public String docs() {
-			return "string {[player], status} Sets whether or not a player has operator status. If no player is specified the player running the script is given.";
-		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-	
 	@api(environments = CommandHelperEnvironment.class)
 	public static class run_cmd extends AbstractFunction {
 		

@@ -71,7 +71,20 @@ public class CArray extends Construct implements ArrayAccess{
 			return new ArrayList<Construct>(array);
 		}
 	}
-	
+
+	/**
+	 * Returns a List based on the array. A ConfigRuntimeException is thrown if 
+	 * the array is associative.
+	 * @return 
+	 */
+	public List<Construct> asList(Target t) {
+		if(inAssociativeMode()) {
+			throw new ConfigRuntimeException("The array must not be associative.", ExceptionType.CastException, t);
+		} else {
+			return new ArrayList<Construct>(array);
+		}
+	}
+
 	/**
 	 * Returns the backing associative array.
 	 * @return 

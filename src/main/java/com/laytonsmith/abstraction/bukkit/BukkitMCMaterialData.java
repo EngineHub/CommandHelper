@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.MCMaterial;
 import com.laytonsmith.abstraction.MCMaterialData;
 import org.bukkit.material.MaterialData;
 
@@ -24,10 +25,15 @@ public class BukkitMCMaterialData implements MCMaterialData{
             throw new ClassCastException();
         }
     }
-    
+
+	@Override
     public Object getHandle(){
         return md;
     }
+
+	public MCMaterial getMaterial() {
+		return new BukkitMCMaterial(md.getItemType());
+	}
 
     public int getData() {
         return md.getData();
@@ -47,5 +53,4 @@ public class BukkitMCMaterialData implements MCMaterialData{
 	public int hashCode() {
 		return md.hashCode();
 	}
-    
 }

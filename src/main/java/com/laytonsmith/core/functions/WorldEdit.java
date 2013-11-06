@@ -3,11 +3,11 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
@@ -107,12 +107,12 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin(t).getSession(( (BukkitMCPlayer) m )._Player()).getRegionSelector(BukkitUtil.getLocalWorld(( (BukkitMCWorld) m.getWorld() ).__World()));
+            RegionSelector sel = Static.getWorldEditPlugin(t).getSession(( (BukkitMCPlayer) m ).getHandle()).getRegionSelector(BukkitUtil.getLocalWorld(( (BukkitMCWorld) m.getWorld() ).__World()));
             if (!( sel instanceof CuboidRegionSelector )) {
                 throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
             }
             if (setter) {
-                sel.selectPrimary(BukkitUtil.toVector(( (BukkitMCLocation) l )._Location()));
+                sel.selectPrimary(BukkitUtil.toVector(((BukkitMCLocation) l).getHandle()));
                 return new CVoid(t);
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos1();
@@ -173,13 +173,13 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin(t).getSession(( (BukkitMCPlayer) m )._Player()).getRegionSelector(BukkitUtil.getLocalWorld(( (BukkitMCWorld) m.getWorld() ).__World()));
+            RegionSelector sel = Static.getWorldEditPlugin(t).getSession(( (BukkitMCPlayer) m ).getHandle()).getRegionSelector(BukkitUtil.getLocalWorld(( (BukkitMCWorld) m.getWorld() ).__World()));
             if (!( sel instanceof CuboidRegionSelector )) {
                 throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
             }
 
             if (setter) {
-                sel.selectSecondary(BukkitUtil.toVector(( (BukkitMCLocation) l )._Location()));
+                sel.selectSecondary(BukkitUtil.toVector(((BukkitMCLocation) l).getHandle()));
                 return new CVoid(t);
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos2();
@@ -1992,13 +1992,13 @@ public class WorldEdit {
 
 			RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(Bukkit.getServer().getWorld(l.getWorld().getName()));
 
-			ApplicableRegionSet set = mgr.getApplicableRegions(((BukkitMCLocation) l)._Location());
+			ApplicableRegionSet set = mgr.getApplicableRegions(((BukkitMCLocation) l).getHandle());
 
 			if (foundFlag instanceof StateFlag) {
 				if (p == null) {
 					return new CBoolean(set.allows((StateFlag) foundFlag), t);
 				} else {
-					return new CBoolean(set.allows((StateFlag) foundFlag, Static.getWorldGuardPlugin(t).wrapPlayer(((BukkitMCPlayer) p)._Player())), t);
+					return new CBoolean(set.allows((StateFlag) foundFlag, Static.getWorldGuardPlugin(t).wrapPlayer(((BukkitMCPlayer) p).getHandle())), t);
 				}
 			} else {
 				Object getFlag;
@@ -2006,7 +2006,7 @@ public class WorldEdit {
 				if (p == null) {
 					getFlag = set.getFlag((Flag) foundFlag);
 				} else {
-					getFlag = set.getFlag((Flag) foundFlag, Static.getWorldGuardPlugin(t).wrapPlayer(((BukkitMCPlayer) p)._Player()));
+					getFlag = set.getFlag((Flag) foundFlag, Static.getWorldGuardPlugin(t).wrapPlayer(((BukkitMCPlayer) p).getHandle()));
 				}
 
 				if (foundFlag instanceof BooleanFlag) {
@@ -2284,8 +2284,7 @@ public class WorldEdit {
 				p = Static.GetPlayer(args[0], t);
 				loc = ObjectGenerator.GetGenerator().location(args[1], p.getWorld(), t);
 			}
-			return new CBoolean(Static.getWorldGuardPlugin(t).canBuild(((BukkitMCPlayer) p)._Player(),
-					((BukkitMCLocation) loc)._Location()), t);
+			return new CBoolean(Static.getWorldGuardPlugin(t).canBuild(((BukkitMCPlayer) p).getHandle(), ((BukkitMCLocation) loc).getHandle()), t);
 		}
 
 		public String getName() {

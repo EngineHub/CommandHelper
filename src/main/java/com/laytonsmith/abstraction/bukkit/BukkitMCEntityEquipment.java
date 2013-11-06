@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;

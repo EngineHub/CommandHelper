@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 
 /**
@@ -15,5 +14,4 @@ public interface MCWolf extends MCTameable {
 	void setAngry(boolean angry);
 	void setSitting(boolean sitting);
 	void setCollarColor(MCDyeColor color);
-	
 }

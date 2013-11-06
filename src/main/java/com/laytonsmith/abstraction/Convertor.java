@@ -1,8 +1,8 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -19,8 +19,11 @@ import java.util.concurrent.Callable;
  */
 public interface Convertor {
 
-    public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch);
-    public Class GetServerEventMixin();
+	public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch);
+
+	public MCVector GetVelocity(double x, double y, double z);
+
+	public Class GetServerEventMixin();
 
     public MCEnchantment[] GetEnchantmentValues();
 
@@ -44,7 +47,9 @@ public interface Convertor {
 
     public MCItemStack GetItemStack(int type, int data, int qty);
     
-	public MCMaterial getMaterial(int id);
+	public MCMaterial GetMaterial(int id);
+    
+	public MCMaterial GetMaterial(String name);
 	
     /**
      * A future runnable is run on a server accessible thread at roughly the time specified in the future.

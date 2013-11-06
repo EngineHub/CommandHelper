@@ -1,11 +1,13 @@
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.abstraction.entities.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.PureUtilities.Geometry.Point3D;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.enums.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
@@ -2145,6 +2147,254 @@ public class PlayerEvents {
 					}
 				} else if (key.equalsIgnoreCase("signing")) {
 					((MCPlayerEditBookEvent) event).setSigning(Static.getBoolean(value));
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+	}
+
+	@api
+	public static class player_toggle_flight extends AbstractEvent {
+
+		public String getName() {
+			return "player_toggle_flight";
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_TOGGLE_FLIGHT;
+		}
+
+		public String docs() {
+			return "{player: <macro> The player who toggled their flying state | flying: <boolean match> Whether or not the player is trying to start or stop flying | world: <macro>}"
+					+ " Called when a player toggles their flying state."
+					+ " {player: The player who toggled their flying state | flying: Whether or not the player is trying to start or stop flying |"
+					+ " location: Where the player is}"
+					+ " {}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPlayerToggleFlightEvent) {
+				MCPlayerToggleFlightEvent ptfe = (MCPlayerToggleFlightEvent) event;
+				MCPlayer player = ptfe.getPlayer();
+				Prefilters.match(prefilter, "player", player.getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "flying", ptfe.isFlying(), PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "world", player.getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPlayerToggleFlightEvent) {
+				MCPlayerToggleFlightEvent ptfe = (MCPlayerToggleFlightEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCPlayer player = ptfe.getPlayer();
+				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("flying", new CBoolean(ptfe.isFlying(), Target.UNKNOWN));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to PlayerToggleFlightEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class player_toggle_sneak extends AbstractEvent {
+
+		public String getName() {
+			return "player_toggle_sneak";
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_TOGGLE_SNEAK;
+		}
+
+		public String docs() {
+			return "{player: <macro> The player who toggled their sneaking state | sneaking: <boolean match> Whether or not the player is now sneaking | world: <macro>}"
+					+ " Called when a player toggles their sneaking state."
+					+ " {player: The player who toggled their sneaking state | sneaking: Whether or not the player is now sneaking |"
+					+ " location: Where the player is}"
+					+ " {}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPlayerToggleSneakEvent) {
+				MCPlayerToggleSneakEvent ptse = (MCPlayerToggleSneakEvent) event;
+				MCPlayer player = ptse.getPlayer();
+				Prefilters.match(prefilter, "player", player.getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "sneaking", ptse.isSneaking(), PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "world", player.getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPlayerToggleSneakEvent) {
+				MCPlayerToggleSneakEvent ptse = (MCPlayerToggleSneakEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCPlayer player = ptse.getPlayer();
+				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("sneaking", new CBoolean(ptse.isSneaking(), Target.UNKNOWN));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to PlayerToggleSneakEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class player_toggle_sprint extends AbstractEvent {
+
+		public String getName() {
+			return "player_toggle_sprint";
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_TOGGLE_SPRINT;
+		}
+
+		public String docs() {
+			return "{player: <macro> The player who toggled their sprinting state | sprinting: <boolean match> Whether or not the player is now sprinting | world: <macro>}"
+					+ " Called when a player toggles their sprinting state."
+					+ " {player: The player who toggled their sprinting state | sprinting: Whether or not the player is now sprinting |"
+					+ " location: Where the player is}"
+					+ " {}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPlayerToggleSprintEvent) {
+				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
+				MCPlayer player = ptse.getPlayer();
+				Prefilters.match(prefilter, "player", player.getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "sprinting", ptse.isSprinting(), PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "world", player.getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPlayerToggleSprintEvent) {
+				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCPlayer player = ptse.getPlayer();
+				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("sprinting", new CBoolean(ptse.isSprinting(), Target.UNKNOWN));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to PlayerToggleSprintEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class player_velocity extends AbstractEvent {
+
+		public String getName() {
+			return "player_velocity";
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_VELOCITY;
+		}
+
+		public String docs() {
+			return "{player: <macro> The player on which the velocity will be applied | world: <macro>}"
+					+ " Called when a velocity is applied to a player."
+					+ " {player: The player on which the velocity will be applied | velocity: The velocity that will be applied |"
+					+ " location: Where the player is}"
+					+ " {velocity}"
+					+ " {}";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPlayerVelocityEvent) {
+				MCPlayerVelocityEvent pve = (MCPlayerVelocityEvent) event;
+				MCPlayer player = pve.getPlayer();
+				Prefilters.match(prefilter, "player", player.getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world", player.getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPlayerVelocityEvent) {
+				MCPlayerVelocityEvent pve = (MCPlayerVelocityEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCPlayer player = pve.getPlayer();
+				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("velocity", ObjectGenerator.GetGenerator().velocity(pve.getVelocity()));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to PlayerVelocityEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCPlayerVelocityEvent) {
+				if (key.equalsIgnoreCase("velocity")) {
+					((MCPlayerVelocityEvent) event).setVelocity(ObjectGenerator.GetGenerator().velocity(value, value.getTarget()));
 					return true;
 				} else {
 					return false;

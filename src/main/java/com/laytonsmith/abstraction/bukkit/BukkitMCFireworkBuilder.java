@@ -59,7 +59,7 @@ public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 	
 	public int launch(MCLocation l) {
 		FireworkEffect fe = builder.build();
-		Location ll = ((BukkitMCLocation)l).asLocation();
+		Location ll = (Location) l.getHandle();
 		Firework fw = (Firework)ll.getWorld().spawnEntity(ll, EntityType.FIREWORK);
 		FireworkMeta fwmeta = fw.getFireworkMeta();
 		fwmeta.addEffect(fe);

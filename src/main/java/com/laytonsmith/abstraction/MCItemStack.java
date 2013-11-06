@@ -1,7 +1,6 @@
 
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 import java.util.Map;
 
 /**

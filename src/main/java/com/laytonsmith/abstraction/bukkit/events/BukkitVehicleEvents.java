@@ -8,13 +8,13 @@ import org.bukkit.event.vehicle.VehicleEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.entities.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCVehicle;
+import com.laytonsmith.abstraction.entities.MCVehicle;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCVehicle;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCVehicle;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCCollisionType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
@@ -149,13 +149,13 @@ public class BukkitVehicleEvents {
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCVehicleMoveEvent implements MCVehicleMoveEvent {
 
-		BukkitMCLocation from;
-		BukkitMCLocation to;
-		BukkitMCVehicle vehicle;
+		MCLocation from;
+		MCLocation to;
+		MCVehicle vehicle;
 		boolean cancelled = false;
 
 		public BukkitMCVehicleMoveEvent(Vehicle vehicle, Location from, Location to) {
-			this.vehicle = new BukkitMCVehicle(vehicle);
+			this.vehicle = (MCVehicle) BukkitConvertor.BukkitGetCorrectEntity(vehicle);
 			this.from = new BukkitMCLocation(from);
 			this.to = new BukkitMCLocation(to);
 		}

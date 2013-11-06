@@ -2,13 +2,14 @@
 
 package com.laytonsmith.abstraction.bukkit.blocks;
 
+import com.laytonsmith.abstraction.bukkit.BukkitMCMaterial;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.enums.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;

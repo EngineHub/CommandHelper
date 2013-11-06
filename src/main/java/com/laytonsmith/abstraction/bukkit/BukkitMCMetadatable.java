@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -9,20 +8,21 @@ import java.util.List;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
 
-public class BukkitMCMetadatable implements MCMetadatable {
-	Metadatable meta;
+public abstract class BukkitMCMetadatable implements MCMetadatable {
+
+	protected Metadatable metadatable;
+
 	public BukkitMCMetadatable(Metadatable m) {
-		this.meta = m;
+		this.metadatable = m;
 	}
-	
-	public BukkitMCMetadatable(AbstractionObject a) {
-		if (a instanceof MCMetadatable) {
-			this.meta = (Metadatable)a.getHandle();
-		}
+
+	@Override
+	public Metadatable getHandle() {
+		return metadatable;
 	}
 
 	public List<MCMetadataValue> getMetadata(String metadataKey) {
-		List<MetadataValue> lst = meta.getMetadata(metadataKey);
+		List<MetadataValue> lst = metadatable.getMetadata(metadataKey);
 		List<MCMetadataValue> retn = new ArrayList<MCMetadataValue>();
 		
 		for(MetadataValue val : lst) {
@@ -33,34 +33,29 @@ public class BukkitMCMetadatable implements MCMetadatable {
 	}
 
 	public boolean hasMetadata(String metadataKey) {
-		return meta.hasMetadata(metadataKey);
+		return metadatable.hasMetadata(metadataKey);
 	}
 
 	public void removeMetadata(String metadataKey, MCPlugin owningPlugin) {
-		meta.removeMetadata(metadataKey, ((BukkitMCPlugin)owningPlugin).getPlugin());
+		metadatable.removeMetadata(metadataKey, ((BukkitMCPlugin)owningPlugin).getPlugin());
 	}
 
 	public void setMetadata(String metadataKey, MCMetadataValue newMetadataValue) {
-		meta.setMetadata(metadataKey, ((BukkitMCMetadataValue)newMetadataValue).asMetadataValue());
-	}
-
-	public Object getHandle() {
-		return meta;
+		metadatable.setMetadata(metadataKey, ((BukkitMCMetadataValue)newMetadataValue).asMetadataValue());
 	}
 	
 	@Override
 	public String toString() {
-		return meta.toString();
+		return metadatable.toString();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCMetadatable?meta.equals(((BukkitMCMetadatable)obj).meta):false);
+		return (obj instanceof BukkitMCMetadatable?metadatable.equals(((BukkitMCMetadatable)obj).metadatable):false);
 	}
 
 	@Override
 	public int hashCode() {
-		return meta.hashCode();
+		return metadatable.hashCode();
 	}
-
 }

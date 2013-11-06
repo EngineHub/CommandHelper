@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
+import com.laytonsmith.abstraction.entities.MCLivingEntity.MCEffect;
 import com.laytonsmith.core.constructs.Target;
 import java.util.List;
 

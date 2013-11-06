@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
+import com.laytonsmith.abstraction.entities.MCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -53,7 +54,7 @@ public class BukkitPlayerListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerPreLogin(PlayerPreLoginEvent e) {
+	public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
 		BukkitPlayerEvents.BukkitMCPlayerPreLoginEvent pple = new BukkitPlayerEvents.BukkitMCPlayerPreLoginEvent(e);
 		EventUtils.TriggerExternal(pple);
 		EventUtils.TriggerListener(Driver.PLAYER_PRELOGIN, "player_prelogin", pple);
@@ -188,9 +189,9 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
-		BukkitMCPlayer currentPlayer = (BukkitMCPlayer) Static.GetPlayer(event.getPlayer().getName(), Target.UNKNOWN);
+		MCPlayer currentPlayer = Static.GetPlayer(event.getPlayer().getName(), Target.UNKNOWN);
 		//Apparently this happens sometimes, so prevent it
-		if (!event.getFrom().equals(currentPlayer._Player().getWorld())) {
+		if (!event.getFrom().equals(((Player) currentPlayer.getHandle()).getWorld())) {
 			BukkitPlayerEvents.BukkitMCWorldChangedEvent wce = new BukkitPlayerEvents.BukkitMCWorldChangedEvent(event);
 			EventUtils.TriggerExternal(wce);
 			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce);
@@ -257,5 +258,33 @@ public class BukkitPlayerListener implements Listener {
 		BukkitPlayerEvents.BukkitMCPlayerEditBookEvent pebe = new BukkitPlayerEvents.BukkitMCPlayerEditBookEvent(event);
 		EventUtils.TriggerExternal(pebe);
 		EventUtils.TriggerListener(Driver.BOOK_EDITED, "book_edited", pebe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerToggleFlight(PlayerToggleFlightEvent event) {
+		BukkitPlayerEvents.BukkitMCPlayerToggleFlightEvent ptfe = new BukkitPlayerEvents.BukkitMCPlayerToggleFlightEvent(event);
+		EventUtils.TriggerExternal(ptfe);
+		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_FLIGHT, "player_toggle_flight", ptfe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+		BukkitPlayerEvents.BukkitMCPlayerToggleSneakEvent ptse = new BukkitPlayerEvents.BukkitMCPlayerToggleSneakEvent(event);
+		EventUtils.TriggerExternal(ptse);
+		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_SNEAK, "player_toggle_sneak", ptse);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerToggleSprint(PlayerToggleSprintEvent event) {
+		BukkitPlayerEvents.BukkitMCPlayerToggleSprintEvent ptse = new BukkitPlayerEvents.BukkitMCPlayerToggleSprintEvent(event);
+		EventUtils.TriggerExternal(ptse);
+		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_SPRINT, "player_toggle_sprint", ptse);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerVelocity(PlayerVelocityEvent event) {
+		BukkitPlayerEvents.BukkitMCPlayerVelocityEvent pve = new BukkitPlayerEvents.BukkitMCPlayerVelocityEvent(event);
+		EventUtils.TriggerExternal(pve);
+		EventUtils.TriggerListener(Driver.PLAYER_VELOCITY, "player_velocity", pve);
 	}
 }
