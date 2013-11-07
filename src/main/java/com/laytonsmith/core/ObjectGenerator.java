@@ -777,7 +777,13 @@ public class ObjectGenerator {
 				result = item(recipe.get("result"), t);
 				
 				if (recipe.containsKey("type") && (recipe.get("type") instanceof CString)) {
-					MCRecipeType recipeType = MCRecipeType.valueOf(recipe.get("type").val());
+					MCRecipeType recipeType;
+					try {
+						recipeType = MCRecipeType.valueOf(recipe.get("type").val());
+					} catch (IllegalArgumentException e) {
+						throw new ConfigRuntimeException("Invalid recipe type.", ExceptionType.FormatException, t);
+					}
+					
 					MCRecipe ret;
 					switch(recipeType) {
 						case SHAPED:
