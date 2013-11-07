@@ -170,12 +170,12 @@ public class ObjectGenerator {
 
     /**
      * An Item Object consists of data about a particular item stack.
-     * Information included is: type, data, qty, and an array of enchantment
-     * objects (labeled enchants): etype (enchantment type) and elevel
-     * (enchantment level). For backwards compatibility, this information is
-     * also listed in numerical slots as well as associative slots. If the
-     * MCItemStack is null, or the underlying item is nonexistant (or air) CNull
-     * is returned.
+     * Information included is: recipeType, data, qty, and an array of enchantment
+ objects (labeled enchants): erecipeType (enchantment recipeType) and elevel
+ (enchantment level). For backwards compatibility, this information is
+ also listed in numerical slots as well as associative slots. If the
+ MCItemStack is null, or the underlying item is nonexistant (or air) CNull
+ is returned.
      *
      * @param is
      * @return
@@ -573,10 +573,10 @@ public class ObjectGenerator {
 	
 	/**
 	 * Returns an MCColor given a colorArray, which supports the following
-	 * three format types (in this order of priority)
-	 * array(r: 0, g: 0, b: 0)
-	 * array(red: 0, green: 0, blue: 0)
-	 * array(0, 0, 0)
+ three format recipeTypes (in this order of priority)
+ array(r: 0, g: 0, b: 0)
+ array(red: 0, green: 0, blue: 0)
+ array(0, 0, 0)
 	 * @param color
 	 * @param t
 	 * @return 
@@ -767,5 +767,133 @@ public class ObjectGenerator {
 			ret.set("ingredients", imap, t);
 		}
 		return ret;
+	}
+	
+	public MCRecipe recipe(Construct c, Target t) {
+		if (c instanceof CArray) {
+			CArray recipe = (CArray) c;
+			MCItemStack result = EmptyItem();
+			if (recipe.containsKey("result") && (recipe.get("result") instanceof CArray)) {
+				result = item(recipe.get("result"), t);
+				
+				if (recipe.containsKey("type") && (recipe.get("type") instanceof CString)) {
+					MCRecipeType recipeType;
+					try {
+						recipeType = MCRecipeType.valueOf(recipe.get("type").val());
+					} catch (IllegalArgumentException e) {
+						throw new ConfigRuntimeException("Invalid recipe type.", ExceptionType.FormatException, t);
+					}
+					
+					MCRecipe ret;
+					switch(recipeType) {
+						case SHAPED:
+						ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPED, result);
+						String[] shape = {"AAA", "AAA", "AAA"};
+						
+						if(recipe.containsKey("shape") && (recipe.get("shape") instanceof CArray)) {
+							CArray sh = (CArray) recipe.get("shape");
+							
+							if (sh.size() == 3 && !sh.inAssociativeMode()) {
+								int i = 0;
+								for(Construct row : sh.asList()) {
+									if(row instanceof CString && ((CString) row).val().length() == 3) {
+										shape[i] = row.val();
+										if (i > 3) {
+											break;
+										} else {
+											i++;
+										}
+									} else {
+										throw new ConfigRuntimeException("Shape array is invalid.", ExceptionType.FormatException, t);
+									}
+								}
+							} else {
+								throw new ConfigRuntimeException("Shape array is invalid.", ExceptionType.FormatException, t);
+							}
+						} else {
+							throw new ConfigRuntimeException("Could not find recipe shape array.", ExceptionType.FormatException, t);
+						}
+						((MCShapedRecipe) ret).setShape(shape);
+						
+						if(recipe.containsKey("ingredients") && (recipe.get("ingredients") instanceof CArray)) {
+							CArray ingredients = (CArray) recipe.get("ingredients");
+							if(ingredients.inAssociativeMode()) {
+								for(String key : ingredients.keySet()) {
+									int type = 0;
+									int data = 0;
+									if (ingredients.get(key) instanceof CString) {
+										CString item = (CString) ingredients.get(key);
+										if (item.val().contains(":")) {
+											String[] split = item.val().split(":");
+											type = Integer.valueOf(split[0]);
+											data = Integer.valueOf(split[1]);
+										} else {
+											type = Integer.valueOf(item.val());
+										}
+									} else {
+										throw new ConfigRuntimeException("Item type was not found", ExceptionType.FormatException, t);
+									}
+									((MCShapedRecipe) ret).setIngredient(key.charAt(0), type, data);
+								}
+							} else {
+								throw new ConfigRuntimeException("Ingredients array is invalid.", ExceptionType.FormatException, t);
+							}
+						} else {
+							throw new ConfigRuntimeException("Could not find recipe ingredient array.", ExceptionType.FormatException, t);
+						}
+						return ret;
+							
+						case SHAPELESS:
+						ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPELESS, result);
+						
+						if(recipe.containsKey("ingredients") && (recipe.get("ingredients") instanceof CArray)) {
+							CArray ingredients = (CArray) recipe.get("ingredients");
+							if(!ingredients.inAssociativeMode()) {
+								for(Construct item : ingredients.asList()) {
+									int type = 0;
+									int data = 0;
+									if (item instanceof CString) {
+										item = (CString) item;
+										if (item.val().contains(":")) {
+											String[] split = item.val().split(":");
+											type = Integer.valueOf(split[0]);
+											data = Integer.valueOf(split[1]);
+										} else {
+											type = Integer.valueOf(item.val());
+										}
+									} else {
+										throw new ConfigRuntimeException("Item type was not found", ExceptionType.FormatException, t);
+									}
+									((MCShapelessRecipe) ret).addIngredient(type, data, 1);
+								}
+							} else {
+								throw new ConfigRuntimeException("Ingredients array is invalid.", ExceptionType.FormatException, t);
+							}
+						} else {
+							throw new ConfigRuntimeException("Could not find recipe ingredient array.", ExceptionType.FormatException, t);
+						}
+						return ret;
+							
+						case FURNACE:
+						ret = StaticLayer.GetNewRecipe(MCRecipeType.FURNACE, result);
+						
+						if (recipe.containsKey("input") && (recipe.get("input") instanceof CArray)) {
+							((MCFurnaceRecipe) ret).setInput(item(recipe.get("input"), t));
+						} else {
+							throw new ConfigRuntimeException("Could not find input item array.", ExceptionType.FormatException, t);
+						}
+						return ret;
+					default:
+						throw new ConfigRuntimeException("Could not find valid recipe type.", ExceptionType.FormatException, t);
+					}
+				} else {
+						throw new ConfigRuntimeException("Could not find recipe type.", ExceptionType.FormatException, t);
+				}
+			} else {
+				throw new ConfigRuntimeException("Could not find result item array.", ExceptionType.FormatException, t);
+			}
+		} else {
+			throw new ConfigRuntimeException("Expected array but recieved " + c, ExceptionType.CastException, t);
+		}
 	}
 }

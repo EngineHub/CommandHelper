@@ -14,5 +14,7 @@ public interface MCShapedRecipe extends MCRecipe {
 	
 	public MCShapedRecipe setIngredient(char key, int type, int data);
 	
+	public MCShapedRecipe setIngredient(char key, MCMaterialData data);
+	
 	public MCShapedRecipe setShape(String[] shape);
 }

@@ -17,11 +17,11 @@ public abstract class BukkitMCRecipe implements MCRecipe {
 	public Object getHandle() {
 		return r;
 	}
-
+	
 	@Override
 	public MCItemStack getResult() {
 		return new BukkitMCItemStack(r.getResult());
 	}
-
+	
 	public abstract MCRecipeType getRecipeType();
 }
