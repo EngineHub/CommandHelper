@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.MustUseOverride;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Set;
 
 /**
@@ -208,6 +209,11 @@ public interface DataSource extends Documentation {
 
 		public CHVersion since() {
 			return since;
+		}
+		
+		@Override
+		public URL getSourceJar() {
+			return null;
 		}
 
 		public static boolean isModifier(String scheme) {

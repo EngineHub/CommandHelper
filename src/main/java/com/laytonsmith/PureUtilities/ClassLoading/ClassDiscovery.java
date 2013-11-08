@@ -569,6 +569,10 @@ public class ClassDiscovery {
 			}
 			while (!interfaces.isEmpty()) {
 				ClassReferenceMirror in = interfaces.pop();
+				if(ClassUtils.getJVMName(superClass).equals(in.getJVMName())){
+					//Early short circuit. We know it's in the the list already.
+					return true;
+				}
 				if (handled.contains(in)) {
 					continue;
 				}

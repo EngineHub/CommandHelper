@@ -8,6 +8,7 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -308,4 +309,10 @@ public abstract class AbstractDataSource implements DataSource {
 		b.append(uri.toString());
 		return b.toString();
 	}
+
+	@Override
+	public URL getSourceJar() {
+		throw new UnsupportedOperationException("TODO: Not supported yet.");
+	}
+	
 }

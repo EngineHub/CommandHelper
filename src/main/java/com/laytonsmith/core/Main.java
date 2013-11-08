@@ -18,6 +18,7 @@ import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.*;
 import com.laytonsmith.tools.docgen.DocGen;
+import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
 import java.io.File;
@@ -57,6 +58,7 @@ public class Main {
 	private static final ArgumentParser optimizerTestMode;
 	private static final ArgumentParser cmdlineMode;
 	private static final ArgumentParser extensionDocsMode;
+	private static final ArgumentParser docExportMode;
 
 	static {
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -136,6 +138,12 @@ public class Main {
 				.addArgument('i', "input-jar", ArgumentParser.Type.STRING, "The extension jar to generate doucmenation for.", "input-jar", true)
 				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated documentation to.", "output-file", false);
 		suite.addMode("extension-docs", extensionDocsMode);
+		docExportMode = ArgumentParser.GetParser()
+				.addDescription("Outputs all known function documentation as a json. This includes known extensions"
+						+ " as well as the built in functions.")
+				.addArgument("extension-dir", ArgumentParser.Type.STRING, "./CommandHelper/extensions", "Provides the path to your extension directory, if not the default, \"./CommandHelper/extensions\"", "extension-dir", false)
+				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated json to. If this parameter is missing, it is simply printed to screen.", "output-file", false);
+		suite.addMode("doc-export", docExportMode);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -344,6 +352,31 @@ public class Main {
 					outputFile = new FileOutputStream(new File(outputFileS));
 				}
 				ExtensionDocGen.generate(inputJar, outputFile);
+			} else if(mode == docExportMode){
+				String extensionDirS = parsedArgs.getStringArgument("extension-dir");
+				String outputFileS = parsedArgs.getStringArgument("output-file");
+				OutputStream outputFile = System.out;
+				if(outputFileS != null){
+					outputFile = new FileOutputStream(new File(outputFileS));
+				}
+				Implementation.useAbstractEnumThread(false);
+				Implementation.setServerType(Implementation.Type.BUKKIT);
+				ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
+				cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
+				File extensionDir = new File(extensionDirS);
+				if(extensionDir.exists()){
+					//Might not exist, but that's ok, however we will print a warning
+					//to stderr.
+					for(File f : extensionDir.listFiles()){
+						if(f.getName().endsWith(".jar")){
+							cd.addDiscoveryLocation(f.toURI().toURL());
+						}
+					}
+				} else {
+					System.err.println("Extension directory specificed doesn't exist: " 
+							+ extensionDirS + ". Continuing anyways.");
+				}
+				new DocGenExportTool(cd, outputFile).export();
 			} else {
 				throw new Error("Should not have gotten here");
 			}

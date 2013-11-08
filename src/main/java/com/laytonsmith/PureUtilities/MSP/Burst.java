@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities.MSP;
 
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
+import java.net.URL;
 
 /**
  * A Burst is a single transmission from client to server, or server to client.
@@ -60,6 +61,11 @@ public class Burst {
 
 		public CHVersion since() {
 			return version;
+		}
+		
+		@Override
+		public URL getSourceJar() {
+			return null;
 		}
 	}
 }

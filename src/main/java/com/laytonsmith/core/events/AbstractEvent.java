@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
@@ -12,6 +13,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.profiler.ProfilePoint;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -163,7 +165,10 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     public boolean isCancelled(BindableEvent o) {
         return mixin.isCancelled(o);
     }
-        
-    
+
+	@Override
+	public URL getSourceJar() {
+		return ClassDiscovery.GetClassContainer(this.getClass());
+	}
     
 }

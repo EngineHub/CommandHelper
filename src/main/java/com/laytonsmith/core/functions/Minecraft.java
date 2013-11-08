@@ -27,6 +27,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1125,6 +1126,22 @@ public class Minecraft {
 		}
 
 		public String docs() {
+			Class c;
+			try {
+				//Since MCColor actually depends on a bukkit server, we don't want to require that for
+				//the sake of documentation, so we'll build the color list much more carefully.
+				c = Class.forName(MCColor.class.getName(), false, this.getClass().getClassLoader());
+			} catch (ClassNotFoundException ex) {
+				//Hrm...
+				Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
+				return "";
+			}
+			List<String> names = new ArrayList<String>();
+			for(Field f : c.getFields()){
+				if(f.getType() == MCColor.class){
+					names.add(f.getName());
+				}
+			}
 			return "void {locationArray, [optionsArray]} Launches a firework. The location array specifies where it is launched from,"
 					+ " and the options array is an associative array described below. All parameters in the associative array are"
 					+ " optional, and default to the specified values if not set. The default options being set will make it look like"
@@ -1150,7 +1167,7 @@ public class Minecraft {
 					+ "| type || An enum value of one of the firework types, one of: " + StringUtils.Join(MCFireworkType.values(), ", ", " or ")
 					+ " || " + MCFireworkType.BALL.name() + "\n"
 					+ "|}\n"
-					+ "The \"named colors\" can be one of: " + StringUtils.Join(MCColor.STANDARD_COLORS.keySet(), ", ", " or ");
+					+ "The \"named colors\" can be one of: " + StringUtils.Join(names, ", ", " or ");
 		}
 
 		public CHVersion since() {

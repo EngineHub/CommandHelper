@@ -9,6 +9,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -263,6 +264,12 @@ public class Exceptions {
 		public CHVersion since() {
 			return since;
 		}
+
+		@Override
+		public URL getSourceJar() {
+			return null;
+		}
+		
 	}
 
 	@api(environments=CommandHelperEnvironment.class)

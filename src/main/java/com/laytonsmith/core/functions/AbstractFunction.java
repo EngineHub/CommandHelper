@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
@@ -12,6 +13,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.snapins.PackagePermission;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,6 +188,11 @@ public abstract class AbstractFunction implements Function {
 
 	public PackagePermission getPermission() {
 		return PackagePermission.NO_PERMISSIONS_NEEDED;
+	}
+
+	@Override
+	public URL getSourceJar() {
+		return ClassDiscovery.GetClassContainer(this.getClass());
 	}
 	
 	

@@ -5,6 +5,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
+import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
@@ -119,6 +120,11 @@ public interface Optimizable extends Function {
 
 		public CHVersion since() {
 			return since;
+		}
+		
+		@Override
+		public URL getSourceJar() {
+			return null;
 		}
 	}
 

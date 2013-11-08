@@ -2,6 +2,7 @@ package com.laytonsmith.core.snapins;
 
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
+import java.net.URL;
 
 /**
  * This should be implemented by permission enums. This provides a standard way
@@ -38,6 +39,12 @@ public interface PackagePermission extends Documentation {
 		public CHVersion since() {
 			return null;
 		}
+
+		@Override
+		public URL getSourceJar() {
+			return null;
+		}
+		
 	};
 	
 	/**
@@ -100,6 +107,11 @@ public interface PackagePermission extends Documentation {
 		public CHVersion since() {
 			return since;
 		}
+		
+		@Override
+		public URL getSourceJar() {
+			return null;
+		}
 	}
 	
 	/**
@@ -143,6 +155,11 @@ public interface PackagePermission extends Documentation {
 
 		public CHVersion since() {
 			return since;
+		}
+		
+		@Override
+		public URL getSourceJar() {
+			return null;
 		}
 		
 	}

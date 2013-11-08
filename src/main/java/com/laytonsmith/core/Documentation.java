@@ -3,6 +3,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Version;
+import java.net.URL;
 
 /**
  * Classes that implement this method know how to provide some documentation to the DocGen
@@ -16,17 +17,29 @@ import com.laytonsmith.PureUtilities.Version;
 public interface Documentation {
     /**
      * The name of this code element
+	 * @return The name of this code element.
      */
-    public String getName();
+    String getName();
+	
     /**
      * Returns documentation in a format that is specified by the code type
      * @return 
      */
-    public String docs();
+    String docs();
+	
     /**
      * Returns the version number of when this functionality was added. It should
      * follow the format 0.0.0
      * @return 
      */
-    public Version since();
+    Version since();
+	
+	/**
+	 * Returns the source jar this code element came from. This may return
+	 * null if the source is dynamic, or it is otherwise unknown where it came from.
+	 * It may not throw an exception though, if any exception were to be generated,
+	 * it should simply return null.
+	 * @return 
+	 */
+	URL getSourceJar();
 }
