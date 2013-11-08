@@ -200,7 +200,7 @@ public class Recipes {
 
 		@Override
 		public String getName() {
-			return "reest_recipes";
+			return "reset_recipes";
 		}
 
 		@Override
