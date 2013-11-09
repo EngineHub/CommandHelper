@@ -579,7 +579,7 @@ public class WorldEdit {
 
         public String docs() {
             return "mixed {[player]} Returns the list regions that player is in. If no player specified, then the current player is used."
-                    + " If region is found, an array of region names are returned, else an empty is returned";
+                    + " If region is found, an array of region names are returned, else an empty array is returned";
         }
 
         public ExceptionType[] thrown() {
