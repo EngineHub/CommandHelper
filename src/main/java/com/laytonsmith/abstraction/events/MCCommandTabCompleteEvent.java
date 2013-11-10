@@ -8,7 +8,7 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCCommandTabCompleteEvent extends BindableEvent {
 
-public MCCommandSender getCommandSender();
+	public MCCommandSender getCommandSender();
 	
 	public MCCommand getCommand();
 	

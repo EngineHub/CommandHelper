@@ -43,4 +43,13 @@ public abstract class AbstractConvertor implements Convertor{
 	public MCWorldCreator getWorldCreator(String worldName) {
 		throw new UnsupportedOperationException("Not supported.");
 	}
+	
+	public MCCommand getNewCommand(String name) {
+		throw new UnsupportedOperationException("Not supported in this implementation.");
+	}
+	
+	@Override
+	public MCCommandSender GetCorrectSender(MCCommandSender unspecific) {
+		throw new UnsupportedOperationException("Not supported in this implementation.");
+	}
 }
