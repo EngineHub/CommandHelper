@@ -830,6 +830,15 @@ public class ObjectGenerator {
 										} else {
 											type = Integer.valueOf(item.val());
 										}
+									} else if (ingredients.get(key) instanceof CInt) {
+										type = Integer.valueOf(((CInt) ingredients.get(key)).val());
+									} else if (ingredients.get(key) instanceof CArray) {
+										MCItemStack item = item(ingredients.get(key), t);
+										type = item.getTypeId();
+										data = item.getDurability();
+									} else if (ingredients.get(key) instanceof CNull) {
+										type = 0;
+										data = 0;
 									} else {
 										throw new ConfigRuntimeException("Item type was not found", ExceptionType.FormatException, t);
 									}
