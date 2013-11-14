@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.command.Command;
@@ -11,7 +12,17 @@ import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents.BukkitMCCommandTabCompleteEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.functions.Commands;
 
 /**
  * 
@@ -159,5 +170,61 @@ public class BukkitMCCommand implements MCCommand {
 	@Override
 	public String toString() {
 		return cmd.toString();
+	}
+
+	// I may be able to move these to c.l.c.f.Commands.java
+	@Override
+	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args) {
+		if (Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {
+			Target t = Target.UNKNOWN;
+			CArray cargs = new CArray(t);
+			for (String arg : args) {
+				cargs.push(new CString(arg, t));
+			}
+			try {
+				Commands.onTabComplete.get(cmd.getName().toLowerCase()).execute(new Construct[]{
+					new CString(alias, t), new CString(sender.getName(), t), cargs,
+					new CArray(t) // reserved for an obgen style command array
+				});
+			} catch (FunctionReturnException e) {
+				Construct fret = e.getReturn();
+				if (fret instanceof CArray) {
+					List<String> ret = new ArrayList<String>();
+					for (Construct key : ((CArray) fret).asList()) {
+						ret.add(key.val());
+					}
+					return ret;
+				}
+			}
+		}
+		BukkitMCCommandTabCompleteEvent event = new BukkitMCCommandTabCompleteEvent(sender, cmd, alias, args);
+		EventUtils.TriggerExternal(event);
+		EventUtils.TriggerListener(Driver.TAB_COMPLETE, "tab_complete_command", event);
+		return event.getCompletions();
+	}
+	
+	@Override
+	public boolean handleCustomCommand(MCCommandSender sender, String label, String[] args) {
+		if (Commands.onCommand.containsKey(cmd.getName().toLowerCase())) {
+			Target t = Target.UNKNOWN;
+			CArray cargs = new CArray(t);
+			for (String arg : args) {
+				cargs.push(new CString(arg, t));
+			}
+			try {
+				Commands.onCommand.get(cmd.getName().toLowerCase()).execute(new Construct[]{
+					new CString(label, t), new CString(sender.getName(), t), cargs,
+					new CArray(t) // reserved for an obgen style command array
+				});
+			} catch (FunctionReturnException e) {
+				Construct fret = e.getReturn();
+				if (fret instanceof CBoolean) {
+					return ((CBoolean) fret).getBoolean();
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

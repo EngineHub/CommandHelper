@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -102,8 +104,91 @@ public class ServerEvents {
 			return Driver.SERVER_PING;
 		}
 	
-		public CHVersion since() {
+		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-	}	
+	}
+	
+	@api
+	public static class tab_complete_command extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "tab_complete_command";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " This will fire if a tab completer has not been set, or if the set tab completer doesn't return an array."
+					+ " {command | alias | completions | args | sender}"
+					+ " {completions}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCCommandTabCompleteEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCCommandTabCompleteEvent) {
+				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
+				Target t = Target.UNKNOWN;
+				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("sender", new CString(e.getCommandSender().getName(), t));
+				CArray comp = new CArray(t);
+				for (String c : e.getCompletions()) {
+					comp.push(new CString(c, t));
+				}
+				ret.put("completions", comp);
+				ret.put("command", new CString(e.getCommand().getName(), t));
+				CArray args = new CArray(t);
+				for (String a : e.getArguments()) {
+						args.push(new CString(a, t));
+				}
+				ret.put("args", args);
+				ret.put("alias", new CString(e.getAlias(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCCommandTabCompleteEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.TAB_COMPLETE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCCommandTabCompleteEvent) {
+				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
+				if ("completions".equals(key)) {
+					if (value instanceof CArray) {
+						e.getCompletions().clear();
+						for (Construct val : ((CArray) value).asList()) {
+							e.getCompletions().add(val.val());
+						}
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 }

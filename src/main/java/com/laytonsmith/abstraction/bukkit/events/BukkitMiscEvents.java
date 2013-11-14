@@ -119,11 +119,11 @@ public class BukkitMiscEvents {
 	public static class BukkitMCCommandTabCompleteEvent implements MCCommandTabCompleteEvent {
 
 		List<String> comp;
-		CommandSender sender;
+		MCCommandSender sender;
 		Command cmd;
 		String alias;
 		String[] args;
-		public BukkitMCCommandTabCompleteEvent(CommandSender sender, Command cmd, String alias, String[] args) {
+		public BukkitMCCommandTabCompleteEvent(MCCommandSender sender, Command cmd, String alias, String[] args) {
 			this.comp = new ArrayList<String>();
 			this.sender = sender;
 			this.cmd = cmd;
@@ -136,14 +136,7 @@ public class BukkitMiscEvents {
 		}
 
 		public MCCommandSender getCommandSender() {
-			if (sender instanceof Player) {
-				return new BukkitMCPlayer((Player) sender);
-			} else if (sender instanceof ConsoleCommandSender) {
-				// There is an open PR that will make this possible
-				return new BukkitMCConsoleCommandSender((ConsoleCommandSender) sender);
-			} else {
-				return null;
-			}
+			return sender;
 		}
 
 		public MCCommand getCommand() {

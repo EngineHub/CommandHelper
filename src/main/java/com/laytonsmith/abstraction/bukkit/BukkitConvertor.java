@@ -31,6 +31,9 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.Listener;
@@ -495,6 +498,31 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCShapedRecipe((ShapedRecipe) r);
 		} else if (r instanceof FurnaceRecipe) {
 			return new BukkitMCFurnaceRecipe((FurnaceRecipe) r);
+		} else {
+			return null;
+		}
+	}
+	
+	@Override
+	public MCCommand getNewCommand(String name) {
+		return BukkitMCCommand.newCommand(name);
+	}
+	
+	@Override
+	public MCCommandSender GetCorrectSender(MCCommandSender unspecific) {
+		if (unspecific == null) {
+			return null;
+		}
+		return BukkitGetCorrectSender(((BukkitMCCommandSender) unspecific)._CommandSender());
+	}
+	
+	public static MCCommandSender BukkitGetCorrectSender(CommandSender sender) {
+		if (sender instanceof Player) {
+			return new BukkitMCPlayer((Player) sender);
+		} else if (sender instanceof ConsoleCommandSender) {
+			return new BukkitMCConsoleCommandSender((ConsoleCommandSender) sender);
+		} else if (sender instanceof BlockCommandSender) {
+			return new BukkitMCBlockCommandSender((BlockCommandSender) sender);
 		} else {
 			return null;
 		}
