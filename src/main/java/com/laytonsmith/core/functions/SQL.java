@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
@@ -35,10 +34,11 @@ import java.util.Map;
  *
  */
 public class SQL {
-	public static String docs(){
+
+	public static String docs() {
 		return "This class of functions provides methods for accessing various SQL servers.";
 	}
-	
+
 	@api
 	public static class query extends AbstractFunction {
 
@@ -61,10 +61,10 @@ public class SQL {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
-				if(args[0] instanceof CArray){
+				if (args[0] instanceof CArray) {
 					Map<String, String> data = new HashMap<String, String>();
-					for(String key : ((CArray)args[0]).keySet()){
-						data.put(key, ((CArray)args[0]).get(key).val());
+					for (String key : ((CArray) args[0]).keySet()) {
+						data.put(key, ((CArray) args[0]).get(key).val());
 					}
 					profile = Profiles.getProfile(data);
 				} else {
@@ -73,80 +73,90 @@ public class SQL {
 				}
 				String query = args[1].val();
 				Construct[] params = new Construct[args.length - 2];
-				for(int i = 2; i < args.length; i++){
+				for (int i = 2; i < args.length; i++) {
 					int index = i - 2;
 					params[index] = args[i];
 				}
 				//Parameters are now all parsed into java objects.
 				Connection conn = DriverManager.getConnection(profile.getConnectionString());
-				PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-				for(int i = 0; i < params.length; i++){
-					int type = ps.getParameterMetaData().getParameterType(i + 1);
-					if(params[i] == null){
-						if(ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls){
-							throw new ConfigRuntimeException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
-						} else {
-							ps.setNull(i + 1, type);
-							continue;
-						}
-					}
-					try {
-						if(type == Types.INTEGER){
-							ps.setInt(i + 1, (Integer)Static.getInt32(params[i], t));
-						} else if(type == Types.DOUBLE){
-							ps.setDouble(i + 1, (Double)Static.getDouble(params[i], t));
-						} else if(type == Types.VARCHAR || type == Types.CHAR){
-							ps.setString(i + 1, (String)params[i].val());
-						} else if(type == Types.BOOLEAN){
-							ps.setBoolean(i + 1, (Boolean)Static.getBoolean(params[i]));
-						}
-					} catch(ClassCastException ex){
-						throw new ConfigRuntimeException("Could not cast parameter " + (i + 1) + " to "
-								+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from " + params[i].getClass().getSimpleName(), 
-								ExceptionType.CastException, t, ex);
-					}
-				}
-				boolean isResultSet = ps.execute();
-				if(isResultSet){
-					//Result set
-					CArray ret = new CArray(t);
-					ResultSetMetaData md = ps.getMetaData();
-					ResultSet rs = ps.getResultSet();
-					while(rs.next()){
-						CArray row = new CArray(t);
-						for(int i = 1; i <= md.getColumnCount(); i++){
-							Construct value;
-							int columnType = md.getColumnType(i);
-							if(columnType == Types.INTEGER){
-								value = new CInt(rs.getInt(i), t);
-							} else if(columnType == Types.DOUBLE){
-								value = new CDouble(rs.getDouble(i), t);
-							} else if(columnType == Types.VARCHAR || columnType == Types.CHAR){
-								value = new CString(rs.getString(i), t);
-							} else if(columnType == Types.BOOLEAN){
-								value = new CBoolean(rs.getBoolean(i), t);
+				PreparedStatement ps = null;
+				try {
+					ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+					for (int i = 0; i < params.length; i++) {
+						int type = ps.getParameterMetaData().getParameterType(i + 1);
+						if (params[i] == null) {
+							if (ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
+								throw new ConfigRuntimeException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
 							} else {
-								//For now, continue. Perhaps later, we can do something different.
+								ps.setNull(i + 1, type);
 								continue;
 							}
-							row.set(md.getColumnName(i), value, t);
 						}
-						ret.push(row);
+						try {
+							if (type == Types.INTEGER) {
+								ps.setInt(i + 1, (Integer) Static.getInt32(params[i], t));
+							} else if (type == Types.DOUBLE) {
+								ps.setDouble(i + 1, (Double) Static.getDouble(params[i], t));
+							} else if (type == Types.VARCHAR || type == Types.CHAR) {
+								ps.setString(i + 1, (String) params[i].val());
+							} else if (type == Types.BOOLEAN) {
+								ps.setBoolean(i + 1, (Boolean) Static.getBoolean(params[i]));
+							}
+						} catch (ClassCastException ex) {
+							throw new ConfigRuntimeException("Could not cast parameter " + (i + 1) + " to "
+									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from " + params[i].getClass().getSimpleName(),
+									ExceptionType.CastException, t, ex);
+						}
 					}
-					return ret;
-				} else {
-					ResultSet rs = ps.getGeneratedKeys();
-					if(rs.next()){
+					boolean isResultSet = ps.execute();
+					if (isResultSet) {
+						//Result set
+						CArray ret = new CArray(t);
+						ResultSetMetaData md = ps.getMetaData();
+						ResultSet rs = ps.getResultSet();
+						while (rs.next()) {
+							CArray row = new CArray(t);
+							for (int i = 1; i <= md.getColumnCount(); i++) {
+								Construct value;
+								int columnType = md.getColumnType(i);
+								if (columnType == Types.INTEGER) {
+									value = new CInt(rs.getInt(i), t);
+								} else if (columnType == Types.DOUBLE) {
+									value = new CDouble(rs.getDouble(i), t);
+								} else if (columnType == Types.VARCHAR || columnType == Types.CHAR) {
+									value = new CString(rs.getString(i), t);
+								} else if (columnType == Types.BOOLEAN) {
+									value = new CBoolean(rs.getBoolean(i), t);
+								} else {
+									//For now, continue. Perhaps later, we can do something different.
+									continue;
+								}
+								row.set(md.getColumnName(i), value, t);
+							}
+							ret.push(row);
+						}
+						return ret;
+					} else {
+						ResultSet rs = ps.getGeneratedKeys();
+						if (rs.next()) {
 						//This was an insert or something that returned generated keys. So we return
-						//that here.
-						return new CInt(rs.getInt(1), t);
+							//that here.
+							return new CInt(rs.getInt(1), t);
+						}
+						//Update count. Just return null.
+						return new CNull(t);
 					}
-					//Update count. Just return null.
-					return new CNull(t);
+				} finally {
+					if(conn != null){ 
+						conn.close();
+					}
+					if(ps != null){
+						ps.close();
+					}
 				}
 			} catch (Profiles.InvalidProfileException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
-			} catch (SQLException ex){
+			} catch (SQLException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
 			}
 		}
@@ -181,6 +191,6 @@ public class SQL {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }
