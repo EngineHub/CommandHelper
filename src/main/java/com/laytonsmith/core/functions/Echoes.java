@@ -555,7 +555,7 @@ public class Echoes {
     }        
 	
 	@api
-	public static class colorize extends AbstractFunction{
+	public static class colorize extends AbstractFunction implements Optimizable {
 
 		public ExceptionType[] thrown() {
 			return null;
@@ -646,6 +646,11 @@ public class Echoes {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_CONSTANT);
 		}
 		
 	}
