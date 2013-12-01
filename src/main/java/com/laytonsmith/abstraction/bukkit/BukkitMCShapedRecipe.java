@@ -11,7 +11,6 @@ import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
-import com.sun.org.apache.xalan.internal.lib.ExsltDatetime;
 
 public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedRecipe {
 
