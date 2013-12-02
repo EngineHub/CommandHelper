@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
@@ -127,6 +128,8 @@ public class Scheduling {
 		}
 	}
 
+	@api
+	@hide("Only meant for cmdline/testing")
 	public static class sleep extends AbstractFunction {
 
 		public String getName() {
@@ -156,22 +159,12 @@ public class Scheduling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-//            if (Thread.currentThread().getName().equals("Server thread")) {
-//                throw new ConfigRuntimeException("sleep() cannot be run in the main server thread", 
-//                        null, t);
-//            }
-//            Construct x = args[0];
-//            double time = Static.getNumber(x, t);
-//            Integer i = (Integer) (Prefs.);
-//            if (i > time || i <= 0) {
-//                try {
-//                    Thread.sleep((int)(time * 1000));
-//                } catch (InterruptedException ex) {
-//                }
-//            } else {
-//                throw new ConfigRuntimeException("The value passed to sleep must be less than the server defined value of " + i + " seconds or less.", 
-//                        ExceptionType.RangeException, t);
-//            }
+            Construct x = args[0];
+            double time = Static.getNumber(x, t);
+			try {
+				Thread.sleep((int)(time * 1000));
+			} catch (InterruptedException ex) {
+			}
 			return new CVoid(t);
 		}
 

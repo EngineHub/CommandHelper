@@ -164,7 +164,7 @@
 		<dependency>
 			<groupId>com.sk89q</groupId>
 			<artifactId>worldedit</artifactId>
-			<version>5.5.6</version>
+			<version>5.5.8</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.spout</groupId>
@@ -260,7 +260,7 @@
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
-			<version>2.1.0</version>
+			<version>2.2.1</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -269,7 +269,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.25</version>
+			<version>5.1.27</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -278,7 +278,7 @@
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
-			<version>1.12</version>
+			<version>1.13</version>
 		</dependency>
 
 		<!-- Apache commons IO -->
@@ -346,13 +346,13 @@
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-junit4</artifactId>
-			<version>1.5.1</version>
+			<version>1.5.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-mockito</artifactId>
-			<version>1.5.1</version>
+			<version>1.5.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
