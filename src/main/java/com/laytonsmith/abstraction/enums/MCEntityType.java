@@ -76,6 +76,7 @@ public enum MCEntityType {
 	MINECART_TNT(true),
 	MINECART_HOPPER(true),
 	MINECART_MOB_SPAWNER(true),
+	MINECART_COMMAND(false),
 	/**
 	 * An unknown entity without an Entity Class
 	 */
@@ -83,6 +84,10 @@ public enum MCEntityType {
 	
 	private boolean apiCanSpawn;
 	
+	/**
+	 * 
+	 * @param spawnable true if the entity is spawnable
+	 */
 	MCEntityType(boolean spawnable) {
 		this.apiCanSpawn = spawnable;
 	}

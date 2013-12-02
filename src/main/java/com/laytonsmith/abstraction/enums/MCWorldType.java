@@ -9,5 +9,6 @@ public enum MCWorldType {
 	NORMAL,
     FLAT,
     VERSION_1_1,
-    LARGE_BIOMES;
+    LARGE_BIOMES,
+	AMPLIFIED;
 }

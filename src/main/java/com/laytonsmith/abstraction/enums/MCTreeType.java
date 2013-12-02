@@ -15,5 +15,7 @@ public enum MCTreeType {
 	JUNGLE_BUSH,
 	RED_MUSHROOM,
 	BROWN_MUSHROOM,
-	SWAMP
+	SWAMP,
+	ACACIA,
+	DARK_OAK;
 }
