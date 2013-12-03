@@ -14,4 +14,6 @@ public interface MCMessenger {
 	public void unregisterIncomingPluginChannel(String channel);
 
 	public Set<String> getIncomingChannels();
+	
+	public void closeAllChannels();
 }

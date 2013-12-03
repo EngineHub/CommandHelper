@@ -11,7 +11,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class CommandHelperMessageListener implements PluginMessageListener {
-	private static CommandHelperMessageListener instance = new CommandHelperMessageListener();
+	private static final CommandHelperMessageListener instance = new CommandHelperMessageListener();
 
 	public static CommandHelperMessageListener getInstance() {
 		return instance;
@@ -20,6 +20,7 @@ public class CommandHelperMessageListener implements PluginMessageListener {
 	private CommandHelperMessageListener() {
 	}
 
+	@Override
 	public void onPluginMessageReceived(final String channel, final Player player, final byte[] bytes) {
 		BukkitMCPluginIncomingMessageEvent event = new BukkitMCPluginIncomingMessageEvent(player, channel, bytes);
 		EventUtils.TriggerExternal(event);
