@@ -217,8 +217,12 @@ public class ArrayHandling {
 						return new CString(args[0].val().charAt(Static.getInt32(index, t)), t);
 					} catch (ConfigRuntimeException e) {
 						if (e.getExceptionType() == ExceptionType.CastException) {
-							throw new ConfigRuntimeException("Expecting an integer index for the array, but found \"" + index
-									+ "\". (Array is not associative, and cannot accept string keys here.)", ExceptionType.CastException, t);
+							if(args[0] instanceof CArray){
+								throw new ConfigRuntimeException("Expecting an integer index for the array, but found \"" + index
+										+ "\". (Array is not associative, and cannot accept string keys here.)", ExceptionType.CastException, t);
+							} else {
+								throw new ConfigRuntimeException("Expecting an array, but \"" + args[0] + "\" was found.", ExceptionType.CastException, t);
+							}
 						} else {
 							throw e;
 						}
