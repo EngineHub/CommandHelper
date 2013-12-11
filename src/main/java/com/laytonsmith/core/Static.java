@@ -132,7 +132,8 @@ public final class Static {
     }
 	
 	public static float getDouble32(Construct c, Target t){
-		double delta = 0.000000001; //Eight places should be enough, right?
+		// Use 6 places at most else the imprecisions of float makes this function throw the exception.
+		double delta = 0.0000001; 
 		double l = getDouble(c, t);
 		float f = (float)l;
 		if(Math.abs(f - l) > delta){
