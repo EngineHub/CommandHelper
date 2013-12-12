@@ -1116,6 +1116,59 @@ public class DataHandling {
 	}
 
 	@api
+	public static class is_bytearray extends AbstractFunction implements Optimizable {
+
+		public String getName() {
+			return "is_bytearray";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "boolean {item} Returns whether or not the item is actually a ByteArray datatype.";
+		}
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			return new CBoolean((args[0] instanceof CByteArray), t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_bytearray(string_get_bytes('yay'))"),
+				new ExampleScript("False condition", "is_bytearray('Nay')"),
+				new ExampleScript("False condition", "is_bytearray(123)"),
+			};
+		}
+	}
+
+	@api
 	public static class is_array extends AbstractFunction implements Optimizable {
 
 		public String getName() {

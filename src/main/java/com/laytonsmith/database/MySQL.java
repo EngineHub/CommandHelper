@@ -125,6 +125,7 @@ public class MySQL extends DB {
 			}
 			try {
 				return "jdbc:mysql://" + host + ":" + port + "/" + database + "?generateSimpleParameterMetadata=true"
+						+ "&jdbcCompliantTruncation=false"
 						+ (username==null?"":"&user=" + URLEncoder.encode(username, "UTF-8"))
 						+ (password==null?"":"&password=" + URLEncoder.encode(password, "UTF-8"));
 			} catch (UnsupportedEncodingException ex) {

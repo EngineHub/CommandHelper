@@ -7,6 +7,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -93,19 +94,26 @@ public class SQL {
 							}
 						}
 						try {
-							if (type == Types.INTEGER) {
-								ps.setInt(i + 1, (Integer) Static.getInt32(params[i], t));
-							} else if (type == Types.DOUBLE) {
+							if (params[i] instanceof CInt) {
+								ps.setLong(i + 1, Static.getInt(params[i], t));
+							} else if (params[i] instanceof CDouble) {
 								ps.setDouble(i + 1, (Double) Static.getDouble(params[i], t));
-							} else if (type == Types.VARCHAR || type == Types.CHAR) {
+							} else if (params[i] instanceof CString) {
 								ps.setString(i + 1, (String) params[i].val());
-							} else if (type == Types.BOOLEAN) {
-								ps.setBoolean(i + 1, (Boolean) Static.getBoolean(params[i]));
+							} else if (params[i] instanceof CByteArray) {
+								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
+							} else if (params[i] instanceof CBoolean) {
+								ps.setBoolean(i + 1, Static.getBoolean(params[i]));
+							}else{
+								throw new ConfigRuntimeException("The type " + params[i].getClass().getSimpleName() 
+										+ " of parameter " + (i + 1) + " is not supported."
+										, ExceptionType.CastException, t);
 							}
 						} catch (ClassCastException ex) {
 							throw new ConfigRuntimeException("Could not cast parameter " + (i + 1) + " to "
-									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from " + params[i].getClass().getSimpleName(),
-									ExceptionType.CastException, t, ex);
+									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from " 
+									+ params[i].getClass().getSimpleName() + "."
+									, ExceptionType.CastException, t, ex);
 						}
 					}
 					boolean isResultSet = ps.execute();
@@ -119,17 +127,41 @@ public class SQL {
 							for (int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
-								if (columnType == Types.INTEGER) {
-									value = new CInt(rs.getInt(i), t);
-								} else if (columnType == Types.DOUBLE) {
+								if (columnType == Types.INTEGER 
+										|| columnType == Types.TINYINT
+										|| columnType == Types.SMALLINT
+										|| columnType == Types.BIGINT) {
+									value = new CInt(rs.getLong(i), t);
+								} else if (columnType == Types.FLOAT
+										|| columnType == Types.DOUBLE
+										|| columnType == Types.REAL
+										|| columnType == Types.DECIMAL
+										|| columnType == Types.NUMERIC) {
 									value = new CDouble(rs.getDouble(i), t);
-								} else if (columnType == Types.VARCHAR || columnType == Types.CHAR) {
+								} else if (columnType == Types.VARCHAR
+										|| columnType == Types.CHAR 
+										|| columnType == Types.LONGVARCHAR) {
 									value = new CString(rs.getString(i), t);
-								} else if (columnType == Types.BOOLEAN) {
+								} else if (columnType == Types.BLOB 
+										|| columnType == Types.BINARY 
+										|| columnType == Types.VARBINARY 
+										|| columnType == Types.LONGVARBINARY) {
+									value = CByteArray.wrap(rs.getBytes(i), t);
+								} else if (columnType == Types.DATE
+										|| columnType == Types.TIME
+										|| columnType == Types.TIMESTAMP) {
+									if (md.getColumnTypeName(i).equals("YEAR")){
+										value = new CInt(rs.getLong(i), t);
+									} else {
+										value = new CInt(rs.getTimestamp(i).getTime(), t);
+									}
+								} else if (columnType == Types.BOOLEAN
+										|| columnType == Types.BIT) {
 									value = new CBoolean(rs.getBoolean(i), t);
 								} else {
-									//For now, continue. Perhaps later, we can do something different.
-									continue;
+									throw new ConfigRuntimeException("SQL returned a unhandled column type " 
+											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "." 
+											, ExceptionType.CastException, t);
 								}
 								row.set(md.getColumnName(i), value, t);
 							}
@@ -147,10 +179,10 @@ public class SQL {
 						return new CNull(t);
 					}
 				} finally {
-					if(conn != null){ 
+					if (conn != null) { 
 						conn.close();
 					}
-					if(ps != null){
+					if (ps != null) {
 						ps.close();
 					}
 				}
@@ -173,18 +205,7 @@ public class SQL {
 
 		@Override
 		public String docs() {
-			return "mixed {profile, query, [params...]} Executes an SQL query, and returns various data depending on the query type. See the extended information"
-					+ " for more details. The profile is either a string, which represents a pre-configured database connection, or an array, which"
-					+ " can include dynamic connection information. The query is the SQL query itself, with question marks (?) that represent input parameters,"
-					+ " and the params are the input parameters themselves. Compile time checking is done, if possible, to ensure that the correct number of"
-					+ " parameters is passed, based on the number of question marks in the query. It is never a good idea to dynamically create the query, so"
-					+ " a compiler warning is issued if a query is dynamically being built. See [[CommandHelper/SQL|this page]] for more details about the SQL"
-					+ " module. ----"
-					+ " For SELECT queries, an array of associative arrays is returned. It is not guaranteed that the arrays themselves are edittable, so this"
-					+ " returned array should be considerd \"read-only\". Optimizations will be added later to make this more efficient. For INSERT queries,"
-					+ " either null or an integer is returned. If the insert caused an auto-increment to occur, that auto-increment ID is returned. Otherwise,"
-					+ " null is returned. For UPDATE, DELETE, or schema changing queries, null is always returned. In the event that an SQL query is incorrect"
-					+ " or otherwise causes an error, an SQLException is thrown. Only primitive data types are supported for the parameters, arrays are not.";
+			return getBundledDocs();
 		}
 
 		@Override
