@@ -263,9 +263,7 @@ public class Interpreter {
 				p.stop();
 			}
 		} catch (CancelCommandException e) {
-			if (System.console() != null) {
-				pl(":");
-			}
+			//Nothing
 		} catch (ConfigRuntimeException e) {
 			ConfigRuntimeException.React(e, env);
 			//No need for the full stack trace

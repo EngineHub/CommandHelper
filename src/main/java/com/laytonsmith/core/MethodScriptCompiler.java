@@ -1279,7 +1279,7 @@ public final class MethodScriptCompiler {
 						//First, a compiler warning
 						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
 						//Now, truncate the children
-						for(int j = i + 1; j < children.size(); j++){
+						for(int j = children.size() - 1; j > i; j--){
 							children.remove(j);							
 						}
 						break outer;

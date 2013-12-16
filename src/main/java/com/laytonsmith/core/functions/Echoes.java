@@ -8,7 +8,6 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
 
 /**
  *
@@ -40,7 +38,7 @@ public class Echoes {
     @api(environments={CommandHelperEnvironment.class})
 	@noboilerplate 
 	public static class die extends AbstractFunction implements Optimizable {
-        public Integer []numArgs() {
+        public Integer [] numArgs() {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
