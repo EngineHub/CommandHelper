@@ -1,0 +1,56 @@
+mixed {profile, query, [parameters...]} Executes an SQL query, and returns various data depending on the query type. 
+See the extended information for more details. ----
+
+The profile is either a string, which represents a pre-configured database connection, or an array, which
+can include dynamic connection information.
+
+The query is the SQL query itself, with question marks (?) that represent input parameters, and the parameters are the 
+input parameters themselves. Compile time checking is done, if possible, to ensure that the correct number of 
+parameters is passed, based on the number of question marks in the query. It is never a good idea to dynamically 
+create the query, so a compiler warning is issued if a query is dynamically being built. 
+See [[CommandHelper/SQL|this page]] for more details about the SQL module.
+
+For SELECT queries, an array of associative arrays is returned. It is not guaranteed that the arrays themselves are 
+editable, so this returned array should be considered \"read-only\". Optimizations will be added later to make this 
+more efficient. For INSERT queries, either null or an integer is returned. If the insert caused an auto-increment to 
+occur, that auto-increment ID is returned. Otherwise, null is returned. For UPDATE, DELETE, or schema changing 
+queries, null is always returned. In the event that an SQL query is incorrect or otherwise causes an error, an 
+SQLException is thrown. Only primitive data types are supported for the parameters, arrays are not.
+
+==== MySQL Data Conversion ===
+
+When inserting data into a MySQL database the data types are converted to match whatever the column type is. If the 
+data you insert is longer or has more precision then the MySQL data type supports it will be truncated and may result 
+in loss of data.
+
+===== Dates =====
+
+When inserting dates you should insert them as strings. The following are examples of correctly converted dates:
+
+{| cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|- 
+! MySQL Data Type !! MethodScript !! Notes
+|-
+| DATE || simple_date('yyyy-MM-dd', time()) || 
+|-
+| DATETIME || simple_date('yyyy-MM-dd HH:mm:ss', time()) ||  
+|-
+| TIME || simple_date('HH:mm:ss', time()) || 
+|-
+| TIMESTAMP || simple_date('yyyy-MM-dd HH:mm:ss', time()) || Even though a timestamp is numeric MySQL handles it the same as DATETIME.
+|-
+| YEAR || simple_date('yyyy', time()) || Alternately you can use a integer here too.
+|}
+
+All date and time types will be retrieved as an integer in milliseconds since January 1, 1970, 00:00:00 GMT. 
+You can then use simple_date() to make it a human readable date string.
+
+===== ByteArrays =====
+
+MySQL data types: BINARY, VARBINARY, TINYBLOB, BLOB, MEDIUMBLOB, LONGBLOB and BIT with more then one bit will return 
+as a ByteArray. It is however not required that you insert these types as a ByteArray (but it is supported).
+
+===== Booleans =====
+
+MySQL's BIT type with only one bit will be retrieved as a boolean. When setting the BIT type you can use a 
+integer (0 or 1), string ("true", "false", "0", "1") and a boolean.

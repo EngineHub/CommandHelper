@@ -430,6 +430,8 @@ public class AliasCore {
 				EventUtils.UnregisterAll();
 				EventList.RunHooks();
 				IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
+				Static.getServer().getMessenger().closeAllChannels(); // Close all channel messager channels registered by CH.
+				
 				scripts = new ArrayList<Script>();
 
 				LocalPackage localPackages = new LocalPackage();
