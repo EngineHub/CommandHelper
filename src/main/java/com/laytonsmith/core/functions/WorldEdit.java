@@ -839,9 +839,6 @@ public class WorldEdit {
 				List<BlockVector> points = new ArrayList<BlockVector>();
 				List<BlockVector2D> points2D = new ArrayList<BlockVector2D>();
 
-				int x = 0;
-				int y = 0;
-				int z = 0;
 
 				int minY = 0;
 				int maxY = 0;
@@ -849,11 +846,11 @@ public class WorldEdit {
 				CArray arg = (CArray) args[args.length - 1];
 
 				for (int i = 0; i < arg.size(); i++) {
-					CArray point = (CArray)arg.get(i, t);
+					MCLocation point = ObjectGenerator.GetGenerator().location(arg.get(i), null, t);
 
-					x = Static.getInt32(point.get(0), t);
-					y = Static.getInt32(point.get(1), t);
-					z = Static.getInt32(point.get(2), t);
+					int x = point.getBlockX();
+					int y = point.getBlockY();
+					int z = point.getBlockZ();
 
 					if (arg.size() == 2) {
 						points.add(new BlockVector(x, y, z));
