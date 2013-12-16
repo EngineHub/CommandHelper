@@ -978,6 +978,10 @@ public class ClassDiscovery {
 				packageRoot = c.getProtectionDomain().getCodeSource().getLocation().toString();
 			}
 			packageRoot = URLDecoder.decode(packageRoot, "UTF-8");
+			if (packageRoot.matches("jar:file:.*!/")) {
+				packageRoot = StringUtils.replaceLast(packageRoot, "!/", "");
+				packageRoot = packageRoot.replaceFirst("jar:", "");
+			}
 			return new URL(packageRoot);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);

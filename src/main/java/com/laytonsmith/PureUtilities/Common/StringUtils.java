@@ -828,7 +828,7 @@ public final class StringUtils {
 			return s.toString();
 		}
 		//Ok, actually have to do the multiply now.
-		StringBuilder b = new StringBuilder();
+		StringBuilder b = new StringBuilder(s.length() * count);
 		for(int i = 0; i < count; i++){
 			b.append(s);
 		}
