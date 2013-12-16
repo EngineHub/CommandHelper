@@ -389,7 +389,7 @@ public class WorldEdit {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
+            return new Integer[]{3};
         }
 
         public String docs() {
