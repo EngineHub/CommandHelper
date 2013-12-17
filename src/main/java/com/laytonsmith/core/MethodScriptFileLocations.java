@@ -4,7 +4,11 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.FileLocations;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -37,7 +41,11 @@ public class MethodScriptFileLocations extends FileLocations {
 			s = StringUtils.replaceLast(s, Pattern.quote(MethodScriptFileLocations.class.getName().replace(".", "/") + ".class"), "");
 			return new File(s);
 		} else {
-			return new File(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+			try {
+				return new File(URLDecoder.decode(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
+			} catch (UnsupportedEncodingException ex) {
+				throw new Error(ex);
+			}
 		}
 	}
 	
