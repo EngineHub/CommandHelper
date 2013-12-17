@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
@@ -79,6 +80,10 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		}
 		try {
 			try {
+				//Get the label from the bind time environment, and put it in the current
+				//environment.
+				String label = b.getEnvironment().getEnv(GlobalEnv.class).GetLabel();
+				env.getEnv(GlobalEnv.class).SetLabel(label);
 				MethodScriptCompiler.execute(tree, env, null, null);
 			} catch(CancelCommandException ex){
 				if(ex.getMessage() != null && !ex.getMessage().equals("")){

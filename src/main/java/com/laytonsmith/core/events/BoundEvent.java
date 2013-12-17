@@ -50,6 +50,12 @@ public class BoundEvent implements Comparable<BoundEvent> {
         }
     }
 
+	/**
+	 * This is the environment that was set at bind time, not the environment
+	 * set during run time. The environment is cloned, so changes to the environment
+	 * will not affect other code.
+	 * @return 
+	 */
 	public Environment getEnvironment() {
 		try {
 			return originalEnv.clone();
