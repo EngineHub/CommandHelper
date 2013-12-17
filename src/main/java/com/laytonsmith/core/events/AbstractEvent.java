@@ -83,6 +83,11 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				//Get the label from the bind time environment, and put it in the current
 				//environment.
 				String label = b.getEnvironment().getEnv(GlobalEnv.class).GetLabel();
+				if(label == null){
+					//Set the permission to global if it's null, since that means
+					//it wasn't set, and so we aren't in a secured environment anyways.
+					label = PermissionsResolver.GLOBAL_PERMISSION;
+				}
 				env.getEnv(GlobalEnv.class).SetLabel(label);
 				MethodScriptCompiler.execute(tree, env, null, null);
 			} catch(CancelCommandException ex){
