@@ -13,8 +13,11 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import java.net.URL;
 import java.util.HashMap;
@@ -75,7 +78,15 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 			event = env.getEnv(GlobalEnv.class).GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
 		}
 		try {
-			MethodScriptCompiler.execute(tree, env, null, null);
+			try {
+				MethodScriptCompiler.execute(tree, env, null, null);
+			} catch(CancelCommandException ex){
+				if(ex.getMessage() != null && !ex.getMessage().equals("")){
+					System.out.println(ex.getMessage());
+				}
+			} catch(ProgramFlowManipulationException ex){
+				ConfigRuntimeException.React(new ConfigRuntimeException("", Exceptions.ExceptionType.FormatException, ex.getTarget()), env);
+			}
 		} finally {
 			if(event != null){
 				event.stop();
