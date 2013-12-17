@@ -13,7 +13,6 @@ public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cl
 	  
     
     private MCCommandSender commandSender = null;
-    private BoundEvent.ActiveEvent event = null;
     private String command = null;		
     
     
@@ -60,18 +59,6 @@ public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cl
     public void SetPlayer(MCPlayer p){
         commandSender = p;
     }    
-    
-    public void SetEvent(BoundEvent.ActiveEvent e){
-        event = e;
-    }
-    
-    /**
-     * Returns the active event, or null if not in scope.
-     * @return 
-     */
-    public BoundEvent.ActiveEvent GetEvent(){
-        return event;
-    }
     
     @Override
     public CommandHelperEnvironment clone() throws CloneNotSupportedException{	    

@@ -347,7 +347,7 @@ public class Interpreter {
 		}
 
 		public Class GetServerEventMixin() {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
+			return ShellEventMixin.class;
 		}
 
 		public MCEnchantment[] GetEnchantmentValues() {

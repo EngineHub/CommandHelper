@@ -7,6 +7,7 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -146,7 +147,7 @@ public class Sandbox {
         }
 
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
+            BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
             if (original == null) {
                 throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
             }
@@ -155,7 +156,7 @@ public class Sandbox {
                 ( (Cancellable) original.getUnderlyingEvent() ).setCancelled(true);
                 BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
             }
-            environment.getEnv(CommandHelperEnvironment.class).GetEvent().setCancelled(true);
+            environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
             return new CVoid(t);
         }
     }

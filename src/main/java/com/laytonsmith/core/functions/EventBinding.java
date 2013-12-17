@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -16,6 +17,7 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -26,6 +28,8 @@ public class EventBinding {
 	public static String docs() {
 		return "This class of functions provide methods to hook deep into the server's event architecture";
 	}
+	
+	private static final AtomicInteger bindCounter = new AtomicInteger(0);
 
 	@api(environments=CommandHelperEnvironment.class)
 	public static class bind extends AbstractFunction {
@@ -121,7 +125,23 @@ public class EventBinding {
 			} catch (EventException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.BindException, t);
 			}
+			
+			//Set up our bind counter
+			synchronized(bindCounter){
+				if(bindCounter.get() == 0){
+					env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
+						@Override
+						public void run() {
+							synchronized(bindCounter){
+								bindCounter.set(0);
+							}
+						}
+					});
+				}
+				bindCounter.incrementAndGet();
+			}
 			return id;
 		}
 
@@ -207,12 +227,18 @@ public class EventBinding {
 				id = args[0].val();
 			} else {
 				//We are cancelling this event. If we are not in an event, throw an exception
-				if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+				if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 					throw new ConfigRuntimeException("No event ID specified, and not running inside an event", ExceptionType.BindException, t);
 				}
-				id = environment.getEnv(CommandHelperEnvironment.class).GetEvent().getBoundEvent().getId();
+				id = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getId();
 			}
 			EventUtils.UnregisterEvent(id);
+			synchronized(bindCounter){
+				bindCounter.decrementAndGet();
+				if(bindCounter.get() == 0){
+					environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+				}
+			}
 			return new CVoid(t);
 		}
 	}
@@ -256,7 +282,7 @@ public class EventBinding {
 				cancelled = Static.getBoolean(args[0]);
 			}
 
-			BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
+			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if (original == null) {
 				throw new ConfigRuntimeException("cancel cannot be called outside an event handler", ExceptionType.BindException, t);
 			}
@@ -300,7 +326,7 @@ public class EventBinding {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
+			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if (original == null) {
 				throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
 			}
@@ -414,18 +440,18 @@ public class EventBinding {
 			if (args.length == 3) {
 				throwOnFailure = Static.getBoolean(args[3]);
 			}
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException(this.getName() + " must be called from within an event handler", ExceptionType.BindException, t);
 			}
-			Event e = environment.getEnv(CommandHelperEnvironment.class).GetEvent().getEventDriver();
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)) {
+			Event e = environment.getEnv(GlobalEnv.class).GetEvent().getEventDriver();
+			if (environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)) {
 				throw new ConfigRuntimeException("Monitor level handlers may not modify an event!", ExceptionType.BindException, t);
 			}
-			ActiveEvent active = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
+			ActiveEvent active = environment.getEnv(GlobalEnv.class).GetEvent();
 			boolean success = false;
 			if (!active.isLocked(parameter)) {
 				try {
-					success = e.modifyEvent(parameter, value, environment.getEnv(CommandHelperEnvironment.class).GetEvent().getUnderlyingEvent());
+					success = e.modifyEvent(parameter, value, environment.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent());
 				} catch (ConfigRuntimeException ex) {
 					ex.setFile(t.file());
 					ex.setLineNum(t.line());
@@ -471,11 +497,11 @@ public class EventBinding {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("lock must be called from within an event handler", ExceptionType.BindException, t);
 			}
 
-			BoundEvent.ActiveEvent e = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
+			BoundEvent.ActiveEvent e = environment.getEnv(GlobalEnv.class).GetEvent();
 			Priority p = e.getBoundEvent().getPriority();
 			List<String> params = new ArrayList<String>();
 			if (args.length == 0) {
@@ -534,10 +560,10 @@ public class EventBinding {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("is_locked may only be called from inside an event handler", ExceptionType.BindException, t);
 			}
-			boolean locked = environment.getEnv(CommandHelperEnvironment.class).GetEvent().isLocked(args[0].val());
+			boolean locked = environment.getEnv(GlobalEnv.class).GetEvent().isLocked(args[0].val());
 			return new CBoolean(locked, t);
 		}
 
@@ -576,10 +602,10 @@ public class EventBinding {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("consume may only be called from an event handler!", ExceptionType.BindException, t);
 			}
-			environment.getEnv(CommandHelperEnvironment.class).GetEvent().consume();
+			environment.getEnv(GlobalEnv.class).GetEvent().consume();
 			return new CVoid(t);
 		}
 
@@ -619,10 +645,10 @@ public class EventBinding {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("is_consumed must be called from within an event handler", ExceptionType.BindException, t);
 			}
-			return new CBoolean(environment.getEnv(CommandHelperEnvironment.class).GetEvent().isConsumed(), t);
+			return new CBoolean(environment.getEnv(GlobalEnv.class).GetEvent().isConsumed(), t);
 		}
 
 		public CHVersion since() {
@@ -665,11 +691,11 @@ public class EventBinding {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("event_meta must be called from within an event handler!", ExceptionType.BindException, t);
 			}
 			CArray history = new CArray(t);
-			for (String entry : environment.getEnv(CommandHelperEnvironment.class).GetEvent().getHistory()) {
+			for (String entry : environment.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
 				history.push(new CString(entry, t));
 			}
 			return history;

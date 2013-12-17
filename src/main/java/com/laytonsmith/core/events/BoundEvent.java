@@ -254,7 +254,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
                 }
             }
             env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(eventObjName, ca, Target.UNKNOWN));
-            env.getEnv(CommandHelperEnvironment.class).SetEvent(activeEvent);
+            env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
             activeEvent.addHistory("Triggering bound event: " + this);
             try{
 				ProfilePoint p = env.getEnv(GlobalEnv.class).GetProfiler().start("Executing event handler for " + this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
@@ -290,7 +290,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             ActiveEvent activeEvent = new ActiveEvent(null);
             activeEvent.setParsedEvent(map);
             activeEvent.setBoundEvent(this);
-            env.getEnv(CommandHelperEnvironment.class).SetEvent(activeEvent);
+            env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
             this.execute(env, activeEvent);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
@@ -300,9 +300,8 @@ public class BoundEvent implements Comparable<BoundEvent> {
     private void execute(Environment env, ActiveEvent activeEvent) throws EventException{
         ParseTree superRoot = new ParseTree(null);
         superRoot.addChild(tree);
-        Script s = Script.GenerateScript(superRoot, PermissionsResolver.GLOBAL_PERMISSION);        
         Event myDriver = this.getEventDriver();
-        myDriver.execute(s, this, env, activeEvent);
+        myDriver.execute(superRoot, this, env, activeEvent);
     }
     
 	//TODO: Once ParseTree supports these again, we may bring this back

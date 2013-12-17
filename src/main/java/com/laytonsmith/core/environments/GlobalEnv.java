@@ -10,6 +10,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
+import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
 import com.laytonsmith.persistance.PersistanceNetwork;
@@ -41,6 +42,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private DaemonManager daemonManager = new DaemonManager();
 	private boolean dynamicScriptingMode = false;
 	private Profiles profiles;
+	private BoundEvent.ActiveEvent event = null;
 
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistanceNetwork network, PermissionsResolver resolver, File root, Profiles profiles) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
@@ -245,4 +247,16 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public Profiles getSQLProfiles() {
 		return this.profiles;
 	}
+	
+	public void SetEvent(BoundEvent.ActiveEvent e){
+        event = e;
+    }
+    
+    /**
+     * Returns the active event, or null if not in scope.
+     * @return 
+     */
+    public BoundEvent.ActiveEvent GetEvent(){
+        return event;
+    }
 }

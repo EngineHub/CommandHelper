@@ -3,7 +3,10 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
@@ -56,10 +59,12 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     
     /**
      * This function is run when the actual event occurs.
-     * @param s
-     * @param b 
+	 * @param tree The compiled parse tree
+     * @param b The bound event
+	 * @param env The operating environment
+	 * @param activeEvent The active event being executed
      */
-    public final void execute(Script s, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{          
+    public final void execute(ParseTree tree, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{          
         try{
             preExecution(env, activeEvent);
         } catch(UnsupportedOperationException e){
@@ -70,7 +75,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 			event = env.getEnv(GlobalEnv.class).GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
 		}
 		try {
-			s.run(null, env, null);
+			MethodScriptCompiler.execute(tree, env, null, null);
 		} finally {
 			if(event != null){
 				event.stop();
@@ -121,6 +126,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * Since most events are minecraft events, we return true by default.
      * @return 
      */
+	@Override
     public boolean supportsExternal(){
         return true;
     }
@@ -162,6 +168,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         return mixin.isCancellable(o);
     }
 
+	@Override
     public boolean isCancelled(BindableEvent o) {
         return mixin.isCancelled(o);
     }
@@ -169,6 +176,15 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	@Override
 	public URL getSourceJar() {
 		return ClassDiscovery.GetClassContainer(this.getClass());
+	}
+
+	/**
+	 * Returns true if the event is annotated with @hide
+	 * @return 
+	 */
+	@Override
+	public final boolean appearInDocumentation() {
+		return this.getClass().getAnnotation(hide.class) != null;
 	}
     
 }

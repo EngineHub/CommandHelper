@@ -95,6 +95,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
         return (o._GetObject() instanceof Cancellable);
     }
 
+	@Override
     public boolean isCancelled(BindableEvent o) {
         if(o._GetObject() instanceof Cancellable){
             return ((Cancellable)o._GetObject()).isCancelled();
