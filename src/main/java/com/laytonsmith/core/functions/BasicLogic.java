@@ -1402,7 +1402,7 @@ public class BasicLogic {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().eval(tree, env);
+				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				if (Static.getBoolean(c)) {
 					return new CBoolean(true, t);
 				}
