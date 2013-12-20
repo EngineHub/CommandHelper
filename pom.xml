@@ -768,6 +768,7 @@
 					<outputDirectory>src/main/generated</outputDirectory>
 					<processors>
 						<processor>com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>
+						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
 					</processors>
 				</configuration>
 			</plugin>
