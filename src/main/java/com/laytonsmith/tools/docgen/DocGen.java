@@ -48,7 +48,7 @@ public class DocGen {
 			System.out.println(examples("string_append", true));
 			//System.exit(0);
 			//events("wiki");
-			//System.out.println(Template("persistance_network"));
+			//System.out.println(Template("persistence_network"));
 		} catch(Throwable t){
 			t.printStackTrace();
 			System.exit(1);

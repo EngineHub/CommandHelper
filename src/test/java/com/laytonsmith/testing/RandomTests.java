@@ -18,8 +18,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import static com.laytonsmith.testing.StaticTest.*;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
@@ -278,8 +278,8 @@ public class RandomTests {
 			ConnectionMixinFactory.ConnectionMixinOptions options;
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(new File("."));
-			PersistanceNetwork network = new PersistanceNetwork("**=json://persistance.json", new URI("default"), options);
-			ReflectionUtils.set(GlobalEnv.class, g, "persistanceNetwork", network);
+			PersistenceNetwork network = new PersistenceNetwork("**=json://persistence.json", new URI("default"), options);
+			ReflectionUtils.set(GlobalEnv.class, g, "persistenceNetwork", network);
 			Run("store_value('t.test1', 'test')\n"
 					+ "store_value('t.test2', 'test')\n"
 					+ "store_value('t.test3.third', 'test')\n"
@@ -291,7 +291,7 @@ public class RandomTests {
 			}, env);
 			verify(fakePlayer).sendMessage("{t.test1: test, t.test2: test, t.test3.third: test}");
 		} finally {
-			new File("persistance.json").deleteOnExit();
+			new File("persistence.json").deleteOnExit();
 		}
 	}
 	

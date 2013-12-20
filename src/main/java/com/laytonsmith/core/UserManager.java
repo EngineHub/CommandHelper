@@ -9,9 +9,9 @@ import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.persistance.DataSourceException;
-import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.ReadOnlyException;
+import com.laytonsmith.persistence.DataSourceException;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.ReadOnlyException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class UserManager {
         return lastCommand;
     }
     
-    public int addAlias(String alias, PersistanceNetwork persist) throws ConfigCompileException, DataSourceException, ReadOnlyException, IOException {
+    public int addAlias(String alias, PersistenceNetwork persist) throws ConfigCompileException, DataSourceException, ReadOnlyException, IOException {
         try{
             MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias, new File("User Alias (" + name + ")"), false)).get(0).compile();
         } catch(IndexOutOfBoundsException e){
@@ -79,7 +79,7 @@ public class UserManager {
     }
     
     public Script getAlias(int id, Environment env) throws ConfigCompileException, DataSourceException{
-        String alias = env.getEnv(GlobalEnv.class).GetPersistanceNetwork().get(new String[]{"user", name, "aliases", Integer.toString(id)});
+        String alias = env.getEnv(GlobalEnv.class).GetPersistenceNetwork().get(new String[]{"user", name, "aliases", Integer.toString(id)});
         if(alias == null){
             return null;
         }
@@ -97,7 +97,7 @@ public class UserManager {
         return MethodScriptCompiler.preprocess(tokens).get(0);
     }
     
-    public void delAlias(int id, PersistanceNetwork persist) throws DataSourceException, ReadOnlyException, IOException{
+    public void delAlias(int id, PersistenceNetwork persist) throws DataSourceException, ReadOnlyException, IOException{
 		DaemonManager dm = new DaemonManager();
         persist.set(dm, new String[]{"user", name, "aliases", Integer.toString(id)}, null);
 		try{
@@ -107,7 +107,7 @@ public class UserManager {
 		}
     }
     
-    public String getAllAliases(int page, PersistanceNetwork persist) throws DataSourceException{
+    public String getAllAliases(int page, PersistenceNetwork persist) throws DataSourceException{
         if(page < 1){
             page = 1;
         }
@@ -127,7 +127,7 @@ public class UserManager {
         return b.toString();
     }
     
-    public List<Script> getAllScripts(PersistanceNetwork persist) throws DataSourceException{
+    public List<Script> getAllScripts(PersistenceNetwork persist) throws DataSourceException{
         Map<String[], String> scripts = persist.getNamespace(new String[]{"user", name, "aliases"});
         List<Script> list = new ArrayList<Script>();
         for(String[] entry : scripts.keySet()){

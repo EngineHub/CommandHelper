@@ -15,9 +15,9 @@ import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
-import com.laytonsmith.persistance.DataSourceException;
-import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import com.laytonsmith.persistence.DataSourceException;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.io.File;
@@ -1028,10 +1028,10 @@ public final class Static {
 		Installer.Install(platformFolder);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(platformFolder);
-		PersistanceNetwork persistanceNetwork = new PersistanceNetwork(new File(platformFolder, "persistance.config"), 
-				new URI("sqlite://" + new File(platformFolder, "persistance.db").getCanonicalPath().replace("\\", "/")), options);
+		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(), 
+				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace("\\", "/")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"), 
-				new Profiler(new File(platformFolder, "profiler.config")), persistanceNetwork, permissionsResolver, platformFolder,
+				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, permissionsResolver, platformFolder,
 				new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());

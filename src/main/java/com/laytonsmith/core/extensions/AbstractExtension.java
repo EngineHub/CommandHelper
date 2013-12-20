@@ -59,7 +59,7 @@ public abstract class AbstractExtension implements Extension {
 	 * @param reloadGlobals
 	 * @param reloadTimeouts
 	 * @param reloadExecutionQueue
-	 * @param reloadPersistanceConfig
+	 * @param reloadPersistenceConfig
 	 * @param reloadPreferences
 	 * @param reloadProfiler
 	 * @param reloadScripts
@@ -67,7 +67,7 @@ public abstract class AbstractExtension implements Extension {
 	 */
 	@Override
 	public void onPreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, 
-					boolean reloadExecutionQueue, boolean reloadPersistanceConfig, 
+					boolean reloadExecutionQueue, boolean reloadPersistenceConfig, 
 					boolean reloadPreferences, boolean reloadProfiler, 
 					boolean reloadScripts, boolean reloadExtensions) {}
 

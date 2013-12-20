@@ -145,13 +145,13 @@ public class ExtensionManager {
         }
 
         public static void PreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, 
-                        boolean reloadExecutionQueue, boolean reloadPersistanceConfig, 
+                        boolean reloadExecutionQueue, boolean reloadPersistenceConfig, 
                         boolean reloadPreferences, boolean reloadProfiler, 
                         boolean reloadScripts, boolean reloadExtensions) {
                 for(Extension ext : extensions.values()) {
                         try {
                                 ext.onPreReloadAliases(reloadGlobals, reloadTimeouts, reloadExecutionQueue, 
-                                                reloadPersistanceConfig, reloadPreferences, 
+                                                reloadPersistenceConfig, reloadPreferences, 
                                                 reloadProfiler, reloadScripts, reloadExtensions);
                         } catch (Throwable e) {
                                 Logger log = Logger.getLogger(ExtensionManager.class.getName());

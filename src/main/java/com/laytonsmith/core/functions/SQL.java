@@ -1,14 +1,19 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -16,6 +21,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.database.Profiles;
@@ -28,8 +34,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -41,7 +50,7 @@ public class SQL {
 	}
 
 	@api
-	public static class query extends AbstractFunction {
+	public static class query extends AbstractFunction implements Optimizable{
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -194,6 +203,40 @@ public class SQL {
 		}
 
 		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			//We can check 2 things here, one, that the statement isn't dynamic, and if not, then
+			//2, that the parameter count matches the ? count. No checks can be done for typing,
+			//without making a connection to the db though, so we won't do that here.
+			Construct queryData = children.get(1).getData();
+			if(queryData instanceof CFunction){
+				//If it's a concat or sconcat, warn them that this is bad
+				if("sconcat".equals(queryData.val()) || "concat".equals(queryData.val())){
+					CHLog.GetLogger().w(CHLog.Tags.COMPILER, "Use of concatenated query detected! This"
+							+ " is very bad practice, and could lead to SQL injection vulnerabilities"
+							+ " in your code. It is highly recommended that you use prepared queries,"
+							+ " which ensure that your parameters are properly escaped.", t);
+				}
+			} else if(queryData instanceof CString){
+				//It's a hard coded query, so we can double check parameter lengths
+				int count = 0;
+				for(char c : queryData.val().toCharArray()){
+					if(c == '?'){
+						count++;
+					}
+				}
+				//-2 accounts for the profile data and query
+				if(children.size() - 2 != count){
+					throw new ConfigCompileException(
+							StringUtils.PluralTemplateHelper(count, "%d parameter token was", "%d parameter tokens were") 
+									+ " found in the query, but "
+									+ StringUtils.PluralTemplateHelper(children.size() - 2, "%d parameter was", "%d parameters were")
+									+ " provided to query().", t);
+				}
+			}
+			return null;
+		}
+
+		@Override
 		public String getName() {
 			return "query";
 		}
@@ -211,6 +254,11 @@ public class SQL {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
 	}

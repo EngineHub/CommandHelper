@@ -14,7 +14,7 @@ import com.laytonsmith.core.functions.Crypto;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;

@@ -1,5 +1,3 @@
-{{unimplemented}}
-
 MethodScript provides various methods for connecting to and running SQL commands.
 The methods exposed ALWAYS use prepared queries, making your code far less prone
 to database injection attacks, as well as better compile time checks where possible.

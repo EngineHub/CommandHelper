@@ -18,7 +18,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistence.DataSourceException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -478,7 +478,7 @@ public class Meta {
 			if (p instanceof MCPlayer) {
 				try {
 					// p might be null
-					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistanceNetwork())) {
+					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistenceNetwork())) {
 						if (s.match(args[0].val())) {
 							return new CBoolean(true, t);
 						}

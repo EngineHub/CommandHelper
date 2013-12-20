@@ -14,8 +14,8 @@ import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.*;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
@@ -72,7 +72,7 @@ public class Main {
 		suite.addMode("help", helpMode).addModeAlias("--help", "help").addModeAlias("-help", "help")
 				.addModeAlias("/?", "help");
 		managerMode = ArgumentParser.GetParser()
-				.addDescription("Launches the built in interactive data manager, which will allow command line access to the full persistance database.");
+				.addDescription("Launches the built in interactive data manager, which will allow command line access to the full persistence database.");
 		suite.addMode("manager", managerMode);
 		interpreterMode = ArgumentParser.GetParser()
 				.addDescription("Launches the minimal cmdline interpreter. Note that many things don't work properly, and this feature is mostly experimental"
@@ -226,8 +226,8 @@ public class Main {
 			} else if (mode == printDBMode) {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-				PersistanceNetwork pn = new PersistanceNetwork(MethodScriptFileLocations.getDefault().getPersistanceConfig(),
-						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistanceDBFile().getCanonicalPath()
+				PersistenceNetwork pn = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile().getCanonicalPath()
 								//This replace is required on Windows.
 								.replace("\\", "/")), options);
 				Map<String[], String> values = pn.getNamespace(new String[]{});

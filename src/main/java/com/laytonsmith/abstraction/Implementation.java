@@ -51,7 +51,6 @@ public final class Implementation {
 				public void run() {
 					try {
 						//This goes ahead and runs the cache, which we can offset to our own thread.
-						StaticLayer.GetConvertor().getMaxBlockID();
 						try {
 							//Let the server startup data blindness go by first, so we display any error messages prominently,
 							//since an Error is a case of very bad code that shouldn't have been released to begin with.
@@ -59,6 +58,7 @@ public final class Implementation {
 						} catch (InterruptedException ex) {
 							//
 						}
+						StaticLayer.GetConvertor().getMaxBlockID();
 						Set<Class> abstractionenums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
 						for (Class c : abstractionenums) {
 							abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);

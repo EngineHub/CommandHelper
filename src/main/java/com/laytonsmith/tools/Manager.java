@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -21,14 +22,14 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
-import com.laytonsmith.persistance.DataSource;
-import com.laytonsmith.persistance.DataSourceException;
-import com.laytonsmith.persistance.DataSourceFactory;
-import com.laytonsmith.persistance.DataSourceFilter;
-import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.ReadOnlyException;
-import com.laytonsmith.persistance.SerializedPersistance;
-import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import com.laytonsmith.persistence.DataSource;
+import com.laytonsmith.persistence.DataSourceException;
+import com.laytonsmith.persistence.DataSourceFactory;
+import com.laytonsmith.persistence.DataSourceFilter;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.ReadOnlyException;
+import com.laytonsmith.persistence.SerializedPersistence;
+import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -50,19 +51,19 @@ public class Manager {
 	private static GlobalEnv gEnv;
 	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
 	private static final File chDirectory = new File(jarLocation, "CommandHelper");
-	private static PersistanceNetwork persistanceNetwork;
+	private static PersistenceNetwork persistenceNetwork;
 
 	public static void start() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		Implementation.useAbstractEnumThread(false);
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(chDirectory);
-		persistanceNetwork = new PersistanceNetwork(new File(chDirectory, "persistance.config"), 
-				new File(chDirectory, "persistance.db").toURI(), options);
+		persistenceNetwork = new PersistenceNetwork(CommandHelperFileLocations.getDefault().getPersistenceConfig(), 
+				CommandHelperFileLocations.getDefault().getDefaultPersistenceDBFile().toURI(), options);
 		Installer.Install(chDirectory);
 		CHLog.initialize(chDirectory);
-		profiler = new Profiler(new File(chDirectory, "profiler.config"));
-		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistanceNetwork, 
+		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
+		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork, 
 				new PermissionsResolver.PermissiveResolver(), chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
@@ -125,7 +126,7 @@ public class Manager {
 			do {
 				//Get the source connection set up
 				pl(YELLOW + "What is the source connection you would like to read the keys from?\n"
-						+ "(Type the connection exactly as you would in the persistance configuration,\n"
+						+ "(Type the connection exactly as you would in the persistence configuration,\n"
 						+ "aliases are not supported)");
 				String ssource = prompt();
 				try {
@@ -254,18 +255,18 @@ public class Manager {
 	public static void cleardb() {
 		try{
 			pl(RED + "Are you absolutely sure you want to clear out your database? " + BLINKON + "No backup is going to be made." + BLINKOFF);
-			pl(WHITE + "This will completely wipe your persistance information out. (No other data will be changed)");
+			pl(WHITE + "This will completely wipe your persistence information out. (No other data will be changed)");
 			pl("[YES/No]");
 			String choice = prompt();
 			if (choice.equals("YES")) {
 				pl("Positive? [YES/No]");
 				if (prompt().equals("YES")) {
 					p("Ok, here we go... ");
-					Set<String[]> keySet = persistanceNetwork.getNamespace(new String[]{}).keySet();
+					Set<String[]> keySet = persistenceNetwork.getNamespace(new String[]{}).keySet();
 					DaemonManager dm = new DaemonManager();
 					for(String [] key : keySet){
 						try {
-							persistanceNetwork.clearKey(dm, key);
+							persistenceNetwork.clearKey(dm, key);
 						} catch (ReadOnlyException ex) {
 							pl(RED + "Read only data source found: " + ex.getMessage());
 						}
@@ -290,7 +291,7 @@ public class Manager {
 	public static void help(String[] args) {
 		if (args.length < 1 || args[0].isEmpty()) {
 			pl("Currently, your options are:\n"
-					+ "\t" + GREEN + "refactor" + WHITE + " - Allows you to shuffle data around in the persistance network more granularly than the merge tool.\n"
+					+ "\t" + GREEN + "refactor" + WHITE + " - Allows you to shuffle data around in the persistence network more granularly than the merge tool.\n"
 					+ "\t" + GREEN + "upgrade" + WHITE + " - Runs upgrade scripts on your persisted data\n"
 					+ "\t" + GREEN + "print" + WHITE + " - Prints out the information from your persisted data\n"
 					+ "\t" + GREEN + "cleardb" + WHITE + " - Clears out your database of persisted data\n"
@@ -315,16 +316,16 @@ public class Manager {
 						+ " match the old format is not touched. Do not use this utility unless specifically"
 						+ " told to during upgrade notices.");
 			} else if ("print".equals(args[0])) {
-				pl("Prints out the information in your persistance file. Entries may be narrowed down by"
+				pl("Prints out the information in your persistence file. Entries may be narrowed down by"
 						+ " specifying the namespace (for instance " + MAGENTA + "print user.username" + WHITE
 						+ " will only show that particular users's aliases.) This is namespace based, so you"
 						+ " must provide the entire namespace that your are trying to narrow down."
 						+ "(" + MAGENTA + "print storage" + WHITE + " is valid, but " + MAGENTA + "print stor"
 						+ WHITE + " is not)");
 			} else if ("cleardb".equals(args[0])) {
-				pl("Wipes your database clean of CommandHelper's persistance entries, but not other data. This"
+				pl("Wipes your database clean of CommandHelper's persistence entries, but not other data. This"
 						+ " includes any data that CommandHelper would have inserted into the database, or data"
-						+ " that CommandHelper otherwise knows how to use. If using SerializedPersistance, this"
+						+ " that CommandHelper otherwise knows how to use. If using Serialized Persistence (ser), this"
 						+ " means the entire file. For other data backends, this may vary slightly, for instance,"
 						+ " an SQL backend would only have the CH specific tables truncated, but the rest of the"
 						+ " database would remain untouched.");
@@ -364,7 +365,7 @@ public class Manager {
 				break;
 			} else if (choice.equalsIgnoreCase("a")) {
 				pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
-						+ " persistance format,\nnot the format you use when using store_value().");
+						+ " persistence format,\nnot the format you use when using store_value().");
 				String key = prompt();
 				pl("Provide a value for " + CYAN + key + WHITE + ". This value you provide will"
 						+ " be interpreted as pure MethodScript. (So things like array() will work)");
@@ -374,7 +375,7 @@ public class Manager {
 				}
 			} else if (choice.equalsIgnoreCase("r")) {
 				pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
-						+ " persistance format,\nnot the format you use when using store_value().");
+						+ " persistence format,\nnot the format you use when using store_value().");
 				String key = prompt();
 				if (doRemove(key)) {
 					pl("Value removed!");
@@ -383,7 +384,7 @@ public class Manager {
 				}
 			} else if (choice.equalsIgnoreCase("v")) {
 				pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
-						+ " persistance format,\nnot the format you use when using store_value().");
+						+ " persistence format,\nnot the format you use when using store_value().");
 				String key = prompt();
 				doView(key);
 			} else {
@@ -396,11 +397,11 @@ public class Manager {
 	public static boolean doView(String key) {
 		try {
 			String [] k = key.split("\\.");
-			if (!persistanceNetwork.hasKey(k)) {
+			if (!persistenceNetwork.hasKey(k)) {
 				pl(RED + "That value is not set!");
 				return true;
 			}
-			pl(CYAN + key + ":" + WHITE + persistanceNetwork.get(k));
+			pl(CYAN + key + ":" + WHITE + persistenceNetwork.get(k));
 			return true;
 		} catch (DataSourceException ex) {
 			pl(RED + ex.getMessage());
@@ -416,7 +417,7 @@ public class Manager {
 			pl(CYAN + "Adding: " + WHITE + value);
 			String [] k = key.split("\\.");
 			DaemonManager dm = new DaemonManager();
-			persistanceNetwork.set(dm, k, value);
+			persistenceNetwork.set(dm, k, value);
 			try{
 				dm.waitForThreads();
 			} catch(InterruptedException e){
@@ -432,9 +433,9 @@ public class Manager {
 	public static boolean doRemove(String key) {
 		try {
 			String [] k = key.split("\\.");
-			if (persistanceNetwork.hasKey(k)) {
+			if (persistenceNetwork.hasKey(k)) {
 				DaemonManager dm = new DaemonManager();
-				persistanceNetwork.clearKey(dm, k);
+				persistenceNetwork.clearKey(dm, k);
 				try{
 					dm.waitForThreads();
 				} catch(InterruptedException e){
@@ -453,9 +454,9 @@ public class Manager {
 	public static void print(String[] args) {
 		try{
 			int count = 0;
-			for(String [] key : persistanceNetwork.getNamespace(new String[]{}).keySet()){
+			for(String [] key : persistenceNetwork.getNamespace(new String[]{}).keySet()){
 				count++;
-				pl(CYAN + StringUtils.Join(key, ".") + ": " + WHITE + persistanceNetwork.get(key));
+				pl(CYAN + StringUtils.Join(key, ".") + ": " + WHITE + persistenceNetwork.get(key));
 			}
 			pl(BLUE + count + " items found");
 		} catch(Exception e){
@@ -473,22 +474,22 @@ public class Manager {
 		String choice = prompt();
 		pl();
 		if (choice.equalsIgnoreCase("y")) {
-			//First we have to read in the preferences file, and see what persistance type they are using
+			//First we have to read in the preferences file, and see what persistence type they are using
 			//Only serialization is supported right now
 			String backingType = "serialization";
 			if (backingType.equals("serialization")) {
 				try {
-					//Back up the persistance.ser file
-					File db = new File("CommandHelper/persistance.ser");
+					//Back up the persistence.ser file
+					File db = new File("CommandHelper/persistence.ser");
 					if (!db.exists()) {
-						pl("Looks like you haven't used your persistance file yet.");
+						pl("Looks like you haven't used your persistence file yet.");
 						return;
 					}
-					FileUtil.copy(db, new File("CommandHelper/persistance.ser.bak"), null);
+					FileUtil.copy(db, new File("CommandHelper/persistence.ser.bak"), null);
 					//Now, load in all the data
-					SerializedPersistance sp;
+					SerializedPersistence sp;
 					try {
-						sp = new SerializedPersistance(db);
+						sp = new SerializedPersistence(db);
 						try {
 							sp.load();
 						} catch (Exception ex) {
@@ -496,7 +497,7 @@ public class Manager {
 						}
 						Map<String, String> data = sp.rawData();
 						if (data.isEmpty()) {
-							pl("Looks like you haven't used your persistance file yet.");
+							pl("Looks like you haven't used your persistence file yet.");
 							return;
 						}
 						sp.clearAllData(); //Bye bye!
@@ -581,13 +582,13 @@ public class Manager {
 			File output;
 			while(true){
 				while(true){
-					pl("What keys are you interested in transferring? The filter should be in the same format as the persistance.config file, i.e."
+					pl("What keys are you interested in transferring? The filter should be in the same format as the persistence.ini file, i.e."
 							+ " \"storage.test\" or \"storage.test.**\". If a wildcard is used, multiple keys may be moved, otherwise, only one will"
 							+ " be.");
 					filter = prompt();
 					break;
 				}
-				File def = MethodScriptFileLocations.getDefault().getPersistanceConfig();
+				File def = MethodScriptFileLocations.getDefault().getPersistenceConfig();
 				while(true) {
 					pl("What is the input configuration (where keys will be read in from, then deleted)? Leave blank for the default, which is " + def.toString()
 							+ ". The path should be relative to " + jarLocation.toString());
@@ -639,7 +640,7 @@ public class Manager {
 			pl(YELLOW + "Now beginning transfer...");
 			URI defaultURI;
 			try {
-				defaultURI = new URI("file://persistance.db");
+				defaultURI = new URI("file://persistence.db");
 			} catch (URISyntaxException ex) {
 				throw new Error(ex);
 			}
@@ -647,8 +648,8 @@ public class Manager {
 			try {
 				DaemonManager dm = new DaemonManager();
 				mixinOptions.setWorkingDirectory(chDirectory);
-				PersistanceNetwork pninput = new PersistanceNetwork(input, defaultURI, mixinOptions);
-				PersistanceNetwork pnoutput = new PersistanceNetwork(output, defaultURI, mixinOptions);
+				PersistenceNetwork pninput = new PersistenceNetwork(input, defaultURI, mixinOptions);
+				PersistenceNetwork pnoutput = new PersistenceNetwork(output, defaultURI, mixinOptions);
 				Pattern p = Pattern.compile(DataSourceFilter.toRegex(filter));
 				Map<String[], String> inputData = pninput.getNamespace(new String[]{});
 				boolean errors = false;
@@ -691,7 +692,7 @@ public class Manager {
 					pl(GREEN + "Done!");
 				}
 				pl(GREEN + "If this is being done as part of an entire transfer process, don't forget to set " + output.toString()
-						+ " as your main Persistance Network configuration file.");
+						+ " as your main Persistence Network configuration file.");
 			} catch (IOException ex) {
 				Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (DataSourceException ex) {

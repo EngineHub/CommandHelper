@@ -25,9 +25,9 @@ import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
-import com.laytonsmith.persistance.MemoryDataSource;
-import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import com.laytonsmith.persistence.MemoryDataSource;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.sk89q.util.StringUtil;
 import java.io.*;
 import java.net.URI;
@@ -98,7 +98,7 @@ public class AliasCore {
 		GlobalEnv gEnv;
 		try {
 			gEnv = new GlobalEnv(parent.executionQueue, parent.profiler,
-					parent.persistanceNetwork, parent.permissionsResolver,
+					parent.persistenceNetwork, parent.permissionsResolver,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
 					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		} catch (IOException ex) {
@@ -267,8 +267,7 @@ public class AliasCore {
 				.addFlag('g', "globals", "Specifies the globals memory. (Values stored with export/import.)")
 				.addFlag('t', "tasks", "Specifies the tasks registered with set_interval/set_timeout.")
 				.addFlag('e', "execution-queue", "Specifies the tasks registered in execution queues.")
-				.addFlag('r', "persistance-config", "Specifies that the persistance config file should be reloaded.")
-				.addFlag("persistence-config", "Alias of -r.")
+				.addFlag('r', "persistence-config", "Specifies that the persistence config file should be reloaded.")
 				.addFlag('p', "preferences", "Specifies that the preferences should not be reloaded.")
 				.addFlag('f', "profiler", "Specifies the profiler config should not be reloaded.")
 				.addFlag('s', "scripts", "Specifies that the scripts should not be reloaded.")
@@ -288,7 +287,7 @@ public class AliasCore {
 		boolean reloadGlobals = true;
 		boolean reloadTimeouts = true;
 		boolean reloadExecutionQueue = true;
-		boolean reloadPersistanceConfig = true;
+		boolean reloadPersistenceConfig = true;
 		boolean reloadPreferences = true;
 		boolean reloadProfiler = true;
 		boolean reloadScripts = true;
@@ -315,7 +314,7 @@ public class AliasCore {
 				reloadGlobals = false;
 				reloadTimeouts = false;
 				reloadExecutionQueue = false;
-				reloadPersistanceConfig = false;
+				reloadPersistenceConfig = false;
 				reloadPreferences = false;
 				reloadProfiler = false;
 				reloadScripts = false;
@@ -331,7 +330,7 @@ public class AliasCore {
 				reloadExecutionQueue = !reloadExecutionQueue;
 			}
 			if (results.isFlagSet('r') || results.isFlagSet("persistence-config")) {
-				reloadPersistanceConfig = !reloadPersistanceConfig;
+				reloadPersistenceConfig = !reloadPersistenceConfig;
 			}
 			if (results.isFlagSet('p')) {
 				reloadPreferences = !reloadPreferences;
@@ -354,7 +353,7 @@ public class AliasCore {
 			
 			// Allow new-style extensions know we are about to reload aliases.
 			ExtensionManager.PreReloadAliases(reloadGlobals, reloadTimeouts, 
-				reloadExecutionQueue, reloadPersistanceConfig, reloadPreferences,
+				reloadExecutionQueue, reloadPersistenceConfig, reloadPreferences,
 				reloadProfiler, reloadScripts, reloadExtensions);
  
 			StaticLayer.GetConvertor().runShutdownHooks();
@@ -367,18 +366,18 @@ public class AliasCore {
 			if (parent.profiler == null || reloadProfiler) {
 				parent.profiler = new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
 			}
-			if (parent.persistanceNetwork == null || reloadPersistanceConfig) {
+			if (parent.persistenceNetwork == null || reloadPersistenceConfig) {
 				MemoryDataSource.ClearDatabases();
 				//PacketJumper.startup();
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-				parent.persistanceNetwork = new PersistanceNetwork(MethodScriptFileLocations.getDefault().getPersistanceConfig(),
-						new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistanceDBFile()
+				parent.persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+						new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
 						.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
 			}
 			GlobalEnv gEnv;
 			try {
-				gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver,
+				gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork, parent.permissionsResolver,
 						MethodScriptFileLocations.getDefault().getConfigDirectory(),
 						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 			} catch (Profiles.InvalidProfileException ex) {
