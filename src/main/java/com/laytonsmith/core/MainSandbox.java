@@ -1,21 +1,8 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryURLCache;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.database.DB;
-import com.laytonsmith.database.MySQL;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.net.URI;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * This class is for testing concepts
@@ -140,7 +127,7 @@ public class MainSandbox {
 //		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
 		
 //		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
-//		DB db = new MySQL();
+//		DB db = new MySQLProfile();
 //		db.connect(conn);
 //		Object o = db.query("SELECT * FROM test;");
 		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/test?generateSimpleParameterMetadata=true");

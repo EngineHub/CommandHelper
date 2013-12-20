@@ -89,6 +89,26 @@ on the MySQL website: http://www.mysql.com/
 ! scope="col" width="20%" | Tag
 ! scope="col" width="60%" | Description
 ! scope="col" width="20%" | Status
+|-
+| database
+| The name of the database you are connecting to
+| Required
+|-
+| username
+| The username you are connecting with.
+| Optional
+|-
+| password
+| The password you are connecting with.
+| Optional
+|-
+| host
+| The host you are connecting to. If not specified, "localhost" is assumed.
+| Optional
+|-
+| port
+| The port you are connecting to. If not specified, 3306 is assumed.
+| Optional
 |}
 
 == Making a query ==

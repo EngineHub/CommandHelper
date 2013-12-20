@@ -179,11 +179,11 @@ public class SQL {
 						return new CNull(t);
 					}
 				} finally {
-					if (conn != null) { 
-						conn.close();
-					}
 					if (ps != null) {
 						ps.close();
+					}
+					if (conn != null) { 
+						conn.close();
 					}
 				}
 			} catch (Profiles.InvalidProfileException ex) {
