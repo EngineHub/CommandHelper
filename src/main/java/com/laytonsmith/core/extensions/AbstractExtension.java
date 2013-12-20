@@ -9,7 +9,7 @@ import java.lang.annotation.Annotation;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public abstract class AbstractExtension implements Extension {
-    public AbstractExtension() {};
+    public AbstractExtension() {}
         
     // Identity functions
 
@@ -50,7 +50,7 @@ public abstract class AbstractExtension implements Extension {
 	 * Called when server is loading, or during a /reloadaliases call.
 	 */
 	@Override
-	public void onStartup() {};
+	public void onStartup() {}
 
 	/**
 	 * Called just before the logic in /reloadaliases is called. Won't be called
@@ -82,5 +82,5 @@ public abstract class AbstractExtension implements Extension {
 	 * Called when server is shutting down, or during a /reloadaliases call.
 	 */
 	@Override
-    public void onShutdown() {};
+    public void onShutdown() {}
 }
