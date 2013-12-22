@@ -1,5 +1,4 @@
 
-
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Geometry.Point3D;
@@ -497,7 +496,7 @@ public class PlayerEvents {
             return "{player: <string match> |"
                     + "join_message: <regex>} This event is called when a player logs in. "
                     + "Setting join_message to null causes it to not be displayed at all. Cancelling "
-                    + "the event does not prevent them from logging in. Instead, you should just kick() them."
+                    + "the event does not prevent them from logging in. Instead, you should just pkick() them."
                     + "{player: The player's name | join_message: The default join message | first_login: True if this is the first time"
                     + " the player has logged in.}"
                     + "{join_message}"
