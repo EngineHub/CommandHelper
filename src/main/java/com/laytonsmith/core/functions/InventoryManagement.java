@@ -1600,7 +1600,7 @@ public class InventoryManagement {
 
 			int total = is.getAmount();
 			int remaining = is.getAmount();
-			for (int i = size; i >= 0; i--) {
+			for (int i = size - 1; i >= 0; i--) {
 				MCItemStack iis = inventory.getItem(i);
 				if (remaining <= 0) {
 					break;
