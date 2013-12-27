@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Deprecated // Use LifeCycle classes instead.
 public @interface startup {
 	
 }

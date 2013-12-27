@@ -81,6 +81,7 @@ public class ExtensionManager {
          * This should be run each time the "startup" of the runtime occurs.
          * It registers its own shutdown hook.
          */
+		@SuppressWarnings( "deprecation" )
         public static void Startup(){
                 for(Extension ext : extensions.values()) {
                         try {
