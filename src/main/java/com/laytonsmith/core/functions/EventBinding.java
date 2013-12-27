@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
@@ -10,6 +11,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.BoundEvent.Priority;
+import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -17,6 +19,8 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -704,5 +708,59 @@ public class EventBinding {
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
+	}
+	
+	@api public static class has_bind extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String id = args[0].val();
+			for(Driver d : Driver.values()){
+				for(BoundEvent b : EventUtils.GetEvents(d)){
+					if(b.getId().equals(id)){
+						return new CBoolean(true, t);
+					}
+				}
+			}
+			return new CBoolean(false, t);
+		}
+
+		@Override
+		public String getName() {
+			return "has_bind";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {id} Returns true if a bind with the specified id exists and is"
+					+ " currently bound. False is returned otherwise. This can be used to"
+					+ " pre-emptively avoid a BindException if duplicate ids are used.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }
