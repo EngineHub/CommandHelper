@@ -1456,7 +1456,7 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "nothing {} Shuts down the server.";
+			return "void {} Shuts down the minecraft server instance.";
 		}
 
 		public Version since() {
