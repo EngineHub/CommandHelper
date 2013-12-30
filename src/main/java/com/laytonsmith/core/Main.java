@@ -150,6 +150,7 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 		try {
+			Implementation.setServerType(Implementation.Type.SHELL);
 			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 			Prefs.SetColors();
 			if(Prefs.UseColors()){

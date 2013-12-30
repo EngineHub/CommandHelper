@@ -153,6 +153,12 @@ public class EventBinding {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		@Override
+		public boolean allowBraces() {
+			return true;
+		}
+		
 	}
 
 	@api

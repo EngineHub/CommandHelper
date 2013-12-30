@@ -146,8 +146,7 @@ public class Interpreter {
 		cdc.setLogger(Logger.getLogger(Interpreter.class.getName()));
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Interpreter.class));
-		//First, we need to initialize the convertor
-		Implementation.setServerType(Implementation.Type.SHELL);
+
 		Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		//Next, we need to get the "installation location", so we won't spew config files everywhere
