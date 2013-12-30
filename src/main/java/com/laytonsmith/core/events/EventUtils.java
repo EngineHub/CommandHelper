@@ -170,7 +170,17 @@ public final class EventUtils {
         if (bounded != null) {
             for (BoundEvent b : bounded) {
                 try {
-                    if (b.getEventName().equals(eventName) && driver.matches(b.getPrefilter(), e)) {
+					boolean matches = false;
+					try {
+						driver.matches(b.getPrefilter(), e);
+					} catch(ConfigRuntimeException ex){
+						//This can happen in limited cases, but still needs to be
+						//handled properly. This would happen if, for instance, a
+						//prefilter was configured improperly with bad runtime data.
+						//We use the environment from the bound event.
+						ConfigRuntimeException.React(ex, b.getEnvironment());
+					}
+                    if (b.getEventName().equals(eventName) && matches) {
                         toRun.add(b);
                     }
                 } catch (PrefilterNonMatchException ex) {
