@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.Misc;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
@@ -302,7 +303,6 @@ public class Main {
 				System.out.println(SyntaxHighlighters.generate(type, theme));
 				System.exit(0);
 			} else if (mode == optimizerTestMode) {
-				Implementation.setServerType(Implementation.Type.SHELL);
 				CHLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 				String path = parsedArgs.getStringArgument();
 				File source = new File(path);
@@ -361,6 +361,9 @@ public class Main {
 					outputFile = new FileOutputStream(new File(outputFileS));
 				}
 				Implementation.useAbstractEnumThread(false);
+				//We have to break the rules here, because we want a different server type.
+				//So we have to use reflection to get around the (usually valid) error
+				ReflectionUtils.set(Implementation.class, "serverType", null);
 				Implementation.setServerType(Implementation.Type.BUKKIT);
 				ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 				cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));

@@ -198,6 +198,13 @@ public class Compiler {
 						//Need to autoconcat
 						ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), lhs.getFileOptions());
 						int index = i + 2;
+						//As an incredibly special case, because (@value = !@value) is supported, and
+						//! hasn't been reduced yet, we want to check for that case, and if present, grab
+						//two symbols.
+						if(list.get(index).getData() instanceof CSymbol && list.get(index).getData().val().equals("!")){
+							ac.addChild(list.get(index));
+							list.remove(index);
+						}
 						ac.addChild(list.get(index));
 						list.remove(index);
 						while (true) {
