@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
@@ -311,7 +312,15 @@ public class Meta {
 			if(cmd.equalsIgnoreCase("interpreter-on")){
 				throw new Exceptions.FormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
 			}
-			Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
+			try{
+				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
+			} catch(Exception ex){
+				throw new ConfigRuntimeException("While running the command: \"" + cmd + "\""
+						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
+						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
+						+ " but in the plugin that provides the command.", 
+						ExceptionType.PluginInternalException, t, ex);
+			}
 			return new CVoid(t);
 		}
 
@@ -321,7 +330,7 @@ public class Meta {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PluginInternalException};
 		}
 
 		public boolean isRestricted() {
