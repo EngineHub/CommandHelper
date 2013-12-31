@@ -1130,6 +1130,7 @@ public class Minecraft {
 			try {
 				//Since MCColor actually depends on a bukkit server, we don't want to require that for
 				//the sake of documentation, so we'll build the color list much more carefully.
+				//Note the false, so we don't actually initialize the class.
 				c = Class.forName(MCColor.class.getName(), false, this.getClass().getClassLoader());
 			} catch (ClassNotFoundException ex) {
 				//Hrm...
