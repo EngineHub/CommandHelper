@@ -16,10 +16,10 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
  *
  */
 public class Routines {
-//	public static String docs(){
-//		return "This class of functions provides Routines capabilities. Currently all these functions"
-//				+ " are only available via cmdline.";
-//	}
+	public static String docs(){
+		return "This class of functions provides Routines capabilities. Currently all these functions"
+				+ " are only available via cmdline.";
+	}
 //	
 //	@api public static class get_lock extends AbstractFunction {
 //

@@ -63,7 +63,7 @@ public final class CLock extends Construct {
 		}
 	}
 
-	public Construct getSignal(){
-		
-	}
+//	public Construct getSignal(){
+//		
+//	}
 }

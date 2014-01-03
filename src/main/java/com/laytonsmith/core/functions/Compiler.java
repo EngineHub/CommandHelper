@@ -141,6 +141,28 @@ public class Compiler {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 
+			//In the lexer, array('one' : 1) would return 3 tokens (note the spaces).
+			//We need to correct this by changing this to 'one:' (CLabel) and continuing.
+			for(int i = 0; i < list.size() - 1; i++){
+				if(list.get(i).getData() instanceof CLabel){
+					//else if it's empty, then the previous token is the label
+					if(list.get(i).getData().val().trim().equals("")){
+						//If i == 0, compile error
+						if(i == 0){
+							throw new ConfigCompileException("Unexpected \":\" symbol", list.get(i).getTarget());
+						}
+						//Unless it's not a primitive, in which case, compiler error
+						//TODO: This should be changed to primitive later. For now, it's
+						//just making sure it's not a function
+						if(list.get(i - 1).getData() instanceof CFunction){
+							throw new ConfigCompileException("Expecting label, but found " + list.get(i - 1).getData().val(), list.get(i - 1).getTarget());
+						}
+						Construct c = new CLabel(list.get(i - 1).getData());
+						list.set(i - 1, new ParseTree(c, list.get(i - 1).getFileOptions()));
+						list.remove(i);
+					}
+				}
+			}
 			//Assignment
 			//Note that we are walking the array in reverse, because multiple assignments,
 			//say @a = @b = 1 will break if they look like assign(assign(@a, @b), 1),
