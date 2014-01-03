@@ -344,6 +344,7 @@ public class CByteArray extends Construct implements Sizable {
 	 * capacity.
 	 * @return 
 	 */
+	@Override
 	public long size(){
 		return maxValue;
 	}
@@ -365,6 +366,7 @@ public class CByteArray extends Construct implements Sizable {
 	 * @param pos 
 	 * @param encoding Defaults to UTF-8 if null, but may be specified otherwise
 	 * @throws IndexOutOfBoundsException If the length of the string is greater than 65536 bytes.
+	 * @throws java.io.UnsupportedEncodingException
 	 */
 	public void writeUTF8String(String string, Integer pos, String encoding) throws IndexOutOfBoundsException, UnsupportedEncodingException {
 		byte[] array;
@@ -390,6 +392,7 @@ public class CByteArray extends Construct implements Sizable {
 	 * @param pos
 	 * @param encoding If null, defaults to UTF-8, but may be specified directly.
 	 * @return 
+	 * @throws java.io.UnsupportedEncodingException 
 	 */
 	public String readUTF8String(Integer pos, String encoding) throws UnsupportedEncodingException {
 		if(pos != null){
@@ -434,7 +437,7 @@ public class CByteArray extends Construct implements Sizable {
 	 * This is a more efficient implementation of CArray for the backing byte arrays.
 	 */
 	private static class CArrayByteBacking extends CArray {
-		private byte[] backing;
+		private final byte[] backing;
 		private String value = null;
 		public CArrayByteBacking(byte [] backing, Target t){
 			super(t);
