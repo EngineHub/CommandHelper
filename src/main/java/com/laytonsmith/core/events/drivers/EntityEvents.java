@@ -588,7 +588,7 @@ public class EntityEvents {
 			return "{id: <macro> The entityID | type: <macro> The type of entity being damaged | cause: <macro>"
 				+ " | world: <string match>} Fires when any loaded entity takes damage."
 				+ " {type: The type of entity the got damaged | id: The entityID of the victim"
-				+ " | player: the player who got damaged (only present if type is PLAYER) | world"
+				+ " | player: the player who got damaged (only present if type is PLAYER) | world | location"
 				+ " | cause: The type of damage | amount | damager: If the source of damage is a player this will"
 				+ " contain their name, otherwise it will be the entityID of the damager (only available when"
 				+ " an entity causes damage) | shooter: The name of the player who shot, otherwise the entityID"
@@ -880,7 +880,7 @@ public class EntityEvents {
                     + "{player: The player being damaged | damager: The type of entity causing damage | "
             		+ "amount: amount of damage caused | cause: the cause of damage | "
                     + "data: the attacking player's name or the shooter if damager is a projectile | "
-            		+ "id: EntityID of the damager} "
+            		+ "id: EntityID of the damager, location} "
                     + "{amount} "
                     + "{player|amount|damager|cause|data|id}";
 		}
@@ -914,6 +914,7 @@ public class EntityEvents {
                 map.put("cause",  new CString(event.getCause().name(), Target.UNKNOWN));
                 map.put("amount",  new CDouble(event.getDamage(), Target.UNKNOWN));
                 map.put("id", new CInt(event.getDamager().getEntityId(), Target.UNKNOWN));
+				map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
                 
                 String data = "";
                 if(event.getDamager() instanceof MCPlayer) {
@@ -1190,6 +1191,7 @@ public class EntityEvents {
 			map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
 			map.put("amount", new CDouble(event.getDamage(), Target.UNKNOWN));
 			map.put("world", new CString(event.getEntity().getWorld().getName(), Target.UNKNOWN));
+			map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 
 			if (event instanceof MCEntityDamageByEntityEvent) {
 				MCEntity damager = ((MCEntityDamageByEntityEvent) event).getDamager();
