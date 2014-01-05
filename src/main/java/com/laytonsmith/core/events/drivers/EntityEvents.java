@@ -234,7 +234,7 @@ public class EntityEvents {
 		}
 
 		public String docs() {
-			return "{type: <macro> the entity type of the projectile}"
+			return "{id: <macro> The entityID | type: <macro> the entity type of the projectile}"
 					+ " Fires when a projectile collides with something."
 					+ " {type | id: the entityID of the projectile |" 
 					+ " location: where it makes contact | shooter}"
@@ -247,6 +247,7 @@ public class EntityEvents {
 				BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCProjectileHitEvent) {
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
+				Prefilters.match(prefilter, "id", e.getEntity().getEntityId(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", e.getEntityType().name(), PrefilterType.MACRO);
 				return true;
 			}
