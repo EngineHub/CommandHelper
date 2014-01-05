@@ -22,6 +22,14 @@ public interface MCLocation extends AbstractionObject{
     public int getBlockZ();
 	public MCChunk getChunk();
     public MCBlock getBlock();
+	public MCLocation add(MCLocation vec);
+	public MCLocation add(Velocity vec);
+	public MCLocation add(double x, double y, double z);
+	public MCLocation multiply(double m);
+	public Velocity toVector();
+	public MCLocation subtract(MCLocation vec);
+	public MCLocation subract(Velocity vec);
+	public MCLocation subract(double x, double y, double z);
 
 	public void setX(double x);
 	public void setY(double y);

@@ -24,6 +24,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
+import java.lang.Math;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.SortedMap;
@@ -1094,6 +1095,168 @@ public class World {
 				world.setGameRuleValue(gameRule, Static.getBoolean(args[2]));
 			}
 			return new CVoid(t);
+		}
+	}
+
+	@api
+	public static class location_shift extends AbstractFunction {
+
+		public String getName() {
+			return "location_shift";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{3};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException,
+				ExceptionType.RangeException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "void {location_from, location_to, distance} Shift from one location to another, by defined distance.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+
+			MCLocation from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
+			MCLocation to = ObjectGenerator.GetGenerator().location(args[1], p != null ? p.getWorld() : null, t);
+
+			int distance = Static.getInt32(args[2], t);
+
+			if (distance <= 0) {
+				throw new ConfigRuntimeException("Distance must be greater than 0.", ExceptionType.RangeException, t);
+			}
+
+			MCLocation shifted_from = from;
+
+			Velocity velocity = to.toVector().subtract(from.toVector()).normalize();
+
+			for (int i = 0; i < distance; i++) {
+				shifted_from = shifted_from.add(velocity);
+			}
+			return ObjectGenerator.GetGenerator().location(shifted_from);
+		}
+	}
+
+	@api
+	public static class get_yaw extends AbstractFunction {
+
+		public String getName() {
+			return "get_yaw";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "void {location_from, location_to} Calculate yaw from one location to another.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+
+			MCLocation from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
+			MCLocation to = ObjectGenerator.GetGenerator().location(args[1], p != null ? p.getWorld() : null, t);
+
+			MCLocation subtract = to.subtract(from);
+			double dX = subtract.getX();
+			double dY = subtract.getY();
+			double dZ = subtract.getZ();
+
+			double distanceXZ = Math.sqrt(dX * dX + dZ * dZ);
+
+			double yaw = Math.toDegrees(Math.acos(dX / distanceXZ));
+			if (dZ < 0.0) {
+				yaw += Math.abs(180 - yaw) * 2;
+			}
+
+			return new CDouble(yaw - 90, t);
+		}
+	}
+
+	@api
+	public static class get_pitch extends AbstractFunction {
+
+		public String getName() {
+			return "get_pitch";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public String docs() {
+			return "void {location_from, location_to} Calculate pitch from one location to another.";
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+
+			MCLocation from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
+			MCLocation to = ObjectGenerator.GetGenerator().location(args[1], p != null ? p.getWorld() : null, t);
+
+			MCLocation subtract = to.subtract(from);
+			double dX = subtract.getX();
+			double dY = subtract.getY();
+			double dZ = subtract.getZ();
+
+			double distanceXZ = Math.sqrt(dX * dX + dZ * dZ);
+			double distanceY = Math.sqrt(distanceXZ * distanceXZ + dY * dY);
+
+			double pitch = Math.toDegrees(Math.acos(dY / distanceY)) - 90;
+
+			return new CDouble(pitch, t);
 		}
 	}
 }

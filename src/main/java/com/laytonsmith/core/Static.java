@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -660,7 +661,25 @@ public final class Static {
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
+		throw new ConfigRuntimeException("That entity (ID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
+	}
+
+	/**
+	 * Returns the entity with the specified unique id. If it doesn't exist, a
+	 * ConfigRuntimeException is thrown.
+	 *
+	 * @param id
+	 * @return
+	 */
+	public static MCEntity getEntityByUuid(UUID id, Target t) {
+		for (MCWorld w : Static.getServer().getWorlds()) {
+			for (MCEntity e : w.getEntities()) {
+				if (e.getUniqueId().compareTo(id) == 0) {
+					return StaticLayer.GetCorrectEntity(e);
+				}
+			}
+		}
+		throw new ConfigRuntimeException("That entity (UUID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
 	}
 	
 	/**

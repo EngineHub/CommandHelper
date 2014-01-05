@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import org.bukkit.Location;
+import org.bukkit.util.Vector;
 
 /**
  *
@@ -111,6 +112,46 @@ public class BukkitMCLocation implements MCLocation {
         l.setYaw(y);
     }
 
+	@Override
+	public MCLocation add(MCLocation vec) {
+		return new BukkitMCLocation(l.add(((BukkitMCLocation) vec)._Location()));
+	}
+
+	@Override
+	public MCLocation add(Velocity vec) {
+		return new BukkitMCLocation(l.add(new Vector(vec.x, vec.y, vec.z)));
+	}
+
+	@Override
+	public MCLocation add(double x, double y, double z) {
+		return new BukkitMCLocation(l.add(x, y, z));
+	}
+
+	@Override
+	public MCLocation multiply(double m) {
+		return new BukkitMCLocation(l.multiply(m));
+	}
+
+	@Override
+	public Velocity toVector() {
+		return new Velocity(l.getX(), l.getY(), l.getZ());
+	}
+
+	@Override
+	public MCLocation subtract(MCLocation vec) {
+		return new BukkitMCLocation(l.subtract(((BukkitMCLocation) vec)._Location()));
+	}
+
+	@Override
+	public MCLocation subract(Velocity vec) {
+		return new BukkitMCLocation(l.subtract(new Vector(vec.x, vec.y, vec.z)));
+	}
+
+	@Override
+	public MCLocation subract(double x, double y, double z) {
+		return new BukkitMCLocation(l.subtract(x, y, z));
+	}
+
     @Override
     public MCLocation clone() {
         return new BukkitMCLocation(l.clone());
@@ -146,6 +187,5 @@ public class BukkitMCLocation implements MCLocation {
 	public MCChunk getChunk() {
 		return new BukkitMCChunk(l.getChunk());
 	}
-
 
 }
