@@ -300,6 +300,7 @@ public class DocGenUI extends javax.swing.JFrame {
 	 * @param args the command line arguments
 	 */
 	public static void main(String args[]) {
+		Implementation.setServerType(Implementation.Type.BUKKIT);
 		try {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 		} catch (IOException ex) {
@@ -331,7 +332,6 @@ public class DocGenUI extends javax.swing.JFrame {
 		}
 		
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenUI.class));
-		Implementation.setServerType(Implementation.Type.BUKKIT);
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 		/* Create and display the form */

@@ -50,7 +50,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.database.Profiles;
-import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -146,8 +146,7 @@ public class Interpreter {
 		cdc.setLogger(Logger.getLogger(Interpreter.class.getName()));
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Interpreter.class));
-		//First, we need to initialize the convertor
-		Implementation.setServerType(Implementation.Type.SHELL);
+
 		Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		//Next, we need to get the "installation location", so we won't spew config files everywhere

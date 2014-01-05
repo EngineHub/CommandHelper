@@ -15,8 +15,8 @@ import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.persistance.DataSourceFactory;
-import com.laytonsmith.persistance.PersistanceNetwork;
+import com.laytonsmith.persistence.DataSourceFactory;
+import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -442,7 +442,7 @@ public class Reflection {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			PersistanceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistanceNetwork();
+			PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			return new CString(pn.getKeySource(args[0].val().split("\\.")).toString(), t);
 		}
 
@@ -458,8 +458,8 @@ public class Reflection {
 
 		@Override
 		public String docs() {
-			return "string {persistanceKey} Returns the source file that this key will store a value to in the Persistance Network."
-					+ " For instance, in your persistance.config file, if you have the entry \"storage.test.**=json:///path/to/file.json\","
+			return "string {persistenceKey} Returns the source file that this key will store a value to in the Persistence Network."
+					+ " For instance, in your persistence.ini file, if you have the entry \"storage.test.**=json:///path/to/file.json\","
 					+ " then reflect_value_source('storage.test.testing') would return 'json:///path/to/file.json'. This is useful for"
 					+ " debugging, as it will definitively trace back the source/destination of a value.";
 		}

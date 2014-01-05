@@ -17,6 +17,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -94,8 +95,10 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				if(ex.getMessage() != null && !ex.getMessage().equals("")){
 					System.out.println(ex.getMessage());
 				}
+			} catch(FunctionReturnException ex){
+				//We simply allow this to end the event execution
 			} catch(ProgramFlowManipulationException ex){
-				ConfigRuntimeException.React(new ConfigRuntimeException("", Exceptions.ExceptionType.FormatException, ex.getTarget()), env);
+				ConfigRuntimeException.React(new ConfigRuntimeException("Unexpected control flow operation used.", Exceptions.ExceptionType.FormatException, ex.getTarget()), env);
 			}
 		} finally {
 			if(event != null){

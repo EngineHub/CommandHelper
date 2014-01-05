@@ -1130,6 +1130,7 @@ public class Minecraft {
 			try {
 				//Since MCColor actually depends on a bukkit server, we don't want to require that for
 				//the sake of documentation, so we'll build the color list much more carefully.
+				//Note the false, so we don't actually initialize the class.
 				c = Class.forName(MCColor.class.getName(), false, this.getClass().getClassLoader());
 			} catch (ClassNotFoundException ex) {
 				//Hrm...
@@ -1456,7 +1457,7 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "nothing {} Shuts down the server.";
+			return "void {} Shuts down the minecraft server instance.";
 		}
 
 		public Version since() {

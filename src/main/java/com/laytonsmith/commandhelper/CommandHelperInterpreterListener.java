@@ -129,7 +129,7 @@ public class CommandHelperInterpreterListener implements Listener {
 		GlobalEnv gEnv;
 		try {
 			gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler,
-					plugin.persistanceNetwork, plugin.permissionsResolver,
+					plugin.persistenceNetwork, plugin.permissionsResolver,
 					CommandHelperFileLocations.getDefault().getConfigDirectory(),
 					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		} catch (IOException ex) {

@@ -17,7 +17,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.persistance.DataSource;
+import com.laytonsmith.persistence.DataSource;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -171,7 +171,7 @@ public class DocGenTemplates {
 		}
 	};
 	
-	public static Generator persistance_connections = new Generator(){
+	public static Generator persistence_connections = new Generator(){
 
 		public String generate(String ... args) {
 			Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);

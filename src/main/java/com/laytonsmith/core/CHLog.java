@@ -42,10 +42,10 @@ public final class CHLog {
     private static Preferences prefs;
     private static final EnumMap<Tags, LogLevel> lookup = new EnumMap<Tags, LogLevel>(Tags.class);
     public enum Tags{
-        COMPILER("compiler", "Logs compiler errors (but not runtime errors)", LogLevel.ERROR),
+        COMPILER("compiler", "Logs compiler errors (but not runtime errors)", LogLevel.WARNING),
         RUNTIME("runtime", "Logs runtime errors, (exceptions that bubble all the way to the top)", LogLevel.ERROR),
         DEPRECATION("deprecation", "Shows deprecation warnings", LogLevel.WARNING),
-        PERSISTANCE("persistance", "Logs when any persistance actions occur.", LogLevel.ERROR),
+        PERSISTENCE("persistence", "Logs when any persistence actions occur.", LogLevel.ERROR),
         //TODO Add the rest of these hooks into the code
 //        IO("IO", "Logs when the filesystem is accessed.", Level.OFF),
 //        ALIAS("alias", "Logs use of user aliases.", Level.OFF),
@@ -95,8 +95,7 @@ public final class CHLog {
         }
         CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, header);
         try{
-            File file = new File(new File(root, Prefs.DebugLogFile()).getParentFile(), "loggerPreferences.txt");
-            CHLog.prefs.init(file);
+            CHLog.prefs.init(MethodScriptFileLocations.getDefault().getLoggerPreferencesFile());
         } catch(IOException e){
             Static.getLogger().log(java.util.logging.Level.SEVERE, "Could not create logger preferences", e);
         }

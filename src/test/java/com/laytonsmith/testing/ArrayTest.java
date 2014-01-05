@@ -322,7 +322,7 @@ public class ArrayTest {
         }
     }
     
-    @Test public void testArrayKeysSortOrderWithPersistance() throws ConfigCompileException{
+    @Test public void testArrayKeysSortOrderWithPersistence() throws ConfigCompileException{
         for(int i = 0; i < 5; i++){
             InOrder inOrder = inOrder(fakePlayer);
             when(fakePlayer.isOp()).thenReturn(true);

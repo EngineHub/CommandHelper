@@ -36,9 +36,9 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.persistance.DataSourceException;
-import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.ReadOnlyException;
+import com.laytonsmith.persistence.DataSourceException;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.ReadOnlyException;
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
@@ -85,7 +85,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PermissionsResolver permissionsResolver;
-	public PersistanceNetwork persistanceNetwork;
+	public PersistenceNetwork persistenceNetwork;
 	public boolean firstLoad = true;
 	public long interpreterUnlockedUntil = 0;
 	/**
@@ -107,14 +107,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
+		Implementation.setServerType(Implementation.Type.BUKKIT);
 		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());		
 		CommandHelperFileLocations.getDefault().getCacheDirectory().mkdirs();
+		CommandHelperFileLocations.getDefault().getPreferencesDirectory().mkdirs();
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
 		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
-		Implementation.setServerType(Implementation.Type.BUKKIT);
 		UpgradeLog upgradeLog = new UpgradeLog(CommandHelperFileLocations.getDefault().getUpgradeLogFile());
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
@@ -157,6 +158,56 @@ public class CommandHelperPlugin extends JavaPlugin {
 				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
+			}
+		});
+		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
+
+			File cd = CommandHelperFileLocations.getDefault().getConfigDirectory();
+			private final String breadcrumb = "move-preference-files-v1.0";
+			@Override
+			public boolean doRun() {
+				return !hasBreadcrumb(breadcrumb)
+						&& new File(cd, "preferences.ini").exists();
+			}
+
+			@Override
+			public void run() {
+				//We need to move the following files:
+				//1. persistance.config to prefs/persistence.ini (note the correct spelling)
+				//2. preferences.ini to prefs/preferences.ini
+				//3. profiler.config to prefs/profiler.ini
+				//4. sql-profiles.xml to prefs/sql-profiles.xml
+				//5. We are not moving loggerPreferences.txt, instead just deleting it,
+				//	because the defaults have changed. Most people aren't using this feature
+				//	anyways. (The new one will write itself out upon installation.)
+				//Other than the config/prefs directory, we are hardcoding all the values, so
+				//we know they are correct (for old values). Any errors will be reported, but will not
+				//stop the entire process.
+				CommandHelperFileLocations p = CommandHelperFileLocations.getDefault();
+				try {
+					FileUtil.move(new File(cd, "persistance.config"), p.getPersistenceConfig());
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				try {
+					FileUtil.move(new File(cd, "preferences.ini"), p.getPreferencesFile());
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				try {
+					FileUtil.move(new File(cd, "profiler.config"), p.getProfilerConfigFile());
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				try {
+					FileUtil.move(new File(cd, "sql-profiles.xml"), p.getSQLProfilesFile());
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				new File(cd, "logs/debug/loggerPreferences.txt").delete();
+				leaveBreadcrumb(breadcrumb);
+				System.out.println("CommandHelper: Your preferences files have all been relocated to " + p.getPreferencesDirectory());
+				System.out.println("CommandHelper: The loggerPreferences.txt file has been deleted and re-created, as the defaults have changed.");
 			}
 		});
 		try {
@@ -433,7 +484,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 				String alias = CommandHelperPlugin.joinString(args, " ");
 				try {
-					int id = um.addAlias(alias, persistanceNetwork);
+					int id = um.addAlias(alias, persistenceNetwork);
 					if (id > -1) {
 						Static.SendMessage(player, MCChatColor.YELLOW + "Alias added with id '" + id + "'");
 					}
@@ -463,7 +514,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			} catch (NumberFormatException e) {
 				//Meh. Index out of bounds, or number format exception. Whatever, show page 1
 			}
-			Static.SendMessage(player, um.getAllAliases(page, persistanceNetwork));
+			Static.SendMessage(player, um.getAllAliases(page, persistenceNetwork));
 			commandRunning.remove(player);
 			return true;
 			// Delete alias
@@ -476,7 +527,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			try {
 				ArrayList<String> deleted = new ArrayList<String>();
 				for (String arg : args) {
-					um.delAlias(Integer.parseInt(arg), persistanceNetwork);
+					um.delAlias(Integer.parseInt(arg), persistenceNetwork);
 					deleted.add("#" + arg);
 				}
 				if (args.length > 1) {

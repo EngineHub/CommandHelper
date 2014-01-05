@@ -34,13 +34,15 @@ public interface Extension {
 	 * @param reloadGlobals
 	 * @param reloadTimeouts
 	 * @param reloadExecutionQueue
-	 * @param reloadPersistanceConfig
+	 * @param reloadPersistenceConfig
 	 * @param reloadPreferences
 	 * @param reloadProfiler
 	 * @param reloadScripts
 	 * @param reloadExtensions
 	 */
-	void onPreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, boolean reloadExecutionQueue, boolean reloadPersistanceConfig, boolean reloadPreferences, boolean reloadProfiler, boolean reloadScripts, boolean reloadExtensions);
+	void onPreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, boolean reloadExecutionQueue, 
+			boolean reloadPersistenceConfig, boolean reloadPreferences, boolean reloadProfiler, 
+			boolean reloadScripts, boolean reloadExtensions);
 
 	/**
 	 * Called when server is shutting down, or during a /reloadaliases call.

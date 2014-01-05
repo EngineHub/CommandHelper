@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.Misc;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
@@ -14,8 +15,8 @@ import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.*;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
@@ -72,7 +73,7 @@ public class Main {
 		suite.addMode("help", helpMode).addModeAlias("--help", "help").addModeAlias("-help", "help")
 				.addModeAlias("/?", "help");
 		managerMode = ArgumentParser.GetParser()
-				.addDescription("Launches the built in interactive data manager, which will allow command line access to the full persistance database.");
+				.addDescription("Launches the built in interactive data manager, which will allow command line access to the full persistence database.");
 		suite.addMode("manager", managerMode);
 		interpreterMode = ArgumentParser.GetParser()
 				.addDescription("Launches the minimal cmdline interpreter. Note that many things don't work properly, and this feature is mostly experimental"
@@ -150,6 +151,7 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 		try {
+			Implementation.setServerType(Implementation.Type.SHELL);
 			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 			Prefs.SetColors();
 			if(Prefs.UseColors()){
@@ -226,8 +228,8 @@ public class Main {
 			} else if (mode == printDBMode) {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-				PersistanceNetwork pn = new PersistanceNetwork(MethodScriptFileLocations.getDefault().getPersistanceConfig(),
-						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistanceDBFile().getCanonicalPath()
+				PersistenceNetwork pn = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile().getCanonicalPath()
 								//This replace is required on Windows.
 								.replace("\\", "/")), options);
 				Map<String[], String> values = pn.getNamespace(new String[]{});
@@ -301,7 +303,6 @@ public class Main {
 				System.out.println(SyntaxHighlighters.generate(type, theme));
 				System.exit(0);
 			} else if (mode == optimizerTestMode) {
-				Implementation.setServerType(Implementation.Type.SHELL);
 				CHLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 				String path = parsedArgs.getStringArgument();
 				File source = new File(path);
@@ -360,6 +361,9 @@ public class Main {
 					outputFile = new FileOutputStream(new File(outputFileS));
 				}
 				Implementation.useAbstractEnumThread(false);
+				//We have to break the rules here, because we want a different server type.
+				//So we have to use reflection to get around the (usually valid) error
+				ReflectionUtils.set(Implementation.class, "serverType", null);
 				Implementation.setServerType(Implementation.Type.BUKKIT);
 				ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 				cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));

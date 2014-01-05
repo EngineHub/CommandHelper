@@ -101,8 +101,8 @@ proc(_profileDataSources,
 	@data = array(array_merge(array('iterations:'), @iterations, array('File size with '.@iterations[-1].' values')))
 	foreach(@names, @name,
 		if(@name != 'redis'){
-			if(file_size('../../persistance/persistance.'.@name) != 0){
-				die(color(red).'The persistance/ folder does not appear to be empty, cannot proceed.')
+			if(file_size('../../persistence/persistence.'.@name) != 0){
+				die(color(red).'The persistence/ folder does not appear to be empty, cannot proceed.')
 			}
 		}
 	)
@@ -123,7 +123,7 @@ proc(_profileDataSources,
 					array_push(@rowData, @time)
 		}
 		if(@name != 'redis'){
-			array_push(@rowData, _human_readable_bytes(file_size('../../persistance/persistance.'.@name)))
+			array_push(@rowData, _human_readable_bytes(file_size('../../persistence/persistence.'.@name)))
 		} else {
 			array_push(@rowData, 'Unknown')
 		}
