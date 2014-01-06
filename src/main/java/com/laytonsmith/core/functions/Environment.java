@@ -10,8 +10,6 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
@@ -908,15 +906,14 @@ public class Environment {
 				
 				for (MCPlayer p : players) {
 					if(usingPath) {
-						((BukkitMCPlayer)p)._Player().playSound(((BukkitMCLocation)loc).asLocation(), path, volume, pitch);
+						p.playSoundPath(loc, path, volume, pitch);
 					} else {
 						p.playSound(loc, sound, volume, pitch);
 					}
 				}
 			} else {
 				if(usingPath) {
-					for(MCPlayer p: loc.getWorld().getPlayers())
-						((BukkitMCPlayer)p)._Player().playSound(((BukkitMCLocation)loc).asLocation(), path, volume, pitch);
+					loc.getWorld().playSoundPath(loc, path, volume, pitch);
 				} else {
 					loc.getWorld().playSound(loc, sound, volume, pitch);
 				}
