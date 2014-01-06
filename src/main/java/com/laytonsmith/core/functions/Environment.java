@@ -10,6 +10,8 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
@@ -862,45 +864,62 @@ public class Environment {
 			return false;
 		}
 
+		@SuppressWarnings("deprecation")
 		public Construct exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound = MCSound.BREATH;
+			boolean usingPath = false;
+			String path = null;
 			float volume = 1, pitch = 1;
-			if (!(args[1] instanceof CArray)) {
+			
+			if (!(args[1] instanceof CArray))
 				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
-			}
+	
 			CArray sa = (CArray) args[1];
+			
 			if (sa.containsKey("sound")) {
 				try {
 					sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
 				} catch (IllegalArgumentException iae) {
-
+					usingPath = true;
+					path = sa.get("sound", t).val().toLowerCase();
 				}
 			} else {
 				throw new Exceptions.FormatException("Sound field was missing.", t);
 			}
-			if (sa.containsKey("volume")) {
+			
+			if (sa.containsKey("volume"))
 				volume = Static.getDouble32(sa.get("volume", t), t);
-			}
-			if (sa.containsKey("pitch")) {
-				pitch = Static.getDouble32(sa.get("pitch", t), t);
-			}
+		
+			if (sa.containsKey("pitch"))
+				pitch = Static.getDouble32(sa.get("pitch", t), t); 
+		
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
 				if (args[2] instanceof CArray) {
-					for (String key : ((CArray) args[2]).keySet()) {
+					for (String key : ((CArray) args[2]).keySet())
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
-					}
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
 				}
+				
 				for (MCPlayer p : players) {
-					p.playSound(l, sound, volume, pitch);
+					if(usingPath) {
+						((BukkitMCPlayer)p)._Player().playSound(((BukkitMCLocation)loc).asLocation(), path, volume, pitch);
+					} else {
+						p.playSound(loc, sound, volume, pitch);
+					}
 				}
 			} else {
-				l.getWorld().playSound(l, sound, volume, pitch);
+				if(usingPath) {
+					for(MCPlayer p: loc.getWorld().getPlayers())
+						((BukkitMCPlayer)p)._Player().playSound(((BukkitMCLocation)loc).asLocation(), path, volume, pitch);
+				} else {
+					loc.getWorld().playSound(loc, sound, volume, pitch);
+				}
 			}
 			return new CVoid(t);
 		}
@@ -920,6 +939,8 @@ public class Environment {
 					+ " are optional and default to 1. Players can be a single"
 					+ " player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ----"
+					+ " If the value in 'sound' is none of the below sound names, "
+					+ " sound paths will be used instead. ------------------"
 					+ " Possible sounds: " 
 					+ StringUtils.Join(MCSound.values(), ", ", ", or ", " or ");
 		}
