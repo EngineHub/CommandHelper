@@ -210,7 +210,7 @@ public class BukkitMCWorld implements MCWorld {
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}
 	
-	public void playSoundPath(MCLocation l, String sound, float volume, float pitch) {
+	public void playSound(MCLocation l, String sound, float volume, float pitch) {
 		for(Player p: w.getPlayers())
 			p.playSound(((BukkitMCLocation)l).asLocation(), sound, volume, pitch);
 	}
