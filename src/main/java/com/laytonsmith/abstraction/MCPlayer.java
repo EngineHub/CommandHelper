@@ -118,6 +118,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note);
 	
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
+	
+	public void playSoundPath(MCLocation l, String sound, float volume, float pitch);
 
 	public int getHunger();
 

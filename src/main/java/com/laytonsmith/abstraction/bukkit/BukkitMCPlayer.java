@@ -433,6 +433,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		p.playSound(((BukkitMCLocation) l).asLocation(), 
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}
+	
+	public void playSoundPath(MCLocation l, String sound, float volume, float pitch) {
+		p.playSound(((BukkitMCLocation)l).asLocation(), sound, volume, pitch);
+	}
 
 	public int getHunger() {
 		return p.getFoodLevel();
