@@ -5,9 +5,9 @@ import com.laytonsmith.PureUtilities.ArgumentSuite;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
@@ -17,7 +17,11 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
-import com.laytonsmith.tools.*;
+import com.laytonsmith.tools.ExampleLocalPackageInstaller;
+import com.laytonsmith.tools.Interpreter;
+import com.laytonsmith.tools.MSLPMaker;
+import com.laytonsmith.tools.Manager;
+import com.laytonsmith.tools.SyntaxHighlighters;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenUI;
@@ -297,6 +301,7 @@ public class Main {
 						}, " // "));
 				System.exit(0);
 			} else if (mode == syntaxMode) {
+				// TODO: Maybe load extensions here?
 				List<String> syntax = parsedArgs.getStringListArgument();
 				String type = (syntax.size() >= 1 ? syntax.get(0) : null);
 				String theme = (syntax.size() >= 2 ? syntax.get(1) : null);

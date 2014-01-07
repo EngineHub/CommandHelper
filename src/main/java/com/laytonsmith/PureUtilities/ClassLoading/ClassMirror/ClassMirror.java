@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.RetentionPolicy;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,16 +43,24 @@ public class ClassMirror<T> implements Serializable {
 	 * the wrapped return.
 	 */
 	private final Class underlyingClass;
+        
+	/**
+	 * The original URL that houses this class.
+	**/
+	private final URL originalURL;
 	
 	/**
 	 * Creates a ClassMirror object for a given input stream representing
 	 * a class file.
 	 * @param is
+	 * @param container
 	 * @throws IOException 
 	 */
-	public ClassMirror(InputStream is) throws IOException {
+	public ClassMirror(InputStream is, URL container) throws IOException {
 		reader = new org.objectweb.asm.ClassReader(is);
 		underlyingClass = null;
+		originalURL = container;
+		
 		parse();
 	}
 	
@@ -62,7 +71,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @throws IOException 
 	 */
 	public ClassMirror(File file) throws FileNotFoundException, IOException {
-		this(new FileInputStream(file));
+		this(new FileInputStream(file), file.toURI().toURL());
 	}
 	
 	/**
@@ -85,6 +94,14 @@ public class ClassMirror<T> implements Serializable {
 		reader.accept(info, org.objectweb.asm.ClassReader.SKIP_CODE 
 				| org.objectweb.asm.ClassReader.SKIP_DEBUG 
 				| org.objectweb.asm.ClassReader.SKIP_FRAMES);
+	}
+        
+	/**
+	 * Return the container that houses this class.
+	 * @return 
+	 */
+	public URL getContainer() {
+		return originalURL;
 	}
 	
 	/**
