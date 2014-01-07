@@ -935,7 +935,7 @@ public class Environment {
 	}
 	
 	@api
-	public static class play_sound_custom extends AbstractFunction {
+	public static class play_named_sound extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException,
@@ -995,7 +995,7 @@ public class Environment {
 		}
 
 		public String getName() {
-			return "play_sound_custom";
+			return "play_named_sound";
 		}
 
 		public Integer[] numArgs() {
