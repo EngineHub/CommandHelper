@@ -964,11 +964,10 @@ public class Environment {
 	
 			CArray sa = (CArray) args[1];
 			
-			if (sa.containsKey("sound")) {
-				path = sa.get("sound", t).val().toUpperCase();
-			} else {
+			if (sa.containsKey("sound"))
 				throw new Exceptions.FormatException("Sound field was missing.", t);
-			}
+			
+			path = sa.get("sound", t).val().toLowerCase();
 			
 			if (sa.containsKey("volume"))
 				volume = Static.getDouble32(sa.get("volume", t), t);
