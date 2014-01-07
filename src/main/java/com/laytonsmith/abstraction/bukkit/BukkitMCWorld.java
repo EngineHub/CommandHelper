@@ -41,8 +41,10 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -206,6 +208,11 @@ public class BukkitMCWorld implements MCWorld {
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
 		w.playSound(((BukkitMCLocation) l).asLocation(), 
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
+	}
+	
+	public void playSoundPath(MCLocation l, String sound, float volume, float pitch) {
+		for(Player p: w.getPlayers())
+			p.playSound(((BukkitMCLocation)l).asLocation(), sound, volume, pitch);
 	}
 
     public MCItem dropItemNaturally(MCLocation l, MCItemStack is) {

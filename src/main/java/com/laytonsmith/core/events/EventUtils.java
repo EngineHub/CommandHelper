@@ -15,7 +15,12 @@ import com.laytonsmith.core.functions.Exceptions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -207,11 +212,16 @@ public final class EventUtils {
 	 * type <code>type</code>.
 	 *
 	 * @param type
+	 * @param eventName
 	 * @param e
 	 */
 	public static void TriggerListener(Driver type, String eventName, BindableEvent e) {
 		Event driver = EventList.getEvent(type, eventName);
-		FireListeners(GetMatchingEvents(type, eventName, e, driver), driver, e);
+		if (driver == null) {
+			throw ConfigRuntimeException.CreateUncatchableException("Tried to fire an unknown event: " + eventName, Target.UNKNOWN);
+		} else {
+			FireListeners(GetMatchingEvents(type, eventName, e, driver), driver, e);
+		}
 	}
 
 	public static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, BindableEvent e) {
@@ -267,12 +277,15 @@ public final class EventUtils {
 			} else {
 				try {
 					Object instance = null;
+					
 					if ((m.getModifiers() & Modifier.STATIC) == 0) {
 						//It's not static, so we need an instance. Ideally we could skip
 						//this step, but it's harder to enforce that across jars.
 						//We could emit a warning, but the end user wouldn't know what
 						//to do with that. However, if this step fails (no no-arg constructors
 						//exist) we will be forced to fail.
+						//
+						// TODO: We could preprocess, as we are for lifecycles, and emit errors.
 						try {
 							instance = m.getDeclaringClass().newInstance();
 						} catch (Exception e) {
@@ -285,16 +298,21 @@ public final class EventUtils {
 									+ " author.", e);
 						}
 					}
+					
 					m.invoke(instance, mce);
 				} catch (IllegalAccessException ex) {
-					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, 
+							"Illegal Access Exception while triggering"
+									+ " an external event:", ex.getCause());
 				} catch (IllegalArgumentException ex) {
 					// If we do this, console gets spammed for hooks that don't apply for
 					// the event being fired. Need to check if mce is instance of params[0].
-
+					
 					//Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (InvocationTargetException ex) {
-					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, 
+							"Invocation Target Exception while triggering"
+									+ " an external event:", ex.getCause());
 				}
 			}
 
