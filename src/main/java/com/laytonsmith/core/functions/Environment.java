@@ -910,7 +910,7 @@ public class Environment {
 		}
 
 		public String getName() {
-			return "play_sound_path";
+			return "play_sound";
 		}
 
 		public Integer[] numArgs() {
