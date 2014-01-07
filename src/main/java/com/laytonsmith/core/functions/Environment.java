@@ -964,7 +964,7 @@ public class Environment {
 	
 			CArray sa = (CArray) args[1];
 			
-			if (sa.containsKey("sound"))
+			if (!sa.containsKey("sound"))
 				throw new Exceptions.FormatException("Sound field was missing.", t);
 			
 			path = sa.get("sound", t).val().toLowerCase();
