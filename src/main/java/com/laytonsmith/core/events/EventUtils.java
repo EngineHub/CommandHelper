@@ -175,6 +175,8 @@ public final class EventUtils {
 		//the eventName, and if so, we will also run the prefilter.
 		SortedSet<BoundEvent> bounded = GetEvents(type);
 		if (bounded != null) {
+			//Wrap this in a new set, so we can safely iterate it with async threads
+			bounded = new TreeSet<BoundEvent>(bounded);
 			for (BoundEvent b : bounded) {
 				try {
 					boolean matches = false;
