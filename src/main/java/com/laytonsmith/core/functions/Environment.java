@@ -879,7 +879,7 @@ public class Environment {
 				try {
 					sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
 				} catch (IllegalArgumentException iae) {
-
+					throw new Exceptions.FormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
 				}
 			} else {
 				throw new Exceptions.FormatException("Sound field was missing.", t);
@@ -935,7 +935,7 @@ public class Environment {
 	}
 	
 	@api
-	public static class play_sound_path extends AbstractFunction {
+	public static class play_sound_custom extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException,
@@ -995,7 +995,7 @@ public class Environment {
 		}
 
 		public String getName() {
-			return "play_sound";
+			return "play_sound_custom";
 		}
 
 		public Integer[] numArgs() {
