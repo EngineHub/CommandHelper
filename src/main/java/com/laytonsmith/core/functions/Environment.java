@@ -862,7 +862,6 @@ public class Environment {
 			return false;
 		}
 
-		@SuppressWarnings("deprecation")
 		public Construct exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -911,7 +910,7 @@ public class Environment {
 		}
 
 		public String getName() {
-			return "play_sound";
+			return "play_sound_path";
 		}
 
 		public Integer[] numArgs() {
@@ -952,7 +951,6 @@ public class Environment {
 			return false;
 		}
 
-		@SuppressWarnings("deprecation")
 		public Construct exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
 				Construct... args) throws ConfigRuntimeException {
