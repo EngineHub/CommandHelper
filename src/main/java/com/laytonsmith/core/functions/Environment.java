@@ -956,7 +956,7 @@ public class Environment {
 				Construct... args) throws ConfigRuntimeException {
 			
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			String path = "mob.horse.breath";
+			String path;
 			float volume = 1, pitch = 1;
 			
 			if (!(args[1] instanceof CArray))
