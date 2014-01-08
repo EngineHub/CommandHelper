@@ -862,15 +862,12 @@ public class Environment {
 			return false;
 		}
 
-		@SuppressWarnings("deprecation")
 		public Construct exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound = MCSound.BREATH;
-			boolean usingPath = false;
-			String path = null;
 			float volume = 1, pitch = 1;
 			
 			if (!(args[1] instanceof CArray))
@@ -882,8 +879,7 @@ public class Environment {
 				try {
 					sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
 				} catch (IllegalArgumentException iae) {
-					usingPath = true;
-					path = sa.get("sound", t).val().toLowerCase();
+					throw new Exceptions.FormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
 				}
 			} else {
 				throw new Exceptions.FormatException("Sound field was missing.", t);
@@ -904,19 +900,11 @@ public class Environment {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 				
-				for (MCPlayer p : players) {
-					if(usingPath) {
-						p.playSoundPath(loc, path, volume, pitch);
-					} else {
-						p.playSound(loc, sound, volume, pitch);
-					}
-				}
+				for (MCPlayer p : players)
+					p.playSound(loc, sound, volume, pitch);
+
 			} else {
-				if(usingPath) {
-					loc.getWorld().playSoundPath(loc, path, volume, pitch);
-				} else {
-					loc.getWorld().playSound(loc, sound, volume, pitch);
-				}
+				loc.getWorld().playSound(loc, sound, volume, pitch);
 			}
 			return new CVoid(t);
 		}
@@ -936,8 +924,6 @@ public class Environment {
 					+ " are optional and default to 1. Players can be a single"
 					+ " player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ----"
-					+ " If the value in 'sound' is none of the below sound names, "
-					+ " sound paths will be used instead. ------------------"
 					+ " Possible sounds: " 
 					+ StringUtils.Join(MCSound.values(), ", ", ", or ", " or ");
 		}
@@ -947,7 +933,90 @@ public class Environment {
 		}
 		
 	}
+	
+	@api
+	public static class play_named_sound extends AbstractFunction {
 
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException,
+					ExceptionType.CastException, ExceptionType.FormatException,
+					ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t,
+				com.laytonsmith.core.environments.Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			String path = "mob.horse.breath";
+			float volume = 1, pitch = 1;
+			
+			if (!(args[1] instanceof CArray))
+				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
+	
+			CArray sa = (CArray) args[1];
+			
+			if (!sa.containsKey("sound"))
+				throw new Exceptions.FormatException("Sound field was missing.", t);
+			
+			path = sa.get("sound", t).val().toLowerCase();
+			
+			if (sa.containsKey("volume"))
+				volume = Static.getDouble32(sa.get("volume", t), t);
+		
+			if (sa.containsKey("pitch"))
+				pitch = Static.getDouble32(sa.get("pitch", t), t); 
+		
+			if (args.length == 3) {
+				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
+				if (args[2] instanceof CArray) {
+					for (String key : ((CArray) args[2]).keySet())
+						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
+				} else {
+					players.add(Static.GetPlayer(args[2], t));
+				}
+				
+				for (MCPlayer p : players) {
+					p.playSound(loc, path, volume, pitch);
+				}
+			} else {
+				loc.getWorld().playSound(loc, path, volume, pitch);
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "play_named_sound";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "void {locationArray, soundArray[, players]} Plays a sound at the"
+					+ " given location. SoundArray is in an associative array with"
+					+ " keys 'sound', 'volume', 'pitch', where volume and pitch"
+					+ " are optional and default to 1. Players can be a single"
+					+ " player or an array of players to play the sound to, if"
+					+ " not given, all players can potentially hear it. Sound is"
+					+ " a sound path, separated by periods. ";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_block_info extends AbstractFunction {
 

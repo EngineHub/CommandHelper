@@ -57,7 +57,7 @@ public interface MCWorld extends AbstractionObject{
 
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
 	
-	public void playSoundPath(MCLocation l, String sound, float volume, float pitch);
+	public void playSound(MCLocation l, String sound, float volume, float pitch);
 
     public MCItem dropItemNaturally(MCLocation l, MCItemStack is);
 
