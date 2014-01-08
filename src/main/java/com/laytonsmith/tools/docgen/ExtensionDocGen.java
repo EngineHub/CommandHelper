@@ -1,9 +1,11 @@
 package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Function;
 import java.io.File;
@@ -32,6 +34,8 @@ public class ExtensionDocGen {
 
 	public static void generate(File inputExtension, OutputStream outputStream) throws InstantiationException, IllegalAccessException, MalformedURLException, IOException {
 		ClassDiscovery customDiscovery = new ClassDiscovery();
+		ClassDiscoveryCache cache = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
+		customDiscovery.setClassDiscoveryCache(cache);
 		URL url = new URL("jar:" + inputExtension.toURI().toURL() + "!/");
 		customDiscovery.addDiscoveryLocation(url);
 		StringBuilder fdocs = new StringBuilder();
