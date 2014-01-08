@@ -6,8 +6,8 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.ZipIterator;
 import java.io.File;
 import java.io.IOException;
@@ -296,7 +296,7 @@ public class ClassDiscovery {
 						try {
 							stream = FileUtil.readAsStream(new File(rootLocationFile,
 									f.getAbsolutePath().replaceFirst(Pattern.quote(new File(root).getAbsolutePath() + File.separator), "")));
-							ClassMirror cm = new ClassMirror(stream);
+							ClassMirror cm = new ClassMirror(stream, new URL(url));
 							mirrors.add(cm);
 						} catch (IOException ex) {
 							Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
@@ -328,7 +328,7 @@ public class ClassDiscovery {
 						public void handle(String filename, InputStream in) {
 							if (!filename.matches(".*\\$(?:\\d)*\\.class") && filename.endsWith(".class")) {
 								try {
-									ClassMirror cm = new ClassMirror(in);
+									ClassMirror cm = new ClassMirror(in, rootLocationFile.toURI().toURL());
 									mirrors.add(cm);
 								} catch (IOException ex) {
 									Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
