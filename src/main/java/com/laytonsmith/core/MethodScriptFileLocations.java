@@ -8,8 +8,6 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -99,6 +97,14 @@ public class MethodScriptFileLocations extends FileLocations {
 	 */
 	public File getExtensionsDirectory(){
 		return new File(getConfigDirectory(), "extensions/");
+	}
+	
+	/**
+	 * Returns the locations of the extension cache.
+	 * @return 
+	 */
+	public File getExtensionCacheDirectory(){
+		return new File(getCacheDirectory(), "extensions/");
 	}
 	
 	/**
