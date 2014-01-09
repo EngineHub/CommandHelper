@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCBlockCommandSender;

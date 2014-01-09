@@ -1,4 +1,4 @@
-package com.laytonsmith.core;
+package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
@@ -13,6 +13,9 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.shutdown;
 import com.laytonsmith.annotations.startup;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.extensions.AbstractExtension;

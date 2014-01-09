@@ -38,7 +38,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.ExtensionManager;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
