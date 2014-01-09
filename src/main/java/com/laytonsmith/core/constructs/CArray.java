@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Static;
@@ -23,6 +24,7 @@ import java.util.*;
  * same effect.
  * @author layton
  */
+@typeof("array")
 public class CArray extends Construct implements ArrayAccess{
 
     private boolean associative_mode = false;

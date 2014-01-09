@@ -3,10 +3,13 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typeof;
+
 /**
  *
  * @author layton
  */
+@typeof("null")
 public class CNull extends Construct implements Cloneable{
     
     public static final long serialVersionUID = 1L;

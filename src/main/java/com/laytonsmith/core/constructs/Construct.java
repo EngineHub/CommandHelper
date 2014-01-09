@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -376,5 +377,21 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 */
 	protected String getQuote(){
 		return "'" + val().replace("\\", "\\\\").replace("'", "\\'") + "'";
+	}
+	
+	/**
+	 * Returns the typeof this Construct, as a string. Not all constructs are annotated with 
+	 * the @typeof annotation, in which case this is considered a "private" object, which
+	 * can't be directly accessed via MethodScript. In this case, an IllegalArgumentException
+	 * is thrown.
+	 * @return 
+	 * @throws IllegalArgumentException If the class isn't public facing.
+	 */
+	public final String typeof(){
+		typeof ann = this.getClass().getAnnotation(typeof.class);
+		if(ann == null){
+			throw new IllegalArgumentException();
+		}
+		return ann.value();
 	}
 }

@@ -215,7 +215,7 @@ public class FileHandling {
 				+ " (This is not applicable for remote files)"
 				+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n."
 				+ " This method will immediately return, and asynchronously read in the file, and finally send the contents"
-				+ " to the callback once the task completes. The callback should have the following signature: closure(@contents, @exception, &lt;code&gt;)."
+				+ " to the callback once the task completes. The callback should have the following signature: closure(@contents, @exception){ &lt;code&gt; }."
 				+ " If @contents is null, that indicates that an exception occured, and @exception will not be null, but instead have an"
 				+ " exeption array. Otherwise, @contents will contain the file's contents, and @exception will be null. This method is useful"
 				+ " to use in two cases, either you need a remote file via SCP, or a local file is big enough that you notice a delay when"

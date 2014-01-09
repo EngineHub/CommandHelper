@@ -2827,6 +2827,68 @@ public class DataHandling {
 		}
 		return b.toString();
 	}
+	
+	@api
+	public static class typeof extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			try {
+				return new CString(args[0].typeof(), t);
+			} catch(IllegalArgumentException ex){
+				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
+						+ " error to the developers.");
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "typeof";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {arg} Returns a string value of the typeof a value. For instance 'array' is returned"
+					+ " for typeof(array()). This is a generic replacement for the is_* series of functions.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage, typeof string", "typeof('value')"),
+				new ExampleScript("Basic usage, typeof int", "typeof(1)"),
+				new ExampleScript("Basic usage, typeof double", "typeof(1.0)"),
+				new ExampleScript("Basic usage, typeof closure", "typeof(closure(){ msg('test') })"),
+			};
+		}
+		
+		
+	}
 }
 
 
