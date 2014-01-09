@@ -154,9 +154,6 @@ public class ExtensionManager {
 
 		cd.setDefaultClassLoader(dcl);
 
-		// Begin caching
-		extCache.mkdirs();
-
 		// Loop thru the found lifecycles, copy them to the cache using the name
 		// given in the lifecycle. If more than one jar has the same internal
 		// name, the filename will be given a number.
