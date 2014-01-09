@@ -20,21 +20,39 @@ package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.SimpleVersion;
+import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCCommand;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.AliasCore;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.Installer;
+import com.laytonsmith.core.Main;
+import com.laytonsmith.core.MethodScriptExecutionQueue;
+import com.laytonsmith.core.PermissionsResolver;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.UpgradeLog;
+import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -43,6 +61,7 @@ import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -262,10 +281,42 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
-		Static.getLogger().log(Level.INFO, "CommandHelper/CommandHelper {0} enabled", getDescription().getVersion());
+		Static.getLogger().log(Level.INFO, "[CommandHelper] CommandHelper {0} enabled", getDescription().getVersion());
 		if(firstLoad){
-			ExtensionManager.Initialize(CommandHelperFileLocations.getDefault().getExtensionsDirectory(),
-					ClassDiscovery.getDefaultInstance());
+			ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
+			
+			// We will only cache on Windows, as Linux doesn't natively lock
+			// files that are in use. Windows prevents any modification, making
+			// it harder for server owners on Windows to update the jars.
+			boolean onWindows = OSUtils.GetOS() == OSUtils.OS.WINDOWS;
+			
+			// Using System.out here instead of the logger as the logger doesn't
+			// immediately print to the console.
+			if (onWindows) {
+				System.out.println("[CommandHelper] Caching extensions...");
+				
+				// Try to delete any loose files in the cache dir, so that we
+				// don't load stuff we aren't supposed to.
+				// TODO: Do this on system shutdown, gracefully.
+				for (File f : CommandHelperFileLocations.getDefault().getExtensionCacheDirectory().listFiles()) {
+					try {
+						Files.delete(f.toPath());
+					} catch (IOException ex) {
+						Static.getLogger().log(Level.WARNING, 
+								"[CommandHelper] Could not delete loose file " 
+										+ f.getAbsolutePath() + ": " + ex.getMessage());
+					}
+				}
+				
+				ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
+				
+				System.out.println("[CommandHelper] Extension caching complete.");
+			}
+			
+			System.out.println("[CommandHelper] Loading extensions...");
+			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+			System.out.println("[CommandHelper] Extension loading complete.");
+			
 			firstLoad = false;
 		}
 		version = new SimpleVersion(getDescription().getVersion());
@@ -332,6 +383,28 @@ public class CommandHelperPlugin extends JavaPlugin {
 		//free up some memory
 		StaticLayer.GetConvertor().runShutdownHooks();
 		stopExecutionQueue();
+		ExtensionManager.Cleanup();
+		
+		ClassDiscovery.getDefaultInstance().invalidateCaches();
+		ClassLoader loader = ClassDiscovery.getDefaultInstance().getDefaultClassLoader();
+		
+		if (loader instanceof DynamicClassLoader) {
+			DynamicClassLoader dcl = (DynamicClassLoader)loader;
+			dcl.destroy();
+		}
+		
+		System.gc();
+		
+		// Try to delete any loose files in the cache dir.
+		for (File f : CommandHelperFileLocations.getDefault().getExtensionCacheDirectory().listFiles()) {
+			try {
+				Files.delete(f.toPath());
+			} catch (IOException ex) {
+				System.out.println("[CommandHelper] Could not delete loose file " 
+						+ f.getAbsolutePath() + ": " + ex.getMessage());
+			}
+		}
+		
 		ac = null;
 		wep = null;
 	}
