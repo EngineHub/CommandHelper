@@ -11,6 +11,7 @@ public interface MCHumanEntity extends MCInventoryHolder, MCLivingEntity, MCAnim
 	public MCGameMode getGameMode();
 	public MCItemStack getItemInHand();
 	public MCItemStack getItemOnCursor();
+	@Override
 	public String getName();
 	public int getSleepTicks();
 	public boolean isBlocking();

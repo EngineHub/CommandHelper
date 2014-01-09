@@ -285,6 +285,7 @@ public class RandomTests {
 					+ "store_value('t.test3.third', 'test')\n"
 					+ "msg(get_values('t'))", fakePlayer, new MethodScriptComplete() {
 
+				@Override
 				public void done(String output) {
 					//
 				}

@@ -38,14 +38,17 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_block_at extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_block_at";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "string {x, y, z, [world] | xyzArray, [world]} Gets the id of the block at x, y, z. This function expects "
 					+ "either 1 or 3 arguments. If 1 argument is passed, it should be an array with the x, y, z"
@@ -55,18 +58,22 @@ public class Environment {
 					+ " player's world is used.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_2;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double x = 0;
 			double y = 0;
@@ -111,6 +118,7 @@ public class Environment {
 			return new CString(b.getTypeId() + ":" + b.getData(), t);
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -119,14 +127,17 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_block_at extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_block_at";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3, 4, 5, 6};
 		}
 
+		@Override
 		public String docs() {
 			return "void {x, y, z, id, [world] [physics] | locationArray, id, [physics]} Sets the id of the block at"
 					+ " the x y z coordinates specified. If the first argument passed is an array,"
@@ -136,18 +147,22 @@ public class Environment {
 					+ " specifies whether or not to update the surrounding blocks when this block is set.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_2;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double x = 0;
 			double y = 0;
@@ -233,6 +248,7 @@ public class Environment {
 			return new CVoid(t);
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -242,14 +258,17 @@ public class Environment {
 	@noboilerplate //This function seems to cause a OutOfMemoryError for some reason?
 	public static class set_sign_text extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_sign_text";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3, 4, 5};
 		}
 
+		@Override
 		public String docs() {
 			return "void {xyzLocation, lineArray | xyzLocation, line1, [line2, [line3, [line4]]]}"
 					+ " Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
@@ -257,22 +276,27 @@ public class Environment {
 					+ " truncated.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -329,35 +353,43 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_sign_text extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_sign_text";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {xyzLocation} Given a location array, returns an array of 4 strings of the text in the sign at that"
 					+ " location. If the location given isn't a sign, then a RangeException is thrown.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
@@ -381,34 +413,42 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_sign_at extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "is_sign_at";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {xyzLocation} Returns true if the block at this location is a sign.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
@@ -423,35 +463,43 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class break_block extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "break_block";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event. Only works with"
 					+ " craftbukkit.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLocation l;
 			MCPlayer p;
@@ -466,32 +514,39 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_biome extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_biome";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
 					+ " The location array's y value is ignored. ----"
 					+ " Biome may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			int x;
 			int z;
@@ -525,6 +580,7 @@ public class Environment {
 			return new CVoid(t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -533,32 +589,39 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_biome extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_biome";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location array's"
 					+ " y value is ignored. ---- The value returned"
 					+ " may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			int x;
 			int z;
@@ -586,6 +649,7 @@ public class Environment {
 			return new CString(bt.name(), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -594,32 +658,39 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_highest_block_at extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_highest_block_at";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "array {x, z, [world] | xyzArray, [world]} Gets the xyz of the highest block at a x and a z."
 					+ "It works the same as get_block_at, except that it doesn't matter now what the Y is."
 					+ "You can set it to -1000 or to 92374 it will just be ignored.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double x = 0;
 			double z = 0;
@@ -654,6 +725,7 @@ public class Environment {
 			return ObjectGenerator.GetGenerator().location(w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z)).getLocation(), false);
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -662,14 +734,17 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class explosion extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "explosion";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {Locationarray, [size], [safe]} Creates an explosion with the given size at the given location."
 					+ "Size defaults to size of a creeper (3), and null uses the default. If safe is true, (defaults to false)"
@@ -678,18 +753,22 @@ public class Environment {
 					+ " and hear the sound, but players won't be hurt, and neither will the blocks.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double x = 0;
 			double y = 0;
@@ -737,6 +816,7 @@ public class Environment {
 			return new CVoid(t);
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -745,19 +825,23 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class play_note extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException,
 						ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCInstrument i = null;
@@ -823,14 +907,17 @@ public class Environment {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "play_note";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], instrument, note, [location]} Plays a note for the given player, at the given location."
 					+ " Player defaults to the current player, and location defaults to the player's location. Instrument may be one of:"
@@ -840,6 +927,7 @@ public class Environment {
 					+ " (Not all notes can be sharped.)";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -848,20 +936,24 @@ public class Environment {
 	@api
 	public static class play_sound extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException,
 					ExceptionType.CastException, ExceptionType.FormatException,
 					ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -909,14 +1001,17 @@ public class Environment {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "play_sound";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {locationArray, soundArray[, players]} Plays a sound at the"
 					+ " given location. SoundArray is in an associative array with"
@@ -928,6 +1023,7 @@ public class Environment {
 					+ StringUtils.Join(MCSound.values(), ", ", ", or ", " or ");
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -937,20 +1033,24 @@ public class Environment {
 	@api
 	public static class play_named_sound extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException,
 					ExceptionType.CastException, ExceptionType.FormatException,
 					ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -993,14 +1093,17 @@ public class Environment {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "play_named_sound";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {locationArray, soundArray[, players]} Plays a sound at the"
 					+ " given location. SoundArray is in an associative array with"
@@ -1011,6 +1114,7 @@ public class Environment {
 					+ " a sound path, separated by periods. ";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1020,18 +1124,22 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_block_info extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
@@ -1046,14 +1154,17 @@ public class Environment {
 			//return new CBoolean(l.getBlock().isSolid(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_block_info";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {locationArray} Returns an associative array with various information about a block ---- <ul>"
 					+ " <li>solid: If a block is solid (i.e. dirt or stone, as opposed to a torch or water)</li>"
@@ -1064,6 +1175,7 @@ public class Environment {
 					+ "</ul>";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1072,35 +1184,43 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_light_at extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException,
 					ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String getName() {
 			return "get_light_at";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {locationArray} Returns the combined light level at a block, taking into account all sources.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
@@ -1116,37 +1236,45 @@ public class Environment {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_block_powered extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException,
 					ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String getName() {
 			return "is_block_powered";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {locationArray} Returns whether or not a block is being supplied with power."
 					+ " Be aware that this interprets 'powered' differently than a human would. For example,"
 					+ " using this on a piston next to a redstone block will return false.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
@@ -1162,35 +1290,43 @@ public class Environment {
 	@api
 	public static class generate_tree extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "generate_tree";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {locationArray, [treeType]} Generates a tree at the given location and returns if the generation succeeded or not."
 					+ " treeType can be " + StringUtils.Join(MCTreeType.values(), ", ", ", or ", " or ") + ", defaulting to TREE.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCTreeType treeType;
 			if (args.length == 1) {

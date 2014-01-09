@@ -54,12 +54,14 @@ public class ExtensionDocGen {
 		}
 		ArrayList<Entry<Class, ArrayList<Class<Function>>>> functionEntryList = new ArrayList<Entry<Class, ArrayList<Class<Function>>>>(functionMap.entrySet());
 		Collections.sort(functionEntryList, new Comparator<Entry<Class, ArrayList<Class<Function>>>>() {
+			@Override
 			public int compare(Entry<Class, ArrayList<Class<Function>>> o1, Entry<Class, ArrayList<Class<Function>>> o2) {
 				return o1.getKey().getName().compareTo(o2.getKey().getName());
 			}
 		});
 		for (Entry<Class, ArrayList<Class<Function>>> e : functionEntryList) {
 			Collections.sort(e.getValue(), new Comparator<Class<Function>>() {
+				@Override
 				public int compare(Class<Function> o1, Class<Function> o2) {
 					return o1.getName().compareTo(o2.getName());
 				}
@@ -107,12 +109,14 @@ public class ExtensionDocGen {
 		}
 		ArrayList<Entry<Class, ArrayList<Class<Event>>>> eventEntryList = new ArrayList<Entry<Class, ArrayList<Class<Event>>>>(eventMap.entrySet());
 		Collections.sort(eventEntryList, new Comparator<Entry<Class, ArrayList<Class<Event>>>>() {
+			@Override
 			public int compare(Entry<Class, ArrayList<Class<Event>>> o1, Entry<Class, ArrayList<Class<Event>>> o2) {
 				return o1.getKey().getName().compareTo(o2.getKey().getName());
 			}
 		});
 		for (Entry<Class, ArrayList<Class<Event>>> e : eventEntryList) {
 			Collections.sort(e.getValue(), new Comparator<Class<Event>>() {
+				@Override
 				public int compare(Class<Event> o1, Class<Event> o2) {
 					return o1.getName().compareTo(o2.getName());
 				}

@@ -218,6 +218,7 @@ public class CheckOverrides extends AbstractProcessor {
 				for (Method m : methodsInError) {
 					stringMethodsInError.add(m.getDeclaringClass().getName() + "."
 							+ m.getName() + "(" + StringUtils.Join(Arrays.asList(m.getParameterTypes()), ", ", ", ", ", ", "", new StringUtils.Renderer<Class<?>>() {
+						@Override
 						public String toString(Class<?> item) {
 							String name = ClassUtils.getCommonName(item);
 							for (String v : verbosePackages) {

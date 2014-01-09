@@ -170,14 +170,17 @@ public class Enchantments {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class enchant_inv extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "enchant_inv";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], slot, type, level} Adds an enchantment to an item in the player's inventory. Type can be a single string,"
 					+ " or an array of enchantment names. If slot is null, the currently selected slot is used. If the enchantment cannot be applied"
@@ -187,22 +190,27 @@ public class Enchantments {
 					+ " and level may be a roman numeral as well.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
@@ -253,24 +261,29 @@ public class Enchantments {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class enchant_rm_inv extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "enchant_rm_inv";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], slot, type} Removes an enchantment from an item. type may be a valid enchantment, or an array of enchantment names. It"
 					+ " can also be null, and all enchantments will be removed. If an enchantment is specified, and the item is not enchanted with that,"
 					+ " it is simply ignored.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
@@ -280,10 +293,12 @@ public class Enchantments {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
@@ -321,35 +336,43 @@ public class Enchantments {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_enchant_inv extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_enchant_inv";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[player], slot} Returns an array of arrays of the enchantments and their levels on the given"
 					+ " item. For example: array(array(DAMAGE_ALL, DAMAGE_UNDEAD), array(1, 2))";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Construct slot;
@@ -382,14 +405,17 @@ public class Enchantments {
 	@api
 	public static class can_enchant_target extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "can_enchant_target";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {name, targetItem} Given an enchantment name, and target item id,"
 					+ " returns wether or not that item can be enchanted with that enchantment."
@@ -397,22 +423,27 @@ public class Enchantments {
 					+ " type.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.EnchantmentException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				String name = Enchantments.ConvertName(args[0].val().toUpperCase());
@@ -428,35 +459,43 @@ public class Enchantments {
 	@api
 	public static class get_enchant_max extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_enchant_max";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {name} Given an enchantment name, returns the max level it can be."
 					+ " If name is not a valid enchantment, an EnchantException is thrown.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.EnchantmentException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String name = Enchantments.ConvertName(args[0].val().toUpperCase());
 			MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
@@ -469,35 +508,43 @@ public class Enchantments {
 
 		private static Map<String, CArray> cache = new HashMap<String, CArray>();
 
+		@Override
 		public String getName() {
 			return "get_enchants";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {item} Given an item id, returns the enchantments that can"
 					+ " be validly added to this item. This may return an empty array.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCItemStack is = Static.ParseItemNotation(this.getName(), args[0].val(), 1, t);
 			/**
@@ -521,35 +568,43 @@ public class Enchantments {
 	@api
 	public static class is_enchantment extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "is_enchantment";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {name} Returns true if this name is a valid enchantment type. Note"
 					+ " that either the bukkit names or the wiki names are valid.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
@@ -563,18 +618,22 @@ public class Enchantments {
 	@api
 	public static class enchantment_list extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t);
@@ -584,14 +643,17 @@ public class Enchantments {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "enchantment_list";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an informational list of all valid enchantment names. Note that this will"
 					+ " simply cover all enchantment types, but may not be a comprehensive list of names that"
@@ -599,6 +661,7 @@ public class Enchantments {
 					+ " and \"official\". Additionally, this may vary from server type to server type.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

@@ -36,6 +36,7 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
         return false;
     }
 
+	@Override
     public Construct get(String index, Target t) {
         try{
             int i = (int)Integer.parseInt(index);
@@ -45,14 +46,17 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
         }
     }
 
+	@Override
     public long size() {
         return val().length();
     }
 
+	@Override
     public boolean canBeAssociative() {
         return false;
     }
 
+	@Override
     public Construct slice(int begin, int end, Target t) {
         if(begin >= end){
             return new CString("", t);

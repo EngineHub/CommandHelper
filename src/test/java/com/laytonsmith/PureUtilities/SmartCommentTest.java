@@ -55,6 +55,7 @@ public class SmartCommentTest {
 		Map<String, SmartComment.Replacement> reps = new HashMap<String, SmartComment.Replacement>();
 		reps.put("code", new SmartComment.Replacement() {
 
+			@Override
 			public String replace(String data) {
 				return "<code>" + data + "</code>";
 			}
@@ -76,6 +77,7 @@ public class SmartCommentTest {
 		Map<String, SmartComment.Replacement> reps = new HashMap<String, SmartComment.Replacement>();
 		reps.put("code", new SmartComment.Replacement() {
 
+			@Override
 			public String replace(String data) {
 				return "<code>" + data + "</code>";
 			}

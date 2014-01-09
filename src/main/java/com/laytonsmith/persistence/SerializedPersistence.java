@@ -76,6 +76,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	 * the entire database, don't use this method. You must manually call save
 	 * after this, if you wish the changes to be written out to disk.
 	 */
+	@Override
 	public void clearAllData() {
 		data = new HashMap<String, String>();
 	}
@@ -86,10 +87,12 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	 *
 	 * @throws Exception
 	 */
+	@Override
 	public void load() throws Exception {
 			if (!isLoaded) {
 				queue.invokeAndWait(new Callable<Object>(){
 
+				@Override
 					public Object call() throws Exception {
 						try {
 							FileInputStream fis = null;
@@ -131,6 +134,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	private MemoryMapFileUtil writer = null;
 	private MemoryMapFileUtil.DataGrabber grabber = new MemoryMapFileUtil.DataGrabber() {
 
+		@Override
 		public byte[] getData() {
 			return byteData;
 		}
@@ -147,6 +151,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 				writer = MemoryMapFileUtil.getInstance(storageLocation, grabber);
 			}
 			queue.invokeLater(dm, new Runnable() {
+				@Override
 				public void run() {
 					ObjectOutputStream out = null;
 					ByteArrayOutputStream baos = null;
@@ -261,6 +266,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	 * @param key
 	 * @return
 	 */
+	@Override
 	public String getValue(String[] key) {
 		return getValue(getNamespace0(key));
 	}
@@ -272,6 +278,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	 * @param key
 	 * @return
 	 */
+	@Override
 	public boolean isKeySet(String[] key) {
 		String k = getNamespace0(key);
 		return data.containsKey(k);
@@ -288,6 +295,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	 * @param partialKey
 	 * @return
 	 */
+	@Override
 	public boolean isNamespaceSet(String[] partialKey) {
 		String m = getNamespace0(partialKey);
 		partialKey = m.split("\\.");
@@ -319,6 +327,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	 * @param partialKey The partial name of the keys you wish to return
 	 * @return An ArrayList of Map.Entries.
 	 */
+	@Override
 	public List<Map.Entry<String, Object>> getNamespaceValues(String[] partialKey) {
 
 		List<Map.Entry<String, Object>> matches = new ArrayList<Map.Entry<String, Object>>();
@@ -375,6 +384,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	/**
 	 * Prints all of the stored values to the specified print stream.
 	 */
+	@Override
 	public void printValues(PrintStream out) {
 		try {
 			out.println("Printing all persisted values:");
@@ -434,6 +444,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 		return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.PRETTYPRINT};
 	}
 
+	@Override
 	public String docs() {
 		return "Serialized Persistence {ser:///path/to/persistence.ser} The default type,"
 				+ " this simply uses java serialization to store data. Extremely simple"
@@ -442,6 +453,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 				+ " binary data. This means that it cannot be easily edited however.";
 	}
 
+	@Override
 	public CHVersion since() {
 		return CHVersion.V3_0_2;
 	}

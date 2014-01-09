@@ -22,6 +22,7 @@ public class CResource<T> extends Construct {
 	public CResource(final T resource, Target t){
 		this(resource, new ResourceToString() {
 
+			@Override
 			public String getString(CResource id) {
 				return "resource@" + id.getId() + ":" + id.getResource().toString();
 			}

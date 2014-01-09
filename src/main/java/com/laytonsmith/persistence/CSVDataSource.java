@@ -39,6 +39,7 @@ public class CSVDataSource extends StringSerializableDataSource {
 		return null;
 	}
 
+	@Override
 	public String docs() {
 		return "CSV {csv:///path/to/csv/file.csv} This type stores data"
 			+ " in a CSV format. All the pros and cons of yml apply"
@@ -48,6 +49,7 @@ public class CSVDataSource extends StringSerializableDataSource {
 			+ " the value, then a newline.";
 	}
 
+	@Override
 	public CHVersion since() {
 		return CHVersion.V0_0_0;
 	}

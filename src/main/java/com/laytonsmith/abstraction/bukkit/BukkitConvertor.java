@@ -55,6 +55,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	
 	private static BukkitMCPluginMeta pluginMeta = null;
 
+	@Override
     public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
         World w2 = null;
         if(w != null){
@@ -63,10 +64,12 @@ public class BukkitConvertor extends AbstractConvertor {
         return new BukkitMCLocation(new Location(w2, x, y, z, yaw, pitch));
     }
 
+	@Override
     public Class GetServerEventMixin() {
         return BukkitAbstractEventMixin.class;
     }
 
+	@Override
     public MCEnchantment[] GetEnchantmentValues() {
         MCEnchantment[] ea = new MCEnchantment[Enchantment.values().length];
         Enchantment[] oea = Enchantment.values();
@@ -77,6 +80,7 @@ public class BukkitConvertor extends AbstractConvertor {
 
     }
 
+	@Override
     public MCEnchantment GetEnchantmentByName(String name) {
         try{
             //If they are looking it up by number, we can support that
@@ -91,17 +95,21 @@ public class BukkitConvertor extends AbstractConvertor {
         }
     }
 
+	@Override
     public MCServer GetServer() {
         return BukkitMCServer.Get();
     }
 
+	@Override
 	public MCMaterial getMaterial(int id) {
 		return new BukkitMCMaterial(Material.getMaterial(id));
 	}
 
+	@Override
     public MCItemStack GetItemStack(int type, int qty) {
         return new BukkitMCItemStack(new ItemStack(type, qty));
     }
+	@Override
     public MCItemStack GetItemStack(int type, int data, int qty) {
         return new BukkitMCItemStack(new ItemStack(type, qty, (short)0, (byte)data));
     }
@@ -115,6 +123,7 @@ public class BukkitConvertor extends AbstractConvertor {
     public static final BukkitWeatherListener WeatherListener = new BukkitWeatherListener();
     public static final BukkitWorldListener WorldListener = new BukkitWorldListener();
 
+	@Override
     public void Startup(CommandHelperPlugin chp) {
         chp.registerEvent((Listener)BlockListener);
         chp.registerEvent((Listener)EntityListener);
@@ -126,6 +135,7 @@ public class BukkitConvertor extends AbstractConvertor {
         chp.registerEvent((Listener)WorldListener);        
     }
 
+	@Override
     public int LookupItemId(String materialName) {
         if(Material.matchMaterial(materialName) != null){
             return new MaterialData(Material.matchMaterial(materialName)).getItemTypeId();
@@ -134,6 +144,7 @@ public class BukkitConvertor extends AbstractConvertor {
         }
     }
 
+	@Override
     public String LookupMaterialName(int id) {
         return Material.getMaterial(id).toString();
     }
@@ -145,18 +156,21 @@ public class BukkitConvertor extends AbstractConvertor {
      */
     private static final Set<Integer> validIDs = new TreeSet<Integer>();
 
+	@Override
     public synchronized int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
         int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));
         validIDs.add(id);
         return id;
     }
     
+	@Override
     public synchronized int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
         int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
         validIDs.add(id);
         return id;        
     }
 
+	@Override
     public synchronized void ClearAllRunnables() {
 		//Doing cancelTasks apparently does not work, so let's just manually cancel each task, which does appear to work.
 		//Anyways, it's better that way anyhow, because we actually remove IDs from validIDs that way.
@@ -172,6 +186,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
     }
 
+	@Override
     public void ClearFutureRunnable(int id) {
         if(validIDs.contains(id)){
             Bukkit.getServer().getScheduler().cancelTask(id);
@@ -293,17 +308,20 @@ public class BukkitConvertor extends AbstractConvertor {
                 + " to find the appropriate implementation. Please alert the developers of this stack trace.");
     }
 
+	@Override
     public MCEntity GetCorrectEntity(MCEntity e) {
 
         Entity be = ((BukkitMCEntity)e).asEntity();
         return BukkitConvertor.BukkitGetCorrectEntity(be);
     }
 
+	@Override
 	public MCItemMeta GetCorrectMeta(MCItemMeta im) {
 		ItemMeta bim = ((BukkitMCItemMeta) im).asItemMeta();
 		return BukkitConvertor.BukkitGetCorrectMeta(bim);
 	}
 
+	@Override
 	public List<MCEntity> GetEntitiesAt(MCLocation location, double radius) {
 		if(location == null){
 			return Collections.EMPTY_LIST;
@@ -346,6 +364,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		return new BukkitMCItemMeta(im);
 	}
     
+	@Override
 	public MCInventory GetEntityInventory(int entityID) {
 		Entity entity = null;
 		outer: for(World w : Bukkit.getWorlds()){
@@ -370,6 +389,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 	}
 
+	@Override
 	public MCInventory GetLocationInventory(MCLocation location) {
 		Block b = ((Location)(location.getHandle())).getBlock();
 		if(b.getState() instanceof InventoryHolder){
@@ -388,6 +408,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	public void runOnMainThreadLater(DaemonManager dm, final Runnable r) {
 		Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable<Object>() {
 
+			@Override
 			public Object call() throws Exception {
 				r.run();
 				return null;
@@ -414,6 +435,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	private static int maxItemID = -1;
 	private static int maxRecordID = -1;
 	
+	@Override
 	public synchronized int getMaxBlockID() {
 		if (maxBlockID == -1) {
 			calculateIDs();
@@ -421,6 +443,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		return maxBlockID;
 	}
 	
+	@Override
 	public synchronized int getMaxItemID() {
 		if (maxItemID == -1) {
 			calculateIDs();
@@ -428,6 +451,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		return maxItemID;
 	}
 	
+	@Override
 	public synchronized int getMaxRecordID() {
 		if (maxRecordID == -1) {
 			calculateIDs();
@@ -451,19 +475,23 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 	}
 
+	@Override
 	public MCColor GetColor(int red, int green, int blue) {
 		return BukkitMCColor.GetMCColor(Color.fromRGB(red, green, blue));
 	}
 
+	@Override
 	public MCFireworkBuilder GetFireworkBuilder() {
 		return new BukkitMCFireworkBuilder();
 	}
 
+	@Override
 	public MCPluginMeta GetPluginMeta() {
 		if(pluginMeta == null){
 			pluginMeta = new BukkitMCPluginMeta(CommandHelperPlugin.self);
 			addShutdownHook(new Runnable() {
 
+				@Override
 				public void run() {
 					pluginMeta = null;
 				}

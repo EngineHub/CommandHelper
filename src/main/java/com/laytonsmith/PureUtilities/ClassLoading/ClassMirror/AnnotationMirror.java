@@ -142,6 +142,7 @@ public class AnnotationMirror implements Serializable {
 		}
 		return (T) Proxy.newProxyInstance(AnnotationMirror.class.getClassLoader(), new Class[]{type}, new InvocationHandler() {
 
+			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 				return getValueWithDefault(method.getName());
 			}

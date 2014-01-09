@@ -91,6 +91,7 @@ public class BukkitMCWorld implements MCWorld {
         }
     }
 
+	@Override
     public Object getHandle(){
         return w;
     }
@@ -99,6 +100,7 @@ public class BukkitMCWorld implements MCWorld {
         return w;
     }
 
+	@Override
 	public List<MCPlayer> getPlayers() {
 		if (w.getPlayers() == null) {
 			return null;
@@ -110,6 +112,7 @@ public class BukkitMCWorld implements MCWorld {
 		return list;
 	}
 
+	@Override
 	public List<MCEntity> getEntities() {
 		if (w.getEntities() == null) {
 			return null;
@@ -121,6 +124,7 @@ public class BukkitMCWorld implements MCWorld {
 		return list;
 	}
 
+	@Override
     public List<MCLivingEntity> getLivingEntities() {
         if (w.getLivingEntities() == null) {
             return null;
@@ -132,42 +136,52 @@ public class BukkitMCWorld implements MCWorld {
         return list;
     }
 
+	@Override
     public String getName() {
         return w.getName();
     }
 
+	@Override
 	public long getSeed() {
 		return w.getSeed();
 	}
 
+	@Override
 	public MCDifficulty getDifficulty() {
 		return BukkitMCDifficulty.getConvertor().getAbstractedEnum(w.getDifficulty());
 	}
 
+	@Override
 	public void setDifficulty(MCDifficulty difficulty) {
 		w.setDifficulty(BukkitMCDifficulty.getConvertor().getConcreteEnum(difficulty));
 	}
 
+	@Override
 	public boolean getPVP() {
 		return w.getPVP();
 	}
 
+	@Override
 	public void setPVP(boolean pvp) {
 		w.setPVP(pvp);
 	}
 
+	@Override
 	public boolean getGameRuleValue(MCGameRule gameRule) {
 		return Boolean.valueOf(w.getGameRuleValue(gameRule.getGameRule()));
 	}
 
+	@Override
 	public void setGameRuleValue(MCGameRule gameRule, boolean value) {
 		w.setGameRuleValue(gameRule.getGameRule(), String.valueOf(value));
 	}
 
+	@Override
 	public MCWorldEnvironment getEnvironment() {
 		return BukkitMCWorldEnvironment.getConvertor().getAbstractedEnum(w.getEnvironment());
 	}
 
+	@Override
 	public String getGenerator() {
 		try {
 			return w.getGenerator().toString();
@@ -176,10 +190,12 @@ public class BukkitMCWorld implements MCWorld {
 		}
 	}
 
+	@Override
 	public MCWorldType getWorldType() {
 		return BukkitMCWorldType.getConvertor().getAbstractedEnum(w.getWorldType());
 	}
 
+	@Override
     public MCBlock getBlockAt(int x, int y, int z) {
         if (w.getBlockAt(x, y, z) == null) {
             return null;
@@ -187,80 +203,98 @@ public class BukkitMCWorld implements MCWorld {
         return new BukkitMCBlock(w.getBlockAt(x, y, z));
     }
 
+	@Override
     public MCEntity spawn(MCLocation l, Class mobType) {
         return BukkitConvertor.BukkitGetCorrectEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
     }
 
+	@Override
 	public MCEntity spawn(MCLocation l, MCEntityType entType) {
 		return BukkitConvertor.BukkitGetCorrectEntity(w.spawnEntity(
 				((BukkitMCLocation) l).asLocation(),
 				BukkitMCEntityType.getConvertor().getConcreteEnum(MCEntityType.valueOf(entType.name()))));
 	}
 
+	@Override
 	public boolean generateTree(MCLocation l, MCTreeType treeType) {
 		return w.generateTree(((BukkitMCLocation) l).asLocation(), BukkitMCTreeType.getConvertor().getConcreteEnum(treeType));
 	}
 
+	@Override
     public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data) {
         w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), e, data);
     }
 
+	@Override
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
 		w.playSound(((BukkitMCLocation) l).asLocation(), 
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}
 	
+	@Override
 	public void playSound(MCLocation l, String sound, float volume, float pitch) {
 		for(Player p: w.getPlayers())
 			p.playSound(((BukkitMCLocation)l).asLocation(), sound, volume, pitch);
 	}
 
+	@Override
     public MCItem dropItemNaturally(MCLocation l, MCItemStack is) {
         return new BukkitMCItem(w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
     }
 
+	@Override
     public MCItem dropItem(MCLocation l, MCItemStack is) {
         return new BukkitMCItem(w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
     }
 
+	@Override
 	public MCLightningStrike strikeLightning(MCLocation GetLocation) {
 		return new BukkitMCLightningStrike(
 				w.strikeLightning(((BukkitMCLocation) GetLocation).l));
 	}
 
+	@Override
 	public MCLightningStrike strikeLightningEffect(MCLocation GetLocation) {
 		return new BukkitMCLightningStrike(
 				w.strikeLightningEffect(((BukkitMCLocation) GetLocation).l));
 	}
 
+	@Override
     public void setStorm(boolean b) {
         w.setStorm(b);
     }
 
+	@Override
     public MCLocation getSpawnLocation() {
         return new BukkitMCLocation(w.getSpawnLocation());
     }
 
+	@Override
     public void refreshChunk(int x, int z) {
         w.refreshChunk(x, z);
     }
 
+	@Override
     public void setTime(long time) {
         w.setTime(time);
     }
 
+	@Override
     public long getTime() {
         return w.getTime();
     }
 
+	@Override
     public MCBiomeType getBiome(int x, int z) {
 		return BukkitMCBiomeType.getConvertor().getAbstractedEnum(w.getBiome(x, z));
     }
 
+	@Override
     public void setBiome(int x, int z, MCBiomeType type) {
         w.setBiome(x, z, Biome.valueOf(type.name()));
     }
 
+	@Override
 	public MCBlock getHighestBlockAt(int x, int z) {
 		//Workaround for getHighestBlockAt, since it doesn't like transparent
 		//blocks.
@@ -271,14 +305,17 @@ public class BukkitMCWorld implements MCWorld {
 		return new BukkitMCBlock(b);
 	}
 
+	@Override
     public void explosion(double x, double y, double z, float size, boolean safe) {
         w.createExplosion(x, y, z, size, !safe, !safe);
     }
 
+	@Override
     public void setSpawnLocation(int x, int y, int z) {
         w.setSpawnLocation(x, y, z);
     }
 
+	@Override
     public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation l, Target t) {
         Class mobType = null;
         CArray ids = new CArray(Target.UNKNOWN);
@@ -579,6 +616,7 @@ public class BukkitMCWorld implements MCWorld {
         return ids;
     }
 
+	@Override
 	public boolean exists() {
 		//I dunno how well this will work, but it's worth a shot.
 		try{
@@ -589,43 +627,53 @@ public class BukkitMCWorld implements MCWorld {
 		}
 	}
 
+	@Override
 	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data) {
 		Location mcloc = (Location)((BukkitMCLocation)loc).getHandle();
 		return new BukkitMCFallingBlock(w.spawnFallingBlock(mcloc, type, data));
 	}
 
+	@Override
 	public boolean regenerateChunk(int x, int z) {
 		return w.regenerateChunk(x, z);
 	}
 
+	@Override
 	public MCChunk getChunkAt(int x, int z) {
 		return new BukkitMCChunk(w.getChunkAt(x, z));
 	}
 
+	@Override
 	public MCChunk getChunkAt(MCBlock b) {
 		return new BukkitMCChunk(w.getChunkAt(((BukkitMCBlock) b).__Block()));
 	}
 
+	@Override
 	public MCChunk getChunkAt(MCLocation l) {
 		return new BukkitMCChunk(w.getChunkAt(((BukkitMCLocation) l).asLocation()));
 	}
 
+	@Override
 	public void setThundering(boolean b) {
 		w.setThundering(b);
 	}
 
+	@Override
 	public void setWeatherDuration(int time) {
 		w.setWeatherDuration(time);
 	}
 
+	@Override
 	public void setThunderDuration(int time) {
 		w.setThunderDuration(time);
 	}
 
+	@Override
 	public boolean isStorming() {
 		return w.hasStorm();
 	}
 
+	@Override
 	public boolean isThundering() {
 		return w.isThundering();
 	}

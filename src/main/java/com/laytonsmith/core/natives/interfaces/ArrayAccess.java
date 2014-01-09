@@ -23,6 +23,7 @@ public interface ArrayAccess extends Mixed, Sizable {
      * Return the size of the array
      * @return 
      */
+	@Override
     public long size();
     
     /**

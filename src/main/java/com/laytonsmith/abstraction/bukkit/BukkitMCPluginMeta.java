@@ -45,6 +45,7 @@ public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageLis
 		Bukkit.getMessenger().registerIncomingPluginChannel(plugin, channel, this);
 	}
 
+	@Override
 	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
 		triggerOnMessage(new BukkitMCPlayer(player), channel, message);
 	}

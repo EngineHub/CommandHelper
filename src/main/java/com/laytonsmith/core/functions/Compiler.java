@@ -62,6 +62,7 @@ public class Compiler {
 			}
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
@@ -78,6 +79,7 @@ public class Compiler {
 					+ "compiler.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CEntry(args[0], args[1], t);
 		}
@@ -104,6 +106,7 @@ public class Compiler {
 			return tree;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
 		}
@@ -489,6 +492,7 @@ public class Compiler {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String s = null;
 			if(args.length == 1){
@@ -514,6 +518,7 @@ public class Compiler {
 					+ " It simply returns the argument provided, or void if none.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
 				return new CVoid(t);
@@ -526,6 +531,7 @@ public class Compiler {
 	@hide("This is only used internally by the compiler, and will be removed at some point.")
 	public static class __cbracket__ extends DummyFunction implements Optimizable {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
@@ -560,6 +566,7 @@ public class Compiler {
 	@hide("This is only used internally by the compiler, and will be removed at some point.")
 	public static class __cbrace__ extends DummyFunction implements Optimizable {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}

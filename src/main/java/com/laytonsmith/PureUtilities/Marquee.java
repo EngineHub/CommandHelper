@@ -58,6 +58,7 @@ public final class Marquee {
 		}
 		
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				int loopPointer = 0;
 				try {

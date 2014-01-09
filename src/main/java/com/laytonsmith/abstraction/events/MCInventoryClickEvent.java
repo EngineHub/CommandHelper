@@ -19,6 +19,7 @@ public interface MCInventoryClickEvent extends MCInventoryInteractEvent {
 	public int getSlot();
 	public int getRawSlot();
 	public MCSlotType getSlotType();
+	@Override
 	public MCHumanEntity getWhoClicked();
 
 	public boolean isLeftClick();

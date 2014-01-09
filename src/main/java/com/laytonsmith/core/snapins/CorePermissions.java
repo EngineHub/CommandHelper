@@ -60,24 +60,29 @@ public enum CorePermissions implements PackagePermission {
 		}
 	}
 
+	@Override
 	public String[] getNamespace() {
 		String[] array = new String[namespace.length];
 		System.arraycopy(namespace, 0, array, 0, array.length);
 		return array;
 	}
 
+	@Override
 	public ThreatLevel getThreatLevel() {
 		return threatLevel;
 	}
 
+	@Override
 	public String getName() {
 		return StringUtils.Join(namespace, ".");
 	}
 
+	@Override
 	public String docs() {
 		return docs;
 	}
 
+	@Override
 	public CHVersion since() {
 		return since;
 	}

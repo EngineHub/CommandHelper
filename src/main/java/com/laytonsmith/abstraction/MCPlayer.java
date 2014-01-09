@@ -34,6 +34,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
     public int getFoodLevel();
 
+	@Override
     public MCPlayerInventory getInventory();
 
     public MCItemStack getItemAt(Integer slot);
@@ -64,6 +65,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
     public void kickPlayer(String message);
 
+	@Override
     public boolean removeEffect(int effect);
 
     public void resetPlayerTime();
@@ -113,6 +115,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	 * thread, but this does mean that the data recieved may be slightly outdated.
 	 * @return
 	 */
+	@Override
 	public MCLocation asyncGetLocation();
 
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note);
@@ -133,6 +136,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public void sendPluginMessage(String channel, byte[] message);
 
+	@Override
 	public boolean isOp();
 
 	public void setOp(boolean bln);

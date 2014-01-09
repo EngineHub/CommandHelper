@@ -13,22 +13,27 @@ public class BukkitMCScore implements MCScore {
 		s = score;
 	}
 
+	@Override
 	public MCObjective getObjective() {
 		return new BukkitMCObjective(s.getObjective());
 	}
 
+	@Override
 	public MCOfflinePlayer getPlayer() {
 		return new BukkitMCOfflinePlayer(s.getPlayer());
 	}
 
+	@Override
 	public int getScore() {
 		return s.getScore();
 	}
 
+	@Override
 	public MCScoreboard getScoreboard() {
 		return new BukkitMCScoreboard(s.getScoreboard());
 	}
 
+	@Override
 	public void setScore(int score) {
 		s.setScore(score);
 	}

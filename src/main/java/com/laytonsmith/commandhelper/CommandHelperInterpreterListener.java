@@ -53,6 +53,7 @@ public class CommandHelperInterpreterListener implements Listener {
             event.setCancelled(true);                    
             StaticLayer.SetFutureRunnable(null, 0, new Runnable() {
 
+				@Override
                 public void run() {
                     textLine(p, event.getMessage());
                 }
@@ -147,6 +148,7 @@ public class CommandHelperInterpreterListener implements Listener {
             MethodScriptCompiler.registerAutoIncludes(env, null);
             MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
 
+				@Override
                 public void done(String output) {
                     output = output.trim();
                     if (output.isEmpty()) {

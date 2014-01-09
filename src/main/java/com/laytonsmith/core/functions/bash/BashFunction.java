@@ -13,10 +13,12 @@ import java.net.URL;
  */
 public abstract class BashFunction implements FunctionBase, CompiledFunction, Documentation {
 
+	@Override
     public boolean appearInDocumentation() {
         return true;
     }    
 
+	@Override
 	public PackagePermission getPermission() {
 		return PackagePermission.NO_PERMISSIONS_NEEDED;
 	}

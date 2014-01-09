@@ -492,6 +492,7 @@ public class ClassMirror<T> implements Serializable {
 		public List<FieldMirror> fields = new ArrayList<FieldMirror>();
 		public List<MethodMirror> methods = new ArrayList<MethodMirror>();
 
+		@Override
 		public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
 			if((access & Opcodes.ACC_ENUM) > 0){
 				isEnum = true;
@@ -508,44 +509,53 @@ public class ClassMirror<T> implements Serializable {
 			this.interfaces = interfaces;
 		}
 
+		@Override
 		public void visitSource(String source, String debug) {
 			//Ignored
 		}
 
+		@Override
 		public void visitOuterClass(String owner, String name, String desc) {
 			//Ignored
 		}
 
+		@Override
 		public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 			AnnotationMirror am = new AnnotationMirror(new ClassReferenceMirror(desc), visible);
 			annotations.add(am);
 			return new AnnotationV(am);
 		}
 
+		@Override
 		public void visitAttribute(Attribute attr) {
 			
 		}
 
+		@Override
 		public void visitInnerClass(String name, String outerName, String innerName, int access) {
 			
 		}
 
+		@Override
 		public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
 			final FieldMirror fm = new FieldMirror(new ModifierMirror(ModifierMirror.Type.FIELD, access),
 					new ClassReferenceMirror(desc), name, value);
 			fields.add(fm);
 			return new FieldVisitor() {
 
+				@Override
 				public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 					AnnotationMirror m = new AnnotationMirror(new ClassReferenceMirror(desc), visible);
 					fm.addAnnotation(m);
 					return new AnnotationV(m);
 				}
 
+				@Override
 				public void visitAttribute(Attribute attr) {
 					
 				}
 
+				@Override
 				public void visitEnd() {
 					
 				}
@@ -554,6 +564,7 @@ public class ClassMirror<T> implements Serializable {
 		
 		private static transient final Pattern METHOD_SIGNATURE_PATTERN = Pattern.compile("^\\((.*)\\)(.*)$");
 
+		@Override
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 			if("<init>".equals(name) || "<clinit>".equals(name)){
 				//For now, we aren't interested in constructors or static initializers
@@ -594,106 +605,131 @@ public class ClassMirror<T> implements Serializable {
 			methods.add(mm);
 			return new MethodVisitor() {
 
+				@Override
 				public AnnotationVisitor visitAnnotationDefault() {
 					return null;
 				}
 
+				@Override
 				public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 					AnnotationMirror am = new AnnotationMirror(new ClassReferenceMirror(desc), visible);
 					mm.addAnnotation(am);
 					return new AnnotationV(am);
 				}
 
+				@Override
 				public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
 					return null;
 				}
 
+				@Override
 				public void visitAttribute(Attribute attr) {
 					
 				}
 
+				@Override
 				public void visitCode() {
 					
 				}
 
+				@Override
 				public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
 					
 				}
 
+				@Override
 				public void visitInsn(int opcode) {
 					
 				}
 
+				@Override
 				public void visitIntInsn(int opcode, int operand) {
 					
 				}
 
+				@Override
 				public void visitVarInsn(int opcode, int var) {
 					
 				}
 
+				@Override
 				public void visitTypeInsn(int opcode, String type) {
 					
 				}
 
+				@Override
 				public void visitFieldInsn(int opcode, String owner, String name, String desc) {
 					
 				}
 
+				@Override
 				public void visitMethodInsn(int opcode, String owner, String name, String desc) {
 					
 				}
 
+				@Override
 				public void visitJumpInsn(int opcode, Label label) {
 					
 				}
 
+				@Override
 				public void visitLabel(Label label) {
 					
 				}
 
+				@Override
 				public void visitLdcInsn(Object cst) {
 					
 				}
 
+				@Override
 				public void visitIincInsn(int var, int increment) {
 					
 				}
 
+				@Override
 				public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
 					
 				}
 
+				@Override
 				public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
 					
 				}
 
+				@Override
 				public void visitMultiANewArrayInsn(String desc, int dims) {
 					
 				}
 
+				@Override
 				public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
 					
 				}
 
+				@Override
 				public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
 					
 				}
 
+				@Override
 				public void visitLineNumber(int line, Label start) {
 					
 				}
 
+				@Override
 				public void visitMaxs(int maxStack, int maxLocals) {
 					
 				}
 
+				@Override
 				public void visitEnd() {
 					
 				}
 			};
 		}
 
+		@Override
 		public void visitEnd() {
 			
 		}
@@ -707,6 +743,7 @@ public class ClassMirror<T> implements Serializable {
 			this.mirror = mirror;
 		}
 
+		@Override
 		public void visit(String name, Object value) {
 			if(value instanceof org.objectweb.asm.Type){
 				//Type can't serialize, so we need to store a reference to it.
@@ -718,18 +755,22 @@ public class ClassMirror<T> implements Serializable {
 			mirror.addAnnotationValue(name, value);
 		}
 
+		@Override
 		public void visitEnum(String name, String desc, String value) {
 			
 		}
 
+		@Override
 		public AnnotationVisitor visitAnnotation(String name, String desc) {
 			return null;
 		}
 
+		@Override
 		public AnnotationVisitor visitArray(String name) {
 			return null;
 		}
 
+		@Override
 		public void visitEnd() {
 			
 		}

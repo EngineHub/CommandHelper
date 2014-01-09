@@ -29,24 +29,29 @@ public class BukkitMCCommandSender implements MCCommandSender{
         }
     }
     
+	@Override
     public Object getHandle(){
         return c;
     }        
     
+	@Override
     public void sendMessage(String string) {
         c.sendMessage(string);
     }
 
     
+	@Override
     public MCServer getServer() {
         return new BukkitMCServer();
     }
 
     
+	@Override
     public String getName() {
         return c.getName();
     }
 
+	@Override
     public boolean isOp() {
         return c.isOp();
     }

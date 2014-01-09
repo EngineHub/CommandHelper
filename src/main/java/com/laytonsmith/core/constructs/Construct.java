@@ -83,6 +83,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * This will never return null.
      * @return 
      */
+	@Override
     public String val() {
         return value;
     }
@@ -248,6 +249,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         }
     }
 
+	@Override
     public int compareTo(Construct c) {
         if(this.value.contains(" ") || this.value.contains("\t") 
                 || c.value.contains(" ") || c.value.contains("\t")){

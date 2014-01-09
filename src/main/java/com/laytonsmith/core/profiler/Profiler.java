@@ -215,6 +215,7 @@ public final class Profiler {
 	 */
 	public void doLog(final String message) {
 		outputQueue.push(null, null, new Runnable() {
+			@Override
 			public void run() {
 				if (writeToScreen) {
 					System.out.println(message);

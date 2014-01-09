@@ -27,14 +27,17 @@ public class WebConnection implements ConnectionMixin{
 		source = newURI.toURL();
 	}
 
+	@Override
 	public String getData() throws IOException {
 		return WebUtility.GetPageContents(source);
 	}
 
+	@Override
 	public void writeData(DaemonManager dm, String data) throws IOException, UnsupportedOperationException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
+	@Override
 	public String getPath() throws UnsupportedOperationException {
 		return source.toString();
 	}

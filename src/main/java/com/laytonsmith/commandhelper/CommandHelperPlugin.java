@@ -295,6 +295,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		//Create a new thread pool, with a custom ThreadFactory,
 		//so we can more clearly name our threads.
 		hostnameLookupThreadPool = Executors.newFixedThreadPool(3, new ThreadFactory() {
+			@Override
 			public Thread newThread(Runnable r) {
 				return new Thread(r, "CommandHelperHostnameLookup-" + (++hostnameThreadPoolID));
 			}

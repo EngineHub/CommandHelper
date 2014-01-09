@@ -73,14 +73,17 @@ public class Minecraft {
 	@api
 	public static class data_values extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "data_values";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CInt) {
 				return new CInt(Static.getInt(args[0], t), t);
@@ -112,23 +115,28 @@ public class Minecraft {
 			}
 		}
 
+		@Override
 		public String docs() {
 			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
 					+ " simply returns that number. If the data value cannot be found, null is returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -137,14 +145,17 @@ public class Minecraft {
 	@api
 	public static class data_name extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "data_name";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {int | itemArray} Performs the reverse functionality as data_values. Given 1, returns 'Stone'. Note that the enum value"
 					+ " given in bukkit's Material class is what is returned as a fallback, if the id doesn't match a value in the internally maintained list."
@@ -152,22 +163,27 @@ public class Minecraft {
 					+ " in, null is returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int i = -1;
 			int i2 = -1;
@@ -211,14 +227,17 @@ public class Minecraft {
 	@api
 	public static class max_stack_size extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "max_stack_size";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "integer {itemType | itemArray} Given an item type, returns"
 					+ " the maximum allowed stack size. This method will accept either"
@@ -228,18 +247,22 @@ public class Minecraft {
 					+ " function, the data is unneccesary.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t);
@@ -260,6 +283,7 @@ public class Minecraft {
 			throw new ConfigRuntimeException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", ExceptionType.CastException, t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -268,14 +292,17 @@ public class Minecraft {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class spawn_mob extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "spawn_mob";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
 					+ " to the location of the player. An array of the entity IDs spawned is returned."
@@ -298,22 +325,27 @@ public class Minecraft {
 					+ " and the pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + ".";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String mob = args[0].val();
 			String secondary = "";
@@ -349,36 +381,44 @@ public class Minecraft {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class tame_mob extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "tame_mob";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], entityID} Tames the entity specified to the player. Wolves and ocelots are supported. Offline players"
 					+ " are supported, but this means that partial matches are NOT supported. You must type the players name exactly. Setting"
 					+ " the player to null will untame the mob. If the entity doesn't exist, nothing happens.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getName();
 			Construct entityID = null;
@@ -413,35 +453,43 @@ public class Minecraft {
 	@api
 	public static class get_mob_owner extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_mob_owner";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {entityID} Returns the owner's name, or null if the mob is unowned. An UntameableMobException is thrown if"
 					+ " mob isn't tameable to begin with.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			MCLivingEntity e = Static.getLivingEntity(id, t);
@@ -463,34 +511,42 @@ public class Minecraft {
 	@api
 	public static class is_tameable extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "is_tameable";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns true or false if the specified entity is tameable";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			MCEntity e = Static.getEntity(id, t);
@@ -509,14 +565,17 @@ public class Minecraft {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class make_effect extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "make_effect";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
 					+ " the radius (or 64 by default). The effect can be one of the following: "
@@ -525,22 +584,27 @@ public class Minecraft {
 					+ " id of a disc as data, STEP_SOUND takes a blockID and SMOKE takes a direction bit (4 is upwards).";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld() : null), t);
 			MCEffect e = null;
@@ -574,37 +638,45 @@ public class Minecraft {
 	@api
 	public static class set_entity_health extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_entity_health";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, healthPercent} Sets the specified entity's health as a percentage,"
 					+ " where 0 kills it and 100 gives it full health."
 					+ " An exception is thrown if the entityID doesn't exist or isn't a LivingEntity.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
 					ExceptionType.RangeException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			double percent = Static.getDouble(args[1], t);
@@ -621,35 +693,43 @@ public class Minecraft {
 	@api
 	public static class get_entity_health extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_entity_health";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {entityID} Returns the entity's health as a percentage of its maximum health."
 					+ " If the specified entity doesn't exist, or is not a LivingEntity, a format exception is thrown.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			return new CDouble(e.getHealth() / e.getMaxHealth() * 100.0, t);
@@ -659,14 +739,17 @@ public class Minecraft {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_server_info extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_server_info";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {[value]} Returns various information about server."
 					+ "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
@@ -683,22 +766,27 @@ public class Minecraft {
 					+ "<li>11 - Server port; Get the game port that the server runs on</li></ul>";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = StaticLayer.GetServer();
 			int index = -1;
@@ -802,34 +890,42 @@ public class Minecraft {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_banned_players extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_banned_players";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "Array {} An array of players banned on the server.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
 
@@ -849,34 +945,42 @@ public class Minecraft {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_whitelisted_players extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_whitelisted_players";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "Array {} An array of players whitelisted on the server.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
 
@@ -896,18 +1000,22 @@ public class Minecraft {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_spawner_type extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -924,19 +1032,23 @@ public class Minecraft {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "get_spawner_type";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {locationArray} Gets the spawner type of the specified mob spawner. ----"
 					+ " Valid types will be one of the mob types.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -946,18 +1058,22 @@ public class Minecraft {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_spawner_type extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -974,19 +1090,23 @@ public class Minecraft {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "set_spawner_type";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
 					+ " or if the type is invalid, a FormatException is thrown.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -996,18 +1116,22 @@ public class Minecraft {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class launch_firework extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld w = null;
@@ -1117,14 +1241,17 @@ public class Minecraft {
 			return colors;
 		}
 
+		@Override
 		public String getName() {
 			return "launch_firework";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			Class c;
 			try {
@@ -1171,6 +1298,7 @@ public class Minecraft {
 					+ "The \"named colors\" can be one of: " + StringUtils.Join(names, ", ", " or ");
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1180,18 +1308,22 @@ public class Minecraft {
 	@api
 	public static class send_texturepack extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
@@ -1199,14 +1331,17 @@ public class Minecraft {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "send_texturepack";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {player, url} Sends a texturepack URL to the player's client."
 					+ " If the client has not been requested to change textures in the"
@@ -1215,6 +1350,7 @@ public class Minecraft {
 					+ " will not recieve the request, so this function will not affect them.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}	
@@ -1223,18 +1359,22 @@ public class Minecraft {
 	@api
 	public static class get_ip_bans extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
@@ -1245,18 +1385,22 @@ public class Minecraft {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_ip_bans";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an array of entries from banned-ips.txt.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1265,18 +1409,22 @@ public class Minecraft {
 	@api
 	public static class set_ip_banned extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
@@ -1289,19 +1437,23 @@ public class Minecraft {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_ip_banned";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {address, banned} If banned is true, address is added to banned-ips.txt,"
 					+ " if false, the address is removed.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1310,10 +1462,12 @@ public class Minecraft {
 	@api
 	public static class material_info extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
 			CArray ret = new CArray(t);
@@ -1331,26 +1485,32 @@ public class Minecraft {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "material_info";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {int} Returns an array of info about the material.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1359,14 +1519,17 @@ public class Minecraft {
 	@api(environments={CommandHelperEnvironment.class})
     public static class drop_item extends AbstractFunction {
 
+		@Override
         public String getName() {
             return "drop_item";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2, 3};
         }
 
+		@Override
 		public String docs() {
 			return "int {[player/LocationArray], item, [spawnNaturally]} Drops the specified item stack at the specified player's feet (or "
 					+ " at an arbitrary Location, if an array is given), and returns its entity id"
@@ -1375,21 +1538,26 @@ public class Minecraft {
 					+ " spawnNaturally takes a boolean, which forces the way the item will be spawned. If true, the item will be dropped with a random offset.";
 		}
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException, ExceptionType.InvalidWorldException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCLocation l;
             MCItemStack is;
@@ -1436,34 +1604,42 @@ public class Minecraft {
 	@api
 	public static class shutdown_server extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "shutdown_server";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String docs() {
 			return "void {} Shuts down the minecraft server instance.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException {
 			Static.getServer().shutdown();
 			throw new CancelCommandException("", t);

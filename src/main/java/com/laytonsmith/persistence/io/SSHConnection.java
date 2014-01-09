@@ -17,14 +17,17 @@ public class SSHConnection implements ConnectionMixin{
 		connection = uri.getSchemeSpecificPart();
 	}
 
+	@Override
 	public String getData() throws IOException {		
 		return StreamUtils.GetString(SSHWrapper.SCPRead(connection));
 	}
 
+	@Override
 	public void writeData(DaemonManager dm, String data) throws IOException, UnsupportedOperationException {
 		SSHWrapper.SCPWrite(data, connection);
 	}
 
+	@Override
 	public String getPath() throws UnsupportedOperationException {
 		return connection;
 	}

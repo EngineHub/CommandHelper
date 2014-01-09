@@ -55,14 +55,17 @@ public class BukkitPlayerEvents {
 			pic = event;
 		}
 		
+		@Override
 		public MCItemStack getItem() {
 			return new BukkitMCItemStack(pic.getItem());
 		}
 
+		@Override
 		public void setItem(MCItemStack item) {
 			pic.setItem(((BukkitMCItemStack) item).asItemStack());
 		}
 
+		@Override
 		public Object _GetObject() {
 			return pic;
 		}
@@ -74,6 +77,7 @@ public class BukkitPlayerEvents {
 							((BukkitMCItemStack) item).asItemStack()));
 		}
 
+		@Override
 		public MCPlayer getPlayer() {
             return new BukkitMCPlayer(pic.getPlayer());
         }
@@ -94,14 +98,17 @@ public class BukkitPlayerEvents {
 			this.block = new BukkitMCBlock(event.getBed());
 		}
 		
+		@Override
 		public MCBlock getBed() {
 			return block;
 		}
 
+		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(event.getPlayer());
 		}
 
+		@Override
 		public Object _GetObject() {
 			return event;
 		}
@@ -114,34 +121,42 @@ public class BukkitPlayerEvents {
             this.e = e;
         }
 
+		@Override
         public Object _GetObject() {
             return e;
         }
 
+		@Override
         public String getMessage() {
             return e.getLeaveMessage();
         }
 
+		@Override
         public void setMessage(String message) {
             e.setLeaveMessage(message);
         }
 
+		@Override
         public String getReason() {
             return e.getReason();
         }
 
+		@Override
         public void setReason(String message) {
             e.setReason(message);
         }
 
+		@Override
         public boolean isCancelled() {
             return e.isCancelled();
         }
 
+		@Override
         public void setCancelled(boolean cancelled) {
             e.setCancelled(cancelled);
         }
 
+		@Override
         public MCPlayer getPlayer() {
             return new BukkitMCPlayer(e.getPlayer());
         }
@@ -156,26 +171,32 @@ public class BukkitPlayerEvents {
 			this.e = e;
 		}
 
+		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(e.getPlayer());
 		}
 
+		@Override
 		public MCLocation getFrom() {
 			return new BukkitMCLocation(e.getFrom());
 		}
 
+		@Override
 		public MCLocation getTo() {
 			return new BukkitMCLocation(e.getTo());
 		}
 
+		@Override
 		public MCTeleportCause getCause() {
 			return BukkitMCTeleportCause.getConvertor().getAbstractedEnum(e.getCause());
 		}
 
+		@Override
 		public void setFrom(MCLocation oldloc) {
 			e.setFrom(((BukkitMCLocation) oldloc)._Location());
 		}
 
+		@Override
 		public void setTo(MCLocation newloc) {
 			World w = ((BukkitMCWorld)newloc.getWorld()).__World();
 			Location loc = new Location(
@@ -190,14 +211,17 @@ public class BukkitPlayerEvents {
 			e.setTo(loc);
 		}
 
+		@Override
 		public Object _GetObject() {
 			return e;
 		}
 
+		@Override
 		public void setCancelled(boolean state) {
 			e.setCancelled(state);
 		}
 
+		@Override
 		public boolean isCancelled() {
 			return e.isCancelled();
 		}
@@ -213,18 +237,22 @@ public class BukkitPlayerEvents {
 			p = event;
 		}
 
+		@Override
 		public void useTravelAgent(boolean useTravelAgent) {
 			p.useTravelAgent(useTravelAgent);
 		}
 
+		@Override
 		public boolean useTravelAgent() {
 			return p.useTravelAgent();
 		}
 
+		@Override
 		public MCTravelAgent getPortalTravelAgent() {
 			return new BukkitMCTravelAgent(p.getPortalTravelAgent());
 		}
 
+		@Override
 		public void setPortalTravelAgent(MCTravelAgent travelAgent) {
 			p.setPortalTravelAgent((TravelAgent) travelAgent.getHandle());
 		}
@@ -245,34 +273,42 @@ public class BukkitPlayerEvents {
             event = e;
         }
 
+		@Override
 		public Object _GetObject() {
 			return event;
 		}
 
+		@Override
 		public String getName() {
 			return event.getPlayer().getName();
 		}
 
+		@Override
 		public String getKickMessage() {
 			return event.getKickMessage();
 		}
 
+		@Override
 		public void setKickMessage(String msg) {
 			event.setKickMessage(msg);
 		}
 
+		@Override
 		public String getResult() {
 			return event.getResult().toString();
 		}
 
+		@Override
 		public void setResult(String rst) {
 			event.setResult(PlayerLoginEvent.Result.valueOf(rst.toUpperCase()));
 		}
 
+		@Override
 		public String getIP() {
 			return event.getAddress().getHostAddress();
 		}
 
+		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(event.getPlayer());
 		}
@@ -286,30 +322,37 @@ public class BukkitPlayerEvents {
             event = e;
         }
 
+		@Override
 		public Object _GetObject() {
 			return event;
 		}
 
+		@Override
 		public String getName() {
 			return event.getName();
 		}
 
+		@Override
 		public String getKickMessage() {
 			return event.getKickMessage();
 		}
 
+		@Override
 		public void setKickMessage(String msg) {
 			event.setKickMessage(msg);
 		}
 
+		@Override
 		public String getResult() {
 			return event.getResult().toString();
 		}
 
+		@Override
 		public void setResult(String rst) {
 			event.setResult(Result.valueOf(rst.toUpperCase()));
 		}
 
+		@Override
 		public String getIP() {
 			return event.getAddress().toString();
 		}
@@ -327,6 +370,7 @@ public class BukkitPlayerEvents {
             pce = event.pce;
         }
 
+		@Override
         public Object _GetObject() {
             return pce;
         }
@@ -338,14 +382,17 @@ public class BukkitPlayerEvents {
             return new BukkitMCPlayerChatEvent(apce);
         }
 
+		@Override
         public String getMessage() {
             return pce.getMessage();
         }
 
+		@Override
         public void setMessage(String message) {
             pce.setMessage(message);
         }
 
+		@Override
         public List<MCPlayer> getRecipients() {
             List<MCPlayer> players = new ArrayList<MCPlayer>();
             for(Player p : pce.getRecipients()){
@@ -354,6 +401,7 @@ public class BukkitPlayerEvents {
             return players;
         }
 
+		@Override
         public void setRecipients(List<MCPlayer> list) {
             pce.getRecipients().clear();
             for(MCPlayer p  : list){
@@ -361,14 +409,17 @@ public class BukkitPlayerEvents {
             }
         }
 
+		@Override
         public MCPlayer getPlayer() {
             return new BukkitMCPlayer(pce.getPlayer());
         }
 
+		@Override
 		public String getFormat() {
 			return pce.getFormat();
 		}
 
+		@Override
 		public void setFormat(String format) {
 			pce.setFormat(format);
 		}
@@ -381,6 +432,7 @@ public class BukkitPlayerEvents {
             pce = event;
         }
 
+		@Override
         public Object _GetObject() {
             return pce;
         }
@@ -389,14 +441,17 @@ public class BukkitPlayerEvents {
             return new BukkitMCPlayerQuitEvent(new PlayerQuitEvent(((BukkitMCPlayer)player)._Player(), message));
         }
 
+		@Override
         public String getMessage() {
             return pce.getQuitMessage();
         }
 
+		@Override
         public void setMessage(String message) {
             pce.setQuitMessage(message);
         }
 
+		@Override
         public MCPlayer getPlayer() {
             return new BukkitMCPlayer(pce.getPlayer());
         }
@@ -411,18 +466,22 @@ public class BukkitPlayerEvents {
             pje = e;
         }
 
+		@Override
         public MCPlayer getPlayer() {
             return new BukkitMCPlayer(pje.getPlayer());
         }
 
+		@Override
         public String getJoinMessage() {
             return pje.getJoinMessage();
         }
 
+		@Override
         public void setJoinMessage(String message) {
             pje.setJoinMessage(message);
         }
 
+		@Override
         public Object _GetObject() {
             return pje;
         }
@@ -449,26 +508,32 @@ public class BukkitPlayerEvents {
                     ((BukkitMCBlock)clickedBlock).__Block(), BlockFace.valueOf(clickedFace.name())));
         }
 
+		@Override
         public MCAction getAction() {
             return BukkitMCAction.getConvertor().getAbstractedEnum(pie.getAction());
         }
 
+		@Override
         public MCPlayer getPlayer() {
             return new BukkitMCPlayer(pie.getPlayer());
         }
 
+		@Override
         public MCBlock getClickedBlock() {
             return new BukkitMCBlock(pie.getClickedBlock());
         }
 
+		@Override
         public MCBlockFace getBlockFace() {
             return MCBlockFace.valueOf(pie.getBlockFace().name());
         }
 
+		@Override
         public MCItemStack getItem() {
             return new BukkitMCItemStack(pie.getItem());
         }
 
+		@Override
         public Object _GetObject() {
             return pie;
         }
@@ -483,6 +548,7 @@ public class BukkitPlayerEvents {
             pre = event;
         }
 
+		@Override
         public Object _GetObject() {
             return pre;
         }
@@ -492,18 +558,22 @@ public class BukkitPlayerEvents {
 					((BukkitMCLocation)location)._Location(), isBedSpawn));
         }
 
+		@Override
         public MCPlayer getPlayer() {
             return new BukkitMCPlayer(pre.getPlayer());
         }
 
+		@Override
         public void setRespawnLocation(MCLocation location) {
             pre.setRespawnLocation(((BukkitMCLocation)location)._Location());
         }
 
+		@Override
         public MCLocation getRespawnLocation() {
             return new BukkitMCLocation(pre.getRespawnLocation());
         }
 
+		@Override
         public Boolean isBedSpawn() {
             return pre.isBedSpawn();
         }
@@ -536,46 +606,57 @@ public class BukkitPlayerEvents {
             return new BukkitMCPlayer(pde.getEntity());
         }
 		
+		@Override
 		public MCEntity getKiller() {
 			return StaticLayer.GetCorrectEntity(new BukkitMCEntity(pde.getEntity().getKiller()));
 		}
 
+		@Override
         public String getDeathMessage() {
             return pde.getDeathMessage();
         }
 
+		@Override
         public void setDeathMessage(String nval) {
             pde.setDeathMessage(nval);
         }
 
+		@Override
 		public boolean getKeepLevel() {
 			return pde.getKeepLevel();
 		}
 
+		@Override
 		public void setKeepLevel(boolean keepLevel) {
 			pde.setKeepLevel(keepLevel);
 		}
 
+		@Override
 		public int getNewExp() {
 			return pde.getNewExp();
 		}
 
+		@Override
 		public void setNewExp(int exp) {
 			pde.setNewExp(exp);
 		}
 
+		@Override
 		public int getNewLevel() {
 			return pde.getNewLevel();
 		}
 
+		@Override
 		public void setNewLevel(int level) {
 			pde.setNewLevel(level);
 		}
 
+		@Override
 		public int getNewTotalExp() {
 			return pde.getNewTotalExp();
 		}
 
+		@Override
 		public void setNewTotalExp(int totalExp) {
 			pde.setNewTotalExp(totalExp);
 		}
@@ -588,20 +669,24 @@ public class BukkitPlayerEvents {
         public BukkitMCPlayerCommandEvent(PlayerCommandPreprocessEvent pcpe){
             this.pcpe = pcpe;
         }
+		@Override
         public Object _GetObject() {
             return pcpe;
         }
 
+		@Override
         public String getCommand(){
             return pcpe.getMessage();
         }
 
+		@Override
         public void cancel() {
             pcpe.setMessage("/commandhelper null");
 			pcpe.setCancelled(true);
             isCancelled = true;
         }
 
+		@Override
         public MCPlayer getPlayer() {
             return new BukkitMCPlayer(pcpe.getPlayer());
         }
@@ -610,10 +695,12 @@ public class BukkitPlayerEvents {
             return new BukkitMCPlayerCommandEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer)entity)._Player(), command));
         }
 
+		@Override
         public void setCommand(String val) {
             pcpe.setMessage(val);
         }
 
+		@Override
         public boolean isCancelled() {
             return isCancelled;
         }
@@ -627,18 +714,22 @@ public class BukkitPlayerEvents {
             pcwe = e;
         }
 
+		@Override
         public MCPlayer getPlayer() {
             return new BukkitMCPlayer(pcwe.getPlayer());
         }
 
+		@Override
         public MCWorld getFrom() {
             return new BukkitMCWorld(pcwe.getFrom());
         }
 
+		@Override
         public MCWorld getTo() {
             return new BukkitMCWorld(pcwe.getPlayer().getWorld());
         }
 
+		@Override
         public Object _GetObject() {
             return pcwe;
         }
@@ -662,26 +753,32 @@ public class BukkitPlayerEvents {
 			this.to = new BukkitMCLocation(to);
 		}
 
+		@Override
 		public MCLocation getFrom() {
 			return from;
 		}
 
+		@Override
 		public MCLocation getTo() {
 			return to;
 		}
 
+		@Override
 		public MCPlayer getPlayer() {
 			return player;
 		}
 
+		@Override
 		public Object _GetObject() {
 			return null;
 		}
 
+		@Override
 		public void setCancelled(boolean state) {
 			cancelled = state;
 		}
 
+		@Override
 		public boolean isCancelled() {
 			return cancelled;
 		}
@@ -695,10 +792,12 @@ public class BukkitPlayerEvents {
 			e = event;
 		}
 		
+		@Override
 		public Object _GetObject() {
 			return e;
 		}
 	
+		@Override
 		public MCEntity getCaught() {
 			if (e.getCaught() == null) {
 				return null;
@@ -706,22 +805,27 @@ public class BukkitPlayerEvents {
 			return new BukkitMCEntity(e.getCaught());
 		}
 	
+		@Override
 		public int getExpToDrop() {
 			return e.getExpToDrop();
 		}
 	
+		@Override
 		public MCFishHook getHook() {
 			return new BukkitMCFishHook(e.getHook());
 		}
 	
+		@Override
 		public MCFishingState getState() {
 			return BukkitMCFishingState.getConvertor().getAbstractedEnum(e.getState());
 		}
 	
+		@Override
 		public void setExpToDrop(int exp) {
 			e.setExpToDrop(exp);
 		}
 		
+		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(e.getPlayer());
 		}
@@ -734,14 +838,17 @@ public class BukkitPlayerEvents {
 			gmc = event;
 		}
 		
+		@Override
 		public MCGameMode getNewGameMode() {
 			return BukkitMCGameMode.getConvertor().getAbstractedEnum(gmc.getNewGameMode());
 		}
 		
+		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(gmc.getPlayer());
 		}
 
+		@Override
 		public Object _GetObject() {
 			return gmc;
 		}
@@ -754,22 +861,27 @@ public class BukkitPlayerEvents {
 			this.tc = event;
 		}
 	
+		@Override
 		public Object _GetObject() {
 			return tc;
 		}
 	
+		@Override
 		public String getChatMessage() {
 			return tc.getChatMessage();
 		}
 	
+		@Override
 		public String getLastToken() {
 			return tc.getLastToken();
 		}
 	
+		@Override
 		public Collection<String> getTabCompletions() {
 			return tc.getTabCompletions();
 		}
 
+		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(tc.getPlayer());
 		}
@@ -812,34 +924,42 @@ public class BukkitPlayerEvents {
 			pebe = event;
 		}
 
+		@Override
 		public Object _GetObject() {
 			return pebe;
 		}
 
+		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(pebe.getPlayer());
 		}
 
+		@Override
 		public MCBookMeta getNewBookMeta() {
 			return new BukkitMCBookMeta(pebe.getNewBookMeta());
 		}
 
+		@Override
 		public MCBookMeta getPreviousBookMeta() {
 			return new BukkitMCBookMeta(pebe.getPreviousBookMeta());
 		}
 
+		@Override
 		public void setNewBookMeta(MCBookMeta bookMeta) {
 			pebe.setNewBookMeta(((BukkitMCBookMeta) bookMeta).getBookMeta());
 		}
 
+		@Override
 		public int getSlot() {
 			return pebe.getSlot();
 		}
 
+		@Override
 		public boolean isSigning() {
 			return pebe.isSigning();
 		}
 
+		@Override
 		public void setSigning(boolean isSigning) {
 			pebe.setSigning(isSigning);
 		}

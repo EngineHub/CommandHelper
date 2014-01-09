@@ -16,6 +16,7 @@ public class BukkitMCNote implements AbstractionObject, MCNote {
 		n = new Note(octave, Note.Tone.valueOf(tone.name()), sharp);
 	}
 
+	@Override
 	public Object getHandle() {
 		return n;
 	}

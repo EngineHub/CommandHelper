@@ -219,6 +219,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * @param o
      * @return 
      */
+	@Override
     public int compareTo(BoundEvent o) {
         if (this.getPriority().getId() < o.getPriority().getId()) {
             return -1;

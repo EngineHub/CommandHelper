@@ -148,6 +148,7 @@ public class AliasCore {
 							ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("Global Alias - \"" + command + "\"", LogLevel.ERROR);
 							try {
 								s.run(s.getVariables(command), env, new MethodScriptComplete() {
+									@Override
 									public void done(String output) {
 										try {
 											if (output != null) {
@@ -212,6 +213,7 @@ public class AliasCore {
 								ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("User Alias (" + player.getName() + ") - \"" + command + "\"", LogLevel.ERROR);
 								try {
 									ac.run(ac.getVariables(command), env, new MethodScriptComplete() {
+										@Override
 										public void done(String output) {
 											if (output != null) {
 												if (!output.trim().isEmpty() && output.trim().startsWith("/")) {

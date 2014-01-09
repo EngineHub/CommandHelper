@@ -276,6 +276,7 @@ public class ClassDiscovery {
 			if (url.startsWith("file:") && !url.endsWith(".jar")) {
 				final AtomicInteger id = new AtomicInteger(0);
 				ExecutorService service = Executors.newFixedThreadPool(10, new ThreadFactory() {
+					@Override
 					public Thread newThread(Runnable r) {
 						return new Thread(r, "ClassDiscovery-Async-" + id.incrementAndGet());
 					}
@@ -325,6 +326,7 @@ public class ClassDiscovery {
 				ZipIterator zi = new ZipIterator(rootLocationFile);
 				try {
 					zi.iterate(new ZipIterator.ZipIteratorCallback() {
+						@Override
 						public void handle(String filename, InputStream in) {
 							if (!filename.matches(".*\\$(?:\\d)*\\.class") && filename.endsWith(".class")) {
 								try {

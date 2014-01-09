@@ -51,14 +51,17 @@ public class Burst {
 			this.version = version;
 		}
 
+		@Override
 		public String getName() {
 			return name();
 		}
 
+		@Override
 		public String docs() {
 			return doc;
 		}
 
+		@Override
 		public CHVersion since() {
 			return version;
 		}

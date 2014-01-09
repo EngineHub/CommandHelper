@@ -38,35 +38,42 @@ public class EntityManagement {
     }
 
 	public static abstract class EntityFunction extends AbstractFunction {
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 	}
 
 	public static abstract class EntityGetterFunction extends EntityFunction {
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 	}
 
 	public static abstract class EntitySetterFunction extends EntityFunction {
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
 					ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
@@ -75,11 +82,13 @@ public class EntityManagement {
 	@api
 	public static class all_entities extends EntityFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException,
 					ExceptionType.CastException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
@@ -130,14 +139,17 @@ public class EntityManagement {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "all_entities";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[world, [x, z]] | [locationArray]} Returns an array of IDs for all entities in the given"
 					+ " scope. With no args, this will return all entities loaded on the entire server. If the first"
@@ -164,6 +176,7 @@ public class EntityManagement {
 	@api
 	public static class entity_exists extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity e;
@@ -175,10 +188,12 @@ public class EntityManagement {
 			return new CBoolean(true, t);
 		}
 
+		@Override
 		public String getName() {
 			return "entity_exists";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns true if entity exists, otherwise false.";
 		}
@@ -187,16 +202,19 @@ public class EntityManagement {
 	@api
 	public static class entity_loc extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
 			return ObjectGenerator.GetGenerator().location(e.getLocation());
 		}
 
+		@Override
 		public String getName() {
 			return "entity_loc";
 		}
 
+		@Override
 		public String docs() {
 			return "locationArray {entityID} Returns the location array for this entity, if it exists."
 					+ " This array will be compatible with any function that expects a location.";
@@ -222,6 +240,7 @@ public class EntityManagement {
 					ExceptionType.CastException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
@@ -234,10 +253,12 @@ public class EntityManagement {
 			return new CBoolean(e.teleport(l), t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_entity_loc";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID, locationArray} Teleports the entity to the given location and returns whether"
 					+ " the action was successful. Note this can set both location and direction.";
@@ -263,6 +284,7 @@ public class EntityManagement {
 	@api
 	public static class entity_velocity extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 
@@ -271,10 +293,12 @@ public class EntityManagement {
 			return va;
 		}
 
+		@Override
 		public String getName() {
 			return "entity_velocity";
 		}
 
+		@Override
 		public String docs() {
 			return "array {entityID} Returns an associative array indicating the x/y/z components of this entity's velocity."
 					+ " As a convenience, the magnitude is also included.";
@@ -293,6 +317,7 @@ public class EntityManagement {
 	@api
 	public static class set_entity_velocity extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 
@@ -301,10 +326,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_entity_velocity";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, array} Sets the velocity of this entity according to the supplied xyz array. All 3"
 					+ " values default to 0, so an empty array will simply stop the entity's motion. Both normal and"
@@ -326,6 +353,7 @@ public class EntityManagement {
 	@api
 	public static class entity_remove extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity((int) Static.getInt(args[0], t), t);
@@ -340,10 +368,12 @@ public class EntityManagement {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "entity_remove";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID} Removes the specified entity from the world, without any drops or animations. "
 				+ "Note: you can't remove players. As a safety measure for working with NPC plugins, it will "
@@ -360,6 +390,7 @@ public class EntityManagement {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent;
@@ -372,10 +403,12 @@ public class EntityManagement {
 			return new CString(ent.getType().name(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "entity_type";
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {entityID} Returns the EntityType of the entity with the specified ID."
 					+ " Returns null if the entity does not exist.";
@@ -385,6 +418,7 @@ public class EntityManagement {
 	@api
 	public static class get_entity_age extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
@@ -396,10 +430,12 @@ public class EntityManagement {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "get_entity_age";
 		}
 
+		@Override
 		public String docs() {
 			return "int {entityID} Returns the entity age as an integer, represented by server ticks.";
 		}
@@ -414,6 +450,7 @@ public class EntityManagement {
 					ExceptionType.RangeException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
@@ -432,10 +469,12 @@ public class EntityManagement {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "set_entity_age";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, int} Sets the age of the entity to the specified int, represented by server ticks.";
 		}
@@ -450,6 +489,7 @@ public class EntityManagement {
 					ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
@@ -464,10 +504,12 @@ public class EntityManagement {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "get_mob_age";
 		}
 
+		@Override
 		public String docs() {
 			return "int {entityID} Returns the mob's age as an integer. Zero represents the point of adulthood. Throws an"
 					+ " UnageableMobException if the mob is not a type that ages";
@@ -477,11 +519,13 @@ public class EntityManagement {
 	@api
 	public static class set_mob_age extends EntityFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException,
 					ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
@@ -503,14 +547,17 @@ public class EntityManagement {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "set_mob_age";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at that age"
 					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does"
@@ -521,16 +568,19 @@ public class EntityManagement {
 	@api
 	public static class get_mob_effects extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_mob_effects";
 		}
 
+		@Override
 		public String docs() {
 			return "array {entityID} Returns an array of potion arrays showing"
 					+ " the effects on this mob.";
@@ -547,14 +597,17 @@ public class EntityManagement {
 	@api
 	public static class set_mob_effect extends EntityFunction {
 
+		@Override
 		public String getName() {
 			return "set_mob_effect";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{3, 4, 5};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityId, potionID, strength, [seconds], [ambient]} Effect is 1-23. Seconds defaults to 30."
 					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
@@ -566,11 +619,13 @@ public class EntityManagement {
 					+ " an effect is attempted to be removed, yet isn't already on the mob).";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
 					ExceptionType.BadEntityException, ExceptionType.RangeException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args)
 				throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(Static.getInt32(args[0], t), t);
@@ -599,11 +654,13 @@ public class EntityManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class shoot_projectile extends EntityFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException,
 					ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCCommandSender cmdsr = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -640,14 +697,17 @@ public class EntityManagement {
 			return new CInt(ent.launchProjectile(toShoot).getEntityId(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "shoot_projectile";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player[, projectile]] | [entityID[, projectile]]} shoots a projectile from the entity or player"
 					+ " specified, or the current player if no arguments are passed. If no projectile is specified,"
@@ -659,14 +719,17 @@ public class EntityManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class entities_in_radius extends EntityFunction {
 
+		@Override
 		public String getName() {
 			return "entities_in_radius";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
@@ -740,6 +803,7 @@ public class EntityManagement {
 			return newTypes;
 		}
 
+		@Override
 		public String docs() {
 			return "array {location array, distance, [type] | location array, distance, [arrayTypes]} Returns an array of"
 					+ " all entities within the given radius. Set type argument to filter entities to a specific type. You"
@@ -747,6 +811,7 @@ public class EntityManagement {
 					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ", " or ");
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
 					ExceptionType.FormatException};
@@ -756,6 +821,7 @@ public class EntityManagement {
 	//@api
 	public static class get_mob_target extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
@@ -766,10 +832,12 @@ public class EntityManagement {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "get_mob_target";
 		}
 
+		@Override
 		public String docs() {
 			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
 					+ " If there is no target, null is returned instead.";
@@ -784,6 +852,7 @@ public class EntityManagement {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
@@ -795,10 +864,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_mob_target";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, entityID} The first ID is the entity who is targetting, the second is the target."
 					+ " It can also be set to null to clear the current target.";
@@ -808,6 +879,7 @@ public class EntityManagement {
 	@api
 	public static class get_mob_equipment extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
@@ -819,10 +891,12 @@ public class EntityManagement {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_mob_equipment";
 		}
 
+		@Override
 		public String docs() {
 			return "equipmentArray {entityID} Returns an associative array showing the equipment this entity is wearing.";
 		}
@@ -840,6 +914,7 @@ public class EntityManagement {
 	@api
 	public static class set_mob_equipment extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntityEquipment ee = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
@@ -863,10 +938,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_mob_equipment";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, array} Takes an associative array with keys representing equipment slots and values"
 					+ " of itemArrays, the same used by set_pinv. The equipment slots are: "
@@ -884,16 +961,19 @@ public class EntityManagement {
 	@api
 	public static class get_max_health extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			return new CDouble(le.getMaxHealth(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_max_health";
 		}
 
+		@Override
 		public String docs() {
 			return "double {entityID} Returns the maximum health of this living entity.";
 		}
@@ -902,6 +982,7 @@ public class EntityManagement {
 	@api
 	public static class set_max_health extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
@@ -909,10 +990,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_max_health";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, double} Sets the max health of a living entity, players included."
 					+ " This value is persistent, and will not reset even after server restarts.";
@@ -928,16 +1011,19 @@ public class EntityManagement {
 	@api
 	public static class entity_onfire extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
 			return new CInt(Static.ticksToMs(ent.getFireTicks())/1000, t);
 		}
 
+		@Override
 		public String getName() {
 			return "entity_onfire";
 		}
 
+		@Override
 		public String docs() {
 			return "int {entityID} Returns the number of seconds until this entity"
 					+ " stops being on fire, 0 if it already isn't.";
@@ -948,6 +1034,7 @@ public class EntityManagement {
 	@api
 	public static class set_entity_onfire extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
@@ -959,10 +1046,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_entity_onfire";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, seconds} Sets the entity on fire for the"
 					+ " given number of seconds. Throws a FormatException"
@@ -974,6 +1063,7 @@ public class EntityManagement {
 	@api
 	public static class play_entity_effect extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
@@ -987,10 +1077,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "play_entity_effect";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, effect} Plays the given visual effect on the"
 					+ " entity. Non-applicable effects simply won't happen. Note:"
@@ -1006,16 +1098,19 @@ public class EntityManagement {
 	@api
 	public static class get_mob_name extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			return new CString(le.getCustomName(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_mob_name";
 		}
 
+		@Override
 		public String docs() {
 			return "string {entityID} Returns the name of the given mob.";
 		}
@@ -1024,6 +1119,7 @@ public class EntityManagement {
 	@api
 	public static class set_mob_name extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
@@ -1031,10 +1127,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_mob_name";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, name} Sets the name of the given mob. This"
 					+ " automatically truncates if it is more than 64 characters.";
@@ -1044,12 +1142,14 @@ public class EntityManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class spawn_entity extends EntityFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
 					ExceptionType.BadEntityException, ExceptionType.InvalidWorldException,
 					ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -1102,14 +1202,17 @@ public class EntityManagement {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "spawn_entity";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			List<String> spawnable = new ArrayList<String>();
 			for (MCEntityType type : MCEntityType.values()) {
@@ -1130,6 +1233,7 @@ public class EntityManagement {
 	@api
 	public static class set_entity_rider extends EntitySetterFunction {
 	
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity horse, rider;
 			boolean success;
@@ -1155,10 +1259,12 @@ public class EntityManagement {
 			return new CBoolean(success, t);
 		}
 	
+		@Override
 		public String getName() {
 			return "set_entity_rider";
 		}
 	
+		@Override
 		public String docs() {
 			return "boolean {horse, rider} Sets the way two entities are stacked. Horse and rider are entity ids."
 					+ " If rider is null, horse will eject its current rider, if it has one. If horse is null,"
@@ -1171,6 +1277,7 @@ public class EntityManagement {
 	@api
 	public static class get_entity_rider extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
@@ -1180,10 +1287,12 @@ public class EntityManagement {
 			return null;
 		}
 
+		@Override
 		public String getName() {
 			return "get_entity_rider";
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {entityID} Returns the ID of the given entity's rider, or null if it doesn't have one.";
 		}
@@ -1192,6 +1301,7 @@ public class EntityManagement {
 	@api
 	public static class get_entity_vehicle extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
@@ -1201,10 +1311,12 @@ public class EntityManagement {
 			return new CNull(t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_entity_vehicle";
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
 		}
@@ -1218,6 +1330,7 @@ public class EntityManagement {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 
@@ -1233,10 +1346,12 @@ public class EntityManagement {
 					ExceptionType.BadEntityTypeException, t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_entity_max_speed";
 		}
 
+		@Override
 		public String docs() {
 			return "double {entityID} Returns a max speed for given entity. Make sure that the entity is a boat"
 					+ " or minecart.";
@@ -1251,6 +1366,7 @@ public class EntityManagement {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 
@@ -1269,10 +1385,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_entity_max_speed";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID} Sets a max speed for given entity. Make sure that the entity is a boat"
 					+ " or minecart.";
@@ -1282,6 +1400,7 @@ public class EntityManagement {
 	@api
 	public static class get_equipment_droprates extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntityEquipment eq = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
 			if (eq.getHolder() instanceof MCPlayer) {
@@ -1294,10 +1413,12 @@ public class EntityManagement {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_equipment_droprates";
 		}
 
+		@Override
 		public String docs() {
 			return "array {entityID} Returns an associative array of the drop rate for each equipment slot."
 					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
@@ -1307,6 +1428,7 @@ public class EntityManagement {
 	@api
 	public static class set_equipment_droprates extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntityEquipment ee = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
 			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
@@ -1333,10 +1455,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_equipment_droprates";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, array} Sets the drop chances for each equipment slot on a mob,"
 					+ " but does not work on players. Passing null instead of an array will automatically"
@@ -1347,14 +1471,17 @@ public class EntityManagement {
 	@api
 	public static class get_name_visible extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).isCustomNameVisible(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_name_visible";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns whether or not a mob's custom name is always visible."
 					+ " If this is true it will be as visible as player names, otherwise it will only be"
@@ -1365,15 +1492,18 @@ public class EntityManagement {
 	@api
 	public static class set_name_visible extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setCustomNameVisible(Static.getBoolean(args[1]));
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_name_visible";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, boolean} Sets the visibility of a mob's custom name."
 					+ " True means it will be visible from a distance, like a playername."
@@ -1384,14 +1514,17 @@ public class EntityManagement {
 	@api
 	public static class can_pickup_items extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).getCanPickupItems(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "can_pickup_items";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns whether the specified living entity can pick up items.";
 		}
@@ -1400,15 +1533,18 @@ public class EntityManagement {
 	@api
 	public static class set_can_pickup_items extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setCanPickupItems(Static.getBoolean(args[1]));
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_can_pickup_items";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, boolean} Sets a living entity's ability to pick up items.";
 		}
@@ -1417,14 +1553,17 @@ public class EntityManagement {
 	@api
 	public static class get_entity_persistence extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(!Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_entity_persistence";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will not.";
 		}
@@ -1433,15 +1572,18 @@ public class EntityManagement {
 	@api
 	public static class set_entity_persistence extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemoveWhenFarAway(!Static.getBoolean(args[1]));
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_entity_persistence";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will not.";
 		}
@@ -1449,18 +1591,22 @@ public class EntityManagement {
 	
 	@api public static class get_art_at extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
@@ -1475,20 +1621,24 @@ public class EntityManagement {
 			throw new ConfigRuntimeException("There is no painting at the specified location", ExceptionType.BadEntityException, t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_art_at";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {locationArray} Gets the specified art at the given location. If the item"
 					+ " at the specified location isn't a painting, an ----"
 					+ " Will be one of the following: " + StringUtils.Join(MCArt.values(), ", ") + ".";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1497,18 +1647,22 @@ public class EntityManagement {
 	
 	@api public static class set_art_at extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
@@ -1540,20 +1694,24 @@ public class EntityManagement {
 			return new CBoolean(worked, t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_art_at";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {locationArray, art} Sets the art at the specified location. If the art"
 					+ " doesn't fit, nothing happens, and false is returned. Otherwise, true is returned."
 					+ " ---- Art may be one of the following: " + StringUtils.Join(MCArt.values(), ", ");
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1562,6 +1720,7 @@ public class EntityManagement {
 	@api
 	public static class get_leashholder extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			if (!le.isLeashed()) {
@@ -1570,10 +1729,12 @@ public class EntityManagement {
 			return new CInt(le.getLeashHolder().getEntityId(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_leashholder";
 		}
 
+		@Override
 		public String docs() {
 			return "int {entityID} Returns the entityID of the entity that is holding the given living entity's leash,"
 					+ " or null if it isn't being held.";
@@ -1583,6 +1744,7 @@ public class EntityManagement {
 	@api
 	public static class set_leashholder extends EntitySetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			MCEntity holder;
@@ -1595,10 +1757,12 @@ public class EntityManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_leashholder";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, entityID} The first entity is the entity to be held on a leash, and must be living."
 					+ " The second entity is the holder of the leash. This does not have to be living,"
@@ -1610,16 +1774,19 @@ public class EntityManagement {
 	@api
 	public static class entity_grounded extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
 			
 			return new CBoolean(e.isOnGround(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "entity_grounded";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} returns whether the entity is touching the ground";
 		}
@@ -1628,14 +1795,17 @@ public class EntityManagement {
 	@api
 	public static class entity_air extends EntityGetterFunction {
 
+		@Override
 		public String getName() {
 			return "entity_air";
 		}
 
+		@Override
 		public String docs() {
 			return "int {entityID} Returns the amount of air the specified living entity has remaining.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemainingAir(), t);
 		}
@@ -1644,14 +1814,17 @@ public class EntityManagement {
 	@api
 	public static class set_entity_air extends EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "set_entity_air";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, int} Sets the amount of air the specified living entity has remaining.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemainingAir(Static.getInt32(args[1], t));
 			return new CVoid(t);
@@ -1661,14 +1834,17 @@ public class EntityManagement {
 	@api
 	public static class entity_max_air extends EntityGetterFunction {
 
+		@Override
 		public String getName() {
 			return "entity_max_air";
 		}
 
+		@Override
 		public String docs() {
 			return "int {entityID} Returns the maximum amount of air the specified living entity can have.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(Static.getInt32(args[0], t), t).getMaximumAir(), t);
 		}
@@ -1677,14 +1853,17 @@ public class EntityManagement {
 	@api
 	public static class set_entity_max_air extends EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "set_entity_max_air";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, int} Sets the maximum amount of air the specified living entity can have.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setMaximumAir(Static.getInt32(args[1], t));
 			return new CVoid(t);
@@ -1694,24 +1873,29 @@ public class EntityManagement {
 	@api
 	public static class entity_line_of_sight extends EntityFunction {
 
+		@Override
 		public String getName() {
 			return "entity_line_of_sight";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public String docs() {
 			return "array {entityID, [transparents, [maxDistance]]} Returns an array containg all blocks along the living entity's line of sight."
 					+ " transparents is an array of block IDs, only air by default."
 					+ " maxDistance represent the maximum distance to scan, it may be limited by the server by at least 100 blocks, no less.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity entity = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			HashSet<Byte> transparents = null;
@@ -1740,24 +1924,29 @@ public class EntityManagement {
 	@api
 	public static class entity_can_see extends EntityFunction {
 
+		@Override
 		public String getName() {
 			return "entity_can_see";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID, otherEntityID} Returns if the entity can have the other entity in his line of sight."
 					+ " For instance for players this mean that it can have the other entity on its screen and that this one is not hidden by opaque blocks."
 					+ " This uses the same algorithm that hostile mobs use to find the closest player.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).hasLineOfSight(Static.getEntity(Static.getInt32(args[1], t), t)), t);
 		}
@@ -1766,15 +1955,18 @@ public class EntityManagement {
 	@api
 	public static class entity_uuid extends EntityGetterFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(Static.getInt32(args[0], t), t);
 			return new CString(entity.getUniqueId().toString(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "entity_uuid";
 		}
 
+		@Override
 		public String docs() {
 			return "string {entityID} returns the persistent unique id of the entity";
 		}

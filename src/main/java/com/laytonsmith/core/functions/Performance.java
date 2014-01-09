@@ -38,14 +38,17 @@ public class Performance {
     
     @api public static class enable_performance_logging extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "enable_performance_logging";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "void {boolean} Enables performance logging. The allow-profiling option must be set to true in your preferences file,"
                     + " and play-dirty mode must be active. If allow-profiling is set to false, a SecurityException is thrown."
@@ -54,21 +57,26 @@ public class Performance {
                     + " for more details on performance logging.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.SecurityException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if(!Prefs.AllowProfiling()){
                 throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, t);

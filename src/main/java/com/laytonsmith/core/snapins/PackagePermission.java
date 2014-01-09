@@ -20,22 +20,27 @@ public interface PackagePermission extends Documentation {
 	 */
 	public static final PackagePermission NO_PERMISSIONS_NEEDED = new PackagePermission() {
 
+		@Override
 		public String[] getNamespace() {
 			return null;
 		}
 
+		@Override
 		public ThreatLevel getThreatLevel() {
 			return null;
 		}
 
+		@Override
 		public String getName() {
 			return null;
 		}
 
+		@Override
 		public String docs() {
 			return null;
 		}
 
+		@Override
 		public CHVersion since() {
 			return null;
 		}
@@ -65,6 +70,7 @@ public interface PackagePermission extends Documentation {
 	 * This should return getNamespace()[getNamespace().length - 1].
 	 * @return 
 	 */
+	@Override
 	String getName();
 	
 	/**
@@ -96,14 +102,17 @@ public interface PackagePermission extends Documentation {
 			this.docs = docs;
 			this.since = since;
 		}
+		@Override
 		public String getName() {
 			return name();
 		}
 
+		@Override
 		public String docs() {
 			return docs;
 		}
 
+		@Override
 		public CHVersion since() {
 			return since;
 		}
@@ -145,14 +154,17 @@ public interface PackagePermission extends Documentation {
 			this.docs = docs;
 			this.since = since;
 		}
+		@Override
 		public String getName() {
 			return name();
 		}
 
+		@Override
 		public String docs() {
 			return docs;
 		}
 
+		@Override
 		public CHVersion since() {
 			return since;
 		}

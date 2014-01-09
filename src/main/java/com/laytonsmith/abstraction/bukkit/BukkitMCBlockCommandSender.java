@@ -27,6 +27,7 @@ public class BukkitMCBlockCommandSender extends BukkitMCCommandSender implements
 		this.bcs = bcs;
 	}
 	
+	@Override
 	public MCBlock getBlock() {
 		return new BukkitMCBlock(bcs.getBlock());
 	}

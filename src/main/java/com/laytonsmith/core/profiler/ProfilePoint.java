@@ -51,6 +51,7 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 	 * @param o
 	 * @return
 	 */
+	@Override
 	public int compareTo(ProfilePoint o) {
 		return o.name.compareTo(name);
 	}

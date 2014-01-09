@@ -345,6 +345,7 @@ public class CArray extends Construct implements ArrayAccess{
         return this.get(new CInt(index, t), t);
     }
     
+	@Override
     public final Construct get(String index, Target t){
         return this.get(new CString(index, t), t);
     }
@@ -487,6 +488,7 @@ public class CArray extends Construct implements ArrayAccess{
 		return ret;
 	}
 
+	@Override
     public long size() {
         if(associative_mode){
             return associative_array.size();
@@ -584,6 +586,7 @@ public class CArray extends Construct implements ArrayAccess{
     
     private Comparator<String> comparator = new Comparator<String>(){
 
+		@Override
         public int compare(String o1, String o2) {
             //Due to a dumb behavior in Double.parseDouble, 
             //we need to check to see if there are non-digit characters in
@@ -623,10 +626,12 @@ public class CArray extends Construct implements ArrayAccess{
         return false;
     }
 
+	@Override
     public boolean canBeAssociative() {
         return true;
     }
 
+	@Override
     public Construct slice(int begin, int end, Target t) {
         return new ArrayHandling.array_get().exec(t, null, new CSlice(begin, end, t));
     }
@@ -661,6 +666,7 @@ public class CArray extends Construct implements ArrayAccess{
             CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Attempting to sort an associative array; key values will be lost.", this.getTarget());
         }
         Collections.sort(array, new Comparator<Construct>() {
+			@Override
             public int compare(Construct o1, Construct o2) {
                 //o1 < o2 -> -1
                 //o1 == o2 -> 0

@@ -20,15 +20,18 @@ public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements
 		this.es = im;
 	}
 
+	@Override
 	public boolean addStoredEnchant(MCEnchantment ench, int level,
 			boolean ignoreRestriction) {
 		return es.addStoredEnchant(((BukkitMCEnchantment) ench).__Enchantment(), level, ignoreRestriction);
 	}
 
+	@Override
 	public int getStoredEnchantLevel(MCEnchantment ench) {
 		return es.getStoredEnchantLevel(((BukkitMCEnchantment) ench).__Enchantment());
 	}
 
+	@Override
 	public Map<MCEnchantment, Integer> getStoredEnchants() {
 		Map<MCEnchantment,Integer> ret = new HashMap<MCEnchantment,Integer>();
 		for (Map.Entry<Enchantment,Integer> entry : es.getStoredEnchants().entrySet()) {
@@ -37,14 +40,17 @@ public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements
 		return ret;
 	}
 
+	@Override
 	public boolean hasStoredEnchant(MCEnchantment ench) {
 		return es.hasStoredEnchant(((BukkitMCEnchantment) ench).__Enchantment());
 	}
 
+	@Override
 	public boolean hasStoredEnchants() {
 		return es.hasStoredEnchants();
 	}
 
+	@Override
 	public boolean removeStoredEnchant(MCEnchantment ench) {
 		return es.removeStoredEnchant(((BukkitMCEnchantment) ench).__Enchantment());
 	}

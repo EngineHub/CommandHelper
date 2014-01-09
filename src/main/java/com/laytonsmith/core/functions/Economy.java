@@ -152,33 +152,41 @@ public class Economy {
     
     @api public static class acc_balance extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "acc_balance";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "double {account_name} Returns the balance of the given account name.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Account ma = GetAccount(this.getName(), t, args);
             return new CDouble(ma.balance(), t);
@@ -187,35 +195,43 @@ public class Economy {
     }
     @api public static class acc_set extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "acc_set";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "void {account_name, value} Sets the account's balance to the given amount";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).set(Static.getNumber(args[1], t))){
                 return new CVoid(t);
@@ -227,35 +243,43 @@ public class Economy {
     }
     @api public static class acc_add extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "acc_add";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "void {account_name, to_add} Adds an amount to the specified account";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).add(Static.getNumber(args[1], t))){
                 return new CVoid(t);
@@ -267,35 +291,43 @@ public class Economy {
     }
     @api public static class acc_subtract extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "acc_subtract";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "void {account_name, to_subtract} Subtracts the given amount from the specified account";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).subtract(Static.getNumber(args[1], t))){
                 return new CVoid(t);
@@ -307,35 +339,43 @@ public class Economy {
     }
     @api public static class acc_multiply extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "acc_multiply";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "void {account_name, to_multiply} Multiplies the account balance by the given amount";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).multiply(Static.getNumber(args[1], t))){
                 return new CVoid(t);
@@ -347,35 +387,43 @@ public class Economy {
     }
     @api public static class acc_divide extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "acc_divide";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "void {account_name, to_divide} Divides the account by the given amount";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).divide(Static.getNumber(args[1], t))){
                 return new CVoid(t);
@@ -387,36 +435,44 @@ public class Economy {
     }
     @api public static class acc_remove extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "acc_remove";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "void {account_name} Removes the specified account from the game - Currently unimplemented, due to lack of support in Vault. Calling"
                     + " this function will currently always throw an exception.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             throw new ConfigRuntimeException("An error occured while trying to remove the player's account, due to"
                     + " this operation being unsupported in Vault. If you want to see this feature supported, "
@@ -431,35 +487,43 @@ public class Economy {
     }
     @api public static class bacc_balance extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "bacc_balance";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "void {bank_name} Gets the specified bank account's balance";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             return new CDouble(GetBankAccount(this.getName(), t, args).balance(), t);
         }
@@ -467,35 +531,43 @@ public class Economy {
     }
     @api public static class bacc_set extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "bacc_set";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{3};
         }
 
+		@Override
         public String docs() {
             return "void {bank_name, value} Sets the bank account's balance to the given amount";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).set(Static.getNumber(args[2], t))){
                 return new CVoid(t);
@@ -507,35 +579,43 @@ public class Economy {
     }
     @api public static class bacc_add extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "bacc_add";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{3};
         }
 
+		@Override
         public String docs() {
             return "void {bank_name, value} Adds the specified amount to the bank account's balance";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).add(Static.getNumber(args[2], t))){
                 return new CVoid(t);
@@ -547,35 +627,43 @@ public class Economy {
     }
     @api public static class bacc_subtract extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "bacc_subtract";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{3};
         }
 
+		@Override
         public String docs() {
             return "void {bank_name, value} Subtracts the specified amount from the bank account's balance";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).subtract(Static.getNumber(args[2], t))){
                 return new CVoid(t);
@@ -587,35 +675,43 @@ public class Economy {
     }
     @api public static class bacc_multiply extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "bacc_multiply";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{3};
         }
 
+		@Override
         public String docs() {
             return "void {bank_name, value} Multiplies the given bank account's balance by the given value";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).multiply(Static.getNumber(args[2], t))){
                 return new CVoid(t);
@@ -627,35 +723,43 @@ public class Economy {
     }
     @api public static class bacc_divide extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "bacc_divide";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{3};
         }
 
+		@Override
         public String docs() {
             return "void {bank_name, value} Divides the bank account's balance by the given value";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).divide(Static.getNumber(args[2], t))){
                 return new CVoid(t);
@@ -667,35 +771,43 @@ public class Economy {
     }
     @api public static class bacc_remove extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "bacc_remove";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "void {bank_name} Removes the given bank account from the game";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).remove()){
                 return new CVoid(t);

@@ -54,6 +54,7 @@ public class SAXDocumentTest {
 		final AtomicInteger i = new AtomicInteger(0);
 		doc.addListener("/root/nodes/inode", new SAXDocument.ElementCallback() {
 
+			@Override
 			public void handleElement(String xpath, String tag, Map<String, String> attr, String contents) {
 				i.incrementAndGet();
 			}
@@ -67,6 +68,7 @@ public class SAXDocumentTest {
 		final AtomicInteger i = new AtomicInteger(0);
 		doc.addListener("/root/nodes/inode[1]", new SAXDocument.ElementCallback() {
 
+			@Override
 			public void handleElement(String xpath, String tag, Map<String, String> attr, String contents) {
 				i.incrementAndGet();
 			}
@@ -80,6 +82,7 @@ public class SAXDocumentTest {
 		final MutableObject m = new MutableObject();
 		doc.addListener("/root/nodes/inode[1]", new SAXDocument.ElementCallback() {
 
+			@Override
 			public void handleElement(String xpath, String tag, Map<String, String> attr, String contents) {
 				m.setObject(contents);
 			}
@@ -93,6 +96,7 @@ public class SAXDocumentTest {
 		final MutableObject m = new MutableObject();
 		doc.addListener("/root/outer", new SAXDocument.ElementCallback() {
 
+			@Override
 			public void handleElement(String xpath, String tag, Map<String, String> attr, String contents) {
 				m.setObject(contents);
 			}
@@ -106,6 +110,7 @@ public class SAXDocumentTest {
 		final MutableObject m = new MutableObject();
 		doc.addListener("/root/node1", new SAXDocument.ElementCallback() {
 
+			@Override
 			public void handleElement(String xpath, String tag, Map<String, String> attr, String contents) {
 				m.setObject(attr.get("attribute"));
 			}

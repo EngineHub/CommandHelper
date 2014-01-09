@@ -30,10 +30,12 @@ public class BukkitMCPluginManager implements MCPluginManager {
         }
     }
     
+	@Override
     public Object getHandle(){
         return p;
     }
 
+	@Override
     public MCPlugin getPlugin(String name) {
         if(p.getPlugin(name) == null){
             return null;
@@ -60,6 +62,7 @@ public class BukkitMCPluginManager implements MCPluginManager {
 		return p.hashCode();
 	}
 
+	@Override
 	public List<MCPlugin> getPlugins() {
 		List<MCPlugin> retn = new ArrayList<MCPlugin>();
 		Plugin[] plugs = p.getPlugins();

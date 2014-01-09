@@ -21,26 +21,31 @@ public class BukkitMCItemFactory implements MCItemFactory {
 		this.f = itemFactory;
 	}
 
+	@Override
 	public MCItemMeta asMetaFor(MCItemMeta meta, MCItemStack stack) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
 		ItemStack bstack = ((BukkitMCItemStack) stack).asItemStack();
 		return BukkitConvertor.BukkitGetCorrectMeta(f.asMetaFor(bmeta, bstack));
 	}
 
+	@Override
 	public MCItemMeta asMetaFor(MCItemMeta meta, MCMaterial material) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
 		Material bmat = Material.getMaterial(material.getType());
 		return BukkitConvertor.BukkitGetCorrectMeta(f.asMetaFor(bmeta, bmat));
 	}
 
+	@Override
 	public boolean equals(MCItemMeta meta1, MCItemMeta meta2) {
 		return f.equals(((BukkitMCItemMeta) meta1).asItemMeta(), ((BukkitMCItemMeta) meta2).asItemMeta());
 	}
 
+	@Override
 	public MCColor getDefaultLeatherColor() {
 		return BukkitMCColor.GetMCColor(f.getDefaultLeatherColor());
 	}
 
+	@Override
 	public MCItemMeta getItemMeta(MCMaterial material) {
 		if(material == null){
 			return null;
@@ -49,12 +54,14 @@ public class BukkitMCItemFactory implements MCItemFactory {
 		return BukkitConvertor.BukkitGetCorrectMeta(im);
 	}
 
+	@Override
 	public boolean isApplicable(MCItemMeta meta, MCItemStack stack) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
 		ItemStack bstack = ((BukkitMCItemStack) stack).asItemStack();
 		return f.isApplicable(bmeta, bstack);
 	}
 
+	@Override
 	public boolean isApplicable(MCItemMeta meta, MCMaterial material) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
 		Material bmat = Material.getMaterial(material.getType());

@@ -19,10 +19,12 @@ public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCre
 		this.cs = cs;
 	}
 
+	@Override
 	public MCEntityType getSpawnedType() {
 		return MCEntityType.valueOf(cs.getSpawnedType().name());
 	}
 
+	@Override
 	public void setSpawnedType(MCEntityType type) {
 		cs.setSpawnedType(EntityType.valueOf(type.name()));
 	}

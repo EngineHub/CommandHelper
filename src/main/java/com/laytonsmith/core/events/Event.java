@@ -24,6 +24,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * This should return the name of the event.
      * @return 
      */
+	@Override
     public String getName();
     /**
      * This should return the docs that are used in the wiki. The format should
@@ -35,6 +36,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * &lt;expr&gt;
      * @return 
      */
+	@Override
     public String docs();
 
     /**

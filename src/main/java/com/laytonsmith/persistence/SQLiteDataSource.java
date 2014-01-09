@@ -167,12 +167,14 @@ public class SQLiteDataSource extends AbstractDataSource{
 		};
 	}
 
+	@Override
 	public String docs() {
 		return "SQLite {sqlite://path/to/db/file.db} This type store data in a SQLite database."
 			+ " All the pros and cons of MySQL apply here. The database will contain a lone table"
 				+ " named " + TABLE_NAME + ", with two columns, " + KEY_COLUMN + " and " + VALUE_COLUMN;
 	}
 
+	@Override
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
 	}

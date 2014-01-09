@@ -278,12 +278,14 @@ public class SQL {
 			if(!started){
 				queue.invokeLater(null, new Runnable() {
 
+					@Override
 					public void run() {
 						//This warms up the queue. Apparently.
 					}
 				});
 				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
+					@Override
 					public void run() {
 						queue.shutdown();
 						started = false;

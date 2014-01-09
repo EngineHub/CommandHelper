@@ -14,6 +14,7 @@ public abstract class MCPluginMeta {
 	protected MCPluginMeta(){
 		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
+			@Override
 			public void run() {
 				List<String> copyOutgoing = new ArrayList<String>(openOutgoingChannels);
 				for(String s : copyOutgoing){

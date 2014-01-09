@@ -48,14 +48,17 @@ public class FileHandling {
 			return new ZipReader(new File(file_location)).getFileContents();
 		}
 
+		@Override
 		public String getName() {
 			return "read";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String location = args[0].val();
 			location = new File(t.file().getParentFile(), location).getAbsolutePath();
@@ -76,6 +79,7 @@ public class FileHandling {
 			}
 		}
 
+		@Override
 		public String docs() {
 			return "string {file} Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
 				+ " the file that is being run, not CommandHelper. If the file is not found, or otherwise can't be read in, an IOException is thrown."
@@ -83,18 +87,22 @@ public class FileHandling {
 				+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n.";
 		}
 
+		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.IOException, Exceptions.ExceptionType.SecurityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			//Because we do disk IO
 			return true;
@@ -117,12 +125,14 @@ public class FileHandling {
 			if(!started){
 				queue.invokeLater(null, new Runnable() {
 
+					@Override
 					public void run() {
 						//This warms up the queue. Apparently.
 					}
 				});
 				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
+					@Override
 					public void run() {
 						queue.shutdown();
 						started = false;
@@ -132,18 +142,22 @@ public class FileHandling {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.SecurityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			startup();
 			final String file = args[0].val();
@@ -158,6 +172,7 @@ public class FileHandling {
 			}
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
+				@Override
 				public void run() {
 					String returnString = null;					
 					ConfigRuntimeException exception = null;
@@ -190,6 +205,7 @@ public class FileHandling {
 					}
 					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
+						@Override
 						public void run() {
 							callback.execute(new Construct[]{cret, cex});
 						}
@@ -199,14 +215,17 @@ public class FileHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "async_read";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {file, callback} Asyncronously reads in a file. ---- "
 				+ " This may be a remote file accessed with an SCP style path. (See the [[CommandHelper/SCP|wiki article]]"
@@ -222,6 +241,7 @@ public class FileHandling {
 				+ " simply using the read() function.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -231,18 +251,22 @@ public class FileHandling {
 	@api
 	public static class file_size extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.SecurityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String location = args[0].val();
 			if(!Security.CheckSecurity(location)){
@@ -252,18 +276,22 @@ public class FileHandling {
 			return new CInt(new File(t.file().getParentFile(), location).length(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "file_size";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {path} Returns the size of a file on the file system.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

@@ -16,18 +16,22 @@ public class BukkitMCCommandBlock extends BukkitMCBlockState implements
 		cb = block;
 	}
 	
+	@Override
 	public String getCommand() {
 		return cb.getCommand();
 	}
 
+	@Override
 	public String getName() {
 		return cb.getName();
 	}
 
+	@Override
 	public void setCommand(String command) {
 		cb.setCommand(command);
 	}
 
+	@Override
 	public void setName(String name) {
 		cb.setName(name);
 	}

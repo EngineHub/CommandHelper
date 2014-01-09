@@ -157,6 +157,7 @@ public abstract class AbstractDataSource implements DataSource {
 		this.invalidModifiers = EnumSet.copyOf(Arrays.asList(invalid));
 	}
 
+	@Override
 	public final String getName() {
 		return this.getClass().getAnnotation(datasource.class).value();
 	}

@@ -40,14 +40,17 @@ public class Math {
 	@api
 	public static class add extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "add";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double tally = Static.getNumber(args[0], t);
 			for (int i = 1; i < args.length; i++) {
@@ -60,22 +63,27 @@ public class Math {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {var1, [var2...]} Adds all the arguments together, and returns either a double or an integer";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -96,6 +104,7 @@ public class Math {
 			return null;
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 						OptimizationOption.OPTIMIZE_DYNAMIC,
@@ -108,14 +117,17 @@ public class Math {
 	@api
 	public static class subtract extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "subtract";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double tally = Static.getNumber(args[0], t);
 			for (int i = 1; i < args.length; i++) {
@@ -128,22 +140,27 @@ public class Math {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {var1, [var2...]} Subtracts the arguments from left to right, and returns either a double or an integer";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -155,6 +172,7 @@ public class Math {
 						new ExampleScript("Demonstrates symbolic usage", "12 - 5"),};
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 						OptimizationOption.CONSTANT_OFFLINE,
@@ -166,14 +184,17 @@ public class Math {
 	@api
 	public static class multiply extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "multiply";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double tally = Static.getNumber(args[0], t);
 			for (int i = 1; i < args.length; i++) {
@@ -186,22 +207,27 @@ public class Math {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {var1, [var2...]} Multiplies the arguments together, and returns either a double or an integer";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -219,6 +245,7 @@ public class Math {
 						new ExampleScript("Demonstrates symbolic usage", "8 * 8"),};
 		}
 		
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 						OptimizationOption.OPTIMIZE_DYNAMIC,
@@ -231,14 +258,17 @@ public class Math {
 	@api
 	public static class divide extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "divide";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double tally = Static.getNumber(args[0], t);
 			for (int i = 1; i < args.length; i++) {
@@ -255,23 +285,28 @@ public class Math {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {var1, [var2...]} Divides the arguments from left to right, and returns either a double or an integer."
 					+ " If you divide by zero, a RangeException is thrown.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -285,6 +320,7 @@ public class Math {
 						new ExampleScript("Demonstrates divide by zero error", "assign(@zero, 0)\nmsg(1 / @zero)"),};
 		}
 		
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 						OptimizationOption.CONSTANT_OFFLINE,
@@ -296,36 +332,44 @@ public class Math {
 	@api
 	public static class mod extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "mod";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long arg1 = Static.getInt(args[0], t);
 			long arg2 = Static.getInt(args[1], t);
 			return new CInt(arg1 % arg2, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "int {x, n} Returns x modulo n";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -349,36 +393,44 @@ public class Math {
 	@api
 	public static class pow extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "pow";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
 			return new CDouble(java.lang.Math.pow(arg1, arg2), t);
 		}
 
+		@Override
 		public String docs() {
 			return "double {x, n} Returns x to the power of n";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -472,10 +524,12 @@ public class Math {
 	@api
 	public static class inc extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "inc";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
@@ -490,6 +544,7 @@ public class Math {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, true);
 		}
 		
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
@@ -521,15 +576,18 @@ public class Math {
 
 		}
 
+		@Override
 		public String docs() {
 			return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to ++var in other languages. Expects ivar to be a variable, then"
 					+ " returns the ivar, or, if var is a constant number, simply adds x to it, and returns the new number.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -539,10 +597,12 @@ public class Math {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -574,10 +634,12 @@ public class Math {
 	@api
 	public static class postinc extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "postinc";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
@@ -591,6 +653,7 @@ public class Math {
 			return doIncrementDecrement(nodes, parent, env, t, this, false, true);
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
@@ -628,15 +691,18 @@ public class Math {
 		}
 
 
+		@Override
 		public String docs() {
 			return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to var++ in other languages. Expects ivar to be a variable, then"
 					+ " returns a copy of the old ivar, or, if var is a constant number, simply adds x to it, and returns the new number.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -646,10 +712,12 @@ public class Math {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -674,10 +742,12 @@ public class Math {
 	@api
 	public static class dec extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "dec";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
@@ -692,6 +762,7 @@ public class Math {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, false);
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
@@ -722,15 +793,18 @@ public class Math {
 			}
 		}
 
+		@Override
 		public String docs() {
 			return "ivar {var, [value]} Subtracts value from var, and stores the new value. Value defaults to 1. Equivalent to --var (or var -= value) in other languages. Expects ivar to be a variable, then"
 					+ " returns the ivar, , or, if var is a constant number, simply adds x to it, and returns the new number.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -740,10 +814,12 @@ public class Math {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -768,10 +844,12 @@ public class Math {
 	@api
 	public static class postdec extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "postdec";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
@@ -786,6 +864,7 @@ public class Math {
 			return doIncrementDecrement(nodes, parent, env, t, this, false, false);
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
@@ -822,15 +901,18 @@ public class Math {
 			}
 		}
 
+		@Override
 		public String docs() {
 			return "ivar {var, [x]} Subtracts x from var, and stores the new value. Equivalent to var-- in other languages. Expects ivar to be a variable, then"
 					+ " returns a copy of the old ivar, , or, if var is a constant number, simply adds x to it, and returns the new number.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -840,10 +922,12 @@ public class Math {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -870,32 +954,39 @@ public class Math {
 
 		Random r = new Random();
 
+		@Override
 		public String getName() {
 			return "rand";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {[] | min/max, [max]} Returns a random number from 0 to max, or min to max, depending on usage. Max is exclusive. Min must"
 					+ " be less than max, and both numbers must be >= 0. This will return an integer. Alternatively, you can pass no arguments, and a random"
 					+ " double, from 0 to 1 will be returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length == 0){
 				return new CDouble(java.lang.Math.random(), t);
@@ -926,6 +1017,7 @@ public class Math {
 			}
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -944,34 +1036,42 @@ public class Math {
 	@api
 	public static class abs extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "abs";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {arg} Returns the absolute value of the argument.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			double d = Static.getDouble(args[0], t);
 			return new CDouble(java.lang.Math.abs(d), t);
@@ -997,34 +1097,42 @@ public class Math {
 	@api
 	public static class floor extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "floor";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {number} Returns the floor of any given number. For example, floor(3.8) returns 3, and floor(-1.1) returns 2";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CInt((long) java.lang.Math.floor(Static.getNumber(args[0], t)), t);
 		}
@@ -1041,34 +1149,42 @@ public class Math {
 	@api
 	public static class ceil extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "ceil";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {number} Returns the ceiling of any given number. For example, ceil(3.2) returns 4, and ceil(-1.1) returns -1";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CInt((long) java.lang.Math.ceil(Static.getNumber(args[0], t)), t);
 		}
@@ -1085,35 +1201,43 @@ public class Math {
 	@api
 	public static class sqrt extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "sqrt";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "number {number} Returns the square root of a number. Note that this is mathematically equivalent to pow(number, .5)."
 					+ " Imaginary numbers are not supported, so number must be positive.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			double d = Static.getNumber(args[0], t);
 			if (d < 0) {
@@ -1139,35 +1263,43 @@ public class Math {
 	@api
 	public static class min extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "min";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "number {num1, [num2...]} Returns the lowest number in a given list of numbers. If any of the arguments"
 					+ " are arrays, they are expanded into individual numbers, and also compared.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
 				throw new ConfigRuntimeException("You must send at least one parameter to min",
@@ -1214,35 +1346,43 @@ public class Math {
 	@api
 	public static class max extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "max";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "number {num1, [num2...]} Returns the highest number in a given list of numbers. If any of the arguments"
 					+ " are arrays, they are expanded into individual numbers, and also compared.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
 				throw new ConfigRuntimeException("You must send at least one parameter to max",
@@ -1289,34 +1429,42 @@ public class Math {
 	@api
 	public static class sin extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "sin";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {number} Returns the sin of the number";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.sin(Static.getNumber(args[0], t)), t);
 		}
@@ -1333,34 +1481,42 @@ public class Math {
 	@api
 	public static class cos extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "cos";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {number} Returns the cos of the number";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.cos(Static.getNumber(args[0], t)), t);
 		}
@@ -1377,34 +1533,42 @@ public class Math {
 	@api
 	public static class tan extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "tan";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {number} Returns the tan of the number";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.tan(Static.getNumber(args[0], t)), t);
 		}
@@ -1421,34 +1585,42 @@ public class Math {
 	@api
 	public static class asin extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "asin";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {number} Returns the arc sin of the number";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.asin(Static.getNumber(args[0], t)), t);
 		}
@@ -1465,34 +1637,42 @@ public class Math {
 	@api
 	public static class acos extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "acos";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {number} Returns the arc cos of the number";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.acos(Static.getNumber(args[0], t)), t);
 		}
@@ -1509,34 +1689,42 @@ public class Math {
 	@api
 	public static class atan extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "atan";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {number} Returns the arc tan of the number";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.atan(Static.getNumber(args[0], t)), t);
 		}
@@ -1553,34 +1741,42 @@ public class Math {
 	@api
 	public static class to_radians extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "to_radians";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {number} Converts the number to radians (which is assumed to have been in degrees)";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.toRadians(Static.getNumber(args[0], t)), t);
 		}
@@ -1597,34 +1793,42 @@ public class Math {
 	@api
 	public static class to_degrees extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "to_degrees";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {number} Converts the number to degrees (which is assumed to have been in radians)";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.toDegrees(Static.getNumber(args[0], t)), t);
 		}
@@ -1641,14 +1845,17 @@ public class Math {
 	@api
 	public static class atan2 extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "atan2";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			//lolcopypaste
 			return "double {y, x} Returns the angle theta from the conversion"
@@ -1657,22 +1864,27 @@ public class Math {
 					+ " computing an arc tangent of y/x in the range of -pi to pi.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(java.lang.Math.atan2(Static.getNumber(args[0], t), Static.getNumber(args[1], t)), t);
 		}
@@ -1689,36 +1901,44 @@ public class Math {
 	@api
 	public static class round extends AbstractFunction implements Optimizable{
 
+		@Override
 		public String getName() {
 			return "round";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {number, [precision]} Unlike floor and ceil, rounds the number to the nearest integer. Precision defaults to 0, but if set to 1 or more, rounds decimal places."
 					+ " For instance, round(2.29, 1) would return 2.3. If precision is < 0, a RangeException is thrown. If precision is set to 0, an integer is always"
 					+ " returned, and if precision is > 0, a double is always returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			double number = Static.getNumber(args[0], t);
 			int precision = 0;
@@ -1760,14 +1980,17 @@ public class Math {
 	@api
 	public static class expr extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "expr";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "double {expression, [valueArray]} Sometimes, when you need to calculate an advanced"
 					+ " mathematical expression, it is messy to write out everything in terms of functions."
@@ -1777,22 +2000,27 @@ public class Math {
 					+ " array(x: 2, y: 3, z: 4)) would be the same thing as the above example.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String expr = args[0].val();
 			CArray vars = null;
@@ -1839,30 +2067,37 @@ public class Math {
 	@api
 	public static class neg extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "neg";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "number {number} Negates a number, essentially multiplying the number by -1";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CInt) {
 				return new CInt(-(Static.getInt(args[0], t)), t);
@@ -1871,6 +2106,7 @@ public class Math {
 			}
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1887,18 +2123,22 @@ public class Math {
 	@api
 	public static class logarithm extends AbstractFunction implements Optimizable {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double val = Static.getDouble(args[0], t);
 			if(val <= 0){
@@ -1913,14 +2153,17 @@ public class Math {
 			return new CDouble(r, t);
 		}
 
+		@Override
 		public String getName() {
 			return "logarithm";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "double {val, [base]} Return the log of a number to the specified base, or the mathematical"
 					+ " constant e if no base is provided (or ln). If val is less than or equal to zero, a RangeException is thrown."
@@ -1929,10 +2172,12 @@ public class Math {
 					+ " of these, a RangeException is thrown instead.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
 		}

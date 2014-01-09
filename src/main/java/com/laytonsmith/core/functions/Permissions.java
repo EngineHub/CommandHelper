@@ -31,14 +31,17 @@ public class Permissions {
 	@api(environments={CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class has_permission extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "has_permission";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[player], permissionName} Using the built in permissions system, checks to see if the player has a particular permission."
 					+ " This is simply passed through to the permissions system. This function does not throw a PlayerOfflineException, because"
@@ -47,22 +50,27 @@ public class Permissions {
 					+ " the console, will always return true.";
 		}
 
+		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new Exceptions.ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String player = null;
 			String permission = null;

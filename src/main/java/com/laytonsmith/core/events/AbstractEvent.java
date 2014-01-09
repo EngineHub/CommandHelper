@@ -49,6 +49,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * can be done here. By default, an UnsupportedOperationException is thrown,
      * but is caught and ignored.
      */
+	@Override
     public void bind(BoundEvent event) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -57,6 +58,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * If the event needs to run special code at server startup, it can be done
      * here. By default, nothing happens.
      */
+	@Override
     public void hook() {
         
     }
@@ -69,6 +71,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	 * @param env The operating environment
 	 * @param activeEvent The active event being executed
      */
+	@Override
     public final void execute(ParseTree tree, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{          
         try{
             preExecution(env, activeEvent);
@@ -142,6 +145,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * @param o
      * @return 
      */
+	@Override
     public int compareTo(Event o) {
         return this.getName().compareTo(o.getName());
     }
@@ -180,14 +184,17 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * in the actual event (if it's an external event, for instance)
      * @param o 
      */
+	@Override
     public void manualTrigger(BindableEvent o){
         mixin.manualTrigger(o);
     }
         
+	@Override
     public void cancel(BindableEvent o, boolean state){
         mixin.cancel(o, state);
     }
     
+	@Override
     public boolean isCancellable(BindableEvent o){
         return mixin.isCancellable(o);
     }

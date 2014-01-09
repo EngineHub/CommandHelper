@@ -17,14 +17,17 @@ public class BukkitMCPainting extends BukkitMCHanging implements MCPainting {
 		this.p = painting;
 	}
 
+	@Override
 	public MCArt getArt() {
 		return BukkitMCArt.getConvertor().getAbstractedEnum(p.getArt());
 	}
 
+	@Override
 	public boolean setArt(MCArt art) {
 		return setArt(art, false);
 	}
 
+	@Override
 	public boolean setArt(MCArt art, boolean force) {
 		return p.setArt(BukkitMCArt.getConvertor().getConcreteEnum(art), force);
 	}

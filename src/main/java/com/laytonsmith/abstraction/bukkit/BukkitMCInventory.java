@@ -31,14 +31,17 @@ public class BukkitMCInventory implements MCInventory {
         this.i = inventory;
     }
 
+	@Override
 	public MCInventoryType getType() {
 		return MCInventoryType.valueOf(this.i.getType().name());
 	}
 
+	@Override
 	public int getSize() {
 		return this.i.getSize();
 	}
 
+	@Override
 	public MCItemStack getItem(int slot) {
 		try {
 			return new BukkitMCItemStack(i.getItem(slot));
@@ -55,6 +58,7 @@ public class BukkitMCInventory implements MCInventory {
 		}
     }
 
+	@Override
 	public void setItem(int slot, MCItemStack stack) {
 		try {
 			this.i.setItem(slot, stack == null ? null : ((BukkitMCItemStack) stack).is);
@@ -73,14 +77,17 @@ public class BukkitMCInventory implements MCInventory {
 		}
     }
 	
+	@Override
 	public void clear() {
 		i.clear();
 	}
 	
+	@Override
 	public void clear(int index) {
 		i.clear(index);
 	}
 
+	@Override
 	public Object getHandle() {
 		return i;
 	}
@@ -100,6 +107,7 @@ public class BukkitMCInventory implements MCInventory {
 		return i.hashCode();
 	}
 	
+	@Override
 	public Map<Integer, MCItemStack> addItem(MCItemStack stack) {
 		Map<Integer, ItemStack> h = i.addItem(stack==null?null:((BukkitMCItemStack)stack).is);
 		Map<Integer, MCItemStack> m = new HashMap<Integer, MCItemStack>();
@@ -112,6 +120,7 @@ public class BukkitMCInventory implements MCInventory {
 		return m;
 	}
 
+	@Override
 	public List<MCHumanEntity> getViewers() {
 		List<MCHumanEntity> retn = new ArrayList<MCHumanEntity>();
 		
@@ -122,10 +131,12 @@ public class BukkitMCInventory implements MCInventory {
 		return retn;
 	}
 	
+	@Override
 	public MCInventoryHolder getHolder() {
 		return new BukkitMCInventoryHolder(i.getHolder());
 	}
 	
+	@Override
 	public String getTitle() {
 		return i.getTitle();
 	}

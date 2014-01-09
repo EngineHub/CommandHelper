@@ -29,6 +29,7 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
         }
     }
 
+	@Override
     public void setHelmet(MCItemStack stack) {
         this.i.setHelmet(((BukkitMCItemStack)stack).is);
 		if(this.i.getHolder() instanceof Player){
@@ -36,6 +37,7 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 		}
     }
 
+	@Override
     public void setChestplate(MCItemStack stack) {
         this.i.setChestplate(((BukkitMCItemStack)stack).is);
 		if(this.i.getHolder() instanceof Player){
@@ -43,6 +45,7 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 		}
     }
 
+	@Override
     public void setLeggings(MCItemStack stack) {
         this.i.setLeggings(((BukkitMCItemStack)stack).is);
 		if(this.i.getHolder() instanceof Player){
@@ -50,6 +53,7 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 		}
     }
 
+	@Override
     public void setBoots(MCItemStack stack) {
         this.i.setBoots(((BukkitMCItemStack)stack).is);
 		if(this.i.getHolder() instanceof Player){
@@ -57,26 +61,32 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 		}
     }
 
+	@Override
     public MCItemStack getHelmet() {
         return new BukkitMCItemStack(this.i.getHelmet());
     }
 
+	@Override
     public MCItemStack getChestplate() {
         return new BukkitMCItemStack(this.i.getChestplate());
     }
 
+	@Override
     public MCItemStack getLeggings() {
         return new BukkitMCItemStack(this.i.getLeggings());
     }
 
+	@Override
     public MCItemStack getBoots() {
         return new BukkitMCItemStack(this.i.getBoots());
     }
 
+	@Override
 	public int getHeldItemSlot() {
 		return i.getHeldItemSlot();
 	}
 	
+	@Override
 	public void setHeldItemSlot(int slot) {
 		i.setHeldItemSlot(slot);
 	}
