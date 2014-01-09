@@ -34,7 +34,7 @@ import javax.tools.Diagnostic;
  *
  */
 @SupportedAnnotationTypes({"java.lang.Override", "com.laytonsmith.annotations.MustUseOverride"})
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class CheckOverrides extends AbstractProcessor {
 	
 	private static final boolean enabled = true;

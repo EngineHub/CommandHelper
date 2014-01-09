@@ -99,6 +99,9 @@ public class ExtensionManager {
 		// immediately print to the console.
 		System.out.println("[CommandHelper] Caching extensions...");
 
+		// Create the directory if it doesn't exist.
+		extCache.mkdirs();
+		
 		// Try to delete any loose files in the cache dir, so that we
 		// don't load stuff we aren't supposed to. This is in case the shutdown
 		// cleanup wasn't successful on the last run.
