@@ -20,18 +20,34 @@ package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCCommand;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.AliasCore;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.ExtensionManager;
+import com.laytonsmith.core.Installer;
+import com.laytonsmith.core.Main;
+import com.laytonsmith.core.MethodScriptExecutionQueue;
+import com.laytonsmith.core.PermissionsResolver;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.UpgradeLog;
+import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -262,10 +278,17 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
-		Static.getLogger().log(Level.INFO, "CommandHelper/CommandHelper {0} enabled", getDescription().getVersion());
+		Static.getLogger().log(Level.INFO, "[CommandHelper] CommandHelper {0} enabled", getDescription().getVersion());
 		if(firstLoad){
-			ExtensionManager.Initialize(CommandHelperFileLocations.getDefault().getExtensionsDirectory(),
-					ClassDiscovery.getDefaultInstance());
+			ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
+			
+			// Only does stuff if we're on Windows.
+			ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
+			
+			System.out.println("[CommandHelper] Loading extensions...");
+			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+			System.out.println("[CommandHelper] Extension loading complete.");
+			
 			firstLoad = false;
 		}
 		version = new SimpleVersion(getDescription().getVersion());
@@ -333,6 +356,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 		//free up some memory
 		StaticLayer.GetConvertor().runShutdownHooks();
 		stopExecutionQueue();
+		
+		ExtensionManager.Cleanup();
+		
 		ac = null;
 		wep = null;
 	}
