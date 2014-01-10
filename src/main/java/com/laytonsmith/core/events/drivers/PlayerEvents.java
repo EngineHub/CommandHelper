@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IllegalFormatConversionException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1409,7 +1410,7 @@ public class PlayerEvents {
 				if("format".equals(key)){
 					try{
 						e.setFormat(value.nval());
-					} catch(UnknownFormatConversionException ex){
+					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
 						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
 					}
 				}
