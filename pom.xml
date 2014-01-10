@@ -433,13 +433,7 @@
 				<version>2.3.2</version>
 				<configuration>
 					<showDeprecation>true</showDeprecation>
-					<!-- Change just the target to 1.7 for now. After a brief
-						trial period, the source will be updated to 1.7 as well.
-						This will force the devs to use 1.6 source, but users to
-						use 1.7. This way, if this causes serious issues for users
-						during the trial period, we can quickly downgrade, and not
-						have to rewrite any code. -->
-					<source>1.6</source>
+					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
 			</plugin>
