@@ -61,11 +61,16 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String location = args[0].val();
-			location = new File(t.file().getParentFile(), location).getAbsolutePath();
-			//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
-			if (!Security.CheckSecurity(location)) {
-				throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
-					Exceptions.ExceptionType.SecurityException, t);
+			if(!new File(location).isAbsolute()){
+				location = new File(t.file().getParentFile(), location).getAbsolutePath();
+			}
+			if(!Cmdline.inCmdLine(env)){
+				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
+				//Cmdline mode doesn't currently have this restriction.
+				if (!Security.CheckSecurity(location)) {
+					throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
+						Exceptions.ExceptionType.SecurityException, t);
+				}
 			}
 			try {
 				String s = file_get_contents(location);
@@ -167,8 +172,10 @@ public class FileHandling {
 			} else {
 				callback = ((CClosure)args[1]);
 			}
-			if(!Security.CheckSecurity(file)){
-				throw new ConfigRuntimeException("You do not have permission to access the file '" + file + "'", ExceptionType.SecurityException, t);
+			if(!Cmdline.inCmdLine(environment)){
+				if(!Security.CheckSecurity(file)){
+					throw new ConfigRuntimeException("You do not have permission to access the file '" + file + "'", ExceptionType.SecurityException, t);
+				}
 			}
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
@@ -186,7 +193,11 @@ public class FileHandling {
 					} else {
 						try {
 							//It's a local file read
-							returnString = FileUtil.read(new File(t.file().getParentFile(), file));
+							String _file = file;
+							if(!new File(_file).isAbsolute()){
+								_file = new File(t.file().getParentFile(), _file).getAbsolutePath();
+							}
+							returnString = FileUtil.read(new File(t.file().getParentFile(), _file));
 						} catch (IOException ex) {
 							exception = new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 						}
