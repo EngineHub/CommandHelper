@@ -549,9 +549,10 @@ public class DataHandling {
 				long start = ((CSlice) arr).getStart();
 				long finish = ((CSlice) arr).getFinish();
 				if (finish < start) {
-					throw new ConfigRuntimeException("When using the .. notation, the left number may not be greater than the right number. Recieved " + start + " and " + finish, ExceptionType.RangeException, t);
+					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish - 1, t), new CInt(-1, t));
+				} else {
+					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
 				}
-				arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
 			}
 			if (arr instanceof CArray) {
 				if (iv instanceof IVariable) {
@@ -654,6 +655,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nforeach(@array, @i,\n\tmsg(@i)\n)"),
 				new ExampleScript("With braces", "assign(@array, array(1, 2, 3))\nforeach(@array, @i){\n\tmsg(@i)\n}"),
 				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),				
+				new ExampleScript("With a slice, counting down", "foreach(3..1, @i){\n\tmsg(@i)\n}"),				
 				new ExampleScript("With a keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}"),
 			};
 		}
@@ -3130,7 +3132,7 @@ public class DataHandling {
 	}
 	
 	@api
-	public static class typeof extends AbstractFunction {
+	public static class typeof extends AbstractFunction implements Optimizable {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -3186,6 +3188,11 @@ public class DataHandling {
 				new ExampleScript("Basic usage, typeof double", "typeof(1.0)"),
 				new ExampleScript("Basic usage, typeof closure", "typeof(closure(){ msg('test') })"),
 			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
 		}
 		
 		
