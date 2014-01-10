@@ -7,6 +7,7 @@ import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Function;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,39 +15,36 @@ import java.util.List;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class ExtensionTracker {
-	private Extension extension;
-	final DynamicClassLoader dcl;
-	final ClassDiscovery cd;
-	private final List<? extends Function> functions;
-	private final List<? extends Event> events;
-	final URL container;
+	/* package */ String identifier;
+	/* package */ List<Extension> allExtensions;
+	private final DynamicClassLoader dcl;
+	private final ClassDiscovery cd;
+	/* package */ final List<Function> functions;
+	/* package */ final List<Event> events;
+	/* package */ final URL container;
 
 	public ExtensionTracker(URL container, ClassDiscovery cd, DynamicClassLoader dcl) {
 		this.functions = new ArrayList<Function>();
 		this.events = new ArrayList<Event>();
+		this.allExtensions = new ArrayList<Extension>();
+		
 		this.container = container;
 		this.cd = cd;
 		this.dcl = dcl;
 	}
 
-	public void shutdown() {
+	public void shutdownTracker() {
+		// Remove as much as possible from memory.
 		cd.removeDiscoveryLocation(container);
 		cd.removePreCache(container);
 		dcl.removeJar(container);
 	}
 
 	/**
-	 * @return the extension
+	 * @return the extensions known to this tracker
 	 */
-	public Extension getExtension() {
-		return extension;
-	}
-
-	/**
-	 * @param extension the extension to set
-	 */
-	public void setExtension(Extension extension) {
-		this.extension = extension;
+	public List<Extension> getExtensions() {
+		return Collections.unmodifiableList(allExtensions);
 	}
 
 	/**
@@ -61,5 +59,13 @@ public class ExtensionTracker {
 	 */
 	public List<? extends Event> getEvents() {
 		return events;
+	}
+
+	/**
+	 * Get the internal identifier for this tracker.
+	 * @return 
+	 */
+	public String getIdentifier() {
+		return identifier;
 	}
 }

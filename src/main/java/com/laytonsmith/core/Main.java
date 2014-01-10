@@ -162,9 +162,11 @@ public class Main {
 				//Use jansi to enable output to color properly, even on windows.
 				org.fusesource.jansi.AnsiConsole.systemInstall();
 			}
-			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
+			ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
+			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 			ClassDiscoveryCache cdcCache 
 					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
+			cd.setClassDiscoveryCache(cdcCache);
 			if (args.length == 0) {
 				args = new String[]{"--help"};
 			}
@@ -370,8 +372,6 @@ public class Main {
 				//So we have to use reflection to get around the (usually valid) error
 				ReflectionUtils.set(Implementation.class, "serverType", null);
 				Implementation.setServerType(Implementation.Type.BUKKIT);
-				ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
-				cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 				File extensionDir = new File(extensionDirS);
 				if(extensionDir.exists()){
 					//Might not exist, but that's ok, however we will print a warning
