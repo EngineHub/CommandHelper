@@ -90,6 +90,13 @@ public final class MethodScriptCompiler {
 					comment_is_block = false;
 					continue;
 				}
+				//Double slash line comment start
+				if(c == '/' && c2 == '/' && !in_comment){
+					in_comment = true;
+					comment_is_block = false;
+					i++;
+					continue;
+				}
 				//Block comment end
 				if (c == '*' && c2 == '/' && in_comment && comment_is_block) {
 					if (in_comment && comment_is_block) {

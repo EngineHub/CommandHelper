@@ -365,11 +365,7 @@ public class Main {
 				if(outputFileS != null){
 					outputFile = new FileOutputStream(new File(outputFileS));
 				}
-				Implementation.useAbstractEnumThread(false);
-				//We have to break the rules here, because we want a different server type.
-				//So we have to use reflection to get around the (usually valid) error
-				ReflectionUtils.set(Implementation.class, "serverType", null);
-				Implementation.setServerType(Implementation.Type.BUKKIT);
+				Implementation.forceServerType(Implementation.Type.BUKKIT);
 				ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 				cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 				File extensionDir = new File(extensionDirS);
