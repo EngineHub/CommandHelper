@@ -2,16 +2,16 @@
 
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Prefs;
 import java.lang.reflect.Constructor;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 
 /**
@@ -26,7 +26,7 @@ public final class EventList {
             new EnumMap<Driver, SortedSet<Event>>(Driver.class);
     static {
         //Initialize all our events as soon as we start up
-        initEvents();
+        //initEvents();
     }
     
     /**
@@ -96,41 +96,39 @@ public final class EventList {
         return null;
     }
     
-    private static void initEvents() {
-        //Register internal classes first, so they can't be overridden
-        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
-        int total = 0;
-		StringBuilder message = new StringBuilder();
-        for(Class c : classes){
-            String apiClass = (c.getEnclosingClass() != null
-                    ? c.getEnclosingClass().getName().split("\\.")[c.getEnclosingClass().getName().split("\\.").length - 1]
-                    : "<global>");
-            if (Event.class.isAssignableFrom(c)) {
-                try {
-                    registerEvent(c, apiClass, message);
-                    total++;
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else if(!api.ValidClasses.IsValid(c)){
-                System.out.println("Invalid class found: " + c.getName() + ". Classes tagged with @api"
-                        + " must extend a valid class type.");
-            }
-        }
-        
-        if(Prefs.DebugMode()){
-			System.out.println(Implementation.GetServerType().getBranding() + ": Loaded the following events: " + message.toString().trim());
-            System.out.println(Implementation.GetServerType().getBranding() + ": Loaded " + total + " event" + (total==1?"":"s"));
-        }
-    }
+//    private static void initEvents() {
+//        //Register internal classes first, so they can't be overridden
+//        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
+//        int total = 0;
+//		StringBuilder message = new StringBuilder();
+//        for(Class c : classes){
+//            String apiClass = (c.getEnclosingClass() != null
+//                    ? c.getEnclosingClass().getName().split("\\.")[c.getEnclosingClass().getName().split("\\.").length - 1]
+//                    : "<global>");
+//            if (Event.class.isAssignableFrom(c)) {
+//				Event e = null;
+//				try {
+//					e = (Event)c.newInstance();
+//				} catch (InstantiationException ex) {
+//					Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
+//				} catch (IllegalAccessException ex) {
+//					Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
+//				}
+//				registerEvent(e, apiClass);
+//				total++;
+//            } else if(!api.ValidClasses.IsValid(c)){
+//                System.out.println("Invalid class found: " + c.getName() + ". Classes tagged with @api"
+//                        + " must extend a valid class type.");
+//            }
+//        }
+//        
+//        if(Prefs.DebugMode()){
+//			System.out.println(Implementation.GetServerType().getBranding() + ": Loaded the following events: " + message.toString().trim());
+//            System.out.println(Implementation.GetServerType().getBranding() + ": Loaded " + total + " event" + (total==1?"":"s"));
+//        }
+//    }
     
-    public static void registerEvent(Class<Event> c, String apiClass, StringBuilder message) throws InstantiationException, IllegalAccessException {
-        //First, we need to instantiate the class
-        
-        Event e = c.newInstance();
-        
+    public static void registerEvent(Event e, String apiClass) {
         //Then, we need to find the mixin for this class, and set it, if this
         //is an AbstractEvent (if it implements Event directly, it's completely on
         //it's own anyways)
@@ -155,10 +153,6 @@ public final class EventList {
             event_list.put(e.driver(), new TreeSet<Event>());
         }
         event_list.get(e.driver()).add(e);
-        
-        if(Prefs.DebugMode()){
-            message.append(" \"").append(e.getName()).append("\"");
-        }
     }
     
 	/**

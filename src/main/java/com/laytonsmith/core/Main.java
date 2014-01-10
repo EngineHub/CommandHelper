@@ -6,7 +6,6 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
@@ -162,9 +161,11 @@ public class Main {
 				//Use jansi to enable output to color properly, even on windows.
 				org.fusesource.jansi.AnsiConsole.systemInstall();
 			}
-			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
+			ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
+			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 			ClassDiscoveryCache cdcCache 
 					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
+			cd.setClassDiscoveryCache(cdcCache);
 			if (args.length == 0) {
 				args = new String[]{"--help"};
 			}
@@ -366,8 +367,6 @@ public class Main {
 					outputFile = new FileOutputStream(new File(outputFileS));
 				}
 				Implementation.forceServerType(Implementation.Type.BUKKIT);
-				ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
-				cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 				File extensionDir = new File(extensionDirS);
 				if(extensionDir.exists()){
 					//Might not exist, but that's ok, however we will print a warning
