@@ -1,5 +1,8 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
+@MEnum("Sound")
 public enum MCSound {
 	AMBIENCE_CAVE,
 	AMBIENCE_RAIN,

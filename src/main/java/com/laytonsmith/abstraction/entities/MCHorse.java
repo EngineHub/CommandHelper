@@ -3,14 +3,18 @@ package com.laytonsmith.abstraction.entities;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.MCVehicle;
+import com.laytonsmith.annotations.MEnum;
 
 public interface MCHorse extends MCTameable, MCVehicle, MCInventoryHolder {
+	@MEnum("HorseVariant")
 	public enum MCHorseVariant {
 		HORSE, DONKEY, MULE, SKELETON, ZOMBIE
 	}
+	@MEnum("HorseColor")
 	public enum MCHorseColor {
 		BLACK, BROWN, CHESTNUT, CREAMY, DARK_BROWN, GRAY, WHITE
 	}
+	@MEnum("HorsePattern")
 	public enum MCHorsePattern {
 		NONE, SOCKS, WHITEFIELD, WHITE_DOTS, BLACK_DOTS
 	}

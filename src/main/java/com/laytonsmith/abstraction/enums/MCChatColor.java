@@ -1,11 +1,13 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * All supported color values for chat
  */
+@MEnum("ChatColor")
 public enum MCChatColor {
 
     /**

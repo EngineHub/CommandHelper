@@ -1,9 +1,12 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  *
  * @author Hekta
  */
+@MEnum("Difficulty")
 public enum MCDifficulty {
 	PEACEFUL(0),
 	EASY(1),

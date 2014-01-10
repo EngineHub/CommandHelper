@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -68,6 +69,7 @@ public class Exceptions {
 		}
 	}
 
+	@MEnum("ExceptionType")
 	public enum ExceptionType implements Documentation {
 
 		/**

@@ -1,10 +1,13 @@
 
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  *
  * @author Layton
  */
+@MEnum("EntityType")
 public enum MCEntityType {
 	/**
 	 * Spawn with {@link World#dropItem}}

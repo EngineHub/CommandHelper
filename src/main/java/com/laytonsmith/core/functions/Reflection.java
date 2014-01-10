@@ -1,6 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
@@ -76,6 +78,8 @@ public class Reflection {
 					+ "<tr><td>file</td><td></td><td>The absolute path to the current file</td></tr>"
 					+ "<tr><td>col</td><td></td><td>The current column number</td></tr>"
 					+ "<tr><td>datasources</td><td></td><td>An array of data source protocols available</td></tr>"
+					+ "<tr><td>enum</td><td>[enum name]</td><td>An array of enum names, or if one if provided, a list of all"
+					+ " the values in that enum</td></tr>"
 					+ "</table>";
 			//+ "<tr><td></td><td></td><td></td></tr>"
 		}
@@ -141,6 +145,26 @@ public class Reflection {
 					}
 				}
 				return new CArray(t, protocols);
+			} else if("enum".equalsIgnoreCase(param)){
+				CArray a = new CArray(t);
+				Set<Class<Enum>> enums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
+				if(args.length == 1){
+					//No name provided
+					for(Class<Enum> e : enums){
+						a.push(new CString(e.getAnnotation(MEnum.class).value(), t));
+					}
+				} else if(args.length == 2){
+					String enumName = args[1].val();
+					for(Class<Enum> e : enums){
+						if(e.getAnnotation(MEnum.class).value().equals(enumName)){
+							for(Enum ee : e.getEnumConstants()){
+								a.push(new CString(ee.name(), t));
+							}
+							break;
+						}
+					}
+				}
+				return a;
 			}
 
 			throw new ConfigRuntimeException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.",

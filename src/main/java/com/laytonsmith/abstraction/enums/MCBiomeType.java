@@ -1,9 +1,12 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  *
  * @author layton
  */
+@MEnum("BiomeType")
 public enum MCBiomeType {
 
         OCEAN,

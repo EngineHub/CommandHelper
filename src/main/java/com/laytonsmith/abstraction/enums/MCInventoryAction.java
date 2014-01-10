@@ -1,10 +1,14 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  * An estimation of what the result will be
  * @author Riking
  */
-public enum MCInventoryAction {/**
+@MEnum("InventoryAction")
+public enum MCInventoryAction {
+	/**
      * Nothing will happen from the click.
      * There may be cases where nothing will happen and this is value is
      * not provided, but it is guaranteed that this value is accurate
