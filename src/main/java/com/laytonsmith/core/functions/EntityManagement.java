@@ -1177,7 +1177,7 @@ public class EntityManagement {
 			if (ent.getPassenger() instanceof MCEntity) {
 				return new CInt(ent.getPassenger().getEntityId(), t);
 			}
-			return null;
+			return new CNull();
 		}
 
 		public String getName() {
