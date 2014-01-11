@@ -387,7 +387,7 @@ public class ExtensionManager {
 		// Loop over the classes, instantiate and register functions and events,
 		// and store the instances in their trackers.
 		for (ClassMirror klass : classes) {
-			URL plugURL = klass.getContainer();
+			URL url = klass.getContainer();
 
 			if (cd.doesClassExtend(klass, Event.class)
 					|| cd.doesClassExtend(klass, Function.class)) {
@@ -397,18 +397,30 @@ public class ExtensionManager {
 						? c.getEnclosingClass().getName().split("\\.")[c.getEnclosingClass().getName().split("\\.").length - 1]
 						: "<global>");
 
-				ExtensionTracker trk = extensions.get(plugURL);
+				ExtensionTracker trk = extensions.get(url);
 
 				if (trk == null) {
-					trk = new ExtensionTracker(plugURL, cd, dcl);
+					trk = new ExtensionTracker(url, cd, dcl);
 
-					extensions.put(plugURL, trk);
+					extensions.put(url, trk);
 				}
 
 				// Instantiate, register and store.
 				try {
 					if (Event.class.isAssignableFrom(c)) {
 						Class<Event> cls = (Class<Event>) c;
+						
+						if (klass.getModifiers().isAbstract()) {
+							// Abstract? Looks like they accidently @api'd
+							// a cheater class. We can't be sure that it is fully
+							// defined, so complain to the console.
+							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, 
+								"Class " + c.getName() + " in " + url + " is"
+								+ " marked as an event but is also abstract."
+								+ " Bugs might occur! Bug someone about this!",
+								Target.UNKNOWN);
+						}
+						
 						Event e = cls.newInstance();
 						events.add(e.getName());
 
@@ -417,6 +429,18 @@ public class ExtensionManager {
 						trk.events.add(e);
 					} else if (Function.class.isAssignableFrom(c)) {
 						Class<Function> cls = (Class<Function>) c;
+						
+						if (klass.getModifiers().isAbstract()) {
+							// Abstract? Looks like they accidently @api'd
+							// a cheater class. We can't be sure that it is fully
+							// defined, so complain to the console.
+							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, 
+								"Class " + c.getName() + " in " + url + " is"
+								+ " marked as a function but is also abstract."
+								+ " Bugs might occur! Bug someone about this!",
+								Target.UNKNOWN);
+						}
+						
 						Function f = cls.newInstance();
 						functions.add(f.getName());
 
@@ -425,7 +449,7 @@ public class ExtensionManager {
 						trk.functions.add(f);
 					}
 				} catch (InstantiationException ex) {
-					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex.getCause());
+					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 				} catch (IllegalAccessException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 				}
