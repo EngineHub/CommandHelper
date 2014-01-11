@@ -37,14 +37,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class player extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "player";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
@@ -69,6 +72,7 @@ public class PlayerManagement {
 			}
 		}
 
+		@Override
 		public String docs() {
 			return "string {[playerName]} Returns the full name of the partial Player name specified or the Player running the command otherwise."
 					+ " If the command is being run from the console, then the string '" + Static.getConsoleName()
@@ -79,18 +83,22 @@ public class PlayerManagement {
 					+ " but you can use this to determine where a command is being run from.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -99,14 +107,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class all_players extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "all_players";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			CArray players = new CArray(t);
 			if (args.length == 0) {
@@ -125,22 +136,27 @@ public class PlayerManagement {
 			return players;
 		}
 
+		@Override
 		public String docs() {
 			return "array {[world]} Returns an array of all the player names of all the online players on the server, if world is given only the name of the players in this world will be returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -149,10 +165,12 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class players_in_radius extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "players_in_radius";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
@@ -182,6 +200,7 @@ public class PlayerManagement {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer[] pa = Static.getServer().getOnlinePlayers();
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -214,22 +233,27 @@ public class PlayerManagement {
 			return sa;
 		}
 
+		@Override
 		public String docs() {
 			return "array {[location array], distance} Returns an array of all the player names of all the online players within the given radius";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -238,14 +262,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class ploc extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "ploc";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer p;
 			if (args.length == 0) {
@@ -259,23 +286,28 @@ public class PlayerManagement {
 			return ObjectGenerator.GetGenerator().location(location);
 		}
 
+		@Override
 		public String docs() {
 			return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise. Note that the y coordinate is"
 					+ " in relation to the block the player is standing on. The array returned will also include the player's world.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -284,14 +316,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_ploc extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_ploc";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the player to the specified coordinates. If the coordinates"
 					+ " are not valid, or the player was otherwise prevented from moving, false is returned, otherwise true. If player is omitted, "
@@ -299,22 +334,27 @@ public class PlayerManagement {
 					+ " x, y, z coordinates shown with F3 will work as expected, instead of getting them stuck inside the floor. ";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String MCPlayer = null;
@@ -379,14 +419,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pcursor extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pcursor";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[player], [array]} Returns an array with the (x, y, z, world) coordinates of the block the player has highlighted"
 					+ " in their crosshairs. If player is omitted, the current player is used. If the block is too far, a"
@@ -395,19 +438,23 @@ public class PlayerManagement {
 					+ " a potential target, allowing a way to get the block containing the player's head.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException,
 					ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.PluginInternalException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_2;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			HashSet<Short> trans = null;
@@ -449,6 +496,7 @@ public class PlayerManagement {
 			}
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -470,18 +518,22 @@ public class PlayerManagement {
 	@api
 	public static class ptarget_space extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length > 0){
@@ -491,19 +543,23 @@ public class PlayerManagement {
 			return ObjectGenerator.GetGenerator().location(p.getLastTwoTargetBlocks(null, 10000).get(0).getLocation(), false);
 		}
 
+		@Override
 		public String getName() {
 			return "ptarget_space";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "{[player]} Returns the \"target space\" that the player is currently targetting. This is the \"space\" where"
 					+ " if they placed a block (and were close enough), it would end up going.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -513,14 +569,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pkill extends AbstractFunction {
 		
+		@Override
 		public String getName() {
 			return "pkill";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -536,22 +595,27 @@ public class PlayerManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String docs() {
 			return "void {[playerName]} Kills the specified player, or the current player if it is omitted";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -567,6 +631,7 @@ public class PlayerManagement {
 			return "kill";
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -583,14 +648,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class pgroup extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pgroup";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -613,22 +681,27 @@ public class PlayerManagement {
 			return a;
 		}
 
+		@Override
 		public String docs() {
 			return "array {[playerName]} Returns an array of the groups a player is in. If playerName is omitted, the current player is used.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -637,14 +710,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class pinfo extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pinfo";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {[pName], [value]} Returns various information about the player specified, or the current player if no argument was given. ---- "
 					+ "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
@@ -664,22 +740,27 @@ public class PlayerManagement {
 					+ " </ul>";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender m = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String player = "";
@@ -835,34 +916,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pworld extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pworld";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {[playerName]} Gets the world of the player specified, or the current player, if playerName isn't specified.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -888,6 +977,7 @@ public class PlayerManagement {
 			return "kick";
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -904,35 +994,43 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pkick extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pkick";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[playerName], [message]} Kicks the specified player, with an optional message. If no message is specified, "
 					+ "\"You have been kicked\" is used. If no player is specified, the current player is used, with the default message.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String message = "You have been kicked";
@@ -958,36 +1056,44 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_display_name extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_display_name";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {playerName, newDisplayName | newDisplayName} Sets a player's display name. If the second usage is used,"
 					+ " it sets the display name of the player running the command. See reset_display_name also. playerName, as well"
 					+ " as all CommandHelper commands expect the player's real name, not their display name.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer MCPlayer = null;
@@ -1010,35 +1116,43 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class reset_display_name extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "reset_display_name";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[playerName]} Resets a player's display name to their real name. If playerName isn't specified, defaults to the"
 					+ " player running the command.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer MCPlayer = null;
@@ -1058,14 +1172,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pfacing extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pfacing";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {F | yaw, pitch | player, F | player, yaw, pitch | player | &lt;none&gt;} Sets the direction the player is facing. ---- When using the first variation, expects an integer 0-3, which will"
 					+ " set the direction the player faces using their existing pitch (up and down) but sets their yaw (left and right) to one of the"
@@ -1079,22 +1196,27 @@ public class PlayerManagement {
 					+ " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			//Getter
@@ -1184,34 +1306,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pmode extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pmode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {[player]} Returns the player's game mode. It will be one of " + StringUtils.Join(MCGameMode.values(), ", ", ", or ") + ".";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1231,34 +1361,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pmode extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pmode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], mode} Sets the player's game mode. mode must be one of: " + StringUtils.Join(MCGameMode.values(), ", ", ", or ");
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1288,35 +1426,43 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pexp extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pexp";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99. (100 would be next level,"
 					+ " therefore, 0.)";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1334,34 +1480,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pexp extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pexp";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], xp} Sets the experience of a player within the current level, as a percentage, from 0 to 100.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1384,34 +1538,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class give_pexp extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "give_pexp";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], exp} Gives the player the specified amount of xp.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1435,34 +1597,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class plevel extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "plevel";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player]} Gets the player's level.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1480,34 +1650,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_plevel extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_plevel";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], level} Sets the level of a player.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1530,34 +1708,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class ptexp extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "ptexp";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player]} Gets the total experience of a player.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1575,34 +1761,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_ptexp extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_ptexp";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], xp} Sets the total experience of a player.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1629,34 +1823,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pfood extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pfood";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player]} Returns the player's current food level.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1674,34 +1876,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pfood extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pfood";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], level} Sets the player's food level. This is an integer from 0-?";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1724,14 +1934,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_peffect extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_peffect";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{3, 4, 5};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {player, potionID, strength, [seconds], [ambient]} Effect is 1-23. Seconds defaults to 30."
 					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
@@ -1743,23 +1956,28 @@ public class PlayerManagement {
 					+ " an effect is attempted to be removed, yet isn't already on the player).";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException,
 						ExceptionType.RangeException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
@@ -1806,18 +2024,22 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_peffect extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length > 0) {
@@ -1827,20 +2049,24 @@ public class PlayerManagement {
 			return ObjectGenerator.GetGenerator().potions(p.getEffects(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_peffect";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[player]} Returns an array of effects that are currently active on a given player."
 					+ " The array will be full of playerEffect objects, which contain three fields, \"potionID\","
 					+ " \"strength\", \"seconds\" remaining, and whether the effect is \"ambient\".";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1849,34 +2075,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_phealth extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_phealth";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], health} Sets the player's health. Health should be a double between 0 and their max health.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -1903,36 +2137,44 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class ponline extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "ponline";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {player} Returns whether or not the specified player is online. Note"
 					+ " that the name must match exactly, but it will not throw a PlayerOfflineException"
 					+ " if the player is not online, or if the player doesn't even exist.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			//We have to use this method here, because we might be in the midst
 			//of an event, in which the player is offline, but not really. It will
@@ -1961,35 +2203,43 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pwhitelisted extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pwhitelisted";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {player} Returns whether or not this player is whitelisted. Note that"
 					+ " this will work with offline players, but the name must be exact.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			boolean ret;
@@ -2005,35 +2255,43 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pwhitelisted extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pwhitelisted";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player. Note that"
 					+ " this will work with offline players, but the name must be exact.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			boolean whitelist = Static.getBoolean(args[1]);
@@ -2045,14 +2303,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pbanned extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pbanned";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {player} Returns whether or not this player is banned. Note that"
 					+ " this will work with offline players, but the name must be exact. At this"
@@ -2061,22 +2322,27 @@ public class PlayerManagement {
 					+ " plugin instead.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			return new CBoolean(pl.isBanned(), t);
@@ -2086,14 +2352,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pbanned extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pbanned";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {player, isBanned} Sets the ban flag of the specified player. Note that"
 					+ " this will work with offline players, but the name must be exact. At this"
@@ -2102,22 +2371,27 @@ public class PlayerManagement {
 					+ " plugin instead.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			boolean ban = Static.getBoolean(args[1]);
@@ -2129,34 +2403,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pwalkspeed extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pwalkspeed";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], speed} Sets players speed. The speed must be between -1 or 1";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -2185,34 +2467,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pwalkspeed extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_pwalkspeed";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {[player]} Gets the players speed. The speed must be between -1 or 1";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -2234,34 +2524,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pflyspeed extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pflyspeed";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], speed} Sets players fly speed. The speed must be between -1 or 1";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -2290,34 +2588,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pflyspeed extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_pflyspeed";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {[player]} Gets the players speed. The speed must be between -1 or 1";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
@@ -2339,35 +2645,43 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pisop extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pisop";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[player]} Returns whether or not the specified player (or the current"
 					+ " player if not specified) is op";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -2381,34 +2695,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_compass_target extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_compass_target";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[player], locationArray} Sets the player's compass target, and returns the old location.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
@@ -2431,34 +2753,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_compass_target extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_compass_target";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[player]} Gets the compass target of the specified player";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -2472,36 +2802,44 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class ponfire extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "ponfire";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player]} Returns the number of ticks remaining that this player will"
 					+ " be on fire for. If the player is not on fire, 0 is returned, which incidentally"
 					+ " is false.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -2516,35 +2854,43 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_ponfire extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_ponfire";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], ticks} Sets the player on fire for the specified number of"
 					+ " ticks. If a boolean is given for ticks, false is 0, and true is 20.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Construct ticks;
@@ -2572,30 +2918,37 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class phas_flight extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "phas_flight";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[player]} Returns whether or not the player has the ability to fly";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -2605,6 +2958,7 @@ public class PlayerManagement {
 			return new CBoolean(p.getAllowFlight(), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2629,6 +2983,7 @@ public class PlayerManagement {
 			return super.docs() + " DEPRECATED(use set_pflight instead)";
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -2644,30 +2999,37 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pflight extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pflight";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], flight} Sets whether or not this player is allowed to fly";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
@@ -2682,6 +3044,7 @@ public class PlayerManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2721,6 +3084,7 @@ public class PlayerManagement {
 			return super.docs() + " DEPRECATED(use set_ptime instead)";
 		}
 
+		@Override
 		public Set<Optimizable.OptimizationOption> optimizationOptions() {
 			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -2736,14 +3100,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_ptime extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_ptime";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			StringBuilder doc = new StringBuilder();
 			doc.append("void {[player], time, [relative]} Sets the time of a given player. Relative defaults to false,"
@@ -2759,22 +3126,27 @@ public class PlayerManagement {
 			return doc.toString();
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			boolean relative = false;
@@ -2835,35 +3207,43 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pget_time extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pget_time";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player]} Returns the time of the specified player, as an integer from"
 					+ " 0 to 24000-1";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
@@ -2880,34 +3260,42 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class preset_time extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "preset_time";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player]} Resets the time of the player to the time of the world.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
@@ -2925,18 +3313,22 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_list_name extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.LengthException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			String listName;
@@ -2956,14 +3348,17 @@ public class PlayerManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_list_name";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], [listName]} Sets the player's list name."
 					+ " The name cannot be longer than 16 characters, but colors are supported."
@@ -2972,6 +3367,7 @@ public class PlayerManagement {
 					+ " characters, a LengthException is thrown.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2980,18 +3376,22 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_list_name extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -3000,18 +3400,22 @@ public class PlayerManagement {
 			return new CString(m.getPlayerListName(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_list_name";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {[player]} Returns the list name of the specified player, or the current player if none specified.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3021,14 +3425,17 @@ public class PlayerManagement {
 	@hide("TODO: I'm not sure why this is hidden.")
 	public static class pvelocity extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pvelocity";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[player]} Returns an associative array that represents the player's velocity."
 					+ " The array contains the following items: magnitude, x, y, z. These represent a"
@@ -3036,18 +3443,22 @@ public class PlayerManagement {
 					+ " for you as a convenience. (It should equal sqrt(x ** 2 + y ** 2 + z ** 2))";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -3062,6 +3473,7 @@ public class PlayerManagement {
 			return vector;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -3070,18 +3482,22 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pvelocity extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			double x;
@@ -3131,14 +3547,17 @@ public class PlayerManagement {
 			return new CBoolean(true, t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_pvelocity";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[player], vector | [player], x, y, z} Sets a player's velocity. vector must be an"
 					+ " associative array with x, y, and z keys defined (if magnitude is set, it is ignored)."
@@ -3148,6 +3567,7 @@ public class PlayerManagement {
 					+ " happens, otherwise, true is returned.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3156,18 +3576,22 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class psend_block_change extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
@@ -3181,19 +3605,23 @@ public class PlayerManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "psend_block_change";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], locationArray, itemID} Changes a block, but only temporarily, and only for the specified player."
 					+ " This can be used to \"fake\" blocks for a player. ItemID is in the 1[:1] data format.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3202,18 +3630,22 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class phunger extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -3222,18 +3654,22 @@ public class PlayerManagement {
 			return new CInt(p.getHunger(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "phunger";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player]} Returns the player's hunger level";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3242,18 +3678,22 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_phunger extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int hunger, hungerIndex = 0;
@@ -3266,18 +3706,22 @@ public class PlayerManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_phunger";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], hunger} Sets a player's hunger level";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3286,18 +3730,22 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class psaturation extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -3307,18 +3755,22 @@ public class PlayerManagement {
 			return new CDouble(p.getSaturation(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "psaturation";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {[player]} Returns the player's saturation level";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3327,18 +3779,22 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_psaturation extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			float saturation;
@@ -3352,18 +3808,22 @@ public class PlayerManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_psaturation";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], saturation} ";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3373,14 +3833,17 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pbed_location extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pbed_location";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -3394,23 +3857,28 @@ public class PlayerManagement {
 			}
 		}
 
+		@Override
 		public String docs() {
 			return "array {[playerName]} Returns an array of x, y, z, coords of the bed of the player specified, or the player running the command otherwise."
 					+ "The array returned will also include the bed's world in index 3 of the array. This is set when a player sleeps or by set_pbed_location.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -3419,35 +3887,43 @@ public class PlayerManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pbed_location extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pbed_location";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the bed of the player to the specified coordinates."
 					+ " If player is omitted, the current player is used.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String pname = null;
@@ -3513,34 +3989,42 @@ public class PlayerManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class pvehicle extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pvehicle";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {[player]} Returns ID of vehicle which player is in or null if player is outside the vehicle";
 			}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
@@ -3559,34 +4043,42 @@ public class PlayerManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class pvehicle_leave extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pvehicle_leave";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[player]} Leave vehicle by player or return false if player is outside the vehicle";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 	}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {;
@@ -3601,18 +4093,22 @@ public class PlayerManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_offline_players extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCServer s = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
@@ -3623,18 +4119,22 @@ public class PlayerManagement {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_offline_players";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an array of every player who has played on this server.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3651,18 +4151,22 @@ public class PlayerManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class phas_played extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCServer s = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
@@ -3670,19 +4174,23 @@ public class PlayerManagement {
 			return new CBoolean(offp.hasPlayedBefore(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "phas_played";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {player} Returns whether the given player has ever been on this server."
 					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3700,18 +4208,22 @@ public class PlayerManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class pfirst_played extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -3724,19 +4236,23 @@ public class PlayerManagement {
 			return new CInt(op.getFirstPlayed(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "pfirst_played";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0,1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player]} Returns the time this player first logged onto this server, or 0 if they never have."
 					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3754,18 +4270,22 @@ public class PlayerManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class plast_played extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -3778,19 +4298,23 @@ public class PlayerManagement {
 			return new CInt(op.getLastPlayed(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "plast_played";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0,1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player]} Returns the time this player was last seen on this server, or 0 if they never were."
 					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -3807,18 +4331,22 @@ public class PlayerManagement {
 	@api
 	public static class get_player_from_entity_id extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			try {
@@ -3828,19 +4356,23 @@ public class PlayerManagement {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "get_player_from_entity_id";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {entityID} Given an entity ID that represents a player, returns that player's name, or"
 					+ " null if the entity ID isn't a player's entity ID.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}

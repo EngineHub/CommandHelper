@@ -23,5 +23,6 @@ public abstract class BukkitMCRecipe implements MCRecipe {
 		return new BukkitMCItemStack(r.getResult());
 	}
 	
+	@Override
 	public abstract MCRecipeType getRecipeType();
 }

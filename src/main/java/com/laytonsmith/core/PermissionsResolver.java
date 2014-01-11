@@ -49,18 +49,22 @@ public interface PermissionsResolver {
 	 */
 	public static class PermissiveResolver implements PermissionsResolver{
 
+		@Override
 		public boolean inGroup(String user, String group) {
 			return false;
 		}
 
+		@Override
 		public boolean hasPermission(String user, String permission, Object data) {
 			return true;
 		}
 
+		@Override
 		public boolean hasPermission(String user, String permission) {
 			return true;
 		}				
 
+		@Override
 		public String[] getGroups(String user) {
 			return new String[]{};
 		}

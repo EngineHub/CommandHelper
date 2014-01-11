@@ -32,18 +32,22 @@ public class PluginMeta {
 	@api
 	public static class fake_incoming_plugin_message extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -59,20 +63,24 @@ public class PluginMeta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "fake_incoming_plugin_message";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player,] channel, message} Fakes an incoming plugin message from the player. Channel should be a string (the"
 					+ " channel name) and message should be a byte_array primitive. Depending on the plugin, these parameters"
 					+ " will vary. If message is null an empty byte_array is sent.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -82,18 +90,22 @@ public class PluginMeta {
 	@api
 	public static class send_plugin_message extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -109,20 +121,24 @@ public class PluginMeta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "send_plugin_message";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player,] channel, message} Sends a plugin message to the player. Channel should be a string (the"
 					+ " channel name) and message should be a byte_array primitive. Depending on the plugin, these parameters"
 					+ " will vary. If message is null an empty byte_array is sent.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -132,18 +148,22 @@ public class PluginMeta {
 	@api
 	public static class register_channel extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PluginChannelException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger msgr = Static.getServer().getMessenger();
 			String channel = args[0].toString();
@@ -157,19 +177,23 @@ public class PluginMeta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "register_channel";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {channel} Registers a plugin channel for CommandHelper to listen on."
 					+ " Incoming messages can be inspected by binding to 'plugin_message_received'.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -178,18 +202,22 @@ public class PluginMeta {
 	@api
 	public static class unregister_channel extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PluginChannelException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger msgr = Static.getServer().getMessenger();
 			String channel = args[0].toString();
@@ -203,18 +231,22 @@ public class PluginMeta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "unregister_channel";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {channel} Unregisters a plugin channel CommandHelper is listening on, if any.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -223,37 +255,45 @@ public class PluginMeta {
 	@api
 	public static class is_channel_registered extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean bool = Static.getServer().getMessenger().isIncomingChannelRegistered(args[0].toString());
 			
 			return new CBoolean(bool, t);
 		}
 
+		@Override
 		public String getName() {
 			return "is_channel_registered";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {channel} Returns true if commandhelper is listening to"
 					+ " the given plugin channel.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -262,18 +302,22 @@ public class PluginMeta {
 	@api
 	public static class get_registered_channels extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Set<String> chans = Static.getServer().getMessenger().getIncomingChannels();
 			CArray arr = new CArray(t);
@@ -285,19 +329,23 @@ public class PluginMeta {
 			return arr;
 		}
 
+		@Override
 		public String getName() {
 			return "get_registered_channels";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an array of strings containing the channels"
 					+ " CommandHelper is listening on.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

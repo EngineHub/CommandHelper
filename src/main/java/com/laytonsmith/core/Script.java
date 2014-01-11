@@ -15,8 +15,6 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.*;
-import com.laytonsmith.core.functions.ArrayHandling;
-import com.laytonsmith.core.functions.DataHandling.assign;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
@@ -152,7 +150,7 @@ public class Script {
                 for (Construct tempNode : rootNode.getAllData()) {
                     if (tempNode instanceof Variable) {
                         if(left_vars == null){
-                            throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.getTarget());
+                            ConfigRuntimeException.CreateUncatchableException("$variables may not be used in this context. Only @variables may be.", tempNode.getTarget());
                         }
                         ((Variable) tempNode).setVal(
                                 new CString(
@@ -180,7 +178,7 @@ public class Script {
             }
             System.out.println("The continue() function must be used inside a for() or foreach() loop");
         } catch (FunctionReturnException e) {
-            if(myEnv.getEnv(CommandHelperEnvironment.class).GetEvent() != null){
+            if(myEnv.getEnv(GlobalEnv.class).GetEvent() != null){
                 //Oh, we're running in an event handler. Those know how to catch it too.
                 throw e;
             }

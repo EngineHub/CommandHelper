@@ -1,0 +1,249 @@
+{{unimplemented}}
+
+Routines provide a way for advanced script writers to make scripts more efficient
+by moving some code into other execution units which can run parallel to others.
+Routines are similar to threads in other languages, but are loosely based of
+of "goroutines" from the Go language. Routines are largely independent from each other;
+most memory is not shared between them, because they use closures to encapsulate variables,
+which prevents sharing of primitives. References are shared, so arrays are shared across
+instances, but arrays are inherently synchronized to allow multiple routines to change
+data without race conditions.
+
+== Creating a Routine ==
+
+A routine is created with the routine function. The most basic routine will accept
+a closure with no arguments.
+
+%%CODE|
+routine(closure(){
+	msg('This runs within the routine')
+})
+%%
+
+This kicks off the new routine, in its own, new thread, and the routine function itself
+returns immediately. The closure will be executed immediately, and any return value
+will be ignored, though returning anything but void from this closure will trigger a
+warning. The closure may accept parameters, but this is addressed below.
+
+=== Concurrency with routines ===
+
+Since routines create a new thread, multiple activities might be running at once.
+For instance, if we ran the following code:
+
+%%CODE|
+routine(closure(){
+	foreach(1..100, @k){
+		msg('Routine 1: '.@k)
+	}
+})
+routine(closure(){
+	foreach(1..100, @k){
+		msg('Routine 2: '.@k)
+	}
+})
+%%
+
+we would end up seeing an interweaving of routine 1 and 2's output jumbled together.
+The order in which routines run (or complete) is generally undefined unless locks or
+channels are involved.
+
+== Locks and Routines ==
+
+A <code>lock</code> object is a special MethodScript data type, which provides two types
+of functionality to routines that have complex interaction with each other. The first
+method is used through channeling, the second is through blocking calls.
+
+=== Channeling ===
+
+In general, routines shouldn't share existing memory across routines (and in fact may not be
+able to easily, because of the nature of closures), but instead should use channeling.
+A channel is a communication method amongst routines that is inherently synchronized.
+Essentially, these allow routines to safely pass data to other routines that are waiting
+for that data (or will be waiting for it).
+
+To use a channel, you must first obtain a lock. This is a special primitive data type that
+is inherently synchronized (and passed by value to closures), 
+and is passed to various functions to return data via channeling.
+This lock represents some inherent communication channel that your routines will communicate across.
+Routines are not limited to just one lock at a time, however. To create a lock, use
+the {{function|get_lock}} function.
+
+After the lock is created, you can use the channel to signal to other routines, or wait
+for another routine to signal it.
+
+%%CODE|
+@lock = get_lock()
+# Often times this is desired to be created before the closures, since they will close over
+# it by value, thereby "cloning" it for us.
+routine('routine1', closure(){
+	# Sleep for ten seconds (representing some long running process, perhaps)
+	sleep(10) 
+	# Then communicate on the channel. In this example, we are sending the string 'Data',
+	# but any data can be passed.
+	rsignal(@lock, 'Data')
+})
+
+routine('routine2', closure(){
+	# We want to wait for the data to be sent to us via the rsignal function.
+	@data = rwait(@lock)
+	# Then do whatever we need to with the data. In this case, @data will equal 'Data'
+	msg(@data)
+})
+%%
+
+Both {{function|rsignal}} and {{function|rwait}} are blocking calls; they will not return
+until both are being called at the same time. Usually this means that you want both the signal
+and wait calls to be within a routine, however, there is no rule that you must do so, but
+each routine will block until each side of the "pipe" is activated. Multiple routines
+may be waiting for a signal. In this case, barring various options being set, one of the waiting
+routines is picked at random and the two ends of the channel are connected at that point.
+This is useful in the case of a producer/consumer setup, where there is only one producer, but
+multiple consumers (perhaps created in a loop), and the consumers will take longer than the producer.
+
+Here is a basic example of using a dynamic number of routines.
+
+%%CODE|
+@lock = get_lock()
+@maxConsumers = 5 # This represents some dynamic number of consumers
+
+routine('Producer', closure(){
+	foreach(1..100, @k){
+		rsignal(@lock, @k)
+	}
+})
+
+
+for(@i = 0, @i < @maxConsumers, @i++){
+	routine('Consumer'.@i, closure(){
+		while(true){
+			@data = rwait(@lock)
+			# Do some long running process with the data
+			sleep(10)
+		}
+	})
+}
+%%
+
+This provides a "thread pool" of 5 routines which concurrently process
+the data that was divided up by the producer. Once all the consumers are occupied
+with the data, the producer will pause until one of the consumers becomes
+available, at which point it will pass the data to the now This example is a bit buggy, however,
+because once the producer is done, the consumers will all still be idling, waiting
+for data. This is where the {{function|close_lock}} function is used. 
+Here is a rewritten example that will behave better, and actually shut down eventually.
+
+%%CODE|
+@lock = get_lock()
+@maxConsumers = 5 # This represents some dynamic number of consumers
+
+routine('Producer', closure(){
+	foreach(1..100, @k){
+		rsignal(@lock, @k)
+	}
+	# Now all the data has been divided up and accepted by the consumers.
+	# They could still be running processing the data we passed in at this point, 
+	# but that doesn't affect what we do here, we close the lock.
+	close_lock(@lock)
+})
+
+
+for(@i = 0, @i < @maxConsumers, @i++){
+	routine('Consumer'.@i, closure(){
+		try(
+			while(true){
+					@data = rwait(@lock) # This will eventually throw a LockClosedException
+				# Do some long running process with the data
+				sleep(10)
+			}
+		, @ex,
+			return()
+		, LockClosedException # We're only interested in this type
+		)
+	})
+}
+%%
+
+In this example, after the producer loops through the data, the lock is closed. At this
+point, any future calls to rwait (or rsignal, for that matter) will cause a LockClosedException
+to be thrown. FIXME: I'm not sure about this feature ->All exception types except this will cause the normal error handling process
+to occur, but in this case, the routine knows to catch it and silently terminate, though
+it can be caught and handled separately.<-
+
+This will cause the routines that are currently blocked to throw the exception,
+and future calls to rwait will immediately throw as well. This provides a convenient
+"out" for the routines, if an indeterminant amount of data is being processed.
+
+=== Blocking calls ===
+
+Another, more flexible form of communication is through blocking calls.
+{{function|rlock}}, {{function|rlock_open}}, {{function|runlock_all}}, and {{function|runlock}} are the
+basis of this type of communication. These methods are a communication signal,
+but do not pass data around via "pipe" like structures, but simply signal
+to other routines that some sort of operation has completed. Usually, the
+routines will be communicating the data through other means, perhaps via
+import/export or some other way. We can slightly modify the producer/consumer example
+above to show a good use of blocking calls.
+
+Assume that both the the producer and consumers need to do all the processing
+off the main thread, so we know that the bulk of all our processing will be done
+in routines. We can set up the producer and consumers in the main thread, then
+the consumers will wait until the producer has completely finished its processing.
+
+%%CODE|
+@lock = get_lock()
+# This time we are going to hardcode the consumers to 5.
+
+routine('Producer', closure(){
+	# This represents some long running process, perhaps
+	# initial preparation of the data.
+	foreach(1..5, @k){
+		sleep(3)
+		# We then export the data to various predefined locations
+		export('data.'.@k, @k)
+	}
+	# This unlocks all the 
+	runlock_all(@lock) 
+	close_lock(@lock)
+})
+
+
+foreach(1..5, @i){
+	# We are introducing a new concept here, we are passing in a value to the closure, @k.
+	# Technically this isn't necessary, because @i is bound to the correct value inside
+	# the closure already (see below where we pass in @i) but for demonstration purposes
+	# we are using this method.
+	routine('Consumer'.@i, closure(@k){
+		# If the consumers were defined before the producer, we could virtually
+		# guarantee that the lock would not be closed before a call to rlock()
+		# is made here. However, we are defining the consumers after, and regardless
+		# we are using the locks as a "gatekeeper" to prevent the consumers from
+		# starting data processing before we're ready, so either a call to runlock()
+		# or closing of the lock is sufficient for our purposes, so we want to use
+		# rlock_open here instead.
+		rlock_open(@lock)
+		if(!lock_closed(@lock)){
+		}
+		@data = import('data.'.@k)
+		# Do some long running process with the data
+		sleep(10)
+	}, @i) # Here is where we are passing @i in
+}
+%%
+
+When the call to runlock_all is made, all routines waiting for the lock using rlock
+will unblock, and resume operation. runlock() works the same as runlock_all(), but
+only causes one blocked routine to resume (chosen randomly). If the lock is closed,
+rlock() will throw a LockClosedException, so we use rlock_open() instead. rlock_open()
+returns if either a normal call to rlock() would cause the function to return, or the lock is closed.
+Normally rlock() would throw an exception if the lock were closed, but rlock_open()
+works as an atomic statement. The non-atomic equivalent of this would be
+%%CODE|
+if(_is_lock_open(@lock)){
+	rlock(@lock)
+}
+%%
+but this code isn't an atomic operation, so if the lock were closed between the call
+to _is_lock_open() and rlock(), an exception would be thrown, which is not what we
+want in this case. If you can guarantee that either the lock will never be closed,
+or you want an exception to be thrown if the lock is closed, rlock() is an appropriate
+choice.

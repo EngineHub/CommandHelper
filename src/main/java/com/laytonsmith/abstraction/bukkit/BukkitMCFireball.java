@@ -16,10 +16,12 @@ public class BukkitMCFireball extends BukkitMCProjectile implements MCFireball {
 		f = be;
 	}
 
+	@Override
 	public Velocity getDirection() {
 		return new Velocity(1, f.getDirection().getX(), f.getDirection().getY(), f.getDirection().getZ());
 	}
 
+	@Override
 	public void setDirection(Velocity vector) {
 		f.setDirection(new Vector(vector.x, vector.y, vector.z));
 	}

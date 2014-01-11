@@ -44,38 +44,47 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return p;
     }
 
+	@Override
     public boolean canSee(MCPlayer p) {
         return this.p.canSee(((BukkitMCPlayer)p)._Player());
     }
 
+	@Override
     public void chat(String chat) {
         p.chat(chat);
     }
 
+	@Override
     public InetSocketAddress getAddress() {
         return p.getAddress();
     }
 
+	@Override
     public boolean getAllowFlight() {
         return p.getAllowFlight();
     }
 
+	@Override
     public MCLocation getCompassTarget() {
         return new BukkitMCLocation(p.getCompassTarget());
     }
 
+	@Override
     public String getDisplayName() {
         return p.getDisplayName();
     }
 
+	@Override
     public float getExp() {
         return p.getExp();
     }
 
+	@Override
     public long getFirstPlayed() {
 		return p.getFirstPlayed();
 	}
 
+	@Override
     public int getFoodLevel() {
         return p.getFoodLevel();
     }
@@ -88,6 +97,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return new BukkitMCPlayerInventory(p.getInventory());
     }
 
+	@Override
     public MCItemStack getItemAt(Integer slot) {
         if (slot == null) {
             return new BukkitMCItemStack(p.getItemInHand());
@@ -113,26 +123,32 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         }
     }
 
+	@Override
     public long getLastPlayed() {
 		return p.getLastPlayed();
 	}
 
+	@Override
     public int getLevel() {
         return p.getLevel();
     }
 
+	@Override
     public MCPlayer getPlayer() {
         return new BukkitMCPlayer(p);
     }
 
+	@Override
     public long getPlayerTime() {
         return p.getPlayerTime();
     }
 
+	@Override
 	public MCWeather getPlayerWeather() {
 		return BukkitMCWeather.getConvertor().getAbstractedEnum(p.getPlayerWeather());
 	}
 
+	@Override
     public int getRemainingFireTicks() {
         return p.getFireTicks();
     }
@@ -145,6 +161,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     // https://raw.github.com/essentials/Essentials/master/Essentials/src/net/ess3/craftbukkit/SetExpFix.java
 	//This method is required because the bukkit player.getTotalExperience() method, shows exp that has been 'spent'.
 	//Without this people would be able to use exp and then still sell it.
+	@Override
 	public int getTotalExperience()
 	{
 		int exp = (int)Math.round(getExpAtLevel(p) * p.getExp());
@@ -176,58 +193,72 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		return 17;
 	}
 
+	@Override
 	public void setFlySpeed(float speed) {
 		p.setFlySpeed(speed);
 	}
 	
+	@Override
 	public float getFlySpeed() {
 		return p.getFlySpeed();
 	}
 	
+	@Override
 	public void setWalkSpeed(float speed) {
 		p.setWalkSpeed(speed);
 	}
 
+	@Override
 	public float getWalkSpeed() {
 		return p.getWalkSpeed();
 	}
 	
+	@Override
     public void giveExp(int xp) {
         p.giveExp(xp);
     }
 
+	@Override
     public boolean hasPlayedBefore() {
 		return p.hasPlayedBefore();
 	}
 
+	@Override
     public boolean isBanned() {
         return p.isBanned();
     }
 
+	@Override
     public boolean isOnline() {
         return p.isOnline();
     }
 
+	@Override
     public boolean isOp() {
         return p.isOp();
     }
 
+	@Override
 	public void setOp(boolean bln) {
 		p.setOp(bln);
 	}
 
+	@Override
     public boolean isSneaking() {
         return p.isSneaking();
     }
 	
+	@Override
 	public boolean isSprinting() {
 		return p.isSprinting();
 	}
 
+	@Override
     public boolean isWhitelisted() {
         return p.isWhitelisted();
     }
 
+	@Override
     public void kickPlayer(String message) {
         p.kickPlayer(message);
     }
@@ -246,48 +277,59 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		return hasIt;
     }
 
+	@Override
     public void resetPlayerTime() {
         p.resetPlayerTime();
     }
 
+	@Override
 	public void resetPlayerWeather() {
 		p.resetPlayerWeather();
 	}
 
+	@Override
     public void sendMessage(String string) {
 		//The client doesn't like tabs
 		string = string.replaceAll("\t", "    ");
         p.sendMessage(string);
     }
 
+	@Override
 	public void sendTexturePack(String url) {
 		p.setTexturePack(url);
 	}
 
+	@Override
     public void setAllowFlight(boolean flight) {
         p.setAllowFlight(flight);
     }
 
+	@Override
     public void setBanned(boolean banned) {
         p.setBanned(banned);
     }
 
+	@Override
     public void setCompassTarget(MCLocation l) {
         p.setCompassTarget(((BukkitMCLocation)l).l);
     }
 
+	@Override
     public void setDisplayName(String name) {
         p.setDisplayName(name);
     }
 
+	@Override
     public void setExp(float i) {
         p.setExp(i);
     }
 
+	@Override
 	public void setFlying(boolean flight) {
 		p.setFlying(flight);
 	}
 
+	@Override
     public void setFoodLevel(int f) {
         p.setFoodLevel(f);
     }
@@ -299,22 +341,27 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.setHealth(i);
     }*/
 
+	@Override
     public void setLevel(int xp) {
         p.setLevel(xp);
     }
 
+	@Override
     public void setPlayerTime(Long time, boolean relative) {
         p.setPlayerTime(time, relative);
     }
 
+	@Override
 	public void setPlayerWeather(MCWeather type) {
 		p.setPlayerWeather(BukkitMCWeather.getConvertor().getConcreteEnum(type));
 	}
 
+	@Override
     public void setRemainingFireTicks(int i) {
         p.setFireTicks(i);
     }
 
+	@Override
     public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Server server = Bukkit.getServer();
 
@@ -358,6 +405,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	// https://raw.github.com/essentials/Essentials/master/Essentials/src/net/ess3/craftbukkit/SetExpFix.java
 	//This method is used to update both the recorded total experience and displayed total experience.
 	//We reset both types to prevent issues.
+	@Override
 	public void setTotalExperience(int total)
 	{
 		if (total < 0)
@@ -391,6 +439,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		}
 	}
 
+	@Override
     public void setVanished(boolean set, MCPlayer to) {
         if (!set) {
             p.showPlayer(((BukkitMCPlayer)to)._Player());
@@ -399,61 +448,80 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         }
     }
 
+	@Override
     public void setWhitelisted(boolean value) {
         p.setWhitelisted(value);
     }
 
+	@Override
     public void setPlayerListName(String listName) {
         p.setPlayerListName(listName);
     }
 
+	@Override
     public String getPlayerListName() {
         return p.getPlayerListName();
     }
 
+	@Override
     public boolean isNewPlayer() {
         //Note the reversed logic here. If they have NOT played before, they are
         //a new player.
         return !p.getServer().getOfflinePlayer(p.getName()).hasPlayedBefore();
     }
 
+	@Override
     public String getHost() {
         return Static.GetHost(this);
     }
 
+	@Override
 	public void sendBlockChange(MCLocation loc, int material, byte data) {
 		p.sendBlockChange(((Location)loc.getHandle()), material, data);
 	}
 
+	@Override
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note) {
 		p.playNote((Location)loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note)note.getHandle());
 	}
 	
+	@Override
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
 		p.playSound(((BukkitMCLocation) l).asLocation(), 
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}
+	
+	@Override
+	public void playSound(MCLocation l, String sound, float volume, float pitch) {
+		p.playSound(((BukkitMCLocation)l).asLocation(), sound, volume, pitch);
+	}
 
+	@Override
 	public int getHunger() {
 		return p.getFoodLevel();
 	}
 
+	@Override
 	public void setHunger(int h) {
 		p.setFoodLevel(h);
 	}
 
+	@Override
 	public float getSaturation() {
 		return p.getSaturation();
 	}
 
+	@Override
 	public void setSaturation(float s) {
 		p.setSaturation(s);
 	}
 
+	@Override
 	public MCLocation getBedSpawnLocation() {
 	    return new BukkitMCLocation(p.getBedSpawnLocation());
 	}
 
+	@Override
 	public void setBedSpawnLocation(MCLocation l) {
 		p.setBedSpawnLocation((Location)l.getHandle(), true);
 	}
@@ -463,23 +531,28 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		return new BukkitMCEntity(p.getVehicle());
 	}
 
+	@Override
 	public void sendPluginMessage(String channel, byte[] message) {
 		StaticLayer.GetConvertor().GetPluginMeta().openOutgoingChannel(channel);
 		p.sendPluginMessage(CommandHelperPlugin.self, channel, message);
 	}
 
+	@Override
 	public boolean isFlying() {
 		return p.isFlying();
 	}
 
+	@Override
 	public void updateInventory() {
 		p.updateInventory();
 	}
 
+	@Override
 	public MCScoreboard getScoreboard() {
 		return new BukkitMCScoreboard(p.getScoreboard());
 	}
 
+	@Override
 	public void setScoreboard(MCScoreboard board) {
 		p.setScoreboard(((BukkitMCScoreboard) board).s);
 	}

@@ -59,6 +59,7 @@ class LexerObject {
 			this.type = type;
 		}
 
+		@Override
 		public int compareTo(TokenMap o) {
 			if (this.token.length() == o.token.length()) {
 				//Zero case

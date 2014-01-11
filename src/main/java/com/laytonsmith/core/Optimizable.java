@@ -110,14 +110,17 @@ public interface Optimizable extends Function {
 			this.since = since;
 		}
 
+		@Override
 		public String getName() {
 			return name();
 		}
 
+		@Override
 		public String docs() {
 			return docs;
 		}
 
+		@Override
 		public CHVersion since() {
 			return since;
 		}

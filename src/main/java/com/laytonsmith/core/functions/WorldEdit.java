@@ -64,23 +64,28 @@ public class WorldEdit {
     @api(environments=CommandHelperEnvironment.class)
     public static class sk_pos1 extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_pos1";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1, 2};
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
         }
 
+		@Override
         public String docs() {
             return "mixed {[player], locationArray | [player]} Sets the player's point 1, or returns it if the array to set isn't specified. If"
                     + " the location is returned, it is returned as a 4 index array:(x, y, z, world)";
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l = null;
@@ -131,22 +136,27 @@ public class WorldEdit {
     @api(environments=CommandHelperEnvironment.class)
     public static class sk_pos2 extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_pos2";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1, 2};
         }
 
+		@Override
         public String docs() {
             return "mixed {[player], array | [player]} Sets the player's point 2, or returns it if the array to set isn't specified";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l = null;
@@ -222,14 +232,17 @@ public class WorldEdit {
 	@api
 	public static class sk_region_info extends SKFunction {
 
+		@Override
 		public String getName() {
 			return "sk_region_info";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "array {region, world, [value]} Given a region name, returns an array of information about that region."
 					+ " ---- If value is set, it should be an integer of one of the following indexes, and only that information for that index"
@@ -245,11 +258,13 @@ public class WorldEdit {
 					+ "If the region cannot be found, a PluginInternalException is thrown.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PluginInternalException, 
 				ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String regionName = args[0].val();
@@ -384,22 +399,27 @@ public class WorldEdit {
     @api
     public static class sk_region_overlaps extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_overlaps";
         }
 
+		@Override
         public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
+            return new Integer[]{3};
         }
 
+		@Override
         public String docs() {
             return "boolean {world, region1, array(region2, [regionN...])} Returns true or false whether or not the specified regions overlap.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String region1 = args[1].val();
             List<ProtectedRegion> checkRegions = new ArrayList<ProtectedRegion>();
@@ -444,23 +464,28 @@ public class WorldEdit {
     @api
     public static class sk_region_intersect extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_intersect";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2, 3};
         }
 
+		@Override
         public String docs() {
             return "array {world, region1, [array(region2, [regionN...])]} Returns an array of regions names which intersect with defined region."
 					+ " You can pass an array of regions to verify or omit this parameter and all regions in selected world will be checked.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String region1 = args[1].val();
             List<ProtectedRegion> checkRegions = new ArrayList<ProtectedRegion>();
@@ -526,22 +551,27 @@ public class WorldEdit {
     @api
     public static class sk_all_regions extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_all_regions";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1};
         }
 
+		@Override
         public String docs() {
             return "array {[world]} Returns all the regions in all worlds, or just the one world, if specified.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             List<World> checkWorlds = null;
@@ -569,23 +599,28 @@ public class WorldEdit {
     @api(environments=CommandHelperEnvironment.class)
     public static class sk_current_regions extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_current_regions";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1};
         }
 
+		@Override
         public String docs() {
             return "mixed {[player]} Returns the list regions that player is in. If no player specified, then the current player is used."
                     + " If region is found, an array of region names are returned, else an empty array is returned";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
@@ -642,23 +677,28 @@ public class WorldEdit {
     @api(environments=CommandHelperEnvironment.class)
     public static class sk_regions_at extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_regions_at";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "mixed {Locationarray} Returns a list of regions at the specified location. "
                     + "If regions are found, an array of region names are returned, otherwise, an empty array is returned.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException, ExceptionType.InsufficientArgumentsException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
@@ -718,22 +758,27 @@ public class WorldEdit {
     @api
     public static class sk_region_volume extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_volume";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "int {region, world} Returns the volume of the given region in the given world.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
@@ -755,23 +800,28 @@ public class WorldEdit {
     @api
     public static class sk_region_create extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_create";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2, 3};
         }
 
+		@Override
         public String docs() {
             return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])|[world], '__global__'}"
 					+ " Create region of the given name in the given world. You can omit list of points if you want to create a __global__ region.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -839,9 +889,6 @@ public class WorldEdit {
 				List<BlockVector> points = new ArrayList<BlockVector>();
 				List<BlockVector2D> points2D = new ArrayList<BlockVector2D>();
 
-				int x = 0;
-				int y = 0;
-				int z = 0;
 
 				int minY = 0;
 				int maxY = 0;
@@ -849,11 +896,11 @@ public class WorldEdit {
 				CArray arg = (CArray) args[args.length - 1];
 
 				for (int i = 0; i < arg.size(); i++) {
-					CArray point = (CArray)arg.get(i, t);
+					MCLocation point = ObjectGenerator.GetGenerator().location(arg.get(i), null, t);
 
-					x = Static.getInt32(point.get(0), t);
-					y = Static.getInt32(point.get(1), t);
-					z = Static.getInt32(point.get(2), t);
+					int x = point.getBlockX();
+					int y = point.getBlockY();
+					int z = point.getBlockZ();
 
 					if (arg.size() == 2) {
 						points.add(new BlockVector(x, y, z));
@@ -903,22 +950,27 @@ public class WorldEdit {
     @api
     public static class sk_region_update extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_update";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2, 3};
         }
 
+		@Override
         public String docs() {
             return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])} Updates the location of a given region to the new location. Other properties of the region, like owners, members, priority, etc are unaffected.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -1040,22 +1092,27 @@ public class WorldEdit {
     @api
     public static class sk_region_rename extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_rename";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2, 3};
         }
 
+		@Override
         public String docs() {
             return "void {[world], oldName, newName} Rename the existing region. Other properties of the region, like owners, members, priority, etc are unaffected.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -1146,22 +1203,27 @@ public class WorldEdit {
     @api
     public static class sk_region_remove extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_remove";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2};
         }
 
+		@Override
         public String docs() {
             return "void {[world], name} Remove existed region.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -1218,22 +1280,27 @@ public class WorldEdit {
     @api
     public static class sk_region_exists extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_exists";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2};
         }
 
+		@Override
         public String docs() {
             return "void {[world], name} Check if a given region exists.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -1282,22 +1349,27 @@ public class WorldEdit {
     @api
     public static class sk_region_addowner extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_addowner";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2, 3};
         }
 
+		@Override
         public String docs() {
             return "void {region, [world], [owner1] | region, [world], [array(owner1, ownerN, ...)]} Add owner(s) to given region.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -1387,22 +1459,27 @@ public class WorldEdit {
     @api
     public static class sk_region_remowner extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_remowner";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2, 3};
         }
 
+		@Override
         public String docs() {
             return "void {region, [world], [owner1] | region, [world], [array(owner1, ownerN, ...)]} Remove owner(s) from given region.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -1487,23 +1564,28 @@ public class WorldEdit {
 	@api
 	public static class sk_region_owners extends SKFunction {
 
+		@Override
 		public String getName() {
 			return "sk_region_owners";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {region, world} Returns an array of owners of this region. If the world"
 					+ " or region cannot be found, a PluginInternalException is thrown.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PluginInternalException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			try {
 				String regionName = args[0].val();
@@ -1541,22 +1623,27 @@ public class WorldEdit {
     @api
     public static class sk_region_addmember extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_addmember";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2, 3};
         }
 
+		@Override
         public String docs() {
             return "void {region, [world], [member1] | region, [world], [array(member1, memberN, ...)]} Add member(s) to given region.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -1646,22 +1733,27 @@ public class WorldEdit {
     @api
     public static class sk_region_remmember extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_remmember";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2, 3};
         }
 
+		@Override
         public String docs() {
             return "void {region, [world], [member1] | region, [world], [array(member1, memberN, ...)]} Remove member(s) from given region.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -1746,23 +1838,28 @@ public class WorldEdit {
 	@api
 	public static class sk_region_members extends SKFunction {
 
+		@Override
 		public String getName() {
 			return "sk_region_members";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {region, world} Returns an array of members of this region. If the world"
 					+ " or region cannot be found, a PluginInternalException is thrown.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PluginInternalException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			try {
 				String regionName = args[0].val();
@@ -1800,14 +1897,17 @@ public class WorldEdit {
     @api
     public static class sk_region_flag extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_flag";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{4, 5};
         }
 
+		@Override
         public String docs() {
             return "void {world, region, flagName, flagValue, [group]} Add/change/remove flag for selected region. FlagName should be any"
 					+ " supported flag from [http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags this list]. For the flagValue, use types which"
@@ -1816,10 +1916,12 @@ public class WorldEdit {
 					+ " group) to delete the flag from the region.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -2100,22 +2202,27 @@ public class WorldEdit {
     @api
     public static class sk_region_setpriority extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_setpriority";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2, 3};
         }
 
+		@Override
         public String docs() {
             return "void {[world], region, priority} Sets priority for a given region.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -2182,22 +2289,27 @@ public class WorldEdit {
     @api
     public static class sk_region_setparent extends SKFunction {
 
+		@Override
         public String getName() {
             return "sk_region_setparent";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2, 3};
         }
 
+		@Override
         public String docs() {
             return "void {world, region, [parentRegion]} Sets parent region for a given region.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
@@ -2263,11 +2375,13 @@ public class WorldEdit {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class sk_can_build extends SKFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidPluginException, ExceptionType.PlayerOfflineException,
 					ExceptionType.FormatException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			Static.checkPlugin("WorldGuard", t);
@@ -2288,14 +2402,17 @@ public class WorldEdit {
 					((BukkitMCLocation) loc)._Location()), t);
 		}
 
+		@Override
 		public String getName() {
 			return "sk_can_build";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[player,] locationArray} Returns whether or not player can build at the location,"
 					+ " according to WorldGuard. If player is not given, the current player is used.";
@@ -2309,14 +2426,17 @@ public class WorldEdit {
 
     public static abstract class SKFunction extends AbstractFunction {
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public Version since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return false;
         }
@@ -2419,14 +2539,17 @@ public class WorldEdit {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "skcb_load";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {filename} Loads a schematic into the clipboard from file."
 					+ " It will use the directory specified in WorldEdit's config.";
@@ -2441,11 +2564,13 @@ public class WorldEdit {
 	@api
 	public static class skcb_rotate extends SKFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.NotFoundException,
 					ExceptionType.InvalidPluginException, ExceptionType.CastException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.checkPlugin("WorldEdit", t);
 			int angle = Static.getInt32(args[0], t);
@@ -2462,14 +2587,17 @@ public class WorldEdit {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "skcb_rotate";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {int} Given a multiple of 90, rotates the clipboard by that number.";
 		}
@@ -2483,11 +2611,13 @@ public class WorldEdit {
 	@api
 	public static class skcb_paste extends SKFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.InvalidPluginException,
 					ExceptionType.NotFoundException, ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.checkPlugin("WorldEdit", t);
 			boolean noAir = false;
@@ -2519,14 +2649,17 @@ public class WorldEdit {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "skcb_paste";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "void {location, [ignoreAir], [fastmode], [entities]} Pastes a schematic from the clipboard"
 					+ " as if a player was standing at the location. If ignoreAir is true,"

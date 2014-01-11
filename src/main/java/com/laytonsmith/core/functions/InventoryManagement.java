@@ -24,14 +24,17 @@ public class InventoryManagement {
     @api(environments={CommandHelperEnvironment.class})
     public static class pinv extends AbstractFunction {
 
+		@Override
         public String getName() {
             return "pinv";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1, 2};
         }
 
+		@Override
         public String docs() {
             return "mixed {[player, [index]]} Gets the inventory information for the specified player, or the current player if none specified. If the index is specified, only the slot "
                     + " given will be returned."
@@ -46,21 +49,26 @@ public class InventoryManagement {
                     + " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
         }
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
 
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
             Integer index = -1;
@@ -136,18 +144,22 @@ public class InventoryManagement {
     @api(environments = {CommandHelperEnvironment.class})
     public static class close_pinv extends AbstractFunction {
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p;
 			
@@ -162,19 +174,23 @@ public class InventoryManagement {
             return new CVoid(t);
         }
 
+		@Override
         public String getName() {
             return "close_pinv";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1};
         }
 
+		@Override
         public String docs() {
             return "void {[player]} Closes the inventory of the current player, "
 					+ "or of the specified player.";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -183,18 +199,22 @@ public class InventoryManagement {
 	@api(environments = {CommandHelperEnvironment.class})
     public static class pworkbench extends AbstractFunction {
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p;
 			
@@ -209,19 +229,23 @@ public class InventoryManagement {
             return new CVoid(t);
         }
 
+		@Override
         public String getName() {
             return "pworkbench";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1};
         }
 
+		@Override
         public String docs() {
             return "void {[player]} Shows a workbench to the current player, "
 					+ "or a specified player.";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -230,18 +254,22 @@ public class InventoryManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class show_enderchest extends AbstractFunction {
 
+		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			MCPlayer other;
@@ -262,20 +290,24 @@ public class InventoryManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "show_enderchest";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player [, player]]} Shows the enderchest of either the current player "
 					+ " or the specified player if given. If a second player is specified, shows the"
 					+ " second player the contents of the first player's enderchest.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -284,18 +316,22 @@ public class InventoryManagement {
 	@api(environments = {CommandHelperEnvironment.class})
     public static class penchanting extends AbstractFunction {
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p;
 			
@@ -310,20 +346,24 @@ public class InventoryManagement {
             return new CVoid(t);
         }
 
+		@Override
         public String getName() {
             return "penchanting";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1};
         }
 
+		@Override
         public String docs() {
             return "void {[player]} Shows an enchanting to the current player, "
 					+ " or a specified player. Note that power is defined by how many"
 					+ " bookcases are near.";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -332,14 +372,17 @@ public class InventoryManagement {
     @api(environments={CommandHelperEnvironment.class})
     public static class set_pinv extends AbstractFunction {
 
+		@Override
         public String getName() {
             return "set_pinv";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2, 3, 4, 5, 7};
         }
 
+		@Override
         public String docs() {
             return "void {[player], pinvArray} Sets a player's inventory to the specified inventory object."
                     + " An inventory object is one that matches what is returned by pinv(), so set_pinv(pinv()),"
@@ -358,21 +401,26 @@ public class InventoryManagement {
 
         }
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
             MCPlayer m = null;
@@ -436,14 +484,17 @@ public class InventoryManagement {
     @api(environments={CommandHelperEnvironment.class})
 	public static class phas_item extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "phas_item";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2};
         }
 
+		@Override
         public String docs() {
             return "int {[player], itemId} Returns the quantity of the specified item"
                     + " that the player is carrying (including armor slots)."
@@ -454,18 +505,22 @@ public class InventoryManagement {
                     + " indicating a data value.";
         }
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.FormatException,
                 Exceptions.ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             String item;
@@ -502,6 +557,7 @@ public class InventoryManagement {
             return 0;
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -511,31 +567,38 @@ public class InventoryManagement {
     @api(environments={CommandHelperEnvironment.class})
 	public static class pitem_slot extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "pitem_slot";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2};
         }
 
+		@Override
         public String docs() {
             return "array {[player], itemID} Given an item id, returns the slot numbers"
                     + " that the matching item has at least one item in.";
         }
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
                 Exceptions.ExceptionType.PlayerOfflineException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             String item;
@@ -573,6 +636,7 @@ public class InventoryManagement {
             return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -582,14 +646,17 @@ public class InventoryManagement {
     @api(environments={CommandHelperEnvironment.class})
 	public static class pgive_item extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "pgive_item";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2, 3, 4};
         }
 
+		@Override
         public String docs() {
             return "int {[player], itemID, qty, [meta]} Gives a player the specified item * qty. The meta argument uses the"
                     + " same format as set_itemmeta. Unlike set_pinv(), this does not specify a slot. The qty is distributed"
@@ -601,18 +668,22 @@ public class InventoryManagement {
                     + " armor slots however. Supports 'infinite' stacks by providing a negative number.";
         }
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
                 Exceptions.ExceptionType.PlayerOfflineException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
@@ -653,6 +724,7 @@ public class InventoryManagement {
 			}
 		}
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -662,32 +734,39 @@ public class InventoryManagement {
     @api(environments={CommandHelperEnvironment.class})
 	public static class ptake_item extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "ptake_item";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2, 3};
         }
 
+		@Override
         public String docs() {
             return "int {[player], itemID, qty} Works in reverse of pgive_item(), but"
                     + " returns the number of items actually taken, which will be"
                     + " from 0 to qty.";
         }
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
                 Exceptions.ExceptionType.FormatException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
@@ -726,6 +805,7 @@ public class InventoryManagement {
             return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -734,14 +814,17 @@ public class InventoryManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pgive_enderchest_item extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "pgive_enderchest_item";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player], itemID, qty, [meta]} Add to a player ender chest the specified item * qty. The meta argument uses the"
 					+ " same format as set_itemmeta. Unlike set_penderchest(), this does not specify a slot. The qty is distributed"
@@ -753,19 +836,23 @@ public class InventoryManagement {
 					+ " Supports 'infinite' stacks by providing a negative number.";
 		}
 
+		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
 				Exceptions.ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCItemStack is;
@@ -804,6 +891,7 @@ public class InventoryManagement {
 			}
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -812,33 +900,40 @@ public class InventoryManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class ptake_enderchest_item extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "ptake_enderchest_item";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[player], itemID, qty} Works in reverse of pgive_enderchest_item(), but"
 					+ " returns the number of items actually taken, which will be"
 					+ " from 0 to qty.";
 		}
 
+		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
 				Exceptions.ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCItemStack is;
@@ -877,6 +972,7 @@ public class InventoryManagement {
 			return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -885,14 +981,17 @@ public class InventoryManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_penderchest extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_penderchest";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], pinvArray} Sets a player's enderchest's inventory to the specified inventory object."
 					+ " An inventory object is one that matches what is returned by penderchest(), so set_penderchest(penderchest()),"
@@ -909,22 +1008,27 @@ public class InventoryManagement {
 
 		}
 
+		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			
@@ -984,14 +1088,17 @@ public class InventoryManagement {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class penderchest extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "penderchest";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {[player, [index]]} Gets the inventory information for the specified player's enderchest, or the current player if none specified. If the index is specified, only the slot "
 					+ " given will be returned."
@@ -1005,22 +1112,27 @@ public class InventoryManagement {
 					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
 		}
 
+		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
@@ -1082,18 +1194,22 @@ public class InventoryManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_inventory_item extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1111,14 +1227,17 @@ public class InventoryManagement {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "get_inventory_item";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {entityID, slotNumber | locationArray, slotNumber} If a number is provided, it is assumed to be an entity, and if the entity supports"
 					+ " inventories, it will be valid. Otherwise, if a location array is provided, it is assumed to be a block (chest, brewer, etc)"
@@ -1127,6 +1246,7 @@ public class InventoryManagement {
 					+ " (and thus the max index count) with get_inventory_type(). An itemArray, like the one used by pinv/set_pinv is returned.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1136,18 +1256,22 @@ public class InventoryManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_inventory_item extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1166,19 +1290,23 @@ public class InventoryManagement {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "set_inventory_item";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, index, itemArray | locationArray, index, itemArray} Sets the specified item in the specified slot given either an entityID or a location array of a container"
 					+ " object. See get_inventory_type for more information. The itemArray is an array in the same format as pinv/set_pinv takes.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1188,18 +1316,22 @@ public class InventoryManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_inventory_type extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1211,14 +1343,17 @@ public class InventoryManagement {
 			return new CString(inv.getType().name(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_inventory_type";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {entityID | locationArray} Returns the inventory type at the location specified, or of the entity specified. If the"
 					+ " entity or location specified is not capable of having an inventory, a FormatException is thrown."
@@ -1226,6 +1361,7 @@ public class InventoryManagement {
 					+ " the valid return types are: " + StringUtils.Join(MCInventoryType.values(), ", ");
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1235,18 +1371,22 @@ public class InventoryManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_inventory_size extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
@@ -1256,19 +1396,23 @@ public class InventoryManagement {
 			return new CInt(inventory.getSize(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_inventory_size";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {entityID | locationArray} Returns the max size of the inventory specified. If the block or entity can't have an inventory,"
 					+ " a FormatException is thrown.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1278,18 +1422,22 @@ public class InventoryManagement {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class pinv_open extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p1 = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCPlayer p2;
@@ -1304,18 +1452,22 @@ public class InventoryManagement {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "pinv_open";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[playerToShow,] playerInventory} Opens a player's inventory, shown to the player specified's screen.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1600,7 +1752,7 @@ public class InventoryManagement {
 
 			int total = is.getAmount();
 			int remaining = is.getAmount();
-			for (int i = size; i >= 0; i--) {
+			for (int i = size - 1; i >= 0; i--) {
 				MCItemStack iis = inventory.getItem(i);
 				if (remaining <= 0) {
 					break;

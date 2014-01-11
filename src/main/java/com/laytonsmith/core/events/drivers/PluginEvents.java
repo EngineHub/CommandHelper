@@ -29,10 +29,12 @@ public class PluginEvents {
 			return false;
 		}
 
+		@Override
 		public String getName() {
 			return "plugin_message_received";
 		}
 
+		@Override
 		public String docs() {
 			return "{channel: <string match>}"
 					+ " Fires when a player's client sends a plugin message."
@@ -42,6 +44,7 @@ public class PluginEvents {
 					+ " {player|channel|bytes}";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent)e;
@@ -53,10 +56,12 @@ public class PluginEvents {
 			return false;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			return null;
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent) e;
@@ -64,15 +69,11 @@ public class PluginEvents {
 				
 				ret.put("channel", new CString(event.getChannel(), Target.UNKNOWN));
 				ret.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-				
-				// There HAS to be a better way to do this.
+
 				// Insert bytes into a CByteArray
-				CByteArray a = new CByteArray(Target.UNKNOWN, event.getBytes().length);
-				int index = 0;
-				for (byte b: event.getBytes()) {
-					a.putByte(b, index);
-					index++;
-				}
+				CByteArray a = CByteArray.wrap(event.getBytes().clone(), Target.UNKNOWN);
+				
+				a.rewind();
 				
 				ret.put("bytes", a);
 				
@@ -82,14 +83,17 @@ public class PluginEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.PLUGIN_MESSAGE_RECEIVED;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

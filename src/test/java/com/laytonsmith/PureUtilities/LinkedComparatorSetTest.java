@@ -37,6 +37,7 @@ public class LinkedComparatorSetTest {
 	@Test public void testCreation(){
 		assertArrayEquals(new Object[]{"b", "a"}, new LinkedComparatorSet<Object>(Arrays.asList(new Object[]{"b", "B", "a"}), new LinkedComparatorSet.EqualsComparator() {
 
+			@Override
 			public boolean checkIfEquals(Object val1, Object val2) {
 				return val1.toString().equalsIgnoreCase(val2.toString());
 			}
@@ -47,6 +48,7 @@ public class LinkedComparatorSetTest {
 		Object[] expected = new Object[]{"A"};
 		Set<Object> set = new LinkedComparatorSet<Object>(new LinkedComparatorSet.EqualsComparator() {
 
+			@Override
 			public boolean checkIfEquals(Object val1, Object val2) {
 				return val1.toString().equalsIgnoreCase(val2.toString());
 			}

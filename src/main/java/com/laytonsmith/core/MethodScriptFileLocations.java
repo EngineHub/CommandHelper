@@ -3,8 +3,11 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.FileLocations;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.abstraction.Implementation;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.regex.Pattern;
 
 /**
@@ -37,7 +40,11 @@ public class MethodScriptFileLocations extends FileLocations {
 			s = StringUtils.replaceLast(s, Pattern.quote(MethodScriptFileLocations.class.getName().replace(".", "/") + ".class"), "");
 			return new File(s);
 		} else {
-			return new File(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+			try {
+				return new File(URLDecoder.decode(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
+			} catch (UnsupportedEncodingException ex) {
+				throw new Error(ex);
+			}
 		}
 	}
 	
@@ -55,15 +62,25 @@ public class MethodScriptFileLocations extends FileLocations {
 	 * @return 
 	 */
 	public File getConfigDirectory(){
-		return new File(getJarDirectory(), "CommandHelper/");
+		return new File(getJarDirectory(), Implementation.GetServerType().getBranding() + "/");
 	}
 	
 	/**
-	 * Returns the location of the preferences file.
+	 * Returns the location of the prefs directory, i.e. where the actual preferences
+	 * files are stored. This is the prefs directory, not the main preferences file.
+	 * @return 
+	 */
+	public File getPreferencesDirectory(){
+		return new File(getConfigDirectory(), "prefs/");
+	}
+	
+	/**
+	 * Returns the location of the preferences file. This is the main
+	 * preferences file, not the prefs directory.
 	 * @return 
 	 */
 	public File getPreferencesFile(){
-		return new File(getConfigDirectory(), "preferences.ini");
+		return new File(getPreferencesDirectory(), "preferences.ini");
 	}
 	
 	/**
@@ -83,6 +100,14 @@ public class MethodScriptFileLocations extends FileLocations {
 	}
 	
 	/**
+	 * Returns the locations of the extension cache.
+	 * @return 
+	 */
+	public File getExtensionCacheDirectory(){
+		return new File(getCacheDirectory(), "extensions/");
+	}
+	
+	/**
 	 * Returns the LocalPackages directory.
 	 * @return 
 	 */
@@ -91,19 +116,19 @@ public class MethodScriptFileLocations extends FileLocations {
 	}
 	
 	/**
-	 * Returns the Persistance Network config file.
+	 * Returns the Persistence Network config file.
 	 * @return 
 	 */
-	public File getPersistanceConfig(){
-		return new File(getConfigDirectory(), "persistance.config");
+	public File getPersistenceConfig(){
+		return new File(getPreferencesDirectory(), "persistence.ini");
 	}
 	
 	/**
-	 * Returns the default Persistance Network db file location.
+	 * Returns the default Persistence Network db file location.
 	 * @return 
 	 */
-	public File getDefaultPersistanceDBFile(){
-		return new File(getConfigDirectory(), "persistance.db");
+	public File getDefaultPersistenceDBFile(){
+		return new File(getConfigDirectory(), "persistence.db");
 	}
 	
 	/**
@@ -111,7 +136,7 @@ public class MethodScriptFileLocations extends FileLocations {
 	 * @return 
 	 */
 	public File getProfilerConfigFile(){
-		return new File(getConfigDirectory(), "profiler.config");
+		return new File(getPreferencesDirectory(), "profiler.ini");
 	}
 	
 	/**
@@ -119,6 +144,14 @@ public class MethodScriptFileLocations extends FileLocations {
 	 * @return 
 	 */
 	public File getSQLProfilesFile(){
-		return new File(getConfigDirectory(), "sql-profiles.xml");
+		return new File(getPreferencesDirectory(), "sql-profiles.xml");
+	}
+	
+	/**
+	 * Returns the location of the logger preferences file.
+	 * @return 
+	 */
+	public File getLoggerPreferencesFile(){
+		return new File(getPreferencesDirectory(), "logger-preferences.ini");
 	}
 }

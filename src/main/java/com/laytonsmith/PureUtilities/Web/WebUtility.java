@@ -45,6 +45,7 @@ public final class WebUtility {
 	}
 	private static int urlRetrieverPoolId = 0;
 	private static ExecutorService urlRetrieverPool = Executors.newCachedThreadPool(new ThreadFactory() {
+		@Override
 		public Thread newThread(Runnable r) {
 			return new Thread(r, "URLRetrieverThread-" + (++urlRetrieverPoolId));
 		}
@@ -330,6 +331,7 @@ public final class WebUtility {
 	 */
 	public static void GetPage(final URL url, final RequestSettings settings, final HTTPResponseCallback callback) {
 		urlRetrieverPool.submit(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					HTTPResponse response = GetPage(url, settings);

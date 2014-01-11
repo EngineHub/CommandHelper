@@ -26,14 +26,17 @@ public class BukkitMCPlugin implements MCPlugin {
         }
     }
     
+	@Override
     public Object getHandle(){
         return p;
     }
 
+	@Override
     public boolean isEnabled() {
         return p.isEnabled();
     }
     
+	@Override
     public boolean isInstanceOf(Class c) {
         if (c.isInstance(p)) {
             return true;
@@ -61,6 +64,7 @@ public class BukkitMCPlugin implements MCPlugin {
 		return p.hashCode();
 	}
 
+	@Override
 	public String getName() {
 		return p.getName();
 	}

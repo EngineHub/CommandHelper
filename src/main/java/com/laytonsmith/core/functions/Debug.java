@@ -192,33 +192,41 @@ public class Debug {
     @api(environments={GlobalEnv.class})
     public static class debug extends AbstractFunction {
 
+		@Override
         public String getName() {
             return "debug";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "void {message} Manually logs a timestamped message to the debug log and the console, if debug-mode is set to true in the preferences";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.IOException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return true;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if (Prefs.DebugMode()) {
                 try {
@@ -234,18 +242,22 @@ public class Debug {
 	@api
 	public static class trace extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof IVariable){
 				if(Prefs.DebugMode()){
@@ -266,20 +278,24 @@ public class Debug {
 			return false;
 		}
 
+		@Override
 		public String getName() {
 			return "trace";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {ivar} If debug mode is on, outputs debug information about a variable. Unlike debug, this only accepts an ivar; it is a meta function."
 					+ " The runtime will then take the variable, and output information about it, in a human readable format, including"
 					+ " the variable's name and value. If debug mode is off, the function is ignored.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -477,18 +493,22 @@ public class Debug {
 	@api
 	public static class dump_threads extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			CArray carray = new CArray(t);
@@ -498,19 +518,23 @@ public class Debug {
 			return carray;
 		}
 
+		@Override
 		public String getName() {
 			return "dump_threads";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an array of all thread names that are currently running in the JVM."
 					+ " This is a debugging tool for your server, and less of a CommandHelper specific thing.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -521,18 +545,22 @@ public class Debug {
 	@noboilerplate
 	public static class heap_dump extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PluginInternalException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			File file = new File("dump.bin");
 			try{
@@ -543,14 +571,17 @@ public class Debug {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "heap_dump";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "void {} Creates a heap dump file, and places it in the working directory, as \"dump.bin\". This might"
 					+ " throw a PluginInternalException if the heap dump tools aren't available in your JVM. Once dumped,"
@@ -558,6 +589,7 @@ public class Debug {
 					+ " [http://docs.oracle.com/javase/6/docs/technotes/tools/share/jhat.html here].";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

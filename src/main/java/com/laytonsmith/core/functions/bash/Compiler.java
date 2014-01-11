@@ -17,18 +17,22 @@ public class Compiler {
     @api(platform=api.Platforms.COMPILER_BASH)
     public static class dyn extends BashFunction{
 
+		@Override
         public String getName() {
             return "dyn";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1};
         }
 
+		@Override
         public String docs() {
             return "mixed {p} ";
         }
 
+		@Override
         public String compile(Target t, String... args) {
             if(args.length == 0){
                 return "0";
@@ -36,6 +40,7 @@ public class Compiler {
             return args[0];
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }

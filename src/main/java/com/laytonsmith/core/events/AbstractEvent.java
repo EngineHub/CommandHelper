@@ -3,15 +3,23 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import java.net.URL;
 import java.util.HashMap;
@@ -41,6 +49,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * can be done here. By default, an UnsupportedOperationException is thrown,
      * but is caught and ignored.
      */
+	@Override
     public void bind(BoundEvent event) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -49,6 +58,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * If the event needs to run special code at server startup, it can be done
      * here. By default, nothing happens.
      */
+	@Override
     public void hook() {
         
     }
@@ -56,10 +66,13 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     
     /**
      * This function is run when the actual event occurs.
-     * @param s
-     * @param b 
+	 * @param tree The compiled parse tree
+     * @param b The bound event
+	 * @param env The operating environment
+	 * @param activeEvent The active event being executed
      */
-    public final void execute(Script s, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{          
+	@Override
+    public final void execute(ParseTree tree, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{          
         try{
             preExecution(env, activeEvent);
         } catch(UnsupportedOperationException e){
@@ -70,7 +83,26 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 			event = env.getEnv(GlobalEnv.class).GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
 		}
 		try {
-			s.run(null, env, null);
+			try {
+				//Get the label from the bind time environment, and put it in the current
+				//environment.
+				String label = b.getEnvironment().getEnv(GlobalEnv.class).GetLabel();
+				if(label == null){
+					//Set the permission to global if it's null, since that means
+					//it wasn't set, and so we aren't in a secured environment anyways.
+					label = PermissionsResolver.GLOBAL_PERMISSION;
+				}
+				env.getEnv(GlobalEnv.class).SetLabel(label);
+				MethodScriptCompiler.execute(tree, env, null, null);
+			} catch(CancelCommandException ex){
+				if(ex.getMessage() != null && !ex.getMessage().equals("")){
+					System.out.println(ex.getMessage());
+				}
+			} catch(FunctionReturnException ex){
+				//We simply allow this to end the event execution
+			} catch(ProgramFlowManipulationException ex){
+				ConfigRuntimeException.React(new ConfigRuntimeException("Unexpected control flow operation used.", Exceptions.ExceptionType.FormatException, ex.getTarget()), env);
+			}
 		} finally {
 			if(event != null){
 				event.stop();
@@ -113,6 +145,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * @param o
      * @return 
      */
+	@Override
     public int compareTo(Event o) {
         return this.getName().compareTo(o.getName());
     }
@@ -121,6 +154,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * Since most events are minecraft events, we return true by default.
      * @return 
      */
+	@Override
     public boolean supportsExternal(){
         return true;
     }
@@ -150,18 +184,22 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * in the actual event (if it's an external event, for instance)
      * @param o 
      */
+	@Override
     public void manualTrigger(BindableEvent o){
         mixin.manualTrigger(o);
     }
         
+	@Override
     public void cancel(BindableEvent o, boolean state){
         mixin.cancel(o, state);
     }
     
+	@Override
     public boolean isCancellable(BindableEvent o){
         return mixin.isCancellable(o);
     }
 
+	@Override
     public boolean isCancelled(BindableEvent o) {
         return mixin.isCancelled(o);
     }
@@ -169,6 +207,15 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	@Override
 	public URL getSourceJar() {
 		return ClassDiscovery.GetClassContainer(this.getClass());
+	}
+
+	/**
+	 * Returns true if the event is annotated with @hide
+	 * @return 
+	 */
+	@Override
+	public final boolean appearInDocumentation() {
+		return this.getClass().getAnnotation(hide.class) != null;
 	}
     
 }

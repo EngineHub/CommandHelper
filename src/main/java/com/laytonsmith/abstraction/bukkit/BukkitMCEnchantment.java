@@ -29,6 +29,7 @@ public class BukkitMCEnchantment implements MCEnchantment{
         }
     }
     
+	@Override
     public Object getHandle(){
         return e;
     }
@@ -41,14 +42,17 @@ public class BukkitMCEnchantment implements MCEnchantment{
 		return e;
 	}
 
+	@Override
     public boolean canEnchantItem(MCItemStack is) {
         return e.canEnchantItem(((BukkitMCItemStack)is).is);
     }
 
+	@Override
     public int getMaxLevel() {
         return e.getMaxLevel();
     }
 
+	@Override
     public String getName() {
         return e.getName();
     }

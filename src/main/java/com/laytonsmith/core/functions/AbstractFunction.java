@@ -39,6 +39,7 @@ public abstract class AbstractFunction implements Function {
 	 * @param nodes
 	 * @return
 	 */
+	@Override
 	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 		return new CVoid(t);
 	}
@@ -48,6 +49,7 @@ public abstract class AbstractFunction implements Function {
 	 *
 	 * @return
 	 */
+	@Override
 	public boolean useSpecialExec() {
 		return false;
 	}
@@ -59,6 +61,7 @@ public abstract class AbstractFunction implements Function {
 	 *
 	 * @return
 	 */
+	@Override
 	public final boolean appearInDocumentation() {
 		return this.getClass().getAnnotation(hide.class) == null;
 	}
@@ -95,6 +98,7 @@ public abstract class AbstractFunction implements Function {
 	 *
 	 * @return
 	 */
+	@Override
 	public boolean allowBraces() {
 		return false;
 	}
@@ -117,18 +121,22 @@ public abstract class AbstractFunction implements Function {
 		return true;
 	}	
 
+	@Override
 	public ExampleScript[] examples() throws ConfigCompileException {
 		return null;
 	}
 
+	@Override
 	public boolean shouldProfile() {
 		return shouldProfile;
 	}
 
+	@Override
 	public LogLevel profileAt() {
 		return LogLevel.VERBOSE;
 	}
 
+	@Override
 	public String profileMessage(Construct... args) {
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
@@ -181,11 +189,13 @@ public abstract class AbstractFunction implements Function {
 		return DocGenTemplates.doTemplateReplacement(template, map);
 	}
 
+	@Override
 	public String profileMessageS(List<ParseTree> args) {
 		return "Executing function: " + this.getName() + "(<" + args.size() + " child"
 				+ (args.size() == 1 ? "" : "ren") + " not shown>)";
 	}
 
+	@Override
 	public PackagePermission getPermission() {
 		return PackagePermission.NO_PERMISSIONS_NEEDED;
 	}

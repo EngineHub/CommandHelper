@@ -33,6 +33,7 @@ icolor red "\$[a-z0-9_]*"
 
 color brightyellow "'(\\.|[^\'])*'" 
 color brightblack "^[[:space:]]*#.*$" 
+color brightblack "^[[:space:]]*//.*$"
 color brightblack start="/\*" end="\*/" 
 
 ## Trailing whitespace

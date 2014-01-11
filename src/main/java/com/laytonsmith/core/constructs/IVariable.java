@@ -18,6 +18,9 @@ public class IVariable extends Construct implements Cloneable {
 
     public IVariable(String name, Construct value, Target t) {
         super(name, ConstructType.IVARIABLE, t);
+		if(value == null){
+			throw new NullPointerException();
+		}
         this.var_value = value;
         this.name = name;
     }

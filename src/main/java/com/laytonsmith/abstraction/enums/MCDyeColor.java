@@ -1,10 +1,13 @@
 
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  *
  * @author Layton
  */
+@MEnum("DyeColor")
 public enum MCDyeColor {
 	WHITE,
     ORANGE,

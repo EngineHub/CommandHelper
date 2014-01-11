@@ -39,18 +39,22 @@ public class DataTransformations {
 	@api
 	public static class json_encode extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[0], t);
 			try {
@@ -60,19 +64,23 @@ public class DataTransformations {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "json_encode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {array} Converts an array into a JSON encoded string. Both normal and associative arrays are supported."
 					+ " Within the array, only primitives and arrays can be encoded.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -81,18 +89,22 @@ public class DataTransformations {
 	@api
 	public static class json_decode extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String s = args[0].val();
 			try {
@@ -102,20 +114,24 @@ public class DataTransformations {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "json_decode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {string} Takes a JSON encoded string, and returns an array, either normal or associative,"
 					+ " depending on the contents of the JSON string. If the JSON string is improperly formatted,"
 					+ " a FormatException is thrown.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -124,18 +140,22 @@ public class DataTransformations {
 	@api
 	public static class yml_encode extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[0], t);
 			boolean prettyPrint = false;
@@ -154,19 +174,23 @@ public class DataTransformations {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "yml_encode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "string {array, [prettyPrint]} Converts an array into a YML encoded string. Only associative arrays are supported."
 					+ " prettyPrint defaults to false. Within the array, only primitives and arrays can be encoded.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -175,18 +199,22 @@ public class DataTransformations {
 	@api
 	public static class yml_decode extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String data = args[0].val();
 			Yaml yaml = new Yaml();
@@ -198,20 +226,24 @@ public class DataTransformations {
 			return Construct.GetConstruct(map);
 		}
 
+		@Override
 		public String getName() {
 			return "yml_decode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {string} Takes a YML encoded string, and returns an associative array,"
 					+ " depending on the contents of the YML string. If the YML string is improperly formatted,"
 					+ " a FormatException is thrown.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -220,18 +252,22 @@ public class DataTransformations {
 	@api
 	public static class ini_encode extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			CArray arr = Static.getArray(args[0], t);
@@ -263,14 +299,17 @@ public class DataTransformations {
 			return new CString(writer.toString(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "ini_encode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "string {array, [comment]} Encodes an array into an INI format output. An associative array is expected, and"
 					+ " a format exception is thrown if it is a normal array. The comment is optional, but if provided will"
@@ -282,6 +321,7 @@ public class DataTransformations {
 					+ " data is anticipated, not the data itself.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -291,18 +331,22 @@ public class DataTransformations {
 	@api
 	public static class ini_decode extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			Reader reader = new StringReader(args[0].val());
@@ -318,14 +362,17 @@ public class DataTransformations {
 			return arr;
 		}
 
+		@Override
 		public String getName() {
 			return "ini_decode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {string} Returns an array, given an INI format input. INI files are loosely defined"
 					+ " as a set of key->value pairs, which lends itself to an associative array format. Key value"
@@ -340,6 +387,7 @@ public class DataTransformations {
 					+ " {{function|json_encode}}/{{function|json_decode}} instead.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -349,18 +397,22 @@ public class DataTransformations {
 	@api
 	public static class xml_read extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			XMLDocument doc;
 			try {
@@ -375,19 +427,23 @@ public class DataTransformations {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "xml_read";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {xml, xpath} Reads a field from some xml using an XPath address. The XPath address is assumed"
 					+ " to be absolute, even if it doesn't start with a '/'.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -397,34 +453,42 @@ public class DataTransformations {
 	//@api
 	public static class xml_write extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public boolean isRestricted() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public Boolean runAsync() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public String getName() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public String docs() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public Version since() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}

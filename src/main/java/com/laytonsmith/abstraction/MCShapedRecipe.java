@@ -6,6 +6,7 @@ public interface MCShapedRecipe extends MCRecipe {
 
 	public Map<Character, MCItemStack> getIngredientMap();
 	
+	@Override
 	public MCItemStack getResult();
 	
 	public String[] getShape();

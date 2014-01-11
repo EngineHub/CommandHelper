@@ -40,17 +40,17 @@ public final class Installer {
             }
         }
 		//Create the local packages folder
-        new File(root, "LocalPackages").mkdirs();
+        MethodScriptFileLocations.getDefault().getLocalPackagesDirectory().mkdirs();
 		try {
 			//Let the profiler get set up
-			Profiler.Install(new File(root, "profiler.config"));
+			Profiler.Install(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
 		} catch (IOException ex) {
 			Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		File persistanceNetwork = new File(root, "persistance.config");
-		if(!persistanceNetwork.exists()){
+		File persistenceNetwork = MethodScriptFileLocations.getDefault().getPersistenceConfig();
+		if(!persistenceNetwork.exists()){
 			try {
-				FileUtil.write(StreamUtils.GetString(Installer.class.getResourceAsStream("/samp_persistance_network.txt"), "UTF-8"), persistanceNetwork, true);
+				FileUtil.write(StreamUtils.GetString(Installer.class.getResourceAsStream("/samp_persistence_network.txt"), "UTF-8"), persistenceNetwork, true);
 			} catch (IOException ex) {
 				Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
 			}

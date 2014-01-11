@@ -50,7 +50,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.database.Profiles;
-import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -146,8 +146,7 @@ public class Interpreter {
 		cdc.setLogger(Logger.getLogger(Interpreter.class.getName()));
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Interpreter.class));
-		//First, we need to initialize the convertor
-		Implementation.setServerType(Implementation.Type.SHELL);
+
 		Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		//Next, we need to get the "installation location", so we won't spew config files everywhere
@@ -254,6 +253,7 @@ public class Interpreter {
 			ProfilePoint p = Interpreter.env.getEnv(GlobalEnv.class).GetProfiler().start("Interpreter Script", LogLevel.ERROR);
 			try {
 				MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
+					@Override
 					public void done(String output) {
 						//Do nothing
 					}
@@ -263,9 +263,7 @@ public class Interpreter {
 				p.stop();
 			}
 		} catch (CancelCommandException e) {
-			if (System.console() != null) {
-				pl(":");
-			}
+			//Nothing
 		} catch (ConfigRuntimeException e) {
 			ConfigRuntimeException.React(e, env);
 			//No need for the full stack trace
@@ -344,42 +342,52 @@ public class Interpreter {
 		
 		RunnableQueue queue = new RunnableQueue("ShellInterpreter-userland");
 
+		@Override
 		public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public Class GetServerEventMixin() {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
+			return ShellEventMixin.class;
 		}
 
+		@Override
 		public MCEnchantment[] GetEnchantmentValues() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCEnchantment GetEnchantmentByName(String name) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCServer GetServer() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCItemStack GetItemStack(int type, int qty) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public void Startup(CommandHelperPlugin chp) {
 			
 		}
 
+		@Override
 		public int LookupItemId(String materialName) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public String LookupMaterialName(int id) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCItemStack GetItemStack(int type, int data, int qty) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
@@ -387,10 +395,12 @@ public class Interpreter {
 		private static int runnableID = 0;
 		private static List<Integer> runnableList = new ArrayList<Integer>();
 
+		@Override
 		public int SetFutureRunnable(DaemonManager dm, final long ms, final Runnable r) {
 			final int id = ++runnableID;
 			Runnable m = new Runnable() {
 
+				@Override
 				public void run() {
 					try {
 						Thread.sleep(ms);
@@ -407,18 +417,22 @@ public class Interpreter {
 			return id;
 		}
 
+		@Override
 		public void ClearAllRunnables() {
 			runnableList.clear();
 		}
 
+		@Override
 		public void ClearFutureRunnable(int id) {
 			runnableList.remove(id);
 		}
 
+		@Override
 		public int SetFutureRepeater(DaemonManager dm, final long ms, final long initialDelay, final Runnable r) {
 			final int id = runnableID++;
 			Runnable m = new Runnable() {
 
+				@Override
 				public void run() {
 					try {
 						Thread.sleep(initialDelay);
@@ -441,54 +455,67 @@ public class Interpreter {
 			return id;
 		}
 
+		@Override
 		public MCEntity GetCorrectEntity(MCEntity e) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCInventory GetEntityInventory(int entityID) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCInventory GetLocationInventory(MCLocation location) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public synchronized int getMaxBlockID() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public synchronized int getMaxItemID() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public synchronized int getMaxRecordID() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCColor GetColor(int red, int green, int blue) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCFireworkBuilder GetFireworkBuilder() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCPluginMeta GetPluginMeta() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCMaterial getMaterial(int id) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public MCItemMeta GetCorrectMeta(MCItemMeta im) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
+		@Override
 		public List<MCEntity> GetEntitiesAt(MCLocation loc, double radius) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}

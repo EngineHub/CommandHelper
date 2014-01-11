@@ -8,7 +8,7 @@ The query is the SQL query itself, with question marks (?) that represent input 
 input parameters themselves. Compile time checking is done, if possible, to ensure that the correct number of 
 parameters is passed, based on the number of question marks in the query. It is never a good idea to dynamically 
 create the query, so a compiler warning is issued if a query is dynamically being built. 
-See [[CommandHelper/SQL|this page]] for more details about the SQL module.
+See [[CommandHelper/Staged/SQL|this page]] for more details about the SQL module.
 
 For SELECT queries, an array of associative arrays is returned. It is not guaranteed that the arrays themselves are 
 editable, so this returned array should be considered \"read-only\". Optimizations will be added later to make this 
@@ -43,7 +43,7 @@ When inserting dates you should insert them as strings. The following are exampl
 |}
 
 All date and time types will be retrieved as an integer in milliseconds since January 1, 1970, 00:00:00 GMT. 
-You can then use simple_date() to make it a human readable date string.
+You can then use {{function|simple_date}} to make it a human readable date string.
 
 ===== ByteArrays =====
 

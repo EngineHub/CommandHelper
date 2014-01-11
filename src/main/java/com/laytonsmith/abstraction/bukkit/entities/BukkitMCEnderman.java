@@ -15,22 +15,27 @@ public class BukkitMCEnderman extends BukkitMCLivingEntity implements
 		e = ent;
 	}
 
+	@Override
 	public MCMaterialData getCarriedMaterial() {
 		return new BukkitMCMaterialData(e.getCarriedMaterial());
 	}
 	
+	@Override
 	public int getCarriedType() {
 		return e.getCarriedMaterial().getItemTypeId();
 	}
 	
+	@Override
 	public byte getCarriedData() {
 		return e.getCarriedMaterial().getData();
 	}
 
+	@Override
 	public void setCarriedMaterial(MCMaterialData held) {
 		e.setCarriedMaterial((MaterialData) held.getHandle());
 	}
 	
+	@Override
 	public void setCarriedMaterial(int type, byte data) {
 		e.setCarriedMaterial(new MaterialData(type, data));
 	}

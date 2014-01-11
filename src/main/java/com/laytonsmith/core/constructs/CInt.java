@@ -3,6 +3,7 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
@@ -10,6 +11,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
  *
  * @author layton
  */
+@typeof("int")
 public class CInt extends Construct implements Cloneable{
     
     public static final long serialVersionUID = 1L;

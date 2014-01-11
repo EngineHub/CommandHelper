@@ -39,23 +39,28 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         return e;
     }
 
+	@Override
     public boolean eject() {
 		return e.eject();
 	}
 
+	@Override
     public void fireEntityDamageEvent(MCDamageCause dc) {
         EntityDamageEvent ede = new EntityDamageEvent(e, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001);
         CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
     }
 
+	@Override
     public int getEntityId(){
         return e.getEntityId();
     }
 
+	@Override
     public float getFallDistance() {
 		return e.getFallDistance();
 	}
 
+	@Override
     public int getFireTicks() {
 		return e.getFireTicks();
 	}
@@ -65,6 +70,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         return e;
     }
 
+	@Override
 	public MCEntityDamageEvent getLastDamageCause() {
 		EntityDamageEvent ldc = e.getLastDamageCause();
 		if (ldc == null) {
@@ -84,6 +90,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         return null;
     }
 
+	@Override
     public MCLocation getLocation() {
         if(e.getLocation() == null){
             return null;
@@ -91,10 +98,12 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         return new BukkitMCLocation(e.getLocation());
     }
 
+	@Override
 	public int getMaxFireTicks() {
 		return e.getMaxFireTicks();
 	}
 
+	@Override
 	public List<MCEntity> getNearbyEntities(double x, double y, double z) {
 		List<Entity> lst = e.getNearbyEntities(x, y, z);
 		List<MCEntity> retn = new ArrayList<MCEntity>();
@@ -106,35 +115,43 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		return retn;
 	}
 
+	@Override
 	public MCEntity getPassenger() {
 		return BukkitConvertor.BukkitGetCorrectEntity(e.getPassenger());
 	}
 
+	@Override
 	public MCServer getServer() {
 		return new BukkitMCServer(e.getServer());
 	}
 
+	@Override
 	public int getTicksLived() {
 		return e.getTicksLived();
 	}
 
+	@Override
 	public MCEntityType getType() {
 		return BukkitMCEntityType.getConvertor().getAbstractedEnum(e.getType());
 	}
 
+	@Override
 	public UUID getUniqueId() {
 		return e.getUniqueId();
 	}
 
+	@Override
 	public MCEntity getVehicle() {
 		return new BukkitMCEntity(e);
 	}
 
+	@Override
 	public Velocity getVelocity() {
 		Vector v = e.getVelocity();
 		return new Velocity(v.length(), v.getX(), v.getY(), v.getZ());
 	}
 
+	@Override
 	public MCWorld getWorld() {
         if (e == null || e.getWorld() == null) {
             return null;
@@ -142,18 +159,22 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         return new BukkitMCWorld(e.getWorld());
     }
 
+	@Override
 	public boolean isDead() {
 		return e.isDead();
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return e.isEmpty();
 	}
 
+	@Override
 	public boolean isInsideVehicle() {
 		return e.isInsideVehicle();
 	}
 	
+	@Override
 	public boolean isOnGround() {
 		return e.isOnGround();
 	}
@@ -166,56 +187,69 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         return e instanceof Tameable;
     }
 
+	@Override
 	public boolean leaveVehicle() {
 		return e.leaveVehicle();
 	}
 
+	@Override
 	public void playEffect(MCEntityEffect type) {
 		e.playEffect(EntityEffect.valueOf(type.name()));
 	}
 
+	@Override
 	public void remove() {
 		e.remove();
 	}
 
+	@Override
 	public void setFallDistance(float distance) {
 		e.setFallDistance(distance);
 	}
 
+	@Override
 	public void setFireTicks(int ticks) {
 		e.setFireTicks(ticks);
 	}
 
+	@Override
 	public void setLastDamageCause(MCEntityDamageEvent event) {
 		e.setLastDamageCause((EntityDamageEvent)event._GetObject());
 	}
 
+	@Override
 	public boolean setPassenger(MCEntity passenger) {
 		return e.setPassenger((Entity)passenger.getHandle());
 	}
 
+	@Override
 	public void setTicksLived(int value) {
 		e.setTicksLived(value);
 	}
 
+	@Override
 	public void setVelocity(Velocity velocity) {
 		Vector v = new Vector(velocity.x, velocity.y, velocity.z);
 		e.setVelocity(v);
 	}
 
+	@Override
 	public boolean teleport(MCEntity destination) {
 	    Entity ent = ((BukkitMCEntity)destination).asEntity();
 		return e.teleport(ent.getLocation());
 	}
 
+	@Override
 	public boolean teleport(MCEntity destination, MCTeleportCause cause) {
 		return e.teleport(((BukkitMCEntity)destination).asEntity(), TeleportCause.valueOf(cause.name()));
 	}
 
+	@Override
 	public boolean teleport(MCLocation location) {
 		return e.teleport(((BukkitMCLocation)location).asLocation());
 	}
 
+	@Override
 	public boolean teleport(MCLocation location, MCTeleportCause cause) {
 		return e.teleport(((BukkitMCLocation)location).asLocation(), TeleportCause.valueOf(cause.name()));
 	}
@@ -224,6 +258,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	 * This only works with craftbukkit
 	 * @return
 	 */
+	@Override
 	public MCLocation asyncGetLocation() {
 		return new BukkitMCLocation(e.getLocation());
 	}

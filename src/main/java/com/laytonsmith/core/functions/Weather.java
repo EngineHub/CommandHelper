@@ -26,18 +26,22 @@ public class Weather {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class lightning extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "lightning";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3, 4};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int x, y, z, ent;
 			MCWorld w = null;
@@ -72,6 +76,7 @@ public class Weather {
 			return new CInt(ent, t);
 		}
 
+		@Override
 		public String docs() {
 			return "int {strikeLocArray, [safe] | x, y, z, [safe]} Makes"
 					+ " lightning strike at the x y z coordinates specified"
@@ -80,14 +85,17 @@ public class Weather {
 					+ " them. Returns the entityID of the lightning bolt.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -96,14 +104,17 @@ public class Weather {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class storm extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "storm";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			boolean b = Static.getBoolean(args[0]);
 			MCWorld w = null;
@@ -124,23 +135,28 @@ public class Weather {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String docs() {
 			return "void {isStorming, [world], [int]} Creates a (rain) storm if isStorming is true, stops a storm if"
 					+ " isStorming is false. The third argument allows setting how long this weather setting will last.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -149,18 +165,22 @@ public class Weather {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class set_thunder extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
@@ -182,19 +202,23 @@ public class Weather {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_thunder";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {boolean, [world], [int]} Sets whether or not the weather can have thunder. The third argument"
 					+ " can specify how long the thunder should last.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -204,18 +228,22 @@ public class Weather {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class has_storm extends AbstractFunction {
 		
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
@@ -233,18 +261,22 @@ public class Weather {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "has_storm";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[world]} Returns whether the world (defaults to player's world) has a storm.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -254,18 +286,22 @@ public class Weather {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class has_thunder extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
@@ -283,18 +319,22 @@ public class Weather {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "has_thunder";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[world]} Returns whether the world (defaults to player's world) has thunder.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

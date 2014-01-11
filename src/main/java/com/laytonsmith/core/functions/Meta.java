@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
@@ -18,7 +19,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistence.DataSourceException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -75,14 +76,17 @@ public class Meta {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class runas extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "runas";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public Construct exec(Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
 				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
@@ -137,10 +141,12 @@ public class Meta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public String docs() {
 			return "void {player, command} Runs a command as a particular user. The special user '" + Static.getConsoleName() + "' can be used to run it as a console"
 					+ " user. Using '~op' is deprecated, and will be removed after the next release, use sudo() instead."
@@ -148,14 +154,17 @@ public class Meta {
 					+ " will be run in the context of each user in the array.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -164,18 +173,22 @@ public class Meta {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class sudo extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
@@ -216,14 +229,17 @@ public class Meta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "sudo";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {command} Runs a single command for this user, as op. Works like runas(~op, '/command') used to work,"
 					+ " before it was deprecated. ---- This is guaranteed to not allow the player to stay op, even if a fatal"
@@ -236,6 +252,7 @@ public class Meta {
 					+ " Enable that setting at your own risk.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -272,6 +289,7 @@ public class Meta {
 			return (MCCommandSender) Proxy.newProxyInstance(sender.getClass().getClassLoader(),
 					new Class[]{(sender instanceof MCPlayer) ? MCPlayer.class : MCCommandSender.class},
 					new InvocationHandler() {
+						@Override
 						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 							String methodName = method.getName();
 							if ("isOp".equals(methodName) || "hasPermission".equals(methodName) || "isPermissionSet".equals(methodName)) {
@@ -287,14 +305,17 @@ public class Meta {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class run extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "run";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
@@ -311,27 +332,40 @@ public class Meta {
 			if(cmd.equalsIgnoreCase("interpreter-on")){
 				throw new Exceptions.FormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
 			}
-			Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
+			try{
+				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
+			} catch(Exception ex){
+				throw new ConfigRuntimeException("While running the command: \"" + cmd + "\""
+						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
+						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
+						+ " but in the plugin that provides the command.", 
+						ExceptionType.PluginInternalException, t, ex);
+			}
 			return new CVoid(t);
 		}
 
+		@Override
 		public String docs() {
 			return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
 					+ "chat; with a forward slash in front.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PluginInternalException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -342,14 +376,17 @@ public class Meta {
 	@hide("This will eventually be replaced by ; statements.")
 	public static class g extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "g";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			for (int i = 0; i < args.length; i++) {
 				args[i].val();
@@ -357,22 +394,27 @@ public class Meta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String docs() {
 			return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -381,27 +423,33 @@ public class Meta {
 	@api
 	public static class eval extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "eval";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
 					+ "removal.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
@@ -434,11 +482,13 @@ public class Meta {
 			}
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
 		//Doesn't matter, run out of state anyways
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -452,18 +502,22 @@ public class Meta {
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class is_alias extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public CBoolean exec(Target t, Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			AliasCore ac = Static.getAliasCore();
@@ -478,7 +532,7 @@ public class Meta {
 			if (p instanceof MCPlayer) {
 				try {
 					// p might be null
-					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistanceNetwork())) {
+					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistenceNetwork())) {
 						if (s.match(args[0].val())) {
 							return new CBoolean(true, t);
 						}
@@ -491,18 +545,22 @@ public class Meta {
 			return new CBoolean(false, t);
 		}
 
+		@Override
 		public String getName() {
 			return "is_alias";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {cmd} Returns true if using call_alias with this cmd would trigger an alias.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -511,14 +569,17 @@ public class Meta {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class call_alias extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "call_alias";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {cmd} Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
 					+ " a script that runs \"/jail = /jail\" for instance, would simply be calling whatever plugin that actually"
@@ -530,22 +591,27 @@ public class Meta {
 					+ " personal alias possibly.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			boolean doRemoval = true;
 			if (!Static.getAliasCore().hasPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())) {
@@ -565,14 +631,17 @@ public class Meta {
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class scriptas extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "scriptas";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {player, [label], script} Runs the specified script in the context of a given player."
 					+ " A script that runs player() for instance, would return the specified player's name,"
@@ -580,10 +649,12 @@ public class Meta {
 					+ " this script is run under as well (in regards to permission checking)";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
@@ -593,14 +664,17 @@ public class Meta {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) {
 			return null;
 		}
@@ -635,32 +709,39 @@ public class Meta {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_cmd extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_cmd";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {} Gets the command (as a string) that ended up triggering this script, exactly"
 					+ " how it was entered by the player. This could be null, if for instance"
 					+ " it is called from within an event.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
 				return new CNull(t);
@@ -669,6 +750,7 @@ public class Meta {
 			}
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -684,6 +766,7 @@ public class Meta {
 			buffer = new StringBuilder();
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			System.out.println("---------------> Invoking proxy");
 			if ("sendMessage".equals(method.getName())) {
@@ -704,18 +787,22 @@ public class Meta {
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class capture_runas extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			System.out.println("---------------> Executing capture_runas(" + args[0].val() + ", " + args[1].val() + ")");
 			MCCommandSender oldCommandSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -745,14 +832,17 @@ public class Meta {
 			return new CString(intercepter.getBuffer(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "capture_runas";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "string {player, command} Works like runas, except any messages sent to the command sender during command execution are attempted to be"
 					+ " intercepted, and are then returned as a string, instead of being sent to the command sender. Note that this is VERY easy"
@@ -760,6 +850,7 @@ public class Meta {
 					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -768,18 +859,22 @@ public class Meta {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_command_block extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCBlockCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetBlockCommandSender();
 			if(cs != null){
@@ -789,19 +884,23 @@ public class Meta {
 			return new CNull(t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_command_block";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "locationArray {} If this command was being run from a command block, this will return the location of"
 					+ " the block. If a player or console ran this command, (or any other command sender) this will return null.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -810,18 +909,22 @@ public class Meta {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class psetop extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			boolean state;
@@ -837,18 +940,22 @@ public class Meta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "psetop";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "string {[player], status} Sets whether or not a player has operator status. If no player is specified the player running the script is given.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -861,18 +968,22 @@ public class Meta {
 		private final static call_alias call_alias = new call_alias();
 		private final static is_alias is_alias = new is_alias();
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CString s;
 			if(args[0] instanceof CString){
@@ -888,14 +999,17 @@ public class Meta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "run_cmd";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {cmd} Runs a command regardless of whether or not it is an alias or a builtin command. Essentially,"
 					+ " this works like checking if(is_alias(@cmd)){ call_alias(@cmd) } else { run(@cmd) }. Be careful with"
@@ -903,6 +1017,7 @@ public class Meta {
 					+ " start with a / or this will throw a FormatException.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}

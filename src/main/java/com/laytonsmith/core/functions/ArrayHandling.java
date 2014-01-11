@@ -38,14 +38,17 @@ public class ArrayHandling {
 	@api
 	public static class array_size extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_size";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				return new CInt(((CArray) args[0]).size(), t);
@@ -53,22 +56,27 @@ public class ArrayHandling {
 			throw new ConfigRuntimeException("Argument 1 of array_size must be an array", ExceptionType.CastException, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "int {array} Returns the size of this array as an integer.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -85,14 +93,17 @@ public class ArrayHandling {
 	@api(environments={GlobalEnv.class})
 	public static class array_get extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "array_get";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			Construct index = new CSlice(0, -1, t);
 			Construct defaultConstruct = null;
@@ -237,10 +248,12 @@ public class ArrayHandling {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IndexOverflowException};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {array, index, [default]} Returns the element specified at the index of the array. ---- If the element doesn't exist, an exception is thrown. "
 					+ "array_get(array, index). Note also that as of 3.1.2, you can use a more traditional method to access elements in an array: "
@@ -251,14 +264,17 @@ public class ArrayHandling {
 					+ " array otherwise doesn't have a value there. This is opposed to throwing an exception or returning null.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -300,10 +316,12 @@ public class ArrayHandling {
 	@api
 	public static class array_set extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_set";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{3};
 		}
@@ -331,6 +349,7 @@ public class ArrayHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				try {
@@ -343,23 +362,28 @@ public class ArrayHandling {
 			throw new ConfigRuntimeException("Argument 1 of array_set must be an array", ExceptionType.CastException, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IndexOverflowException};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array, index, value} Sets the value of the array at the specified index. array_set(array, index, value). Returns void. If"
 					+ " the element at the specified index isn't already set, throws an exception. Use array_push to avoid this.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -376,14 +400,17 @@ public class ArrayHandling {
 	@api
 	public static class array_push extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_push";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				if (args.length < 2) {
@@ -397,22 +424,27 @@ public class ArrayHandling {
 			throw new ConfigRuntimeException("Argument 1 of array_push must be an array", ExceptionType.CastException, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array, value, [value2...]} Pushes the specified value(s) onto the end of the array";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -429,18 +461,22 @@ public class ArrayHandling {
 	@api
 	public static class array_insert extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IndexOverflowException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			Construct value = args[1];
@@ -455,14 +491,17 @@ public class ArrayHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "array_insert";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array, item, index} Inserts an item at the specified index, and shifts all other items in the array to the right one."
 					+ " If index is greater than the size of the array, an IndexOverflowException is thrown, though the index may be equal"
@@ -470,6 +509,7 @@ public class ArrayHandling {
 					+ " are not supported.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -491,14 +531,17 @@ public class ArrayHandling {
 	@api
 	public static class array_contains extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_contains";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			equals e = new equals();
 			if (args[0] instanceof CArray) {
@@ -514,22 +557,27 @@ public class ArrayHandling {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {array, testValue} Checks to see if testValue is in array.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -548,34 +596,42 @@ public class ArrayHandling {
 	@api
 	public static class array_contains_ic extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_contains_ic";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {array, testValue} Works like array_contains, except the comparison ignores case.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			equals_ic e = new equals_ic();
 			if (args[0] instanceof CArray) {
@@ -604,34 +660,42 @@ public class ArrayHandling {
 	@api
 	public static class array_index_exists extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_index_exists";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {array, index} Checks to see if the specified array has an element at index";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				if (!((CArray) args[0]).inAssociativeMode()) {
@@ -666,14 +730,17 @@ public class ArrayHandling {
 	@api
 	public static class array_resize extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_resize";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array, size, [fill]} Resizes the given array so that it is at least of size size, filling the blank spaces with"
 					+ " fill, or null by default. If the size of the array is already at least size, nothing happens; in other words this"
@@ -681,22 +748,27 @@ public class ArrayHandling {
 			//+ " If the array is an associative array, the non numeric values are simply copied over.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray && args[1] instanceof CInt) {
 				CArray original = (CArray) args[0];
@@ -726,36 +798,44 @@ public class ArrayHandling {
 	@api
 	public static class range extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "range";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "array {start, finish, [increment] | finish} Returns an array of numbers from start to (finish - 1)"
 					+ " skipping increment integers per count. start defaults to 0, and increment defaults to 1. All inputs"
 					+ " must be integers. If the input doesn't make sense, it will reasonably degrade, and return an empty array.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			long start = 0;
 			long finish = 0;
@@ -797,35 +877,43 @@ public class ArrayHandling {
 	@api
 	public static class array_keys extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_keys";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {array} Returns the keys in this array as a normal array. If the array passed in is already a normal array,"
 					+ " the keys will be 0 -> (array_size(array) - 1)";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
@@ -851,35 +939,43 @@ public class ArrayHandling {
 	@api
 	public static class array_normalize extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_normalize";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {array} Returns a new normal array, given an associative array. (If the array passed in is not associative, a copy of the "
 					+ " array is returned).";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
@@ -905,36 +1001,44 @@ public class ArrayHandling {
 	@api
 	public static class array_merge extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_merge";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "array {array1, array2, [arrayN...]} Merges the specified arrays from left to right, and returns a new array. If the array"
 					+ " merged is associative, it will overwrite the keys from left to right, but if the arrays are normal, the keys are ignored,"
 					+ " and values are simply pushed.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray newArray = new CArray(t);
 			if (args.length < 2) {
@@ -972,14 +1076,17 @@ public class ArrayHandling {
 	@api
 	public static class array_remove extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_remove";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {array, index} Removes an index from an array. If the array is a normal"
 					+ " array, all values' indicies are shifted left one. If the array is associative,"
@@ -987,22 +1094,27 @@ public class ArrayHandling {
 					+ " unchanged. The value removed is returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException, ExceptionType.PluginInternalException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
@@ -1024,32 +1136,39 @@ public class ArrayHandling {
 	@api
 	public static class array_implode extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array_implode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "string {array, [glue]} Given an array and glue, to-strings all the elements"
 					+ " in the array (just the values, not the keys), and joins them with the glue, defaulting to a space. For instance"
 					+ " array_implode(array(1, 2, 3), '-') will return \"1-2-3\".";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (!(args[0] instanceof CArray)) {
 				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
@@ -1073,6 +1192,7 @@ public class ArrayHandling {
 			return new CString(b.toString(), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -1089,14 +1209,17 @@ public class ArrayHandling {
 	@api
 	public static class cslice extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "cslice";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "slice {from, to} Dynamically creates an array slice, which can be used with array_get"
 					+ " (or the [bracket notation]) to get a range of elements. cslice(0, 5) is equivalent"
@@ -1104,22 +1227,27 @@ public class ArrayHandling {
 					+ " or other more complex expressions, which are not possible in static code.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CSlice(Static.getInt(args[0], t), Static.getInt(args[1], t), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1136,18 +1264,22 @@ public class ArrayHandling {
 	@api
 	public static class array_sort extends AbstractFunction implements Optimizable {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (!(args[0] instanceof CArray)) {
 				throw new ConfigRuntimeException("The first parameter to array_sort must be an array", ExceptionType.CastException, t);
@@ -1166,14 +1298,17 @@ public class ArrayHandling {
 			return ca;
 		}
 
+		@Override
 		public String getName() {
 			return "array_sort";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {array, [sortType]} Sorts an array in place, and also returns a reference to the array. ---- The"
 					+ " complexity of this sort algorithm is guaranteed to be no worse than n log n, as it uses merge sort."
@@ -1193,6 +1328,7 @@ public class ArrayHandling {
 					+ " than array_normalize, which could have also been implemented in place.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1239,12 +1375,14 @@ public class ArrayHandling {
 			if(!started){
 				queue.invokeLater(null, new Runnable() {
 
+					@Override
 					public void run() {
 						//This warms up the queue. Apparently.
 					}
 				});
 				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
+					@Override
 					public void run() {
 						queue.shutdown();
 						started = false;
@@ -1255,18 +1393,22 @@ public class ArrayHandling {
 		}
 		
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			startup();
 			final CArray array = Static.getArray(args[0], t);
@@ -1274,6 +1416,7 @@ public class ArrayHandling {
 			final CClosure callback = Static.getObject((args.length==2?args[1]:args[2]), t, "closure", CClosure.class);
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
+				@Override
 				public void run() {
 					Construct c = new array_sort().exec(Target.UNKNOWN, null, array, sortType);
 					callback.execute(new Construct[]{c});
@@ -1282,14 +1425,17 @@ public class ArrayHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "array_sort_async";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array, [sortType], closure(array)} Works like array_sort, but does the sort on another"
 					+ " thread, then calls the closure and sends it the sorted array. This is useful if the array"
@@ -1297,6 +1443,7 @@ public class ArrayHandling {
 					+ " one of " + StringUtils.Join(CArray.SortType.values(), ", ", " or ");
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1305,18 +1452,22 @@ public class ArrayHandling {
 	
 	@api public static class array_remove_values extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!(args[0] instanceof CArray)){
 				throw new ConfigRuntimeException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
@@ -1325,14 +1476,17 @@ public class ArrayHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "array_remove_values";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array, value} Removes all instances of value from the specified array."
 					+ " For instance, array_remove_values(array(1, 2, 2, 3), 2) would produce the"
@@ -1340,6 +1494,7 @@ public class ArrayHandling {
 					+ " modify the array passed in, much like array_remove.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1355,18 +1510,22 @@ public class ArrayHandling {
 	
 	@api public static class array_indexes extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!(args[0] instanceof CArray)){
 				throw new ConfigRuntimeException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
@@ -1374,14 +1533,17 @@ public class ArrayHandling {
 			return ((CArray)args[0]).indexesOf(args[1]);
 		}
 
+		@Override
 		public String getName() {
 			return "array_indexes";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {array, value} Returns an array with all the keys of the specified array"
 					+ " at which the specified value is equal. That is, for the array(1, 2, 2, 3), if"
@@ -1389,6 +1551,7 @@ public class ArrayHandling {
 					+ " array at all, an empty array will be returned.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1405,18 +1568,22 @@ public class ArrayHandling {
 	
 	@api public static class array_index extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = (CArray)new array_indexes().exec(t, environment, args);
 			if(ca.isEmpty()){
@@ -1426,20 +1593,24 @@ public class ArrayHandling {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "array_index";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {array, value} Works exactly like array_indexes(array, value)[0], except in the case where"
 					+ " the value is not found, returns null. That is to say, if the value is contained in an"
 					+ " array (even multiple times) the index of the first element is returned.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1457,18 +1628,22 @@ public class ArrayHandling {
 	@api
 	public static class array_reverse extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray){
 				((CArray)args[0]).reverse();
@@ -1476,19 +1651,23 @@ public class ArrayHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "array_reverse";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array} Reverses an array in place. However, if the array is associative, throws a CastException, since associative"
 					+ " arrays are more like a map.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1505,19 +1684,23 @@ public class ArrayHandling {
 	
 	@api public static class array_rand extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
 		Random r = new Random(System.currentTimeMillis());
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			long number = 1;
 			boolean getKeys = true;
@@ -1554,14 +1737,17 @@ public class ArrayHandling {
 			return newArray;
 		}
 
+		@Override
 		public String getName() {
 			return "array_rand";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "array {array, [number, [getKeys]]} Returns a random selection of keys or values from an array. The array may be"
 					+ " either normal or associative. Number defaults to 1, and getKey defaults to true. If number is greater than"
@@ -1570,6 +1756,7 @@ public class ArrayHandling {
 					+ " if order is important, use array_sort().";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1577,11 +1764,11 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Usage with a normal array", "assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array))"),
+				new ExampleScript("Usage with a normal array", "assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array))", "{1}"),
 				new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results", 
-					"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))"),
+					"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))", "{b, c}"),
 				new ExampleScript("Usage with an associative array", 
-					"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))"),
+					"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))", "two"),
 			};
 		}
 	}
@@ -1591,18 +1778,22 @@ public class ArrayHandling {
 
 		private final static equals equals = new equals();
 		private final static BasicLogic.sequals sequals = new BasicLogic.sequals();
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			boolean compareTypes = true;
@@ -1617,6 +1808,7 @@ public class ArrayHandling {
 				CArray newArray = new CArray(t);
 				Set<Construct> set = new LinkedComparatorSet<Construct>(asList, new LinkedComparatorSet.EqualsComparator<Construct>() {
 
+					@Override
 					public boolean checkIfEquals(Construct item1, Construct item2) {
 						return (fCompareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2)))
 								|| (!fCompareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)));
@@ -1629,14 +1821,17 @@ public class ArrayHandling {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "array_unique";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {array, [compareTypes]} Removes all non-unique values from an array. ---- compareTypes is true by default, which means that in the array"
 					+ " array(1, '1'), nothing would be removed from the array, since both values are different data types. However, if compareTypes is false,"
@@ -1644,6 +1839,7 @@ public class ArrayHandling {
 					+ " there are no unique values, so a clone of the array is returned.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

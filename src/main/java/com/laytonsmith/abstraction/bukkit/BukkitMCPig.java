@@ -16,10 +16,12 @@ public class BukkitMCPig extends BukkitMCAgeable implements MCPig {
 		p = be;
 	}
 
+	@Override
 	public boolean isSaddled() {
 		return p.hasSaddle();
 	}
 
+	@Override
 	public void setSaddled(boolean saddled) {
 		p.setSaddle(saddled);
 	}

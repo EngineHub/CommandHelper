@@ -32,18 +32,22 @@ public class Marquee {
 	private static Map<String, com.laytonsmith.PureUtilities.Marquee> marqeeMap = new HashMap<String, com.laytonsmith.PureUtilities.Marquee>();
 	@api public static class marquee extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			final String marqueeName;
 			final String text;
@@ -67,10 +71,12 @@ public class Marquee {
 			}
 			final com.laytonsmith.PureUtilities.Marquee m = new com.laytonsmith.PureUtilities.Marquee(text, stringWidth, delayTime, new com.laytonsmith.PureUtilities.Marquee.MarqueeCallback() {
 
+				@Override
 				public void stringPortion(final String portion, com.laytonsmith.PureUtilities.Marquee m) {
 					try{
 						StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>(){
 
+							@Override
 							public Object call() throws Exception {
 									callback.execute(new Construct[]{new CString(portion, t)});
 									return null;
@@ -89,6 +95,7 @@ public class Marquee {
 			m.start();
 			StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
+				@Override
 				public void run() {
 					m.stop();
 				}
@@ -99,14 +106,17 @@ public class Marquee {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "marquee";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{4, 5};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[marqueeName], text, stringWidth, delayTime, callback} Sets up a marquee, which will automatically"
 					+ " split up a given string for you, and call the callback. The split string will automatically wrap, handle"
@@ -118,6 +128,7 @@ public class Marquee {
 					+ " This is usually used in combination with signs, but in theory could be used with anything that uses text.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -126,18 +137,22 @@ public class Marquee {
 	
 	@api public static class marquee_stop extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String marqueeName = args[0].val();
 			if(marqeeMap.containsKey(marqueeName)){
@@ -146,18 +161,22 @@ public class Marquee {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "marquee_stop";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {marqueeName} Stops a named marquee.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

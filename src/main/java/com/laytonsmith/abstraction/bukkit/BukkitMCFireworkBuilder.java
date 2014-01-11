@@ -27,36 +27,43 @@ public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 		strength = 0;
 	}
 	
+	@Override
 	public MCFireworkBuilder setFlicker(boolean flicker) {
 		builder.flicker(flicker);
 		return this;
 	}
 
+	@Override
 	public MCFireworkBuilder setTrail(boolean trail) {
 		builder.trail(trail);
 		return this;
 	}
 
+	@Override
 	public MCFireworkBuilder addColor(MCColor color) {
 		builder.withColor(BukkitMCColor.GetColor(color));
 		return this;
 	}
 
+	@Override
 	public MCFireworkBuilder addFadeColor(MCColor color) {
 		builder.withFade(BukkitMCColor.GetColor(color));
 		return this;
 	}
 	
+	@Override
 	public MCFireworkBuilder setType(MCFireworkType type){
 		builder.with(BukkitMCFireworkType.getConvertor().getConcreteEnum(type));
 		return this;
 	}
 
+	@Override
 	public MCFireworkBuilder setStrength(int i) {
 		strength = i;
 		return this;
 	}
 	
+	@Override
 	public int launch(MCLocation l) {
 		FireworkEffect fe = builder.build();
 		Location ll = ((BukkitMCLocation)l).asLocation();

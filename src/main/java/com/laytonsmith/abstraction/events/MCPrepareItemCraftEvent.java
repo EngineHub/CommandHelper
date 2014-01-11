@@ -7,5 +7,6 @@ import com.laytonsmith.abstraction.events.MCInventoryEvent;
 public interface MCPrepareItemCraftEvent extends MCInventoryEvent {
 	public MCRecipe getRecipe();
 	public boolean isRepair();
+	@Override
 	public MCCraftingInventory getInventory();
 }

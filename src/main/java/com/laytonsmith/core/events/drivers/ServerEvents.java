@@ -34,10 +34,12 @@ public class ServerEvents {
 	@api
 	public static class server_ping extends AbstractEvent {
 	
+		@Override
 		public String getName() {
 			return "server_ping";
 		}
 	
+		@Override
 		public String docs() {
 			return "{players: <math match> | maxplayers: <math match>}"
 					+ " Fired when a user who has saved this server looks at their serverlist."
@@ -47,6 +49,7 @@ public class ServerEvents {
 					+ " {}";
 		}
 	
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
 				throws PrefilterNonMatchException {
 			if (e instanceof MCServerPingEvent) {
@@ -58,10 +61,12 @@ public class ServerEvents {
 			return false;
 		}
 	
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 	
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
 			if (e instanceof MCServerPingEvent) {
@@ -84,6 +89,7 @@ public class ServerEvents {
 			}
 		}
 	
+		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
 			if (event instanceof MCServerPingEvent) {
@@ -100,10 +106,12 @@ public class ServerEvents {
 			return false;
 		}
 	
+		@Override
 		public Driver driver() {
 			return Driver.SERVER_PING;
 		}
 	
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}

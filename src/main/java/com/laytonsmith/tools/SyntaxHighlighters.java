@@ -28,8 +28,7 @@ import java.util.regex.Pattern;
 public class SyntaxHighlighters {
 
     public static String generate(String type, String theme) {
-		Implementation.useAbstractEnumThread(false);
-		Implementation.setServerType(Implementation.Type.BUKKIT);
+		Implementation.forceServerType(Implementation.Type.BUKKIT);
         if("npp".equals(type) || "notepad++".equals(type)){
 
             if("default".equals(theme)){
@@ -91,6 +90,8 @@ public class SyntaxHighlighters {
      */
     private static String template(String location) {        
         String template = Static.GetStringResource(location);
+		//Replace all instances of ///! with nothing.
+		template = template.replace("///!", "");
         Pattern p = Pattern.compile("%%(.*?)%%");
         Matcher m = p.matcher(template);
         while(m.find()){

@@ -40,18 +40,22 @@ public class ItemMeta {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_itemmeta extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCItemStack is;
@@ -74,14 +78,17 @@ public class ItemMeta {
 			return ObjectGenerator.GetGenerator().itemMeta(is, t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_itemmeta";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {[player,] inventorySlot} Returns an associative array of known ItemMeta for the slot given,"
 					+ " or null if there isn't any. All items can have a display(name), lore, and/or enchants, "
@@ -89,6 +96,7 @@ public class ItemMeta {
 					+ applicableItemMeta;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -120,18 +128,22 @@ public class ItemMeta {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_itemmeta extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Construct slot, meta;
@@ -157,14 +169,17 @@ public class ItemMeta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_itemmeta";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player,] inventorySlot, ItemMetaArray} Applies the data from the given array to the item at the"
 					+ " specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if none of"
@@ -172,6 +187,7 @@ public class ItemMeta {
 					+ " existing data. ---- Available fields: " + applicableItemMeta;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -206,18 +222,22 @@ public class ItemMeta {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_armor_color extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
@@ -240,20 +260,24 @@ public class ItemMeta {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "get_armor_color";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "colorArray {[player], inventorySlot} Returns a color array for the color of the leather armor at"
 					+ " the given slot. A CastException is thrown if this is not leather armor at that slot. The color"
 					+ " array returned will look like: array(r: 0, g: 0, b: 0)";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -263,18 +287,22 @@ public class ItemMeta {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_armor_color extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
@@ -310,14 +338,17 @@ public class ItemMeta {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_armor_color";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[player], slot, colorArray} Sets the color of the leather armor at the given slot. colorArray"
 					+ " should be an array that matches one of the formats: array(r: 0, g: 0, b: 0)"
@@ -325,6 +356,7 @@ public class ItemMeta {
 					+ " array(0, 0, 0)";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -334,18 +366,22 @@ public class ItemMeta {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class is_leather_armor extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
@@ -360,19 +396,23 @@ public class ItemMeta {
 			return new CBoolean(im instanceof MCLeatherArmorMeta, t);
 		}
 
+		@Override
 		public String getName() {
 			return "is_leather_armor";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[player], itemSlot} Returns true if the item at the given slot is a piece of leather"
 					+ " armor, that is, if dying it is allowed.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

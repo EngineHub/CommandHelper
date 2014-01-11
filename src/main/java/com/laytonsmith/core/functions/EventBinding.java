@@ -1,5 +1,7 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -9,6 +11,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.BoundEvent.Priority;
+import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -16,6 +19,9 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -26,28 +32,35 @@ public class EventBinding {
 	public static String docs() {
 		return "This class of functions provide methods to hook deep into the server's event architecture";
 	}
+	
+	private static final AtomicInteger bindCounter = new AtomicInteger(0);
 
 	@api(environments=CommandHelperEnvironment.class)
 	public static class bind extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "bind";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "string {event_name, options, prefilter, event_obj, [custom_params], &lt;code&gt;} Binds some functionality to an event, so that"
 					+ " when said event occurs, the event handler will fire. Returns the id of this event, so it can be unregistered"
 					+ " later, if need be.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
@@ -57,14 +70,17 @@ public class EventBinding {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
@@ -121,7 +137,23 @@ public class EventBinding {
 			} catch (EventException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.BindException, t);
 			}
+			
+			//Set up our bind counter
+			synchronized(bindCounter){
+				if(bindCounter.get() == 0){
+					env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
+						@Override
+						public void run() {
+							synchronized(bindCounter){
+								bindCounter.set(0);
+							}
+						}
+					});
+				}
+				bindCounter.incrementAndGet();
+			}
 			return id;
 		}
 
@@ -129,40 +161,54 @@ public class EventBinding {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		@Override
+		public boolean allowBraces() {
+			return true;
+		}
+		
 	}
 
 	@api
 	public static class dump_events extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "dump_events";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an array of all the events currently registered on the server. Mostly meant for debugging,"
 					+ " however it would be possible to parse this response to cherry pick events to unregister.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return EventUtils.DumpEvents();
 		}
@@ -171,35 +217,43 @@ public class EventBinding {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class unbind extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "unbind";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[eventID]} Unbinds an event, which causes it to not run anymore. If called from within an event handler, eventID is"
 					+ " optional, and defaults to the current event id.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = null;
 			if (args.length == 1) {
@@ -207,12 +261,18 @@ public class EventBinding {
 				id = args[0].val();
 			} else {
 				//We are cancelling this event. If we are not in an event, throw an exception
-				if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+				if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 					throw new ConfigRuntimeException("No event ID specified, and not running inside an event", ExceptionType.BindException, t);
 				}
-				id = environment.getEnv(CommandHelperEnvironment.class).GetEvent().getBoundEvent().getId();
+				id = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getId();
 			}
 			EventUtils.UnregisterEvent(id);
+			synchronized(bindCounter){
+				bindCounter.decrementAndGet();
+				if(bindCounter.get() == 0){
+					environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+				}
+			}
 			return new CVoid(t);
 		}
 	}
@@ -220,43 +280,51 @@ public class EventBinding {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class cancel extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "cancel";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[state]} Cancels the event (if applicable). If the event is not cancellable, or is already cancelled, nothing happens."
 					+ " If called from outside an event handler, a BindException is thrown. By default, state is true, but you can"
 					+ " uncancel an event (if possible) by calling cancel(false).";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean cancelled = true;
 			if (args.length == 1) {
 				cancelled = Static.getBoolean(args[0]);
 			}
 
-			BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
+			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if (original == null) {
 				throw new ConfigRuntimeException("cancel cannot be called outside an event handler", ExceptionType.BindException, t);
 			}
@@ -270,37 +338,45 @@ public class EventBinding {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class is_cancelled extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "is_cancelled";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {} Returns whether or not the underlying event is cancelled or not. If the event is not cancellable in the first place,"
 					+ " false is returned. If called from outside an event, a BindException is thrown";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
+			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if (original == null) {
 				throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
 			}
@@ -315,14 +391,17 @@ public class EventBinding {
 	@api
 	public static class trigger extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "trigger";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {eventName, eventObject, [serverWide]} Manually triggers bound events. The event object passed to this function is "
 					+ " sent directly as-is to the bound events. Check the documentation for each event to see what is required."
@@ -332,22 +411,27 @@ public class EventBinding {
 					+ " will receive the event.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray obj = null;
 			if (args[1] instanceof CNull) {
@@ -369,14 +453,17 @@ public class EventBinding {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class modify_event extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "modify_event";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {parameter, value, [throwOnFailure]} Modifies the underlying event object, if applicable."
 					+ " The documentation for each event will explain what parameters can be modified,"
@@ -391,22 +478,27 @@ public class EventBinding {
 					+ " even attempts to modify an event, an exception will be thrown.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String parameter = args[0].val();
 			Construct value = args[1];
@@ -414,18 +506,18 @@ public class EventBinding {
 			if (args.length == 3) {
 				throwOnFailure = Static.getBoolean(args[3]);
 			}
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException(this.getName() + " must be called from within an event handler", ExceptionType.BindException, t);
 			}
-			Event e = environment.getEnv(CommandHelperEnvironment.class).GetEvent().getEventDriver();
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)) {
+			Event e = environment.getEnv(GlobalEnv.class).GetEvent().getEventDriver();
+			if (environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)) {
 				throw new ConfigRuntimeException("Monitor level handlers may not modify an event!", ExceptionType.BindException, t);
 			}
-			ActiveEvent active = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
+			ActiveEvent active = environment.getEnv(GlobalEnv.class).GetEvent();
 			boolean success = false;
 			if (!active.isLocked(parameter)) {
 				try {
-					success = e.modifyEvent(parameter, value, environment.getEnv(CommandHelperEnvironment.class).GetEvent().getUnderlyingEvent());
+					success = e.modifyEvent(parameter, value, environment.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent());
 				} catch (ConfigRuntimeException ex) {
 					ex.setFile(t.file());
 					ex.setLineNum(t.line());
@@ -445,37 +537,44 @@ public class EventBinding {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class lock extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "lock";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "void {<none> | parameterArray | parameter, [parameter...]} Locks the specified event parameter(s), or all of them,"
 					+ " if specified with no arguments. Locked parameters become read only for lower priority event handlers.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("lock must be called from within an event handler", ExceptionType.BindException, t);
 			}
 
-			BoundEvent.ActiveEvent e = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
+			BoundEvent.ActiveEvent e = environment.getEnv(GlobalEnv.class).GetEvent();
 			Priority p = e.getBoundEvent().getPriority();
 			List<String> params = new ArrayList<String>();
 			if (args.length == 0) {
@@ -498,6 +597,7 @@ public class EventBinding {
 			return new CVoid(t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -506,14 +606,17 @@ public class EventBinding {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class is_locked extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "is_locked";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {parameter} Returns whether or not a call to modify_event() would fail, based on"
 					+ " the parameter being locked by a higher priority handler. If this returns false, it"
@@ -521,26 +624,31 @@ public class EventBinding {
 					+ " it isn't locked.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("is_locked may only be called from inside an event handler", ExceptionType.BindException, t);
 			}
-			boolean locked = environment.getEnv(CommandHelperEnvironment.class).GetEvent().isLocked(args[0].val());
+			boolean locked = environment.getEnv(GlobalEnv.class).GetEvent().isLocked(args[0].val());
 			return new CBoolean(locked, t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -549,40 +657,48 @@ public class EventBinding {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class consume extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "consume";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "void {} Consumes an event, so that lower priority handlers don't even"
 					+ " recieve the event. Monitor level handlers will still recieve it, however,"
 					+ " and they can check to see if the event was consumed.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("consume may only be called from an event handler!", ExceptionType.BindException, t);
 			}
-			environment.getEnv(CommandHelperEnvironment.class).GetEvent().consume();
+			environment.getEnv(GlobalEnv.class).GetEvent().consume();
 			return new CVoid(t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -591,14 +707,17 @@ public class EventBinding {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class is_consumed extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "is_consumed";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {} Returns whether or not this event has been consumed. Usually only useful"
 					+ " for Monitor level handlers, it could also be used for highly robust code,"
@@ -606,25 +725,30 @@ public class EventBinding {
 					+ " would still recieve it.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("is_consumed must be called from within an event handler", ExceptionType.BindException, t);
 			}
-			return new CBoolean(environment.getEnv(CommandHelperEnvironment.class).GetEvent().isConsumed(), t);
+			return new CBoolean(environment.getEnv(GlobalEnv.class).GetEvent().isConsumed(), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -639,44 +763,106 @@ public class EventBinding {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class event_meta extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "event_meta";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns meta information about the activity in regards to this event. This"
 					+ " is meant as a debug tool.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetEvent() == null) {
+			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("event_meta must be called from within an event handler!", ExceptionType.BindException, t);
 			}
 			CArray history = new CArray(t);
-			for (String entry : environment.getEnv(CommandHelperEnvironment.class).GetEvent().getHistory()) {
+			for (String entry : environment.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
 				history.push(new CString(entry, t));
 			}
 			return history;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
+	}
+	
+	@api public static class has_bind extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String id = args[0].val();
+			for(Driver d : Driver.values()){
+				for(BoundEvent b : EventUtils.GetEvents(d)){
+					if(b.getId().equals(id)){
+						return new CBoolean(true, t);
+					}
+				}
+			}
+			return new CBoolean(false, t);
+		}
+
+		@Override
+		public String getName() {
+			return "has_bind";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {id} Returns true if a bind with the specified id exists and is"
+					+ " currently bound. False is returned otherwise. This can be used to"
+					+ " pre-emptively avoid a BindException if duplicate ids are used.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }

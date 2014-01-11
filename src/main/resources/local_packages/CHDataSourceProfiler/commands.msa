@@ -10,14 +10,14 @@
 	@iterations = array_sort(array(1, 10, 100, 1000, 5000))
 
 	if(!$proceed){
-		msg('Please ensure that your persistance.config file has the following values:')
+		msg('Please ensure that your persistence.ini file has the following values:')
 		foreach(reflect_pull('datasources'), @protocol,
 			if(@protocol != 'redis'){
-				msg(color(gold).'storage.'.@protocol.'.**='.@protocol.'://persistance/persistance.'.@protocol)
+				msg(color(gold).'storage.'.@protocol.'.**='.@protocol.'://persistence/persistence.'.@protocol)
 			}
 		)
 		msg(color(gold).'storage.redis.**=redis://localhost')
-		msg('Additionally, ensure that the persistance/ folder is empty, and that a redis server is running (if you wish to test redis)')
+		msg('Additionally, ensure that the persistence/ folder is empty, and that a redis server is running (if you wish to test redis)')
 		msg('If you do not wish to test redis, be sure to put a dummy value in place of the redis network, perhaps using mem')
 		msg('Reload aliases, then run '.color(aqua).'/profiledatasources true'.color(reset).' to proceed')
 		msg(color(red).'THIS MUST BE RUN FROM COMMAND LINE, WITH NO USERS ONLINE')

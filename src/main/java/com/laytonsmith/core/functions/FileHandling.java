@@ -48,21 +48,29 @@ public class FileHandling {
 			return new ZipReader(new File(file_location)).getFileContents();
 		}
 
+		@Override
 		public String getName() {
 			return "read";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String location = args[0].val();
-			location = new File(t.file().getParentFile(), location).getAbsolutePath();
-			//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
-			if (!Security.CheckSecurity(location)) {
-				throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
-					Exceptions.ExceptionType.SecurityException, t);
+			if(!new File(location).isAbsolute()){
+				location = new File(t.file().getParentFile(), location).getAbsolutePath();
+			}
+			if(!Cmdline.inCmdLine(env)){
+				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
+				//Cmdline mode doesn't currently have this restriction.
+				if (!Security.CheckSecurity(location)) {
+					throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
+						Exceptions.ExceptionType.SecurityException, t);
+				}
 			}
 			try {
 				String s = file_get_contents(location);
@@ -76,6 +84,7 @@ public class FileHandling {
 			}
 		}
 
+		@Override
 		public String docs() {
 			return "string {file} Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
 				+ " the file that is being run, not CommandHelper. If the file is not found, or otherwise can't be read in, an IOException is thrown."
@@ -83,18 +92,22 @@ public class FileHandling {
 				+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n.";
 		}
 
+		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.IOException, Exceptions.ExceptionType.SecurityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			//Because we do disk IO
 			return true;
@@ -117,12 +130,14 @@ public class FileHandling {
 			if(!started){
 				queue.invokeLater(null, new Runnable() {
 
+					@Override
 					public void run() {
 						//This warms up the queue. Apparently.
 					}
 				});
 				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
+					@Override
 					public void run() {
 						queue.shutdown();
 						started = false;
@@ -132,18 +147,22 @@ public class FileHandling {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.SecurityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			startup();
 			final String file = args[0].val();
@@ -153,11 +172,14 @@ public class FileHandling {
 			} else {
 				callback = ((CClosure)args[1]);
 			}
-			if(!Security.CheckSecurity(file)){
-				throw new ConfigRuntimeException("You do not have permission to access the file '" + file + "'", ExceptionType.SecurityException, t);
+			if(!Cmdline.inCmdLine(environment)){
+				if(!Security.CheckSecurity(file)){
+					throw new ConfigRuntimeException("You do not have permission to access the file '" + file + "'", ExceptionType.SecurityException, t);
+				}
 			}
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
+				@Override
 				public void run() {
 					String returnString = null;					
 					ConfigRuntimeException exception = null;
@@ -171,7 +193,11 @@ public class FileHandling {
 					} else {
 						try {
 							//It's a local file read
-							returnString = FileUtil.read(new File(t.file().getParentFile(), file));
+							String _file = file;
+							if(!new File(_file).isAbsolute()){
+								_file = new File(t.file().getParentFile(), _file).getAbsolutePath();
+							}
+							returnString = FileUtil.read(new File(t.file().getParentFile(), _file));
 						} catch (IOException ex) {
 							exception = new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 						}
@@ -190,6 +216,7 @@ public class FileHandling {
 					}
 					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
+						@Override
 						public void run() {
 							callback.execute(new Construct[]{cret, cex});
 						}
@@ -199,14 +226,17 @@ public class FileHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "async_read";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {file, callback} Asyncronously reads in a file. ---- "
 				+ " This may be a remote file accessed with an SCP style path. (See the [[CommandHelper/SCP|wiki article]]"
@@ -215,13 +245,14 @@ public class FileHandling {
 				+ " (This is not applicable for remote files)"
 				+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n."
 				+ " This method will immediately return, and asynchronously read in the file, and finally send the contents"
-				+ " to the callback once the task completes. The callback should have the following signature: closure(@contents, @exception, &lt;code&gt;)."
+				+ " to the callback once the task completes. The callback should have the following signature: closure(@contents, @exception){ &lt;code&gt; }."
 				+ " If @contents is null, that indicates that an exception occured, and @exception will not be null, but instead have an"
 				+ " exeption array. Otherwise, @contents will contain the file's contents, and @exception will be null. This method is useful"
 				+ " to use in two cases, either you need a remote file via SCP, or a local file is big enough that you notice a delay when"
 				+ " simply using the read() function.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -231,18 +262,22 @@ public class FileHandling {
 	@api
 	public static class file_size extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.SecurityException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String location = args[0].val();
 			if(!Security.CheckSecurity(location)){
@@ -252,18 +287,22 @@ public class FileHandling {
 			return new CInt(new File(t.file().getParentFile(), location).length(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "file_size";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {path} Returns the size of a file on the file system.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

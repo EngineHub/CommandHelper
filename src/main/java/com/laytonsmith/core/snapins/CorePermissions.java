@@ -17,7 +17,7 @@ public enum CorePermissions implements PackagePermission {
 			+ " VFS, which on most systems could allow for full control of the system", CHVersion.V3_3_1, new PackagePermission[]{FILE_READ, FILE_WRITE}),
 	NETWORK("CORE.NETWORK", ThreatLevel.CAUTIOUS, "This permission grants raw network access. If filesystem access is not allowed,"
 			+ " this is a relatively safe permission to allow, but can be misused by malicious code to transmit sensitive data.", CHVersion.V3_3_1),
-	GLOBAL_PERSISTANCE("CORE.GLOBAL_PERSISTANCE", ThreatLevel.TRIVIAL, "This permission grants access to the global persistance storage."
+	GLOBAL_PERSISTENCE("CORE.GLOBAL_PERSISTENCE", ThreatLevel.TRIVIAL, "This permission grants access to the global persistence storage."
 			+ " This generally cannot be abused, other than to delete other package's data.", CHVersion.V3_3_1),
 	;
 	
@@ -60,24 +60,29 @@ public enum CorePermissions implements PackagePermission {
 		}
 	}
 
+	@Override
 	public String[] getNamespace() {
 		String[] array = new String[namespace.length];
 		System.arraycopy(namespace, 0, array, 0, array.length);
 		return array;
 	}
 
+	@Override
 	public ThreatLevel getThreatLevel() {
 		return threatLevel;
 	}
 
+	@Override
 	public String getName() {
 		return StringUtils.Join(namespace, ".");
 	}
 
+	@Override
 	public String docs() {
 		return docs;
 	}
 
+	@Override
 	public CHVersion since() {
 		return since;
 	}

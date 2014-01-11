@@ -22,22 +22,27 @@ public class BukkitMCCommandMap implements MCCommandMap {
 		scm = invokeMethod;
 	}
 
+	@Override
 	public Object getHandle() {
 		return scm;
 	}
 
+	@Override
 	public void clearCommands() {
 		scm.clearCommands();
 	}
 	
+	@Override
 	public boolean isCommand(String name) {
 		return scm.getCommand(name) != null;
 	}
 
+	@Override
 	public MCCommand getCommand(String name) {
 		return scm.getCommand(name) == null ? null : new BukkitMCCommand(scm.getCommand(name));
 	}
 
+	@Override
 	public List<MCCommand> getCommands() {
 		List<MCCommand> cmds = new ArrayList<MCCommand>();
 		for (Command c : scm.getCommands()) {
@@ -46,15 +51,18 @@ public class BukkitMCCommandMap implements MCCommandMap {
 		return cmds;
 	}
 
+	@Override
 	public boolean register(String fallback, MCCommand cmd) {
 		return scm.register(fallback, ((BukkitMCCommand) cmd).cmd);
 	}
 
+	@Override
 	public boolean register(String label, String fallback, MCCommand cmd) {
 		return scm.register(label, fallback, ((BukkitMCCommand) cmd).cmd);
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public boolean unregister(MCCommand cmd) {
 		if (cmd.isRegistered()) {
 			((Map<String,Command>) ReflectionUtils.get(scm.getClass(), scm, "knownCommands")).remove(cmd.getName());

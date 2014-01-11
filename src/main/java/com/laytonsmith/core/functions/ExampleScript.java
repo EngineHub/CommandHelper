@@ -16,7 +16,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.database.Profiles;
-import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -97,6 +97,7 @@ public class ExampleScript {
 		
 		fakePlayer = (MCPlayer)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{MCPlayer.class}, new InvocationHandler() {
 
+			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 				if(method.getName().equals("getName") || method.getName().equals("getDisplayName")){
 					return "Player";
@@ -117,12 +118,14 @@ public class ExampleScript {
 			init = true;
 			fakeServer = (MCServer)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{MCServer.class}, new InvocationHandler() {
 
+				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {				
 					return genericReturn(method.getReturnType());
 				}
 			});		
 			final PluginManager bukkitPluginManager = (PluginManager)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{PluginManager.class}, new InvocationHandler() {
 
+				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {				
 					System.out.println(method.getReturnType().getSimpleName() + " " + method.getName());
 					return genericReturn(method.getReturnType());
@@ -130,6 +133,7 @@ public class ExampleScript {
 			});
 			final Server bukkitServer = (Server)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{Server.class}, new InvocationHandler() {
 
+				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					System.out.println(method.getReturnType().getSimpleName() + " " + method.getName());
 					if(method.getName().equals("getPluginManager")){
@@ -140,6 +144,7 @@ public class ExampleScript {
 			});
 			fakePlugin = (Plugin)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{Plugin.class}, new InvocationHandler() {
 
+				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					System.out.println(method.getReturnType().getSimpleName() + " " + method.getName());
 					if(method.getName().equals("getServer")){
@@ -223,6 +228,7 @@ public class ExampleScript {
 		try{
 			s.run(new ArrayList<Variable>(), env, new MethodScriptComplete() {
 
+				@Override
 				public void done(String output) {
 					if(output != null){
 						finalOutput.append(output);

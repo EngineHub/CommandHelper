@@ -49,10 +49,12 @@ public class InventoryEvents {
 	@api
 	public static class inventory_click extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "inventory_click";
 		}
 
+		@Override
 		public String docs() {
 			return "{slottype: <macro> The type of slot being clicked, can be "
 					+ StringUtils.Join(MCSlotType.values(), ", ", ", or ")
@@ -71,6 +73,7 @@ public class InventoryEvents {
 					+ " {}";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
 				throws PrefilterNonMatchException {
 			if (event instanceof MCInventoryClickEvent) {
@@ -86,10 +89,12 @@ public class InventoryEvents {
 			return false;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
@@ -132,10 +137,12 @@ public class InventoryEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.INVENTORY_CLICK;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
@@ -159,6 +166,7 @@ public class InventoryEvents {
 			StaticLayer.GetServer().getPlayer(ic.getWhoClicked().getName()).updateInventory();
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -168,10 +176,12 @@ public class InventoryEvents {
 	@api
 	public static class inventory_drag extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "inventory_drag";
 		}
 
+		@Override
 		public String docs() {
 			return "{world: <string match> World name | type: <macro> Can be " + StringUtils.Join(MCDragType.values(), ", ", ", or ")
 					+ " | cursoritem: <item match> item in hand, before event starts}"
@@ -183,6 +193,7 @@ public class InventoryEvents {
 					+ "{} ";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
 				throws PrefilterNonMatchException {
 			if (event instanceof MCInventoryDragEvent) {
@@ -197,10 +208,12 @@ public class InventoryEvents {
 			return false;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			return null;
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCInventoryDragEvent) {
@@ -248,10 +261,12 @@ public class InventoryEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.INVENTORY_DRAG;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
 			if (event instanceof MCInventoryDragEvent) {
@@ -272,6 +287,7 @@ public class InventoryEvents {
 			StaticLayer.GetServer().getPlayer(id.getWhoClicked().getName()).updateInventory();
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -281,10 +297,12 @@ public class InventoryEvents {
 	@api
 	public static class inventory_open extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "inventory_open";
 		}
 
+		@Override
 		public String docs() {
 			return "{} "
 					+ "Fired when a player opens an inventory. "
@@ -295,15 +313,18 @@ public class InventoryEvents {
 					+ "{} ";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
 				throws PrefilterNonMatchException {
 			return true;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			return null;
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCInventoryOpenEvent) {
@@ -330,15 +351,18 @@ public class InventoryEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.INVENTORY_OPEN;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -348,10 +372,12 @@ public class InventoryEvents {
 	@api
 	public static class inventory_close extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "inventory_close";
 		}
 
+		@Override
 		public String docs() {
 			return "{} "
 					+ "Fired when a player closes an inventory. "
@@ -362,15 +388,18 @@ public class InventoryEvents {
 					+ "{} ";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
 				throws PrefilterNonMatchException {
 			return true;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			return null;
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCInventoryCloseEvent) {
@@ -397,15 +426,18 @@ public class InventoryEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.INVENTORY_CLOSE;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -415,10 +447,12 @@ public class InventoryEvents {
 	@api
 	public static class item_enchant extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "item_enchant";
 		}
 
+		@Override
 		public String docs() {
 			return "{} "
 					+ "Fired when a player enchants an item. "
@@ -435,14 +469,17 @@ public class InventoryEvents {
 					+ "{}";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return true;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			return null;
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCEnchantItemEvent) {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
@@ -471,10 +508,12 @@ public class InventoryEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.ITEM_ENCHANT;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCEnchantItemEvent) {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
@@ -497,6 +536,7 @@ public class InventoryEvents {
 			return false;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -505,6 +545,7 @@ public class InventoryEvents {
 	@api
 	public static class item_pre_enchant extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "item_pre_enchant";
 		}

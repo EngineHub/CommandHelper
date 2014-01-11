@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -68,6 +69,7 @@ public class Exceptions {
 		}
 	}
 
+	@MEnum("ExceptionType")
 	public enum ExceptionType implements Documentation {
 
 		/**
@@ -253,14 +255,17 @@ public class Exceptions {
 			this.since = since;
 		}
 
+		@Override
 		public String getName() {
 			return name();
 		}
 
+		@Override
 		public String docs() {
 			return docs;
 		}
 
+		@Override
 		public CHVersion since() {
 			return since;
 		}
@@ -275,15 +280,18 @@ public class Exceptions {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class _try extends AbstractFunction {
 
+		@Override
 		public String getName() {
 
 			return "try";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "void {tryCode, [varName, catchCode, [exceptionTypes]] | tryCode, catchCode} This function works similar to a try-catch block in most languages. If the code in"
 					+ " tryCode throws an exception, instead of killing the whole script, it stops running, and begins running the catchCode."
@@ -297,10 +305,12 @@ public class Exceptions {
 					+ " exceptions can be thrown and where, and examples.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -310,10 +320,12 @@ public class Exceptions {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -394,6 +406,7 @@ public class Exceptions {
 			return new CVoid(t);
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
@@ -407,14 +420,17 @@ public class Exceptions {
 	@api
 	public static class _throw extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "throw";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			List<ExceptionType> e = Arrays.asList(Exceptions.ExceptionType.values());
 			String exceptions = "\nValid Exceptions: ";
@@ -432,18 +448,22 @@ public class Exceptions {
 					+ exceptions;
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -456,6 +476,7 @@ public class Exceptions {
 //			return true;
 //		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				ExceptionType c = null;
@@ -476,18 +497,22 @@ public class Exceptions {
 	@api
 	public static class set_uncaught_exception_handler extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CClosure){
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
@@ -497,14 +522,17 @@ public class Exceptions {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "set_uncaught_exception_handler";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {closure(@ex)} Sets the uncaught exception handler. If code throws an exception, instead of doing"
 					+ " the default (displaying the error to the user/console) it will run your code instead. The exception"
@@ -519,6 +547,7 @@ public class Exceptions {
 					+ " logging mechanism, perhaps to console, so you don't \"lose\" your exceptions, and fail to realize anything is wrong.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

@@ -33,6 +33,17 @@ public final class Implementation {
 	public static void useAbstractEnumThread(boolean on){
 		useAbstractEnumThread = on;
 	}
+	
+	/**
+	 * This method works like setServerType, except it does not check to 
+	 * see that the server type wasn't already set. This should only be
+	 * used by the embedded tools or other meta code, not during normal
+	 * execution. This does not trigger the abstract enum thread.
+	 * @param type 
+	 */
+	public static void forceServerType(Implementation.Type type){
+		serverType = type;
+	}
 
 	public static void setServerType(Implementation.Type type) {
 		if (serverType == null) {
@@ -48,10 +59,9 @@ public final class Implementation {
 		if (type != Type.TEST && type != Type.SHELL && useAbstractEnumThread) {
 			Thread abstractionenumsThread;
 			abstractionenumsThread = new Thread(new Runnable() {
+				@Override
 				public void run() {
 					try {
-						//This goes ahead and runs the cache, which we can offset to our own thread.
-						StaticLayer.GetConvertor().getMaxBlockID();
 						try {
 							//Let the server startup data blindness go by first, so we display any error messages prominently,
 							//since an Error is a case of very bad code that shouldn't have been released to begin with.
@@ -59,6 +69,7 @@ public final class Implementation {
 						} catch (InterruptedException ex) {
 							//
 						}
+						StaticLayer.GetConvertor().getMaxBlockID();
 						Set<Class> abstractionenums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
 						for (Class c : abstractionenums) {
 							abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);

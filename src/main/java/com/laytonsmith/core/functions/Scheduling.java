@@ -57,35 +57,43 @@ public class Scheduling {
 	@api
 	public static class time extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "time";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "int {} Returns the current unix time stamp, in milliseconds. The resolution of this is not guaranteed to be extremely accurate. If "
 					+ "you need extreme accuracy, use nano_time()";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CInt(System.currentTimeMillis(), t);
 		}
@@ -94,35 +102,43 @@ public class Scheduling {
 	@api
 	public static class nano_time extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "nano_time";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "int {} Returns an arbitrary number based on the most accurate clock available on this system. Only useful when compared to other calls"
 					+ " to nano_time(). The return is in nano seconds. See the Java API on System.nanoTime() for more information on the usage of this function.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CInt(System.nanoTime(), t);
 		}
@@ -132,32 +148,39 @@ public class Scheduling {
 	@hide("Only meant for cmdline/testing")
 	public static class sleep extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "sleep";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {seconds} Sleeps the script for the specified number of seconds, up to the maximum time limit defined in the preferences file."
 					+ " Seconds may be a double value, so 0.5 would be half a second."
 					+ " PLEASE NOTE: Sleep times are NOT very accurate, and should not be relied on for preciseness.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Construct x = args[0];
             double time = Static.getNumber(x, t);
@@ -168,6 +191,7 @@ public class Scheduling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public Boolean runAsync() {
 			//Because we stop the thread
 			return true;
@@ -177,14 +201,17 @@ public class Scheduling {
 	@api(environments={GlobalEnv.class})
 	public static class set_interval extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_interval";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "int {timeInMS, [initialDelayInMS,] closure} Sets a task to run every so often. This works similarly to set_timeout,"
 					+ " except the task will automatically re-register itself to run again. Note that the resolution"
@@ -194,18 +221,22 @@ public class Scheduling {
 					+ " this can be set to 0 (or some other number) to adjust how long of a delay there is before it begins.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			long time = Static.getInt(args[0], t);
 			int offset = 0;
@@ -221,6 +252,7 @@ public class Scheduling {
 			final AtomicInteger ret = new AtomicInteger(-1);
 
 			ret.set(StaticLayer.SetFutureRepeater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, delay, new Runnable() {
+				@Override
 				public void run() {
 					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 					try {
@@ -242,6 +274,7 @@ public class Scheduling {
 			return new CInt(ret.get(), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -250,14 +283,17 @@ public class Scheduling {
 	@api(environments={GlobalEnv.class})
 	public static class set_timeout extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_timeout";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "int {timeInMS, closure} Sets a task to run in the specified number of ms in the future."
 					+ " The task will only run once. Note that the resolution"
@@ -265,18 +301,22 @@ public class Scheduling {
 					+ " that a time of 1-50ms is essentially the same as 50ms.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			long time = Static.getInt(args[0], t);
 			if (!(args[1] instanceof CClosure)) {
@@ -285,6 +325,7 @@ public class Scheduling {
 			final CClosure c = (CClosure) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
 			ret.set(StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, new Runnable() {
+				@Override
 				public void run() {
 					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 					try {
@@ -306,6 +347,7 @@ public class Scheduling {
 			return new CInt(ret.get(), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -314,14 +356,17 @@ public class Scheduling {
 	@api(environments={GlobalEnv.class})
 	public static class clear_task extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "clear_task";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[id]} Stops the interval or timeout that is specified. The id can be gotten by"
 					+ " storing the integer returned from either set_timeout or set_interval."
@@ -331,18 +376,22 @@ public class Scheduling {
 					+ " closure, in which case it defaults to the id of that particular task.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0 && environment.getEnv(GlobalEnv.class).GetCustom("timeout-id") != null) {
 				StaticLayer.ClearFutureRunnable((Integer) environment.getEnv(GlobalEnv.class).GetCustom("timeout-id"));
@@ -354,6 +403,7 @@ public class Scheduling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -362,18 +412,22 @@ public class Scheduling {
 	@api
 	public static class simple_date extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "simple_date";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			Map<String, DocGenTemplates.Generator> map = new HashMap<String, DocGenTemplates.Generator>();
 			map.put("timezoneValues", new DocGenTemplates.Generator() {
 
+				@Override
 				public String generate(String... args) {
 					String [] timezones = new String[0];
 					try{
@@ -396,22 +450,27 @@ public class Scheduling {
 			return getBundledDocs(map);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) {
 			Date now = new Date();
 			if (args.length >= 2 && !(args[1] instanceof CNull)) {

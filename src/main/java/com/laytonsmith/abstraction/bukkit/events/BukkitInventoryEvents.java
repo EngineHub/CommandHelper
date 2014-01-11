@@ -70,6 +70,7 @@ public class BukkitInventoryEvents {
 			event = e;
 		}
 
+		@Override
 		public List<MCHumanEntity> getViewers() {
 			List<MCHumanEntity> viewers = new ArrayList<MCHumanEntity>();
 
@@ -80,14 +81,17 @@ public class BukkitInventoryEvents {
 			return viewers;
 		}
 
+		@Override
 		public MCInventoryView getView() {
 			return new BukkitMCInventoryView(event.getView());
 		}
 
+		@Override
 		public MCInventory getInventory() {
 			return new BukkitMCInventory(event.getInventory());
 		}
 
+		@Override
 		public Object _GetObject() {
 			return event;
 		}
@@ -102,22 +106,27 @@ public class BukkitInventoryEvents {
 			iie = e;
 		}
 
+		@Override
 		public MCHumanEntity getWhoClicked() {
 			return new BukkitMCHumanEntity(iie.getWhoClicked());
 		}
 
+		@Override
 		public void setResult(MCResult newResult) {
 			iie.setResult(Result.valueOf(newResult.name()));
 		}
 
+		@Override
 		public MCResult getResult() {
 			return BukkitMCResult.getConvertor().getAbstractedEnum(iie.getResult());
 		}
 
+		@Override
 		public boolean isCanceled() {
 			return iie.isCancelled();
 		}
 
+		@Override
         public void setCancelled(boolean cancelled) {
             iie.setCancelled(cancelled);
         }
@@ -132,6 +141,7 @@ public class BukkitInventoryEvents {
 			ioe = e;
 		}
 
+		@Override
 		public MCHumanEntity getPlayer() {
 			return new BukkitMCHumanEntity(ioe.getPlayer());
 		}
@@ -146,6 +156,7 @@ public class BukkitInventoryEvents {
 			ice = e;
 		}
 
+		@Override
 		public MCHumanEntity getPlayer() {
 			return new BukkitMCHumanEntity(ice.getPlayer());
 		}
@@ -160,46 +171,57 @@ public class BukkitInventoryEvents {
 			this.ic = e;
 		}
 
+		@Override
 		public MCItemStack getCurrentItem() {
 			return new BukkitMCItemStack(ic.getCurrentItem());
 		}
 
+		@Override
 		public MCItemStack getCursor() {
 			return new BukkitMCItemStack(ic.getCursor());
 		}
 
+		@Override
 		public int getSlot() {
 			return ic.getSlot();
 		}
 
+		@Override
 		public int getRawSlot() {
 			return ic.getRawSlot();
 		}
 
+		@Override
 		public MCSlotType getSlotType() {
 			return MCSlotType.valueOf(ic.getSlotType().name());
 		}
 
+		@Override
 		public boolean isLeftClick() {
 			return ic.getClick().isLeftClick();
 		}
 
+		@Override
 		public boolean isRightClick() {
 			return ic.getClick().isRightClick();
 		}
 
+		@Override
 		public boolean isShiftClick() {
 			return ic.getClick().isShiftClick();
 		}
 
+		@Override
 		public boolean isCreativeClick() {
 			return ic.getClick().isCreativeAction();
 		}
 		
+		@Override
 		public boolean isKeyboardClick() {
 			return ic.getClick().isKeyboardClick();
 		}
 
+		@Override
 		public void setCurrentItem(MCItemStack slot) {
 			if (slot != null) {
 				ic.setCurrentItem(((BukkitMCItemStack) slot).asItemStack());
@@ -208,14 +230,17 @@ public class BukkitInventoryEvents {
 			}
 		}
 
+		@Override
 		public void setCursor(MCItemStack cursor) {
 			ic.setCursor(((BukkitMCItemStack) cursor).asItemStack());
 		}
 
+		@Override
 		public MCInventoryAction getAction() {
 			return BukkitMCInventoryAction.getConvertor().getAbstractedEnum(ic.getAction());
 		}
 
+		@Override
 		public MCClickType getClickType() {
 			return BukkitMCClickType.getConvertor().getAbstractedEnum((ic.getClick()));
 		}
@@ -230,6 +255,7 @@ public class BukkitInventoryEvents {
 			this.id = e;
 		}
 
+		@Override
 		public Map<Integer, MCItemStack> getNewItems() {
 			Map<Integer, MCItemStack> ret = new HashMap<Integer, MCItemStack>();
 
@@ -242,6 +268,7 @@ public class BukkitInventoryEvents {
 			return ret;
 		}
 
+		@Override
 		public Set<Integer> getRawSlots() {
 			Set<Integer> ret = new HashSet<Integer>();
 
@@ -252,6 +279,7 @@ public class BukkitInventoryEvents {
 			return ret;
 		}
 
+		@Override
 		public Set<Integer> getInventorySlots() {
 			Set<Integer> ret = new HashSet<Integer>();
 
@@ -262,18 +290,22 @@ public class BukkitInventoryEvents {
 			return ret;
 		}
 
+		@Override
 		public MCItemStack getCursor() {
 			return new BukkitMCItemStack(id.getCursor());
 		}
 
+		@Override
 		public void setCursor(MCItemStack newCursor) {
 			id.setCursor(((BukkitMCItemStack) newCursor).asItemStack());
 		}
 
+		@Override
 		public MCItemStack getOldCursor() {
 			return new BukkitMCItemStack(id.getOldCursor());
 		}
 
+		@Override
 		public MCDragType getType() {
 			return MCDragType.valueOf(id.getType().name());
 		}
@@ -287,14 +319,17 @@ public class BukkitInventoryEvents {
 			this.ei = e;
 		}
 		
+		@Override
 		public MCBlock getEnchantBlock() {
 			return new BukkitMCBlock(ei.getEnchantBlock());
 		}
 		
+		@Override
 		public MCPlayer GetEnchanter() {
 			return new BukkitMCPlayer(ei.getEnchanter());
 		}
 		
+		@Override
 		public Map<MCEnchantment, Integer> getEnchantsToAdd() {
 			Map<MCEnchantment, Integer> ret = new HashMap<MCEnchantment, Integer>();
 
@@ -307,6 +342,7 @@ public class BukkitInventoryEvents {
 			return ret;
 		}
 		
+		@Override
 		public void setEnchantsToAdd(Map<MCEnchantment, Integer> enchants) {
 			Map<Enchantment, Integer> ret = ei.getEnchantsToAdd();
 			ret.clear();
@@ -331,10 +367,12 @@ public class BukkitInventoryEvents {
 		
 		
 		
+		@Override
 		public MCItemStack getItem() {
 			return new BukkitMCItemStack(ei.getItem());
 		}
 		
+		@Override
 		public void setItem(MCItemStack i) {
 			ItemStack item = ei.getItem();
 			ItemStack is = ((BukkitMCItemStack) i).asItemStack();
@@ -346,14 +384,17 @@ public class BukkitInventoryEvents {
 			item.setType(is.getType());
 		}
 		
+		@Override
 		public void setExpLevelCost(int level) {
 			ei.setExpLevelCost(level);
 		}
 		
+		@Override
 		public int getExpLevelCost() {
 			return ei.getExpLevelCost();
 		}
 		
+		@Override
 		public int whichButton() {
 			return ei.whichButton();
 		}
@@ -367,26 +408,32 @@ public class BukkitInventoryEvents {
 			this.pie = e;
 		}
 		
+		@Override
 		public MCBlock getEnchantBlock() {
 			return new BukkitMCBlock(pie.getEnchantBlock());
 		}
 		
+		@Override
 		public MCPlayer getEnchanter() {
 			return new BukkitMCPlayer(pie.getEnchanter());
 		}
 		
+		@Override
 		public int getEnchantmentBonus() {
 			return pie.getEnchantmentBonus();
 		}
 		
+		@Override
 		public int[] getExpLevelCostsOffered() {
 			return pie.getExpLevelCostsOffered();
 		}
 		
+		@Override
 		public MCItemStack getItem() {
 			return new BukkitMCItemStack(pie.getItem());
 		}
 		
+		@Override
 		public void setItem(MCItemStack i) {
 			ItemStack item = pie.getItem();
 			ItemStack is = ((BukkitMCItemStack) i).asItemStack();

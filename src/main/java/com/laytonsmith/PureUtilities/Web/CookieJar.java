@@ -34,6 +34,7 @@ public final class CookieJar {
 	}
 	private final Set<Cookie> cookies = new LinkedComparatorSet<Cookie>(new LinkedComparatorSet.EqualsComparator<Cookie>() {
 
+		@Override
 		public boolean checkIfEquals(Cookie val1, Cookie val2) {
 			return val1.compareTo(val2) == 0;
 		}

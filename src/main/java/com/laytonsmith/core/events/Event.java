@@ -3,6 +3,7 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
@@ -23,6 +24,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * This should return the name of the event.
      * @return 
      */
+	@Override
     public String getName();
     /**
      * This should return the docs that are used in the wiki. The format should
@@ -34,6 +36,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * &lt;expr&gt;
      * @return 
      */
+	@Override
     public String docs();
 
     /**
@@ -62,6 +65,8 @@ public interface Event extends Comparable<Event>, Documentation{
     
     /**
      * This is called to determine if an event is cancellable in the first place
+	 * @param e
+	 * @return 
      */
     public boolean isCancellable(BindableEvent e);
     
@@ -108,7 +113,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * the Event itself. AbstractEvent's default implementation is to simply run the
      * script, but an event can choose to override this functionality if needed.
      */
-    public void execute(Script s, BoundEvent b, Environment env, ActiveEvent activeEvent) throws EventException;
+    public void execute(ParseTree s, BoundEvent b, Environment env, ActiveEvent activeEvent) throws EventException;
     
     /**
      * If it is required to do something extra for server wide events, this can be
@@ -141,5 +146,12 @@ public interface Event extends Comparable<Event>, Documentation{
      * @return 
      */
     public boolean isCancelled(BindableEvent underlyingEvent);
+	
+	/**
+     * Some events don't need to show up in documentation. Maybe they are experimental, or magic
+     * functions. If they shouldn't show up in the normal API documentation, return false.
+	 * @return 
+     */
+    public boolean appearInDocumentation();
     
 }

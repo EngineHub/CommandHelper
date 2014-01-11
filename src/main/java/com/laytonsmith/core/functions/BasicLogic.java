@@ -32,10 +32,12 @@ public class BasicLogic {
 	@api
 	public static class _if extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "if";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
@@ -64,19 +66,23 @@ public class BasicLogic {
 			}
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {cond, trueRet, [falseRet]} If the first argument evaluates to a true value, the second argument is returned, otherwise the third argument is returned."
 					+ " If there is no third argument, it returns void.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -86,11 +92,13 @@ public class BasicLogic {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 		//Doesn't matter, this function is run out of state
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -172,14 +180,17 @@ public class BasicLogic {
 	@api
 	public static class _switch extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "switch";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {value, [equals, code]..., [defaultCode]} Provides a switch statement. If none of the conditions"
 					+ " match, and no default is provided, void is returned."
@@ -188,10 +199,12 @@ public class BasicLogic {
 					+ " case. Slices embedded in an array are fine as well.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -201,14 +214,17 @@ public class BasicLogic {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull(t);
 		}
@@ -328,24 +344,29 @@ public class BasicLogic {
 	@api(environments={GlobalEnv.class})
 	public static class ifelse extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "ifelse";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {[boolean1, code]..., [elseCode]} Provides a more convenient method"
 					+ " for running if/else chains. If none of the conditions are true, and"
 					+ " there is no 'else' condition, void is returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -355,14 +376,17 @@ public class BasicLogic {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull(t);
 		}
@@ -583,14 +607,17 @@ public class BasicLogic {
 			return ret.getBoolean();
 		}
 
+		@Override
 		public String getName() {
 			return "equals";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args.length <= 1) {
 				throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, t);
@@ -646,22 +673,27 @@ public class BasicLogic {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {var1, var2[, varX...]} Returns true or false if all the arguments are equal";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -687,14 +719,17 @@ public class BasicLogic {
 	@api
 	public static class sequals extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "sequals";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, val2} Uses a strict equals check, which determines if"
 					+ " two values are not only equal, but also the same type. So, while"
@@ -703,22 +738,27 @@ public class BasicLogic {
 					+ " than not, you want to use plain equals().";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			equals equals = new equals();
 			if (args[1].getClass().equals(args[0].getClass())
@@ -750,34 +790,42 @@ public class BasicLogic {
 	@api
 	public static class snequals extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "snequals";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, val2} Equivalent to not(sequals(val1, val2))";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(!((CBoolean) new sequals().exec(t, environment, args)).getBoolean(), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -802,35 +850,43 @@ public class BasicLogic {
 	@api
 	public static class nequals extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "nequals";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, val2} Returns true if the two values are NOT equal, or false"
 					+ " otherwise. Equivalent to not(equals(val1, val2))";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			equals e = new equals();
 			CBoolean b = (CBoolean) e.exec(t, env, args);
@@ -857,35 +913,43 @@ public class BasicLogic {
 	@api
 	public static class equals_ic extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "equals_ic";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, val2[, valX...]} Returns true if all the values are equal to each other, while"
 					+ " ignoring case.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length <= 1) {
 				throw new ConfigRuntimeException("At least two arguments must be passed to equals_ic", ExceptionType.InsufficientArgumentsException, t);
@@ -951,35 +1015,43 @@ public class BasicLogic {
 	@api
 	public static class nequals_ic extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "nequals_ic";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, val2} Returns true if the two values are NOT equal to each other, while"
 					+ " ignoring case.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			equals_ic e = new equals_ic();
 			return new CBoolean(!((CBoolean) e.exec(t, environment, args)).getBoolean(), t);
@@ -1005,18 +1077,22 @@ public class BasicLogic {
 	@api
 	public static class ref_equals extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray && args[1] instanceof CArray){
 				return new CBoolean(args[0] == args[1], t);
@@ -1025,20 +1101,24 @@ public class BasicLogic {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "ref_equals";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, val2} Returns true if and only if the two values are actually the same reference."
 					+ " Primitives that are equal will always be the same reference, this method is only useful for"
 					+ " object/array comparisons.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1065,36 +1145,44 @@ public class BasicLogic {
 	@api
 	public static class lt extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "lt";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
 			return new CBoolean(arg1 < arg2, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {var1, var2} Returns the results of a less than operation";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -1120,36 +1208,44 @@ public class BasicLogic {
 	@api
 	public static class gt extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "gt";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
 			return new CBoolean(arg1 > arg2, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {var1, var2} Returns the result of a greater than operation";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -1175,36 +1271,44 @@ public class BasicLogic {
 	@api
 	public static class lte extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "lte";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
 			return new CBoolean(arg1 <= arg2, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {var1, var2} Returns the result of a less than or equal to operation";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -1231,36 +1335,44 @@ public class BasicLogic {
 	@api
 	public static class gte extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "gte";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
 			return new CBoolean(arg1 >= arg2, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {var1, var2} Returns the result of a greater than or equal to operation";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -1286,14 +1398,17 @@ public class BasicLogic {
 	@api(environments={GlobalEnv.class})
 	public static class and extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "and";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
@@ -1317,23 +1432,28 @@ public class BasicLogic {
 			return new CBoolean(true, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {var1, [var2...]} Returns the boolean value of a logical AND across all arguments. Uses lazy determination, so once "
 					+ "an argument returns false, the function returns.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -1372,6 +1492,7 @@ public class BasicLogic {
 			};
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CONSTANT_OFFLINE);
 		}
@@ -1380,14 +1501,17 @@ public class BasicLogic {
 	@api(environments={GlobalEnv.class})
 	public static class or extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "or";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
@@ -1402,7 +1526,7 @@ public class BasicLogic {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().eval(tree, env);
+				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				if (Static.getBoolean(c)) {
 					return new CBoolean(true, t);
 				}
@@ -1410,23 +1534,28 @@ public class BasicLogic {
 			return new CBoolean(false, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy determination, so once an "
 					+ "argument resolves to true, the function returns.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -1464,6 +1593,7 @@ public class BasicLogic {
 			};
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CONSTANT_OFFLINE);
 		}
@@ -1472,34 +1602,42 @@ public class BasicLogic {
 	@api
 	public static class not extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "not";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CBoolean(!Static.getBoolean(args[0]), t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {var1} Returns the boolean value of a logical NOT for this argument";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -1525,34 +1663,42 @@ public class BasicLogic {
 	@api
 	public static class xor extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "xor";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, val2} Returns the xor of the two values.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean val1 = Static.getBoolean(args[0]);
 			boolean val2 = Static.getBoolean(args[1]);
@@ -1578,34 +1724,42 @@ public class BasicLogic {
 	@api
 	public static class nand extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "nand";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, [val2...]} Return the equivalent of not(and())";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) {
 			return new CNull(t);
 		}
@@ -1633,34 +1787,42 @@ public class BasicLogic {
 	@api
 	public static class nor extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "nor";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, [val2...]} Returns the equivalent of not(or())";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) {
 			return new CNull(t);
 		}
@@ -1688,34 +1850,42 @@ public class BasicLogic {
 	@api
 	public static class xnor extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "xnor";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {val1, val2} Returns the xnor of the two values";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			xor xor = new xor();
 			boolean val = ((CBoolean) xor.exec(t, environment, args)).getBoolean();
@@ -1741,34 +1911,42 @@ public class BasicLogic {
 	@api
 	public static class bit_and extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "bit_and";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "int {int1, [int2...]} Returns the bitwise AND of the values";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_and requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
@@ -1801,34 +1979,42 @@ public class BasicLogic {
 	@api
 	public static class bit_or extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "bit_or";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "int {int1, [int2...]} Returns the bitwise OR of the specified values";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_or requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
@@ -1863,34 +2049,42 @@ public class BasicLogic {
 	@api
 	public static class bit_not extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "bit_not";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {int1} Returns the bitwise NOT of the given value";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(~Static.getInt(args[0], t), t);
 		}
@@ -1914,34 +2108,42 @@ public class BasicLogic {
 	@api
 	public static class lshift extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "lshift";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "int {value, bitsToShift} Left shifts the value bitsToShift times";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
@@ -1967,34 +2169,42 @@ public class BasicLogic {
 	@api
 	public static class rshift extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "rshift";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "int {value, bitsToShift} Right shifts the value bitsToShift times";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
@@ -2021,35 +2231,43 @@ public class BasicLogic {
 	@api
 	public static class urshift extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "urshift";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "int {value, bitsToShift} Right shifts value bitsToShift times, pushing a 0, making"
 					+ " this an unsigned right shift.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
@@ -2077,27 +2295,33 @@ public class BasicLogic {
 	@hide("This isn't a true function, and shouldn't be directly used. It will eventually be removed.")
 	public static class _elseif extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "elseif";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "elseif {param} Returns an elseif construct. Used internally by the compiler, use"
 					+ " in actual code will have undefined behavior.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -2112,10 +2336,12 @@ public class BasicLogic {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull(t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2137,27 +2363,33 @@ public class BasicLogic {
 	@hide("This isn't a true function, and shouldn't be used as such. Eventually this will be removed.")
 	public static class _else extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "else";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "else {param} Returns an else construct. Used internally by the compiler, use in"
 					+ " code will result in undefined behavior.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -2172,10 +2404,12 @@ public class BasicLogic {
 			return new CIdentifier("else", nodes[0], t);
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull(t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

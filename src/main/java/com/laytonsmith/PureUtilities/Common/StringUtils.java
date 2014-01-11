@@ -193,14 +193,17 @@ public final class StringUtils {
 		final List<T> list = new ArrayList<T>(set);
 		return doJoin(new ItemGetter<T>() {
 
+			@Override
 			public T get(int index) {
 				return list.get(index);
 			}
 
+			@Override
 			public int size() {
 				return list.size();
 			}
 
+			@Override
 			public boolean isEmpty() {
 				return list.isEmpty();
 			}
@@ -298,14 +301,17 @@ public final class StringUtils {
 	public static String Join(final Object[] list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<Object> renderer) {
 		return doJoin(new ItemGetter<Object>() {
 
+			@Override
 			public Object get(int index) {
 				return list[index];
 			}
 
+			@Override
 			public int size() {
 				return list.length;
 			}
 
+			@Override
 			public boolean isEmpty() {
 				return list.length == 0;
 			}
@@ -404,14 +410,17 @@ public final class StringUtils {
 	public static <T> String Join(final List<T> list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer) {
 		return doJoin(new ItemGetter<T>() {
 
+			@Override
 			public T get(int index) {
 				return list.get(index);
 			}
 
+			@Override
 			public int size() {
 				return list.size();
 			}
 
+			@Override
 			public boolean isEmpty() {
 				return list.isEmpty();
 			}
@@ -433,6 +442,7 @@ public final class StringUtils {
 		if(renderer == null){
 			renderer = new Renderer<T>() {
 
+				@Override
 				public String toString(T item) {
 					if(item == null){
 						return "null";
@@ -828,7 +838,7 @@ public final class StringUtils {
 			return s.toString();
 		}
 		//Ok, actually have to do the multiply now.
-		StringBuilder b = new StringBuilder();
+		StringBuilder b = new StringBuilder(s.length() * count);
 		for(int i = 0; i < count; i++){
 			b.append(s);
 		}

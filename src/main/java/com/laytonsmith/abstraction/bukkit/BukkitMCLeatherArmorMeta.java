@@ -25,10 +25,12 @@ public class BukkitMCLeatherArmorMeta extends BukkitMCItemMeta implements MCLeat
 		lam = (LeatherArmorMeta)o;
 	}
 
+	@Override
 	public MCColor getColor() {
 		return BukkitMCColor.GetMCColor(lam.getColor());
 	}
 
+	@Override
 	public void setColor(MCColor color) {
 		lam.setColor(BukkitMCColor.GetColor(color));
 	}

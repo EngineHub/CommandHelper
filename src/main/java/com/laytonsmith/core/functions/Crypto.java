@@ -37,33 +37,41 @@ public class Crypto {
     @api
     public static class rot13 extends AbstractFunction implements Optimizable {
 
+		@Override
         public String getName() {
             return "rot13";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "string {val} Returns the rot13 version of val. Note that rot13(rot13(val)) returns val";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             String s = args[0].val();
             StringBuilder b = new StringBuilder();
@@ -105,35 +113,43 @@ public class Crypto {
     @api
     public static class md5 extends AbstractFunction implements Optimizable {
 
+		@Override
         public String getName() {
             return "md5";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "string {val} Returns the md5 hash of the specified string. The md5 hash is no longer considered secure, so you should"
                     + " not use it for storage of sensitive data, however for general hashing, it is a quick and easy solution. md5 is"
                     + " a one way hashing algorithm.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
@@ -165,34 +181,42 @@ public class Crypto {
     @api
     public static class sha1 extends AbstractFunction implements Optimizable {
 
+		@Override
         public String getName() {
             return "sha1";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "string {val} Returns the sha1 hash of the specified string. Note that sha1 is considered more secure than md5, and is"
                     + " typically used when storing sensitive data. It is a one way hashing algorithm.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
@@ -223,34 +247,42 @@ public class Crypto {
     
     @api public static class sha256 extends AbstractFunction implements Optimizable {
 
+	@Override
 	public String getName() {
             return "sha256";
         }
 
+	@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+	@Override
         public String docs() {
             return "string {val} Returns the sha256 hash of the specified string. Note that sha256 is considered more secure than sha1 and md5, and is"
                     + " typically used when storing sensitive data. It is a one way hashing algorithm.";
         }
 
+	@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
+	@Override
         public boolean isRestricted() {
             return false;
         }
+	@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
 
+	@Override
         public Boolean runAsync() {
             return null;
         }
 
+	@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
@@ -282,18 +314,22 @@ public class Crypto {
     
     @api public static class bcrypt extends AbstractFunction{
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             int log_rounds = 5;
             if(args.length == 2){
@@ -307,14 +343,17 @@ public class Crypto {
 			}
         }
 
+		@Override
         public String getName() {
             return "bcrypt";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2};
         }
 
+		@Override
         public String docs() {
             return "string {val, [workload]} Encrypts a value using bcrypt, using the specified workload, or 5 if none provided. BCrypt is supposedly more secure than SHA1, and"
                     + " certainly more secure than md5. Note that using bcrypt is slower, which is one of its security advantages, however, setting the workload to higher numbers"
@@ -322,6 +361,7 @@ public class Crypto {
                     + " many seconds, and setting it to 15 will take a few minutes. The workload must be between 5 and 31. See the documentation for check_bcrypt for full usage.";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -338,36 +378,44 @@ public class Crypto {
     
     @api public static class check_bcrypt extends AbstractFunction{
 
+		@Override
         public ExceptionType[] thrown() {
             return null;
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             boolean match = BCrypt.checkpw(args[0].val(), args[1].val());
             return new CBoolean(match, t);
         }
 
+		@Override
         public String getName() {
             return "check_bcrypt";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "boolean {plaintext, hash} Checks to see if this plaintext password does in fact hash to the hash specified. Unlike md5 or sha1, simply comparing hashes won't work. Consider the following usage:"
                     + " assign(@plain, 'plaintext') assign(@hash, bcrypt(@plain)) msg(if(check_bcrypt(@plain, @hash), 'They match!', 'They do not match!'))";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -386,18 +434,22 @@ public class Crypto {
 	@api
 	public static class base64_encode extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = Static.getByteArray(args[0], t);
 			byte[] data = ba.asByteArrayCopy();
@@ -405,18 +457,22 @@ public class Crypto {
 			return CByteArray.wrap(data, t);
 		}
 
+		@Override
 		public String getName() {
 			return "base64_encode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "byte_array {byteData} Encodes the given byte_array data into a base 64 byte_array.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -433,18 +489,22 @@ public class Crypto {
 	@api
 	public static class base64_decode extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = Static.getByteArray(args[0], t);
 			byte[] data = ba.asByteArrayCopy();
@@ -452,18 +512,22 @@ public class Crypto {
 			return CByteArray.wrap(data, t);
 		}
 
+		@Override
 		public String getName() {
 			return "base64_decode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "byte_array {base64data} Decodes the base 64 encoded byte_array data back into the original byte_array data.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}

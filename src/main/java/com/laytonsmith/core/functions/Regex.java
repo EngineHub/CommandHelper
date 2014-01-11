@@ -35,14 +35,17 @@ public class Regex {
     
     @api public static class reg_match extends AbstractFunction implements Optimizable {
 
+		@Override
         public String getName() {
             return "reg_match";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "array {pattern, subject} Searches for the given pattern, and returns an array with the results. Captures are supported."
                     + " If the pattern is not found anywhere in the subject, an empty array is returned. The indexes of the array"
@@ -50,23 +53,28 @@ public class Regex {
                     + " the regex.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
@@ -129,36 +137,44 @@ public class Regex {
     
     @api public static class reg_match_all extends AbstractFunction implements Optimizable {
 
+		@Override
         public String getName() {
             return "reg_match_all";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "array {pattern, subject} Searches subject for all matches to the regular expression given in pattern, unlike reg_match,"
                     + " which just returns the first match.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
@@ -220,36 +236,44 @@ public class Regex {
     
     @api public static class reg_replace extends AbstractFunction implements Optimizable {
 
+		@Override
         public String getName() {
             return "reg_replace";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{3};
         }
 
+		@Override
         public String docs() {
             return "string {pattern, replacement, subject} Replaces any occurances of pattern with the replacement in subject."
                     + " Back references are allowed.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String replacement = args[1].val();
@@ -317,14 +341,17 @@ public class Regex {
 		
 		private final static String split = new StringHandling.split().getName();
 
+		@Override
         public String getName() {
             return "reg_split";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2, 3};
         }
 
+		@Override
         public String docs() {
             return "array {pattern, subject, [limit]} Splits a string on the given regex, and returns an array of the parts. If"
                     + " nothing matched, an array with one element, namely the original subject, is returned."
@@ -332,23 +359,28 @@ public class Regex {
 					+ " that number of splits will occur.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
@@ -409,35 +441,43 @@ public class Regex {
     
     @api public static class reg_count extends AbstractFunction implements Optimizable {
 
+		@Override
         public String getName() {
             return "reg_count";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "int {pattern, subject} Counts the number of occurances in the subject.";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
@@ -478,36 +518,44 @@ public class Regex {
     @api
     public static class reg_escape extends AbstractFunction implements Optimizable{
 
+		@Override
         public ExceptionType[] thrown() {
             return null;
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             return new CString(java.util.regex.Pattern.quote(args[0].val()), t);
         }
 
+		@Override
         public String getName() {
             return "reg_escape";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "string {arg} Escapes arg so that it may be used directly in a regular expression, without fear that"
                     + " it will have special meaning; that is, it escapes all special characters. Use this if you need"
                     + " to use user input or similar as a literal search index.";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }

@@ -33,6 +33,7 @@ public class BukkitMCBlock implements MCBlock{
         this.b = b;
     }
     
+	@Override
     public int getTypeId(){
         if(b == null){
             return 0;
@@ -40,22 +41,27 @@ public class BukkitMCBlock implements MCBlock{
         return b.getTypeId();
     }
     
+	@Override
     public byte getData(){
         return b.getData();
     }
 
+	@Override
     public void setTypeId(int idata) {
         b.setTypeId(idata);
     }
 
+	@Override
     public void setData(byte imeta) {
         b.setData(imeta);
     }
 
+	@Override
 	public void setTypeAndData(int type, byte data, boolean physics) {
 		b.setTypeIdAndData(type, data, physics);
 	}
 
+	@Override
     public MCBlockState getState() {
         if(b.getState() == null){
             return null;
@@ -66,6 +72,7 @@ public class BukkitMCBlock implements MCBlock{
         return new BukkitMCBlockState(b.getState());
     }
 
+	@Override
     public MCMaterial getType() {
         if(b.getType() == null){
             return null;
@@ -73,18 +80,22 @@ public class BukkitMCBlock implements MCBlock{
         return new BukkitMCMaterial(b.getType());
     }
 
+	@Override
     public MCWorld getWorld() {
         return new BukkitMCWorld(b.getWorld());
     }
 
+	@Override
     public int getX() {
         return b.getX();
     }
 
+	@Override
     public int getY() {
         return b.getY();
     }
 
+	@Override
     public int getZ() {
         return b.getZ();
     }
@@ -93,18 +104,22 @@ public class BukkitMCBlock implements MCBlock{
         return b;
     }
 
+	@Override
     public MCSign getSign() {
         return new BukkitMCSign((Sign)b.getState());
     }
 
+	@Override
     public boolean isSign() {
         return (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN);
     }
 
+	@Override
     public boolean isNull() {
         return b == null;
     }
 
+	@Override
     public Collection<MCItemStack> getDrops() {
         Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
         for(ItemStack is : b.getDrops()){
@@ -113,6 +128,7 @@ public class BukkitMCBlock implements MCBlock{
         return collection;
     }
 	
+	@Override
 	public Collection<MCItemStack> getDrops(MCItemStack tool) {
 		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
 		for(ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())){
@@ -126,47 +142,58 @@ public class BukkitMCBlock implements MCBlock{
 		return b.toString();
 	}
 
+	@Override
 	public boolean isSolid() {
 		return b.getType().isSolid();
 	}
 
+	@Override
 	public boolean isFlammable() {
 		return b.getType().isFlammable();
 	}
 
+	@Override
 	public boolean isTransparent() {
 		return b.getType().isTransparent();
 	}
 
+	@Override
 	public boolean isOccluding() {
 		return b.getType().isOccluding();
 	}
 
+	@Override
 	public boolean isBurnable() {
 		return b.getType().isBurnable();
 	}
 
+	@Override
 	public MCLocation getLocation() {
 		return new BukkitMCLocation(b.getLocation());
 	}
 
+	@Override
 	public int getLightLevel() {
 		return b.getLightLevel();
 	}
 
+	@Override
 	public int getBlockPower() {
 		// this is not useful
 		return b.getBlockPower();
 	}
 	
+	@Override
 	public boolean isBlockPowered() {
 		return b.isBlockPowered();
 	}
 
+	@Override
 	public MCBlock getRelative(MCBlockFace face) {
 		return new BukkitMCBlock(b.getRelative(face.getModX(), face.getModY(), face.getModZ()));
 	}
 
+	@Override
 	public MCBlockFace getFace(MCBlock block) {
 		return BukkitMCBlockFace.getConvertor().getAbstractedEnum(b.getFace(((BukkitMCBlock)block).b));
 	}

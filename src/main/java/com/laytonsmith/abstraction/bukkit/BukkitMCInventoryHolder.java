@@ -15,10 +15,12 @@ public class BukkitMCInventoryHolder implements MCInventoryHolder {
 		holder = i;
 	}
 	
+	@Override
 	public MCInventory getInventory() {
 		return new BukkitMCInventory(holder.getInventory());
 	}
 
+	@Override
 	public Object getHandle() {
 		return holder;
 	}

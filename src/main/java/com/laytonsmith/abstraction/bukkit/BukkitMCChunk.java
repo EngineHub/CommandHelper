@@ -17,14 +17,17 @@ public class BukkitMCChunk implements MCChunk {
 		this.c = c;
 	}
 	
+	@Override
 	public int getX() {
 		return c.getX();
 	}
 
+	@Override
 	public int getZ() {
 		return c.getZ();
 	}
 
+	@Override
 	public MCEntity[] getEntities() {
 		MCEntity[] ret = new MCEntity[c.getEntities().length];
 		for (int i=0; i < c.getEntities().length; i++) {
@@ -33,10 +36,12 @@ public class BukkitMCChunk implements MCChunk {
 		return ret;
 	}
 
+	@Override
 	public MCWorld getWorld() {
 		return new BukkitMCWorld(c.getWorld());
 	}
 	
+	@Override
 	public Object getHandle() {
 		return c;
 	}

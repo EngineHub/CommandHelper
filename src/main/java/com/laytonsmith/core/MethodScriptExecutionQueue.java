@@ -32,6 +32,7 @@ public class MethodScriptExecutionQueue extends ExecutionQueue {
 	private Thread.UncaughtExceptionHandler getExceptionHandler(){
 		Thread.UncaughtExceptionHandler uceh = new Thread.UncaughtExceptionHandler() {
 
+			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				Environment env = Environment.createEnvironment(MethodScriptExecutionQueue.this.env);
 				if(e instanceof ConfigRuntimeException){

@@ -33,9 +33,11 @@ public class DocGenUI extends javax.swing.JFrame {
 	DocGenUIHandler handler;
 	DocGenUIHandler.ProgressManager manager = new DocGenUIHandler.ProgressManager() {
 
+					@Override
 					public void setProgress(final Integer i) {
 						SwingUtilities.invokeLater(new Runnable() {
 
+							@Override
 							public void run() {
 								if(i == null){
 									progress.setIndeterminate(true);
@@ -48,9 +50,11 @@ public class DocGenUI extends javax.swing.JFrame {
 						});
 					}
 					
+					@Override
 					public void setStatus(final String status){
 						SwingUtilities.invokeLater(new Runnable() {
 
+							@Override
 							public void run() {
 								infoLabel.setText(status);								
 							}
@@ -98,6 +102,7 @@ public class DocGenUI extends javax.swing.JFrame {
 			manager.setProgress(0);
 			SwingUtilities.invokeLater(new Runnable() {
 
+				@Override
 				public void run() {
 					uploadButton.setText("Upload");
 				}
@@ -279,6 +284,7 @@ public class DocGenUI extends javax.swing.JFrame {
 		} else {
 			new Thread(new Runnable() {
 
+				@Override
 				public void run() {
 					try {
 						Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
@@ -300,6 +306,7 @@ public class DocGenUI extends javax.swing.JFrame {
 	 * @param args the command line arguments
 	 */
 	public static void main(String args[]) {
+		Implementation.setServerType(Implementation.Type.BUKKIT);
 		try {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 		} catch (IOException ex) {
@@ -309,6 +316,7 @@ public class DocGenUI extends javax.swing.JFrame {
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
 
+				@Override
 				public void run() {
 					try {
 						UIManager.setLookAndFeel(new SubstanceGraphiteGlassLookAndFeel());
@@ -331,11 +339,11 @@ public class DocGenUI extends javax.swing.JFrame {
 		}
 		
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenUI.class));
-		Implementation.setServerType(Implementation.Type.BUKKIT);
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 		/* Create and display the form */
 		java.awt.EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				new DocGenUI().setVisible(true);
 			}

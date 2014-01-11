@@ -17,14 +17,17 @@ public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 		this.sm = (SkullMeta) o;
 	}
 
+	@Override
 	public boolean hasOwner() {
 		return sm.hasOwner();
 	}
 
+	@Override
 	public String getOwner() {
 		return sm.getOwner();
 	}
 
+	@Override
 	public boolean setOwner(String owner) {
 		return sm.setOwner(owner);
 	}

@@ -48,7 +48,7 @@ public class DocGen {
 			System.out.println(examples("string_append", true));
 			//System.exit(0);
 			//events("wiki");
-			//System.out.println(Template("persistance_network"));
+			//System.out.println(Template("persistence_network"));
 		} catch(Throwable t){
 			t.printStackTrace();
 			System.exit(1);
@@ -194,6 +194,7 @@ public class DocGen {
         List<Map.Entry<Class, ArrayList<FunctionBase>>> entrySet = new ArrayList<Map.Entry<Class, ArrayList<FunctionBase>>>(functionlist.entrySet());
         Collections.sort(entrySet, new Comparator<Map.Entry<Class, ArrayList<FunctionBase>>>() {
 
+			@Override
             public int compare(Map.Entry<Class, ArrayList<FunctionBase>> o1, Map.Entry<Class, ArrayList<FunctionBase>> o2) {
                 return o1.getKey().getName().compareTo(o2.getKey().getName());
             }
@@ -272,6 +273,7 @@ public class DocGen {
             }
             Collections.sort(documentableFunctions, new Comparator<FunctionBase>() {
 
+				@Override
                 public int compare(FunctionBase o1, FunctionBase o2) {
                     return o1.getName().compareTo(o2.getName());
                 }

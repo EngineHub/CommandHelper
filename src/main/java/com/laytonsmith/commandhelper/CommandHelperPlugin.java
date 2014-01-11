@@ -20,25 +20,41 @@ package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCCommand;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.AliasCore;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.ExtensionManager;
+import com.laytonsmith.core.Installer;
+import com.laytonsmith.core.Main;
+import com.laytonsmith.core.MethodScriptExecutionQueue;
+import com.laytonsmith.core.PermissionsResolver;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.UpgradeLog;
+import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.persistance.DataSourceException;
-import com.laytonsmith.persistance.PersistanceNetwork;
-import com.laytonsmith.persistance.ReadOnlyException;
+import com.laytonsmith.persistence.DataSourceException;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.ReadOnlyException;
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
@@ -85,7 +101,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PermissionsResolver permissionsResolver;
-	public PersistanceNetwork persistanceNetwork;
+	public PersistenceNetwork persistenceNetwork;
 	public boolean firstLoad = true;
 	public long interpreterUnlockedUntil = 0;
 	/**
@@ -107,14 +123,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
+		Implementation.setServerType(Implementation.Type.BUKKIT);
 		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());		
 		CommandHelperFileLocations.getDefault().getCacheDirectory().mkdirs();
+		CommandHelperFileLocations.getDefault().getPreferencesDirectory().mkdirs();
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
 		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
-		Implementation.setServerType(Implementation.Type.BUKKIT);
 		UpgradeLog upgradeLog = new UpgradeLog(CommandHelperFileLocations.getDefault().getUpgradeLogFile());
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
@@ -157,6 +174,56 @@ public class CommandHelperPlugin extends JavaPlugin {
 				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
+			}
+		});
+		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
+
+			File cd = CommandHelperFileLocations.getDefault().getConfigDirectory();
+			private final String breadcrumb = "move-preference-files-v1.0";
+			@Override
+			public boolean doRun() {
+				return !hasBreadcrumb(breadcrumb)
+						&& new File(cd, "preferences.ini").exists();
+			}
+
+			@Override
+			public void run() {
+				//We need to move the following files:
+				//1. persistance.config to prefs/persistence.ini (note the correct spelling)
+				//2. preferences.ini to prefs/preferences.ini
+				//3. profiler.config to prefs/profiler.ini
+				//4. sql-profiles.xml to prefs/sql-profiles.xml
+				//5. We are not moving loggerPreferences.txt, instead just deleting it,
+				//	because the defaults have changed. Most people aren't using this feature
+				//	anyways. (The new one will write itself out upon installation.)
+				//Other than the config/prefs directory, we are hardcoding all the values, so
+				//we know they are correct (for old values). Any errors will be reported, but will not
+				//stop the entire process.
+				CommandHelperFileLocations p = CommandHelperFileLocations.getDefault();
+				try {
+					FileUtil.move(new File(cd, "persistance.config"), p.getPersistenceConfig());
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				try {
+					FileUtil.move(new File(cd, "preferences.ini"), p.getPreferencesFile());
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				try {
+					FileUtil.move(new File(cd, "profiler.config"), p.getProfilerConfigFile());
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				try {
+					FileUtil.move(new File(cd, "sql-profiles.xml"), p.getSQLProfilesFile());
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				new File(cd, "logs/debug/loggerPreferences.txt").delete();
+				leaveBreadcrumb(breadcrumb);
+				System.out.println("CommandHelper: Your preferences files have all been relocated to " + p.getPreferencesDirectory());
+				System.out.println("CommandHelper: The loggerPreferences.txt file has been deleted and re-created, as the defaults have changed.");
 			}
 		});
 		try {
@@ -211,10 +278,17 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
-		Static.getLogger().log(Level.INFO, "CommandHelper/CommandHelper {0} enabled", getDescription().getVersion());
+		Static.getLogger().log(Level.INFO, "[CommandHelper] CommandHelper {0} enabled", getDescription().getVersion());
 		if(firstLoad){
-			ExtensionManager.Initialize(CommandHelperFileLocations.getDefault().getExtensionsDirectory(),
-					ClassDiscovery.getDefaultInstance());
+			ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
+			
+			// Only does stuff if we're on Windows.
+			ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
+			
+			System.out.println("[CommandHelper] Loading extensions...");
+			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+			System.out.println("[CommandHelper] Extension loading complete.");
+			
 			firstLoad = false;
 		}
 		version = new SimpleVersion(getDescription().getVersion());
@@ -244,6 +318,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		//Create a new thread pool, with a custom ThreadFactory,
 		//so we can more clearly name our threads.
 		hostnameLookupThreadPool = Executors.newFixedThreadPool(3, new ThreadFactory() {
+			@Override
 			public Thread newThread(Runnable r) {
 				return new Thread(r, "CommandHelperHostnameLookup-" + (++hostnameThreadPoolID));
 			}
@@ -281,6 +356,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 		//free up some memory
 		StaticLayer.GetConvertor().runShutdownHooks();
 		stopExecutionQueue();
+		
+		ExtensionManager.Cleanup();
+		
 		ac = null;
 		wep = null;
 	}
@@ -433,7 +511,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 				String alias = CommandHelperPlugin.joinString(args, " ");
 				try {
-					int id = um.addAlias(alias, persistanceNetwork);
+					int id = um.addAlias(alias, persistenceNetwork);
 					if (id > -1) {
 						Static.SendMessage(player, MCChatColor.YELLOW + "Alias added with id '" + id + "'");
 					}
@@ -463,7 +541,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			} catch (NumberFormatException e) {
 				//Meh. Index out of bounds, or number format exception. Whatever, show page 1
 			}
-			Static.SendMessage(player, um.getAllAliases(page, persistanceNetwork));
+			Static.SendMessage(player, um.getAllAliases(page, persistenceNetwork));
 			commandRunning.remove(player);
 			return true;
 			// Delete alias
@@ -476,7 +554,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			try {
 				ArrayList<String> deleted = new ArrayList<String>();
 				for (String arg : args) {
-					um.delAlias(Integer.parseInt(arg), persistanceNetwork);
+					um.delAlias(Integer.parseInt(arg), persistenceNetwork);
 					deleted.add("#" + arg);
 				}
 				if (args.length > 1) {

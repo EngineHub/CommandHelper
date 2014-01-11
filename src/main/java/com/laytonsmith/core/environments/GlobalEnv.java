@@ -10,9 +10,10 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
+import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
-import com.laytonsmith.persistance.PersistanceNetwork;
+import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private ExecutionQueue executionQueue = null;
 	private Profiler profiler = null;
 	//This is changed reflectively in a test, please don't rename.
-	private PersistanceNetwork persistanceNetwork = null;
+	private PersistenceNetwork persistenceNetwork = null;
 	private PermissionsResolver permissionsResolver = null;
 	private Map<String, Boolean> flags = new HashMap<String, Boolean>();
 	private Map<String, Object> custom = new HashMap<String, Object>();
@@ -41,16 +42,17 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private DaemonManager daemonManager = new DaemonManager();
 	private boolean dynamicScriptingMode = false;
 	private Profiles profiles;
+	private BoundEvent.ActiveEvent event = null;
 
-	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistanceNetwork network, PermissionsResolver resolver, File root, Profiles profiles) {
+	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network, PermissionsResolver resolver, File root, Profiles profiles) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
 		Static.AssertNonNull(profiler, "Profiler cannot be null");
-		Static.AssertNonNull(network, "PersistanceNetwork cannot be null");
+		Static.AssertNonNull(network, "PersistenceNetwork cannot be null");
 		Static.AssertNonNull(resolver, "PermissionsResolver cannot be null");
 		Static.AssertNonNull(root, "Root file cannot be null");
 		this.executionQueue = queue;
 		this.profiler = profiler;
-		this.persistanceNetwork = network;
+		this.persistenceNetwork = network;
 		this.permissionsResolver = resolver;
 		this.root = root;
 		if (this.executionQueue instanceof MethodScriptExecutionQueue) {
@@ -67,8 +69,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		return profiler;
 	}
 
-	public PersistanceNetwork GetPersistanceNetwork() {
-		return persistanceNetwork;
+	public PersistenceNetwork GetPersistenceNetwork() {
+		return persistenceNetwork;
 	}
 
 	public PermissionsResolver GetPermissionsResolver() {
@@ -245,4 +247,16 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public Profiles getSQLProfiles() {
 		return this.profiles;
 	}
+	
+	public void SetEvent(BoundEvent.ActiveEvent e){
+        event = e;
+    }
+    
+    /**
+     * Returns the active event, or null if not in scope.
+     * @return 
+     */
+    public BoundEvent.ActiveEvent GetEvent(){
+        return event;
+    }
 }

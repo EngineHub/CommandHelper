@@ -382,6 +382,7 @@ public class FileUtil {
 		final MutableObject result = new MutableObject("ASCII");
 		det.Init(new nsICharsetDetectionObserver() {
 
+			@Override
 			public void Notify(String charset) {
 				result.setObject(charset);
 			}

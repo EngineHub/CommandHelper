@@ -19,10 +19,12 @@ public class BukkitMCBlockState implements MCBlockState {
         this.bs = state;
     }
 
+	@Override
     public MCMaterialData getData() {
         return new BukkitMCMaterialData(bs.getData());
     }
 
+	@Override
     public int getTypeId() {
         return bs.getTypeId();
     }

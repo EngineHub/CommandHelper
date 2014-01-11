@@ -11,6 +11,7 @@ import com.laytonsmith.core.constructs.Construct;
  */
 public class BashPlatformResolver implements PlatformResolver{
 
+	@Override
     public String outputConstant(Construct c) {
         if(c instanceof CString){
             return "\"" + c.val() + "\"";

@@ -17,7 +17,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.persistance.DataSource;
+import com.laytonsmith.persistence.DataSource;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -161,6 +161,7 @@ public class DocGenTemplates {
 	
 	public static Generator data_source_modifiers = new Generator() {
 
+		@Override
 		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
 			for(DataSource.DataSourceModifier mod : DataSource.DataSourceModifier.values()){
@@ -171,8 +172,9 @@ public class DocGenTemplates {
 		}
 	};
 	
-	public static Generator persistance_connections = new Generator(){
+	public static Generator persistence_connections = new Generator(){
 
+		@Override
 		public String generate(String ... args) {
 			Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
 			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*?)\\s*$");
@@ -220,6 +222,7 @@ public class DocGenTemplates {
 	
 	public static Generator optimization_explanations = new Generator(){
 
+		@Override
 		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
 			for(Optimizable.OptimizationOption option : Optimizable.OptimizationOption.values()){
@@ -234,6 +237,7 @@ public class DocGenTemplates {
 	
 	public static Generator BURST_VALUE_TYPES = new Generator() {
 
+		@Override
 		public String generate(String ... args) {
 			return StringUtils.Join(Burst.BurstType.values(), ", ", ", or ", " or ");
 		}
@@ -241,6 +245,7 @@ public class DocGenTemplates {
 	
 	public static Generator BURST_TYPE_DOCS = new Generator() {
 
+		@Override
 		public String generate(String ... args) {
 			//TODO
 			return "TODO";
@@ -249,6 +254,7 @@ public class DocGenTemplates {
 	
 	public static Generator EXCEPTION_TYPES = new Generator() {
 
+		@Override
 		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
 			for(Documentation d : ExceptionType.values()){
@@ -269,6 +275,7 @@ public class DocGenTemplates {
 	 */
 	public static Generator GET_CLASS = new Generator() {
 
+		@Override
 		public String generate(String... args) {
 			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
 			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getName() + "]";
@@ -293,6 +300,7 @@ public class DocGenTemplates {
 	 */
 	public static Generator GET_SIMPLE_CLASS = new Generator() {
 
+		@Override
 		public String generate(String... args) {
 			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
 			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getSimpleName() + "]";
@@ -306,6 +314,7 @@ public class DocGenTemplates {
 	 */
 	public static Generator GET_FUNCTION_FILE = new Generator() {
 
+		@Override
 		public String generate(String... args) {
 			try {
 				FunctionBase b = FunctionList.getFunction(args[0]);
@@ -323,6 +332,7 @@ public class DocGenTemplates {
 	
 	public static Generator cmdlinehelp = new Generator() {
 
+		@Override
 		public String generate(String... args) {
 			StringBuilder b = new StringBuilder();
 			b.append("<pre style=\"white-space: pre-wrap;\">\n").append(Main.ARGUMENT_SUITE.getBuiltDescription()).append("\n</pre>\n");
@@ -348,6 +358,7 @@ public class DocGenTemplates {
 	public static Generator CODE = new Generator(){
 		
 
+		@Override
 		public String generate(String... args) {
 			String code = StringUtils.Join(args, "|");
 			String [] lines = code.split("\r\n|\n\r|\n");

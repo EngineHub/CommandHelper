@@ -1,5 +1,8 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
+@MEnum("TeleportCause")
 public enum MCTeleportCause {
 	COMMAND,
 	END_PORTAL,
