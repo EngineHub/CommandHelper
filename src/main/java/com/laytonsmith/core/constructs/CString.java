@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
@@ -10,6 +11,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
  *
  * @author Layton
  */
+@typeof("string")
 public class CString extends Construct implements Cloneable, ArrayAccess{
     
     public CString(String value, Target t){
@@ -34,6 +36,7 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
         return false;
     }
 
+	@Override
     public Construct get(String index, Target t) {
         try{
             int i = (int)Integer.parseInt(index);
@@ -43,14 +46,17 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
         }
     }
 
+	@Override
     public long size() {
         return val().length();
     }
 
+	@Override
     public boolean canBeAssociative() {
         return false;
     }
 
+	@Override
     public Construct slice(int begin, int end, Target t) {
         if(begin >= end){
             return new CString("", t);

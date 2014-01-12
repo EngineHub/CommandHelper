@@ -59,10 +59,12 @@ public class VehicleEvents {
 	@api
 	public static class vehicle_enter extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "vehicle_enter";
 		}
 
+		@Override
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
 					+ " the enitytype of the passenger} Fires when an entity enters a vehicle."
@@ -72,6 +74,7 @@ public class VehicleEvents {
 					+ " {}";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
@@ -82,10 +85,12 @@ public class VehicleEvents {
 			return false;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
@@ -106,14 +111,17 @@ public class VehicleEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.VEHICLE_ENTER;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -122,10 +130,12 @@ public class VehicleEvents {
 	@api
 	public static class vehicle_leave extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "vehicle_leave";
 		}
 
+		@Override
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
 					+ " the enitytype of the passenger} Fires when an entity leaves a vehicle."
@@ -135,6 +145,7 @@ public class VehicleEvents {
 					+ " {}";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
@@ -145,10 +156,12 @@ public class VehicleEvents {
 			return false;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
@@ -169,14 +182,17 @@ public class VehicleEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.VEHICLE_LEAVE;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -185,10 +201,12 @@ public class VehicleEvents {
 	@api
 	public static class vehicle_collide extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "vehicle_collide";
 		}
 
+		@Override
 		public String docs() {
 			return "{type: <macro> The entitytype of the vehicle | collisiontype: <macro> One of "
 					+ StringUtils.Join(MCCollisionType.values(), ", ", ", or ", " or ")
@@ -204,6 +222,7 @@ public class VehicleEvents {
 					+ " {}";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent event = (MCVehicleCollideEvent) e;
@@ -228,10 +247,12 @@ public class VehicleEvents {
 			return false;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent e = (MCVehicleCollideEvent) event;
@@ -270,10 +291,12 @@ public class VehicleEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.VEHICLE_COLLIDE;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCVehicleEnitityCollideEvent) {
 				MCVehicleEnitityCollideEvent e = (MCVehicleEnitityCollideEvent) event;
@@ -289,6 +312,7 @@ public class VehicleEvents {
 			return false;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -312,6 +336,7 @@ public class VehicleEvents {
 				thresholdList.clear();
 				thresholdList.add(1);
 				thread = new Thread(new Runnable() {
+					@Override
 					public void run() {
 						outerLoop:
 						while (true) {
@@ -357,26 +382,32 @@ public class VehicleEvents {
 											final MCVehicleMoveEvent fakeEvent = new MCVehicleMoveEvent() {
 												boolean cancelled = false;
 
+												@Override
 												public MCLocation getFrom() {
 													return last;
 												}
 
+												@Override
 												public MCLocation getTo() {
 													return current;
 												}
 
+												@Override
 												public Object _GetObject() {
 													return null;
 												}
 
+												@Override
 												public void setCancelled(boolean state) {
 													cancelled = state;
 												}
 
+												@Override
 												public boolean isCancelled() {
 													return cancelled;
 												}
 
+												@Override
 												public MCVehicle getVehicle() {
 													return v;
 												}
@@ -387,6 +418,7 @@ public class VehicleEvents {
 											//Ok, now the events to be run need to actually be run on the main server thread, so let's run that now.
 											try {
 												StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+													@Override
 													public Object call() throws Exception {
 														EventUtils.FireListeners(toRun, vehicle_move.this, fakeEvent);
 														return null;
@@ -425,6 +457,7 @@ public class VehicleEvents {
 				}, Implementation.GetServerType().getBranding() + "VehicleMoveEventRunner");
 				thread.start();
 				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+					@Override
 					public void run() {
 						thread = null;
 					}
@@ -432,10 +465,12 @@ public class VehicleEvents {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "vehicle_move";
 		}
 
+		@Override
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
 					+ " the enitytype of the passenger} Fires when an vehicle is moving."
@@ -467,6 +502,7 @@ public class VehicleEvents {
 			}
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent event = (MCVehicleMoveEvent) e;
@@ -510,6 +546,7 @@ public class VehicleEvents {
 			return false;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 
 			int id = Static.getInt32(manualObject.get("id"), Target.UNKNOWN);
@@ -524,6 +561,7 @@ public class VehicleEvents {
 			return EventBuilder.instantiate(MCVehicleMoveEvent.class, e, from, to);
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent e = (MCVehicleMoveEvent) event;
@@ -561,15 +599,18 @@ public class VehicleEvents {
 			}
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.VEHICLE_MOVE;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			//Nothing can be modified, so always return false
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

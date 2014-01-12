@@ -38,6 +38,7 @@ public class BukkitMCServer implements MCServer {
 		this.s = server;
 	}
 
+	@Override
 	public Object getHandle(){
         return s;
     }
@@ -46,10 +47,12 @@ public class BukkitMCServer implements MCServer {
         return s;
     }
 
+	@Override
     public String getName() {
         return s.getName();
     }
 
+	@Override
     public MCPlayer[] getOnlinePlayers() {
         if(s.getOnlinePlayers() == null){
             return null;
@@ -77,6 +80,7 @@ public class BukkitMCServer implements MCServer {
         return s.dispatchCommand(cs, command);
     }
 
+	@Override
     public MCPluginManager getPluginManager() {
         if(s.getPluginManager() == null){
             return null;
@@ -84,6 +88,7 @@ public class BukkitMCServer implements MCServer {
         return new BukkitMCPluginManager(s.getPluginManager());
     }
 
+	@Override
     public MCPlayer getPlayer(String name) {
         if(s.getPlayer(name) == null){
             return null;
@@ -91,6 +96,7 @@ public class BukkitMCServer implements MCServer {
         return new BukkitMCPlayer(s.getPlayer(name));
     }
 
+	@Override
     public MCWorld getWorld(String name) {
         if(s.getWorld(name) == null){
             return null;
@@ -98,6 +104,7 @@ public class BukkitMCServer implements MCServer {
         return new BukkitMCWorld(s.getWorld(name));
     }
     
+	@Override
     public List<MCWorld> getWorlds(){
         if(s.getWorlds() == null){
             return null;
@@ -109,30 +116,37 @@ public class BukkitMCServer implements MCServer {
         return list;
     }
 
+	@Override
     public void broadcastMessage(String message) {
         s.broadcastMessage(message);
     }
 
+	@Override
 	public void broadcastMessage(String message, String permission) {
 		s.broadcast(message, permission);
 	}
 	
+	@Override
 	public MCConsoleCommandSender getConsole() {
 		return new BukkitMCConsoleCommandSender(s.getConsoleSender());
 	}
 
+	@Override
 	public MCItemFactory getItemFactory() {
 		return new BukkitMCItemFactory(s.getItemFactory());
 	}
 	
+	@Override
 	public MCCommandMap getCommandMap() {
 		return new BukkitMCCommandMap((SimpleCommandMap) ReflectionUtils.invokeMethod(s.getClass(), s, "getCommandMap"));
 	}
 
+	@Override
     public MCOfflinePlayer getOfflinePlayer(String player) {
         return new BukkitMCOfflinePlayer(s.getOfflinePlayer(player));
     }
 
+	@Override
 	public MCOfflinePlayer[] getOfflinePlayers() {
 		if (s.getOfflinePlayers() == null) {
 			return null;
@@ -146,46 +160,57 @@ public class BukkitMCServer implements MCServer {
 	}
 
     /* Boring information get methods -.- */
+	@Override
     public String getModVersion() {
         return s.getBukkitVersion();
     }
 
+	@Override
     public String getVersion() {
         return s.getVersion();
     }
 
+	@Override
     public int getPort() {
         return s.getPort();
     }
 
+	@Override
     public Boolean getAllowEnd() {
         return s.getAllowEnd();
     }
 
+	@Override
     public Boolean getAllowFlight() {
         return s.getAllowFlight();
     }
 
+	@Override
     public Boolean getAllowNether() {
         return s.getAllowNether();
     }
     
+	@Override
     public Boolean getOnlineMode() {
     	return s.getOnlineMode();
     }
 
+	@Override
     public String getWorldContainer() {
         return s.getWorldContainer().getPath();
     }
 
+	@Override
     public String getServerName() {
         return s.getServerName();
     }
 
+	@Override
     public int getMaxPlayers() {
         return s.getMaxPlayers();
     }
 
+	@Override
     public List<MCOfflinePlayer> getBannedPlayers() {
         if(s.getBannedPlayers() == null){
             return null;
@@ -197,6 +222,7 @@ public class BukkitMCServer implements MCServer {
         return list;
     }
 
+	@Override
     public List<MCOfflinePlayer> getWhitelistedPlayers() {
         if(s.getBannedPlayers() == null){
             return null;
@@ -208,6 +234,7 @@ public class BukkitMCServer implements MCServer {
         return list;
     }
 
+	@Override
     public List<MCOfflinePlayer> getOperators() {
         if(s.getOperators() == null){
             return null;
@@ -219,6 +246,7 @@ public class BukkitMCServer implements MCServer {
         return list;
     }
 
+	@Override
     public Economy getEconomy() {
         try{
             @SuppressWarnings("unchecked")
@@ -233,6 +261,7 @@ public class BukkitMCServer implements MCServer {
         return null;            
     }
 
+	@Override
     public void runasConsole(String cmd) {
         s.dispatchCommand(s.getConsoleSender(), cmd);
     }
@@ -252,6 +281,7 @@ public class BukkitMCServer implements MCServer {
 		return s.hashCode();
 	}
 
+	@Override
 	public MCInventory createInventory(MCInventoryHolder holder, MCInventoryType type) {
 		InventoryHolder ih = null;
 		
@@ -266,6 +296,7 @@ public class BukkitMCServer implements MCServer {
 		return new BukkitMCInventory(Bukkit.createInventory(ih, InventoryType.valueOf(type.name())));
 	}
 	
+	@Override
 	public MCInventory createInventory(MCInventoryHolder holder, int size) {
 		InventoryHolder ih = null;
 		
@@ -280,6 +311,7 @@ public class BukkitMCServer implements MCServer {
 		return new BukkitMCInventory(Bukkit.createInventory(ih, size));
 	}
 	
+	@Override
 	public MCInventory createInventory(MCInventoryHolder holder, int size, String title) {
 		InventoryHolder ih = null;
 		
@@ -294,42 +326,52 @@ public class BukkitMCServer implements MCServer {
 		return new BukkitMCInventory(Bukkit.createInventory(ih, size, title));
 	}
 	
+	@Override
 	public void banIP(String address) {
 		s.banIP(address);
 	}
 	
+	@Override
 	public Set<String> getIPBans() {
 		return s.getIPBans();
 	}
 	
+	@Override
 	public void unbanIP(String address) {
 		s.unbanIP(address);
 	}
 	
+	@Override
 	public MCMessenger getMessenger() {
 		return new BukkitMCMessenger(s.getMessenger());
 	}
 
+	@Override
 	public MCScoreboard getMainScoreboard() {
 		return new BukkitMCScoreboard(s.getScoreboardManager().getMainScoreboard());
 	}
 
+	@Override
 	public MCScoreboard getNewScoreboard() {
 		return new BukkitMCScoreboard(s.getScoreboardManager().getNewScoreboard());
 	}
 	
+	@Override
 	public boolean unloadWorld(MCWorld world, boolean save) {
 		return s.unloadWorld(((BukkitMCWorld) world).__World(), save);
 	}
 
+	@Override
 	public void shutdown() {
 		s.shutdown();
 	}
 	
+	@Override
 	public boolean addRecipe(MCRecipe recipe) {
 		return s.addRecipe(((BukkitMCRecipe) recipe).r);
 	}
 	
+	@Override
 	public List<MCRecipe> getRecipesFor(MCItemStack result) {
 		List<MCRecipe> ret = new ArrayList<MCRecipe>();
 		List<Recipe> recipes = s.getRecipesFor(((BukkitMCItemStack) result).__ItemStack());
@@ -339,6 +381,7 @@ public class BukkitMCServer implements MCServer {
 		return ret;
 	}
 	
+	@Override
 	public List<MCRecipe> allRecipes() {
 		List<MCRecipe> ret = new ArrayList<MCRecipe>();
 		for (Iterator recipes = s.recipeIterator(); recipes.hasNext();) {
@@ -352,10 +395,12 @@ public class BukkitMCServer implements MCServer {
 //		Iterator<MCRecipe> ret = //create iterator;
 //	}
 	
+	@Override
 	public void clearRecipes() {
 		s.clearRecipes();
 	}
 	
+	@Override
 	public void resetRecipes() {
 		s.resetRecipes();
 	}

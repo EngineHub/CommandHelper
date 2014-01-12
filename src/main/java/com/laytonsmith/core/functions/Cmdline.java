@@ -59,18 +59,22 @@ public class Cmdline {
     @noboilerplate
     public static class sys_out extends AbstractFunction {
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
             System.out.print(msg);
@@ -82,14 +86,17 @@ public class Cmdline {
             return new CVoid(t);
         }
 
+		@Override
         public String getName() {
             return "sys_out";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "void {text} Writes the text to the system's std out. Unlike console(), this does not use anything else to format the output, though in many"
                     + " cases they will behave the same. However, colors and other formatting characters will not \"bleed\" through, so"
@@ -97,6 +104,7 @@ public class Cmdline {
                     + " manually add \\n to create your linebreaks, and only make one call to sys_out.";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -115,18 +123,22 @@ public class Cmdline {
     @noboilerplate
     public static class sys_err extends AbstractFunction {
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
             System.err.print(msg);
@@ -138,14 +150,17 @@ public class Cmdline {
             return new CVoid(t);
         }
 
+		@Override
         public String getName() {
             return "sys_err";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "void {text} Writes the text to the system's std err. Unlike console(), this does not use anything else to format the output, though in many"
                     + " cases they will behave nearly the same. However, colors and other formatting characters will not \"bleed\" through, so"
@@ -153,6 +168,7 @@ public class Cmdline {
                     + " manually add \\n to create your linebreaks, and only make one call to sys_err.";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -169,18 +185,22 @@ public class Cmdline {
     @noboilerplate
     public static class exit extends AbstractFunction implements Optimizable {
 
+		@Override
         public Exceptions.ExceptionType[] thrown() {
             return null;
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             int exit_code = 0;
             if (args.length == 1) {
@@ -192,19 +212,23 @@ public class Cmdline {
             return new Echoes.die().exec(t, environment, args);
         }
 
+		@Override
         public String getName() {
             return "exit";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1};
         }
 
+		@Override
         public String docs() {
             return "void {[int]} Exits the program. If this is being run from the command line, works by exiting the interpreter, with "
                     + " the specified exit code (defaulting to 0). If this is being run from in-game, works just like die().";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -228,18 +252,22 @@ public class Cmdline {
     @api
     public static class sys_properties extends AbstractFunction {
 
+		@Override
         public ExceptionType[] thrown() {
             return null;
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if (args.length == 1) {
                 String propName = args[0].val();
@@ -255,14 +283,17 @@ public class Cmdline {
 
         }
 
+		@Override
         public String getName() {
             return "sys_properties";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1};
         }
 
+		@Override
         public String docs() {
             return "mixed {[propertyName]} If propertyName is set, that single property is returned, or null if that property doesn't exist. If propertyName is not set, an"
                     + " associative array with all the system properties is returned. This mechanism hooks into Java's system property mechanism, and is just a wrapper for"
@@ -270,6 +301,7 @@ public class Cmdline {
                     + " properties, see http://docs.oracle.com/javase/tutorial/essential/environment/sysprop.html";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -286,18 +318,22 @@ public class Cmdline {
     @api
     public static class get_env extends AbstractFunction {
 
+		@Override
         public ExceptionType[] thrown() {
             return null;
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if (args.length == 1) {
                 return new CString(System.getenv(args[0].val()), t);
@@ -310,19 +346,23 @@ public class Cmdline {
             }
         }
 
+		@Override
         public String getName() {
             return "get_env";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{0, 1};
         }
 
+		@Override
         public String docs() {
             return "mixed {[variableName]} Returns the environment variable specified, if variableName is set. Otherwise, returns an associative array"
                     + " of all the environment variables.";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -331,19 +371,23 @@ public class Cmdline {
     @api
     public static class set_env extends AbstractFunction {
 
+		@Override
         public ExceptionType[] thrown() {
             return null;
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public Boolean runAsync() {
             return null;
         }
 
 		@SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             //TODO: Make this more robust by having a local cache of the environment which we modify, and get_env returns from.
             Map<String, String> newenv = new HashMap<String, String>(System.getenv());
@@ -393,14 +437,17 @@ public class Cmdline {
             return new CBoolean(ret, t);
         }
 
+		@Override
         public String getName() {
             return "set_env";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "void {variableName, value} Sets the value of an environment variable. This only changes the environment value in this process, not system-wide."
                     + " This uses some hackery to work, and may not be 100% reliable in all cases, and shouldn't be relied on heavily. It will"
@@ -408,6 +455,7 @@ public class Cmdline {
                     + " a particular data type on a call to get_env, you will need to manually cast the variable. Arrays will be toString'd as well, but will be accepted.";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }

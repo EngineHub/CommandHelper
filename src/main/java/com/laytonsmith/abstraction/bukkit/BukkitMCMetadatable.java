@@ -21,6 +21,7 @@ public class BukkitMCMetadatable implements MCMetadatable {
 		}
 	}
 
+	@Override
 	public List<MCMetadataValue> getMetadata(String metadataKey) {
 		List<MetadataValue> lst = meta.getMetadata(metadataKey);
 		List<MCMetadataValue> retn = new ArrayList<MCMetadataValue>();
@@ -32,18 +33,22 @@ public class BukkitMCMetadatable implements MCMetadatable {
 		return retn;
 	}
 
+	@Override
 	public boolean hasMetadata(String metadataKey) {
 		return meta.hasMetadata(metadataKey);
 	}
 
+	@Override
 	public void removeMetadata(String metadataKey, MCPlugin owningPlugin) {
 		meta.removeMetadata(metadataKey, ((BukkitMCPlugin)owningPlugin).getPlugin());
 	}
 
+	@Override
 	public void setMetadata(String metadataKey, MCMetadataValue newMetadataValue) {
 		meta.setMetadata(metadataKey, ((BukkitMCMetadataValue)newMetadataValue).asMetadataValue());
 	}
 
+	@Override
 	public Object getHandle() {
 		return meta;
 	}

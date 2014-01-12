@@ -13,10 +13,12 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 		this.proj = e;
 	}
 	
+	@Override
 	public boolean doesBounce() {
 		return proj.doesBounce();
 	}
 
+	@Override
 	public MCLivingEntity getShooter() {
 		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj.getShooter());
 		
@@ -27,10 +29,12 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 		return null;
 	}
 
+	@Override
 	public void setBounce(boolean doesBounce) {
 		proj.setBounce(doesBounce);
 	}
 
+	@Override
 	public void setShooter(MCLivingEntity shooter) {
 		proj.setShooter(((BukkitMCLivingEntity)shooter).asLivingEntity());
 	}

@@ -164,24 +164,28 @@ public class Scoreboards {
 		/**
 		 * @return true
 		 */
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 		/**
 		 * @return false
 		 */
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 		/**
 		 * @return {@link CHVersion#V3_3_1}
 		 */
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 		/**
 		 * @return Array containing only {@link ExceptionType#ScoreboardException}
 		 */
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.ScoreboardException};
 		}
@@ -195,6 +199,7 @@ public class Scoreboards {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.ScoreboardException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
@@ -208,14 +213,17 @@ public class Scoreboards {
 			return new CString(ret, t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_pscoreboard";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "scoreboard {player} Returns the id of the scoreboard assigned to a player."
 					+ " If it is not already cached, it will be added using the player's name."
@@ -231,6 +239,7 @@ public class Scoreboards {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.ScoreboardException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
@@ -238,14 +247,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_pscoreboard";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {player, [scoreboard]} Sets the scoreboard to be used by a player."
 					+ " The scoreboard argument is the id of a registered scoreboard. " + DEF_MSG;
@@ -260,6 +272,7 @@ public class Scoreboards {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
@@ -269,14 +282,17 @@ public class Scoreboards {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_scoreboards";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an array of the registered scoreboard ID's."
 					+ " The special scoreboard '"+ MAIN + "' represents the server's main"
@@ -287,6 +303,7 @@ public class Scoreboards {
 	@api
 	public static class get_objectives extends SBFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s;
@@ -324,14 +341,17 @@ public class Scoreboards {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_objectives";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[scoreboard], [criteria]} Returns an array of arrays about the objectives"
 					+ " on the given scoreboard, which defaults to '" + MAIN + "' if not given."
@@ -343,6 +363,7 @@ public class Scoreboards {
 	@api
 	public static class get_teams extends SBFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s;
@@ -373,14 +394,17 @@ public class Scoreboards {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_teams";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[scoreboard]} Returns an array of arrays about the teams on the given scoreboard,"
 					+ " which defaults to '" + MAIN + "' if not given. The arrays contain the keys name,"
@@ -391,20 +415,24 @@ public class Scoreboards {
 	@api
 	public static class create_scoreboard extends SBFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			addBoard(args[0].val(), Static.getServer().getNewScoreboard(), t);
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "create_scoreboard";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {name} Creates a new scoreboard identified by the given name,"
 					+ " and stores it internally for later use. Throws an exception if the name is already in use.";
@@ -419,6 +447,7 @@ public class Scoreboards {
 			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
 		
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
@@ -442,14 +471,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "create_objective";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {name, [criteria, [scoreboard]]} Adds a new objective to the scoreboard,"
 					+ " throwing a ScoreboardException if the name is already in use. The vanilla criteria names are "
@@ -468,6 +500,7 @@ public class Scoreboards {
 			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
 		
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, 1, t, args);
@@ -483,14 +516,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "create_team";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {name, [scoreboard]} Adds a new team to the scoreboard,"
 					+ " throws a ScoreboardException if a team already exists with the given name."
@@ -507,6 +543,7 @@ public class Scoreboards {
 					ExceptionType.ScoreboardException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
@@ -549,14 +586,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_objective_display";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {objectiveName, array, [scoreboard] | objectiveName, displayname, [scoreboard]}"
 					+ " Sets the display name and/or slot of the given objective. If arg 2 is not an array,"
@@ -576,6 +616,7 @@ public class Scoreboards {
 			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
@@ -631,14 +672,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_team_display";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {teamName, array, [scoreboard] | teamName, displayname, [scoreboard]}"
 					+ " Sets the display name, prefix, and/or suffix of the given team."
@@ -659,6 +703,7 @@ public class Scoreboards {
 			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
@@ -673,14 +718,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "team_add_player";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists."
 					+ " Offline players can be added, so the name must be exact. Alternatively,"
@@ -692,6 +740,7 @@ public class Scoreboards {
 	@api
 	public static class team_remove_player extends SBFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
@@ -703,14 +752,17 @@ public class Scoreboards {
 					Static.getServer().getOfflinePlayer(args[1].val())), t);
 		}
 
+		@Override
 		public String getName() {
 			return "team_remove_player";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {teamname, player, [scoreboard]} Attempts to remove a player from a team,"
 					+ " and returns true if successful, for false if the player was not part of the team." + DEF_MSG;
@@ -720,6 +772,7 @@ public class Scoreboards {
 	@api
 	public static class remove_scoreboard extends SBFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
@@ -746,14 +799,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "remove_scoreboard";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {scoreboard, [nullify]} Stops tracking the given scoreboard, unless it is '"
 					+ MAIN + "', because that never goes away. If nullify is true (defaults to true),"
@@ -766,6 +822,7 @@ public class Scoreboards {
 	@api
 	public static class remove_objective extends SBFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, 1, t, args);
@@ -780,14 +837,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "remove_objective";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {objectivename, [scoreboard]} Unregisters an objective from the scoreboard. " + DEF_MSG;
 		}
@@ -796,6 +856,7 @@ public class Scoreboards {
 	@api
 	public static class remove_team extends SBFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, 1, t, args);
@@ -810,14 +871,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "remove_team";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {teamname, [scoreboard]} Unregisters a team from the scoreboard. " + DEF_MSG;
 		}
@@ -826,6 +890,7 @@ public class Scoreboards {
 	@api
 	public static class get_pscore extends SBFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
@@ -837,14 +902,17 @@ public class Scoreboards {
 			return new CInt(o.getScore(ofp).getScore(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "get_pscore";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "int {objectiveName, player, [scoreboard]} Returns the player's score for the given objective."
 					+ " Works for offline players, so the name must be exact. " + DEF_MSG;
@@ -859,6 +927,7 @@ public class Scoreboards {
 			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
 		
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(4, 3, t, args);
@@ -874,14 +943,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_pscore";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "void {objectiveName, player, int, [scoreboard]} Sets the player's score for the given objective."
 					+ " Works for offline players, so the name must be exact. Alternatively,"
@@ -893,19 +965,23 @@ public class Scoreboards {
 	@api
 	public static class reset_all_pscores extends SBFunction {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			assignBoard(2, 1, t, args).resetScores(Static.getServer().getOfflinePlayer(args[0].val()));
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "reset_all_pscores";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {player, [scoreboard]} Resets all scores for a player tracked by the given scoreboard."
 					+ " This means they will not be show up on any displays. " + DEF_MSG;
@@ -920,6 +996,7 @@ public class Scoreboards {
 			return new ExceptionType[]{ExceptionType.ScoreboardException, ExceptionType.FormatException};
 		}
 		
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
@@ -941,14 +1018,17 @@ public class Scoreboards {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_team_options";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array,"
 					+ " checking for keys 'friendlyfire' and 'friendlyinvisibles'. " + DEF_MSG;

@@ -97,28 +97,34 @@ public class SSHWrapper {
 				}
 				sshSession = jsch.getSession(user, host, port);
 				sshSession.setUserInfo(new UserInfo() {
+					@Override
 					public String getPassphrase() {
 						//This may need to be made more granular later
 						return password;
 					}
 
+					@Override
 					public String getPassword() {
 						return password;
 					}
 
+					@Override
 					public boolean promptPassword(String message) {
 						return true;
 					}
 
+					@Override
 					public boolean promptPassphrase(String message) {
 						return true;
 					}
 
+					@Override
 					public boolean promptYesNo(String message) {
 						System.out.println(message + " (Automatically responding with 'Yes')");
 						return true;
 					}
 
+					@Override
 					public void showMessage(String message) {
 						System.out.println(message);
 					}

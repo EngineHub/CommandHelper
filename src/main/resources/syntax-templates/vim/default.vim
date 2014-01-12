@@ -8,6 +8,7 @@ syn keyword events %%space:events%%
 syn keyword colors %%space:colors%% 
 syn keyword unsymboledkeywords %%space:keywords%%
 syn match linecomment /#.*/
+syn match linecomment /\/\/.*/
 syn region blockcomment start=/\/\*/ end=/\*\//
 syn region stringlit start=/'/ skip=/\\'/ end=/'/
 syn region smartstring start=/"/ skip=/\\"/ end=/"/

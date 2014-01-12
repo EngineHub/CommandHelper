@@ -34,46 +34,57 @@ public class BukkitMCInventoryView implements MCInventoryView {
 		return iv.hashCode();
 	}
 
+	@Override
 	public MCInventory getBottomInventory() {
 		return new BukkitMCInventory(iv.getBottomInventory());
 	}
 
+	@Override
 	public MCInventory getTopInventory() {
 		return new BukkitMCInventory(iv.getTopInventory());
 	}
 
+	@Override
 	public void close() {
 		iv.close();
 	}
 
+	@Override
 	public int countSlots() {
 		return iv.countSlots();
 	}
 
+	@Override
 	public int convertSlot(int rawSlot) {
 		return iv.convertSlot(rawSlot);
 	}
 
+	@Override
 	public MCItemStack getItem(int slot) {
 		return new BukkitMCItemStack(iv.getItem(slot));
 	}
 
+	@Override
 	public MCHumanEntity getPlayer() {
 		return new BukkitMCHumanEntity(iv.getPlayer());
 	}
 
+	@Override
 	public String getTitle() {
 		return iv.getTitle();
 	}
 	
+	@Override
 	public MCInventoryType getType() {
 		return MCInventoryType.valueOf(this.iv.getType().name());
 	}
 	
+	@Override
 	public void setCursor(MCItemStack item) {
 		iv.setCursor(((BukkitMCItemStack)item).__ItemStack());
 	}
 
+	@Override
 	public void setItem(int slot, MCItemStack item) {
 		iv.setItem(slot, (((BukkitMCItemStack)item).__ItemStack()));
 	}

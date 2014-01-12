@@ -30,18 +30,22 @@ public class BukkitMCColor implements MCColor {
 	private int green;
 	private int blue;
 
+	@Override
 	public int getRed() {
 		return red;
 	}
 
+	@Override
 	public int getGreen() {
 		return green;
 	}
 
+	@Override
 	public int getBlue() {
 		return blue;
 	}
 
+	@Override
 	public MCColor build(int red, int green, int blue) {
 		BukkitMCColor color = new BukkitMCColor();
 		color.red = red;

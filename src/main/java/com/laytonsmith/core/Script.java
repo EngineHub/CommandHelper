@@ -150,7 +150,7 @@ public class Script {
                 for (Construct tempNode : rootNode.getAllData()) {
                     if (tempNode instanceof Variable) {
                         if(left_vars == null){
-                            throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.getTarget());
+                            ConfigRuntimeException.CreateUncatchableException("$variables may not be used in this context. Only @variables may be.", tempNode.getTarget());
                         }
                         ((Variable) tempNode).setVal(
                                 new CString(

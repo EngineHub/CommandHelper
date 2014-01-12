@@ -199,14 +199,17 @@ public interface DataSource extends Documentation {
 			this.since = since;
 		}
 
+		@Override
 		public String getName() {
 			return name().toLowerCase();
 		}
 
+		@Override
 		public String docs() {
 			return documentation;
 		}
 
+		@Override
 		public CHVersion since() {
 			return since;
 		}

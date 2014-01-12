@@ -12,7 +12,7 @@
  ****************************************************/
 $language_data = array(
     'LANG_NAME' => 'CommandHelper',
-    'COMMENT_SINGLE' => array(1 => '#'),
+    'COMMENT_SINGLE' => array(1 => '#', 2 => '//'),
     'HARD_QUOTE' => array("'", "'"),
     'HARDESCAPE' => array("\\"),
     'HARDCHAR' => array("\\"),
@@ -27,17 +27,17 @@ $language_data = array(
     'KEYWORDS' => array(
         // Non-Restricted
         1 => array(
-            %%comma:functions:quoted:unrestricted%%
+///!            %%comma:functions:quoted:unrestricted%%
         ),
         // Restricted
         2 => array(
-             %%comma:functions:quoted:restricted%%
+///!             %%comma:functions:quoted:restricted%%
         ),
         3 => array(
-             %%comma:events:quoted%%
+///!             %%comma:events:quoted%%
         ),
         4 => array(
-            %%comma:colors:quoted%%
+///!            %%comma:colors:quoted%%
         )
     ),
     'SYMBOLS' => array (
@@ -105,4 +105,3 @@ $language_data = array(
         )
     )
 );
-?>

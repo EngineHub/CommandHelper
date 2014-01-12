@@ -47,34 +47,42 @@ public class World {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class get_spawn extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_spawn";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[world]} Returns a location array for the specified world, or the current player's world, if not specified.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String world;
 			if (args.length == 1) {
@@ -93,19 +101,23 @@ public class World {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class set_spawn extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException,
 						ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld() : null);
 			int x = 0;
@@ -134,20 +146,24 @@ public class World {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "set_spawn";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 3, 4};
 		}
 
+		@Override
 		public String docs() {
 			return "void {locationArray | [world], x, y, z} Sets the spawn of the world. Note that in some cases, a plugin"
 					+ " may set the spawn differently, and this method will do nothing. In that case, you should use"
 					+ " the plugin's commands to set the spawn.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -156,35 +172,43 @@ public class World {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class refresh_chunk extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "refresh_chunk";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[world], x, z | [world], locationArray} Resends the chunk data to all clients, using the specified world, or the current"
 					+ " players world if not provided.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
@@ -225,35 +249,43 @@ public class World {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class regen_chunk extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "regen_chunk";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "void {x, z, [world]| locationArray, [world]} Regenerate the chunk, using the specified world, or the current"
 					+ " players world if not provided. Beware that this is destructive! Any data in this chunk will be lost!";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
@@ -316,14 +348,17 @@ public class World {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class set_world_time extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_world_time";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			StringBuilder doc = new StringBuilder();
 			synchronized (World.class) {
@@ -339,22 +374,27 @@ public class World {
 			return doc.toString();
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
@@ -413,35 +453,43 @@ public class World {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class get_world_time extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_world_time";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {[world]} Returns the time of the specified world, as an integer from"
 					+ " 0 to 24000-1";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
@@ -460,18 +508,22 @@ public class World {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class create_world extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCWorldCreator creator = StaticLayer.GetConvertor().getWorldCreator(args[0].val());
 			if (args.length >= 3) {
@@ -503,14 +555,17 @@ public class World {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "create_world";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 3, 4, 5};
 		}
 
+		@Override
 		public String docs() {
 			return "void {name, [type, environment, [seed, [generator]]]} Creates a new world with the specified options."
 					+ " If the world already exists, it will be loaded from disk, and the last 3 arguments may be"
@@ -520,6 +575,7 @@ public class World {
 					+ " Generator is the name of a world generator loaded on the server.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -528,18 +584,22 @@ public class World {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_worlds extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray worlds = new CArray(t);
 			for(MCWorld w : Static.getServer().getWorlds()){
@@ -548,18 +608,22 @@ public class World {
 			return worlds;
 		}
 
+		@Override
 		public String getName() {
 			return "get_worlds";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns a list of all currently loaded worlds.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -568,14 +632,17 @@ public class World {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_chunk_loc extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_chunk_loc";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer p = null;
@@ -609,24 +676,29 @@ public class World {
 				new CString(l.getChunk().getWorld().getName(), t));
 		}
 
+		@Override
 		public String docs() {
 			return "array {[location array]} Returns an array of x, z, world "
 					+ "coords of the chunk of either the location specified or the location of "
 					+ "the player running the command.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -635,18 +707,22 @@ public class World {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class spawn_falling_block extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null , t);
@@ -681,14 +757,17 @@ public class World {
 			return new CInt(block.getEntityId(), t);
 		}
 
+		@Override
 		public String getName() {
 			return "spawn_falling_block";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "integer {location array, id[:type], [vector array ie. array(x, y, z)]} Spawns a"
 				+ " falling block of the specified id and type at the specified location, applying"
@@ -696,6 +775,7 @@ public class World {
 				+ " seems to imply about 3 times walking speed. Gravity applies for y.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -704,18 +784,22 @@ public class World {
 	@api
 	public static class world_info extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
@@ -732,19 +816,23 @@ public class World {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "world_info";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "array {world} Returns an associative array of all the info needed to duplicate the world."
 					+ " The keys are name, seed, environment, generator, and worldtype.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -753,18 +841,22 @@ public class World {
 	@api
 	public static class unload_world extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean save = true;
 			if (args.length == 2) {
@@ -777,19 +869,23 @@ public class World {
 			return new CBoolean(Static.getServer().unloadWorld(world, save), t);
 		}
 
+		@Override
 		public String getName() {
 			return "unload_world";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {world, [save]} Unloads a world, and saves it if save is true (defaults true),"
 					+ " and returns whether or not the operation was successful.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -798,34 +894,42 @@ public class World {
 	@api
 	public static class get_difficulty extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_difficulty";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String docs() {
 			return "string {world} Returns the difficulty of the world, It will be one of " + StringUtils.Join(MCDifficulty.values(), ", ", ", or ", " or ") + ".";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
@@ -838,35 +942,43 @@ public class World {
 	@api
 	public static class set_difficulty extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_difficulty";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String docs() {
 			return "void {[world], difficulty} Sets the difficulty of the world with the given name, or all worlds if the name is not given."
 					+ " difficulty can be " + StringUtils.Join(MCDifficulty.values(), ", ", ", or ", " or ") + ".";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCDifficulty difficulty;
 			if (args.length == 1) {
@@ -897,34 +1009,42 @@ public class World {
 	@api
 	public static class get_pvp extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_pvp";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {world} Returns if PVP is allowed in the world.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
@@ -937,34 +1057,42 @@ public class World {
 	@api
 	public static class set_pvp extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_pvp";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String docs() {
 			return "void {[world], boolean} Sets if PVP is allowed in the world with the given name, or all worlds if the name is not given.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 1) {
 				boolean pvp = Static.getBoolean(args[0]);
@@ -985,36 +1113,44 @@ public class World {
 	@api
 	public static class get_gamerule extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_gamerule";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing gamerules for the given world."
 					+ " If gameRule is set, the function only returns the value of the specified gamerule, a boolean."
 					+ "gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
@@ -1041,35 +1177,43 @@ public class World {
 	@api
 	public static class set_gamerule extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "set_gamerule";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public String docs() {
 			return "void {[world], gameRule, value} Sets the value of the gamerule for the specified world, value is a boolean. If world is not given the value is set for all worlds."
 					+ " gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCGameRule gameRule;
 			if (args.length == 2) {

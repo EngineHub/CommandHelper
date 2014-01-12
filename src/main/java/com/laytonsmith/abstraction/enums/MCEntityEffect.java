@@ -1,5 +1,8 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
+@MEnum("EntityEffect")
 public enum MCEntityEffect {
 	DEATH,
 	HURT,

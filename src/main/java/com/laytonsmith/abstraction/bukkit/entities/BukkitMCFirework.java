@@ -14,10 +14,12 @@ public class BukkitMCFirework extends BukkitMCEntity implements MCFirework {
 		f = e;
 	}
 
+	@Override
 	public MCFireworkMeta getFireWorkMeta() {
 		return new BukkitMCFireworkMeta(f.getFireworkMeta());
 	}
 
+	@Override
 	public void setFireWorkMeta(MCFireworkMeta fm) {
 		f.setFireworkMeta(((BukkitMCFireworkMeta) fm).asItemMeta());
 	}

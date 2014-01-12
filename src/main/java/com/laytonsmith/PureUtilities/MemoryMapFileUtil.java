@@ -129,6 +129,7 @@ public class MemoryMapFileUtil {
 				}
 				getService().submit(new Runnable() {
 
+					@Override
 					public void run() {
 						try{
 							MemoryMapFileUtil.this.run();
@@ -149,6 +150,7 @@ public class MemoryMapFileUtil {
 										60L, TimeUnit.MILLISECONDS,
 										new LinkedBlockingQueue<Runnable>(),
 										new ThreadFactory() {
+											@Override
 											public Thread newThread(Runnable r) {
 												Thread t = new Thread(r, "MemoryMapWriter-" + file);
 												t.setPriority(Thread.MIN_PRIORITY);

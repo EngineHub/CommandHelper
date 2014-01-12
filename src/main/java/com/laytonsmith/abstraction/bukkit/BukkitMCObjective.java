@@ -17,14 +17,17 @@ public class BukkitMCObjective implements MCObjective {
 		o = obj;
 	}
 
+	@Override
 	public String getCriteria() {
 		return o.getCriteria();
 	}
 
+	@Override
 	public String getDisplayName() {
 		return o.getDisplayName();
 	}
 
+	@Override
 	public MCDisplaySlot getDisplaySlot() {
 		DisplaySlot ds = o.getDisplaySlot();
 		if (ds == null) {
@@ -33,30 +36,37 @@ public class BukkitMCObjective implements MCObjective {
 		return BukkitMCDisplaySlot.getConvertor().getAbstractedEnum(ds);
 	}
 
+	@Override
 	public String getName() {
 		return o.getName();
 	}
 
+	@Override
 	public MCScore getScore(MCOfflinePlayer player) {
 		return new BukkitMCScore(o.getScore((OfflinePlayer) player.getHandle()));
 	}
 
+	@Override
 	public MCScoreboard getScoreboard() {
 		return new BukkitMCScoreboard(o.getScoreboard());
 	}
 
+	@Override
 	public boolean isModifiable() {
 		return o.isModifiable();
 	}
 
+	@Override
 	public void setDisplayName(String displayName) {
 		o.setDisplayName(displayName);
 	}
 
+	@Override
 	public void setDisplaySlot(MCDisplaySlot slot) {
 		o.setDisplaySlot(BukkitMCDisplaySlot.getConvertor().getConcreteEnum(slot));
 	}
 
+	@Override
 	public void unregister() {
 		o.unregister();
 	}

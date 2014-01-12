@@ -53,6 +53,7 @@ public class ResourceManager {
 	static {
 		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
+			@Override
 			public void run() {
 				resources.clear();
 			}
@@ -81,18 +82,22 @@ public class ResourceManager {
 	@api
 	public static class res_create_resource extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			ResourceTypes type;
 			Construct data = null;
@@ -119,6 +124,7 @@ public class ResourceManager {
 				case STRING_BUILDER:
 					resource = new CResource<StringBuffer>(new StringBuffer(), new CResource.ResourceToString() {
 
+				@Override
 						public String getString(CResource res) {
 							return res.getResource().toString();
 						}
@@ -131,14 +137,17 @@ public class ResourceManager {
 			return resource;
 		}
 
+		@Override
 		public String getName() {
 			return "res_create_resource";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "resource {type, [data]} Creates a new resource, which is stored in memory. Various"
 					+ " functions require resources of certain types, which are created with this function."
@@ -149,6 +158,7 @@ public class ResourceManager {
 					+ StringUtils.Join(ResourceTypes.values(), ", ", ", or ");
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -157,18 +167,22 @@ public class ResourceManager {
 	
 	@api
 	public static class res_free_resource extends AbstractFunction {
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.NotFoundException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CResource){
 				CResource<?> resource = (CResource<?>) args[0];
@@ -183,19 +197,23 @@ public class ResourceManager {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "res_free_resource";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {resource} Frees the given resource. This should ALWAYS be called at some point after creating a resource"
 					+ " with res_create_resource, once you are done with the resource.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}

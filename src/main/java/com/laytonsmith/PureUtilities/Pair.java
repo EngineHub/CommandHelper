@@ -22,14 +22,17 @@ public class Pair<A, B> implements Map.Entry<A, B> {
         return "<" + fst.toString() + ", " + snd.toString() + ">";
     }
 
+	@Override
     public A getKey() {
         return fst;
     }
 
+	@Override
     public B getValue() {
         return snd;
     }
 
+	@Override
     public B setValue(B value) {
         B old = snd;
         snd = (B)value;

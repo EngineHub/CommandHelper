@@ -140,18 +140,22 @@ public class SimpleVersion implements Version {
         return hash;
     }
 
+	@Override
 	public boolean lt(Version other) {
 		return checkLT(this, other);
 	}
 
+	@Override
 	public boolean lte(Version other) {
 		return checkLTE(this, other);
 	}
 
+	@Override
 	public boolean gt(Version other) {
 		return checkGT(this, other);
 	}
 
+	@Override
 	public boolean gte(Version other) {
 		return checkGTE(this, other);
 	}

@@ -38,34 +38,42 @@ public class DataHandling {
 	@api
 	public static class array extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "array";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CArray(t, args);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[var1, [var2...]]} Creates an array of values.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -93,31 +101,38 @@ public class DataHandling {
 	@api
 	public static class associative_array extends AbstractFunction{
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = CArray.GetAssociativeArray(t, args);
 			return array;
 		}
 
+		@Override
 		public String getName() {
 			return "associative_array";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "array {[args...]} Works exactly like array(), except the array created will be an associative array, even"
 					+ " if the array has been created with no elements. This is the only use case where this is neccessary, vs"
@@ -125,6 +140,7 @@ public class DataHandling {
 					+ " array could have been created using array().";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -145,14 +161,17 @@ public class DataHandling {
 	@api
 	public static class assign extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "assign";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			Construct c = args[1];
 			while (c instanceof IVariable) {
@@ -167,14 +186,17 @@ public class DataHandling {
 			throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "ivariable {ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it. Returns the variable that was assigned.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -184,10 +206,12 @@ public class DataHandling {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -258,14 +282,17 @@ public class DataHandling {
 	@noboilerplate
 	public static class _for extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "for";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{4};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) {
 			return new CVoid(t);
 		}
@@ -280,10 +307,12 @@ public class DataHandling {
 			return new forelse(true).execs(t, env, parent, nodes);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public String docs() {
 			return "void {assign, condition, expression1, expression2} Acts as a typical for loop. The assignment is first run. Then, a"
 					+ " condition is checked. If that condition is checked and returns true, expression2 is run. After that, expression1 is run. In java"
@@ -291,15 +320,18 @@ public class DataHandling {
 					+ "pre defined one, or the results of the assign() function. condition must be a boolean.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 		//Doesn't matter, run out of state
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -357,6 +389,7 @@ public class DataHandling {
 		}
 		
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -374,14 +407,17 @@ public class DataHandling {
 			this.runAsFor = runAsFor;
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -391,6 +427,7 @@ public class DataHandling {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return null;
 		}				
@@ -445,20 +482,24 @@ public class DataHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "forelse";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{5};
 		}
 
+		@Override
 		public String docs() {
 			return "void {assign, condition, expression1, expression2, else} Works like a normal for, but if upon checking the condition the first time,"
 					+ " it is determined that it is false (that is, NO code loops are going to be run) the else code is run instead. If the loop runs,"
 					+ " even once, it will NOT run the else branch.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -468,14 +509,17 @@ public class DataHandling {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class foreach extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "foreach";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{3, 4};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
@@ -505,9 +549,10 @@ public class DataHandling {
 				long start = ((CSlice) arr).getStart();
 				long finish = ((CSlice) arr).getFinish();
 				if (finish < start) {
-					throw new ConfigRuntimeException("When using the .. notation, the left number may not be greater than the right number. Recieved " + start + " and " + finish, ExceptionType.RangeException, t);
+					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish - 1, t), new CInt(-1, t));
+				} else {
+					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
 				}
-				arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
 			}
 			if (arr instanceof CArray) {
 				if (iv instanceof IVariable) {
@@ -565,10 +610,12 @@ public class DataHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array, [key], ivar, code} Walks through array, setting ivar equal to each element in the array, then running code."
 					+ " In addition, foreach(1..4, @i, code()) is also valid, setting @i to 1, 2, 3, 4 each time. The same syntax is valid as"
@@ -576,15 +623,18 @@ public class DataHandling {
 					+ " See the examples for a demonstration.";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 		//Doesn't matter, runs out of state anyways
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -605,6 +655,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nforeach(@array, @i,\n\tmsg(@i)\n)"),
 				new ExampleScript("With braces", "assign(@array, array(1, 2, 3))\nforeach(@array, @i){\n\tmsg(@i)\n}"),
 				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),				
+				new ExampleScript("With a slice, counting down", "foreach(3..1, @i){\n\tmsg(@i)\n}"),				
 				new ExampleScript("With a keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}"),
 			};
 		}
@@ -700,32 +751,39 @@ public class DataHandling {
 	@noboilerplate
 	public static class _while extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "while";
 		}
 
+		@Override
 		public String docs() {
 			return "void {condition, code} While the condition is true, the code is executed. break and continue work"
 					+ " inside a dowhile, but continuing more than once is pointless, since the loop isn't inherently"
 					+ " keeping track of any counters anyways. Breaking multiple times still works however.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -753,6 +811,7 @@ public class DataHandling {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull();
 		}
@@ -788,30 +847,37 @@ public class DataHandling {
 	@noboilerplate
 	public static class _dowhile extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull();
 		}
 
+		@Override
 		public String getName() {
 			return "dowhile";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "void {code, condition} Like while, but always runs the code at least once. The condition is checked"
 					+ " after each run of the code, and if it is true, the code is run again. break and continue work"
@@ -819,6 +885,7 @@ public class DataHandling {
 					+ " keeping track of any counters anyways. Breaking multiple times still works however.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -871,14 +938,17 @@ public class DataHandling {
 	@api
 	public static class _break extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "break";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "nothing {[int]} Stops the current loop. If int is specified, and is greater than 1, the break travels that many loops up. So, if you had"
 					+ " a loop embedded in a loop, and you wanted to break in both loops, you would call break(2). If this function is called outside a loop"
@@ -886,22 +956,27 @@ public class DataHandling {
 					+ " argument is specified, it is the same as calling break(1).";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
@@ -946,6 +1021,7 @@ public class DataHandling {
 			return null;
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -956,36 +1032,44 @@ public class DataHandling {
 	@api
 	public static class _continue extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "continue";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[int]} Skips the rest of the code in this loop, and starts the loop over, with it continuing at the next index. If this function"
 					+ " is called outside of a loop, the command will fail. If int is set, it will skip 'int' repetitions. If no argument is specified,"
 					+ " 1 is used.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
@@ -1012,34 +1096,42 @@ public class DataHandling {
 	@api
 	public static class is_stringable extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_stringable";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns whether or not the item is convertable to a string. Everything but arrays can be used as strings.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(!(args[0] instanceof CArray), t);
 		}
@@ -1065,35 +1157,43 @@ public class DataHandling {
 	@api
 	public static class is_string extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_string";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns whether or not the item is actually a string datatype. If you just care if some data can be used as a string,"
 					+ " use is_stringable().";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean((args[0] instanceof CString), t);
 		}
@@ -1118,34 +1218,42 @@ public class DataHandling {
 	@api
 	public static class is_bytearray extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_bytearray";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns whether or not the item is actually a ByteArray datatype.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean((args[0] instanceof CByteArray), t);
 		}
@@ -1171,34 +1279,42 @@ public class DataHandling {
 	@api
 	public static class is_array extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_array";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns whether or not the item is an array";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CArray, t);
 		}
@@ -1224,36 +1340,44 @@ public class DataHandling {
 	@api
 	public static class is_double extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_double";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns whether or not the given item is a double. Note that numeric strings and integers"
 					+ " can usually be used as a double, however this function checks the actual datatype of the item. If"
 					+ " you just want to see if an item can be used as a number, use is_numeric() instead.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CDouble, t);
 		}
@@ -1278,36 +1402,44 @@ public class DataHandling {
 	@api
 	public static class is_integer extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_integer";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns whether or not the given item is an integer. Note that numeric strings can usually be used as integers,"
 					+ " however this function checks the actual datatype of the item. If you just want to see if an item can be used as a number,"
 					+ " use is_integral() or is_numeric() instead.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CInt, t);
 		}
@@ -1332,35 +1464,43 @@ public class DataHandling {
 	@api
 	public static class is_boolean extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_boolean";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns whether the given item is of the boolean datatype. Note that all datatypes can be used as booleans, however"
 					+ " this function checks the specific datatype of the given item.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CBoolean, t);
 		}
@@ -1385,34 +1525,42 @@ public class DataHandling {
 	@api
 	public static class is_null extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_null";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns whether or not the given item is null.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CNull, t);
 		}
@@ -1437,31 +1585,38 @@ public class DataHandling {
 	@api
 	public static class is_numeric extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_numeric";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns false if the item would fail if it were used as a numeric value."
 					+ " If it can be parsed or otherwise converted into a numeric value, true is returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
@@ -1472,6 +1627,7 @@ public class DataHandling {
 			return new CBoolean(b, t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -1500,14 +1656,17 @@ public class DataHandling {
 	@api
 	public static class is_integral extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_integral";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns true if the numeric value represented by "
 					+ " a given double or numeric string could be cast to an integer"
@@ -1517,18 +1676,22 @@ public class DataHandling {
 					+ " value was narrowed to 4.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double d;
 			try {
@@ -1539,6 +1702,7 @@ public class DataHandling {
 			return new CBoolean((long) d == d, t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -1567,23 +1731,28 @@ public class DataHandling {
 	@api
 	public static class proc extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "proc";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[name], [ivar...], procCode} Creates a new user defined procedure (also known as \"function\") that can be called later in code. Please see the more detailed"
 					+ " documentation on procedures for more information.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
@@ -1593,10 +1762,12 @@ public class DataHandling {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_3;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -1673,6 +1844,7 @@ public class DataHandling {
 			return myProc;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
@@ -1751,30 +1923,37 @@ public class DataHandling {
 	@api
 	public static class _return extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "return";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1};
 		}
 
+		@Override
 		public String docs() {
 			return "nothing {mixed} Returns the specified value from this procedure. It cannot be called outside a procedure.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -1786,6 +1965,7 @@ public class DataHandling {
 			);
 		}				
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			Construct ret = (args.length == 1 ? args[0] : new CVoid(t));
 			throw new FunctionReturnException(ret, t);
@@ -1795,34 +1975,42 @@ public class DataHandling {
 	@api
 	public static class include extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "include";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "void {path} Includes external code at the specified path.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IncludeException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
@@ -1862,14 +2050,17 @@ public class DataHandling {
 	@api
 	public static class call_proc extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "call_proc";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {proc_name, [var1...]} Dynamically calls a user defined procedure. call_proc(_myProc, 'var1') is the equivalent of"
 					+ " _myProc('var1'), except you could dynamically build the procedure name if need be. This is useful for dynamic coding,"
@@ -1878,22 +2069,27 @@ public class DataHandling {
 					+ " a procedure if you know what its name is beforehand.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidProcedureException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
@@ -1914,6 +2110,7 @@ public class DataHandling {
 					ExceptionType.InvalidProcedureException, t);
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -1987,35 +2184,43 @@ public class DataHandling {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class is_proc extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "is_proc";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {procName} Returns whether or not the given procName is currently defined, i.e. if calling this proc wouldn't"
 					+ " throw an exception.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_2_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) {
 			return new CBoolean(env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val()) == null ? false : true, t);
 		}
@@ -2024,34 +2229,42 @@ public class DataHandling {
 	@api
 	public static class is_associative extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "is_associative";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {array} Returns whether or not the array is associative. If the parameter is not an array, throws a CastException.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				return new CBoolean(((CArray) args[0]).inAssociativeMode(), t);
@@ -2080,35 +2293,43 @@ public class DataHandling {
 	@api
 	public static class is_closure extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "is_closure";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {arg} Returns true if the argument is a closure (could be executed)"
 					+ " or false otherwise";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CClosure, t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2125,14 +2346,17 @@ public class DataHandling {
 	@api
 	public static class _import extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "import";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {ivar | key} This function imports a value from the global value"
 					+ " register. In the first mode, it looks for an ivariable with the specified"
@@ -2146,10 +2370,12 @@ public class DataHandling {
 					+ " for more information.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
@@ -2159,14 +2385,17 @@ public class DataHandling {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof IVariable) {
 				//Mode 1     
@@ -2185,6 +2414,7 @@ public class DataHandling {
 			return new _export().examples();
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -2208,14 +2438,17 @@ public class DataHandling {
 	@api
 	public static class _export extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "export";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "void {ivar | key, value} Stores a value in the global storage register."
 					+ " When using the first mode, the ivariable is stored so it can be imported"
@@ -2228,10 +2461,12 @@ public class DataHandling {
 					+ " contents of the array will manipulate the stored value.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
@@ -2241,14 +2476,17 @@ public class DataHandling {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 1) {
 				if (args[0] instanceof IVariable) {
@@ -2290,6 +2528,7 @@ public class DataHandling {
 			};
 		}
 		
+		@Override
 		public Set<Optimizable.OptimizationOption> optimizationOptions() {
 			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -2313,14 +2552,17 @@ public class DataHandling {
 	@api(environments=CommandHelperEnvironment.class)
 	public static class closure extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "closure";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "closure {[varNames...,] code} Returns a closure on the provided code. A closure is"
 					+ " a datatype that represents some code as code, not the results of some"
@@ -2336,10 +2578,12 @@ public class DataHandling {
 					+ " and examples.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
@@ -2349,10 +2593,12 @@ public class DataHandling {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
@@ -2387,6 +2633,7 @@ public class DataHandling {
 			return closure;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -2405,14 +2652,17 @@ public class DataHandling {
 	@api
 	public static class execute extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "execute";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {[values...,] closure} Executes the given closure. You can also send arguments"
 					+ " to the closure, which it may or may not use, depending on the particular closure's"
@@ -2420,18 +2670,22 @@ public class DataHandling {
 					+ " be returned with execute. Otherwise, void is returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[args.length - 1] instanceof CClosure) {
 				Construct[] vals = new Construct[args.length - 1];
@@ -2448,6 +2702,7 @@ public class DataHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2456,36 +2711,44 @@ public class DataHandling {
 	@api
 	public static class _boolean extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "boolean";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {item} Returns a new construct that has been cast to a boolean. The item is cast according to"
 					+ " the boolean conversion rules. Since all data types can be cast to a"
 					+ " a boolean, this function will never throw an exception.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(Static.getBoolean(args[0]), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -2515,14 +2778,17 @@ public class DataHandling {
 	@api
 	public static class _integer extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "integer";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "integer {item} Returns a new construct that has been cast to an integer."
 					+ " This function will throw a CastException if is_numeric would return"
@@ -2532,22 +2798,27 @@ public class DataHandling {
 					+ " if this data loss would occur.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt((long) Static.getDouble(args[0], t), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -2573,36 +2844,44 @@ public class DataHandling {
 	@api
 	public static class _double extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "double";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "double {item} Returns a new construct that has been cast to an double."
 					+ " This function will throw a CastException if is_numeric would return"
 					+ " false for this item, but otherwise, it will be cast properly.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(Static.getDouble(args[0], t), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -2627,14 +2906,17 @@ public class DataHandling {
 	@api
 	public static class _string extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "string";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {item} Creates a new construct that is the \"toString\" of an item."
 					+ " For arrays, an human readable version is returned; this should not be"
@@ -2642,22 +2924,27 @@ public class DataHandling {
 					+ " or \"false\" and null returns \"null\".";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CString(args[0].val(), t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -2685,18 +2972,22 @@ public class DataHandling {
 	
 	@api public static class to_radix extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int radix = Static.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX){
@@ -2705,14 +2996,17 @@ public class DataHandling {
 			return new CString(Long.toString(Static.getInt(args[0], t), radix), t);
 		}
 
+		@Override
 		public String getName() {
 			return "to_radix";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "string {value, radix} Given an int and a radix, returns a string representation of the integer value"
 					+ " in the given base. A common use would be to output a hex or binary representation of a number, for"
@@ -2729,6 +3023,7 @@ public class DataHandling {
 					+ Character.MIN_RADIX + ", because it is impossible to represent any numbers with out at least a binary base.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2744,18 +3039,22 @@ public class DataHandling {
 	
 	@api public static class parse_int extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String value = args[0].val();
 			int radix = Static.getInt32(args[1], t);
@@ -2772,20 +3071,24 @@ public class DataHandling {
 			return new CInt(ret, t);
 		}
 
+		@Override
 		public String getName() {
 			return "parse_int";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "int {value, radix} Converts a string representation of an integer to a real integer, given the value's"
 					+ " radix (base). See {{function|to_radix}} for a more detailed explanation of number theory. Radix must be"
 					+ " between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2826,6 +3129,73 @@ public class DataHandling {
 			b.append(args[i].val());
 		}
 		return b.toString();
+	}
+	
+	@api
+	public static class typeof extends AbstractFunction implements Optimizable {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			try {
+				return new CString(args[0].typeof(), t);
+			} catch(IllegalArgumentException ex){
+				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
+						+ " error to the developers.");
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "typeof";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {arg} Returns a string value of the typeof a value. For instance 'array' is returned"
+					+ " for typeof(array()). This is a generic replacement for the is_* series of functions.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage, typeof string", "typeof('value')"),
+				new ExampleScript("Basic usage, typeof int", "typeof(1)"),
+				new ExampleScript("Basic usage, typeof double", "typeof(1.0)"),
+				new ExampleScript("Basic usage, typeof closure", "typeof(closure(){ msg('test') })"),
+			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
+		}
+		
+		
 	}
 }
 

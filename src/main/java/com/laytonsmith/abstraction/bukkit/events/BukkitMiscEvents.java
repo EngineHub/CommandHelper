@@ -34,14 +34,17 @@ public class BukkitMiscEvents {
 			this.sce = sce;
 		}
 
+		@Override
 		public Object _GetObject() {
 			return sce;
 		}
 
+		@Override
 		public String getCommand() {
 			return sce.getCommand();
 		}
 
+		@Override
 		public void setCommand(String command) {
 			sce.setCommand(command);
 		}
@@ -63,18 +66,22 @@ public class BukkitMiscEvents {
 		}
 		
 		
+		@Override
 		public String getChannel() {
 			return channel;
 		}
 
+		@Override
 		public byte[] getBytes() {
 			return bytes;
 		}
 
+		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(player);
 		}
 
+		@Override
 		public Object _GetObject() {
 			return null;
 		}
@@ -87,30 +94,37 @@ public class BukkitMiscEvents {
 			slp = event;
 		}
 		
+		@Override
 		public Object _GetObject() {
 			return slp;
 		}
 	
+		@Override
 		public InetAddress getAddress() {
 			return slp.getAddress();
 		}
 	
+		@Override
 		public int getMaxPlayers() {
 			return slp.getMaxPlayers();
 		}
 	
+		@Override
 		public String getMOTD() {
 			return slp.getMotd();
 		}
 	
+		@Override
 		public int getNumPlayers() {
 			return slp.getNumPlayers();
 		}
 	
+		@Override
 		public void setMaxPlayers(int max) {
 			slp.setMaxPlayers(max);
 		}
 	
+		@Override
 		public void setMOTD(String motd) {
 			slp.setMotd(motd);
 		}
@@ -131,26 +145,32 @@ public class BukkitMiscEvents {
 			this.args = args;
 		}
 		
+		@Override
 		public Object _GetObject() {
 			return comp;
 		}
 
+		@Override
 		public MCCommandSender getCommandSender() {
 			return sender;
 		}
 
+		@Override
 		public MCCommand getCommand() {
 			return new BukkitMCCommand(cmd);
 		}
 
+		@Override
 		public String getAlias() {
 			return alias;
 		}
 
+		@Override
 		public String[] getArguments() {
 			return args;
 		}
 
+		@Override
 		public List<String> getCompletions() {
 			return comp;
 		}

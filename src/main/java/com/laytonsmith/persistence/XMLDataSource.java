@@ -39,10 +39,12 @@ public class XMLDataSource extends StringSerializableDataSource{
         return null;
     }
 
+	@Override
     public String docs() {
         return "XML {xml://path/to/xml/file.xml} --";
     }
 
+	@Override
     public CHVersion since() {
         return CHVersion.V0_0_0;
     }

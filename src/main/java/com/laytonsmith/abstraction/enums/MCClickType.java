@@ -1,10 +1,14 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  * 
  * @author Riking
  */
-public enum MCClickType {/**
+@MEnum("ClickType")
+public enum MCClickType {
+	/**
      * The left (or primary) mouse button.
      */
     LEFT,

@@ -1,10 +1,13 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  * Gamerule names
  *
  * @author Hekta
  */
+@MEnum("GameRule")
 public enum MCGameRule {
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
 	DODAYLIGHTCYCLE("doDaylightCycle"),

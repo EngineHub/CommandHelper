@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
@@ -17,6 +18,7 @@ import java.util.logging.Logger;
  *
  * @author Layton
  */
+@typeof("closure")
 public class CClosure extends Construct {
 
     public static final long serialVersionUID = 1L;

@@ -41,32 +41,39 @@ public class Persistence {
 	@noboilerplate
 	public static class store_value extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "store_value";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[namespace, ...,] key, value} Allows you to store a value, which can then be retrieved later. key must be a string containing"
 					+ " only letters, numbers, underscores. Periods may also be used, but they form a namespace, and have special meaning."
 					+ " (See get_values())";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_2;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String key = GetNamespace(args, args.length - 1, getName(), t);
 			String value = null;
@@ -100,6 +107,7 @@ public class Persistence {
 			return new CVoid(t);
 		}
 
+		@Override
 		public Boolean runAsync() {
 			//Because we do IO
 			return true;
@@ -115,32 +123,39 @@ public class Persistence {
 	@noboilerplate
 	public static class get_value extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_value";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "Mixed {[namespace, ...,] key} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
 					+ " is returned. On a more detailed note: If the value stored in the persistence database is not actually a construct,"
 					+ " then null is also returned.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_2;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			Object o;
 			String namespace = GetNamespace(args, null, getName(), t);
@@ -168,6 +183,7 @@ public class Persistence {
 			}
 		}
 
+		@Override
 		public Boolean runAsync() {
 			//Because we do IO
 			return true;
@@ -183,14 +199,17 @@ public class Persistence {
 	@noboilerplate
 	public static class get_values extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "get_values";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "array {name[, space, ...]} Returns all the values in a particular namespace"
 					+ " as an associative"
@@ -201,14 +220,17 @@ public class Persistence {
 					+ " a single value (in this case).";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return true;
 		}
@@ -220,6 +242,7 @@ public class Persistence {
 			};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			PersistenceNetwork p = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			List<String> keyChain = new ArrayList<String>();
@@ -249,6 +272,7 @@ public class Persistence {
 			return ca;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
@@ -263,34 +287,42 @@ public class Persistence {
 	@noboilerplate
 	public static class has_value extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "has_value";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {[namespace, ...,] key} Returns whether or not there is data stored at the specified key in the Persistence database.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			try {
 				return new CBoolean(env.getEnv(GlobalEnv.class).GetPersistenceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")), t);
@@ -311,34 +343,42 @@ public class Persistence {
 	@noboilerplate
 	public static class clear_value extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "clear_value";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "void {[namespace, ...,] key} Completely removes a value from storage. Calling has_value(key) after this call will return false.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String namespace = GetNamespace(args, null, getName(), t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);

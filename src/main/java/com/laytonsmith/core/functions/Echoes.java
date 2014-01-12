@@ -38,10 +38,12 @@ public class Echoes {
     @api(environments={CommandHelperEnvironment.class})
 	@noboilerplate 
 	public static class die extends AbstractFunction implements Optimizable {
+		@Override
         public Integer [] numArgs() {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException{
             if(args.length == 0){
                 throw new CancelCommandException("", t);
@@ -66,22 +68,28 @@ public class Echoes {
             }
         }
 
+		@Override
         public ExceptionType[] thrown(){
             return new ExceptionType[]{};
         }
 
+		@Override
         public String getName(){ return "die"; }
+		@Override
         public String docs(){
             return "nothing {[var1, var2...,]} Kills the command immediately, without completing it. A message is optional, but if provided, displayed to the user.";
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
+		@Override
         public Boolean runAsync(){
             return false;
         }
@@ -100,14 +108,17 @@ public class Echoes {
 	@noboilerplate 
 	public static class msg extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "msg";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
+		@Override
         public Construct exec(final Target t, Environment env, final Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++){
@@ -128,21 +139,26 @@ public class Echoes {
             return new CVoid(t);
         }
         
+		@Override
         public ExceptionType[] thrown(){
             return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
+		@Override
         public String docs() {
             return "void {var1, [var2...]} Echoes a message to the player running the command";
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
+		@Override
         public Boolean runAsync(){
             return false;
         }
@@ -151,14 +167,17 @@ public class Echoes {
     
     @api public static class tmsg extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "tmsg";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length < 2){
                 throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, t);
@@ -187,20 +206,25 @@ public class Echoes {
             return new CVoid(t);
         }
 
+		@Override
         public String docs() {
             return "void {player, msg, [...]} Displays a message on the specified players screen, similar to msg, but targets a specific user.";
         }
+		@Override
         public ExceptionType[] thrown(){
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.InsufficientArgumentsException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
+		@Override
         public Boolean runAsync(){
             return false;
         }
@@ -219,14 +243,17 @@ public class Echoes {
 			COLOR_SYMBOLS = Collections.unmodifiableSet(temp);
 		}
 
+		@Override
         public String getName() {
             return "color";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String color = null;
 			String val = args[0].nval();
@@ -297,6 +324,7 @@ public class Echoes {
             return ret;
         }
 
+		@Override
         public String docs() {
             String [] b = new String[MCChatColor.values().length];
             for(int i = 0; i < b.length; i++){
@@ -309,17 +337,21 @@ public class Echoes {
                     + " it is a much better idea to use this function as opposed to hard coding your own color codes.";
         }
         
+		@Override
         public ExceptionType[] thrown(){
             return new ExceptionType[]{};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
+		@Override
         public Boolean runAsync(){
             return null;
         }
@@ -336,33 +368,41 @@ public class Echoes {
     
     @api public static class strip_colors extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "strip_colors";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public String docs() {
             return "string {toStrip} Strips all the color codes from a given string";
         }
 
+		@Override
         public ExceptionType[] thrown() {
             return new ExceptionType[]{};
         }
 
+		@Override
         public boolean isRestricted() {
             return false;
         }
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
 
+		@Override
         public Boolean runAsync() {
             return false;
         }
 
+		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             return new CString(MCChatColor.stripColor(args[0].val()), t);
         }
@@ -372,14 +412,17 @@ public class Echoes {
     @api(environments={CommandHelperEnvironment.class})
 	public static class chat extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "chat";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1};
         }
 
+		@Override
         public Construct exec(final Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null){
@@ -390,22 +433,27 @@ public class Echoes {
             return new CVoid(t);
         }
 
+		@Override
         public String docs() {
             return "void {string} Echoes string to the chat, as if the user simply typed something into the chat bar. This function cannot"
 					+ " be run from console, a PlayerOfflineException is thrown if attempted. Use broadcast() instead.";
         }
         
+		@Override
         public ExceptionType[] thrown(){
             return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
+		@Override
         public Boolean runAsync(){
             return false;
         }
@@ -414,38 +462,46 @@ public class Echoes {
     
     @api public static class chatas extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "chatas";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
 
+		@Override
         public String docs() {
             return "void {player, msg} Sends a chat message to the server, as the given player. Otherwise the same as the chat"
                     + " function";
         }
         
+		@Override
         public ExceptionType[] thrown(){
             return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_0_2;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             final MCPlayer player = Static.GetPlayer(args[0], t);
             Static.AssertPlayerNonNull(player, t);
 			player.chat(args[1].val());
             return new CVoid(t);
         }
+		@Override
         public Boolean runAsync(){
             return false;
         }
@@ -454,32 +510,39 @@ public class Echoes {
     
     @api public static class broadcast extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "broadcast";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2};
         }
 
+		@Override
         public String docs() {
             return "void {message, [permission]} Broadcasts a message to all players on the server."
             		+ " If permission is given, only players with that permission will see the broadcast.";
         }
         
+		@Override
         public ExceptionType[] thrown(){
             return new ExceptionType[]{ExceptionType.NullPointerException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
                 throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.NullPointerException, t);
@@ -496,6 +559,7 @@ public class Echoes {
             }
             return new CVoid(t);
         }
+		@Override
         public Boolean runAsync(){
             return false;
         }
@@ -506,32 +570,39 @@ public class Echoes {
     @noboilerplate
     public static class console extends AbstractFunction{
 
+		@Override
         public String getName() {
             return "console";
         }
 
+		@Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2};
         }
 
+		@Override
         public String docs() {
             return "void {message, [prefix]} Logs a message to the console. If prefix is true, prepends \"CommandHelper:\""
                     + " to the message. Default is true.";
         }
         
+		@Override
         public ExceptionType[] thrown(){
             return new ExceptionType[]{ExceptionType.CastException};
         }
 
+		@Override
         public boolean isRestricted() {
             return true;
         }
 
         
+		@Override
         public CHVersion since() {
             return CHVersion.V3_0_2;
         }
 
+		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mes = args[0].val();
             boolean prefix = true;
@@ -546,6 +617,7 @@ public class Echoes {
             System.out.println(mes);
             return new CVoid(t);
         }
+		@Override
         public Boolean runAsync(){
             return null;
         }
@@ -555,19 +627,23 @@ public class Echoes {
 	@api
 	public static class colorize extends AbstractFunction implements Optimizable {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
 		color color = new color();
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Construct text = args[0];
 			String symbol = "&";
@@ -625,14 +701,17 @@ public class Echoes {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "colorize";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {text, [symbol]} Replaces all the colorizable text in the string. For instance,"
 					+ " colorize('&aText') would be equivalent to (color('a').'Text'). By default, the"
@@ -642,6 +721,7 @@ public class Echoes {
 					+ " twice, for instance '&&c' would return a literal '&c' instead of a red modifier.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}

@@ -29,7 +29,7 @@
 	<key>Language Features</key>
 	<dict>
 		<key>Close Block Comments</key>
-		<string></string>
+		<string>*/</string>
 		<key>Close Parameter Lists</key>
 		<string>)</string>
 		<key>Close Statement Blocks</key>
@@ -49,7 +49,7 @@
 		<key>Identifier and Keyword Characters</key>
 		<string>123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz.</string>
 		<key>Open Block Comments</key>
-		<string></string>
+		<string>/*</string>
 		<key>Open Line Comments</key>
 		<string>#</string>
 		<key>Open Parameter Lists</key>

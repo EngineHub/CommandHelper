@@ -119,6 +119,7 @@ public class VirtualFileSystem {
 			//We need to kick off a thread to determine the current FS size.
 			fsSizeThread = new Thread(new Runnable() {
 
+				@Override
 				public void run() {
 					while(true){
 						try {

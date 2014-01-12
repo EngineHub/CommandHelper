@@ -30,30 +30,37 @@ public class BukkitMCLocation implements MCLocation {
         }
     }
 
+	@Override
     public Object getHandle() {
         return l;
     }
 
+	@Override
     public double getX() {
         return l.getX();
     }
 
+	@Override
     public double getY() {
         return l.getY();
     }
 
+	@Override
     public double getZ() {
         return l.getZ();
     }
 
+	@Override
 	public double distance(MCLocation o) {
 		return l.distance(((BukkitMCLocation)o)._Location());
 	}
 	
+	@Override
 	public double distanceSquared(MCLocation o) {
 		return l.distanceSquared(((BukkitMCLocation)o)._Location());
 	}
 
+	@Override
     public MCWorld getWorld() {
         if (l.getWorld() == null) {
             return null;
@@ -61,26 +68,32 @@ public class BukkitMCLocation implements MCLocation {
         return new BukkitMCWorld(l.getWorld());
     }
 
+	@Override
     public float getYaw() {
         return l.getYaw();
     }
 
+	@Override
     public float getPitch() {
         return l.getPitch();
     }
 
+	@Override
     public int getBlockX() {
         return l.getBlockX();
     }
 
+	@Override
     public int getBlockY() {
         return l.getBlockY();
     }
 
+	@Override
     public int getBlockZ() {
         return l.getBlockZ();
     }
 
+	@Override
     public MCBlock getBlock() {
         if (l == null || l.getBlock() == null) {
             return null;
@@ -92,22 +105,27 @@ public class BukkitMCLocation implements MCLocation {
         return l;
     }
 
+	@Override
 	public void setX(double x) {
 		l.setX(x);
 	}
 
+	@Override
 	public void setY(double y) {
 		l.setY(y);
 	}
 
+	@Override
 	public void setZ(double z) {
 		l.setZ(z);
 	}
 
+	@Override
     public void setPitch(float p) {
         l.setPitch(p);
     }
 
+	@Override
     public void setYaw(float y) {
         l.setYaw(y);
     }
@@ -176,14 +194,17 @@ public class BukkitMCLocation implements MCLocation {
 		return l.hashCode();
 	}
 
+	@Override
 	public void breakBlock() {
 		l.getBlock().breakNaturally();
 	}
 
+	@Override
 	public Velocity getDirection() {
 		return new Velocity(1, l.getDirection().getX(), l.getDirection().getY(), l.getDirection().getZ());
 	}
 
+	@Override
 	public MCChunk getChunk() {
 		return new BukkitMCChunk(l.getChunk());
 	}

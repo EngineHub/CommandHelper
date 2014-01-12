@@ -29,6 +29,7 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
         }
     }
     
+	@Override
     public Object getHandle(){
         return at;
     }
@@ -70,6 +71,7 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
 		return at.hashCode();
 	}
 
+	@Override
 	public String getName() {
 		return at.getName();
 	}

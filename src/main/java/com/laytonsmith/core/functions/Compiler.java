@@ -62,6 +62,7 @@ public class Compiler {
 			}
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
@@ -78,6 +79,7 @@ public class Compiler {
 					+ "compiler.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CEntry(args[0], args[1], t);
 		}
@@ -104,6 +106,7 @@ public class Compiler {
 			return tree;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
 		}
@@ -141,28 +144,6 @@ public class Compiler {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 
-			//In the lexer, array('one' : 1) would return 3 tokens (note the spaces).
-			//We need to correct this by changing this to 'one:' (CLabel) and continuing.
-			for(int i = 0; i < list.size() - 1; i++){
-				if(list.get(i).getData() instanceof CLabel){
-					//else if it's empty, then the previous token is the label
-					if(list.get(i).getData().val().trim().equals("")){
-						//If i == 0, compile error
-						if(i == 0){
-							throw new ConfigCompileException("Unexpected \":\" symbol", list.get(i).getTarget());
-						}
-						//Unless it's not a primitive, in which case, compiler error
-						//TODO: This should be changed to primitive later. For now, it's
-						//just making sure it's not a function
-						if(list.get(i - 1).getData() instanceof CFunction){
-							throw new ConfigCompileException("Expecting label, but found " + list.get(i - 1).getData().val(), list.get(i - 1).getTarget());
-						}
-						Construct c = new CLabel(list.get(i - 1).getData());
-						list.set(i - 1, new ParseTree(c, list.get(i - 1).getFileOptions()));
-						list.remove(i);
-					}
-				}
-			}
 			//Assignment
 			//Note that we are walking the array in reverse, because multiple assignments,
 			//say @a = @b = 1 will break if they look like assign(assign(@a, @b), 1),
@@ -489,6 +470,7 @@ public class Compiler {
 			return true;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String s = null;
 			if(args.length == 1){
@@ -514,6 +496,7 @@ public class Compiler {
 					+ " It simply returns the argument provided, or void if none.";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
 				return new CVoid(t);
@@ -526,6 +509,7 @@ public class Compiler {
 	@hide("This is only used internally by the compiler, and will be removed at some point.")
 	public static class __cbracket__ extends DummyFunction implements Optimizable {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
@@ -560,6 +544,7 @@ public class Compiler {
 	@hide("This is only used internally by the compiler, and will be removed at some point.")
 	public static class __cbrace__ extends DummyFunction implements Optimizable {
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}

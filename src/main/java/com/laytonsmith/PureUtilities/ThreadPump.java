@@ -114,6 +114,7 @@ public abstract class ThreadPump {
 		final Object[] ret = new Object[1];
 		invokeLater(new Runnable() {
 
+			@Override
 			public void run() {
 				try{
 					ret[0] = callable.call();
@@ -137,6 +138,7 @@ public abstract class ThreadPump {
 				lockTime = System.currentTimeMillis();
 				pumpStarted = true;
 				new Thread(new Runnable(){
+					@Override
 					public void run(){
 						doPump();
 					}
@@ -154,6 +156,7 @@ public abstract class ThreadPump {
 			runOnMainThread(new Runnable() {
 
 				@SuppressWarnings("NestedSynchronizedStatement")
+				@Override
 				public void run() {
 					//This condition happens when we are done with the thread
 					//AND there are no pending events.

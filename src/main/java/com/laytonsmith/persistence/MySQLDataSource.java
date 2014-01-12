@@ -52,6 +52,7 @@ public class MySQLDataSource extends AbstractDataSource{
 		return null;
 	}
 
+	@Override
 	public String docs() {
 		return "MySQL {mysql://[user[:password]@]host[:port]/database/table}"
 			+ " This type stores data in a MySQL database. Unlike the"
@@ -65,6 +66,7 @@ public class MySQLDataSource extends AbstractDataSource{
 			+ " in the database is required to be of a specific format: TODO";
 	}
 
+	@Override
 	public CHVersion since() {
 		return CHVersion.V0_0_0;
 	}

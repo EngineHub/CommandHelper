@@ -35,30 +35,37 @@ public enum CHVersion implements Version {
 		return this.version.compareTo(o);
 	}
 
+	@Override
 	public int getMajor() {
 		return this.version.getMajor();
 	}
 
+	@Override
 	public int getMinor() {
 		return this.version.getMinor();
 	}
 
+	@Override
 	public int getSupplemental() {
 		return this.version.getSupplemental();
 	}
 
+	@Override
 	public boolean lt(Version other) {
 		return this.version.lt(other);
 	}
 
+	@Override
 	public boolean lte(Version other) {
 		return this.version.lte(other);
 	}
 
+	@Override
 	public boolean gt(Version other) {
 		return this.version.gt(other);
 	}
 
+	@Override
 	public boolean gte(Version other) {
 		return this.version.gte(other);
 	}

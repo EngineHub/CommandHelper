@@ -18,18 +18,22 @@ public class BukkitMCItem extends BukkitMCEntity implements MCItem{
 		this.i = i;
 	}
 	
+	@Override
 	public MCItemStack getItemStack(){
 		return new BukkitMCItemStack(i.getItemStack());
 	}
 	
+	@Override
 	public int getPickupDelay(){
 		return i.getPickupDelay();
 	}
 	
+	@Override
 	public void setItemStack(MCItemStack stack){
 		i.setItemStack(((BukkitMCItemStack) stack).asItemStack());
 	}
 	
+	@Override
 	public void setPickupDelay(int delay){
 		i.setPickupDelay(delay);
 	}

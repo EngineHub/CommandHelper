@@ -42,6 +42,7 @@ public class BukkitVehicleEvents {
 			vec = (VehicleEntityCollisionEvent) event;
 		}
 		
+		@Override
 		public MCEntity getEntity() {
 			if (vec.getEntity() == null) {
 				return null;
@@ -49,18 +50,22 @@ public class BukkitVehicleEvents {
 			return BukkitConvertor.BukkitGetCorrectEntity(vec.getEntity());
 		}
 
+		@Override
 		public boolean isCollisionCancelled() {
 			return vec.isCollisionCancelled();
 		}
 
+		@Override
 		public boolean isPickupCancelled() {
 			return vec.isPickupCancelled();
 		}
 
+		@Override
 		public void setCollisionCancelled(boolean cancel) {
 			vec.setCollisionCancelled(cancel);
 		}
 
+		@Override
 		public void setPickupCancelled(boolean cancel) {
 			vec.setPickupCancelled(cancel);
 		}
@@ -81,6 +86,7 @@ public class BukkitVehicleEvents {
 			vbc = (VehicleBlockCollisionEvent) event;
 		}
 		
+		@Override
 		public MCBlock getBlock() {
 			return new BukkitMCBlock(vbc.getBlock());
 		}
@@ -101,6 +107,7 @@ public class BukkitVehicleEvents {
 			vee = event;
 		}
 		
+		@Override
 		public MCEntity getEntity() {
 			if (vee.getEntered() == null) {
 				return null;
@@ -119,6 +126,7 @@ public class BukkitVehicleEvents {
 			vee = event;
 		}
 		
+		@Override
 		public MCEntity getEntity() {
 			if (vee.getExited() == null) {
 				return null;
@@ -134,6 +142,7 @@ public class BukkitVehicleEvents {
 			ve = event;
 		}
 
+		@Override
 		public MCVehicle getVehicle() {
 			if (ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
 				return (MCVehicle) BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
@@ -141,6 +150,7 @@ public class BukkitVehicleEvents {
 			return null;
 		}
 
+		@Override
 		public Object _GetObject() {
 			return ve;
 		}
@@ -160,26 +170,32 @@ public class BukkitVehicleEvents {
 			this.to = new BukkitMCLocation(to);
 		}
 
+		@Override
 		public MCLocation getFrom() {
 			return from;
 		}
 
+		@Override
 		public MCLocation getTo() {
 			return to;
 		}
 
+		@Override
 		public MCVehicle getVehicle() {
 			return vehicle;
 		}
 
+		@Override
 		public Object _GetObject() {
 			return null;
 		}
 
+		@Override
 		public void setCancelled(boolean state) {
 			cancelled = state;
 		}
 
+		@Override
 		public boolean isCancelled() {
 			return cancelled;
 		}

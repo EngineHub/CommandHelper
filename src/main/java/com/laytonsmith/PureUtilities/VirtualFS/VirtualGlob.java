@@ -40,6 +40,7 @@ public class VirtualGlob implements Comparable<VirtualGlob> {
 		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
+	@Override
 	public int compareTo(VirtualGlob o) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}

@@ -17,10 +17,12 @@ public class BukkitMCExperienceOrb extends BukkitMCEntity implements MCExperienc
 		this.eo = eo;
 	}
 	
+	@Override
 	public int getExperience(){
 		return eo.getExperience();
 	}
 	
+	@Override
 	public void setExperience(int amount){
 		eo.setExperience(amount);
 	}

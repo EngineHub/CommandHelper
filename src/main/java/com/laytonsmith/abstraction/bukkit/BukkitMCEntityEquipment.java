@@ -20,18 +20,22 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 		this.ee = equipment;
 	}
 	
+	@Override
 	public void clearEquipment() {
 		ee.clear();
 	}
 
+	@Override
 	public int getSize() {
 		return MCEquipmentSlot.values().length;
 	}
 	
+	@Override
 	public MCEntity getHolder() {
 		return BukkitConvertor.BukkitGetCorrectEntity(ee.getHolder());
 	}
 
+	@Override
 	public Map<MCEquipmentSlot, MCItemStack> getAllEquipment() {
 		Map<MCEquipmentSlot, MCItemStack> slots = new EnumMap<MCEquipmentSlot, MCItemStack>(MCEquipmentSlot.class);
 		for (MCEquipmentSlot key : MCEquipmentSlot.values()) {
@@ -56,6 +60,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 		return slots;
 	}
 
+	@Override
 	public void setAllEquipment(Map<MCEquipmentSlot, MCItemStack> slots) {
 		MCItemStack stack = null;
 		for (MCEquipmentSlot key : slots.keySet()) {
@@ -80,6 +85,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 		}
 	}
 	
+	@Override
 	public Map<MCEquipmentSlot, Float> getAllDropChances() {
 		Map<MCEquipmentSlot, Float> slots = new EnumMap<MCEquipmentSlot, Float>(MCEquipmentSlot.class);
 		for (MCEquipmentSlot key : MCEquipmentSlot.values()) {
@@ -104,6 +110,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 		return slots;
 	}
 	
+	@Override
 	public void setAllDropChances(Map<MCEquipmentSlot, Float> slots) {
 		float chance;
 		for (MCEquipmentSlot key : slots.keySet()) {
@@ -131,82 +138,102 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	// For the purposes of faking a normal inventory, we most likely will not be accessing
 	// anything below this line, but they are here for flexibility and completion
 	
+	@Override
 	public MCItemStack getWeapon() {
 		return new BukkitMCItemStack(ee.getItemInHand());
 	}
 
+	@Override
 	public MCItemStack getHelmet() {
 		return new BukkitMCItemStack(ee.getHelmet());
 	}
 
+	@Override
 	public MCItemStack getChestplate() {
 		return new BukkitMCItemStack(ee.getChestplate());
 	}
 
+	@Override
 	public MCItemStack getLeggings() {
 		return new BukkitMCItemStack(ee.getLeggings());
 	}
 
+	@Override
 	public MCItemStack getBoots() {
 		return new BukkitMCItemStack(ee.getBoots());
 	}
 
+	@Override
 	public void setWeapon(MCItemStack stack) {
 		ee.setItemInHand(((BukkitMCItemStack) stack).asItemStack());
 	}
 
+	@Override
 	public void setHelmet(MCItemStack stack) {
 		ee.setHelmet(((BukkitMCItemStack) stack).asItemStack());
 	}
 
+	@Override
 	public void setChestplate(MCItemStack stack) {
 		ee.setChestplate(((BukkitMCItemStack) stack).asItemStack());
 	}
 
+	@Override
 	public void setLeggings(MCItemStack stack) {
 		ee.setLeggings(((BukkitMCItemStack) stack).asItemStack());
 	}
 
+	@Override
 	public void setBoots(MCItemStack stack) {
 		ee.setBoots(((BukkitMCItemStack) stack).asItemStack());
 	}
 
+	@Override
 	public float getWeaponDropChance() {
 		return ee.getItemInHandDropChance();
 	}
 
+	@Override
 	public float getHelmetDropChance() {
 		return ee.getHelmetDropChance();
 	}
 
+	@Override
 	public float getChestplateDropChance() {
 		return ee.getChestplateDropChance();
 	}
 
+	@Override
 	public float getLeggingsDropChance() {
 		return ee.getLeggingsDropChance();
 	}
 
+	@Override
 	public float getBootsDropChance() {
 		return ee.getBootsDropChance();
 	}
 
+	@Override
 	public void setWeaponDropChance(float chance) {
 		ee.setItemInHandDropChance(chance);
 	}
 
+	@Override
 	public void setHelmetDropChance(float chance) {
 		ee.setHelmetDropChance(chance);
 	}
 
+	@Override
 	public void setChestplateDropChance(float chance) {
 		ee.setChestplateDropChance(chance);
 	}
 
+	@Override
 	public void setLeggingsDropChance(float chance) {
 		ee.setLeggingsDropChance(chance);
 	}
 
+	@Override
 	public void setBootsDropChance(float chance) {
 		ee.setBootsDropChance(chance);
 	}

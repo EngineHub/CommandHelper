@@ -40,23 +40,28 @@ public class StringHandling {
 	@api
 	public static class cc extends AbstractFunction {
 
+		@Override
 		public String getName() {
 			return "cc";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "string {args...} The cousin to <strong>c</strong>on<strong>c</strong>at, this function does some magic under the covers"
 					+ " to remove the auto-concatenation effect in bare strings. Take the following example: cc(bare string) -> barestring";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return null;
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
@@ -66,14 +71,17 @@ public class StringHandling {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
@@ -119,18 +127,22 @@ public class StringHandling {
 	@api
 	public static class concat extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "concat";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for (int i = 0; i < args.length; i++) {
@@ -139,18 +151,22 @@ public class StringHandling {
 			return new CString(b.toString(), t);
 		}
 
+		@Override
 		public String docs() {
 			return "string {var1, [var2...]} Concatenates any number of arguments together, and returns a string";
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -184,14 +200,17 @@ public class StringHandling {
 		private static final String g = new Meta.g().getName();
 		private static final String p = new Compiler.p().getName();
 		
+		@Override
 		public String getName() {
 			return "sconcat";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for (int i = 0; i < args.length; i++) {
@@ -245,22 +264,27 @@ public class StringHandling {
 //                return new CString(b.toString(), t);
 //            }
 //        }
+		@Override
 		public String docs() {
 			return "string {var1, [var2...]} Concatenates any number of arguments together, but puts a space between elements";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -305,14 +329,17 @@ public class StringHandling {
 	@api
 	public static class replace extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "replace";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{3};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String thing = args[0].val();
 			String what = args[1].val();
@@ -320,22 +347,27 @@ public class StringHandling {
 			return new CString(thing.replace(what, that), t);
 		}
 
+		@Override
 		public String docs() {
 			return "string {subject, search, replacement} Replaces all instances of 'search' with 'replacement' in 'subject'";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -358,14 +390,17 @@ public class StringHandling {
 	@api
 	public static class parse_args extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "parse_args";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String[] sa = args[0].val().split(" ");
 			ArrayList<Construct> a = new ArrayList<Construct>();
@@ -381,24 +416,29 @@ public class StringHandling {
 			return new CArray(t, csa);
 		}
 
+		@Override
 		public String docs() {
 			return "array {string} Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
 					+ " $ into a usable array of items with which to script against. Extra spaces are ignored, so you would never get an empty"
 					+ " string as an input.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -422,34 +462,42 @@ public class StringHandling {
 	@api
 	public static class trim extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "trim";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {s} Returns the string s with leading and trailing whitespace cut off";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(args[0].val().trim(), args[0].getTarget());
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -471,34 +519,42 @@ public class StringHandling {
 	@api
 	public static class trimr extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "trimr";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {s} Returns the string s with trailing whitespace cut off";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimRight(args[0].val()), args[0].getTarget());
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -520,34 +576,42 @@ public class StringHandling {
 	@api
 	public static class triml extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "triml";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {s} Returns the string s with leading whitespace cut off";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimLeft(args[0].val()), t);
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
@@ -569,34 +633,42 @@ public class StringHandling {
 	@api
 	public static class length extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "length";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {str | array} Returns the character length of str, if the value is castable to a string, or the length of the array, if an array is given";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof Sizable) {
 				return new CInt(((Sizable) args[0]).size(), t);
@@ -623,34 +695,42 @@ public class StringHandling {
 	@api
 	public static class to_upper extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "to_upper";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {str} Returns an all caps version of str";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(args[0].val().toUpperCase(), t);
 		}
@@ -674,34 +754,42 @@ public class StringHandling {
 	@api
 	public static class to_lower extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "to_lower";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {str} Returns an all lower case version of str";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(args[0].val().toLowerCase(), t);
 		}
@@ -725,14 +813,17 @@ public class StringHandling {
 	@api
 	public static class substr extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "substr";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "string {str, begin, [end]} Returns a substring of the given string str, starting from index begin, to index end, or the"
 					+ " end of the string, if no index is given. If either begin or end are out of bounds of the string, an exception is thrown."
@@ -740,22 +831,27 @@ public class StringHandling {
 					+ " See also length().";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_1_2;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
@@ -793,36 +889,44 @@ public class StringHandling {
 	@api
 	public static class string_position extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "string_position";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "int {haystack, needle} Finds the numeric position of the first occurence of needle in haystack. haystack is the string"
 					+ " to search in, and needle is the string to search with. Returns the position of the needle (starting with 0) or -1 if"
 					+ " the string is not found at all.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.NullPointerException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String haystack = args[0].nval();
 			String needle = args[1].nval();
@@ -848,14 +952,17 @@ public class StringHandling {
 	@api
 	public static class split extends AbstractFunction implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "split";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
 
+		@Override
 		public String docs() {
 			return "array {split, string, [limit]} Splits a string into parts, using the split as the index. Though it can be used in every single case"
 					+ " you would use reg_split, this does not use regex,"
@@ -864,22 +971,27 @@ public class StringHandling {
 					+ " that number of splits will occur.";
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			//http://stackoverflow.com/questions/2667015/is-regex-too-slow-real-life-examples-where-simple-non-regex-alternative-is-bett
 			//According to this, regex isn't necessarily slower, but we do want to escape the pattern either way, since the main advantage
@@ -938,20 +1050,24 @@ public class StringHandling {
 	@api
 	public static class sprintf extends AbstractFunction implements Optimizable {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException,
 						ExceptionType.InsufficientArgumentsException,
 						ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
 				throw new ConfigRuntimeException(getName() + " expects 1 or more argument", ExceptionType.InsufficientArgumentsException, t);
@@ -1295,14 +1411,17 @@ public class StringHandling {
 			return count;
 		}
 
+		@Override
 		public String getName() {
 			return "sprintf";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "string {formatString, parameters... | formatString, array(parameters...)} Returns a string formatted to the"
 					+ " given formatString specification, using the parameters passed in. The formatString should be formatted"
@@ -1312,10 +1431,12 @@ public class StringHandling {
 					+ " valid. All format specifiers in the documentation are valid.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE, OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
@@ -1347,18 +1468,22 @@ public class StringHandling {
 	@api
 	public static class string_get_bytes extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String val = args[0].val();
 			String encoding = "UTF-8";
@@ -1372,20 +1497,24 @@ public class StringHandling {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "string_get_bytes";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "byte_array {string, [encoding]} Returns this string as a byte_array, encoded using the specified encoding,"
 					+ " or UTF-8 if no encoding is specified. Valid encodings are the encoding types that java supports. If the"
 					+ " encoding is invalid, a FormatException is thrown.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1395,18 +1524,22 @@ public class StringHandling {
 	@api
 	public static class string_from_bytes extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = Static.getByteArray(args[0], t);
 			String encoding = "UTF-8";
@@ -1420,19 +1553,23 @@ public class StringHandling {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "string_from_bytes";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "string {byte_array, [encoding]} Returns a new string, given the byte array encoding provided. The encoding defaults"
 					+ " to UTF-8, but may be specified. A FormatException is thrown if the encoding type is invalid.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1442,18 +1579,22 @@ public class StringHandling {
 	@api
 	public static class string_append extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CResource m = (CResource) args[0];
 			StringBuffer buf = ResourceManager.GetResource(m, StringBuffer.class, t);
@@ -1463,14 +1604,17 @@ public class StringHandling {
 			return new CVoid(t);
 		}
 
+		@Override
 		public String getName() {
 			return "string_append";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "void {resource, toAppend...} Appends any number of values to the underlying"
 					+ " string builder. This is much more efficient than doing normal concatenation"
@@ -1478,6 +1622,7 @@ public class StringHandling {
 					+ " be converted to a string via a cast, string(@res).";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1517,18 +1662,22 @@ public class StringHandling {
 	
 	@api public static class char_from_unicode extends AbstractFunction implements Optimizable {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try{
 				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
@@ -1537,14 +1686,17 @@ public class StringHandling {
 			}
 		}
 
+		@Override
 		public String getName() {
 			return "char_from_unicode";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "string {unicode} Returns the unicode character for a given unicode value. This is meant"
 					+ " for dynamic input that needs converting to a unicode character, if you're hardcoding"
@@ -1554,6 +1706,7 @@ public class StringHandling {
 					+ " length(char_from_unicode(@val)) will equal 1.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1565,6 +1718,7 @@ public class StringHandling {
 			};
 		}
 
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
 		}
@@ -1573,18 +1727,22 @@ public class StringHandling {
 	
 	@api public static class unicode_from_char extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0].val().toCharArray().length == 0){
 				throw new Exceptions.RangeException("Empty string cannot be converted to unicode.", t);
@@ -1593,19 +1751,23 @@ public class StringHandling {
 			return new CInt(i, t);
 		}
 
+		@Override
 		public String getName() {
 			return "unicode_from_char";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
+		@Override
 		public String docs() {
 			return "int {character} Returns the unicode code point for a given character. The character is a string, but it should"
 					+ " only be 1 code point character (which may be length(@character) == 2).";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1621,36 +1783,44 @@ public class StringHandling {
 	
 	@api public static class levenshtein extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return false;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(StringUtils.LevenshteinDistance(args[0].val(), args[1].val()), t);
 		}
 
+		@Override
 		public String getName() {
 			return "levenshtein";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
 
+		@Override
 		public String docs() {
 			return "int {string1, string2} Returns the levenshtein distance of two character sequences. For"
 				+ " instance, \"123\" and \"133\" would have a string distance of 1, while \"123\""
 				+ " and \"123\" would be 0, since they are the same string.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}

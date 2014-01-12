@@ -26,21 +26,27 @@ public class BukkitMCWolf extends BukkitMCTameable implements MCWolf {
         this.w = (Wolf) ao.getHandle();
     }
 	
+	@Override
 	public MCDyeColor getCollarColor() {
 		return MCDyeColor.valueOf(w.getCollarColor().name());
 	}
+	@Override
 	public boolean isAngry() {
 		return w.isAngry();
 	}
+	@Override
 	public boolean isSitting() {
 		return w.isSitting();
 	}
+	@Override
 	public void setAngry(boolean angry) {
 		w.setAngry(angry);
 	}
+	@Override
 	public void setSitting(boolean sitting) {
 		w.setSitting(sitting);
 	}
+	@Override
 	public void setCollarColor(MCDyeColor color) {
 		w.setCollarColor(DyeColor.valueOf(color.name()));
 	}

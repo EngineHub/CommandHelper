@@ -1,10 +1,13 @@
 
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  *
  * @author layton
  */
+@MEnum("Effect")
 public enum MCEffect {
     BOW_FIRE(1002),
     CLICK1(1001),

@@ -1,22 +1,27 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -261,5 +266,112 @@ public class SQL {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
+	}
+	
+	@api
+	public static class query_async extends AbstractFunction {
+		
+		RunnableQueue queue = new RunnableQueue("MethodScript-queryAsync");
+		boolean started = false;
+		
+		private void startup(){
+			if(!started){
+				queue.invokeLater(null, new Runnable() {
+
+					@Override
+					public void run() {
+						//This warms up the queue. Apparently.
+					}
+				});
+				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+
+					@Override
+					public void run() {
+						queue.shutdown();
+						started = false;
+					}
+				});
+				started = true;
+			}
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+			startup();
+			Construct arg = args[args.length - 1];
+			if(!(arg instanceof CClosure)){
+				throw new ConfigRuntimeException("The last argument to " + getName() + " must be a closure.", ExceptionType.CastException, t);
+			}
+			final CClosure closure = ((CClosure)arg);
+			final Construct[] newArgs = new Construct[args.length - 1];
+			//Make a new array minus the closure
+			System.arraycopy(args, 0, newArgs, 0, newArgs.length);
+			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
+
+				@Override
+				public void run() {
+					Construct returnValue = new CNull();
+					Construct exception = new CNull();
+					try{
+						returnValue = new query().exec(t, environment, newArgs);
+					} catch(ConfigRuntimeException ex){
+						exception = ObjectGenerator.GetGenerator().exception(ex, t);
+					}
+					final Construct cret = returnValue;
+					final Construct cex = exception;
+					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
+
+						@Override
+						public void run() {
+							closure.execute(new Construct[]{cret, cex});
+						}
+					});
+				}
+			});
+			return new CVoid(t);
+		}
+
+		@Override
+		public String getName() {
+			return "query_async";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		@Override
+		public String docs() {
+			return "void {profile, query, [params...], callback} Asynchronously makes a query to an SQL server."
+					+ " The profile, query, and params arguments work the same as {{function|query}}, so see"
+					+ " the documentation of that function for details about those parameters."
+					+ " The callback should have the following signature: closure(@contents, @exception){ &lt;code&gt; }."
+					+ " @contents will contain the return value that query would normally return. If @exception is not"
+					+ " null, then an exception occurred during the query, and that exception will be passed in. If"
+					+ " @exception is null, then no error occured, though @contents may still be null if query() would"
+					+ " otherwise have returned null.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }

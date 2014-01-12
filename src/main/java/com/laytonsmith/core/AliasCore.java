@@ -29,9 +29,24 @@ import com.laytonsmith.persistence.MemoryDataSource;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.sk89q.util.StringUtil;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -148,6 +163,7 @@ public class AliasCore {
 							ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("Global Alias - \"" + command + "\"", LogLevel.ERROR);
 							try {
 								s.run(s.getVariables(command), env, new MethodScriptComplete() {
+									@Override
 									public void done(String output) {
 										try {
 											if (output != null) {
@@ -212,6 +228,7 @@ public class AliasCore {
 								ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("User Alias (" + player.getName() + ") - \"" + command + "\"", LogLevel.ERROR);
 								try {
 									ac.run(ac.getVariables(command), env, new MethodScriptComplete() {
+										@Override
 										public void done(String output) {
 											if (output != null) {
 												if (!output.trim().isEmpty() && output.trim().startsWith("/")) {

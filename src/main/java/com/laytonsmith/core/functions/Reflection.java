@@ -1,6 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
@@ -52,14 +54,17 @@ public class Reflection {
 	public static class reflect_pull extends AbstractFunction {
 
 		private static Set<Construct> protocols;
+		@Override
 		public String getName() {
 			return "reflect_pull";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {param, [args, ...]} Returns information about the runtime in a usable"
 					+ " format. Depending on the information returned, it may be useable directly,"
@@ -73,22 +78,28 @@ public class Reflection {
 					+ "<tr><td>file</td><td></td><td>The absolute path to the current file</td></tr>"
 					+ "<tr><td>col</td><td></td><td>The current column number</td></tr>"
 					+ "<tr><td>datasources</td><td></td><td>An array of data source protocols available</td></tr>"
+					+ "<tr><td>enum</td><td>[enum name]</td><td>An array of enum names, or if one if provided, a list of all"
+					+ " the values in that enum</td></tr>"
 					+ "</table>";
 			//+ "<tr><td></td><td></td><td></td></tr>"
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.IOException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("Not enough parameters was sent to " + getName(), ExceptionType.InsufficientArgumentsException, t);
@@ -134,12 +145,33 @@ public class Reflection {
 					}
 				}
 				return new CArray(t, protocols);
+			} else if("enum".equalsIgnoreCase(param)){
+				CArray a = new CArray(t);
+				Set<Class<Enum>> enums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
+				if(args.length == 1){
+					//No name provided
+					for(Class<Enum> e : enums){
+						a.push(new CString(e.getAnnotation(MEnum.class).value(), t));
+					}
+				} else if(args.length == 2){
+					String enumName = args[1].val();
+					for(Class<Enum> e : enums){
+						if(e.getAnnotation(MEnum.class).value().equals(enumName)){
+							for(Enum ee : e.getEnumConstants()){
+								a.push(new CString(ee.name(), t));
+							}
+							break;
+						}
+					}
+				}
+				return a;
 			}
 
 			throw new ConfigRuntimeException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.",
 					ExceptionType.FormatException, t);
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -164,18 +196,22 @@ public class Reflection {
 			}
 		}
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return null;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String element = args[0].val();
 			DocField docField;
@@ -257,14 +293,17 @@ public class Reflection {
 			);
 		}
 
+		@Override
 		public String getName() {
 			return "reflect_docs";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0, 2};
 		}
 
+		@Override
 		public String docs() {
 			return "string { | element, docField} Returns the documentation for an element. There are 4 things that an element might have,"
 					+ " and one of these should be passed as the docField argument: type, return, args, description. A valid element is either"
@@ -274,6 +313,7 @@ public class Reflection {
 					+ " it returns the documentation for " + getName() + ", that is, what you're reading right now.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -282,14 +322,17 @@ public class Reflection {
 	@api
 	public static class get_functions extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
@@ -307,6 +350,7 @@ public class Reflection {
 			}
 		}
 		
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
 			if (funcs.keySet().size() < 10) {
@@ -322,20 +366,24 @@ public class Reflection {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_functions";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an associative array of all loaded functions. The keys of this array are the"
 					+ " names of the classes containing the functions (which you know as the sections of the API page),"
 					+ " and the values are arrays of the names of the functions within those classes.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -344,18 +392,22 @@ public class Reflection {
 	@api
 	public static class get_events extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
@@ -365,18 +417,22 @@ public class Reflection {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_events";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an array of all registered event names.";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -385,18 +441,22 @@ public class Reflection {
 	@api
 	public static class get_aliases extends AbstractFunction {
 
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
 
+		@Override
 		public Boolean runAsync() {
 			return false;
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (Script s : Static.getAliasCore().getScripts()) {
@@ -405,18 +465,22 @@ public class Reflection {
 			return ret;
 		}
 
+		@Override
 		public String getName() {
 			return "get_aliases";
 		}
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public String docs() {
 			return "array {} Returns an array of the defined alias signatures (The part left of the = sign).";
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}

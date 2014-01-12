@@ -4,10 +4,13 @@
  */
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  *
  * @author Layton
  */
+@MEnum("FireworkType")
 public enum MCFireworkType {
 	BALL,
 	BALL_LARGE,

@@ -208,6 +208,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 		return DataSourceModifier.values();
 	}
 
+	@Override
 	public String docs() {
 		return "Temporary Memory {mem:databaseName} Creates a temporary database that exists in memory only. Since keys across"
 				+ " databases are always unique anyways, the name for databaseName is irrelevant, but is required, so"
@@ -218,6 +219,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 				+ " exists only in the process's memory space.";
 	}
 
+	@Override
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
 	}

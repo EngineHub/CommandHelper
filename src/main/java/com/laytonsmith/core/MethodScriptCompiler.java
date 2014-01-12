@@ -90,6 +90,13 @@ public final class MethodScriptCompiler {
 					comment_is_block = false;
 					continue;
 				}
+				//Double slash line comment start
+				if(c == '/' && c2 == '/' && !in_comment){
+					in_comment = true;
+					comment_is_block = false;
+					i++;
+					continue;
+				}
 				//Block comment end
 				if (c == '*' && c2 == '/' && in_comment && comment_is_block) {
 					if (in_comment && comment_is_block) {
@@ -526,6 +533,14 @@ public final class MethodScriptCompiler {
 				token_list.add(new Token(TType.FUNC_END, ")", target));
 				continue;
 			}
+			if(c == ';' && !state_in_quote){
+				if(buf.length() > 0){
+					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+					buf = new StringBuilder();
+				}
+				token_list.add(new Token(TType.SEMICOLON, ";", target));
+				continue;
+			}
 			if (Character.isWhitespace(c) && !state_in_quote && c != '\n') {
 				//keep the whitespace, but end the previous token, unless the last character
 				//was also whitespace. All whitespace is added as a single space.                
@@ -945,41 +960,59 @@ public final class MethodScriptCompiler {
 			Token next1 = i + 1 < stream.size() ? stream.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
 			Token next2 = i + 2 < stream.size() ? stream.get(i + 2) : new Token(TType.UNKNOWN, "", t.target);
 			//Token next3 = i + 3 < stream.size() ? stream.get(i + 3) : new Token(TType.UNKNOWN, "", t.target);
+			Token nextNonWhitespace = new Token(TType.UNKNOWN, "", t.target);
+			int nextNonWhitespaceIndex = -1;
+			Token nextNonWhitespace2 = new Token(TType.UNKNOWN, "", t.target);
+			int nextNonWhitespaceIndex2 = -1;
+			Token nextNonWhitespace3 = new Token(TType.UNKNOWN, "", t.target);
+			int nextNonWhitespaceIndex3 = -1;
+			Token prevNonWhitespace = new Token(TType.UNKNOWN, "", t.target);
+			int prevNonWhitespaceIndex = -1;
+			for(int j = i + 1; j < stream.size(); j++){
+				Token temp = stream.get(j);
+				if(!temp.type.isWhitespace()){
+					nextNonWhitespace = temp;
+					nextNonWhitespaceIndex = j;
+					break;
+				}
+			}
+			for(int j = nextNonWhitespaceIndex + 1; j < stream.size(); j++){
+				Token temp = stream.get(j);
+				if(!temp.type.isWhitespace()){
+					nextNonWhitespace2 = temp;
+					nextNonWhitespaceIndex2 = j;
+					break;
+				}
+			}
+			for(int j = nextNonWhitespaceIndex2 + 1; j < stream.size(); j++){
+				Token temp = stream.get(j);
+				if(!temp.type.isWhitespace()){
+					nextNonWhitespace3 = temp;
+					nextNonWhitespaceIndex3 = j;
+					break;
+				}
+			}
+			for(int j = i - 1; j > 0; j--){
+				Token temp = stream.get(j);
+				if(!temp.type.isWhitespace()){
+					prevNonWhitespace = temp;
+					prevNonWhitespaceIndex = j;
+					break;
+				}
+			}
 
 			//Associative array handling
-			if (next1.type.equals(TType.LABEL)) {
+			if (nextNonWhitespace.type.equals(TType.LABEL)) {
+				//If it's not an atomic identifier it's an error.
+				if(!t.type.isAtomicLit()){
+					throw new ConfigCompileException("Invalid label specified", t.getTarget());
+				}
 				tree.addChild(new ParseTree(new CLabel(Static.resolveConstruct(t.val(), t.target)), fileOptions));
 				constructCount.peek().incrementAndGet();
-				i++;
+				i = nextNonWhitespaceIndex; //Move forward past any whitespace
 				continue;
 			}
-			//Slice notation handling
-			if (next1.type.equals(TType.SLICE)) {
-				CSlice slice;
-				if (t.value.equals("[")) {
-					//empty first
-					slice = new CSlice(".." + next2.value, next2.target);
-					arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
-					i++;
-				} else if (next2.value.equals("]")) {
-					//empty last
-					slice = new CSlice(t.value + "..", t.target);
-				} else {
-					//both are provided
-					String modifier = "";
-					if(prev1.type == TType.MINUS){
-						//It's a negative, incorporate that here, and remove the
-						//minus from the tree
-						modifier = "-";
-						tree.removeChildAt(tree.getChildren().size() - 1);
-					}
-					slice = new CSlice(modifier + t.value + ".." + next2.value, t.target);
-					i++;
-				}
-				i++;
-				tree.addChild(new ParseTree(slice, fileOptions));
-				continue;
-			}
+
 			//Array notation handling
 			if (t.type.equals(TType.LSQUARE_BRACKET)) {
 				arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
@@ -1019,7 +1052,7 @@ public final class MethodScriptCompiler {
 			//Smart strings
 			if (t.type == TType.SMART_STRING) {
 				ParseTree function = new ParseTree(fileOptions);
-				function.setData(new CFunction("smart_string", t.target));
+				//function.setData(new CFunction(new smart_string().getName(), t.target));
 				ParseTree string = new ParseTree(fileOptions);
 				string.setData(new CString(t.value, t.target));
 				function.addChild(string);
@@ -1033,29 +1066,7 @@ public final class MethodScriptCompiler {
 						+ " symbols.", t.target);
 			}
 
-			if (t.type == TType.LIT) {
-				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
-				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
-				tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
-				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.IDENTIFIER)) {
-				tree.addChild(new ParseTree(new CPreIdentifier(t.val(), t.target), fileOptions));
-				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.IVARIABLE)) {
-				tree.addChild(new ParseTree(new IVariable(t.val(), t.target), fileOptions));
-				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.UNKNOWN)) {
-				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
-				constructCount.peek().incrementAndGet();
-			} else if (t.type.isSymbol()) { //Logic and math symbols
-				tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
-				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
-				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
-				constructCount.peek().incrementAndGet();
-				//right_vars.add(new Variable(t.val(), null, t.line_num));
-			} else if (t.type.equals(TType.FUNC_NAME)) {
+			if (t.type.equals(TType.FUNC_NAME)) {
 				CFunction func = new CFunction(t.val(), t.target);
 				//This will throw an exception for us if the function doesn't exist
 				if (!func.val().matches("^_[^_].*")) {
@@ -1158,6 +1169,81 @@ public final class MethodScriptCompiler {
 				constructCount.peek().set(0);
 				continue;
 			}
+			if (nextNonWhitespace.type.equals(TType.SLICE)) {
+				//Slice notation handling
+				CSlice slice;
+				if (t.type.isSeparator() || (t.type.isWhitespace() && prevNonWhitespace.type.isSeparator())) {
+					//empty first
+					String value = nextNonWhitespace2.val();
+					i = nextNonWhitespaceIndex2 - 1;
+					if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
+						value = nextNonWhitespace2.val() + nextNonWhitespace3.val();
+						i = nextNonWhitespaceIndex3 - 1;
+					}
+					slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
+					//arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
+				} else if (nextNonWhitespace2.type.isSeparator()) {
+					//empty last
+					Token first = t;
+					String modifier = "";
+					if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
+						//The negative would have already been inserted into the tree
+						modifier = prevNonWhitespace.val();
+						tree.removeChildAt(tree.getChildren().size() - 1);
+					}
+					slice = new CSlice(modifier + first.value + "..", first.target);
+					i = nextNonWhitespaceIndex2 - 2;
+				} else {
+					//both are provided
+					String modifier1 = "";
+					if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
+						//It's a negative, incorporate that here, and remove the
+						//minus from the tree
+						modifier1 = prevNonWhitespace.val();
+						tree.removeChildAt(tree.getChildren().size() - 1);
+					}
+					Token first = t;
+					if(first.type.isWhitespace()){
+						first = prevNonWhitespace;
+					}
+					Token second = nextNonWhitespace2;
+					i = nextNonWhitespaceIndex2 - 1;
+					String modifier2 = "";
+					if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
+						modifier2 = nextNonWhitespace2.val();
+						second = nextNonWhitespace3;
+						i = nextNonWhitespaceIndex3 - 1;
+					}
+					
+					slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target);
+				}
+				i++;
+				tree.addChild(new ParseTree(slice, fileOptions));
+				continue;
+			} else if (t.type == TType.LIT) {
+				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
+				constructCount.peek().incrementAndGet();
+			} else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
+				tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
+				constructCount.peek().incrementAndGet();
+			} else if (t.type.equals(TType.IDENTIFIER)) {
+				tree.addChild(new ParseTree(new CPreIdentifier(t.val(), t.target), fileOptions));
+				constructCount.peek().incrementAndGet();
+			} else if (t.type.equals(TType.IVARIABLE)) {
+				tree.addChild(new ParseTree(new IVariable(t.val(), t.target), fileOptions));
+				constructCount.peek().incrementAndGet();
+			} else if (t.type.equals(TType.UNKNOWN)) {
+				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
+				constructCount.peek().incrementAndGet();
+			} else if (t.type.isSymbol()) { //Logic and math symbols
+				tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
+				constructCount.peek().incrementAndGet();
+			} else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
+				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
+				constructCount.peek().incrementAndGet();
+				//right_vars.add(new Variable(t.val(), null, t.line_num));
+			}
+			
 		}
 		if (arrayStack.size() != 1) {
 			throw new ConfigCompileException("Mismatched square brackets", t.target);

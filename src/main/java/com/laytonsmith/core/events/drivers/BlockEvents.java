@@ -33,10 +33,12 @@ public class BlockEvents {
     @api
     public static class block_break extends AbstractEvent {
 
+		@Override
         public String getName() {
             return "block_break";
         }
 
+		@Override
         public String docs() {
             return "{player: <string match> | type: <string match> | data: <string match>} "
                     + "This event is called when a block is broken. "
@@ -52,14 +54,17 @@ public class BlockEvents {
                     + "{player|block|drops}";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
 
+		@Override
         public Driver driver() {
             return Driver.BLOCK_BREAK;
         }
 
+		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
                 throws PrefilterNonMatchException {
             if (e instanceof MCBlockBreakEvent) {
@@ -103,10 +108,12 @@ public class BlockEvents {
             return true;
         }
 
+		@Override
         public BindableEvent convert(CArray manualObject) {
             return null;
         }
 
+		@Override
         public Map<String, Construct> evaluate(BindableEvent e)
                 throws EventException {
 
@@ -148,6 +155,7 @@ public class BlockEvents {
             return map;
         }
 
+		@Override
         public boolean modifyEvent(String key, Construct value,
                 BindableEvent e) {
 
@@ -195,10 +203,12 @@ public class BlockEvents {
     @api
     public static class block_place extends AbstractEvent {
 
+		@Override
         public String getName() {
             return "block_place";
         }
 
+		@Override
         public String docs() {
             return "{player: <string match> | type: <string match> | data: <string match>} "
                     + "This event is called when a player places a block. "
@@ -213,14 +223,17 @@ public class BlockEvents {
                     + "{player|X|Y|Z|world|type|data|against|oldblock}";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
 
+		@Override
         public Driver driver() {
             return Driver.BLOCK_PLACE;
         }
 
+		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
                 throws PrefilterNonMatchException {
             if (e instanceof MCBlockPlaceEvent) {
@@ -264,10 +277,12 @@ public class BlockEvents {
             return true;
         }
 
+		@Override
         public BindableEvent convert(CArray manualObject) {
             return null;
         }
 
+		@Override
         public Map<String, Construct> evaluate(BindableEvent e)
                 throws EventException {
             MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
@@ -311,6 +326,7 @@ public class BlockEvents {
             return map;
         }
 
+		@Override
         public boolean modifyEvent(String key, Construct value,
                 BindableEvent e) {
             MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
@@ -348,10 +364,12 @@ public class BlockEvents {
 	@api
     public static class block_burn extends AbstractEvent {
 
+		@Override
         public String getName() {
             return "block_burn";
         }
 
+		@Override
         public String docs() {
             return "{type: <string match> | data: <string match>} "
                     + "This event is called when a block is burned. "
@@ -364,14 +382,17 @@ public class BlockEvents {
 					+ "{block|location}";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
 
+		@Override
         public Driver driver() {
             return Driver.BLOCK_BURN;
         }
 
+		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
                 throws PrefilterNonMatchException {
             if (e instanceof MCBlockBurnEvent) {
@@ -409,10 +430,12 @@ public class BlockEvents {
             return true;
         }
 
+		@Override
         public BindableEvent convert(CArray manualObject) {
             return null;
         }
 
+		@Override
         public Map<String, Construct> evaluate(BindableEvent e)
                 throws EventException {
 
@@ -441,6 +464,7 @@ public class BlockEvents {
             return map;
         }
 
+		@Override
         public boolean modifyEvent(String key, Construct value,
                 BindableEvent e) {
 
@@ -538,10 +562,12 @@ public class BlockEvents {
     @api
     public static class sign_changed extends AbstractEvent {
 
+		@Override
         public String getName() {
             return "sign_changed";
         }
 
+		@Override
         public String docs() {
             return "{player: <string match> | 1: <macro> | 2: <macro> | "
                     + "3: <macro> | 4: <macro> } "
@@ -554,14 +580,17 @@ public class BlockEvents {
                     + "{player|location|text}";
         }
 
+		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
 
+		@Override
         public Driver driver() {
             return Driver.SIGN_CHANGED;
         }
 
+		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCSignChangeEvent) {
                 MCSignChangeEvent sce = (MCSignChangeEvent) e;
@@ -582,6 +611,7 @@ public class BlockEvents {
             return false;
         }
 
+		@Override
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCSignChangeEvent) {
                 MCSignChangeEvent sce = (MCSignChangeEvent) e;
@@ -602,6 +632,7 @@ public class BlockEvents {
             }
         }
 
+		@Override
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if (event instanceof MCSignChangeEvent) {
                 MCSignChangeEvent sce = (MCSignChangeEvent) event;
@@ -654,6 +685,7 @@ public class BlockEvents {
             return false;
         }
 
+		@Override
         public BindableEvent convert(CArray manual) {
             MCSignChangeEvent e = EventBuilder.instantiate(
                     MCSignChangeEvent.class,
@@ -667,10 +699,12 @@ public class BlockEvents {
 	@api
 	public static class block_dispense extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "block_dispense";
 		}
 
+		@Override
 		public String docs() {
 			return "{type: <string match> Type of dispenser | item: <item match> Item which is dispensed}"
 					+ " This event is called when a dispenser dispense an item. Cancelling the event cancels dispensing."
@@ -681,14 +715,17 @@ public class BlockEvents {
 					+ "{type|item|velocity|location}";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.BLOCK_DISPENSE;
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
 				throws PrefilterNonMatchException {
 			if (e instanceof MCBlockDispenseEvent) {
@@ -701,10 +738,12 @@ public class BlockEvents {
 			return false;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			return null;
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
 			MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
@@ -724,6 +763,7 @@ public class BlockEvents {
 			return map;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCBlockDispenseEvent) {
 				if ("item".equals(key)) {
@@ -742,14 +782,17 @@ public class BlockEvents {
 	@api
 	public static class block_grow extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "block_grow";
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.BLOCK_GROW;
 		}
 
+		@Override
 		public String docs() {
 			return "{oldtype: <string match> The block type before the growth | olddata: <string match> The block data before the growth |"
 					+ " newtype: <string match> The block type after the growth | newdata: <string match> The block data after the growth |"
@@ -761,10 +804,12 @@ public class BlockEvents {
 					+ " {}";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCBlockGrowEvent) {
 				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
@@ -781,10 +826,12 @@ public class BlockEvents {
 			}
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject) {
 			return null;
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCBlockGrowEvent) {
 				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
@@ -806,6 +853,7 @@ public class BlockEvents {
 			}
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
 			return false;
 		}

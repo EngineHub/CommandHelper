@@ -410,6 +410,7 @@ public class MethodScriptCompilerTest {
                 "msg('hello') world";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, new MethodScriptComplete() {
 
+			@Override
             public void done(String output) {
                 assertEquals("world", output.trim());
                 bool.set(true);

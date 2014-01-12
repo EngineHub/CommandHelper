@@ -16,10 +16,12 @@ public class CommandHelperPermissionsResolver implements PermissionsResolver {
 		this.manager = manager;
 	}
 
+	@Override
 	public boolean inGroup(String user, String group) {
 		return manager.inGroup(user, group);
 	}
 
+	@Override
 	public boolean hasPermission(String user, String permission, Object data) {
 		String worldName = null;
 		if(data instanceof MCWorld){
@@ -30,10 +32,12 @@ public class CommandHelperPermissionsResolver implements PermissionsResolver {
 		return manager.hasPermission(worldName, user, permission);
 	}
 
+	@Override
 	public boolean hasPermission(String user, String permission) {
 		return manager.hasPermission(user, permission);
 	}		
 
+	@Override
 	public String[] getGroups(String user) {
 		return manager.getGroups(user);
 	}

@@ -58,6 +58,7 @@ public class JSONDataSource extends StringSerializableDataSource {
 		return new DataSourceModifier[]{DataSourceModifier.PRETTYPRINT};
 	}
 
+	@Override
 	public String docs() {
 		return "JSON {json:///path/to/file.json} This type stores data in JSON"
 			+ " format. All the pros and cons of yml apply here, but instead"
@@ -76,6 +77,7 @@ public class JSONDataSource extends StringSerializableDataSource {
 		return "{}";
 	}
 
+	@Override
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
 	}

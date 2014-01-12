@@ -155,6 +155,7 @@ public class RedisDataSource extends AbstractDataSource {
 		};
 	}
 
+	@Override
 	public String docs() {
 		return "Redis {redis://host:port?timeout=90&password=pass} This type allows a connection to a "
 				+ " redis server. A redis server must be set up and running, and if not \"localhost,\" it is heavily"
@@ -164,6 +165,7 @@ public class RedisDataSource extends AbstractDataSource {
 				+ " additional connection information.";
 	}
 
+	@Override
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
 	}

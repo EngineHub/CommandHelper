@@ -1,9 +1,12 @@
 package com.laytonsmith.abstraction.blocks;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  *
  * @author layton
  */
+@MEnum("BlockFace")
 public enum MCBlockFace {
     NORTH(0, 0, -1),
     EAST(1, 0, 0),

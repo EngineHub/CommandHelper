@@ -15,6 +15,7 @@ public interface MCOfflinePlayer extends MCAnimalTamer{
      *
      * @return Player name
      */
+	@Override
     public String getName();
 
     /**

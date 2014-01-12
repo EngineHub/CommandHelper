@@ -29,6 +29,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 	protected MemoryMapFileUtil writer;
 	protected MemoryMapFileUtil.DataGrabber grabber = new MemoryMapFileUtil.DataGrabber() {
 
+		@Override
 		public byte[] getData() {
 			return data;
 		}
@@ -78,6 +79,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		writer = MemoryMapFileUtil.getInstance(file, grabber);
 	}
 
+	@Override
 	public String getData() throws IOException {
 		if(reader.isZipped()){
 			//We have an entirely different method here: it is assumed that
@@ -90,6 +92,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		return new String(this.data, encoding);
 	}
 
+	@Override
 	public void writeData(DaemonManager dm, final String data) throws  ReadOnlyException, IOException, UnsupportedOperationException {		
 		File outputFile = reader.getFile();
 		if(reader.isZipped()){
@@ -105,6 +108,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		writer.mark(dm);
 	}
 
+	@Override
 	public String getPath() throws IOException {
 		return file.getCanonicalPath();
 	}

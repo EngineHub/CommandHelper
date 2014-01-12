@@ -465,6 +465,7 @@ public class StaticTest {
         final StringBuffer b = new StringBuffer();
         Run(script, player, new MethodScriptComplete() {
 
+			@Override
             public void done(String output) {
                 b.append(output);
             }
@@ -573,125 +574,154 @@ public class StaticTest {
         private static MCServer fakeServer;
 		private RunnableQueue queue = new RunnableQueue("TestConvertorRunnableQueue");
 
+		@Override
         public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
              return StaticTest.GetFakeLocation(w, x, y + 1, z);
         }
 
+		@Override
         public Class GetServerEventMixin() {
             return FakeServerMixin.class;
         }
 
+		@Override
         public MCEnchantment[] GetEnchantmentValues() {
             Convertor c = new BukkitConvertor();
             return c.GetEnchantmentValues();
         }
 
+		@Override
         public MCEnchantment GetEnchantmentByName(String name) {
             Convertor c = new BukkitConvertor();
             return c.GetEnchantmentByName(name);
         }
 
+		@Override
         public MCServer GetServer() {
             return fakeServer;
         }
 
+		@Override
         public MCItemStack GetItemStack(int type, int qty) {
             Convertor c = new BukkitConvertor();
             return c.GetItemStack(type, qty);
         }
 
+		@Override
         public void Startup(CommandHelperPlugin chp) {
             //Nothing.
         }
 
+		@Override
         public int LookupItemId(String materialName) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+		@Override
         public String LookupMaterialName(int id) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+		@Override
         public MCItemStack GetItemStack(int type, int data, int qty) {
             Convertor c = new BukkitConvertor();
             return c.GetItemStack(type, data, qty);
         }
 
+		@Override
         public int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
 			//This needs fixing later
 			queue.invokeLater(dm, r);
 			return 0;
         }
 
+		@Override
         public void ClearAllRunnables() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+		@Override
         public void ClearFutureRunnable(int id) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+		@Override
         public int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+		@Override
         public MCEntity GetCorrectEntity(MCEntity e) {
             return e;
         }
 
+		@Override
 		public MCInventory GetEntityInventory(int entityID) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public MCInventory GetLocationInventory(MCLocation location) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public int getMaxBlockID() {
 			return 0;
 		}
 
+		@Override
 		public int getMaxItemID() {
 			return 0;
 		}
 
+		@Override
 		public int getMaxRecordID() {
 			return 0;
 		}
 
+		@Override
 		public MCColor GetColor(final int red, final int green, final int blue) {
 			return new MCColor() {
 
+				@Override
 				public int getRed() {
 					return red;
 				}
 
+				@Override
 				public int getGreen() {
 					return green;
 				}
 
+				@Override
 				public int getBlue() {
 					return blue;
 				}
 
+				@Override
 				public MCColor build(int red, int green, int blue) {
 					return GetColor(red, green, blue);
 				}
 			};
 		}
 
+		@Override
 		public MCFireworkBuilder GetFireworkBuilder() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public MCPluginMeta GetPluginMeta() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public MCMaterial getMaterial(int id) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
@@ -701,6 +731,7 @@ public class StaticTest {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public List<MCEntity> GetEntitiesAt(MCLocation loc, double radius) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
@@ -725,14 +756,17 @@ public class StaticTest {
             
         }
 
+		@Override
         public void cancel(BindableEvent e, boolean state) {
             cancelled = state;
         }
 
+		@Override
         public boolean isCancellable(BindableEvent o) {
             return true;
         }
 
+		@Override
         public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException {
             Map<String, Construct> map = new HashMap<String, Construct>();
             if(fakePlayer != null){
@@ -741,10 +775,12 @@ public class StaticTest {
             return map;
         }
 
+		@Override
         public void manualTrigger(BindableEvent e) {
             throw new RuntimeException("Manual triggering is not supported in tests yet");
         }
 
+		@Override
         public boolean isCancelled(BindableEvent o) {
             return cancelled;
         }

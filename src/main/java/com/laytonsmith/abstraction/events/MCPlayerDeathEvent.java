@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCPlayer;
  */
 public interface MCPlayerDeathEvent extends MCEntityDeathEvent {
 
+	@Override
 	public MCPlayer getEntity();
 
 	public String getDeathMessage();

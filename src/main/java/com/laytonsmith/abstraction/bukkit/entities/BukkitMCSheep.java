@@ -14,18 +14,22 @@ public class BukkitMCSheep extends BukkitMCAgeable implements MCSheep {
 		this.s = be;
 	}
 
+	@Override
 	public MCDyeColor getColor() {
 		return BukkitMCDyeColor.getConvertor().getAbstractedEnum(s.getColor());
 	}
 
+	@Override
 	public void setColor(MCDyeColor color) {
 		s.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
 	}
 
+	@Override
 	public boolean isSheared() {
 		return s.isSheared();
 	}
 
+	@Override
 	public void setSheared(boolean shear) {
 		s.setSheared(shear);
 	}

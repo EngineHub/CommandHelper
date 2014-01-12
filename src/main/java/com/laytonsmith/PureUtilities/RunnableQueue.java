@@ -26,6 +26,7 @@ public class RunnableQueue {
 		}
 		threadFactory = new ThreadFactory() {
 
+			@Override
 			public Thread newThread(Runnable r) {
 				Thread t = new Thread(r, threadPrefix + "-" + (++threadCount));
 				t.setDaemon(false);
@@ -34,6 +35,7 @@ public class RunnableQueue {
 				} else {
 					t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 
+						@Override
 						public void uncaughtException(Thread t, Throwable e) {
 							System.err.println("The thread " + t.getName() + " threw an exception, and it was not handled.");
 							e.printStackTrace(System.err);
@@ -63,6 +65,7 @@ public class RunnableQueue {
 		activate();
 		service.submit(new Runnable() {
 
+			@Override
 			public void run() {
 				try{
 					r.run();
