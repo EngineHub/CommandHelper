@@ -342,7 +342,11 @@ public class PlayerEvents {
 				Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", event.getCause().toString(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "from", event.getFrom(), PrefilterType.LOCATION_MATCH);
-				Prefilters.match(prefilter, "to", event.getTo(), PrefilterType.LOCATION_MATCH);
+				if (event.getTo() != null) {
+					Prefilters.match(prefilter, "to", event.getTo(), PrefilterType.LOCATION_MATCH);
+				} else {
+					Prefilters.match(prefilter, "to", new CNull(Target.UNKNOWN), PrefilterType.MACRO);
+				}
 				return true;
 
 			}
