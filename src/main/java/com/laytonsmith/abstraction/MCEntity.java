@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import java.util.List;
 import java.util.UUID;
-import org.bukkit.util.NumberConversions;
 
 /**
  * 
@@ -45,21 +44,7 @@ public interface MCEntity extends MCMetadatable {
 			return this;
 		}
 
-		public Velocity multiply(int m) {
-			this.x *= m;
-			this.y *= m;
-			this.z *= m;
-			return this;
-		}
-
 		public Velocity multiply(double m) {
-			this.x *= m;
-			this.y *= m;
-			this.z *= m;
-			return this;
-		}
-
-		public Velocity multiply(float m) {
 			this.x *= m;
 			this.y *= m;
 			this.z *= m;
@@ -83,7 +68,7 @@ public interface MCEntity extends MCMetadatable {
 		}
 
 		public double length() {
-			return Math.sqrt(NumberConversions.square(this.x) + NumberConversions.square(this.y) + NumberConversions.square(this.z));
+			return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
 		}
 	}
 

@@ -143,12 +143,12 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-	public MCLocation subract(Velocity vec) {
+	public MCLocation subtract(Velocity vec) {
 		return new BukkitMCLocation(l.subtract(new Vector(vec.x, vec.y, vec.z)));
 	}
 
 	@Override
-	public MCLocation subract(double x, double y, double z) {
+	public MCLocation subtract(double x, double y, double z) {
 		return new BukkitMCLocation(l.subtract(x, y, z));
 	}
 
