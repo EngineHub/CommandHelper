@@ -55,7 +55,7 @@ public class Manager {
 
 	public static void start() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		Implementation.useAbstractEnumThread(false);
-		Implementation.setServerType(Implementation.Type.BUKKIT);
+		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(chDirectory);
 		persistenceNetwork = new PersistenceNetwork(CommandHelperFileLocations.getDefault().getPersistenceConfig(), 
