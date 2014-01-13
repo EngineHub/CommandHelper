@@ -19,6 +19,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;

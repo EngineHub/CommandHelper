@@ -1,4 +1,4 @@
-package com.laytonsmith.core;
+package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
@@ -8,18 +8,22 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.shutdown;
 import com.laytonsmith.annotations.startup;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Event;
-import com.laytonsmith.core.extensions.AbstractExtension;
-import com.laytonsmith.core.extensions.Extension;
-import com.laytonsmith.core.extensions.ExtensionTracker;
-import com.laytonsmith.core.extensions.MSExtension;
+import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -29,6 +33,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,8 +48,6 @@ import org.bukkit.Server;
  * @author Layton
  */
 public class ExtensionManager {
-	// TODO: make a ExtensionTracker class storing pertinent info about a given
-	// extension.
 	private static final Map<URL, ExtensionTracker> extensions = new HashMap<URL, ExtensionTracker>();
 	private static final List<File> locations = new ArrayList<File>();
 
@@ -101,7 +104,7 @@ public class ExtensionManager {
 
 		// Create the directory if it doesn't exist.
 		extCache.mkdirs();
-		
+
 		// Try to delete any loose files in the cache dir, so that we
 		// don't load stuff we aren't supposed to. This is in case the shutdown
 		// cleanup wasn't successful on the last run.
@@ -315,7 +318,6 @@ public class ExtensionManager {
 			}
 		}
 
-		// TODO: store the cd and dcl used so we can gracefully unload later.
 		DynamicClassLoader dcl = new DynamicClassLoader();
 		cd.setDefaultClassLoader(dcl);
 
@@ -335,8 +337,12 @@ public class ExtensionManager {
 			}
 		}
 
+		// Grab all known lifecycle classes, and use them. If more than one 
+		// lifecycle is found per URL, it's stored and used, but the first
+		// one found defines the internal name.
 		for (ClassMirror<AbstractExtension> extmirror : cd.getClassesWithAnnotationThatExtend(MSExtension.class, AbstractExtension.class)) {
 			Extension ext;
+			URL url = extmirror.getContainer();
 
 			Class<AbstractExtension> extcls = extmirror.loadClass(dcl, true);
 			try {
@@ -353,37 +359,118 @@ public class ExtensionManager {
 				continue;
 			}
 
-			ExtensionTracker trk = new ExtensionTracker(extmirror.getContainer(), cd, dcl);
-			trk.setExtension(ext);
+			ExtensionTracker trk = extensions.get(url);
 
-			extensions.put(extmirror.getContainer(), trk);
+			if (trk == null) {
+				trk = new ExtensionTracker(url, cd, dcl);
+
+				extensions.put(url, trk);
+			}
+			
+			// Grab the identifier for the first lifecycle we come across and
+			// use it.
+			if (trk.identifier == null) {
+				trk.identifier = ext.getName();
+			}
+
+			trk.allExtensions.add(ext);
 		}
 
 		// Lets store info about the functions and events extensions have.
 		// This will aide in gracefully unloading stuff later.
 		Set<ClassMirror<?>> classes = cd.getClassesWithAnnotation(api.class);
 
+		// Temp tracking for loading messages later on.
+		List<String> events = new ArrayList<String>();
+		List<String> functions = new ArrayList<String>();
+
+		// Loop over the classes, instantiate and register functions and events,
+		// and store the instances in their trackers.
 		for (ClassMirror klass : classes) {
-			URL plugURL = klass.getContainer();
+			URL url = klass.getContainer();
 
 			if (cd.doesClassExtend(klass, Event.class)
 					|| cd.doesClassExtend(klass, Function.class)) {
-				ExtensionTracker trk = extensions.get(plugURL);
+				Class c = klass.loadClass(dcl, true);
+
+				String apiClass = (c.getEnclosingClass() != null
+						? c.getEnclosingClass().getName().split("\\.")[c.getEnclosingClass().getName().split("\\.").length - 1]
+						: "<global>");
+
+				ExtensionTracker trk = extensions.get(url);
 
 				if (trk == null) {
-					trk = new ExtensionTracker(plugURL, cd, dcl);
+					trk = new ExtensionTracker(url, cd, dcl);
 
-					extensions.put(plugURL, trk);
+					extensions.put(url, trk);
 				}
 
-				if (cd.doesClassExtend(klass, Event.class)) {
-					// To be completed later.
-				}
+				// Instantiate, register and store.
+				try {
+					if (Event.class.isAssignableFrom(c)) {
+						Class<Event> cls = (Class<Event>) c;
+						
+						if (klass.getModifiers().isAbstract()) {
+							// Abstract? Looks like they accidently @api'd
+							// a cheater class. We can't be sure that it is fully
+							// defined, so complain to the console.
+							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, 
+								"Class " + c.getName() + " in " + url + " is"
+								+ " marked as an event but is also abstract."
+								+ " Bugs might occur! Bug someone about this!",
+								Target.UNKNOWN);
+						}
+						
+						Event e = cls.newInstance();
+						events.add(e.getName());
 
-				if (cd.doesClassExtend(klass, Function.class)) {
-					// To be completed later.
+						EventList.registerEvent(e, apiClass);
+
+						trk.events.add(e);
+					} else if (Function.class.isAssignableFrom(c)) {
+						Class<Function> cls = (Class<Function>) c;
+						
+						if (klass.getModifiers().isAbstract()) {
+							// Abstract? Looks like they accidently @api'd
+							// a cheater class. We can't be sure that it is fully
+							// defined, so complain to the console.
+							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, 
+								"Class " + c.getName() + " in " + url + " is"
+								+ " marked as a function but is also abstract."
+								+ " Bugs might occur! Bug someone about this!",
+								Target.UNKNOWN);
+						}
+						
+						Function f = cls.newInstance();
+						functions.add(f.getName());
+
+						FunctionList.registerFunction(f, apiClass);
+
+						trk.functions.add(f);
+					}
+				} catch (InstantiationException ex) {
+					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+				} catch (IllegalAccessException ex) {
+					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
+		}
+
+		// Lets print out the details to the console, if we are in debug mode.
+		if (Prefs.DebugMode()) {
+			Collections.sort(events);
+			String eventString = StringUtils.Join(events, ", ", ", and ", " and ");
+			Collections.sort(functions);
+			String functionString = StringUtils.Join(functions, ", ", ", and ", " and ");
+
+			System.out.println(Implementation.GetServerType().getBranding()
+					+ ": Loaded the following functions: " + functionString.trim());
+			System.out.println(Implementation.GetServerType().getBranding()
+					+ ": Loaded " + functions.size() + " function" + (functions.size() == 1 ? "." : "s."));
+			System.out.println(Implementation.GetServerType().getBranding()
+					+ ": Loaded the following events: " + eventString.trim());
+			System.out.println(Implementation.GetServerType().getBranding()
+					+ ": Loaded " + events.size() + " event" + (events.size() == 1 ? "." : "s."));
 		}
 	}
 
@@ -393,7 +480,7 @@ public class ExtensionManager {
 	public static void Cleanup() {
 		// Shutdown and release all the extensions
 		for (ExtensionTracker trk : extensions.values()) {
-			trk.shutdown();
+			trk.shutdownTracker();
 		}
 
 		extensions.clear();
@@ -434,19 +521,20 @@ public class ExtensionManager {
 	 */
 	@SuppressWarnings("deprecation")
 	public static void Startup() {
-		for (ExtensionTracker ext : extensions.values()) {
-			try {
-				if (ext.getExtension() != null) {
-					ext.getExtension().onStartup();
+		for (ExtensionTracker trk : extensions.values()) {
+			for (Extension ext : trk.getExtensions()) {
+				try {
+					ext.onStartup();
+				} catch (Throwable e) {
+					Logger log = Logger.getLogger(ExtensionManager.class.getName());
+					log.log(Level.SEVERE, ext.getClass().getName()
+							+ "'s onStartup caused an exception:");
+					log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 				}
-			} catch (Throwable e) {
-				Logger log = Logger.getLogger(ExtensionManager.class.getName());
-				log.log(Level.SEVERE, ext.getExtension().getName()
-						+ "'s onStartup caused an exception:");
-				log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 			}
 		}
 
+		// Deprecated. Soon to be removed!
 		for (MethodMirror mm : ClassDiscovery.getDefaultInstance().getMethodsWithAnnotation(startup.class)) {
 			if (!mm.getParams().isEmpty()) {
 				//Error, but skip this one, don't throw an exception ourselves, just log it.
@@ -456,8 +544,7 @@ public class ExtensionManager {
 			} else if (!mm.getModifiers().isStatic()) {
 				CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR,
 						"Method " + mm.getDeclaringClass() + "#" + mm.getName()
-						+ " is not static,"
-						+ " but it should be.", Target.UNKNOWN);
+						+ " is not static, but it should be.", Target.UNKNOWN);
 			} else {
 				try {
 					Method m = mm.loadMethod(ClassDiscovery.getDefaultInstance().getDefaultClassLoader(), true);
@@ -476,19 +563,20 @@ public class ExtensionManager {
 
 			@Override
 			public void run() {
-				for (ExtensionTracker ext : extensions.values()) {
-					try {
-						if (ext.getExtension() != null) {
-							ext.getExtension().onShutdown();
+				for (ExtensionTracker trk : extensions.values()) {
+					for (Extension ext : trk.getExtensions()) {
+						try {
+							ext.onShutdown();
+						} catch (Throwable e) {
+							Logger log = Logger.getLogger(ExtensionManager.class.getName());
+							log.log(Level.SEVERE, ext.getClass().getName()
+									+ "'s onStartup caused an exception:");
+							log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 						}
-					} catch (Throwable e) {
-						Logger log = Logger.getLogger(ExtensionManager.class.getName());
-						log.log(Level.SEVERE, ext.getExtension().getName()
-								+ "'s onShutdown caused an exception:");
-						log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 					}
 				}
-
+				
+				// Deprecated. Soon to be removed!
 				for (MethodMirror mm : ClassDiscovery.getDefaultInstance().getMethodsWithAnnotation(shutdown.class)) {
 					if (!mm.getParams().isEmpty()) {
 						//Error, but skip this one, don't throw an exception ourselves, just log it.
@@ -514,34 +602,34 @@ public class ExtensionManager {
 			boolean reloadExecutionQueue, boolean reloadPersistenceConfig,
 			boolean reloadPreferences, boolean reloadProfiler,
 			boolean reloadScripts, boolean reloadExtensions) {
-		for (ExtensionTracker ext : extensions.values()) {
-			try {
-				if (ext.getExtension() != null) {
-					ext.getExtension().onPreReloadAliases(reloadGlobals,
-							reloadTimeouts, reloadExecutionQueue,
-							reloadPersistenceConfig, reloadPreferences,
-							reloadProfiler, reloadScripts, reloadExtensions);
+		for (ExtensionTracker trk : extensions.values()) {
+			for (Extension ext: trk.getExtensions()) {
+				try {
+					ext.onPreReloadAliases(reloadGlobals,
+						reloadTimeouts, reloadExecutionQueue,
+						reloadPersistenceConfig, reloadPreferences,
+						reloadProfiler, reloadScripts, reloadExtensions);
+				} catch (Throwable e) {
+					Logger log = Logger.getLogger(ExtensionManager.class.getName());
+					log.log(Level.SEVERE, ext.getClass().getName()
+							+ "'s onPreReloadAliases caused an exception:");
+					log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 				}
-			} catch (Throwable e) {
-				Logger log = Logger.getLogger(ExtensionManager.class.getName());
-				log.log(Level.SEVERE, ext.getExtension().getName()
-						+ "'s onPreReloadAliases caused an exception:");
-				log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 			}
 		}
 	}
 
 	public static void PostReloadAliases() {
-		for (ExtensionTracker ext : extensions.values()) {
-			try {
-				if (ext.getExtension() != null) {
-					ext.getExtension().onPostReloadAliases();
+		for (ExtensionTracker trk : extensions.values()) {
+			for (Extension ext: trk.getExtensions()) {
+				try {
+					ext.onPostReloadAliases();
+				} catch (Throwable e) {
+					Logger log = Logger.getLogger(ExtensionManager.class.getName());
+					log.log(Level.SEVERE, ext.getClass().getName()
+							+ "'s onPreReloadAliases caused an exception:");
+					log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 				}
-			} catch (Throwable e) {
-				Logger log = Logger.getLogger(ExtensionManager.class.getName());
-				log.log(Level.SEVERE, ext.getExtension().getName()
-						+ "'s onPostReloadAliases caused an exception:");
-				log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 			}
 		}
 	}
