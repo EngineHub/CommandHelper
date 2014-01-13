@@ -87,6 +87,9 @@ public class World {
 			if (args.length == 1) {
 				world = args[0].val();
 			} else {
+				if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null){
+					throw new ConfigRuntimeException("A world must be specified in a context with no player.", ExceptionType.InvalidWorldException, t);
+				}
 				world = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld().getName();
 			}
 			MCWorld w = Static.getServer().getWorld(world);
