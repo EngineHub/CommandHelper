@@ -291,7 +291,8 @@ public class EventBinding {
 
 		@Override
 		public String docs() {
-			return "void {[state]} Cancels the event (if applicable). If the event is not cancellable, or is already cancelled, nothing happens."
+			return "void {[state]} Cancels the event (if applicable). If the event is not cancellable, or is already set to the specified"
+					+ " cancelled state, nothing happens."
 					+ " If called from outside an event handler, a BindException is thrown. By default, state is true, but you can"
 					+ " uncancel an event (if possible) by calling cancel(false).";
 		}
