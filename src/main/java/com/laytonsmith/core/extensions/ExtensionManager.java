@@ -343,16 +343,24 @@ public class ExtensionManager {
 		for (ClassMirror<AbstractExtension> extmirror : cd.getClassesWithAnnotationThatExtend(MSExtension.class, AbstractExtension.class)) {
 			Extension ext;
 			URL url = extmirror.getContainer();
-
-			Class<AbstractExtension> extcls = extmirror.loadClass(dcl, true);
+			Class<AbstractExtension> extcls;
+			
+			if (extmirror.getModifiers().isAbstract()) {
+				Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE,
+						"Probably won't be able to instantiate " + extmirror.getClassName() 
+								+ ": The class is marked as abstract! Will try anyway.");
+			}
+			
+			try {
+				extcls = extmirror.loadClass(dcl, true);
+			} catch (NoClassDefFoundError ex) {
+				ex.printStackTrace();
+				continue;
+			}
+			
 			try {
 				ext = extcls.newInstance();
-			} catch (InstantiationException ex) {
-				//Error, but skip this one, don't throw an exception ourselves, just log it.
-				Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE,
-						"Could not instantiate " + extcls.getName() + ": " + ex.getMessage());
-				continue;
-			} catch (IllegalAccessException ex) {
+			} catch (InstantiationException | IllegalAccessException ex) {
 				//Error, but skip this one, don't throw an exception ourselves, just log it.
 				Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE,
 						"Could not instantiate " + extcls.getName() + ": " + ex.getMessage());

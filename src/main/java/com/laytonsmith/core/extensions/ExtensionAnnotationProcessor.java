@@ -74,6 +74,12 @@ public class ExtensionAnnotationProcessor extends AbstractProcessor {
 			
 			Set<Modifier> modifiers = possible.getModifiers();
 			
+			// The class must not be abstract.
+			if (modifiers.contains(Modifier.ABSTRACT)) {
+				error("Lifecycle classes must not be declared abstract!", possible);
+				continue;
+			}
+			
 			// The class must be static.
 			if (!modifiers.contains(Modifier.PUBLIC)) {
 				error("Lifecycle classes must be declared public!", possible);
