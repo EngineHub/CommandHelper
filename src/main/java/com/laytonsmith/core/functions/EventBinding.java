@@ -19,8 +19,7 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -833,9 +832,12 @@ public class EventBinding {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			for(Driver d : Driver.values()){
-				for(BoundEvent b : EventUtils.GetEvents(d)){
-					if(b.getId().equals(id)){
-						return new CBoolean(true, t);
+				Set<BoundEvent> events = EventUtils.GetEvents(d);
+				if (events != null) {
+					for(BoundEvent b : events){
+						if(b.getId().equals(id)){
+							return new CBoolean(true, t);
+						}
 					}
 				}
 			}
