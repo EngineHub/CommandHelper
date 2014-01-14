@@ -1,9 +1,13 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -11,6 +15,9 @@ import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -23,7 +30,7 @@ public class ExtensionMeta {
 	}
 	
 	@api
-	public static class function_exists extends AbstractFunction {
+	public static class function_exists extends AbstractFunction implements Optimizable {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -63,17 +70,32 @@ public class ExtensionMeta {
 
 		@Override
 		public String docs() {
-			return "boolean {function} Returns true if the function is known to CommandHelper.";
+			return "boolean {name} Returns true if the function is known to "
+					+ Implementation.GetServerType().getBranding() + ".";
 		}
 
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			if (!(children.get(0).getData() instanceof CString)) {
+				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
+			}
+			
+			return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
+		}
 	}
 	
 	@api
-	public static class event_exists extends AbstractFunction {
+	public static class event_exists extends AbstractFunction implements Optimizable {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -109,12 +131,27 @@ public class ExtensionMeta {
 
 		@Override
 		public String docs() {
-			return "boolean {event} Returns true if the event is known to CommandHelper.";
+			return "boolean {name} Returns true if the event is known to "
+					+ Implementation.GetServerType().getBranding() + ".";
 		}
 
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			 return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+		
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			if (!(children.get(0).getData() instanceof CString)) {
+				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
+			}
+			
+			return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
 		}
 	}
 }
