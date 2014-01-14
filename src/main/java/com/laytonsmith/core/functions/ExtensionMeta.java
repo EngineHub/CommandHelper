@@ -71,7 +71,15 @@ public class ExtensionMeta {
 		@Override
 		public String docs() {
 			return "boolean {name} Returns true if the function is known to "
-					+ Implementation.GetServerType().getBranding() + ".";
+					+ Implementation.GetServerType().getBranding() + ". This is a special function; it"
+					+ " is resolved at compile time, and allows for conditional uses of functions that"
+					+ " may or may not exist, such as functions that might or might not be loaded in an extension."
+					+ " This is useful for shared code in environments where an extension may or may not"
+					+ " be available. if(function_exists('my_extension_function')){ my_extension_function() } can"
+					+ " then be used to selectively \"bypass\" the compiler restrictions that would normally cause a fatal"
+					+ " compile error, since that function is missing. Therefore, you can wrap extension related code"
+					+ " around extension specific blocks, and make that code portable to other installations that"
+					+ " may not have the extension installed.";
 		}
 
 		@Override
@@ -92,6 +100,17 @@ public class ExtensionMeta {
 			
 			return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Wrapping a block of code that uses extension functions", 
+						"if(function_exists('my_function')){\n"
+						+ "\tmy_function()\n"
+						+ "}\n", "<No errors will occur if the extension that contains my_function() isn't loaded>")
+			};
+		}
+		
 	}
 	
 	@api
