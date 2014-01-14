@@ -62,7 +62,13 @@ public class FileHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String location = args[0].val();
 			if(!new File(location).isAbsolute()){
-				location = new File(t.file().getParentFile(), location).getAbsolutePath();
+				try {
+					location = new File(t.file().getParentFile(), location).getCanonicalPath();
+				} catch (IOException ex) {
+					throw new ConfigRuntimeException("Bad file location '" 
+							+ location + "' (" + ex.getMessage() + ")",
+						Exceptions.ExceptionType.IOException, t);
+				}
 			}
 			if(!Cmdline.inCmdLine(env)){
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
