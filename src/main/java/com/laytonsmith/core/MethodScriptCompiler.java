@@ -1068,10 +1068,6 @@ public final class MethodScriptCompiler {
 
 			if (t.type.equals(TType.FUNC_NAME)) {
 				CFunction func = new CFunction(t.val(), t.target);
-				//This will throw an exception for us if the function doesn't exist
-				if (!func.val().matches("^_[^_].*")) {
-					FunctionList.getFunction(func);
-				}
 				ParseTree f = new ParseTree(func, fileOptions);
 				tree.addChild(f);
 				constructCount.push(new AtomicInteger(0));
@@ -1120,15 +1116,6 @@ public final class MethodScriptCompiler {
 						tree.removeChildren();
 					}
 					tree.addChild(c);
-				}
-				//Check argument number now
-				if (tree.getData().val() != null) {
-					if (!tree.getData().val().matches("^_[^_].*")) {
-						Integer[] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
-						if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())) {
-							throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().getTarget());
-						}
-					}
 				}
 				usesBraces.pop();
 				constructCount.pop();
@@ -1258,6 +1245,31 @@ public final class MethodScriptCompiler {
 		parents.pop();
 		tree = parents.pop();
 		return tree;
+	}
+	
+	/**
+	 * Recurses down the tree and
+	 * <ul><li>Links functions</li>
+	 * <li>Checks function arguments</li></ul>
+	 * This is a separate process from optimization, because optimization
+	 * ignores any missing functions.
+	 * @param tree 
+	 */
+	private static void link(ParseTree tree) throws ConfigCompileException{
+		for(ParseTree child : tree.getChildren()){
+			if(child.getData() instanceof CFunction){
+				if (!child.getData().val().matches("^_[^_].*")) {
+					FunctionList.getFunction(child.getData());
+					Integer[] numArgs = FunctionList.getFunction(child.getData()).numArgs();
+					if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && 
+							!Arrays.asList(numArgs).contains(child.getChildren().size())) {
+						throw new ConfigCompileException("Incorrect number of arguments passed to " 
+								+ child.getData().val(), child.getData().getTarget());
+					}
+				}
+				link(child);
+			}
+		}
 	}
 
 	/**

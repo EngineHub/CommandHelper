@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -166,6 +167,7 @@ public class Main {
 			ClassDiscoveryCache cdcCache 
 					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
 			cd.setClassDiscoveryCache(cdcCache);
+			ExtensionManager.Initialize(cd);
 			if (args.length == 0) {
 				args = new String[]{"--help"};
 			}
