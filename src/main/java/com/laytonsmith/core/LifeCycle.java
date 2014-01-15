@@ -8,7 +8,7 @@ import com.laytonsmith.core.extensions.MSExtension;
  *
  * @author Jason Unger <entityreborn@gmail.com>
  */
-@MSExtension("CommandHelperCore")
+@MSExtension("Core")
 public class LifeCycle extends AbstractExtension {
 	@Override
 	public Version getVersion() {
