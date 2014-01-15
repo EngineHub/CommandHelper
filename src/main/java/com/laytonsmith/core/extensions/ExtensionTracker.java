@@ -3,6 +3,8 @@ package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Function;
 import java.net.URL;
@@ -16,6 +18,7 @@ import java.util.List;
  */
 public class ExtensionTracker {
 	/* package */ String identifier;
+	/* package */ Version version;
 	/* package */ List<Extension> allExtensions;
 	private final DynamicClassLoader dcl;
 	private final ClassDiscovery cd;
@@ -24,9 +27,10 @@ public class ExtensionTracker {
 	/* package */ final URL container;
 
 	public ExtensionTracker(URL container, ClassDiscovery cd, DynamicClassLoader dcl) {
-		this.functions = new ArrayList<Function>();
-		this.events = new ArrayList<Event>();
-		this.allExtensions = new ArrayList<Extension>();
+		this.functions = new ArrayList<>();
+		this.events = new ArrayList<>();
+		this.allExtensions = new ArrayList<>();
+		this.version = CHVersion.V0_0_0;
 		
 		this.container = container;
 		this.cd = cd;
@@ -67,5 +71,13 @@ public class ExtensionTracker {
 	 */
 	public String getIdentifier() {
 		return identifier;
+	}
+	
+	/**
+	 * Get the internal version for this tracker.
+	 * @return 
+	 */
+	public Version getVersion() {
+		return version;
 	}
 }
