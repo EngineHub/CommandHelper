@@ -6,17 +6,23 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.extensions.ExtensionManager;
+import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.net.URL;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -173,6 +179,105 @@ public class ExtensionMeta {
 			}
 			
 			return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
+		}
+	}
+	
+	@api
+	public static class extension_info extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
+			
+			CArray retn = new CArray(t);
+			for (URL url: trackers.keySet()) {
+				ExtensionTracker trk = trackers.get(url);
+				CArray trkdata;
+				
+				if (!retn.containsKey(trk.getIdentifier())) {
+					trkdata = new CArray(t);
+				} else {
+					trkdata = (CArray)retn.get(trk.getIdentifier());
+				}
+				
+				// For both events and functions, make sure we don't overwrite
+				// in cases of extensions with the same name. Shouldn't happen,
+				// but lets handle it nicely. This will ALWAYS happen for old
+				// style extensions, as they don't have an identifier.
+				CArray funcs;
+				if (!trkdata.containsKey("functions")) {
+					funcs = new CArray(t);
+				} else {
+					funcs = (CArray)trkdata.get("functions");
+				}
+				for (Function func: trk.getFunctions()) {
+					if (!funcs.contains(func.getName())) {
+						funcs.push(new CString(func.getName(), t));
+					}
+				}
+				funcs.sort(CArray.SortType.STRING_IC);
+				trkdata.set("functions", funcs, t);
+				
+				CArray events;
+				if (!trkdata.containsKey("events")) {
+					events = new CArray(t);
+				} else {
+					events = (CArray)trkdata.get("events");
+				}
+				for (Event event: trk.getEvents()) {
+					events.push(new CString(event.getName(), t));
+				}
+				events.sort(CArray.SortType.STRING_IC);
+				trkdata.set("events", events, t);
+				
+				trkdata.set("version", trk.getVersion().toString());
+				
+				if (trk.getIdentifier() != null) {
+					retn.set(trk.getIdentifier(), trkdata, t);
+				} else {
+					retn.set("__unidentified__", trkdata, t);
+				}
+			}
+			
+			return retn;
+		}
+
+		@Override
+		public String getName() {
+			return "extension_info";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {name} Returns extension info for the extensions"
+					+ " the system has loaded. Included data will be events,"
+					+ " functions and version, keyed by the name of the extension"
+					+ " (or __unidentified__ if it's an old-style extension).";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 }

@@ -48,8 +48,8 @@ import org.bukkit.Server;
  * @author Layton
  */
 public class ExtensionManager {
-	private static final Map<URL, ExtensionTracker> extensions = new HashMap<URL, ExtensionTracker>();
-	private static final List<File> locations = new ArrayList<File>();
+	private static final Map<URL, ExtensionTracker> extensions = new HashMap<>();
+	private static final List<File> locations = new ArrayList<>();
 
 	/**
 	 * Process the given location for any jars. If the location is a jar, add it
@@ -59,7 +59,7 @@ public class ExtensionManager {
 	 * @return
 	 */
 	private static List<File> getFiles(File location) {
-		List<File> toProcess = new ArrayList<File>();
+		List<File> toProcess = new ArrayList<>();
 
 		if (location.isDirectory()) {
 			for (File f : location.listFiles()) {
@@ -86,6 +86,10 @@ public class ExtensionManager {
 		}
 
 		return toProcess;
+	}
+	
+	public static Map<URL, ExtensionTracker> getTrackers() {
+		return Collections.unmodifiableMap(extensions);
 	}
 
 	public static void Cache(File extCache) {
@@ -131,7 +135,7 @@ public class ExtensionManager {
 		cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 
 		//Look in the given locations for jars, add them to our class discovery.
-		List<File> toProcess = new ArrayList<File>();
+		List<File> toProcess = new ArrayList<>();
 
 		for (File location : locations) {
 			toProcess.addAll(getFiles(location));
@@ -160,8 +164,8 @@ public class ExtensionManager {
 		// Loop thru the found lifecycles, copy them to the cache using the name
 		// given in the lifecycle. If more than one jar has the same internal
 		// name, the filename will be given a number.
-		Set<File> done = new HashSet<File>();
-		Map<String, Integer> namecount = new HashMap<String, Integer>();
+		Set<File> done = new HashSet<>();
+		Map<String, Integer> namecount = new HashMap<>();
 
 		// First, cache new lifecycle style extensions. They will be renamed to
 		// use their internal name.
@@ -227,7 +231,6 @@ public class ExtensionManager {
 					Logger.getLogger(ExtensionManager.class.getName()).log(
 							Level.SEVERE, "Could not copy '" + f.getName()
 							+ "' to cache: " + ex.getMessage());
-					continue;
 				}
 			}
 		}
@@ -275,7 +278,6 @@ public class ExtensionManager {
 						Logger.getLogger(ExtensionManager.class.getName()).log(
 								Level.SEVERE, "Could not copy '" + f.getName()
 								+ "' to cache: " + ex.getMessage());
-						continue;
 					}
 				}
 			}
@@ -304,7 +306,7 @@ public class ExtensionManager {
 
 		// Look in the extension folder for jars, add them to our class discover,
 		// then initialize everything
-		List<File> toProcess = new ArrayList<File>();
+		List<File> toProcess = new ArrayList<>();
 
 		// Grab files from the cache if on Windows. Otherwise just load
 		// directly from the stored locations.
@@ -379,6 +381,7 @@ public class ExtensionManager {
 			// use it.
 			if (trk.identifier == null) {
 				trk.identifier = ext.getName();
+				trk.version = ext.getVersion();
 			}
 
 			trk.allExtensions.add(ext);
@@ -389,8 +392,8 @@ public class ExtensionManager {
 		Set<ClassMirror<?>> classes = cd.getClassesWithAnnotation(api.class);
 
 		// Temp tracking for loading messages later on.
-		List<String> events = new ArrayList<String>();
-		List<String> functions = new ArrayList<String>();
+		List<String> events = new ArrayList<>();
+		List<String> functions = new ArrayList<>();
 
 		// Loop over the classes, instantiate and register functions and events,
 		// and store the instances in their trackers.
