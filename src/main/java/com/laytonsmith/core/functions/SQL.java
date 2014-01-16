@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -271,10 +270,13 @@ public class SQL {
 	@api
 	public static class query_async extends AbstractFunction {
 		
-		RunnableQueue queue = new RunnableQueue("MethodScript-queryAsync");
+		RunnableQueue queue = null;
 		boolean started = false;
 		
-		private void startup(){
+		private synchronized void startup(){
+			if(queue == null){
+				queue = new RunnableQueue("MethodScript-queryAsync");
+			}
 			if(!started){
 				queue.invokeLater(null, new Runnable() {
 
@@ -288,6 +290,7 @@ public class SQL {
 					@Override
 					public void run() {
 						queue.shutdown();
+						queue = null;
 						started = false;
 					}
 				});

@@ -61,7 +61,7 @@ public final class Prefs {
         a.add(new Preference(PNames.SHOW_WARNINGS.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to display warnings in the console, while compiling"));
         a.add(new Preference(PNames.CONSOLE_LOG_COMMANDS.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to display the original command in the console when it is run"));
         //a.add(new Preference("max-sleep-time", "5", Type.INT, "The maximum number of seconds a sleep function can sleep for. If <= 0, no limit is imposed. Must be an integer."));
-        a.add(new Preference(PNames.SCRIPT_NAME.config(), "config.txt", Preferences.Type.STRING, "The path to the config file, relative to the CommandHelper plugin folder"));
+        a.add(new Preference(PNames.SCRIPT_NAME.config(), "aliases.msa", Preferences.Type.STRING, "The path to the default config file, relative to the CommandHelper plugin folder"));
         a.add(new Preference(PNames.ENABLE_INTERPRETER.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to enable the /interpreter command. Note that even with this enabled, a player must still have the commandhelper.interpreter permission, but"
                 + " setting it to false prevents all players from accessing the interpreter regardless of their permissions."));
         a.add(new Preference(PNames.BASE_DIR.config(), "", Preferences.Type.STRING, "The base directory that scripts can read and write to. If left blank, then the default of the server directory will be used. "

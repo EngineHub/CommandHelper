@@ -758,7 +758,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "void {condition, code} While the condition is true, the code is executed. break and continue work"
+			return "void {condition, [code]} While the condition is true, the code is executed. break and continue work"
 					+ " inside a dowhile, but continuing more than once is pointless, since the loop isn't inherently"
 					+ " keeping track of any counters anyways. Breaking multiple times still works however.";
 		}
@@ -770,7 +770,7 @@ public class DataHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
@@ -792,10 +792,14 @@ public class DataHandling {
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
 				while (Static.getBoolean(parent.seval(nodes[0], env))) {
-					try {
-						parent.seval(nodes[1], env);
-					} catch (LoopContinueException e) {
-						//ok.
+					//We allow while(thing()); to be done. This makes certain
+					//types of coding styles possible.
+					if(nodes.length > 1){
+						try {
+							parent.seval(nodes[1], env);
+						} catch (LoopContinueException e) {
+							//ok.
+						}
 					}
 				}
 			} catch (LoopBreakException e) {

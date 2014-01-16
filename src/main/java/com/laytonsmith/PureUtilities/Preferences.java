@@ -16,7 +16,6 @@ import java.util.logging.Logger;
  * to add new preferences, or change default values, without fear of changing
  * values that the user has specifically set. For sample usage, see
  * https://gist.github.com/1042094
- * @author Layton Smith
  */
 public class Preferences {
     private final Map<String, Preference> prefs = new HashMap<String, Preference>();

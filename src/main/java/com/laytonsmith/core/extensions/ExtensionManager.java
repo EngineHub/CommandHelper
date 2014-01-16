@@ -9,6 +9,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
@@ -381,7 +382,14 @@ public class ExtensionManager {
 			// use it.
 			if (trk.identifier == null) {
 				trk.identifier = ext.getName();
-				trk.version = ext.getVersion();
+				try {
+					trk.version = ext.getVersion();
+				} catch(AbstractMethodError ex){
+					// getVersion() was added later. This is a temporary fix
+					// to allow extension authors some time to update.
+					// TODO: Remove this soon.
+					trk.version = new SimpleVersion("0.0.0");
+				}
 			}
 
 			trk.allExtensions.add(ext);

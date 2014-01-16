@@ -1005,6 +1005,13 @@ public final class MethodScriptCompiler {
 			if (nextNonWhitespace.type.equals(TType.LABEL)) {
 				//If it's not an atomic identifier it's an error.
 				if(!t.type.isAtomicLit()){
+					if(t.type == TType.IVARIABLE){
+						//This is a common case where people try to use dynamic
+						//labels. For future optimization reasons, this is not
+						//allowed, but we can at least give them a better error
+						//message.
+						throw new ConfigCompileException("Invalid label specified. Variables cannot be used as labels.", t.getTarget());
+					}
 					throw new ConfigCompileException("Invalid label specified", t.getTarget());
 				}
 				tree.addChild(new ParseTree(new CLabel(Static.resolveConstruct(t.val(), t.target)), fileOptions));

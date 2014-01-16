@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.SSHWrapper;
 import com.laytonsmith.PureUtilities.Version;
@@ -13,6 +14,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -26,8 +28,11 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Level;
+import java.util.zip.GZIPInputStream;
 
 /**
  *
@@ -310,6 +315,79 @@ public class FileHandling {
 
 		@Override
 		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class read_gzip_binary extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			String location = args[0].val();
+			if(!new File(location).isAbsolute()){
+				try {
+					location = new File(t.file().getParentFile(), location).getCanonicalPath();
+				} catch (IOException ex) {
+					throw new ConfigRuntimeException("Bad file location '" 
+							+ location + "' (" + ex.getMessage() + ")",
+						Exceptions.ExceptionType.IOException, t);
+				}
+			}
+			if(!Cmdline.inCmdLine(env)){
+				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
+				//Cmdline mode doesn't currently have this restriction.
+				if (!Security.CheckSecurity(location)) {
+					throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
+						Exceptions.ExceptionType.SecurityException, t);
+				}
+			}
+			try {
+				InputStream stream = new GZIPInputStream(new FileInputStream(location));
+				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
+			} catch (IOException ex) {
+				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + new File(location).getAbsolutePath()
+					+ "\nFile " + (new File(location).exists() ? "exists" : "does not exist"));
+				throw new ConfigRuntimeException("File could not be read in.",
+					Exceptions.ExceptionType.IOException, t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "read_gzip_binary";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "byte_array {file} Reads in a gzipped file, and returns a byte_array for it. The file is returned"
+					+ " exactly as is on disk, no conversions are done. base-dir restrictions are enforced for the"
+					+ " path, the same as read(). If file is relative, it is assumed to be relative to this file.";
+		}
+
+		@Override
+		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 		
