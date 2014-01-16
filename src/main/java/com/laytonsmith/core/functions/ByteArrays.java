@@ -326,6 +326,8 @@ public class ByteArrays {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			} catch(BufferUnderflowException e){
 				throw new Exceptions.RangeException(e.getMessage(), t);
+			} catch(NegativeArraySizeException e){
+				throw new Exceptions.FormatException("Invalid data", t);
 			}
 		}
 
