@@ -1095,7 +1095,7 @@ public final class MethodScriptCompiler {
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
 				tree.addChild(arrayGet);
-				constructCount.peek().set(index);
+				constructCount.peek().set(constructCount.peek().get() - myIndex.numberOfChildren());
 				continue;
 			}
 
