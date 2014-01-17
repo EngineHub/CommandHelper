@@ -957,6 +957,11 @@ public final class MethodScriptCompiler {
 		ParseTree tree = new ParseTree(fileOptions);
 		tree.setData(new CNull(unknown));
 		Stack<ParseTree> parents = new Stack<ParseTree>();
+		/**
+		 * constructCount is used to determine if we need to use autoconcat
+		 * when reaching a FUNC_END. The previous constructs, if the count
+		 * is greater than 1, will be moved down into an autoconcat.
+		 */
 		Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
 		Stack<AtomicBoolean> usesBraces = new Stack<AtomicBoolean>();
 		constructCount.push(new AtomicInteger(0));
@@ -967,6 +972,10 @@ public final class MethodScriptCompiler {
 		tree = tree.getChildAt(0);
 		constructCount.push(new AtomicInteger(0));
 
+		/**
+		 * The array stack is used to keep track of the number
+		 * of square braces in use.
+		 */
 		Stack<AtomicInteger> arrayStack = new Stack<AtomicInteger>();
 		arrayStack.add(new AtomicInteger(-1));
 
@@ -1057,8 +1066,7 @@ public final class MethodScriptCompiler {
 				continue;
 			} else if (t.type.equals(TType.RSQUARE_BRACKET)) {
 				boolean emptyArray = false;
-				if (prev1.type.equals(TType.LSQUARE_BRACKET)) {
-					//throw new ConfigCompileException("Empty array_get operator ([])", t.line_num); 
+				if (prevNonWhitespace.type.equals(TType.LSQUARE_BRACKET)) {
 					emptyArray = true;
 				}
 				if (arrayStack.size() == 1) {
@@ -1075,6 +1083,7 @@ public final class MethodScriptCompiler {
 				ParseTree myIndex;
 				if (!emptyArray) {
 					myIndex = new ParseTree(new CFunction("__autoconcat__", myArray.getTarget()), fileOptions);
+					
 					for (int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
 					}
@@ -1086,7 +1095,7 @@ public final class MethodScriptCompiler {
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
 				tree.addChild(arrayGet);
-				constructCount.peek().set(constructCount.peek().get() - myIndex.numberOfChildren());
+				constructCount.peek().set(index);
 				continue;
 			}
 

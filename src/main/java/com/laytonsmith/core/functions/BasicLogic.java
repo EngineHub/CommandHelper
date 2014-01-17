@@ -478,7 +478,7 @@ public class BasicLogic {
 			//Loop through all the conditions and make sure each is unique. Also
 			//make sure that each value is not dynamic.
 			String notConstant = "Cases for a switch statement must be constant, not variable";
-			String alreadyContains = "The switch statement already contains a case for this value";
+			String alreadyContains = "The switch statement already contains a case for this value, remove the duplicate value";
 			final equals EQUALS = new equals();
 			Set<Construct> values = new TreeSet<>(new Comparator<Construct>() {
 
