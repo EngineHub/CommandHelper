@@ -476,20 +476,24 @@ public class ExtensionManager {
 		}
 
 		// Lets print out the details to the console, if we are in debug mode.
-		if (Prefs.DebugMode()) {
-			Collections.sort(events);
-			String eventString = StringUtils.Join(events, ", ", ", and ", " and ");
-			Collections.sort(functions);
-			String functionString = StringUtils.Join(functions, ", ", ", and ", " and ");
+		try{
+			if (Prefs.DebugMode()) {
+				Collections.sort(events);
+				String eventString = StringUtils.Join(events, ", ", ", and ", " and ");
+				Collections.sort(functions);
+				String functionString = StringUtils.Join(functions, ", ", ", and ", " and ");
 
-			System.out.println(Implementation.GetServerType().getBranding()
-					+ ": Loaded the following functions: " + functionString.trim());
-			System.out.println(Implementation.GetServerType().getBranding()
-					+ ": Loaded " + functions.size() + " function" + (functions.size() == 1 ? "." : "s."));
-			System.out.println(Implementation.GetServerType().getBranding()
-					+ ": Loaded the following events: " + eventString.trim());
-			System.out.println(Implementation.GetServerType().getBranding()
-					+ ": Loaded " + events.size() + " event" + (events.size() == 1 ? "." : "s."));
+				System.out.println(Implementation.GetServerType().getBranding()
+						+ ": Loaded the following functions: " + functionString.trim());
+				System.out.println(Implementation.GetServerType().getBranding()
+						+ ": Loaded " + functions.size() + " function" + (functions.size() == 1 ? "." : "s."));
+				System.out.println(Implementation.GetServerType().getBranding()
+						+ ": Loaded the following events: " + eventString.trim());
+				System.out.println(Implementation.GetServerType().getBranding()
+						+ ": Loaded " + events.size() + " event" + (events.size() == 1 ? "." : "s."));
+			}
+		} catch(Throwable e) {
+			// Prefs weren't loaded, probably caused by running tests.
 		}
 	}
 
