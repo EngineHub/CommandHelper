@@ -332,8 +332,9 @@ public class BasicLogic {
 								+ "\tcase 5..6:\n"
 								+ "\tcase 8:\n"
 								+ "\t\tmsg('5, 6, or 8')\n"
-								+ "\tdefault:"
-								+ "\t\tmsg('Any other value'); # A default is optional\n"),
+								+ "\tdefault:\n"
+								+ "\t\tmsg('Any other value'); # A default is optional\n"
+								+ "}\n"),
 				new ExampleScript("With default condition", "switch('noMatch',\n"
 				+ "\t'notIt1',\n"
 				+ "\t\tmsg('Nope'),\n"
