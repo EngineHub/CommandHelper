@@ -8,6 +8,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
@@ -147,6 +148,7 @@ public class Scheduling {
 
 	@api
 	@hide("Only meant for cmdline/testing")
+	@noboilerplate
 	public static class sleep extends AbstractFunction {
 
 		@Override
@@ -259,7 +261,7 @@ public class Scheduling {
 					try {
 						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 						try {
-							c.execute(null);
+							c.execute();
 						} finally {
 							p.stop();
 						}
@@ -332,7 +334,7 @@ public class Scheduling {
 					try {
 						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 						try {
-							c.execute(null);
+							c.execute();
 						} finally {
 							p.stop();
 						}
@@ -896,7 +898,7 @@ public class Scheduling {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException};
+			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
 		}
 
 		@Override

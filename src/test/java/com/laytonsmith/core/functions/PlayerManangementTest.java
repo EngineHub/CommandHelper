@@ -6,25 +6,19 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
 import java.util.HashSet;
 import org.junit.*;
 import static org.junit.Assert.assertEquals;
-import org.junit.runner.RunWith;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-//import static org.powermock.api.mockito.PowerMockito.*;
 
 /**
  *
  * @author Layton
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Static.class)
 public class PlayerManangementTest {
 
     MCServer fakeServer;
@@ -45,8 +39,8 @@ public class PlayerManangementTest {
     @Before
     public void setUp() throws Exception {
         fakeServer = GetFakeServer();
-        fakePlayer = GetOp("wraithguard01", fakeServer);
-        StaticTest.InstallFakeConvertor(fakePlayer); 
+        fakePlayer = GetOp("player", fakeServer);
+        StaticTest.InstallFakeConvertor(fakePlayer);
         when(fakePlayer.getServer()).thenReturn(fakeServer);
         CommandHelperPlugin.myServer = fakeServer;
         String name = fakePlayer.getName();
@@ -82,7 +76,7 @@ public class PlayerManangementTest {
         String script = "all_players()";
         String done = SRun(script, fakePlayer);
         //This output is too long to test with msg()        
-        assertEquals("{wraithguard01, wraithguard02, wraithguard03}", done);
+        assertEquals("{player1, player2, player3, player}", done);
     }
 
     @Test
@@ -127,10 +121,11 @@ public class PlayerManangementTest {
         when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
         when(fakePlayer.getTargetBlock((HashSet) eq(null), anyInt(), eq(false))).thenReturn(b);
         MCWorld w = mock(MCWorld.class);
+		MCLocation loc = StaticTest.GetFakeLocation(w, 0, 0, 0);
+		when(b.getLocation()).thenReturn(loc);
         when(b.getWorld()).thenReturn(w);
         Run("pcursor()", fakePlayer);
-        Run("pcursor('" + fakePlayer.getName() + "')", fakePlayer);
-        verify(fakePlayer, times(2)).getTargetBlock((HashSet) eq(null), anyInt(), eq(false));
+        verify(fakePlayer, times(1)).getTargetBlock((HashSet) eq(null), anyInt(), eq(false));
     }
 
     @Test(timeout = 10000)

@@ -10,18 +10,12 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
 
 /**
  *
  * @author layton
  */
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Static.class)
 public class MinecraftTest {
     MCServer fakeServer;
     MCPlayer fakePlayer;

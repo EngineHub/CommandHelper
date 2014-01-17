@@ -80,14 +80,15 @@ import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import static org.mockito.Mockito.mock;
+//import static org.powermock.api.mockito.PowerMockito.mock;
+//import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * 
  * @author Layton
  */
-@RunWith(PowerMockRunner.class)
+//@RunWith(PowerMockRunner.class)
 
 public class StaticTest {
 	static com.laytonsmith.core.environments.Environment env;
@@ -551,7 +552,7 @@ public class StaticTest {
      */
     public static MCServer GetFakeServer(){
         MCServer fakeServer = mock(MCServer.class);
-        String [] pnames = new String[]{"wraithguard01", "wraithguard02", "wraithguard03"};
+        String [] pnames = new String[]{"player1", "player2", "player3"};
         ArrayList<MCPlayer> pps = new ArrayList<MCPlayer>();
         for(String p : pnames){
             MCPlayer pp = GetOnlinePlayer(p, fakeServer);

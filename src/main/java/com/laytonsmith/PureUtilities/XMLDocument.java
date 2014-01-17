@@ -9,6 +9,8 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,6 +24,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathFactoryConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -53,9 +56,10 @@ public class XMLDocument {
 			dbf.setNamespaceAware(false);
 			docBuilder = dbf.newDocumentBuilder();
 			doc = docBuilder.newDocument();
-			XPathFactory xpf = XPathFactory.newInstance();
+			XPathFactory xpf = XPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, 
+					"com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl", XMLDocument.class.getClassLoader());
 			xpath = xpf.newXPath();
-		} catch (ParserConfigurationException ex) {
+		} catch (ParserConfigurationException | XPathFactoryConfigurationException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
