@@ -1201,67 +1201,79 @@ public final class MethodScriptCompiler {
 				//We got here because the previous token isn't being ignored, because it's
 				//actually a control character, instead of whitespace, but this is a
 				//"empty first" slice notation. Compare this to the code below.
-				String value = nextNonWhitespace.val();
-				i = nextNonWhitespaceIndex - 1;
-				if(nextNonWhitespace.type == TType.MINUS || nextNonWhitespace.type == TType.PLUS){
-					value = nextNonWhitespace.val() + nextNonWhitespace3.val();
-					i = nextNonWhitespaceIndex2 - 1;
+				try{
+					String value = nextNonWhitespace.val();
+					i = nextNonWhitespaceIndex - 1;
+					if(nextNonWhitespace.type == TType.MINUS || nextNonWhitespace.type == TType.PLUS){
+						value = nextNonWhitespace.val() + nextNonWhitespace3.val();
+						i = nextNonWhitespaceIndex2 - 1;
+					}
+					CSlice slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
+					tree.addChild(new ParseTree(slice, fileOptions));
+					i++;
+					continue;
+				} catch(ConfigRuntimeException ex){
+					//CSlice can throw CREs, but at this stage, we have to
+					//turn them into a CCE.
+					throw new ConfigCompileException(ex);
 				}
-				CSlice slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
-				tree.addChild(new ParseTree(slice, fileOptions));
-				i++;
-				continue;
 			}
 			if (nextNonWhitespace.type.equals(TType.SLICE)) {
 				//Slice notation handling
-				CSlice slice;
-				if (t.type.isSeparator() || (t.type.isWhitespace() && prevNonWhitespace.type.isSeparator())) {
-					//empty first
-					String value = nextNonWhitespace2.val();
-					i = nextNonWhitespaceIndex2 - 1;
-					if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
-						value = nextNonWhitespace2.val() + nextNonWhitespace3.val();
-						i = nextNonWhitespaceIndex3 - 1;
+				try {
+					CSlice slice;
+					if (t.type.isSeparator() || (t.type.isWhitespace() && prevNonWhitespace.type.isSeparator())) {
+						//empty first
+						String value = nextNonWhitespace2.val();
+						i = nextNonWhitespaceIndex2 - 1;
+						if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
+							value = nextNonWhitespace2.val() + nextNonWhitespace3.val();
+							i = nextNonWhitespaceIndex3 - 1;
+						}
+						slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
+					} else if (nextNonWhitespace2.type.isSeparator()) {
+						//empty last
+						Token first = t;
+						String modifier = "";
+						if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
+							//The negative would have already been inserted into the tree
+							modifier = prevNonWhitespace.val();
+							tree.removeChildAt(tree.getChildren().size() - 1);
+						}
+						slice = new CSlice(modifier + first.value + "..", first.target);
+						i = nextNonWhitespaceIndex2 - 2;
+					} else {
+						//both are provided
+						String modifier1 = "";
+						if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
+							//It's a negative, incorporate that here, and remove the
+							//minus from the tree
+							modifier1 = prevNonWhitespace.val();
+							tree.removeChildAt(tree.getChildren().size() - 1);
+						}
+						Token first = t;
+						if(first.type.isWhitespace()){
+							first = prevNonWhitespace;
+						}
+						Token second = nextNonWhitespace2;
+						i = nextNonWhitespaceIndex2 - 1;
+						String modifier2 = "";
+						if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
+							modifier2 = nextNonWhitespace2.val();
+							second = nextNonWhitespace3;
+							i = nextNonWhitespaceIndex3 - 1;
+						}
+
+						slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target);
 					}
-					slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
-				} else if (nextNonWhitespace2.type.isSeparator()) {
-					//empty last
-					Token first = t;
-					String modifier = "";
-					if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
-						//The negative would have already been inserted into the tree
-						modifier = prevNonWhitespace.val();
-						tree.removeChildAt(tree.getChildren().size() - 1);
-					}
-					slice = new CSlice(modifier + first.value + "..", first.target);
-					i = nextNonWhitespaceIndex2 - 2;
-				} else {
-					//both are provided
-					String modifier1 = "";
-					if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
-						//It's a negative, incorporate that here, and remove the
-						//minus from the tree
-						modifier1 = prevNonWhitespace.val();
-						tree.removeChildAt(tree.getChildren().size() - 1);
-					}
-					Token first = t;
-					if(first.type.isWhitespace()){
-						first = prevNonWhitespace;
-					}
-					Token second = nextNonWhitespace2;
-					i = nextNonWhitespaceIndex2 - 1;
-					String modifier2 = "";
-					if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
-						modifier2 = nextNonWhitespace2.val();
-						second = nextNonWhitespace3;
-						i = nextNonWhitespaceIndex3 - 1;
-					}
-					
-					slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target);
+					i++;
+					tree.addChild(new ParseTree(slice, fileOptions));
+					continue;
+				} catch(ConfigRuntimeException ex){
+					//CSlice can throw CREs, but at this stage, we have to
+					//turn them into a CCE.
+					throw new ConfigCompileException(ex);
 				}
-				i++;
-				tree.addChild(new ParseTree(slice, fileOptions));
-				continue;
 			} else if (t.type == TType.LIT) {
 				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
