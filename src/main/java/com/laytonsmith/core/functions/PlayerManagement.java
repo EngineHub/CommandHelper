@@ -9,6 +9,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -637,7 +638,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "kill is deprecated, in favor of the more conventionally named pkill. Please change"
 					+ " all usages of kill() to pkill() ", t);
 			return null;
@@ -983,7 +984,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "kick is deprecated, in favor of the more conventionally named pkick. Please change"
 					+ " all usages of kick() to pkick() ", t);
 			return null;
@@ -2989,9 +2990,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_flight is deprecated, change it to set_pflight before the next release", t);
-			return super.optimizeDynamic(t, children);
+			return null;
 		}
 
 	}
@@ -3090,9 +3091,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_time is deprecated, change it to set_ptime before the next release", t);
-			return super.optimizeDynamic(t, children);
+			return null;
 		}
 
 	}

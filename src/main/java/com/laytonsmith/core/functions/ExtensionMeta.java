@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
@@ -101,7 +102,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (!(children.get(0).getData() instanceof CString)) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
@@ -173,7 +174,7 @@ public class ExtensionMeta {
 		}
 		
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (!(children.get(0).getData() instanceof CString)) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}

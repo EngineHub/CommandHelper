@@ -6,7 +6,6 @@ import com.laytonsmith.core.constructs.Target;
 /**
  * This is thrown by constructs like break and continue to indicate that
  * a loop specific ProgramFlowManipulationException is being thrown.
- * @author Layton
  */
 public abstract class LoopManipulationException extends ProgramFlowManipulationException {
 	private int times;
@@ -16,9 +15,20 @@ public abstract class LoopManipulationException extends ProgramFlowManipulationE
 		this.times = times;
 		this.name = name;
 	}
+	/**
+	 * Returns the number of times specified in the loop manipulation.
+	 * @return 
+	 */
 	public int getTimes(){
         return times;
-    }    
+    }   
+	
+	/**
+	 * Sets the number of times remaining in the loop manipulation. After
+	 * handling an interation, you should decrement the number and set it
+	 * here.
+	 * @param number 
+	 */
     public void setTimes(int number){
         this.times = number;
     }

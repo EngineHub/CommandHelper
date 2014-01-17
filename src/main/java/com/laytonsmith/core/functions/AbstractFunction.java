@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -89,7 +90,7 @@ public abstract class AbstractFunction implements Function {
 	 * @param children
 	 * @return
 	 */
-	public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+	public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 		return null;
 	}
 

@@ -1010,7 +1010,7 @@ public final class MethodScriptCompiler {
 						//labels. For future optimization reasons, this is not
 						//allowed, but we can at least give them a better error
 						//message.
-						throw new ConfigCompileException("Invalid label specified. Variables cannot be used as labels.", t.getTarget());
+						throw new ConfigCompileException("Invalid label specified (" + t.val() + "). Variables cannot be used as labels.", t.getTarget());
 					}
 					throw new ConfigCompileException("Invalid label specified", t.getTarget());
 				}
@@ -1018,6 +1018,17 @@ public final class MethodScriptCompiler {
 				constructCount.peek().incrementAndGet();
 				i = nextNonWhitespaceIndex; //Move forward past any whitespace
 				continue;
+			}
+			if(t.type == TType.LABEL && tree.getChildren().size() > 0){
+				ParseTree cc = tree.getChildren().get(tree.getChildren().size() - 1);
+				if(cc.getData() instanceof CSlice){
+					//Special case where a slice is being used as a label.
+					//Replace the value in the tree with a label, then continue.
+					tree.removeChildAt(tree.getChildren().size() - 1);
+					tree.addChild(new ParseTree(new CLabel(cc.getData()), fileOptions));
+					constructCount.peek().incrementAndGet();
+					continue;
+				}
 			}
 
 			//Array notation handling
@@ -1479,7 +1490,7 @@ public final class MethodScriptCompiler {
 		if (options.contains(OptimizationOption.OPTIMIZE_DYNAMIC)) {
 			ParseTree tempNode;
 			try {
-				tempNode = ((Optimizable)func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren());
+				tempNode = ((Optimizable)func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
 			} catch (ConfigRuntimeException e) {
 				//Turn it into a compile exception, then rethrow
 				throw new ConfigCompileException(e);

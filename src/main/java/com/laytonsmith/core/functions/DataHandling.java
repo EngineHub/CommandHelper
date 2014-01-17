@@ -36,7 +36,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class array extends AbstractFunction {
+	public static class array extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -77,17 +77,6 @@ public class DataHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-//        @Override
-//        public boolean canOptimize() {
-//            //FALSE. Can't optimize, because this returns a reference. This is
-//            //a much more complicated issue. TODO
-//            return false;
-//        }
-//
-//        @Override
-//        public Construct optimize(Target t, Construct... args) {
-//            return exec(t, null, args);
-//        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -96,6 +85,29 @@ public class DataHandling {
 				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)"),
 			};
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+		
+		FileOptions lastFileOptions = null;
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			//We need to check here to ensure that
+			//we aren't getting a slice in a label, which is used in switch
+			//statements, but doesn't make sense here.
+			for(ParseTree child : children){
+				if(child.getData() instanceof CFunction && new Compiler.centry().getName().equals(child.getData().val())){
+					if(((CLabel)child.getChildAt(0).getData()).cVal() instanceof CSlice){
+						throw new ConfigCompileException("Slices cannot be used as array indices", child.getChildAt(0).getTarget());
+					}
+				}
+			}
+			return null;
+		}
+		
 	}
 	
 	@api
@@ -235,7 +247,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.get(0).getData() instanceof IVariable
 					&& children.get(1).getData() instanceof IVariable){
 				if(((IVariable)children.get(0).getData()).getName().equals(
@@ -366,7 +378,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//In for(@i = 0, @i < @x, @i++, ...), the @i++ is more optimally written as ++@i, but
 			//it is commonplace to use postfix operations, so if the condition is in fact that simple,
 			//let's reverse it.
@@ -1007,7 +1019,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1){
 				if(children.get(0).isDynamic()){
 					//This is absolutely a bad design, if there is a variable here
@@ -1027,7 +1039,10 @@ public class DataHandling {
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC
+					//, OptimizationOption.TERMINAL This can't be added yet, because of things like switch, where code
+					//branches aren't considered correctly.
+			);
 		}
 		
 		
@@ -2120,7 +2135,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 1){
 				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -2178,7 +2193,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//If they hardcode the name, that's fine, because the variables may just be the only thing that's variable.
 			return null;
 		}
@@ -2424,7 +2439,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2){
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
 							+ " Use import('my.namespace') instead of import('my', 'namespace')", t);
@@ -2538,7 +2553,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2){
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
 							+ " Use export('my.namespace', @var) instead of export('my', 'namespace', @var)", t);

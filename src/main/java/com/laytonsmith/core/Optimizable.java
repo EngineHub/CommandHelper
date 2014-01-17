@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -160,8 +161,10 @@ public interface Optimizable extends Function {
 	 * likely the default).
 	 *
 	 * @param t
-	 * @param children
+	 * @param children The children that are being passed to this function
+	 * @param fileOptions The file options for the top level function
 	 * @return
 	 */
-	public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException;
+	public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException;
+
 }
