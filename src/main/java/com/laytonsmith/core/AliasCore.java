@@ -13,7 +13,6 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -445,7 +444,7 @@ public class AliasCore {
 
 			if (reloadScripts) {
 				EventUtils.UnregisterAll();
-				EventList.RunHooks();
+				ExtensionManager.RunHooks();
 				IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
 				Static.getServer().getMessenger().closeAllChannels(); // Close all channel messager channels registered by CH.
 				
