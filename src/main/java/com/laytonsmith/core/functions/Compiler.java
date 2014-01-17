@@ -436,7 +436,7 @@ public class Compiler {
 						} else {
 							//Hmm, this is weird. I'm not sure what condition this can happen in
 							throw new ConfigCompileException("Unexpected IDENTIFIER? O.o Please report a bug,"
-									+ " and include the script you used to get this error.", Target.UNKNOWN);
+									+ " and include the script you used to get this error. At or around:", list.get(i).getTarget());
 						}
 					}
 				}
