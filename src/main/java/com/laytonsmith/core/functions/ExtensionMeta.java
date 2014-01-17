@@ -226,7 +226,7 @@ public class ExtensionMeta {
 				} else {
 					funcs = (CArray)trkdata.get("functions");
 				}
-				for (Function func: trk.getFunctions()) {
+				for (FunctionBase func: trk.getFunctions()) {
 					if (!funcs.contains(func.getName())) {
 						funcs.push(new CString(func.getName(), t));
 					}
