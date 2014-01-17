@@ -326,7 +326,7 @@ public class CArray extends Construct implements ArrayAccess{
             try {
                 return array.get(Static.getInt32(index, t));
             } catch (IndexOutOfBoundsException e) {
-                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t);
+                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t, e);
             }
         } else {
             if(associative_array.containsKey(normalizeConstruct(index))){
@@ -336,7 +336,10 @@ public class CArray extends Construct implements ArrayAccess{
                 }
                 return val;
             } else {
-                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t);
+				//Create this so we can at least attach a stacktrace.
+				@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
+				IndexOutOfBoundsException ioobe = new IndexOutOfBoundsException();
+                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t, ioobe);
             }
         }
     }
