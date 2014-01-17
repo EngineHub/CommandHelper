@@ -2,8 +2,20 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CIdentifier;
+import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CPreIdentifier;
+import com.laytonsmith.core.constructs.CSlice;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CSymbol;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -14,7 +26,15 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EmptyStackException;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1048,6 +1068,9 @@ public final class MethodScriptCompiler {
 				int array = arrayStack.pop().get();
 				//index is the location of the first node with the index
 				int index = array + 1;
+				if (!tree.hasChildren()) {
+					throw new ConfigCompileException("Brackets are illegal here", t.target);
+				}
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if (!emptyArray) {
