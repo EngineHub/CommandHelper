@@ -1174,6 +1174,21 @@ public final class MethodScriptCompiler {
 				constructCount.peek().set(0);
 				continue;
 			}
+			if(t.type == TType.SLICE){
+				//We got here because the previous token isn't being ignored, because it's
+				//actually a control character, instead of whitespace, but this is a
+				//"empty first" slice notation. Compare this to the code below.
+				String value = nextNonWhitespace.val();
+				i = nextNonWhitespaceIndex - 1;
+				if(nextNonWhitespace.type == TType.MINUS || nextNonWhitespace.type == TType.PLUS){
+					value = nextNonWhitespace.val() + nextNonWhitespace3.val();
+					i = nextNonWhitespaceIndex2 - 1;
+				}
+				CSlice slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
+				tree.addChild(new ParseTree(slice, fileOptions));
+				i++;
+				continue;
+			}
 			if (nextNonWhitespace.type.equals(TType.SLICE)) {
 				//Slice notation handling
 				CSlice slice;
@@ -1186,7 +1201,6 @@ public final class MethodScriptCompiler {
 						i = nextNonWhitespaceIndex3 - 1;
 					}
 					slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
-					//arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
 				} else if (nextNonWhitespace2.type.isSeparator()) {
 					//empty last
 					Token first = t;

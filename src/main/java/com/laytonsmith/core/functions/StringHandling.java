@@ -1632,7 +1632,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "@res = res_create_resource('STRING_BUILDER')\n"
-					+ "foreach(1..100, @i,\n"
+					+ "foreach(1..50, @i,\n"
 					+ "\tstring_append(@res, @i, '.')\n"
 					+ ")\n"
 					+ "@string = string(@res)\n"
@@ -1655,7 +1655,9 @@ public class StringHandling {
 					+ ")\n"
 					+ "@t4 = time()\n"
 					+ "msg('Task 1 took '.(@t2 - @t1).'ms under '.@to.' iterations')\n"
-					+ "msg('Task 2 took '.(@t4 - @t3).'ms under '.@to.' iterations')")
+					+ "msg('Task 2 took '.(@t4 - @t3).'ms under '.@to.' iterations')",
+					"Task 1 took 542ms under 100000 iterations\n"
+					+ "Task 2 took 28305ms under 100000 iterations\n")
 			};
 		}
 		
