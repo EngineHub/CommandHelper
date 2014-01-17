@@ -21,8 +21,8 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
-import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
@@ -443,9 +443,7 @@ public class ExtensionManager {
 						Event e = cls.newInstance();
 						events.add(e.getName());
 
-						EventList.registerEvent(e, apiClass);
-
-						trk.events.add(e);
+						trk.registerEvent(e);
 					} else if (Function.class.isAssignableFrom(c)) {
 						Class<Function> cls = (Class<Function>) c;
 						
@@ -662,6 +660,66 @@ public class ExtensionManager {
 			locations.add(file.getCanonicalFile());
 		} catch (IOException ex) {
 			Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+	
+	public static Set<Event> GetEvents() {
+		Set<Event> retn = new HashSet<>();
+		
+		for (ExtensionTracker trk: extensions.values()) {
+			retn.addAll(trk.getEvents());
+		}
+		
+		return retn;
+	}
+	
+	public static Set<Event> GetEvents(Driver type) {
+		Set<Event> retn = new HashSet<>();
+		
+		for (ExtensionTracker trk: extensions.values()) {
+			retn.addAll(trk.events.get(type));
+		}
+		
+		return retn;
+	}
+	
+	public static Event GetEvent(Driver type, String name) {
+		for (ExtensionTracker trk: extensions.values()) {
+			Set<Event> events = trk.events.get(type);
+			
+			for (Event event: events) {
+				if (event.getName().equalsIgnoreCase(name)) {
+					return event;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	public static Event GetEvent(String name) {
+		for (ExtensionTracker trk: extensions.values()) {
+			Set<Event> events = trk.getEvents();
+			
+			for (Event event: events) {
+				if (event.getName().equalsIgnoreCase(name)) {
+					return event;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * This runs the hooks on all events. This should be called each time
+	 * the server "starts up".
+	 */
+	public static void RunHooks(){
+		for(Event event : GetEvents()){
+			try{
+				event.hook();
+			} catch(UnsupportedOperationException ex){}
 		}
 	}
 }
