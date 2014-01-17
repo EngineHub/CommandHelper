@@ -479,11 +479,12 @@ public class BasicLogic {
 			//make sure that each value is not dynamic.
 			String notConstant = "Cases for a switch statement must be constant, not variable";
 			String alreadyContains = "The switch statement already contains a case for this value";
+			final equals EQUALS = new equals();
 			Set<Construct> values = new TreeSet<>(new Comparator<Construct>() {
 
 				@Override
 				public int compare(Construct t, Construct t1) {
-					if (t.equals(t1)) {
+					if (EQUALS.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
 						return 0;
 					} else {
 						return t.val().compareTo(t1.val());
@@ -513,7 +514,7 @@ public class BasicLogic {
 					for (Construct c : list) {
 						if (c instanceof CSlice) {
 							for (Construct cc : ((CSlice) c).asList()) {
-								if (values.contains(c)) {
+								if (values.contains(cc)) {
 									throw new ConfigCompileException(alreadyContains, cc.getTarget());
 								}
 								values.add(cc);
@@ -570,7 +571,7 @@ public class BasicLogic {
 								}
 							}
 						} else {
-							if (new equals().exec(t, null, children.get(0).getData(), value).getBoolean()) {
+							if (EQUALS.exec(t, null, children.get(0).getData(), value).getBoolean()) {
 								toReturn = children.get(i + 1);
 								break;
 							}

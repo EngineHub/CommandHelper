@@ -211,6 +211,30 @@ public class OptimizationTest {
 		assertEquals("msg('hi')", optimize("if(reg_count('hi', dyn('hi'))){ } msg('hi')"));
 	}
 	
+	//tests the new switch syntax
+	@Test public void testSwitch1() throws Exception {
+		assertEquals("switch(@a,{1, 2},msg('1, 2'),{3..4},sconcat(msg('3'),msg('4')),msg('default'))", 
+				optimize("switch(@a){"
+						+ "	case 1:"
+						+ "	case 2:"
+						+ "		msg('1, 2');"
+						+ "	case 3..4:"
+						+ "		msg('3');"
+						+ "		msg('4');"
+						+ "	case 'ignored':"
+						+ "	default:"
+						+ "		msg('default');"
+						+ "}"));
+	}
+	@Test(expected = ConfigCompileException.class)
+	public void testSwitch2() throws Exception {
+		optimize("switch(@a){"
+				+ "	case 1:"
+				+ "	case 0..2:"
+				+ "		msg('invalid');"
+				+ "}");
+	}
+	
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{
