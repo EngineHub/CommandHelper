@@ -809,10 +809,6 @@ public final class MethodScriptCompiler {
 			tokens2.add(tokens1_1.get(i));
 		}
 
-
-
-
-
 		//Now that we have all lines minified, we should be able to split
 		//on newlines, and easily find the left and right sides
 
@@ -820,8 +816,12 @@ public final class MethodScriptCompiler {
 		List<Token> right = new ArrayList<Token>();
 		List<Script> scripts = new ArrayList<Script>();
 		boolean inLeft = true;
-		for (Token t : tokens2) {
+		for (int i = 0; i < tokens2.size(); i++) {
+			Token t = tokens2.get(i);
 			if (inLeft) {
+				if(t.type == TType.NEWLINE){
+					throw new ConfigCompileException("Unexpected token: \"" + tokens2.get(i - 1).val() + "\" at or before", tokens2.get(i - 1).getTarget());
+				}
 				if (t.type == TType.ALIAS_END) {
 					inLeft = false;
 				} else {
@@ -1034,14 +1034,14 @@ public final class MethodScriptCompiler {
 			if (nextNonWhitespace.type.equals(TType.LABEL)) {
 				//If it's not an atomic identifier it's an error.
 				if(!t.type.isAtomicLit()){
+					//This is a common case where people try to use dynamic
+					//labels. For future optimization reasons, this is not
+					//allowed. For certain common cases, we can at least give them a better error
+					//message though.
 					if(t.type == TType.IVARIABLE){
-						//This is a common case where people try to use dynamic
-						//labels. For future optimization reasons, this is not
-						//allowed, but we can at least give them a better error
-						//message.
 						throw new ConfigCompileException("Invalid label specified (" + t.val() + "). Variables cannot be used as labels.", t.getTarget());
 					}
-					throw new ConfigCompileException("Invalid label specified", t.getTarget());
+					throw new ConfigCompileException("Invalid label specified, variable data cannot be used as a label", t.getTarget());
 				}
 				tree.addChild(new ParseTree(new CLabel(Static.resolveConstruct(t.val(), t.target)), fileOptions));
 				constructCount.peek().incrementAndGet();

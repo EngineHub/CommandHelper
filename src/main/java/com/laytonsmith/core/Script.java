@@ -34,7 +34,6 @@ import java.util.logging.Level;
  * Certain key information is stored in the Script class. First, the information needed
  * to see if a target string should trigger this script. Secondly, the default values
  * of any variables, and thirdly, the unparsed tree for the right side of the script.
- * @author Layton
  */
 public class Script {
 
