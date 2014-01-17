@@ -10,10 +10,18 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -21,7 +29,6 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -29,8 +36,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -412,9 +417,10 @@ public class Reflection {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for (String name : EventList.GetEvents()) {
-				ret.push(new CString(name, t));
+			for (Event event : EventList.GetEvents()) {
+				ret.push(new CString(event.getName(), t));
 			}
+			ret.sort(CArray.SortType.STRING_IC);
 			return ret;
 		}
 
@@ -463,6 +469,7 @@ public class Reflection {
 			for (Script s : Static.getAliasCore().getScripts()) {
 				ret.push(new CString(s.getSignature(), t));
 			}
+			ret.sort(CArray.SortType.STRING_IC);
 			return ret;
 		}
 

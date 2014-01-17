@@ -49,7 +49,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UpgradeLog;
 import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistence.DataSourceException;
@@ -338,7 +337,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		registerEvent(serverListener);
 
 		//Script events
-		EventList.Startup(this);
+		StaticLayer.Startup(this);
 
 		playerListener.loadGlobalAliases();
 		interpreterListener.reload();
