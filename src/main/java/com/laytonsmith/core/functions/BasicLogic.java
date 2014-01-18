@@ -2289,6 +2289,71 @@ public class BasicLogic {
 	}
 
 	@api
+	public static class bit_xor extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "bit_xor";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		@Override
+		public String docs() {
+			return "int {int1, [int2...]} Returns the bitwise exclusive OR of the specified values";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if (args.length < 1) {
+				throw new ConfigRuntimeException("bit_xor requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
+			}
+			long val = Static.getInt(args[0], t);
+			for (int i = 1; i < args.length; i++) {
+				val = val ^ Static.getInt(args[i], t);
+			}
+			return new CInt(val, t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
+			);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "bit_xor(1, 2, 4)"),};
+		}
+	}
+
+	@api
 	public static class bit_not extends AbstractFunction implements Optimizable {
 
 		@Override
