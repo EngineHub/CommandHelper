@@ -5,21 +5,17 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventMixinInterface;
-import com.laytonsmith.core.functions.FunctionBase;
+import com.laytonsmith.core.functions.Function;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,19 +32,12 @@ public class ExtensionTracker {
 	/* package */ List<Extension> allExtensions;
 	private final DynamicClassLoader dcl;
 	private final ClassDiscovery cd;
-	/* package */ final Map<api.Platforms, Map<String, FunctionBase>> functions;
-    /* package */ final Map<String, Set<api.Platforms>> supportedPlatforms;
+	/* package */ final List<Function> functions;
 	/* package */ final Map<Driver, Set<Event>> events;
 	/* package */ final URL container;
 
 	public ExtensionTracker(URL container, ClassDiscovery cd, DynamicClassLoader dcl) {
-		functions  = new EnumMap<>(api.Platforms.class);
-		supportedPlatforms = new HashMap<>();
-		
-		for(api.Platforms p : api.Platforms.values()){
-            functions.put(p, new HashMap<String, FunctionBase>());
-        }
-		
+		this.functions = new ArrayList<>();
 		this.events = new EnumMap<>(Driver.class);
 		this.allExtensions = new ArrayList<>();
 		this.version = CHVersion.V0_0_0;
@@ -75,40 +64,9 @@ public class ExtensionTracker {
 	/**
 	 * @return the functions
 	 */
-	public Set<FunctionBase> getFunctions() {
-		Set<FunctionBase> retn = new HashSet<>();
-		
-		for (Map<String, FunctionBase> function: functions.values()) {
-			retn.addAll(function.values());
-		}
-		
-		return retn;
+	public List<? extends Function> getFunctions() {
+		return functions;
 	}
-	
-	public void registerFunction(FunctionBase f) {
-		api api = f.getClass().getAnnotation(api.class);                    
-		api.Platforms [] platforms = api.platform();
-		
-		if(!api.enabled()){
-			return;
-		}
-
-		if(supportedPlatforms.get(f.getName()) == null){
-			supportedPlatforms.put(f.getName(), EnumSet.noneOf(api.Platforms.class));
-		}
-		
-		supportedPlatforms.get(f.getName()).addAll(Arrays.asList(platforms));
-		
-		for (api.Platforms platform : platforms) {
-			try {
-				functions.get(platform).put(f.getName(), f);
-			} catch(UnsupportedOperationException e){
-				//This function isn't done yet, and during production this is a serious problem,
-				//but it will be caught when we test all the functions, so for now just ignore it,
-				//since this function is called during initial initialization
-			}	
-		}
-    }
 
 	/**
 	 * @return the events
