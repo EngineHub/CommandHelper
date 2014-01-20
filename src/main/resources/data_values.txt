@@ -12,6 +12,7 @@ cobble=4:0
 plank=5:0
 woodenplank=5:0
 woodplank=5:0
+woodplanks=5:0
 wplank=5:0
 plankwooden=5:0
 plankwood=5:0
