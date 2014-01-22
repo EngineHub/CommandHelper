@@ -677,7 +677,7 @@ public class ExtensionManager {
 		Set<Event> retn = new HashSet<>();
 		
 		for (ExtensionTracker trk: extensions.values()) {
-			retn.addAll(trk.events.get(type));
+			retn.addAll(trk.getEvents(type));
 		}
 		
 		return retn;
@@ -685,7 +685,7 @@ public class ExtensionManager {
 	
 	public static Event GetEvent(Driver type, String name) {
 		for (ExtensionTracker trk: extensions.values()) {
-			Set<Event> events = trk.events.get(type);
+			Set<Event> events = trk.getEvents(type);
 			
 			for (Event event: events) {
 				if (event.getName().equalsIgnoreCase(name)) {

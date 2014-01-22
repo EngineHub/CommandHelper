@@ -79,6 +79,16 @@ public class ExtensionTracker {
 		return retn;
 	}
 	
+	public Set<Event> getEvents(Driver type) {
+		Set<Event> retn = events.get(type);
+		
+		if (retn == null) {
+			return Collections.emptySet();
+		}
+		
+		return retn;
+	}
+	
 	public void registerEvent(Event e) {
 		if(e instanceof AbstractEvent){
             AbstractEvent ae = (AbstractEvent) e;
