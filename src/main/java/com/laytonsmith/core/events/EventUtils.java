@@ -318,5 +318,20 @@ public final class EventUtils {
 
 		}
 	}
+	
+	/**
+	 * Verifies that the event name given is a valid event name. If not, an
+	 * IllegalArgumentException is thrown.
+	 * @param name The name of the event to validate
+	 * @throws IllegalArgumentException if the event name is invalid
+	 */
+	public static void verifyEventName(String name) throws IllegalArgumentException {
+		for(Event e : EventList.GetEvents()){
+			if(e.getName().equals(name)){
+				return;
+			}
+		}
+		throw new IllegalArgumentException("No event named \"" + name + "\" was found.");
+	}
 
 }

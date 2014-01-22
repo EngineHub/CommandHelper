@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -14,10 +15,12 @@ import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,7 +38,7 @@ public class EventBinding {
 	private static final AtomicInteger bindCounter = new AtomicInteger(0);
 
 	@api(environments=CommandHelperEnvironment.class)
-	public static class bind extends AbstractFunction {
+	public static class bind extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -164,6 +167,27 @@ public class EventBinding {
 		@Override
 		public boolean allowBraces() {
 			return true;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if (children.size() < 5) {
+				throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, t);
+			}
+			if(children.get(0).isConst()){
+				String name = children.get(0).getData().val();
+				try {
+					EventUtils.verifyEventName(name);
+				} catch(IllegalArgumentException ex){
+					throw new ConfigCompileException(ex.getMessage(), t);
+				}
+			}
+			return null;
 		}
 		
 	}

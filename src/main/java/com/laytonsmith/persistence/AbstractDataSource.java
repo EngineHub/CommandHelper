@@ -12,8 +12,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -66,6 +68,20 @@ public abstract class AbstractDataSource implements DataSource {
 	public final String get(String[] key) throws DataSourceException {
 		checkGet(key);
 		return get0(key);
+	}
+
+	/**
+	 * By default, we use the naive method to get the values, by getting the keys in step 1, then
+	 * performing x gets to retrieve the values. This can probably be optimized
+	 * to reduce the number of get calls in some data sources, and should be overridden if so.
+	 */
+	@Override
+	public Map<String[], String> getValues(String[] leadKey) throws DataSourceException {
+		Map<String[], String> map = new HashMap<>();
+		for(String [] key : getNamespace(leadKey)){
+			map.put(key, get(key));
+		}
+		return map;
 	}
 
 	@Override
