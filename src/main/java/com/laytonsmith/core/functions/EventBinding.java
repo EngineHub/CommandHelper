@@ -186,6 +186,11 @@ public class EventBinding {
 				} catch(IllegalArgumentException ex){
 					throw new ConfigCompileException(ex.getMessage(), t);
 				}
+			} else {
+				// This ability may be removed in the future, to allow for better compilation checks of event type, once objects are added.
+				// We'll add this warning to gauge impact.
+				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of dynamic bind. This may be removed in the future, please"
+						+ " contact the developers to provide feedback if this affects you.", t);
 			}
 			return null;
 		}
