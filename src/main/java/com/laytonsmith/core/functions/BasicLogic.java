@@ -2162,12 +2162,12 @@ public class BasicLogic {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
+			return new Integer[]{2, Integer.MAX_VALUE};
 		}
 
 		@Override
 		public String docs() {
-			return "int {int1, [int2...]} Returns the bitwise AND of the values";
+			return "int {int1, int2, [int3...]} Returns the bitwise AND of the values";
 		}
 
 		@Override
@@ -2192,9 +2192,6 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length < 1) {
-				throw new ConfigRuntimeException("bit_and requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
-			}
 			long val = Static.getInt(args[0], t);
 			for (int i = 1; i < args.length; i++) {
 				val = val & Static.getInt(args[i], t);
@@ -2206,7 +2203,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.OPTIMIZE_DYNAMIC
 			);
 		}
 
@@ -2216,6 +2214,14 @@ public class BasicLogic {
 				new ExampleScript("Basic usage", "bit_and(1, 2, 4)"),
 				new ExampleScript("Usage in masking applications. Note that 5 in binary is 101 and 4 is 100. (See bit_or for a more complete example.)",
 				"assign(@var, 5)\nif(bit_and(@var, 4),\n\tmsg('Third bit set')\n)"),};
+		}
+		
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if (children.size() < 2){
+				throw new ConfigCompileException("bit_and() requires at least 2 arguments.", t);
+			}
+			return null;
 		}
 	}
 
@@ -2229,12 +2235,12 @@ public class BasicLogic {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
+			return new Integer[]{2, Integer.MAX_VALUE};
 		}
 
 		@Override
 		public String docs() {
-			return "int {int1, [int2...]} Returns the bitwise OR of the specified values";
+			return "int {int1, int2, [int3...]} Returns the bitwise OR of the specified values";
 		}
 
 		@Override
@@ -2259,9 +2265,6 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length < 1) {
-				throw new ConfigRuntimeException("bit_or requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
-			}
 			long val = Static.getInt(args[0], t);
 			for (int i = 1; i < args.length; i++) {
 				val = val | Static.getInt(args[i], t);
@@ -2273,7 +2276,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.OPTIMIZE_DYNAMIC
 			);
 		}
 
@@ -2285,6 +2289,85 @@ public class BasicLogic {
 				+ "assign(@flags, bit_or(@flag1, @flag3))\n"
 				+ "if(bit_and(@flags, @flag1),\n\tmsg('Contains flag 1')\n)\n"
 				+ "if(!bit_and(@flags, @flag2),\n\tmsg('Does not contain flag 2')\n)"),};
+		}
+		
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if (children.size() < 2){
+				throw new ConfigCompileException("bit_or() requires at least 2 arguments.", t);
+			}
+			return null;
+		}
+	}
+
+	@api
+	public static class bit_xor extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "bit_xor";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, Integer.MAX_VALUE};
+		}
+
+		@Override
+		public String docs() {
+			return "int {int1, int2, [int3...]} Returns the bitwise exclusive OR of the specified values";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			long val = Static.getInt(args[0], t);
+			for (int i = 1; i < args.length; i++) {
+				val = val ^ Static.getInt(args[i], t);
+			}
+			return new CInt(val, t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "bit_xor(1, 2, 4)"),};
+		}
+		
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if (children.size() < 2){
+				throw new ConfigCompileException("bit_xor() requires at least 2 arguments.", t);
+			}
+			return null;
 		}
 	}
 

@@ -298,6 +298,12 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
+    public void testBitXor() throws ConfigCompileException {
+        assertEquals("6", SRun("bit_xor(5, 3)", null));
+        assertEquals("8", SRun("bit_xor(2, 10)", null));
+    }
+
+    @Test(timeout = 10000)
     public void testBitNot() throws ConfigCompileException {
         assertEquals("-5", SRun("bit_not(4)", null));
     }
