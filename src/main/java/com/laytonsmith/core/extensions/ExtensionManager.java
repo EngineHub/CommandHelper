@@ -20,11 +20,14 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
-import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.FunctionBase;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -412,10 +415,6 @@ public class ExtensionManager {
 					|| cd.doesClassExtend(klass, Function.class)) {
 				Class c = klass.loadClass(dcl, true);
 
-				String apiClass = (c.getEnclosingClass() != null
-						? c.getEnclosingClass().getName().split("\\.")[c.getEnclosingClass().getName().split("\\.").length - 1]
-						: "<global>");
-
 				ExtensionTracker trk = extensions.get(url);
 
 				if (trk == null) {
@@ -460,10 +459,8 @@ public class ExtensionManager {
 						
 						Function f = cls.newInstance();
 						functions.add(f.getName());
-
-						FunctionList.registerFunction(f, apiClass);
-
-						trk.functions.add(f);
+						
+						trk.registerFunction(f);
 					}
 				} catch (InstantiationException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -722,4 +719,48 @@ public class ExtensionManager {
 			} catch(UnsupportedOperationException ex){}
 		}
 	}
+	
+    public static FunctionBase GetFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
+        if(platform == null){
+            //Default to the Java interpreter
+            platform = api.Platforms.INTERPRETER_JAVA;
+        }
+		
+        if (c instanceof CFunction) {
+			for (ExtensionTracker trk: extensions.values()) {
+				if(trk.functions.get(platform).containsKey(c.val()) 
+						&& trk.supportedPlatforms.get(c.val()).contains(platform)){
+					return trk.functions.get(platform).get(c.val());  
+				}
+			}
+			
+			throw new ConfigCompileException("The function \"" + c.val() + 
+					"\" does not exist in the " + platform.platformName(),
+							c.getTarget());
+        } else {
+			throw new ConfigCompileException("Expecting CFunction type", c.getTarget());
+		}
+    }
+
+    public static Set<FunctionBase> GetFunctions(api.Platforms platform) {
+        if(platform == null){
+            Set<FunctionBase> retn = new HashSet<>();
+			
+            for(api.Platforms p : api.Platforms.values()){
+                retn.addAll(GetFunctions(p));
+            }
+			
+            return retn;
+        }
+		
+        Set<FunctionBase> retn = new HashSet<>();
+		
+		for (ExtensionTracker trk: extensions.values()) {
+			for(String name : trk.functions.get(platform).keySet()){
+				retn.add(trk.functions.get(platform).get(name));
+			}
+		}
+		
+        return retn;
+    }
 }
