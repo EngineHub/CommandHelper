@@ -1,9 +1,11 @@
 package com.laytonsmith.persistence;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,8 +111,15 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public Set<String[]> keySet() {
-		return model.keySet();
+	public Set<String[]> keySet(String[] keyBase) {
+		Set<String[]> keys = new HashSet<>();
+		String kb = StringUtils.Join(keyBase, ".");
+		for(String[] key : model.keySet()){
+			if(StringUtils.Join(key, ".").startsWith(kb)){
+				keys.add(key);
+			}
+		}
+		return keys;
 	}
 
 	@Override

@@ -114,14 +114,15 @@ public class RedisDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public Set<String[]> keySet() throws DataSourceException {
+	public Set<String[]> keySet(String[] keyBase) throws DataSourceException {
 		connect();
 		Set<String> ret;
+		String kb = StringUtils.Join(keyBase, ".") + "*";
 		try{
 			if(inTransaction()){
-				ret = transaction.keys("*").get();
+				ret = transaction.keys(kb).get();
 			} else {
-				ret = connection.keys("*");
+				ret = connection.keys(kb);
 			}
 		} catch(JedisConnectionException e){
 			throw new DataSourceException(e);

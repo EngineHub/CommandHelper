@@ -166,19 +166,23 @@ public class PersistenceNetwork {
 	 */
 	public synchronized Map<String[], String> getNamespace(String[] namespace /*, boolean isMainThread*/) throws DataSourceException, IllegalArgumentException {
 		//TODO: isMainThread needs to be used here somewhere, I think?
+		//This is a slight optimization, instead of looking through ALL the connections, just
+		//look through the ones that have data matching this namespace in them.
 		List<URI> uris = filter.getAllConnections(namespace);
-		//First we have to get the namespaces. We can get a list of all the connections
-		//we need to search, then grab all the data in them, but then we need to use
-		//just a plain get() to grab the data, based on each key, because we don't
-		//want to accidentally grab a "hidden" value in another data source.
-		List<String[]> keysToGrab = new ArrayList<String[]>();
-		for (URI uri : uris) {
-			keysToGrab.addAll(getDataSource(uri).getNamespace(namespace));
-		}
-		//Ok, now the keys to grab are all populated, so let's walk through them and build our map
+		
 		Map<String[], String> map = new HashMap<String[], String>();
-		for (String[] key : keysToGrab) {
-			map.put(key, get(key));
+		for (URI uri : uris) {
+			Map<String[], String> db = getDataSource(uri).getValues(namespace);
+			//We have to loop through and make sure that this key should actually
+			//come from this connection. It may not, if there are "hidden" keys. 
+			//The easiest way to do so is to ask the filter if this key == this uri.
+			//The .get here isn't terribly inefficient, because in this case it won't actually
+			//poll the data source.
+			for(String[] key : db.keySet()){
+				if(filter.getConnection(key).equals(uri)){
+					map.put(key, db.get(key));
+				}
+			}
 		}
 		return map;
 	}

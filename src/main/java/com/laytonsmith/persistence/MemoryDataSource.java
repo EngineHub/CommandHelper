@@ -160,16 +160,16 @@ public final class MemoryDataSource extends AbstractDataSource {
 	
 
 	@Override
-	public Set<String> stringKeySet() throws DataSourceException {
+	public Set<String> stringKeySet(String[] keyBase) throws DataSourceException {
 		Set<String> keys = new TreeSet<String>();
-		for(String[] key : keySet()){
+		for(String[] key : keySet(keyBase)){
 			keys.add(StringUtils.Join(key, "."));
 		}
 		return keys;
 	}
 
 	@Override
-	public synchronized Set<String[]> keySet() throws DataSourceException {
+	public synchronized Set<String[]> keySet(String[] keyBase) throws DataSourceException {
 		Set<String> set = new HashSet<String>();
 		for(String key : getDatabase(dbName).keySet()){
 			set.add(key);
@@ -186,8 +186,11 @@ public final class MemoryDataSource extends AbstractDataSource {
 			}
 		}
 		Set<String[]> ret = new HashSet<String[]>();
+		String kb = StringUtils.Join(keyBase, ".");
 		for(String key : set){
-			ret.add(key.split("\\."));
+			if(key.startsWith(kb)){
+				ret.add(key.split("\\."));
+			}
 		}
 		return ret;
 	}

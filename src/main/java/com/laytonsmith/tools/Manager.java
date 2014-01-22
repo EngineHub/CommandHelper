@@ -159,7 +159,7 @@ public class Manager {
 				boolean acceptAllDestination = false;
 				boolean acceptAllSource = false;
 				DaemonManager dm = new DaemonManager();
-				for (String[] key : source.keySet()) {
+				for (String[] key : source.keySet(new String[0])) {
 					if (destination.hasKey(key)) {
 						if (!source.get(key).equals(destination.get(key))) {
 							String data;

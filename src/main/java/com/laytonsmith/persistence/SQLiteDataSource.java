@@ -14,7 +14,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,13 +73,14 @@ public class SQLiteDataSource extends AbstractDataSource{
 	}
 
 	@Override
-	public Set<String[]> keySet() throws DataSourceException{
+	public Set<String[]> keySet(String[] keyBase) throws DataSourceException{
 		try{
 			try {
 				connect();
 				Statement statement = connection.createStatement();
-				ResultSet rs = statement.executeQuery("SELECT `" + KEY_COLUMN + "` FROM `" + TABLE_NAME + "`");
-				Set<String[]> list = new HashSet<String[]>();
+				ResultSet rs = statement.executeQuery("SELECT `" + KEY_COLUMN + "` FROM `" + TABLE_NAME + "` WHERE `" 
+						+ KEY_COLUMN + "` LIKE '" + StringUtils.Join(keyBase, ".") + "%'");
+				Set<String[]> list = new HashSet<>();
 				while(rs.next()){
 					list.add(rs.getString(KEY_COLUMN).split("\\."));
 				}
@@ -85,7 +88,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 			} finally{
 				disconnect();
 			}
-		} catch (Exception ex) {
+		} catch (IOException | SQLException ex) {
 			throw new DataSourceException("Could not retrieve key set from SQLite connection " + path, ex);
 		}
 	}
@@ -106,7 +109,30 @@ public class SQLiteDataSource extends AbstractDataSource{
 			} finally {
 				disconnect();
 			}
-		} catch(Exception e){
+		} catch(IOException | SQLException e){
+			throw new DataSourceException("Could not get key from SQLite connection " + path, e);
+		}
+	}
+
+	@Override
+	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
+		try {
+			try {
+				connect();
+				PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + TABLE_NAME
+					+ "` WHERE `" + KEY_COLUMN + "` LIKE '" + StringUtils.Join(leadKey, ".") + "%'");
+				ResultSet rs = statement.executeQuery();
+				Map<String[], String> ret = new HashMap<>();
+				while(rs.next()){
+					String key = rs.getString(KEY_COLUMN);
+					String value = rs.getString(VALUE_COLUMN);
+					ret.put(key.split("\\."), value);
+				}
+				return ret;
+			} finally {
+				disconnect();
+			}
+		} catch(IOException | SQLException e){
 			throw new DataSourceException("Could not get key from SQLite connection " + path, e);
 		}
 	}
