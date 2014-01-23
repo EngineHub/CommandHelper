@@ -18,6 +18,25 @@ public enum CHVersion implements Version {
     V3_3_0("3.3.0"), 
     V3_3_1("3.3.1");
     final SimpleVersion version;
+	
+	/**
+	 * This points to the latest version in the series. This should normally only
+	 * be used for things that report the <i>current</i> version, not things that are
+	 * versioned. This is not an actual enum within the class, this is a static member of
+	 * the class which points to the an actual enum.
+	 */
+	public static final CHVersion LATEST;
+	
+	static {
+		//Dynamically determine the latest value.
+		CHVersion latest = null;
+		for(CHVersion v : CHVersion.values()){
+			if(latest == null || v.gt(latest)){
+				latest = v;
+			}
+		}
+		LATEST = latest;
+	}
     private CHVersion(String version){
         this.version = new SimpleVersion(version);
     }

@@ -12,16 +12,16 @@ import static com.laytonsmith.testing.StaticTest.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import static org.mockito.Mockito.verify;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+//import org.powermock.core.classloader.annotations.PowerMockIgnore;
+//import org.powermock.core.classloader.annotations.PrepareForTest;
+//import org.powermock.modules.junit4.PowerMockRunner;
 /**
  *
  * @author Layton
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Static.class)
-@PowerMockIgnore({"javax.xml.parsers.*", "com.sun.org.apache.xerces.internal.jaxp.*"})
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest(Static.class)
+//@PowerMockIgnore({"javax.xml.parsers.*", "com.sun.org.apache.xerces.internal.jaxp.*"})
 public class EnchantmentsTest {
     MCServer fakeServer;
     MCPlayer fakePlayer;

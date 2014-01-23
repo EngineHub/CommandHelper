@@ -10,8 +10,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -43,7 +45,7 @@ public class DataSourceFilter {
 	/**
 	 * Namespace lookups are also expensive, so let's also cache the results.
 	 */
-	private Map<String, List<URI>> namespaceCache = new TreeMap<String, List<URI>>();
+	private Map<String, Set<URI>> namespaceCache = new TreeMap<String, Set<URI>>();
 
 	/**
 	 * Creates a new data source filter. This is represented by a file that
@@ -213,6 +215,23 @@ public class DataSourceFilter {
 	public URI getConnection(String[] key) {
 		return getConnection(StringUtils.Join(key, "."));
 	}
+	
+	/**
+	 * Returns a set of ALL connections.
+	 * @return 
+	 */
+	public Set<URI> getAllConnections(){
+		Set<URI> set = new HashSet<>();
+		for(String uri : namespaced.values()){
+			try {
+				set.add(new URI(uri));
+			} catch (URISyntaxException ex){
+				//Won't happen
+				throw new Error(ex);
+			}
+		}
+		return set;
+	}
 
 	/**
 	 * Returns all the connections that actually match this namespace part.
@@ -220,7 +239,7 @@ public class DataSourceFilter {
 	 * @param key
 	 * @return
 	 */
-	public List<URI> getAllConnections(String[] key) {
+	public Set<URI> getAllConnections(String[] key) {
 		return getAllConnections(StringUtils.Join(key, "."));
 	}
 
@@ -231,9 +250,9 @@ public class DataSourceFilter {
 	 * @param key
 	 * @return
 	 */
-	public List<URI> getAllConnections(String key) {
+	public Set<URI> getAllConnections(String key) {
 		if(namespaceCache.containsKey(key)){
-			return new ArrayList<URI>(namespaceCache.get(key));
+			return new HashSet<>(namespaceCache.get(key));
 		}
 		Map<String[], String> matches = new HashMap<String[], String>();
 		String [] split = key.split("\\.");
@@ -271,17 +290,18 @@ public class DataSourceFilter {
 			}
 		}	
 		
-		List<URI> list = new ArrayList<URI>();
+		Set<URI> list = new HashSet<>();
 		for(String [] match : matches.keySet()){
 			String uri = matches.get(match);
 			try {
 				list.add(new URI(uri));
 			} catch (URISyntaxException ex) {
 				//Won't happen
+				throw new Error(ex);
 			}
 		}
 		namespaceCache.put(key, list);
-		return new ArrayList<URI>(list);
+		return new HashSet<>(list);
 	}
 	
 	private boolean arrayContains(String[] array, String contains, int from, int to){

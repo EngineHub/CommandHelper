@@ -6,13 +6,13 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -156,21 +156,36 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		try {
 			Implementation.setServerType(Implementation.Type.SHELL);
+			
+			CHLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
+			
 			Prefs.SetColors();
 			if(Prefs.UseColors()){
 				//Use jansi to enable output to color properly, even on windows.
 				org.fusesource.jansi.AnsiConsole.systemInstall();
 			}
-			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
+			
+			ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
+			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 			ClassDiscoveryCache cdcCache 
 					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
+			cd.setClassDiscoveryCache(cdcCache);
+			
+			ExtensionManager.getInstance().addDiscoveryLocation(
+					MethodScriptFileLocations.getDefault().getExtensionsDirectory());
+			ExtensionManager.getInstance().cache(
+					MethodScriptFileLocations.getDefault().getExtensionCacheDirectory(),
+					MethodScriptFileLocations.getDefault().getCacheDirectory());
+			ExtensionManager.getInstance().load(cd);
+			
 			if (args.length == 0) {
 				args = new String[]{"--help"};
 			}
 
 			ArgumentParser mode;
 			ArgumentParser.ArgumentParserResults parsedArgs;
+			
 			try {
 				ArgumentSuite.ArgumentSuiteResults results = ARGUMENT_SUITE.match(args, "help");
 				mode = results.getMode();
@@ -308,7 +323,6 @@ public class Main {
 				System.out.println(SyntaxHighlighters.generate(type, theme));
 				System.exit(0);
 			} else if (mode == optimizerTestMode) {
-				CHLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 				String path = parsedArgs.getStringArgument();
 				File source = new File(path);
 				String plain = FileUtil.read(source);
@@ -366,8 +380,6 @@ public class Main {
 					outputFile = new FileOutputStream(new File(outputFileS));
 				}
 				Implementation.forceServerType(Implementation.Type.BUKKIT);
-				ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
-				cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 				File extensionDir = new File(extensionDirS);
 				if(extensionDir.exists()){
 					//Might not exist, but that's ok, however we will print a warning

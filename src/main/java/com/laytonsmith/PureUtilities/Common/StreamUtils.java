@@ -78,6 +78,13 @@ public class StreamUtils {
 
 	}
 	
+	/**
+	 * Fully reads in a stream, as efficiently as possible, and returns a
+	 * byte array.
+	 * @param in
+	 * @return
+	 * @throws IOException 
+	 */
 	public static byte[] GetBytes(InputStream in) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(in);
 		List<Byte> bytes = new ArrayList<Byte>();

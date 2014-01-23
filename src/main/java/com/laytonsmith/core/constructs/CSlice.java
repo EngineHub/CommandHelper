@@ -4,7 +4,11 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Exceptions;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -42,7 +46,7 @@ public class CSlice extends CArray {
             start = Long.parseLong(sstart.trim());
             finish = Long.parseLong(sfinish.trim());
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Expecting integer in a slice, but was given " + sstart + " and " + sfinish, Exceptions.ExceptionType.CastException,  t);
+            throw new ConfigRuntimeException("Expecting integer in a slice, but was given \"" + sstart + "\" and \"" + sfinish + "\"", Exceptions.ExceptionType.CastException,  t);
         }
 		calculateCaches();
     }
@@ -53,6 +57,12 @@ public class CSlice extends CArray {
         this.finish = to;
 		calculateCaches();
     }
+
+	@Override
+	public List<Construct> asList() {
+		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
+		return ca.asList();
+	}
 	
 	private void calculateCaches(){
 		direction = start < finish?1:start==finish?0:-1;
@@ -76,6 +86,18 @@ public class CSlice extends CArray {
 	@Override
 	public String val() {
 		return start + ".." + finish;
+	}
+
+	@Override
+	public String toString() {
+		return val();
+	}
+
+	@Override
+	protected String getString(Set<CArray> arrays) {
+		//We don't need to consider arrays, because we can't
+		//get stuck in an infinite loop.
+		return val();
 	}
 
 	@Override

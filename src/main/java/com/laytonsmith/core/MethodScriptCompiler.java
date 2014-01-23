@@ -2,8 +2,20 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CIdentifier;
+import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CPreIdentifier;
+import com.laytonsmith.core.constructs.CSlice;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CSymbol;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -14,7 +26,15 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EmptyStackException;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -789,10 +809,6 @@ public final class MethodScriptCompiler {
 			tokens2.add(tokens1_1.get(i));
 		}
 
-
-
-
-
 		//Now that we have all lines minified, we should be able to split
 		//on newlines, and easily find the left and right sides
 
@@ -800,8 +816,12 @@ public final class MethodScriptCompiler {
 		List<Token> right = new ArrayList<Token>();
 		List<Script> scripts = new ArrayList<Script>();
 		boolean inLeft = true;
-		for (Token t : tokens2) {
+		for (int i = 0; i < tokens2.size(); i++) {
+			Token t = tokens2.get(i);
 			if (inLeft) {
+				if(t.type == TType.NEWLINE){
+					throw new ConfigCompileException("Unexpected token: \"" + tokens2.get(i - 1).val() + "\" at or before", tokens2.get(i - 1).getTarget());
+				}
 				if (t.type == TType.ALIAS_END) {
 					inLeft = false;
 				} else {
@@ -937,6 +957,11 @@ public final class MethodScriptCompiler {
 		ParseTree tree = new ParseTree(fileOptions);
 		tree.setData(new CNull(unknown));
 		Stack<ParseTree> parents = new Stack<ParseTree>();
+		/**
+		 * constructCount is used to determine if we need to use autoconcat
+		 * when reaching a FUNC_END. The previous constructs, if the count
+		 * is greater than 1, will be moved down into an autoconcat.
+		 */
 		Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
 		Stack<AtomicBoolean> usesBraces = new Stack<AtomicBoolean>();
 		constructCount.push(new AtomicInteger(0));
@@ -947,6 +972,10 @@ public final class MethodScriptCompiler {
 		tree = tree.getChildAt(0);
 		constructCount.push(new AtomicInteger(0));
 
+		/**
+		 * The array stack is used to keep track of the number
+		 * of square braces in use.
+		 */
 		Stack<AtomicInteger> arrayStack = new Stack<AtomicInteger>();
 		arrayStack.add(new AtomicInteger(-1));
 
@@ -1005,12 +1034,30 @@ public final class MethodScriptCompiler {
 			if (nextNonWhitespace.type.equals(TType.LABEL)) {
 				//If it's not an atomic identifier it's an error.
 				if(!t.type.isAtomicLit()){
-					throw new ConfigCompileException("Invalid label specified", t.getTarget());
+					//This is a common case where people try to use dynamic
+					//labels. For future optimization reasons, this is not
+					//allowed. For certain common cases, we can at least give them a better error
+					//message though.
+					if(t.type == TType.IVARIABLE){
+						throw new ConfigCompileException("Invalid label specified (" + t.val() + "). Variables cannot be used as labels.", t.getTarget());
+					}
+					throw new ConfigCompileException("Invalid label specified, variable data cannot be used as a label", t.getTarget());
 				}
 				tree.addChild(new ParseTree(new CLabel(Static.resolveConstruct(t.val(), t.target)), fileOptions));
 				constructCount.peek().incrementAndGet();
 				i = nextNonWhitespaceIndex; //Move forward past any whitespace
 				continue;
+			}
+			if(t.type == TType.LABEL && tree.getChildren().size() > 0){
+				ParseTree cc = tree.getChildren().get(tree.getChildren().size() - 1);
+				if(cc.getData() instanceof CSlice){
+					//Special case where a slice is being used as a label.
+					//Replace the value in the tree with a label, then continue.
+					tree.removeChildAt(tree.getChildren().size() - 1);
+					tree.addChild(new ParseTree(new CLabel(cc.getData()), fileOptions));
+					constructCount.peek().incrementAndGet();
+					continue;
+				}
 			}
 
 			//Array notation handling
@@ -1019,8 +1066,7 @@ public final class MethodScriptCompiler {
 				continue;
 			} else if (t.type.equals(TType.RSQUARE_BRACKET)) {
 				boolean emptyArray = false;
-				if (prev1.type.equals(TType.LSQUARE_BRACKET)) {
-					//throw new ConfigCompileException("Empty array_get operator ([])", t.line_num); 
+				if (prevNonWhitespace.type.equals(TType.LSQUARE_BRACKET)) {
 					emptyArray = true;
 				}
 				if (arrayStack.size() == 1) {
@@ -1030,10 +1076,14 @@ public final class MethodScriptCompiler {
 				int array = arrayStack.pop().get();
 				//index is the location of the first node with the index
 				int index = array + 1;
+				if (!tree.hasChildren()) {
+					throw new ConfigCompileException("Brackets are illegal here", t.target);
+				}
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if (!emptyArray) {
 					myIndex = new ParseTree(new CFunction("__autoconcat__", myArray.getTarget()), fileOptions);
+					
 					for (int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
 					}
@@ -1068,10 +1118,6 @@ public final class MethodScriptCompiler {
 
 			if (t.type.equals(TType.FUNC_NAME)) {
 				CFunction func = new CFunction(t.val(), t.target);
-				//This will throw an exception for us if the function doesn't exist
-				if (!func.val().matches("^_[^_].*")) {
-					FunctionList.getFunction(func);
-				}
 				ParseTree f = new ParseTree(func, fileOptions);
 				tree.addChild(f);
 				constructCount.push(new AtomicInteger(0));
@@ -1121,15 +1167,6 @@ public final class MethodScriptCompiler {
 					}
 					tree.addChild(c);
 				}
-				//Check argument number now
-				if (tree.getData().val() != null) {
-					if (!tree.getData().val().matches("^_[^_].*")) {
-						Integer[] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
-						if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())) {
-							throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().getTarget());
-						}
-					}
-				}
 				usesBraces.pop();
 				constructCount.pop();
 				try {
@@ -1169,57 +1206,83 @@ public final class MethodScriptCompiler {
 				constructCount.peek().set(0);
 				continue;
 			}
+			if(t.type == TType.SLICE){
+				//We got here because the previous token isn't being ignored, because it's
+				//actually a control character, instead of whitespace, but this is a
+				//"empty first" slice notation. Compare this to the code below.
+				try{
+					String value = nextNonWhitespace.val();
+					i = nextNonWhitespaceIndex - 1;
+					if(nextNonWhitespace.type == TType.MINUS || nextNonWhitespace.type == TType.PLUS){
+						value = nextNonWhitespace.val() + nextNonWhitespace3.val();
+						i = nextNonWhitespaceIndex2 - 1;
+					}
+					CSlice slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
+					tree.addChild(new ParseTree(slice, fileOptions));
+					i++;
+					continue;
+				} catch(ConfigRuntimeException ex){
+					//CSlice can throw CREs, but at this stage, we have to
+					//turn them into a CCE.
+					throw new ConfigCompileException(ex);
+				}
+			}
 			if (nextNonWhitespace.type.equals(TType.SLICE)) {
 				//Slice notation handling
-				CSlice slice;
-				if (t.type.isSeparator() || (t.type.isWhitespace() && prevNonWhitespace.type.isSeparator())) {
-					//empty first
-					String value = nextNonWhitespace2.val();
-					i = nextNonWhitespaceIndex2 - 1;
-					if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
-						value = nextNonWhitespace2.val() + nextNonWhitespace3.val();
-						i = nextNonWhitespaceIndex3 - 1;
+				try {
+					CSlice slice;
+					if (t.type.isSeparator() || (t.type.isWhitespace() && prevNonWhitespace.type.isSeparator())) {
+						//empty first
+						String value = nextNonWhitespace2.val();
+						i = nextNonWhitespaceIndex2 - 1;
+						if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
+							value = nextNonWhitespace2.val() + nextNonWhitespace3.val();
+							i = nextNonWhitespaceIndex3 - 1;
+						}
+						slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
+					} else if (nextNonWhitespace2.type.isSeparator()) {
+						//empty last
+						Token first = t;
+						String modifier = "";
+						if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
+							//The negative would have already been inserted into the tree
+							modifier = prevNonWhitespace.val();
+							tree.removeChildAt(tree.getChildren().size() - 1);
+						}
+						slice = new CSlice(modifier + first.value + "..", first.target);
+						i = nextNonWhitespaceIndex2 - 2;
+					} else {
+						//both are provided
+						String modifier1 = "";
+						if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
+							//It's a negative, incorporate that here, and remove the
+							//minus from the tree
+							modifier1 = prevNonWhitespace.val();
+							tree.removeChildAt(tree.getChildren().size() - 1);
+						}
+						Token first = t;
+						if(first.type.isWhitespace()){
+							first = prevNonWhitespace;
+						}
+						Token second = nextNonWhitespace2;
+						i = nextNonWhitespaceIndex2 - 1;
+						String modifier2 = "";
+						if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
+							modifier2 = nextNonWhitespace2.val();
+							second = nextNonWhitespace3;
+							i = nextNonWhitespaceIndex3 - 1;
+						}
+
+						slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target);
 					}
-					slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
-					//arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
-				} else if (nextNonWhitespace2.type.isSeparator()) {
-					//empty last
-					Token first = t;
-					String modifier = "";
-					if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
-						//The negative would have already been inserted into the tree
-						modifier = prevNonWhitespace.val();
-						tree.removeChildAt(tree.getChildren().size() - 1);
-					}
-					slice = new CSlice(modifier + first.value + "..", first.target);
-					i = nextNonWhitespaceIndex2 - 2;
-				} else {
-					//both are provided
-					String modifier1 = "";
-					if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
-						//It's a negative, incorporate that here, and remove the
-						//minus from the tree
-						modifier1 = prevNonWhitespace.val();
-						tree.removeChildAt(tree.getChildren().size() - 1);
-					}
-					Token first = t;
-					if(first.type.isWhitespace()){
-						first = prevNonWhitespace;
-					}
-					Token second = nextNonWhitespace2;
-					i = nextNonWhitespaceIndex2 - 1;
-					String modifier2 = "";
-					if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
-						modifier2 = nextNonWhitespace2.val();
-						second = nextNonWhitespace3;
-						i = nextNonWhitespaceIndex3 - 1;
-					}
-					
-					slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target);
+					i++;
+					tree.addChild(new ParseTree(slice, fileOptions));
+					continue;
+				} catch(ConfigRuntimeException ex){
+					//CSlice can throw CREs, but at this stage, we have to
+					//turn them into a CCE.
+					throw new ConfigCompileException(ex);
 				}
-				i++;
-				tree.addChild(new ParseTree(slice, fileOptions));
-				continue;
 			} else if (t.type == TType.LIT) {
 				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
@@ -1258,6 +1321,31 @@ public final class MethodScriptCompiler {
 		parents.pop();
 		tree = parents.pop();
 		return tree;
+	}
+	
+	/**
+	 * Recurses down the tree and
+	 * <ul><li>Links functions</li>
+	 * <li>Checks function arguments</li></ul>
+	 * This is a separate process from optimization, because optimization
+	 * ignores any missing functions.
+	 * @param tree 
+	 */
+	private static void link(ParseTree tree) throws ConfigCompileException{
+		for(ParseTree child : tree.getChildren()){
+			if(child.getData() instanceof CFunction){
+				if (!child.getData().val().matches("^_[^_].*")) {
+					FunctionList.getFunction(child.getData());
+					Integer[] numArgs = FunctionList.getFunction(child.getData()).numArgs();
+					if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && 
+							!Arrays.asList(numArgs).contains(child.getChildren().size())) {
+						throw new ConfigCompileException("Incorrect number of arguments passed to " 
+								+ child.getData().val(), child.getData().getTarget());
+					}
+				}
+				link(child);
+			}
+		}
 	}
 
 	/**
@@ -1460,7 +1548,7 @@ public final class MethodScriptCompiler {
 		if (options.contains(OptimizationOption.OPTIMIZE_DYNAMIC)) {
 			ParseTree tempNode;
 			try {
-				tempNode = ((Optimizable)func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren());
+				tempNode = ((Optimizable)func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
 			} catch (ConfigRuntimeException e) {
 				//Turn it into a compile exception, then rethrow
 				throw new ConfigCompileException(e);

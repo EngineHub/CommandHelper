@@ -28,6 +28,7 @@ import java.lang.Math;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.SortedMap;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -88,6 +89,9 @@ public class World {
 			if (args.length == 1) {
 				world = args[0].val();
 			} else {
+				if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null){
+					throw new ConfigRuntimeException("A world must be specified in a context with no player.", ExceptionType.InvalidWorldException, t);
+				}
 				world = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld().getName();
 			}
 			MCWorld w = Static.getServer().getWorld(world);
@@ -245,7 +249,7 @@ public class World {
 			return new CVoid(t);
 		}
 	}
-
+	
 	@api(environments=CommandHelperEnvironment.class)
 	public static class regen_chunk extends AbstractFunction {
 
@@ -324,6 +328,95 @@ public class World {
 			}
 
 			return new CBoolean(world.regenerateChunk(x, z), t);
+		}
+	}
+	
+	@api(environments=CommandHelperEnvironment.class)
+	public static class is_slime_chunk extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "is_slime_chunk";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {x, z, [world]| locationArray, [world]} Returns if the chunk is a slime spawning chunk, using the specified world, or the current"
+					+ " players world if not provided.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		Random rnd = new Random();
+		
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world;
+			int x;
+			int z;
+			long seed;
+			if (args.length == 1) {
+				//Location array provided                
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
+				world = l.getWorld();
+				seed = world.getSeed();
+				x = l.getChunk().getX();
+				z = l.getChunk().getZ();
+			} else if (args.length == 2) {
+				//Either location array and world provided, or x and z. Test for array at pos 1
+				if (args[0] instanceof CArray) {
+					world = Static.getServer().getWorld(args[1].val());
+					seed = world.getSeed();
+					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+					x = l.getChunk().getX();
+					z = l.getChunk().getZ();
+				} else {
+					if (m == null) {
+						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+					}
+					world = m.getWorld();
+					seed = world.getSeed();
+					x = Static.getInt32(args[0], t);
+					z = Static.getInt32(args[1], t);
+				}
+			} else {
+				//world, x and z provided
+				x = Static.getInt32(args[0], t);
+				z = Static.getInt32(args[1], t);
+				world = Static.getServer().getWorld(args[2].val());
+				seed = world.getSeed();
+			}
+			rnd.setSeed(seed
+				+ x * x * 0x4c1906
+				+ x * 0x5ac0db
+				+ z * z * 0x4307a7L
+				+ z * 0x5f24f
+				^ 0x3ad8025f);
+			return new CBoolean(rnd.nextInt(10) == 0, t);
 		}
 	}
 

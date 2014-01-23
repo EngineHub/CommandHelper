@@ -67,6 +67,7 @@ public class MathTest {
         assertCEquals(C.onstruct(5), a.exec(Target.UNKNOWN, env, C.onstruct(5)));
         assertCEquals(C.onstruct(3), a.exec(Target.UNKNOWN, env, C.onstruct(-3)));
         assertCEquals(C.onstruct(0), a.exec(Target.UNKNOWN, env, C.onstruct(0)));
+        assertCEquals(C.onstruct(3.5), a.exec(Target.UNKNOWN, env, C.onstruct(-3.5)));
     }
 
     @Test(timeout = 10000)
@@ -76,6 +77,7 @@ public class MathTest {
         assertCEquals(C.onstruct(6), a.exec(Target.UNKNOWN, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(-4), a.exec(Target.UNKNOWN, env, C.onstruct(-3), C.onstruct(-1)));
         assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, C.onstruct(1), C.onstruct(0)));
+        assertCEquals(C.onstruct(562949953421310L), a.exec(Target.UNKNOWN, env, C.onstruct(281474976710655L), C.onstruct(281474976710655L)));
         assertCEquals(C.onstruct(3.1415), a.exec(Target.UNKNOWN, env, C.onstruct(3), C.onstruct(0.1415)));
     }
 
@@ -124,6 +126,8 @@ public class MathTest {
         assertCEquals(C.onstruct(9), a.exec(Target.UNKNOWN, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(6), a.exec(Target.UNKNOWN, env, C.onstruct(-3), C.onstruct(-2)));
         assertCEquals(C.onstruct(5), a.exec(Target.UNKNOWN, env, C.onstruct(10), C.onstruct(0.5)));
+        assertCEquals(C.onstruct(-562949953421311L), a.exec(Target.UNKNOWN, env, C.onstruct(281474976710655L), C.onstruct(281474976710655L)));
+        assertCEquals(C.onstruct(5312385410449346020L), a.exec(Target.UNKNOWN, env, C.onstruct(9876543210L), C.onstruct(9876543210L)));
     }
 
     @Test(timeout = 10000)
@@ -177,6 +181,7 @@ public class MathTest {
         assertCEquals(C.onstruct(0), a.exec(Target.UNKNOWN, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(-1), a.exec(Target.UNKNOWN, env, C.onstruct(-3), C.onstruct(-2)));
         assertCEquals(C.onstruct(3), a.exec(Target.UNKNOWN, env, C.onstruct(3.1415), C.onstruct(0.1415)));
+        assertCEquals(C.onstruct(281474976710655L), a.exec(Target.UNKNOWN, env, C.onstruct(562949953421310L), C.onstruct(281474976710655L)));
     }
 
     @Test(timeout = 10000)

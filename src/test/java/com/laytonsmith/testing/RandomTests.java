@@ -72,7 +72,7 @@ public class RandomTests {
 			inner:
 			for (Class inter : c.getInterfaces()) {
 				for (Class extended : inter.getInterfaces()) {
-					if (extended == AbstractionObject.class) {
+					if (extended == AbstractionObject.class && !c.isInterface()) {
 						//This is a direct subclass of an interface that implements AbstractionObject, so check
 						//to ensure that the equals, toString, and hashCode methods are overloaded.
 						break inner;

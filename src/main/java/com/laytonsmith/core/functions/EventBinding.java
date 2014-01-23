@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -14,13 +15,14 @@ import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -36,7 +38,7 @@ public class EventBinding {
 	private static final AtomicInteger bindCounter = new AtomicInteger(0);
 
 	@api(environments=CommandHelperEnvironment.class)
-	public static class bind extends AbstractFunction {
+	public static class bind extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -166,6 +168,32 @@ public class EventBinding {
 		public boolean allowBraces() {
 			return true;
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if (children.size() < 5) {
+				throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, t);
+			}
+			if(children.get(0).isConst()){
+				String name = children.get(0).getData().val();
+				try {
+					EventUtils.verifyEventName(name);
+				} catch(IllegalArgumentException ex){
+					throw new ConfigCompileException(ex.getMessage(), t);
+				}
+			} else {
+				// This ability may be removed in the future, to allow for better compilation checks of event type, once objects are added.
+				// We'll add this warning to gauge impact.
+				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of dynamic bind. This may be removed in the future, please"
+						+ " contact the developers to provide feedback if this affects you.", t);
+			}
+			return null;
+		}
 		
 	}
 
@@ -292,7 +320,8 @@ public class EventBinding {
 
 		@Override
 		public String docs() {
-			return "void {[state]} Cancels the event (if applicable). If the event is not cancellable, or is already cancelled, nothing happens."
+			return "void {[state]} Cancels the event (if applicable). If the event is not cancellable, or is already set to the specified"
+					+ " cancelled state, nothing happens."
 					+ " If called from outside an event handler, a BindException is thrown. By default, state is true, but you can"
 					+ " uncancel an event (if possible) by calling cancel(false).";
 		}
@@ -833,9 +862,12 @@ public class EventBinding {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			for(Driver d : Driver.values()){
-				for(BoundEvent b : EventUtils.GetEvents(d)){
-					if(b.getId().equals(id)){
-						return new CBoolean(true, t);
+				Set<BoundEvent> events = EventUtils.GetEvents(d);
+				if (events != null) {
+					for(BoundEvent b : events){
+						if(b.getId().equals(id)){
+							return new CBoolean(true, t);
+						}
 					}
 				}
 			}

@@ -23,18 +23,18 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import static org.mockito.Mockito.*;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+//import org.powermock.api.mockito.PowerMockito;
+//import org.powermock.core.classloader.annotations.PowerMockIgnore;
+//import org.powermock.core.classloader.annotations.PrepareForTest;
+//import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
  * @author Layton
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(CommandHelperPlugin.class)
-@PowerMockIgnore({"javax.xml.parsers.*", "com.sun.org.apache.xerces.internal.jaxp.*"})
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest(CommandHelperPlugin.class)
+//@PowerMockIgnore({"javax.xml.parsers.*", "com.sun.org.apache.xerces.internal.jaxp.*"})
 public class MethodScriptCompilerTest {
 
     MCServer fakeServer;
@@ -268,14 +268,6 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("hello");
     }
 
-    @Test(expected=ConfigCompileException.class)
-    public void testExecute8() throws ConfigCompileException {
-        String script =
-                "msg('hello') //This is no longer a comment too :( invalid()'\"'' function\n";
-        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
-        verify(fakePlayer).sendMessage("hello");
-    }
-
     @Test
     public void testExecute9() throws ConfigCompileException {
         String script =
@@ -445,40 +437,40 @@ public class MethodScriptCompilerTest {
         }
     }
     
-    @Test
-    public void testCompileWithDoubleSlashCommand() throws ConfigCompileException{
-        AliasCore ac = mock(AliasCore.class);
-        ac.autoIncludes = new ArrayList<File>();
-        PowerMockito.mockStatic(CommandHelperPlugin.class);
-        when(CommandHelperPlugin.getCore()).thenReturn(ac);
-        assertEquals(ac, CommandHelperPlugin.getCore());
-        String config = "//cmd blah = msg('success')";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
-        s.compile();
-        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);		
-        s.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
-        verify(fakePlayer).sendMessage("success");
-    }
-    
-    @Test
-    public void testCompileTwoAliases() throws ConfigCompileException{
-        AliasCore ac = mock(AliasCore.class);
-        ac.autoIncludes = new ArrayList<File>();
-        PowerMockito.mockStatic(CommandHelperPlugin.class);
-        when(CommandHelperPlugin.getCore()).thenReturn(ac);
-        assertEquals(ac, CommandHelperPlugin.getCore());
-        String config = "/cmd1 = msg('success')\n"
-                + "                 \n" //Spaces and tabs are here
-                + "/cmd2 = msg('success')";
-        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
-        Script s1 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
-        s1.compile();
-        s1.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
-        Script s2 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(1);
-        s2.compile();
-        s2.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
-        verify(fakePlayer, times(2)).sendMessage("success");
-    }
+//    @Test
+//    public void testCompileWithDoubleSlashCommand() throws ConfigCompileException{
+//        AliasCore ac = mock(AliasCore.class);
+//        ac.autoIncludes = new ArrayList<File>();
+//        PowerMockito.mockStatic(CommandHelperPlugin.class);
+//        when(CommandHelperPlugin.getCore()).thenReturn(ac);
+//        assertEquals(ac, CommandHelperPlugin.getCore());
+//        String config = "//cmd blah = msg('success')";
+//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
+//        s.compile();
+//        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);		
+//        s.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
+//        verify(fakePlayer).sendMessage("success");
+//    }
+//    
+//    @Test
+//    public void testCompileTwoAliases() throws ConfigCompileException{
+//        AliasCore ac = mock(AliasCore.class);
+//        ac.autoIncludes = new ArrayList<File>();
+//        PowerMockito.mockStatic(CommandHelperPlugin.class);
+//        when(CommandHelperPlugin.getCore()).thenReturn(ac);
+//        assertEquals(ac, CommandHelperPlugin.getCore());
+//        String config = "/cmd1 = msg('success')\n"
+//                + "                 \n" //Spaces and tabs are here
+//                + "/cmd2 = msg('success')";
+//        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
+//        Script s1 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
+//        s1.compile();
+//        s1.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
+//        Script s2 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(1);
+//        s2.compile();
+//        s2.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
+//        verify(fakePlayer, times(2)).sendMessage("success");
+//    }
 
     @Test
     public void testCompile2() {
@@ -912,21 +904,21 @@ public class MethodScriptCompilerTest {
 	}
 	
 	@Test public void testCSlices() throws Exception{
-		assertEquals("-1", SRun("-1..-3[0]", null));
-		assertEquals("-2", SRun("-1..-3[1]", null));
-		assertEquals("-3", SRun("-1..-3[2]", null));
+		assertEquals("-1", SRun("p(-1..-3[0])", null));
+		assertEquals("-2", SRun("p(-1..-3[1])", null));
+		assertEquals("-3", SRun("p(-1..-3[2])", null));
 		
-		assertEquals("0", SRun("0..2[0]", null));
-		assertEquals("1", SRun("0..2[1]", null));
-		assertEquals("2", SRun("0..2[2]", null));
+		assertEquals("0", SRun("p(0..2[0])", null));
+		assertEquals("1", SRun("p(0..2[1])", null));
+		assertEquals("2", SRun("p(0..2[2])", null));
 		
-		assertEquals("5", SRun("5..3[0]", null));
-		assertEquals("4", SRun("5..3[1]", null));
-		assertEquals("3", SRun("5..3[2]", null));
+		assertEquals("5", SRun("p(5..3[0])", null));
+		assertEquals("4", SRun("p(5..3[1])", null));
+		assertEquals("3", SRun("p(5..3[2])", null));
 		
-		assertEquals("1", SRun("1..3[0]", null));
-		assertEquals("2", SRun("1..3[1]", null));
-		assertEquals("3", SRun("1..3[2]", null));
+		assertEquals("1", SRun("p(1..3[0])", null));
+		assertEquals("2", SRun("p(1..3[1])", null));
+		assertEquals("3", SRun("p(1..3[2])", null));
 		
 		try{
 			SRun("1..2[10]", null);

@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.Objective;
@@ -129,5 +130,10 @@ public class BukkitMCScoreboard implements MCScoreboard {
 			return s.equals(((BukkitMCScoreboard) obj).s);
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return s.hashCode();
 	}
 }

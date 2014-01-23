@@ -5,13 +5,13 @@ import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
@@ -208,7 +208,7 @@ public class SQL {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//We can check 2 things here, one, that the statement isn't dynamic, and if not, then
 			//2, that the parameter count matches the ? count. No checks can be done for typing,
 			//without making a connection to the db though, so we won't do that here.
@@ -271,10 +271,13 @@ public class SQL {
 	@api
 	public static class query_async extends AbstractFunction {
 		
-		RunnableQueue queue = new RunnableQueue("MethodScript-queryAsync");
+		RunnableQueue queue = null;
 		boolean started = false;
 		
-		private void startup(){
+		private synchronized void startup(){
+			if(queue == null){
+				queue = new RunnableQueue("MethodScript-queryAsync");
+			}
 			if(!started){
 				queue.invokeLater(null, new Runnable() {
 
@@ -288,6 +291,7 @@ public class SQL {
 					@Override
 					public void run() {
 						queue.shutdown();
+						queue = null;
 						started = false;
 					}
 				});

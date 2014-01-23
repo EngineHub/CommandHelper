@@ -131,6 +131,9 @@ public final class TermColors {
         return fields;
     }
     
+	/**
+	 * Enables colors.
+	 */
     public static void EnableColors(){
         for(Field f : fields()){
             try {
@@ -143,6 +146,9 @@ public final class TermColors {
         }
     }
     
+	/**
+	 * Disables colors.
+	 */
     public static void DisableColors(){
         for(Field f : fields()){
             try {
@@ -154,6 +160,14 @@ public final class TermColors {
             }
         }
     }
+	
+	/**
+	 * Returns true or false if colors are enabled or not.
+	 * @return 
+	 */
+	public static boolean ColorsDisabled(){
+		return RED == null;
+	}
     
     private static String special(String type){
         if(SYSTEM.equals(SYS.UNIX)){

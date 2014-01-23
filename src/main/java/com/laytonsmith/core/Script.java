@@ -34,7 +34,6 @@ import java.util.logging.Level;
  * Certain key information is stored in the Script class. First, the information needed
  * to see if a target string should trigger this script. Secondly, the default values
  * of any variables, and thirdly, the unparsed tree for the right side of the script.
- * @author Layton
  */
 public class Script {
 
@@ -456,27 +455,6 @@ public class Script {
         if (cleft.size() != cmds.length && !lastIsFinal) {
             isAMatch = false;
         }
-//        ArrayList<Variable> vars = new ArrayList<Variable>();
-//        Variable v = null;
-//        for (int j = 0; j < cleft.size(); j++) {
-//            try {
-//                if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
-//                    if (((Variable) cleft.get(j)).getName().equals("$")) {
-//                        v = new Variable(((Variable) cleft.get(j)).getName(),
-//                                lastVar.toString(), Target.UNKNOWN);
-//                    } else {
-//                        v = new Variable(((Variable) cleft.get(j)).getName(),
-//                                args.get(j), Target.UNKNOWN);
-//                    }
-//                }
-//            } catch (IndexOutOfBoundsException e) {
-//                v = new Variable(((Variable) cleft.get(j)).getName(),
-//                        ((Variable) cleft.get(j)).getDefault(), Target.UNKNOWN);
-//            }
-//            if (v != null) {
-//                vars.add(v);
-//            }
-//        }
         return isAMatch;
     }
 
@@ -675,10 +653,6 @@ public class Script {
                     throw new ConfigCompileException("Unexpected " + t.type.toString(), t.target);
                 }
                 inside_opt_var = false;
-//                if (last_token.type.equals(TType.VARIABLE)
-//                        || last_token.type.equals(TType.FINAL_VAR)) {
-//                    after_no_def_opt_var = true;
-//                }
             }
         }
 
@@ -822,31 +796,6 @@ public class Script {
                         + "matches the signature of " + commandThat.trim() + " defined at " + thatCommand.get(0).getTarget(), thisCommand.get(0).getTarget());
             }
         }
-
-//        //Also, check for undefined variables on the right, and unused variables on the left
-//        ArrayList<String> left_copy = new ArrayList<String>();
-//        for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
-//            left_copy.add(v.getValue().getName());
-//        }
-//        Arrays.asList(new String[]{}).toArray(new String[]{});
-//        for (ParseTree gtn : cright) {
-//            GenericTree<Construct> tree = new GenericTree<Construct>();
-//            tree.setRoot(gtn);
-//            List<ParseTree> builtTree = tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
-//            for (ParseTree c : builtTree) {
-//                if (c.getData() instanceof Variable) {
-//                    for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
-//                        if (v.getValue().getName().equals(((Variable) c.getData()).getName())) {
-//                            //Found it, remove this from the left_copy, and break
-//                            left_copy.remove(v.getValue().getName());
-//                            break;
-//                            //TODO: Layton!
-//                        }
-//                    }
-//                }
-//            }
-//        }
-        //}
     }
 
     /**

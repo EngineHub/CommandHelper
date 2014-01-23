@@ -124,7 +124,7 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> list) throws ConfigCompileException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
 			return optimizeSpecial(list, true);
 		}
 
@@ -436,7 +436,7 @@ public class Compiler {
 						} else {
 							//Hmm, this is weird. I'm not sure what condition this can happen in
 							throw new ConfigCompileException("Unexpected IDENTIFIER? O.o Please report a bug,"
-									+ " and include the script you used to get this error.", Target.UNKNOWN);
+									+ " and include the script you used to get this error. At or around:", list.get(i).getTarget());
 						}
 					}
 				}
@@ -521,14 +521,10 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			FileOptions options = new FileOptions(new HashMap<String, String>());
-			if (!children.isEmpty()) {
-				options = children.get(0).getFileOptions();
-			}
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree node;
 			if (children.isEmpty()) {
-				node = new ParseTree(new CVoid(t), options);
+				node = new ParseTree(new CVoid(t), fileOptions);
 			} else if (children.size() == 1) {
 				node = children.get(0);
 			} else {
@@ -536,7 +532,7 @@ public class Compiler {
 				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
 						+ " report this error to the developer.", t);
 			}
-			return new ParseTree(new CBracket(node), options);
+			return new ParseTree(new CBracket(node), fileOptions);
 		}
 	}
 
@@ -556,14 +552,10 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			FileOptions options = new FileOptions(new HashMap<String, String>());
-			if (!children.isEmpty()) {
-				options = children.get(0).getFileOptions();
-			}
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree node;
 			if (children.isEmpty()) {
-				node = new ParseTree(new CVoid(t), options);
+				node = new ParseTree(new CVoid(t), fileOptions);
 			} else if (children.size() == 1) {
 				node = children.get(0);
 			} else {
@@ -571,7 +563,7 @@ public class Compiler {
 				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
 						+ " report this error to the developer.", t);
 			}
-			return new ParseTree(new CBrace(node), options);
+			return new ParseTree(new CBrace(node), fileOptions);
 		}
 	}
 }

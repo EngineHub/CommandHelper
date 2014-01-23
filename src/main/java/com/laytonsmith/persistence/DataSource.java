@@ -6,6 +6,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -19,21 +20,24 @@ import java.util.Set;
 public interface DataSource extends Documentation {
 
 	/**
-	 * Returns a list of keys stored in this interface.
-	 *
+	 * Returns a list of keys stored in this interface. If keyBase is empty,
+	 * all keys are returned, otherwise, only keys matching the
+	 * namespace will be returned.
 	 * @return
 	 */
-	public Set<String[]> keySet() throws DataSourceException;
+	public Set<String[]> keySet(String [] keyBase) throws DataSourceException;
 
 	/**
 	 * Returns a list of keys, pre-concatenated into dot notation. This may
 	 * be equally inefficient for all data sources (getting keySet, then
 	 * doing the concatenation one at a time), however if a data source is
-	 * able to optimize for this, it is able.
+	 * able to optimize for this, it is able. The same rule applies as keySet,
+	 * if keyBase is empty, all keys are returned, otherwise, only the
+	 * keys for that namespace are returned.
 	 *
 	 * @return
 	 */
-	public Set<String> stringKeySet() throws DataSourceException;
+	public Set<String> stringKeySet(String [] keyBase) throws DataSourceException;
 
 	/**
 	 * Given a namespace, returns all the keys in this data source that are
@@ -46,12 +50,23 @@ public interface DataSource extends Documentation {
 	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException;
 
 	/**
-	 * Retrieves a value from the data source. This should be the same
-	 * as get(key, false), which is generally the default usage.
+	 * Retrieves a single value from the data source.
 	 * @param key
 	 * @return 
 	 */
 	public String get(String[] key) throws DataSourceException;
+
+	/**
+	 * Retrieves a namespace from the data source. Unlike get, this
+	 * will return multiple values, mapped to their key. For instance,
+	 * getValues({"a"}) might return {"a": "value1", "a.b": "value2"}, where
+	 * the "lead value" "a" is the namespace for which we retrieve all values
+	 * under that key, including the value at "a" itself, if set.
+	 * @param leadKey
+	 * @return
+	 * @throws DataSourceException 
+	 */
+	public Map<String[], String> getValues(String[] leadKey) throws DataSourceException;
 
 	/**
 	 * Sets a value in the data source. If value is null, the key is

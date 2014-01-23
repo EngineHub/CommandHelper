@@ -13,12 +13,12 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
@@ -369,7 +369,7 @@ public class AliasCore {
 			}
 			
 			// Allow new-style extensions know we are about to reload aliases.
-			ExtensionManager.PreReloadAliases(reloadGlobals, reloadTimeouts, 
+			ExtensionManager.getInstance().preReloadAliases(reloadGlobals, reloadTimeouts, 
 				reloadExecutionQueue, reloadPersistenceConfig, reloadPreferences,
 				reloadProfiler, reloadScripts, reloadExtensions);
  
@@ -377,7 +377,7 @@ public class AliasCore {
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 			
 			if (reloadExtensions) {
-				ExtensionManager.Startup();
+				ExtensionManager.getInstance().startup();
 			}
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
 			if (parent.profiler == null || reloadProfiler) {
@@ -444,7 +444,7 @@ public class AliasCore {
 
 			if (reloadScripts) {
 				EventUtils.UnregisterAll();
-				EventList.RunHooks();
+				ExtensionManager.getInstance().runEventHooks();
 				IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
 				Static.getServer().getMessenger().closeAllChannels(); // Close all channel messager channels registered by CH.
 				
@@ -491,7 +491,7 @@ public class AliasCore {
 			}
 		}
 		
-		ExtensionManager.PostReloadAliases();
+		ExtensionManager.getInstance().postReloadAliases();
 	}
 
 	/**

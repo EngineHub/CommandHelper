@@ -7,6 +7,7 @@ import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
@@ -52,14 +53,18 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = Static.getNumber(args[0], t);
-			for (int i = 1; i < args.length; i++) {
-				tally += Static.getNumber(args[i], t);
-			}
 			if (Static.anyDoubles(args)) {
+				double tally = Static.getNumber(args[0], t);
+				for (int i = 1; i < args.length; i++) {
+					tally += Static.getNumber(args[i], t);
+				}
 				return new CDouble(tally, t);
 			} else {
-				return new CInt((long) tally, t);
+				long tally = Static.getInt(args[0], t);
+				for (int i = 1; i < args.length; i++) {
+					tally += Static.getInt(args[i], t);
+				}
+				return new CInt(tally, t);
 			}
 		}
 
@@ -99,7 +104,7 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -129,14 +134,18 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = Static.getNumber(args[0], t);
-			for (int i = 1; i < args.length; i++) {
-				tally -= Static.getNumber(args[i], t);
-			}
 			if (Static.anyDoubles(args)) {
+				double tally = Static.getNumber(args[0], t);
+				for (int i = 1; i < args.length; i++) {
+					tally -= Static.getNumber(args[i], t);
+				}
 				return new CDouble(tally, t);
 			} else {
-				return new CInt((long) tally, t);
+				long tally = Static.getInt(args[0], t);
+				for (int i = 1; i < args.length; i++) {
+					tally -= Static.getInt(args[i], t);
+				}
+				return new CInt(tally, t);
 			}
 		}
 
@@ -196,14 +205,18 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = Static.getNumber(args[0], t);
-			for (int i = 1; i < args.length; i++) {
-				tally *= Static.getNumber(args[i], t);
-			}
 			if (Static.anyDoubles(args)) {
+				double tally = Static.getNumber(args[0], t);
+				for (int i = 1; i < args.length; i++) {
+					tally *= Static.getNumber(args[i], t);
+				}
 				return new CDouble(tally, t);
 			} else {
-				return new CInt((long) tally, t);
+				long tally = Static.getInt(args[0], t);
+				for (int i = 1; i < args.length; i++) {
+					tally *= Static.getInt(args[i], t);
+				}
+				return new CInt(tally, t);
 			}
 		}
 
@@ -233,7 +246,7 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -1048,7 +1061,7 @@ public class Math {
 
 		@Override
 		public String docs() {
-			return "double {arg} Returns the absolute value of the argument.";
+			return "mixed {arg} Returns the absolute value of the argument.";
 		}
 
 		@Override
@@ -1073,8 +1086,11 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			double d = Static.getDouble(args[0], t);
-			return new CDouble(java.lang.Math.abs(d), t);
+			if (args[0] instanceof CInt){
+				return new CInt(java.lang.Math.abs(Static.getInt(args[0], t)), t);
+			}else{
+				return new CDouble(java.lang.Math.abs(Static.getDouble(args[0], t)), t);
+			}
 		}
 
 		@Override

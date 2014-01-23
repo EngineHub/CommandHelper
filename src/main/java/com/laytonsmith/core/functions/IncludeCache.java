@@ -36,7 +36,6 @@ public class IncludeCache {
                 CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
                 try {
                     String s = new ZipReader(file).getFileContents();
-					//TODO: Is the g() really needed now?
                     ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true));
                     CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
                     IncludeCache.add(file, tree);

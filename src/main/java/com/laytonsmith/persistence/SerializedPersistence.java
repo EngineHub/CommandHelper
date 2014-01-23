@@ -402,10 +402,13 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	}
 
 	@Override
-	public Set<String[]> keySet() {
+	public Set<String[]> keySet(String[] keyBase) {
 		Set<String[]> list = new HashSet<String[]>();
+		String kb = StringUtils.Join(keyBase, ".");
 		for (String key : data.keySet()) {
-			list.add(key.split("\\."));
+			if(key.startsWith(kb)){
+				list.add(key.split("\\."));
+			}
 		}
 		return list;
 	}

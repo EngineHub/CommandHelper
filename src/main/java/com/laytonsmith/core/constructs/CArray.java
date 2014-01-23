@@ -326,7 +326,7 @@ public class CArray extends Construct implements ArrayAccess{
             try {
                 return array.get(Static.getInt32(index, t));
             } catch (IndexOutOfBoundsException e) {
-                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t);
+                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t, e);
             }
         } else {
             if(associative_array.containsKey(normalizeConstruct(index))){
@@ -336,7 +336,10 @@ public class CArray extends Construct implements ArrayAccess{
                 }
                 return val;
             } else {
-                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t);
+				//Create this so we can at least attach a stacktrace.
+				@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
+				IndexOutOfBoundsException ioobe = new IndexOutOfBoundsException();
+                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t, ioobe);
             }
         }
     }
@@ -434,12 +437,20 @@ public class CArray extends Construct implements ArrayAccess{
         return val();
     }
 	
-	private String getString(Set<CArray> arrays){
+	/**
+	 * Returns a string version of this array. The arrays
+	 * that have been accounted for so far are stored in arrays,
+	 * to prevent recursion. Subclasses may override this method
+	 * if a more efficient or concise string can be generated.
+	 * @param arrays The values accounted for so far
+	 * @return 
+	 */
+	protected String getString(Set<CArray> arrays){
 		StringBuilder b = new StringBuilder();
 		b.append("{");
-		if (!associative_mode) {
-			for (int i = 0; i < array.size(); i++) {
-				Mixed value = array.get(i);
+		if (!inAssociativeMode()) {
+			for (int i = 0; i < this.size(); i++) {
+				Mixed value = this.get(i);
 				String v;
 				if(value instanceof CArray){
 					if(arrays.contains((CArray)value)){
@@ -459,16 +470,16 @@ public class CArray extends Construct implements ArrayAccess{
 			}
 		} else {
 			boolean first = true;
-			for(String key : associative_array.keySet()){
+			for(String key : this.keySet()){
 				if(!first){
 					b.append(", ");
 				}
 				first = false;
 				String v;
-				if(associative_array.get(key) == null){
+				if(this.get(key) == null){
 					v = "null";
 				} else {
-					Mixed value = associative_array.get(key);
+					Mixed value = this.get(key);
 					if(value instanceof CArray){
 						if(arrays.contains(((CArray)value))){
 							v = "*recursion*";

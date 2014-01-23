@@ -8,9 +8,8 @@ import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.tools.Interpreter;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -348,6 +347,8 @@ public class DocGenUI extends javax.swing.JFrame {
 				new DocGenUI().setVisible(true);
 			}
 		});
+		
+		ExtensionManager.getInstance().load(ClassDiscovery.getDefaultInstance());
 		
 		//This goes ahead and initializes the platform.
 		FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA);

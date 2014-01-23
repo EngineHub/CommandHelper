@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
@@ -172,7 +173,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -290,7 +291,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			//Remove empty g or p children
 			Iterator<ParseTree> it = children.iterator();
@@ -1259,7 +1260,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.isEmpty()) {
 				throw new ConfigCompileException(getName() + " expects 1 or more argument", t);
 			} else if (children.get(0).isConst()) {
@@ -1631,7 +1632,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "@res = res_create_resource('STRING_BUILDER')\n"
-					+ "foreach(1..100, @i,\n"
+					+ "foreach(1..50, @i,\n"
 					+ "\tstring_append(@res, @i, '.')\n"
 					+ ")\n"
 					+ "@string = string(@res)\n"
@@ -1654,7 +1655,9 @@ public class StringHandling {
 					+ ")\n"
 					+ "@t4 = time()\n"
 					+ "msg('Task 1 took '.(@t2 - @t1).'ms under '.@to.' iterations')\n"
-					+ "msg('Task 2 took '.(@t4 - @t3).'ms under '.@to.' iterations')")
+					+ "msg('Task 2 took '.(@t4 - @t3).'ms under '.@to.' iterations')",
+					"Task 1 took 542ms under 100000 iterations\n"
+					+ "Task 2 took 28305ms under 100000 iterations\n")
 			};
 		}
 		

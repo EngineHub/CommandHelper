@@ -12,8 +12,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -66,6 +68,25 @@ public abstract class AbstractDataSource implements DataSource {
 	public final String get(String[] key) throws DataSourceException {
 		checkGet(key);
 		return get0(key);
+	}
+
+	@Override
+	public final Map<String[], String> getValues(String[] leadKey) throws DataSourceException {
+		checkGet(leadKey);
+		return getValues0(leadKey);
+	}
+	
+	/**
+	 * By default, we use the naive method to get the values, by getting the keys in step 1, then
+	 * performing x gets to retrieve the values. This can probably be optimized
+	 * to reduce the number of get calls in some data sources, and should be overridden if so.
+	 */
+	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
+		Map<String[], String> map = new HashMap<>();
+		for(String [] key : getNamespace(leadKey)){
+			map.put(key, get(key));
+		}
+		return map;
 	}
 
 	@Override
@@ -127,9 +148,9 @@ public abstract class AbstractDataSource implements DataSource {
 	 * @return
 	 */
 	@Override
-	public Set<String> stringKeySet() throws DataSourceException {
+	public Set<String> stringKeySet(String [] keyBase) throws DataSourceException {
 		Set<String> keys = new TreeSet<String>();
-		for (String[] key : keySet()) {
+		for (String[] key : keySet(keyBase)) {
 			keys.add(StringUtils.Join(key, "."));
 		}
 		return keys;
@@ -139,7 +160,7 @@ public abstract class AbstractDataSource implements DataSource {
 	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException {
 		Set<String[]> list = new HashSet<String[]>();
 		String ns = StringUtils.Join(namespace, ".");
-		for (String key : stringKeySet()) {
+		for (String key : stringKeySet(namespace)) {
 			if ("".equals(ns) //Blank string; this means they want it to always match.
 					|| key.matches(Pattern.quote(ns) + "(?:$|\\..*)")) {
 				String[] split = key.split("\\.");

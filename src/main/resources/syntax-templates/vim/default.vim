@@ -12,10 +12,10 @@ syn match linecomment /\/\/.*/
 syn region blockcomment start=/\/\*/ end=/\*\//
 syn region stringlit start=/'/ skip=/\\'/ end=/'/
 syn region smartstring start=/"/ skip=/\\"/ end=/"/
-syn match ivariable /@[a-zA-Z0-9]\+/
-syn match variable /\$[a-zA-Z0-9]\+/
-syn match finalvar /\$[^a-zA-Z0-9]/
-syn match label /[a-zA-Z][a-zA-Z0-9]\+:/
+syn match ivariable /@[a-zA-Z0-9_]\+/
+syn match variable /\$[a-zA-Z0-9_]\+/
+syn match finalvar /\$[^a-zA-Z0-9_]/
+syn match label /[a-zA-Z_][a-zA-Z0-9_]\+:/
 
 let b:current_syntax = "commandhelper"
 

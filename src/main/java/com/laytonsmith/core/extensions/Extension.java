@@ -1,5 +1,6 @@
 package com.laytonsmith.core.extensions;
 
+import com.laytonsmith.PureUtilities.Version;
 import java.io.File;
 
 /**
@@ -20,8 +21,20 @@ public interface Extension {
 	 * @return
 	 */
 	String getName();
-
+	
 	/**
+	 * Return the version for this extension.
+	 * @return 
+	 */
+	Version getVersion();
+
+	// Lifetime functions
+	/**
+	 * Called when server is loading, or during a /reloadaliases call.
+	 */
+	void onStartup();
+	
+    /**
 	 * Called after the logic in /reloadaliases is called. Won't be called
 	 * if /reloadaliases's help function is called.
 	 */
@@ -48,11 +61,4 @@ public interface Extension {
 	 * Called when server is shutting down, or during a /reloadaliases call.
 	 */
 	void onShutdown();
-
-	// Lifetime functions
-	/**
-	 * Called when server is loading, or during a /reloadaliases call.
-	 */
-	void onStartup();
-    
 }

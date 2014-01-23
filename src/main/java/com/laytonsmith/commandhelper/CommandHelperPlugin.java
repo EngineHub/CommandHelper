@@ -38,7 +38,6 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.ExtensionManager;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
@@ -49,8 +48,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UpgradeLog;
 import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -280,13 +279,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		Static.getLogger().log(Level.INFO, "[CommandHelper] CommandHelper {0} enabled", getDescription().getVersion());
 		if(firstLoad){
-			ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
+			ExtensionManager manager = ExtensionManager.getInstance();
+			manager.addDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
 			
 			// Only does stuff if we're on Windows.
-			ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
+			manager.cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory(),
+					CommandHelperFileLocations.getDefault().getCacheDirectory(), Server.class);
 			
 			System.out.println("[CommandHelper] Loading extensions...");
-			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+			manager.load(ClassDiscovery.getDefaultInstance());
 			System.out.println("[CommandHelper] Extension loading complete.");
 			
 			firstLoad = false;
@@ -338,7 +339,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		registerEvent(serverListener);
 
 		//Script events
-		EventList.Startup(this);
+		StaticLayer.Startup(this);
 
 		playerListener.loadGlobalAliases();
 		interpreterListener.reload();
@@ -357,7 +358,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		StaticLayer.GetConvertor().runShutdownHooks();
 		stopExecutionQueue();
 		
-		ExtensionManager.Cleanup();
+		ExtensionManager.getInstance().cleanup(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
 		
 		ac = null;
 		wep = null;

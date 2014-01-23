@@ -5,6 +5,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -104,7 +105,7 @@ public class Regex {
         }             
 
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }
@@ -203,7 +204,7 @@ public class Regex {
         }              
 
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }
@@ -292,7 +293,7 @@ public class Regex {
         }           
 
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
             if(!data.getData().isDynamic()){
 				String pattern = data.getData().val();
@@ -404,7 +405,7 @@ public class Regex {
         }
         
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
             ParseTree data = children.get(0);
             if(!data.getData().isDynamic()){
 				String pattern = data.getData().val();
@@ -490,7 +491,7 @@ public class Regex {
         }               
 
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }

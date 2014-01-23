@@ -11,16 +11,16 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+//import static org.powermock.api.mockito.PowerMockito.when;
+//import org.powermock.core.classloader.annotations.PrepareForTest;
+//import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
  * @author layton
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Static.class)
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest(Static.class)
 public class GeneralTest {
     MCPlayer fakePlayer;
     public GeneralTest() {
@@ -42,23 +42,23 @@ public class GeneralTest {
     }
     
 
-    @Test
-    //This is moreso a test of the event testing framework
-    public void testBasicEventUsage() throws ConfigCompileException{
-        //Register the event handler
-        String script = "bind(player_join, null, null, @event, msg('success'))";
-        SRun(script, null);
-                
-        //Create the mock event, and have it return the fakePlayer
-        MCPlayerJoinEvent mcpje = mock(MCPlayerJoinEvent.class);        
-        when(mcpje.getPlayer()).thenReturn(fakePlayer);
-        
-        //Trigger the event
-        EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", mcpje);
-        
-        //Verify that it ran correctly
-        verify(fakePlayer).sendMessage("success");
-    }
+//    @Test
+//    //This is moreso a test of the event testing framework
+//    public void testBasicEventUsage() throws ConfigCompileException{
+//        //Register the event handler
+//        String script = "bind(player_join, null, null, @event, msg('success'))";
+//        SRun(script, null);
+//                
+//        //Create the mock event, and have it return the fakePlayer
+//        MCPlayerJoinEvent mcpje = mock(MCPlayerJoinEvent.class);        
+//        when(mcpje.getPlayer()).thenReturn(fakePlayer);
+//        
+//        //Trigger the event
+//        EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", mcpje);
+//        
+//        //Verify that it ran correctly
+//        verify(fakePlayer).sendMessage("success");
+//    }
     
     //This is an invalid test. It's working as expected, because the proc is not in scope
     //When the event is run.

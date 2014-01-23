@@ -3,10 +3,11 @@ package com.laytonsmith.tools.docgen;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
-import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.MSP.Burst;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.Documentation;
@@ -18,7 +19,12 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.DataSource;
+import com.laytonsmith.tools.Manager;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -44,7 +50,7 @@ public class DocGenTemplates {
 	
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		System.out.println(Generate("Arrays"));
+		System.out.println(Generate("Data_Manager"));
 	}
 	
 	public static String Generate(String forPage){
@@ -344,6 +350,33 @@ public class DocGenTemplates {
 				}
 			}
 			return b.toString();
+		}
+	};
+	
+	public static Generator dataManagerTools = new Generator() {
+
+		@Override
+		public String generate(String... args) {
+			try {
+				boolean colorsDisabled = TermColors.ColorsDisabled();
+				TermColors.DisableColors();
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				PrintStream ps = new PrintStream(baos);
+				Manager.out = ps;
+				Manager.help(new String[0]);
+				String initial = baos.toString("UTF-8").replace("\n", "<br />").replace("\t", "&nbsp;&nbsp;&nbsp;");
+				baos.reset();
+				for(String option : Manager.options){
+					Manager.out.println("\n===" + option + "===");
+					Manager.help(new String[]{option});
+				}
+				if(!colorsDisabled){
+					TermColors.EnableColors();
+				}
+				return initial + baos.toString("UTF-8");
+			} catch (UnsupportedEncodingException ex) {
+				throw new Error(ex);
+			}
 		}
 	};
 	

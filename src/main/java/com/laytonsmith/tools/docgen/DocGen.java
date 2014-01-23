@@ -26,7 +26,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -155,12 +163,11 @@ public class DocGen {
 	 * @throws ConfigCompileException 
 	 */
     public static String functions(MarkupType type, api.Platforms platform, boolean staged) throws ConfigCompileException {
-        List<FunctionBase> functions = FunctionList.getFunctionList(platform);
+        Set<FunctionBase> functions = FunctionList.getFunctionList(platform);
         HashMap<Class, ArrayList<FunctionBase>> functionlist = new HashMap<Class, ArrayList<FunctionBase>>();
 		StringBuilder out = new StringBuilder();
-        for (int i = 0; i < functions.size(); i++) {
+        for (FunctionBase f: functions) {
             //Sort the functions into classes
-            FunctionBase f = functions.get(i);
             Class apiClass = (f.getClass().getEnclosingClass() != null
                     ? f.getClass().getEnclosingClass()
                     : null);

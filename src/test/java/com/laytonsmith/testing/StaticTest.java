@@ -5,7 +5,25 @@ package com.laytonsmith.testing;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.RunnableQueue;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.AbstractConvertor;
+import com.laytonsmith.abstraction.Convertor;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCFireworkBuilder;
+import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNote;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPluginMeta;
+import com.laytonsmith.abstraction.MCRecipe;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -15,14 +33,32 @@ import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.AliasCore;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.MethodScriptComplete;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
-import com.laytonsmith.core.exceptions.*;
+import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.LoopBreakException;
+import com.laytonsmith.core.exceptions.LoopContinueException;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -31,21 +67,27 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.junit.Assert.fail;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+//import static org.powermock.api.mockito.PowerMockito.mock;
+//import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * 
  * @author Layton
  */
-@RunWith(PowerMockRunner.class)
+//@RunWith(PowerMockRunner.class)
 
 public class StaticTest {
 	static com.laytonsmith.core.environments.Environment env;
@@ -509,7 +551,7 @@ public class StaticTest {
      */
     public static MCServer GetFakeServer(){
         MCServer fakeServer = mock(MCServer.class);
-        String [] pnames = new String[]{"wraithguard01", "wraithguard02", "wraithguard03"};
+        String [] pnames = new String[]{"player1", "player2", "player3"};
         ArrayList<MCPlayer> pps = new ArrayList<MCPlayer>();
         for(String p : pnames){
             MCPlayer pp = GetOnlinePlayer(p, fakeServer);
@@ -531,6 +573,7 @@ public class StaticTest {
         }
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Static.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(StaticTest.class));
+		ExtensionManager.getInstance().load(ClassDiscovery.getDefaultInstance());
 		Implementation.setServerType(Implementation.Type.TEST);
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();
