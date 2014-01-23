@@ -19,7 +19,7 @@ public final class EventList {
      * @return list of the names of all events, as returned by getName()
      */
     public static Set<Event> GetEvents() {
-    	return ExtensionManager.GetEvents();
+    	return ExtensionManager.getInstance().getEvents();
     }
     
     /**
@@ -28,7 +28,7 @@ public final class EventList {
      * @return 
      */
     public static Set<Event> GetEvents(Driver type){
-        return ExtensionManager.GetEvents(type);
+        return ExtensionManager.getInstance().getEvents(type);
     }
     
     /**
@@ -37,7 +37,7 @@ public final class EventList {
      * return null if there is no event named name.
      */
     public static Event getEvent(Driver type, String name){
-        return ExtensionManager.GetEvent(type, name);
+        return ExtensionManager.getInstance().getEvent(type, name);
     }
     /**
      * This could return null if there is no event named name.
@@ -45,6 +45,6 @@ public final class EventList {
      * @return 
      */
     public static Event getEvent(String name){
-        return ExtensionManager.GetEvent(name);
+        return ExtensionManager.getInstance().getEvent(name);
     }
 }

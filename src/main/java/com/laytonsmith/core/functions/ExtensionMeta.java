@@ -203,7 +203,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
+			Map<URL, ExtensionTracker> trackers = ExtensionManager.getInstance().getTrackers();
 			
 			CArray retn = new CArray(t);
 			for (URL url: trackers.keySet()) {

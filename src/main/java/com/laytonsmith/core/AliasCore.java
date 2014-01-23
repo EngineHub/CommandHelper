@@ -369,7 +369,7 @@ public class AliasCore {
 			}
 			
 			// Allow new-style extensions know we are about to reload aliases.
-			ExtensionManager.PreReloadAliases(reloadGlobals, reloadTimeouts, 
+			ExtensionManager.getInstance().preReloadAliases(reloadGlobals, reloadTimeouts, 
 				reloadExecutionQueue, reloadPersistenceConfig, reloadPreferences,
 				reloadProfiler, reloadScripts, reloadExtensions);
  
@@ -377,7 +377,7 @@ public class AliasCore {
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 			
 			if (reloadExtensions) {
-				ExtensionManager.Startup();
+				ExtensionManager.getInstance().startup();
 			}
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
 			if (parent.profiler == null || reloadProfiler) {
@@ -444,7 +444,7 @@ public class AliasCore {
 
 			if (reloadScripts) {
 				EventUtils.UnregisterAll();
-				ExtensionManager.RunHooks();
+				ExtensionManager.getInstance().runEventHooks();
 				IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
 				Static.getServer().getMessenger().closeAllChannels(); // Close all channel messager channels registered by CH.
 				
@@ -491,7 +491,7 @@ public class AliasCore {
 			}
 		}
 		
-		ExtensionManager.PostReloadAliases();
+		ExtensionManager.getInstance().postReloadAliases();
 	}
 
 	/**

@@ -77,10 +77,9 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.junit.Assert.fail;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 //import static org.powermock.api.mockito.PowerMockito.mock;
 //import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -574,7 +573,7 @@ public class StaticTest {
         }
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Static.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(StaticTest.class));
-		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+		ExtensionManager.getInstance().load(ClassDiscovery.getDefaultInstance());
 		Implementation.setServerType(Implementation.Type.TEST);
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();

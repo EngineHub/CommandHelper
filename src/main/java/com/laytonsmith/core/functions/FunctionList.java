@@ -28,10 +28,10 @@ public class FunctionList {
     }
 	
     public static FunctionBase getFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
-        return ExtensionManager.GetFunction(c, platform);
+        return ExtensionManager.getInstance().getFunction(c, platform);
     }
 
     public static Set<FunctionBase> getFunctionList(api.Platforms platform) {
-        return ExtensionManager.GetFunctions(platform);
+        return ExtensionManager.getInstance().getFunctions(platform);
     }
 }

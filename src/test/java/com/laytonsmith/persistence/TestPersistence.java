@@ -1,20 +1,13 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.persistence.DataSource;
-import com.laytonsmith.persistence.DataSourceException;
-import com.laytonsmith.persistence.StringSerializableDataSource;
-import com.laytonsmith.persistence.DataSourceFactory;
-import com.laytonsmith.persistence.PersistenceNetwork;
-import com.laytonsmith.persistence.MemoryDataSource;
-import com.laytonsmith.persistence.DataSourceFilter;
-import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.Misc;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.persistence.io.ReadWriteFileConnection;
-import static com.laytonsmith.testing.StaticTest.*;
+import static com.laytonsmith.testing.StaticTest.GetPrivate;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,10 +17,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.After;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -336,7 +333,7 @@ public class TestPersistence {
 
 	public SortedSet<String> getConnections(String key, String... mapping) throws Exception {
 		DataSourceFilter dsf = new DataSourceFilter(StringUtils.Join(mapping, "\n"), new URI("default"));
-		List<URI> uris = dsf.getAllConnections(key);
+		Set<URI> uris = dsf.getAllConnections(key);
 		SortedSet<String> set = new TreeSet<String>();
 		for (URI uri : uris) {
 			set.add(uri.toString());

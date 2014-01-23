@@ -3,10 +3,10 @@ package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
+import com.laytonsmith.PureUtilities.Extensions.ExtensionTrackerBase;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
@@ -30,18 +30,15 @@ import java.util.TreeSet;
  * Extension tracking and control class.
  * @author Jason Unger <entityreborn@gmail.com>
  */
-public class ExtensionTracker {
-	/* package */ String identifier;
-	/* package */ Version version;
+public class ExtensionTracker extends ExtensionTrackerBase {
 	/* package */ List<Extension> allExtensions;
-	private final DynamicClassLoader dcl;
-	private final ClassDiscovery cd;
 	/* package */ final Map<api.Platforms, Map<String, FunctionBase>> functions;
     /* package */ final Map<String, Set<api.Platforms>> supportedPlatforms;
 	/* package */ final Map<Driver, Set<Event>> events;
-	/* package */ final URL container;
 
-	public ExtensionTracker(URL container, ClassDiscovery cd, DynamicClassLoader dcl) {
+	public ExtensionTracker(String identifier, Version version, URL container, ClassDiscovery cd, DynamicClassLoader dcl) {
+		super(identifier, version, dcl, cd, container);
+		
 		functions  = new EnumMap<>(api.Platforms.class);
 		supportedPlatforms = new HashMap<>();
 		
@@ -51,18 +48,6 @@ public class ExtensionTracker {
 		
 		this.events = new EnumMap<>(Driver.class);
 		this.allExtensions = new ArrayList<>();
-		this.version = CHVersion.V0_0_0;
-		
-		this.container = container;
-		this.cd = cd;
-		this.dcl = dcl;
-	}
-
-	public void shutdownTracker() {
-		// Remove as much as possible from memory.
-		cd.removeDiscoveryLocation(container);
-		cd.removePreCache(container);
-		dcl.removeJar(container);
 	}
 
 	/**
@@ -85,6 +70,10 @@ public class ExtensionTracker {
 		return retn;
 	}
 	
+	/**
+	 * Register a function exposed by the extension this tracker manages.
+	 * @param f 
+	 */
 	public void registerFunction(FunctionBase f) {
 		api api = f.getClass().getAnnotation(api.class);                    
 		api.Platforms [] platforms = api.platform();
@@ -115,12 +104,18 @@ public class ExtensionTracker {
 	 */
 	public Set<Event> getEvents() {
 		Set<Event> retn = new HashSet<>();
+		
 		for (Set<Event> set: events.values()) {
 			retn.addAll(set);
 		}
+		
 		return retn;
 	}
 	
+	/**
+	 * @param type
+	 * @return the events of a given type.
+	 */
 	public Set<Event> getEvents(Driver type) {
 		Set<Event> retn = events.get(type);
 		
@@ -131,6 +126,10 @@ public class ExtensionTracker {
 		return retn;
 	}
 	
+	/**
+	 * Register an event exposed by the extension this tracker manages.
+	 * @param e 
+	 */
 	public void registerEvent(Event e) {
 		if(e instanceof AbstractEvent){
             AbstractEvent ae = (AbstractEvent) e;
@@ -154,21 +153,5 @@ public class ExtensionTracker {
         }
 		
         events.get(e.driver()).add(e);
-	}
-
-	/**
-	 * Get the internal identifier for this tracker.
-	 * @return 
-	 */
-	public String getIdentifier() {
-		return identifier;
-	}
-	
-	/**
-	 * Get the internal version for this tracker.
-	 * @return 
-	 */
-	public Version getVersion() {
-		return version;
 	}
 }

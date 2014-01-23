@@ -172,8 +172,12 @@ public class Main {
 					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
 			cd.setClassDiscoveryCache(cdcCache);
 			
-			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
-			ExtensionManager.Initialize(cd);
+			ExtensionManager.getInstance().addDiscoveryLocation(
+					MethodScriptFileLocations.getDefault().getExtensionsDirectory());
+			ExtensionManager.getInstance().cache(
+					MethodScriptFileLocations.getDefault().getExtensionCacheDirectory(),
+					MethodScriptFileLocations.getDefault().getCacheDirectory());
+			ExtensionManager.getInstance().load(cd);
 			
 			if (args.length == 0) {
 				args = new String[]{"--help"};
