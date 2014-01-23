@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -168,7 +169,7 @@ public class PersistenceNetwork {
 		//TODO: isMainThread needs to be used here somewhere, I think?
 		//This is a slight optimization, instead of looking through ALL the connections, just
 		//look through the ones that have data matching this namespace in them.
-		List<URI> uris = filter.getAllConnections(namespace);
+		Set<URI> uris = filter.getAllConnections(namespace);
 		
 		Map<String[], String> map = new HashMap<String[], String>();
 		for (URI uri : uris) {
