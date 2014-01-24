@@ -1,18 +1,19 @@
 
 package com.laytonsmith.PureUtilities.ClassLoading;
 
-import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.ZipReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -62,9 +63,10 @@ public class ClassDiscoveryCache {
 	
 	/**
 	 * Given a file location, retrieves the ClassDiscoveryURLCache from it.
-	 * If it is a jar, and the jarInfo.ser file exists, it is returned. If not,
-	 * the file is hashed, and checked for a local cache copy, and if so, that is
-	 * returned. If not, one is created, saved to disk, then returned.
+	 * If it is a jar, the file is hashed, and checked for a local cache copy, 
+	 * and if one exists, that cache is returned. 
+	 * If not, the jar is scanned for a jarInfo.ser. If one exists, it is returned.
+	 * Otherwise, the jar is scanned, a local cache is saved to disk, then returned.
 	 * 
 	 * No exceptions will be thrown from this class, if something fails, it will fall back
 	 * to ultimately just regenerating the cache from source.
@@ -75,15 +77,6 @@ public class ClassDiscoveryCache {
 	 */
 	public ClassDiscoveryURLCache getURLCache(URL fromClassLocation){
 		if(fromClassLocation.toString().endsWith(".jar")){
-			File location = new File(fromClassLocation.getFile(), ClassDiscoveryCache.OUTPUT_FILENAME);
-			ZipReader reader = new ZipReader(location);
-			if(reader.exists()){
-				try {
-					return new ClassDiscoveryURLCache(fromClassLocation, reader.getInputStream());
-				} catch (Exception ex) {
-					//Do nothing, we'll just re-load from disk.
-				}
-			}
 			File cacheOutputName = null;
 			try {
 				File jarFile = new File(fromClassLocation.getFile());
@@ -108,10 +101,33 @@ public class ClassDiscoveryCache {
 			} catch (Exception ex) {
 				//Hmm. Ok, well, we'll just regenerate.
 			}
+			JarFile jfile;
+			try {
+				jfile = new JarFile(fromClassLocation.getFile());
+				
+				for (Enumeration<JarEntry> ent = jfile.entries(); ent.hasMoreElements();) {
+					JarEntry entry = ent.nextElement();
+					
+					if (entry.getName().equals(ClassDiscoveryCache.OUTPUT_FILENAME)) {
+						InputStream is = jfile.getInputStream(entry);
+						
+						try {
+							return new ClassDiscoveryURLCache(fromClassLocation, is);
+						} catch (Exception ex) {
+							//Do nothing, we'll just re-load from disk.
+						}
+					}
+				}
+			} catch (IOException ex) {
+				Logger.getLogger(ClassDiscoveryCache.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			
 			if(logger != null){
 				logger.log(Level.INFO, "Performing one time scan of {0}, this may take a few moments.", fromClassLocation);
 			}
+			
 			ClassDiscoveryURLCache cache = new ClassDiscoveryURLCache(fromClassLocation, progress);
+			
 			if(cacheOutputName != null){
 				try {
 					ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(cacheOutputName, false));
@@ -128,6 +144,7 @@ public class ClassDiscoveryCache {
 					}
 				}
 			}
+			
 			return cache;
 		} else {
 			return new ClassDiscoveryURLCache(fromClassLocation, progress);

@@ -45,7 +45,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Server;
 
 /**
  *
@@ -72,9 +71,8 @@ public class ExtensionManager {
 						// Add the trimmed absolute path.
 						toProcess.add(f.getCanonicalFile());
 					} catch (IOException ex) {
-						Logger.getLogger(ExtensionManager.class.getName()).log(
-								Level.SEVERE, "Could not get exact path for "
-								+ f.getAbsolutePath(), ex);
+						Static.getLogger().log(Level.SEVERE, "Could not get exact"
+								+ " path for " + f.getAbsolutePath(), ex);
 					}
 				}
 			}
@@ -83,9 +81,8 @@ public class ExtensionManager {
 				// Add the trimmed absolute path.
 				toProcess.add(location.getCanonicalFile());
 			} catch (IOException ex) {
-				Logger.getLogger(ExtensionManager.class.getName()).log(
-						Level.SEVERE, "Could not get exact path for "
-						+ location.getAbsolutePath(), ex);
+				Static.getLogger().log(Level.SEVERE, "Could not get exact path"
+						+ " for " + location.getAbsolutePath(), ex);
 			}
 		}
 
@@ -96,7 +93,7 @@ public class ExtensionManager {
 		return Collections.unmodifiableMap(extensions);
 	}
 
-	public static void Cache(File extCache) {
+	public static void Cache(File extCache, Class... extraClasses) {
 		// We will only cache on Windows, as Linux doesn't natively lock
 		// files that are in use. Windows prevents any modification, making
 		// it harder for server owners on Windows to update the jars.
@@ -105,10 +102,6 @@ public class ExtensionManager {
 		if (!onWindows) {
 			return;
 		}
-
-		// Using System.out here instead of the logger as the logger doesn't
-		// immediately print to the console.
-		System.out.println("[CommandHelper] Caching extensions...");
 
 		// Create the directory if it doesn't exist.
 		extCache.mkdirs();
@@ -131,12 +124,15 @@ public class ExtensionManager {
 		// jar has to offer.
 		ClassDiscoveryCache cache = new ClassDiscoveryCache(
 				CommandHelperFileLocations.getDefault().getCacheDirectory());
+		cache.setLogger(Static.getLogger());
 		DynamicClassLoader dcl = new DynamicClassLoader();
 		ClassDiscovery cd = new ClassDiscovery();
 
 		cd.setClassDiscoveryCache(cache);
 		cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(ExtensionManager.class));
-		cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
+		for (Class klazz: extraClasses) {
+			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(klazz));
+		}
 
 		//Look in the given locations for jars, add them to our class discovery.
 		List<File> toProcess = new ArrayList<>();
@@ -155,7 +151,7 @@ public class ExtensionManager {
 			try {
 				jar = file.toURI().toURL();
 			} catch (MalformedURLException ex) {
-				Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
+				Static.getLogger().log(Level.SEVERE, null, ex);
 				continue;
 			}
 
@@ -187,8 +183,7 @@ public class ExtensionManager {
 				try {
 					f = new File(plugURL.toURI());
 				} catch (URISyntaxException ex) {
-					Logger.getLogger(ExtensionManager.class.getName()).log(
-							Level.SEVERE, null, ex);
+					Static.getLogger().log(Level.SEVERE, null, ex);
 					continue;
 				}
 
@@ -232,9 +227,8 @@ public class ExtensionManager {
 				try {
 					Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException ex) {
-					Logger.getLogger(ExtensionManager.class.getName()).log(
-							Level.SEVERE, "Could not copy '" + f.getName()
-							+ "' to cache: " + ex.getMessage());
+					Static.getLogger().log(Level.SEVERE, "Could not copy '" 
+							+ f.getName() + "' to cache: " + ex.getMessage());
 				}
 			}
 		}
@@ -251,8 +245,7 @@ public class ExtensionManager {
 				try {
 					f = new File(plugURL.toURI());
 				} catch (URISyntaxException ex) {
-					Logger.getLogger(ExtensionManager.class.getName()).log(
-							Level.SEVERE, null, ex);
+					Static.getLogger().log(Level.SEVERE, null, ex);
 					continue;
 				}
 
@@ -279,15 +272,12 @@ public class ExtensionManager {
 					try {
 						Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 					} catch (IOException ex) {
-						Logger.getLogger(ExtensionManager.class.getName()).log(
-								Level.SEVERE, "Could not copy '" + f.getName()
-								+ "' to cache: " + ex.getMessage());
+						Static.getLogger().log(Level.SEVERE, "Could not copy '" 
+								+ f.getName() + "' to cache: " + ex.getMessage());
 					}
 				}
 			}
 		}
-
-		System.out.println("[CommandHelper] Extension caching complete.");
 
 		// Shut down the original dcl to "unlock" the processed jars.
 		// The cache and cd instances will just fall into oblivion.
@@ -338,7 +328,7 @@ public class ExtensionManager {
 
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
 				} catch (MalformedURLException ex) {
-					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
+					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
 			}
 		}
@@ -352,9 +342,9 @@ public class ExtensionManager {
 			Class<AbstractExtension> extcls;
 			
 			if (extmirror.getModifiers().isAbstract()) {
-				Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE,
-						"Probably won't be able to instantiate " + extmirror.getClassName() 
-								+ ": The class is marked as abstract! Will try anyway.");
+				Static.getLogger().log(Level.SEVERE, "Probably won't be able to"
+						+ " instantiate " + extmirror.getClassName() + ": The"
+						+ " class is marked as abstract! Will try anyway.");
 			}
 			
 			try {
@@ -368,8 +358,8 @@ public class ExtensionManager {
 				ext = extcls.newInstance();
 			} catch (InstantiationException | IllegalAccessException ex) {
 				//Error, but skip this one, don't throw an exception ourselves, just log it.
-				Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE,
-						"Could not instantiate " + extcls.getName() + ": " + ex.getMessage());
+				Static.getLogger().log(Level.SEVERE, "Could not instantiate " 
+						+ extcls.getName() + ": " + ex.getMessage());
 				continue;
 			}
 
@@ -463,9 +453,9 @@ public class ExtensionManager {
 						trk.registerFunction(f);
 					}
 				} catch (InstantiationException ex) {
-					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+					Static.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
 				} catch (IllegalAccessException ex) {
-					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
+					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
 			}
 		}
@@ -544,7 +534,7 @@ public class ExtensionManager {
 				try {
 					ext.onStartup();
 				} catch (Throwable e) {
-					Logger log = Logger.getLogger(ExtensionManager.class.getName());
+					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onStartup caused an exception:");
 					log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
@@ -556,9 +546,9 @@ public class ExtensionManager {
 		for (MethodMirror mm : ClassDiscovery.getDefaultInstance().getMethodsWithAnnotation(startup.class)) {
 			if (!mm.getParams().isEmpty()) {
 				//Error, but skip this one, don't throw an exception ourselves, just log it.
-				Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE,
-						"Method annotated with @" + startup.class.getSimpleName()
-						+ " takes parameters; it should not.");
+				Static.getLogger().log(Level.SEVERE, "Method annotated with @" 
+						+ startup.class.getSimpleName() + " takes parameters;"
+						+ " it should not.");
 			} else if (!mm.getModifiers().isStatic()) {
 				CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR,
 						"Method " + mm.getDeclaringClass() + "#" + mm.getName()
@@ -586,7 +576,7 @@ public class ExtensionManager {
 						try {
 							ext.onShutdown();
 						} catch (Throwable e) {
-							Logger log = Logger.getLogger(ExtensionManager.class.getName());
+							Logger log = Static.getLogger();
 							log.log(Level.SEVERE, ext.getClass().getName()
 									+ "'s onStartup caused an exception:");
 							log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
@@ -628,7 +618,7 @@ public class ExtensionManager {
 						reloadPersistenceConfig, reloadPreferences,
 						reloadProfiler, reloadScripts, reloadExtensions);
 				} catch (Throwable e) {
-					Logger log = Logger.getLogger(ExtensionManager.class.getName());
+					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onPreReloadAliases caused an exception:");
 					log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
@@ -643,7 +633,7 @@ public class ExtensionManager {
 				try {
 					ext.onPostReloadAliases();
 				} catch (Throwable e) {
-					Logger log = Logger.getLogger(ExtensionManager.class.getName());
+					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onPreReloadAliases caused an exception:");
 					log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
@@ -656,7 +646,7 @@ public class ExtensionManager {
 		try {
 			locations.add(file.getCanonicalFile());
 		} catch (IOException ex) {
-			Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
+			Static.getLogger().log(Level.SEVERE, null, ex);
 		}
 	}
 	

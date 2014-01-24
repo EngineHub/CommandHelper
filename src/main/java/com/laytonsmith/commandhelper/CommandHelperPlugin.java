@@ -21,6 +21,7 @@ package com.laytonsmith.commandhelper;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.SimpleVersion;
@@ -38,7 +39,6 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
@@ -50,6 +50,7 @@ import com.laytonsmith.core.UpgradeLog;
 import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -103,6 +104,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public PersistenceNetwork persistenceNetwork;
 	public boolean firstLoad = true;
 	public long interpreterUnlockedUntil = 0;
+	private Thread loadingThread;
 	/**
 	 * Listener for the plugin system.
 	 */
@@ -123,14 +125,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public void onLoad() {
 		Implementation.setServerType(Implementation.Type.BUKKIT);
+		
 		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());		
 		CommandHelperFileLocations.getDefault().getCacheDirectory().mkdirs();
 		CommandHelperFileLocations.getDefault().getPreferencesDirectory().mkdirs();
-		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
-		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
-		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
+		
 		UpgradeLog upgradeLog = new UpgradeLog(CommandHelperFileLocations.getDefault().getUpgradeLogFile());
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
@@ -225,16 +224,19 @@ public class CommandHelperPlugin extends JavaPlugin {
 				System.out.println("CommandHelper: The loggerPreferences.txt file has been deleted and re-created, as the defaults have changed.");
 			}
 		});
+		
 		try {
 			upgradeLog.runTasks();
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		
 		try{
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		
 		Prefs.SetColors();
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
@@ -242,6 +244,40 @@ public class CommandHelperPlugin extends JavaPlugin {
 			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 7. You should have plans"
 					+ " to upgrade at some point, as " + Implementation.GetServerType().getBranding() + " may require it at some point.", Target.UNKNOWN);
 		}
+		
+		self = this;
+
+		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
+		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
+		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
+
+		System.out.println("[CommandHelper] Running initial class discovery,"
+				+ " this will probably take a few seconds...");
+		myServer = StaticLayer.GetServer();
+		
+		System.out.println("[CommandHelper] Loading extensions in the background...");
+		
+		loadingThread = new Thread("extensionloader") {
+			@Override
+			public void run() {
+				ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
+			
+				if (OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
+					// Using System.out here instead of the logger as the logger doesn't
+					// immediately print to the console.
+					System.out.println("[CommandHelper] Caching extensions...");
+					ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
+					System.out.println("[CommandHelper] Extension caching complete.");
+				}
+				
+				ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+				System.out.println("[CommandHelper] Extension loading complete.");
+			}
+		};
+		
+		loadingThread.start();
 	}
 
 	/**
@@ -249,6 +285,16 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 */
 	@Override
 	public void onEnable() {
+		if(loadingThread.isAlive()){
+			System.out.println("[CommandHelper] Waiting for extension loading to complete...");
+			
+			try {
+				loadingThread.join();
+			} catch (InterruptedException ex) {
+				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		
 		//Metrics
 		try {
 			org.mcstats.Metrics m = new Metrics(this);
@@ -263,8 +309,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} catch (IOException e) {
 			// Failed to submit the stats :-(
 		}
-		self = this;
-		myServer = StaticLayer.GetServer();
+		
 		try {
 			//This may seem redundant, but on a /reload, we want to refresh these
 			//properties.
@@ -277,19 +322,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
-		Static.getLogger().log(Level.INFO, "[CommandHelper] CommandHelper {0} enabled", getDescription().getVersion());
-		if(firstLoad){
-			ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
-			
-			// Only does stuff if we're on Windows.
-			ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
-			
-			System.out.println("[CommandHelper] Loading extensions...");
-			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-			System.out.println("[CommandHelper] Extension loading complete.");
-			
-			firstLoad = false;
-		}
 		version = new SimpleVersion(getDescription().getVersion());
 		PermissionsResolverManager.initialize(this);
 		permissionsResolver = new CommandHelperPermissionsResolver(PermissionsResolverManager.getInstance());
@@ -341,6 +373,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		playerListener.loadGlobalAliases();
 		interpreterListener.reload();
+		
+		Static.getLogger().log(Level.INFO, "[CommandHelper] CommandHelper {0} enabled", getDescription().getVersion());
 	}
 
 	public static AliasCore getCore() {
