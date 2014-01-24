@@ -50,7 +50,8 @@ public interface DataSource extends SimpleDocumentation {
 	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException;
 
 	/**
-	 * Retrieves a single value from the data source.
+	 * Retrieves a single value from the data source. If the value doesn't exist
+	 * at all, null should be returned.
 	 * @param key
 	 * @return 
 	 */

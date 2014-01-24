@@ -6,6 +6,7 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -84,7 +85,10 @@ public class DataSourceFactory {
 				ds.populate();
 			}
 			return ds;
-		} catch (Exception ex) {
+		} catch (InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | DataSourceException ex) {
+			if(ex instanceof InvocationTargetException && ex.getCause() instanceof DataSourceException){
+				throw (DataSourceException)ex.getCause();
+			}
 			throw new DataSourceException("Could not instantiate a DataSource for " + c.getName() + ": " + ex.getMessage(), ex);
 		}
 	}

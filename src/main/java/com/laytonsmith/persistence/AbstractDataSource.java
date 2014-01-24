@@ -54,6 +54,11 @@ public abstract class AbstractDataSource implements DataSource {
 		}
 	}
 	
+	/**
+	 * Gets the connection mixin for this connection type.
+	 * @return
+	 * @throws DataSourceException 
+	 */
 	protected ConnectionMixin getConnectionMixin() throws DataSourceException{
 		if(connectionMixin == null){
 			connectionMixin = ConnectionMixinFactory.GetConnectionMixin(uri, modifiers, mixinOptions, getBlankDataModel());
