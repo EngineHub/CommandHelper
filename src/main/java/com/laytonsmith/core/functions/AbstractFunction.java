@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
+import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -204,6 +205,13 @@ public abstract class AbstractFunction implements Function {
 	@Override
 	public URL getSourceJar() {
 		return ClassDiscovery.GetClassContainer(this.getClass());
+	}
+	
+	private final static Class[] EMPTY_CLASS = new Class[0];
+
+	@Override
+	public Class<? extends Documentation>[] seeAlso() {
+		return EMPTY_CLASS;
 	}
 	
 	

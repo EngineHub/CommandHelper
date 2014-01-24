@@ -1,8 +1,7 @@
 package com.laytonsmith.PureUtilities.MSP;
 
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Documentation;
-import java.net.URL;
+import com.laytonsmith.core.SimpleDocumentation;
 
 /**
  * A Burst is a single transmission from client to server, or server to client.
@@ -19,7 +18,7 @@ public class Burst {
 	//TODO: Is this type right?
 	String riderChecksum;
 	
-	public static enum BurstType implements Documentation {
+	public static enum BurstType implements SimpleDocumentation {
 		@RemoteCapability()
 		META("Provides meta information to the client/server. The payload will be a json with further information", CHVersion.V3_3_1),
 		@RemoteCapability()
@@ -66,9 +65,5 @@ public class Burst {
 			return version;
 		}
 		
-		@Override
-		public URL getSourceJar() {
-			return null;
-		}
 	}
 }

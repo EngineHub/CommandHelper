@@ -331,10 +331,5 @@ public abstract class AbstractDataSource implements DataSource {
 		b.append(uri.toString());
 		return b.toString();
 	}
-
-	@Override
-	public URL getSourceJar() {
-		throw new UnsupportedOperationException("TODO: Not supported yet.");
-	}
 	
 }

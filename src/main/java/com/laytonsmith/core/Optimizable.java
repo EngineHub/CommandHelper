@@ -33,7 +33,7 @@ public interface Optimizable extends Function {
 	 */
 	public static final ParseTree PULL_ME_UP = new ParseTree(null);
 
-	public enum OptimizationOption implements Documentation{
+	public enum OptimizationOption implements SimpleDocumentation {
 
 		/**
 		 * If this function can be run at compile time if all the parameters of
@@ -126,10 +126,6 @@ public interface Optimizable extends Function {
 			return since;
 		}
 		
-		@Override
-		public URL getSourceJar() {
-			return null;
-		}
 	}
 
 	/**

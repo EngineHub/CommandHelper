@@ -14,6 +14,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -263,7 +264,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
-			for(Documentation d : ExceptionType.values()){
+			for(SimpleDocumentation d : ExceptionType.values()){
 				b.append("===").append(d.getName()).append("===\n");
 				b.append(d.docs());
 				b.append("\n\nSince: ").append(d.since().toString()).append("\n\n");

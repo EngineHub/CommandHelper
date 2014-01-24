@@ -86,10 +86,5 @@ public enum CorePermissions implements PackagePermission {
 	public CHVersion since() {
 		return since;
 	}
-
-	@Override
-	public URL getSourceJar() {
-		return null;
-	}
 	
 }

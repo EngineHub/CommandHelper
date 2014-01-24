@@ -4,6 +4,7 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
@@ -216,6 +217,13 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	@Override
 	public final boolean appearInDocumentation() {
 		return this.getClass().getAnnotation(hide.class) != null;
+	}
+	
+	private final static Class[] EMPTY_CLASS = new Class[0];
+
+	@Override
+	public Class<? extends Documentation>[] seeAlso() {
+		return EMPTY_CLASS;
 	}
     
 }
