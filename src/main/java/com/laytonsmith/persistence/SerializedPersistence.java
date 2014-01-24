@@ -2,7 +2,6 @@ package com.laytonsmith.persistence;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
-import com.laytonsmith.PureUtilities.Persistence;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.datasource;
@@ -23,7 +22,7 @@ import java.util.logging.Logger;
  * @author layton
  */
 @datasource("ser")
-public class SerializedPersistence extends AbstractDataSource implements Persistence {
+public class SerializedPersistence extends AbstractDataSource {
 	
 	private SerializedPersistence(){
 		
@@ -72,23 +71,12 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	}
 
 	/**
-	 * Unless you're the data manager, and you <em>really</em> want to clear out
-	 * the entire database, don't use this method. You must manually call save
-	 * after this, if you wish the changes to be written out to disk.
-	 */
-	@Override
-	public void clearAllData() {
-		data = new HashMap<String, String>();
-	}
-
-	/**
 	 * Loads the database from disk. This is automatically called when setValue
 	 * or getValue is called.
 	 *
 	 * @throws Exception
 	 */
-	@Override
-	public void load() throws Exception {
+	private void load() throws Exception {
 			if (!isLoaded) {
 				queue.invokeAndWait(new Callable<Object>(){
 
@@ -144,8 +132,7 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	 *
 	 * @throws IOException
 	 */
-	@Override
-	public void save(final DaemonManager dm) throws IOException{
+	private void save(final DaemonManager dm) throws IOException{
 		if(!inTransaction()){
 			if(writer == null){
 				writer = MemoryMapFileUtil.getInstance(storageLocation, grabber);
@@ -255,112 +242,8 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 	 * @return The object that was in this key, or null if the value did not
 	 * exist.
 	 */
-	@Override
-	public String setValue(DaemonManager dm, String[] key, String value) {
+	private String setValue(DaemonManager dm, String[] key, String value) {
 		return setValue(dm, getNamespace0(key), (String) value);
-	}
-
-	/**
-	 * Returns the value of a particular key, or null if the key doesn't exist
-	 *
-	 * @param key
-	 * @return
-	 */
-	@Override
-	public String getValue(String[] key) {
-		return getValue(getNamespace0(key));
-	}
-
-	/**
-	 * Checks to see if a particular key is set. Unlike isNamespaceSet, this
-	 * requires that the exact key be specified to see if it exists.
-	 *
-	 * @param key
-	 * @return
-	 */
-	@Override
-	public boolean isKeySet(String[] key) {
-		String k = getNamespace0(key);
-		return data.containsKey(k);
-	}
-
-	/**
-	 * Returns whether or not a particular namespace value is set. For instance,
-	 * if the value plugin.myPlugin.players.playerName.data is set, then the
-	 * call to
-	 * <code>isNamespaceSet(new String[]{"plugin", "myPlugin"})</code> would
-	 * return
-	 * <code>true</code>
-	 *
-	 * @param partialKey
-	 * @return
-	 */
-	@Override
-	public boolean isNamespaceSet(String[] partialKey) {
-		String m = getNamespace0(partialKey);
-		partialKey = m.split("\\.");
-		Iterator i = data.entrySet().iterator();
-		while (i.hasNext()) {
-			String key = ((Map.Entry) i.next()).getKey().toString();
-			String[] namespace = key.split("\\.");
-			boolean match = true;
-			for (int k = 0; k < partialKey.length; k++) {
-				if (namespace.length < k) {
-					match = false;
-					continue;
-				}
-				if (!namespace[k].equals(partialKey[k])) {
-					match = false;
-					continue;
-				}
-			}
-			if (match) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Returns all the matched namespace entries.
-	 *
-	 * @param partialKey The partial name of the keys you wish to return
-	 * @return An ArrayList of Map.Entries.
-	 */
-	@Override
-	public List<Map.Entry<String, Object>> getNamespaceValues(String[] partialKey) {
-
-		List<Map.Entry<String, Object>> matches = new ArrayList<Map.Entry<String, Object>>();
-		String m = getNamespace0(partialKey);
-		partialKey = m.split("\\.");
-		if (!isLoaded) {
-			try {
-				load();
-			} catch (Exception ex) {
-				Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		}
-		Iterator i = data.entrySet().iterator();
-		while (i.hasNext()) {
-			Map.Entry entry = (Map.Entry) i.next();
-			String key = entry.getKey().toString();
-			String[] namespace = key.split("\\.");
-			boolean match = true;
-			for (int k = 0; k < partialKey.length; k++) {
-				if (namespace.length < partialKey.length) {
-					match = false;
-					continue;
-				}
-				if (!namespace[k].equals(partialKey[k])) {
-					match = false;
-					continue;
-				}
-			}
-			if (match) {
-				matches.add(entry);
-			}
-		}
-		return matches;
 	}
 
 	/**
@@ -379,26 +262,6 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 			}
 		}
 		return b.toString();
-	}
-
-	/**
-	 * Prints all of the stored values to the specified print stream.
-	 */
-	@Override
-	public void printValues(PrintStream out) {
-		try {
-			out.println("Printing all persisted values:");
-			load();
-			Iterator i = data.entrySet().iterator();
-			while (i.hasNext()) {
-				Map.Entry e = ((Map.Entry) i.next());
-				out.println(e.getKey()
-						+ ": " + data.get(e.getKey().toString()).toString());
-			}
-			out.println("Done printing persisted values");
-		} catch (Exception ex) {
-			Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
-		}
 	}
 
 	@Override
@@ -475,5 +338,10 @@ public class SerializedPersistence extends AbstractDataSource implements Persist
 			data = transactionData;
 		}
 		transactionData = null;
+	}
+
+	@Override
+	public void disconnect() {
+		//
 	}
 }

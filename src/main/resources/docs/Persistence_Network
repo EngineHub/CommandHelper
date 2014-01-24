@@ -227,24 +227,29 @@ Take what information you will from the data, and feel free to run it on your sy
 not just relative to each other on the test system.
 
 <pre style='font-family: monospace'>
-       | 10 values | 100 values | 1000 values | 5000 values | file size with 5000 values
--------+---------------------------------------------------------------------------------
-ini    |   67 ms   |   29 ms    |    139 ms   | 174.644 sec |          144 K
--------+---------------------------------------------------------------------------------
-mem    |    4 ms   |    22 ms   |    74 ms    |    124 ms   |           N/A
--------+---------------------------------------------------------------------------------
-sqlite |   177 ms  |   319 ms   |  4.891 sec  |  46.780 sec |          364 K
--------+---------------------------------------------------------------------------------
-json   |    8 ms   |    15 ms   |    373 ms   |  5.406 sec  |          116 K
--------+---------------------------------------------------------------------------------
-ser    |   16 ms   |    23 ms   |    83 ms    |    114 ms   |          164 K
--------+---------------------------------------------------------------------------------
-yml    |   33 ms   |    14 ms   |  2.105 sec  |  46.640 sec |          112 K 
--------+---------------------------------------------------------------------------------
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
+| iterations: |    1   |   10  |    100    |    1000   |     5000     | File size with 5000 values |
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
+|    redis    |  38 ms |  5 ms |   49 ms   |   306 ms  |    774 ms    |           Unknown          |
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
+|     yml     |  62 ms | 12 ms |   246 ms  | 2.177 sec |    42 sec    |          103.7 kB          |
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
+|    mysql    | 342 ms | 50 ms |   283 ms  | 4.036 sec |    21 sec    |           Unknown          |
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
+|     ser     |  13 ms |  1 ms |    8 ms   |   47 ms   |    164 ms    |           78.4 kB          |
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
+|     mem     |  1 ms  |  0 ms |    3 ms   |   28 ms   |    184 ms    |            N/A             |
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
+|     json    |  12 ms |  1 ms |   22 ms   |   541 ms  |   6.250 sec  |          108.9 kB          |
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
+|     ini     |  1 ms  |  1 ms |   15 ms   | 1.888 sec | 3.25 minutes |          138.9 kB          |
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
+|    sqlite   | 181 ms | 89 ms | 1.588 sec | 6.867 sec |    32 sec    |          360.4 kB          |
++-------------+--------+-------+-----------+-----------+--------------+----------------------------+
 </pre>
 
 An important observation that could be made based on this data is that SQLite is 
-considerably slower than any of the other protocols. This is because SQLite
+considerably slower than many of the other protocols. This is because SQLite
 is less prone to data corruption, and is multiprocess safe. SQLite manages its own
 locking and journaling systems, so it is unlikely to corrupt if a bad write
 occurs, or if multiple processes are accessing it at once. Due to this, it is the
@@ -252,4 +257,5 @@ default storage mechanism, despite its slower runtime. The tradeoff of data prot
 vs. script speed vs. interoperability is not something that can be generically decided
 in all cases though, so feel free to change defaults as you see fit. Each protocol
 has pros and cons, so you must decide which one to use.
+
 {{LearningTrail}}

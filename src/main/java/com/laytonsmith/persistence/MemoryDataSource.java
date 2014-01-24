@@ -36,6 +36,11 @@ public final class MemoryDataSource extends AbstractDataSource {
 		}
 		databasePool.clear();
 	}
+
+	@Override
+	public void disconnect() {
+		ClearDatabases();
+	}
 	
 	private static Map<String, String> getDatabase(String name){
 		if(!databasePool.containsKey(name)){

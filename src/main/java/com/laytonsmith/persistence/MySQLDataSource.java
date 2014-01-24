@@ -30,13 +30,14 @@ public class MySQLDataSource extends AbstractDataSource{
 	/* These values may not be changed without creating an upgrade routine */
 	private static final String KEY_COLUMN = "key";
 	private static final String VALUE_COLUMN = "value";
-	Connection connection;
+	private Connection connection;
 	private String host;
 	private int port;
 	private String username;
 	private String password;
 	private String database;
 	private String table;
+	private long lastConnected = 0;
 	
 	private MySQLDataSource(){
 		
@@ -76,14 +77,10 @@ public class MySQLDataSource extends AbstractDataSource{
 		//Escape any quotes in the table name, because we can't use prepared statements here
 		table = table.replace("`", "``");
 		try {
-			try {
-				connect();
-				//Create the table if it doesn't exist
-				Statement statement = connection.createStatement();
-				statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + table + "` (`" + KEY_COLUMN + "` TEXT, `" + VALUE_COLUMN + "` TEXT)");
-			} finally {
-				disconnect();
-			}
+			connect();
+			//Create the table if it doesn't exist
+			Statement statement = connection.createStatement();
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + table + "` (`" + KEY_COLUMN + "` TEXT, `" + VALUE_COLUMN + "` TEXT)");
 		} catch (IOException | SQLException ex) {
 			throw new DataSourceException("Could not connect to MySQL data source \"" + uri.toString() + "\": " + ex.getMessage(), ex);
 		}
@@ -94,17 +91,46 @@ public class MySQLDataSource extends AbstractDataSource{
 	 * All calls to connect must have a corresponding call to disconnect() in
 	 * a finally block.
 	 */
-	private void connect() throws IOException, SQLException{
-		String connectionString = "jdbc:mysql://" + host + ":" + port + "/" + database + "?generateSimpleParameterMetadata=true"
-					+ "&jdbcCompliantTruncation=false"
-					+ (username == null ? "" : "&user=" + URLEncoder.encode(username, "UTF-8"))
-					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"));
-		connection = DriverManager.getConnection(connectionString);		
+	private void connect() throws IOException, SQLException {
+		boolean needToConnect = false;
+		if(connection == null){
+			needToConnect = true;
+		} else if(connection.isClosed()){
+			needToConnect = true;
+		} else if(lastConnected < System.currentTimeMillis() - 10000){
+			// If we connected more than 10 seconds ago, we should re-test
+			// the connection explicitely, because isClosed may return false,
+			// even if the connection will fail. The only real way to test
+			// if the connection is actually open is to run a test query, but
+			// doing that too often will cause unneccessary delay, so we
+			// wait an arbitrary amount, in this case, 10 seconds.
+			// http://stackoverflow.com/questions/3668506/efficient-sql-test-query-or-validation-query-that-will-work-across-all-or-most
+			try {
+				connection.createStatement().execute("SELECT 1");
+				// Nope, don't need to connect.
+			} catch(SQLException ex){
+				// Need to connect, since this broke.
+				needToConnect = true;
+			}
+		}
+		if(needToConnect){
+			String connectionString = "jdbc:mysql://" + host + ":" + port + "/" + database + "?generateSimpleParameterMetadata=true"
+						+ "&jdbcCompliantTruncation=false"
+						+ (username == null ? "" : "&user=" + URLEncoder.encode(username, "UTF-8"))
+						+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"));
+			connection = DriverManager.getConnection(connectionString);
+		}
 	}
 	
-	private void disconnect() throws SQLException{
-		if(connection != null){
-			connection.close();
+	@Override
+	public void disconnect() throws DataSourceException {
+		try {
+			if(connection != null){
+				connection.close();
+				connection = null;
+			}
+		} catch(SQLException ex){
+			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
 
@@ -112,20 +138,16 @@ public class MySQLDataSource extends AbstractDataSource{
 	public Set<String[]> keySet(String[] keyBase) throws DataSourceException {
 		String searchPrefix = StringUtils.Join(keyBase, ".");
 		try {
-			try {
-				connect();
-				PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "` FROM `" + table + "` WHERE `" + KEY_COLUMN + "` LIKE ?");
-				statement.setString(1, StringUtils.Join(keyBase, ".") + "%");
-				Set<String[]> set = new HashSet<>();
-				try(ResultSet result = statement.executeQuery()){
-					while(result.next()){
-						set.add(result.getString(KEY_COLUMN).split("\\."));
-					}
+			connect();
+			PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "` FROM `" + table + "` WHERE `" + KEY_COLUMN + "` LIKE ?");
+			statement.setString(1, StringUtils.Join(keyBase, ".") + "%");
+			Set<String[]> set = new HashSet<>();
+			try(ResultSet result = statement.executeQuery()){
+				while(result.next()){
+					set.add(result.getString(KEY_COLUMN).split("\\."));
 				}
-				return set;
-			} finally {
-				disconnect();
 			}
+			return set;
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
@@ -134,19 +156,15 @@ public class MySQLDataSource extends AbstractDataSource{
 	@Override
 	public String get0(String[] key) throws DataSourceException {
 		try {
-			try {
-				connect();
-				PreparedStatement statement = connection.prepareStatement("SELECT `" + VALUE_COLUMN + "` FROM `" + table + "` WHERE `" + KEY_COLUMN + "`=? LIMIT 1");
-				statement.setString(1, StringUtils.Join(key, "."));
-				try (ResultSet result = statement.executeQuery()) {
-					String ret = null;
-					if(result.next()){
-						ret = result.getString(VALUE_COLUMN);
-					}
-					return ret;
+			connect();
+			PreparedStatement statement = connection.prepareStatement("SELECT `" + VALUE_COLUMN + "` FROM `" + table + "` WHERE `" + KEY_COLUMN + "`=? LIMIT 1");
+			statement.setString(1, StringUtils.Join(key, "."));
+			try (ResultSet result = statement.executeQuery()) {
+				String ret = null;
+				if(result.next()){
+					ret = result.getString(VALUE_COLUMN);
 				}
-			} finally {
-				disconnect();
+				return ret;
 			}
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
@@ -156,22 +174,18 @@ public class MySQLDataSource extends AbstractDataSource{
 	@Override
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		try {
-			try {
-				connect();
-				if(value == null){
-					PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + table + "` WHERE `" + KEY_COLUMN + "`=?");
-					statement.setString(1, StringUtils.Join(key, "."));
-					statement.executeUpdate();
-				} else {
-					PreparedStatement statement = connection.prepareStatement("INSERT INTO `" + table + "` (`" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "`) VALUES (?, ?)");
-					statement.setString(1, StringUtils.Join(key, "."));
-					statement.setString(2, value);
-					statement.executeUpdate();
-				}
-				return true;
-			} finally {
-				disconnect();
+			connect();
+			if(value == null){
+				PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + table + "` WHERE `" + KEY_COLUMN + "`=?");
+				statement.setString(1, StringUtils.Join(key, "."));
+				statement.executeUpdate();
+			} else {
+				PreparedStatement statement = connection.prepareStatement("INSERT INTO `" + table + "` (`" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "`) VALUES (?, ?)");
+				statement.setString(1, StringUtils.Join(key, "."));
+				statement.setString(2, value);
+				statement.executeUpdate();
 			}
+			return true;
 		} catch (SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
@@ -180,20 +194,16 @@ public class MySQLDataSource extends AbstractDataSource{
 	@Override
 	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
 		try {
-			try {
-				connect();
-				PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + table + "` WHERE `" + KEY_COLUMN + "` LIKE ?");
-				statement.setString(1, StringUtils.Join(leadKey, ".") + "%");
-				Map<String[], String> map = new HashMap<>();
-				try (ResultSet results = statement.executeQuery()){
-					while(results.next()){
-						map.put(results.getString(KEY_COLUMN).split("\\."), results.getString(VALUE_COLUMN));
-					}
+			connect();
+			PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + table + "` WHERE `" + KEY_COLUMN + "` LIKE ?");
+			statement.setString(1, StringUtils.Join(leadKey, ".") + "%");
+			Map<String[], String> map = new HashMap<>();
+			try (ResultSet results = statement.executeQuery()){
+				while(results.next()){
+					map.put(results.getString(KEY_COLUMN).split("\\."), results.getString(VALUE_COLUMN));
 				}
-				return map;
-			} finally {
-				disconnect();
 			}
+			return map;
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
 		}

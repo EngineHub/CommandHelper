@@ -176,6 +176,16 @@ public interface DataSource extends SimpleDocumentation {
 	 * @throws DataSourceException If any other exception occurs
 	 */
 	public void stopTransaction(DaemonManager dm, boolean rollback) throws DataSourceException, IOException;
+	
+	/**
+	 * Disconnects the Data Source. This may not do anything for some connection types, but
+	 * for streaming connection types, this will close the connection. Regardless, after
+	 * calling this method, it should be assumed that future calls to this data source
+	 * will be invalid, and might throw errors if used.
+	 * @throws DataSourceException In the event that some kind of internal error occurs, this
+	 * may be thrown.
+	 */
+	public void disconnect() throws DataSourceException;
 
 	/**
 	 * These are the valid modifiers for a generic connection. Not all data

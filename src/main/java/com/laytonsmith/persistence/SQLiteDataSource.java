@@ -32,62 +32,83 @@ public class SQLiteDataSource extends AbstractDataSource{
 	private static final String KEY_COLUMN = "key";
 	private static final String VALUE_COLUMN = "value";
 	private static final String TABLE_NAME = "persistance"; //Note the misspelling!
-	Connection connection;
-	String path;
-	ConnectionMixin mixin;
+	private Connection connection;
+	private String path;
+	private ConnectionMixin mixin;
+	private long lastConnected = 0;
 	
 	private SQLiteDataSource(){
 		
 	}
+	
 	public SQLiteDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
 		super(uri, options);		
 		mixin = getConnectionMixin();		
 		try {
-			try{
-				Class.forName(org.sqlite.JDBC.class.getName());
-				path = mixin.getPath();
-				connect();
-				Statement statement = connection.createStatement();
-				statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + TABLE_NAME + "` (`" + KEY_COLUMN + "` TEXT PRIMARY KEY,"
-						+ " `" + VALUE_COLUMN + "` TEXT)");
-			}finally {
-				disconnect();
-			}
-		} catch (Exception ex) {
+			Class.forName(org.sqlite.JDBC.class.getName());
+			path = mixin.getPath();
+			connect();
+			Statement statement = connection.createStatement();
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + TABLE_NAME + "` (`" + KEY_COLUMN + "` TEXT PRIMARY KEY,"
+					+ " `" + VALUE_COLUMN + "` TEXT)");
+			lastConnected = System.currentTimeMillis();
+		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
 			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
 		} 
 	}
 	
-	/**
-	 * All calls to connect must have a corresponding call to disconnect() in
-	 * a finally block.
-	 */
 	private void connect() throws IOException, SQLException{
-		connection = DriverManager.getConnection("jdbc:sqlite:" + mixin.getPath());		
+		boolean needToConnect = false;
+		if(connection == null){
+			needToConnect = true;
+		} else if(connection.isClosed()){
+			needToConnect = true;
+		} else if(lastConnected < System.currentTimeMillis() - 10000){
+			// If we connected more than 10 seconds ago, we should re-test
+			// the connection explicitely, because isClosed may return false,
+			// even if the connection will fail. The only real way to test
+			// if the connection is actually open is to run a test query, but
+			// doing that too often will cause unneccessary delay, so we
+			// wait an arbitrary amount, in this case, 10 seconds.
+			// http://stackoverflow.com/questions/3668506/efficient-sql-test-query-or-validation-query-that-will-work-across-all-or-most
+			try {
+				connection.createStatement().execute("SELECT 1");
+				// Nope, don't need to connect.
+			} catch(SQLException ex){
+				// Need to connect, since this broke.
+				needToConnect = true;
+			}
+		}
+		if(needToConnect){
+			connection = DriverManager.getConnection("jdbc:sqlite:" + mixin.getPath());
+		}
 	}
 	
-	private void disconnect() throws SQLException{
-		if(connection != null){
-			connection.close();
+	@Override
+	public void disconnect() throws DataSourceException {
+		try {
+			if(connection != null){
+					connection.close();
+					connection = null; // Speeds up re-initialization
+			}
+		} catch (SQLException ex) {
+			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
 
 	@Override
 	public Set<String[]> keySet(String[] keyBase) throws DataSourceException{
 		try{
-			try {
-				connect();
-				Statement statement = connection.createStatement();
-				ResultSet rs = statement.executeQuery("SELECT `" + KEY_COLUMN + "` FROM `" + TABLE_NAME + "` WHERE `" 
-						+ KEY_COLUMN + "` LIKE '" + StringUtils.Join(keyBase, ".") + "%'");
-				Set<String[]> list = new HashSet<>();
-				while(rs.next()){
-					list.add(rs.getString(KEY_COLUMN).split("\\."));
-				}
-				return list;
-			} finally{
-				disconnect();
+			connect();
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT `" + KEY_COLUMN + "` FROM `" + TABLE_NAME + "` WHERE `" 
+					+ KEY_COLUMN + "` LIKE '" + StringUtils.Join(keyBase, ".") + "%'");
+			lastConnected = System.currentTimeMillis();
+			Set<String[]> list = new HashSet<>();
+			while(rs.next()){
+				list.add(rs.getString(KEY_COLUMN).split("\\."));
 			}
+			return list;
 		} catch (IOException | SQLException ex) {
 			throw new DataSourceException("Could not retrieve key set from SQLite connection " + path, ex);
 		}
@@ -96,18 +117,15 @@ public class SQLiteDataSource extends AbstractDataSource{
 	@Override
 	public String get0(String[] key) throws DataSourceException {
 		try{
-			try{
-				connect();
-				PreparedStatement statement = connection.prepareStatement("SELECT `" + VALUE_COLUMN + "` FROM `" + TABLE_NAME + "` WHERE `" + KEY_COLUMN + "`=?");
-				statement.setString(1, StringUtils.Join(key, "."));
-				ResultSet rs = statement.executeQuery();
-				if(rs.next()){
-					return rs.getString(VALUE_COLUMN);
-				} else {
-					return null;
-				}
-			} finally {
-				disconnect();
+			connect();
+			PreparedStatement statement = connection.prepareStatement("SELECT `" + VALUE_COLUMN + "` FROM `" + TABLE_NAME + "` WHERE `" + KEY_COLUMN + "`=?");
+			statement.setString(1, StringUtils.Join(key, "."));
+			ResultSet rs = statement.executeQuery();
+			lastConnected = System.currentTimeMillis();
+			if(rs.next()){
+				return rs.getString(VALUE_COLUMN);
+			} else {
+				return null;
 			}
 		} catch(IOException | SQLException e){
 			throw new DataSourceException("Could not get key from SQLite connection " + path, e);
@@ -117,21 +135,18 @@ public class SQLiteDataSource extends AbstractDataSource{
 	@Override
 	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
 		try {
-			try {
-				connect();
-				PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + TABLE_NAME
-					+ "` WHERE `" + KEY_COLUMN + "` LIKE '" + StringUtils.Join(leadKey, ".") + "%'");
-				ResultSet rs = statement.executeQuery();
-				Map<String[], String> ret = new HashMap<>();
-				while(rs.next()){
-					String key = rs.getString(KEY_COLUMN);
-					String value = rs.getString(VALUE_COLUMN);
-					ret.put(key.split("\\."), value);
-				}
-				return ret;
-			} finally {
-				disconnect();
+			connect();
+			PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + TABLE_NAME
+				+ "` WHERE `" + KEY_COLUMN + "` LIKE '" + StringUtils.Join(leadKey, ".") + "%'");
+			ResultSet rs = statement.executeQuery();
+			lastConnected = System.currentTimeMillis();
+			Map<String[], String> ret = new HashMap<>();
+			while(rs.next()){
+				String key = rs.getString(KEY_COLUMN);
+				String value = rs.getString(VALUE_COLUMN);
+				ret.put(key.split("\\."), value);
 			}
+			return ret;
 		} catch(IOException | SQLException e){
 			throw new DataSourceException("Could not get key from SQLite connection " + path, e);
 		}
@@ -144,15 +159,12 @@ public class SQLiteDataSource extends AbstractDataSource{
 			return true;
 		}
 		try{
-			try{
-				connect();
-				PreparedStatement statement = connection.prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME + "` (`" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "`) VALUES (?, ?)");
-				statement.setString(1, StringUtils.Join(key, "."));
-				statement.setString(2, value);
-				return statement.executeUpdate() > 0;
-			} finally {
-				disconnect();
-			}
+			PreparedStatement statement = connection.prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME + "` (`" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "`) VALUES (?, ?)");
+			statement.setString(1, StringUtils.Join(key, "."));
+			statement.setString(2, value);
+			boolean success = statement.executeUpdate() > 0;
+			lastConnected = System.currentTimeMillis();
+			return success;
 		} catch(Exception e){
 			throw new DataSourceException("Could not set key in SQLite connection " + path, e);			
 		}
@@ -162,14 +174,11 @@ public class SQLiteDataSource extends AbstractDataSource{
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		if(hasKey(key)){
 			try{
-				try{
-					connect();				
-					PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + TABLE_NAME + "` WHERE `" + KEY_COLUMN + "`=?");
-					statement.setString(1, StringUtils.Join(key, "."));
-					statement.executeUpdate();
-				} finally{
-					disconnect();
-				}
+				connect();				
+				PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + TABLE_NAME + "` WHERE `" + KEY_COLUMN + "`=?");
+				statement.setString(1, StringUtils.Join(key, "."));
+				statement.executeUpdate();
+				lastConnected = System.currentTimeMillis();
 			} catch(Exception e){
 				throw new DataSourceException("Could not clear key in SQLite connection " + path, e);
 			}
@@ -209,6 +218,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 	protected void startTransaction0(DaemonManager dm) {
 		try {
 			connection.prepareStatement("BEGIN TRANSACTION").execute();
+			lastConnected = System.currentTimeMillis();
 		} catch (SQLException ex) {
 			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -222,6 +232,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 			} else {
 				connection.prepareStatement("END TRANSACTION").execute();
 			}
+			lastConnected = System.currentTimeMillis();
 		} catch (SQLException ex) {
 			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}

@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This utility class provides the means to interact with given data sources.
@@ -22,6 +24,8 @@ import java.util.Set;
  * @author lsmith
  */
 public class DataSourceFactory {
+	
+	private static Map<URI, DataSource> dataSourcePool = new HashMap<>();
 
 	/**
 	 * Given a connection uri and the connection options, creates and returns a
@@ -39,6 +43,23 @@ public class DataSourceFactory {
 	public static DataSource GetDataSource(String uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException, URISyntaxException {
 		return GetDataSource(new URI(uri), options);
 	}
+	
+	/**
+	 * Internally, DataSourceFactory re-uses connections, for efficiency reasons. When
+	 * the server is shutdown, a clean shutdown of all the cached connections is
+	 * desired. This method will disconnect all persistently connecting connections,
+	 * as well as delete them from the cache.
+	 */
+	public static void DisconnectAll(){
+		for(DataSource ds : dataSourcePool.values()){
+			try {
+				ds.disconnect();
+			} catch (DataSourceException ex) {
+				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, ex.getMessage(), Target.UNKNOWN);
+			}
+		}
+		dataSourcePool.clear();
+	}
 
 	/**
 	 * Given a connection uri and the connection options, creates and returns a
@@ -54,6 +75,9 @@ public class DataSourceFactory {
 	 */
 	public static DataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		init();
+		if(dataSourcePool.containsKey(uri)){
+			return dataSourcePool.get(uri);
+		}
 		List<DataSource.DataSourceModifier> modifiers = new ArrayList<DataSource.DataSourceModifier>();
 		while (DataSource.DataSourceModifier.isModifier(uri.getScheme())) {
 			modifiers.add(DataSource.DataSourceModifier.getModifier(uri.getScheme()));
@@ -77,6 +101,9 @@ public class DataSourceFactory {
 					((AbstractDataSource) ds).checkModifiers();
 				}
 			} catch (DataSourceException e) {
+				//Warning, for invalid modifiers. This isn't an error, invalid modifiers will just be
+				//ignored, but the user probably meant something else if they're getting this warning,
+				//so we still alert them to the issue.
 				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, e.getMessage(), Target.UNKNOWN);
 			}
 			//If the data source is transient, it will populate itself later, as needed.
@@ -84,6 +111,7 @@ public class DataSourceFactory {
 			if (!ds.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)) {
 				ds.populate();
 			}
+			dataSourcePool.put(uri, ds);
 			return ds;
 		} catch (InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | DataSourceException ex) {
 			if(ex instanceof InvocationTargetException && ex.getCause() instanceof DataSourceException){
