@@ -25,5 +25,11 @@ public interface Documentation extends SimpleDocumentation {
 	 */
 	URL getSourceJar();
 	
+	/**
+	 * Returns a list of other Documentation elements that are similar to this
+	 * one, and may be shown as links to those elements with the documentation
+	 * for this element.
+	 * @return 
+	 */
 	Class<? extends Documentation>[] seeAlso();
 }

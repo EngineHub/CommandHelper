@@ -17,6 +17,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.ExampleScript;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
@@ -48,12 +49,14 @@ public class DocGen {
 		try{
 			//Boilerplate startup stuff
 			Implementation.setServerType(Implementation.Type.BUKKIT);
+			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGen.class));
+			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 			Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 			CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 			
 			//System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
-			System.out.println(examples("string_append", true));
+			System.out.println(examples("if", true));
 			//System.exit(0);
 			//events("wiki");
 			//System.out.println(Template("persistence_network"));
@@ -114,15 +117,31 @@ public class DocGen {
 					} else {
 						exampleBuilder.append("\n\nThe output might be:\n<pre");
 					}
-					exampleBuilder.append(style).append(">").append(es.getOutput()).append("</pre>\n\n");
+					exampleBuilder.append(style).append(">").append(es.getOutput()).append("</pre>\n");
 					count++;
 				}
 			} else {
 				exampleBuilder.append("Sorry, there are no examples for this function! :(");
 			}
 			
+			Class[] seeAlso = f.seeAlso();
+			String seeAlsoText = "";
+			if(seeAlso != null && seeAlso.length > 0){
+				seeAlsoText += "===See Also===\n";
+				boolean first = true;
+				for(Class<? extends Documentation> c : seeAlso){
+					if(Function.class.isAssignableFrom(c)){
+						Function f2 = (Function)c.newInstance();
+						if(!first){
+							seeAlsoText += ", ";
+						}
+						first = false;
+						seeAlsoText += "[[CommandHelper/" + (staged?"Staged/":"") + "API/" + f2.getName() + "|" + f2.getName() + "]]";
+					}
+				}
+			}
 			
-			Map<String, String> templateFields = new HashMap<String, String>();
+			Map<String, String> templateFields = new HashMap<>();
 			templateFields.put("function_name", f.getName());
 			templateFields.put("returns", di.ret);
 			templateFields.put("tableUsages", tableUsages);
@@ -134,6 +153,7 @@ public class DocGen {
 			templateFields.put("usages", usageBuilder.toString());
 			templateFields.put("examples", exampleBuilder.toString());
 			templateFields.put("staged", staged?"Staged/":"");
+			templateFields.put("seeAlso", seeAlsoText);
 					
 					
 			String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/templates/example_templates"));

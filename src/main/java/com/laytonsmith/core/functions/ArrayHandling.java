@@ -1,8 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.LinkedComparatorSet;
 import com.laytonsmith.PureUtilities.RunnableQueue;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
@@ -15,6 +15,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
+import com.laytonsmith.core.functions.DataHandling.array;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.ArrayList;
@@ -312,6 +313,12 @@ public class ArrayHandling {
 				OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{array_set.class, array.class};
+		}
+	
 	}
 
 	@api
@@ -395,6 +402,11 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates usage", "assign(@array, array(null))\nmsg(@array)\narray_set(@array, 0, 'value0')\nmsg(@array)"),
 				new ExampleScript("Demonstrates using assign", "assign(@array, array(null))\nmsg(@array)\nassign(@array[0], 'value0')\nmsg(@array)"),
 			};
+		}
+		
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{array_get.class, array.class};
 		}
 	}
 
