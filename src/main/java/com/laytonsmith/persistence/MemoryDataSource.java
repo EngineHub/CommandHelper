@@ -94,7 +94,6 @@ public final class MemoryDataSource extends AbstractDataSource {
 		
 	}
 	
-	@SuppressWarnings("LeakingThisInConstructor")
 	public MemoryDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
 		super(uri, options);
 		dbName = uri.getSchemeSpecificPart();
