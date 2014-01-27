@@ -735,7 +735,7 @@ public final class MethodScriptCompiler {
 	 */
 	public static List<Script> preprocess(List<Token> tokenStream) throws ConfigCompileException {
 		//First, pull out the duplicate newlines
-		ArrayList<Token> temp = new ArrayList<Token>();
+		ArrayList<Token> temp = new ArrayList<>();
 		for (int i = 0; i < tokenStream.size(); i++) {
 			try {
 				if (tokenStream.get(i).type.equals(TType.NEWLINE)) {
@@ -819,9 +819,6 @@ public final class MethodScriptCompiler {
 		for (int i = 0; i < tokens2.size(); i++) {
 			Token t = tokens2.get(i);
 			if (inLeft) {
-				if(t.type == TType.NEWLINE){
-					throw new ConfigCompileException("Unexpected token: \"" + tokens2.get(i - 1).val() + "\" at or before", tokens2.get(i - 1).getTarget());
-				}
 				if (t.type == TType.ALIAS_END) {
 					inLeft = false;
 				} else {
@@ -830,10 +827,15 @@ public final class MethodScriptCompiler {
 			} else {
 				if (t.type == TType.NEWLINE) {
 					inLeft = true;
-					//Env newEnv = new Env();//env;
-//                    try{
-//                        newEnv = env.clone();
-//                    } catch(Exception e){}
+					// Check for spurious symbols, which indicate an issue with the
+					// script, but ignore any whitespace.
+					for(int j = left.size() - 1; j >= 0; j--){
+						if(left.get(j).type == TType.NEWLINE){
+							if(j > 0 && left.get(j - 1).type != TType.WHITESPACE){
+								throw new ConfigCompileException("Unexpected token: " + left.get(j - 1).val(), left.get(j - 1).getTarget());
+							}
+						}
+					}
 					Script s = new Script(left, right);
 					scripts.add(s);
 					left = new ArrayList();
