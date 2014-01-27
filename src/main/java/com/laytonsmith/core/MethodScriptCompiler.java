@@ -1032,20 +1032,19 @@ public final class MethodScriptCompiler {
 				}
 			}
 
-			//Associative array handling
+			//Associative array/label handling
 			if (nextNonWhitespace.type.equals(TType.LABEL)) {
 				//If it's not an atomic identifier it's an error.
-				if(!t.type.isAtomicLit()){
-					//This is a common case where people try to use dynamic
-					//labels. For future optimization reasons, this is not
-					//allowed. For certain common cases, we can at least give them a better error
-					//message though.
-					if(t.type == TType.IVARIABLE){
-						throw new ConfigCompileException("Invalid label specified (" + t.val() + "). Variables cannot be used as labels.", t.getTarget());
-					}
-					throw new ConfigCompileException("Invalid label specified, variable data cannot be used as a label", t.getTarget());
+				if(!t.type.isAtomicLit() && t.type != TType.IVARIABLE){
+					throw new ConfigCompileException("Invalid label specified", t.getTarget());
 				}
-				tree.addChild(new ParseTree(new CLabel(Static.resolveConstruct(t.val(), t.target)), fileOptions));
+				Construct val;
+				if(t.type == TType.IVARIABLE){
+					val = new IVariable(t.val(), t.target);
+				} else {
+					val = Static.resolveConstruct(t.val(), t.target);
+				}
+				tree.addChild(new ParseTree(new CLabel(val), fileOptions));
 				constructCount.peek().incrementAndGet();
 				i = nextNonWhitespaceIndex; //Move forward past any whitespace
 				continue;
@@ -1320,9 +1319,30 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<List<Procedure>>();
 		procs.add(new ArrayList<Procedure>());
 		optimize(tree, procs);
+		checkLabels(tree);
 		parents.pop();
 		tree = parents.pop();
 		return tree;
+	}
+	
+	/**
+	 * Recurses down the tree and ensures that there are no dynamic labels. This has
+	 * to finish completely after optimization, because the optimizer has no 
+	 * good hook to know when optimization for a unit is fully completed, until
+	 * ALL units are fully complete, so this happens separately after optimization,
+	 * but as apart of the normal compile process.
+	 * @param tree
+	 * @throws ConfigCompileException 
+	 */
+	private static void checkLabels(ParseTree tree) throws ConfigCompileException {
+//		for(ParseTree t : tree.getChildren()){
+//			if(t.getData() instanceof CLabel){
+//				if(((CLabel)t.getData()).cVal() instanceof IVariable){
+//					throw new ConfigCompileException("Variables may not be used as labels", t.getTarget());
+//				}
+//			}
+//			checkLabels(t);
+//		}
 	}
 	
 	/**
@@ -1349,6 +1369,8 @@ public final class MethodScriptCompiler {
 			}
 		}
 	}
+	
+	private static final String __autoconcat__ = new Compiler.__autoconcat__().getName();
 
 	/**
 	 * Recurses down into the tree, attempting to optimize where possible. A few
@@ -1374,7 +1396,7 @@ public final class MethodScriptCompiler {
 		if (tree.getData().val().equals("cc")) {
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				ParseTree node = tree.getChildAt(i);
-				if (node.getData().val().equals("__autoconcat__")) {
+				if (node.getData().val().equals(__autoconcat__)) {
 					Compiler.__autoconcat__ func = (Compiler.__autoconcat__) FunctionList.getFunction(node.getData());
 					ParseTree tempNode = func.optimizeSpecial(node.getChildren(), false);
 					tree.setData(tempNode.getData());
@@ -1521,7 +1543,7 @@ public final class MethodScriptCompiler {
 			//However, as a special function, we *might* be able to get a const proc out of this
 			//Let's see.
 			try {
-				ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), fileOptions);
+				ParseTree root = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), fileOptions);
 				Script fakeScript = Script.GenerateScript(root, "*");
 				Environment env = null;
 				try{

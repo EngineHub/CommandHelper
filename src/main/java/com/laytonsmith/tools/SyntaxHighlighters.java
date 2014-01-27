@@ -119,6 +119,9 @@ public class SyntaxHighlighters {
             base.add("true");
             base.add("case");
             base.add("default");
+            base.add("else");
+            base.add("in");
+            base.add("as");
         } else if(datalist.equalsIgnoreCase("functions")){
             for(Function f : GetFunctions()){
                 if(!f.appearInDocumentation()){

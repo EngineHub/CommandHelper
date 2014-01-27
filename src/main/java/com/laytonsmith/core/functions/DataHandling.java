@@ -519,7 +519,7 @@ public class DataHandling {
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
-	public static class foreach extends AbstractFunction {
+	public static class foreach extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -632,7 +632,14 @@ public class DataHandling {
 			return "void {array, [key], ivar, code} Walks through array, setting ivar equal to each element in the array, then running code."
 					+ " In addition, foreach(1..4, @i, code()) is also valid, setting @i to 1, 2, 3, 4 each time. The same syntax is valid as"
 					+ " in an array slice. If key is set (it must be an ivariable) then the index of each iteration will be set to that."
-					+ " See the examples for a demonstration.";
+					+ " See the examples for a demonstration. ---- "
+					+ " Enhanced syntax may also be used in foreach, using the \"in\", \"as\" and \"else\" keywords. See the examples for"
+					+ " examples of each structure. Using these keywords makes the structure of the foreach read much better. For instance,"
+					+ " with foreach(@value in @array){ } the code very literally reads \"for each value in array\", making ascertaining"
+					+ " the behavior of the loop easier. The \"as\" keyword reads less plainly, and so is not recommended for use, but is"
+					+ " allowed. Note that the array and value are reversed with the \"as\" keyword. An \"else\" block may be used after"
+					+ " the foreach, which will only run if the array provided is empty, that is, the loop code would never run. This provides"
+					+ " a good way to provide \"default\" handling.";
 		}
 
 		@Override
@@ -664,11 +671,33 @@ public class DataHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nforeach(@array, @i,\n\tmsg(@i)\n)"),
+				new ExampleScript("Using \"in\" keyword", "@array = array(1, 2, 3);\n"
+						+ "foreach(@value in @array){\n"
+						+ "\tmsg(@value);\n"
+						+ "}"),
+				new ExampleScript("Using \"in\" keyword, with a key", "@array = array(1, 2, 3);\n"
+						+ "foreach(@key: @value in @array){\n"
+						+ "\tmsg(@key . ': ' . @value);\n"
+						+ "}"),
+				new ExampleScript("Using \"a\" keyword", "@array = array(1, 2, 3);\n"
+						+ "foreach(@array as @value){\n"
+						+ "\tmsg(@value);\n"
+						+ "}"),
+				new ExampleScript("Using \"as\" keyword, with a key", "@array = array(1, 2, 3);\n"
+						+ "foreach(@array as @key: @value){\n"
+						+ "\tmsg(@key . ': ' . @value);\n"
+						+ "}"),
+				new ExampleScript("With else clause", "@array = array() # Note empty array\n"
+						+ "foreach(@value in @array){\n"
+						+ "\tmsg(@value);\n"
+						+ "} else {\n"
+						+ "\tmsg('No values were in the array');\n"
+						+ "}"),
+				new ExampleScript("Basic functional usage", "assign(@array, array(1, 2, 3))\nforeach(@array, @i,\n\tmsg(@i)\n)"),
 				new ExampleScript("With braces", "assign(@array, array(1, 2, 3))\nforeach(@array, @i){\n\tmsg(@i)\n}"),
 				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),				
 				new ExampleScript("With a slice, counting down", "foreach(3..1, @i){\n\tmsg(@i)\n}"),				
-				new ExampleScript("With a keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}"),
+				new ExampleScript("With array keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}"),
 			};
 		}
 		
@@ -683,6 +712,92 @@ public class DataHandling {
 					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
 					+ ", <code>)";
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+		
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 2){
+				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
+			}
+			if(children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new Compiler.centry().getName())){
+				// This is what "@key: @value in @array" looks like initially. We'll refactor this so the next segment can take over properly.
+				ParseTree sconcat = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), fileOptions);
+				sconcat.addChild(children.get(0).getChildAt(0));
+				for(int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++){
+					sconcat.addChild(children.get(0).getChildAt(1).getChildAt(i));
+				}
+				children.set(0, sconcat);
+			}
+			if(children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new StringHandling.sconcat().getName())){
+				// We may be looking at a "@value in @array" or "@array as @value" type 
+				// structure, so we need to re-arrange this into the standard format.
+				ParseTree array = null;
+				ParseTree key = null;
+				ParseTree value = null;
+				List<ParseTree> c = children.get(0).getChildren();
+				if(c.size() == 3){
+					// No key specified
+					switch (c.get(1).getData().val()) {
+						case "in":
+							// @value in @array
+							value = c.get(0);
+							array = c.get(2);
+							break;
+						case "as":
+							// @array as @value
+							value = c.get(2);
+							array = c.get(0);
+							break;
+					}
+				} else if(c.size() == 4){
+					if("in".equals(c.get(2).getData().val())){
+						// @key: @value in @array
+						key = c.get(0);
+						value = c.get(1);
+						array = c.get(3);
+					} else if("as".equals(c.get(1).getData().val())){
+						// @array as @key: @value
+						array = c.get(0);
+						key = c.get(2);
+						value = c.get(3);
+					}
+				}
+				if(key != null && key.getData() instanceof CLabel){
+					if(!(((CLabel)key.getData()).cVal() instanceof IVariable)){
+						throw new ConfigCompileException("Expected a variable for key, but \"" + key.getData().val() + "\" was found", t);
+					}
+					key.setData(((CLabel)key.getData()).cVal());
+				}
+				// Now set up the new tree, and return that. Since foreachelse overrides us, we
+				// need to accept all the arguments after the first, and put those in.
+				List<ParseTree> newChildren = new ArrayList<>();
+				newChildren.add(array);
+				if(key != null){
+					newChildren.add(key);
+				}
+				newChildren.add(value);
+				for(int i = 1; i < children.size(); i++){
+					newChildren.add(children.get(i));
+				}
+				children.clear();
+				children.addAll(newChildren);
+				// Change foreach(){ ... } else { ... } to a foreachelse.
+				if(children.get(children.size() - 1).getData() instanceof CFunction 
+						&& children.get(children.size() - 1).getData().val().equals("else")){
+					ParseTree foreachelse = new ParseTree(new CFunction(new foreachelse().getName(), t), fileOptions);
+					children.set(children.size() - 1, children.get(children.size() - 1).getChildAt(0));
+					foreachelse.setChildren(children);
+					return foreachelse;
+				}
+			}
+			return null;
+		}
+
+		
 	}
 	
 	@api
