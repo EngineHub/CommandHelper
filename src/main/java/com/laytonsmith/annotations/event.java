@@ -16,6 +16,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Deprecated // Use @api class MyClass extends AbstractEvent instead!
 public @interface event {
 	
 }
