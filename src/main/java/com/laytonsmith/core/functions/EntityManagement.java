@@ -2700,7 +2700,8 @@ public class EntityManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityTypeException};
+			return new ExceptionType[]{ExceptionType.CastException, 
+				ExceptionType.BadEntityTypeException, ExceptionType.BadEntityException};
 		}
 
 		@Override
