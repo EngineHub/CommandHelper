@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCInventoryHolder;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.MCVehicle;
 import com.laytonsmith.annotations.MEnum;
@@ -37,4 +38,10 @@ public interface MCHorse extends MCTameable, MCVehicle, MCInventoryHolder {
 	public int getMaxDomestication();
 	public void setDomestication(int level);
 	public void setMaxDomestication(int level);
+	
+	// Inventory
+	public void setSaddle(MCItemStack stack);
+	public MCItemStack getSaddle();
+	public void setArmor(MCItemStack stack);
+	public MCItemStack getArmor();
 }

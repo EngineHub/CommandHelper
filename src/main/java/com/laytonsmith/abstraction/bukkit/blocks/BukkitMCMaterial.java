@@ -35,6 +35,11 @@ public class BukkitMCMaterial implements MCMaterial {
 	}
 
 	@Override
+	public String getName() {
+		return m.name();
+	}
+
+	@Override
     public int getMaxStackSize() {
         return m.getMaxStackSize();
     }
