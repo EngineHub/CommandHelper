@@ -44,6 +44,8 @@ array {entityID} Returns an associative array containing all the data of the giv
 * maxdomestication: The maximum domestication level of the horse.
 * style: The horse's style (can be %HORSE_STYLE%).
 * variant: The horse's variant (can be %HORSE_VARIANT%).
+* armor: An item pertaining to the armor a horse has put on.
+* saddle: An item pertaining to the saddle a horse has put on. Can be anything.
 |-
 | IRON_GOLEM
 | 
