@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -81,7 +80,7 @@ public abstract class SQLDataSource extends AbstractDataSource {
 	 *
 	 * @return
 	 */
-	private String getEscapedTable() {
+	protected String getEscapedTable() {
 		return getTable().replace("`", "``");
 	}
 
@@ -203,7 +202,8 @@ public abstract class SQLDataSource extends AbstractDataSource {
 	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
 		try {
 			connect();
-			PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "` LIKE ?");
+			PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + getEscapedTable() + "`"
+					+ " WHERE `" + KEY_COLUMN + "` LIKE ?");
 			statement.setString(1, StringUtils.Join(leadKey, ".") + "%");
 			Map<String[], String> map = new HashMap<>();
 			try (ResultSet results = statement.executeQuery()){
@@ -223,7 +223,7 @@ public abstract class SQLDataSource extends AbstractDataSource {
 		if(hasKey(key)){
 			try{
 				connect();				
-				PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + getTable() + "` WHERE `" + KEY_COLUMN + "`=?");
+				PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "`=?");
 				statement.setString(1, StringUtils.Join(key, "."));
 				statement.executeUpdate();
 				lastConnected = System.currentTimeMillis();

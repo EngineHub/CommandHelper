@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
@@ -623,8 +624,11 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates basic usage", "assign(@x, 0)\nmsg(@x)\ninc(@x)\nmsg(@x)"),
-						new ExampleScript("Demonstrates symbolic usage", "assign(@x, 0)\nmsg(@x)\n++@x\nmsg(@x)"),};
+						new ExampleScript("Demonstrates basic usage", "@x = 0;\nmsg(@x);\ninc(@x);\nmsg(@x);"),
+						new ExampleScript("Demonstrates symbolic usage", "@x = 0;\n"
+								+ "msg(@x);\n"
+								+ "(++@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
+								+ "msg(@x);"),};
 		}
 
 		@Override
@@ -641,6 +645,11 @@ public class Math {
 			return EnumSet.of(
 						OptimizationOption.OPTIMIZE_CONSTANT
 			);
+		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{dec.class};
 		}
 	}
 
@@ -809,7 +818,7 @@ public class Math {
 		@Override
 		public String docs() {
 			return "ivar {var, [value]} Subtracts value from var, and stores the new value. Value defaults to 1. Equivalent to --var (or var -= value) in other languages. Expects ivar to be a variable, then"
-					+ " returns the ivar, , or, if var is a constant number, simply adds x to it, and returns the new number.";
+					+ " returns the ivar, or if var is a constant number, simply adds x to it, and returns the new number.";
 		}
 
 		@Override
@@ -852,6 +861,22 @@ public class Math {
 						OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("Demonstrates basic usage", "@x = 1;\nmsg(@x);\ndec(@x);\nmsg(@x);"),
+						new ExampleScript("Demonstrates symbolic usage", "@x = 1;\n"
+								+ "msg(@x);\n"
+								+ "(--@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
+								+ "msg(@x);"),};
+		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{inc.class};
+		}
+		
 	}
 
 	@api

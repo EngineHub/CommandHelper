@@ -39,8 +39,7 @@ public class SQLiteDataSource extends SQLDataSource {
 			path = mixin.getPath();
 			connect();
 			Statement statement = getConnection().createStatement();
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + TABLE_NAME + "` (`" + getKeyColumn() + "` TEXT PRIMARY KEY,"
-					+ " `" + getValueColumn() + "` TEXT)");
+			statement.executeUpdate(getTableCreationQuery());
 			updateLastConnected();
 		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
 			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
@@ -83,8 +82,20 @@ public class SQLiteDataSource extends SQLDataSource {
 	@Override
 	public String docs() {
 		return "SQLite {sqlite://path/to/db/file.db} This type store data in a SQLite database."
-			+ " All the pros and cons of MySQL apply here. The database will contain a lone table"
-				+ " named " + TABLE_NAME + ", with two columns, " + getKeyColumn() + " and " + getValueColumn();
+			+ " All the pros and cons of MySQL apply here. The database will contain a lone table,"
+				+ " and the table should be created with the query: "
+				+ getTableCreationQuery();
+	}
+	
+	/**
+	 * Returns the table creation query that should be used to create the table specified.
+	 * This is public for documentation, but is used internally.
+	 * @param table
+	 * @return 
+	 */
+	public final String getTableCreationQuery(){
+		return "CREATE TABLE IF NOT EXISTS `" + TABLE_NAME + "` (`" + getKeyColumn() + "` TEXT PRIMARY KEY,"
+					+ " `" + getValueColumn() + "` TEXT)";
 	}
 
 	@Override
@@ -123,10 +134,6 @@ public class SQLiteDataSource extends SQLDataSource {
 
 	@Override
 	protected String getConnectionString() {
-		try {
-			return "jdbc:sqlite:" + mixin.getPath();
-		} catch (UnsupportedOperationException | IOException ex) {
-			throw new Error(ex);
-		}
+		return "jdbc:sqlite:" + path;
 	}
 }

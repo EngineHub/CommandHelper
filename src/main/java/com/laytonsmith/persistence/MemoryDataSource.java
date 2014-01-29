@@ -8,6 +8,7 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,8 +20,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author lsmith
+ * This class provides a temporary data source that is in memory only, and is
+ * never written out to disk. All methods in this class are thread safe.
  */
 @datasource("mem")
 public final class MemoryDataSource extends AbstractDataSource {
@@ -30,7 +31,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	/**
 	 * Clears all data from all databases. Should be called when a natural reload type operation is called.
 	 */
-	public static void ClearDatabases(){
+	public synchronized static void ClearDatabases(){
 		for(String s : databasePool.keySet()){
 			databasePool.get(s).clear();
 		}
@@ -42,9 +43,17 @@ public final class MemoryDataSource extends AbstractDataSource {
 		ClearDatabases();
 	}
 	
-	private static Map<String, String> getDatabase(String name){
+	/**
+	 * Retrieves the underlying database for a given database name.
+	 * The actual database instance is returned, not a copy, and if
+	 * the database doesn't exist, a new one is returned, therefore
+	 * this will never return null.
+	 * @param name
+	 * @return 
+	 */
+	public synchronized static Map<String, String> getDatabase(String name){
 		if(!databasePool.containsKey(name)){
-			databasePool.put(name, new TreeMap<String, String>());
+			databasePool.put(name, Collections.synchronizedMap(new TreeMap<String, String>()));
 		}
 		return databasePool.get(name);
 	}

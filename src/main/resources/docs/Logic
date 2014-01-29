@@ -1,0 +1,273 @@
+
+Many times you want to use a bit of basic logic to determine what to do. Usually you want to compare 
+two values to see if some relationship between them is true. Based on the result of this comparison, 
+you want to do one thing or another. This is where the logic operators come in handy. There are several 
+functions that all act relatively the same in the BasicLogic class. Essentially, they compare certain 
+values, then return a boolean.
+
+''Note: The examples in this tutorial primarily use operators, see the page on [[CommandHelper/Staged/Operators|Operators]]''
+''for a refresher, if the operators are unclear.''
+
+==Basic Usage==
+
+Let's take the {{function|lt}} function into consideration (<code>&lt;</code> operator). 
+lt returns true if the value on the left is less than the value on the right. In a typical 
+algebra class, when comparing two numbers, you would write something like this:
+<pre>
+x < y
+</pre>
+Assuming x is 3 and y is 4, this statement is true. However, if we swap the values, and make x 4 and y 3, 
+the statement is false. Written in code, it would look like this:
+
+%%CODE|
+@x < @y
+%%
+
+All the functions in the [[CommandHelper/API#BasicLogic|BasicLogic class]] return a 
+boolean based on certain conditions. You should be familiar with the lt (less than <code>&lt;</code>), 
+lte (less than or equals to <code>&lt;=</code>), gt (greater than <code>&gt;</code>), 
+gte (greater than or equals <code>&gt;=</code>) functions 
+from a basic algebra class that covers inequalities.
+
+==Boolean logic==
+
+Some of the functions you may not have seen before if you haven't taken a logic or programming class 
+are the boolean logic operators. For a full discussion of boolean logic, you may wish to read up 
+[http://en.wikipedia.org/wiki/Boolean_logic on wikipedia] for more information, however a basic 
+treatment is covered below.
+
+The three main operators: and (<code>&&</code>), or (<code>||</code>), and not (<code>!</code>)
+ are the building blocks for more complicated logic statements. 
+These functions deal with the overall truth value of a construct, not individual bits (see the 
+bit_and and bit_or functions). 
+
+<code>and()</code> (<code>&&</code>) returns true if '''all''' the parameters resolve to true:
+%%CODE|
+(true && true && true && true) # returns true
+(true && true && false && true) # returns false
+%%
+
+<code>or()</code> (<code>||</code>) returns true if '''any''' of the parameters are true
+%%CODE|
+(true || false || false || false) # returns true
+(false || false || false || false) # returns false
+%%
+
+<code>not()</code> (<code>!</code>) returns the opposite truth value of the parameter:
+%%CODE|
+(!true) # returns false
+(!false) # returns true
+%%
+
+<code>xor()</code> returns true if both parameters are different
+%%CODE|
+xor(true, true) # returns false
+xor(false, false) # returns false
+xor(true, false) # returns true
+xor(false, true) # returns true
+%%
+
+For convenience, there are also the nand, nor, xnor functions, which are equivalent respectively to not(and()), not(or()), and not(xor()).
+
+==Bitwise Functions==
+The three bitwise functions bit_and, bit_or, and bit_not work similarly to <code>and</code>, 
+<code>or</code> and <code>not</code>, but they only work with integers, and they work on a 
+binary level to determine the bitwise equivalent of two or more integers, and return that integer. 
+Again, a full discussion of how bitwise operations work is beyond the scope of this article, but some examples are below:
+
+%%CODE|
+bit_and(4, 7) # binary equivalent: (100, 111) returns 100 = 4
+bit_and(7, 5) # binary equivalent: (111, 101) returns 101 = 5
+bit_and(1, 4) # binary equivalent: (001, 100) returns 000 = 0
+
+bit_or(1, 3) # binary equivalent: (001, 011) returns 011 = 3
+bit_or(2, 4) # binary equivalent: (010, 100) returns 110 = 6
+
+bit_not(4) # binary equivalent: (0..100) returns 1..011 = -5
+%%
+
+Bitwise operations are useful for storing many boolean values as a single integer, among other uses. 
+It may be useful to note that integers are stored as 64 bit two's compliment values.
+
+<code>lshift</code>, <code>rshift</code>, and <code>urshift</code> are also available. lshift(value, bitsToShift) is the general format for all three.
+
+%%CODE|
+lshift(4, 2) # returns 16 
+urshift(10, 2) # returns 2
+rshift(-10, 2) # returns -3
+urshift(-10, 2) # returns 4611686018427387901 
+rshift(3, 1) # returns 1
+%%
+
+==if()==
+Now that we have established that some conditions are true or not, we may want to do different 
+things depending. This is where the <code>if()</code> function comes in. We are creating "code branches" 
+when we use if and other conditional statements, which means that sometimes code will not get run. 
+The syntax of the if statements is as follows:
+
+%%CODE|
+if(condition){
+	// code to run if true
+} else {
+	// code to run if false
+}
+%%
+
+The condition and code to run if true are required, but the code to run if false ("else") is optional. 
+If it is left off, and the condition is false, void is returned. Only one branch of code is executed here. 
+If condition resolves to true (which may itself contain more complex code), then the second argument is 
+evaluated and returned, otherwise the third argument is evaluated and returned. Note that the other 
+code branch is not even evaluated, that is, it is skipped entirely.
+
+%%CODE|
+if(true){
+	msg('Once');
+} else {
+	// This "block" won't run at all
+	msg('Twice');
+}
+%%
+
+The "old style" of if was a fully functional syntax, though that syntax is still useful for ''ternary statements''.
+In most languages, this is the ''condition ? true : false'' syntax. <code>if</code> technically returns a value. If
+the value in each block is a single, returning value, that value will be returned. As a convention, only if a
+ternary operator is desired should you use the functional syntax. The following code works as expected:
+
+%%CODE|
+@var = if(@condition, 1, 2);
+%%
+
+If the @condition is true, then 1 is assigned to @var, otherwise 2 is.
+
+===Truth value testing===
+
+The following are considered to evaluate to true:
+
+* The keyword and boolean value <code>true</code>
+* Any non-empty string
+* Any number different from 0
+
+Anything else, including arrays, are considered false.
+
+==else if==
+if/else if/else chains can be formed as well, if multiple conditions need to be checked. Using only
+if/else would quickly get messy if you have multiple values to check for. 
+Instead, you may use the ''else if'' chain.
+
+%%CODE|
+if(@val1){
+	// code1
+} else if(@val2){
+	// code2
+} else if(@val3){
+	// code3
+}
+%%
+In this usage, the <code>val</code>s will be evaluated from top to bottom, and once the first val is true, 
+the corresponding code will be run. If none of the vals are true, then nothing in the chain will run.
+
+%%CODE|
+if(@val1){
+	// code1
+} else if(@val2){
+	// code2
+} else if(@val3){
+	// code3
+} else {
+	// default case
+}
+%%
+
+In this usage, we can imagine a "default" case. If at least one of the <code>@val</code>s 
+is true, then it will behave the same. However, if none of the vals are true, then the 
+final code block will be run instead. This is the final "else" clause of the statement.
+
+The {{function|ifelse}} function is the non-brace way to do if/else if/else chains, though
+its usage is not recommended, as it is less readable. Internally, if/else if/else chains are
+converted to it still, however.
+
+==switch()==
+A switch statement works by simplifying comparisons. Unlike if/else if/else, switch checks to see if some value 
+is equal to another value, then running that code, instead of just seeing if the value itself is true. 
+Switch statements can actually be written using if chains, so to demonstrate, here is the same code written both ways:
+%%CODE|
+@value = 'value';
+if(@value == 'value1'){
+	// code1
+} else if(@value == 'value2'){
+	// code2
+} else if(@value == 'value3'){
+	// code3
+} else {
+	// default
+}
+
+switch(@value){
+          case 'value1':
+               code1();
+          case 'value2':
+               code2();
+          case 'value3':
+               code3();
+          default:
+               code4();
+}
+%%
+As you can see, it's a bit less code using the switch statement, but the results can be achieved either way. 
+Sometimes you may want to do a different type of comparison, other than equals, so you have to use if/else if/else chains.
+As with if/else if/else chains, a "default" condition can be stated, in the event none of the given conditions are satisfied.
+When possible, however, switch statements should be used, as they can be better optimized by the compiler.
+
+Sometimes you may want to run some code given that the value equals one of any number of values. 
+In this case, you may specify multiple cases, and if the value equals any 
+of the values specified, the corresponding code is run.
+
+%%CODE|
+#if val equals either test2, test3, or test4, code234 is run
+switch(@val){
+	case 'test1':
+		code1();
+	case 'test2':
+	case 'test3':
+	case 'test4':
+		code234();
+	default:
+		defaultCode();
+}
+%%
+
+Though you can technically use non-string and non-integer values as the comparison types, it is not recommended, 
+and in fact, arrays may not be used at all. When writing code, you should only use integers and strings whenever possible.
+
+Slices may also be used, and if so, if the test value falls within the range of the slice, that code block is run.
+
+%%CODE|
+@value = 1;
+switch(@value){
+	case 0:
+		case0();
+	case 1..5:
+		case1_5(); // This one will run
+}
+%%
+
+Unlike many other languages, no {{function|break}} is strictly necessary. Code blocks are run starting with the case statement,
+running until the next case. Only if a case should be ignored must you use break(), otherwise code will merge with the following case.
+For instance, say we want nothing to happen should the value = 2.
+
+%%CODE|
+switch(@value){
+	case 1:
+		code1();
+	case 2:
+		break();
+	default:
+		defaultCode();
+}
+%%
+
+Had we left the break() out, case 2 and the default case would have merged together. In all other cases, break() is optional.
+
+<code>switch</code> also has a pure functional syntax, but it is not recommended for use in new code.
+
+{{LearningTrail}}

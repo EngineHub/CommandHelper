@@ -19,13 +19,12 @@ import java.util.Set;
  * the data, then it may choose to not use this class. Note: Not all data
  * sources can store a key in both namespace.value and namespace.value.other, in
  * that case, to make namespace.value's actual value, it should be stored as
- * namespace.value.~
+ * namespace.value._
  *
- * @author lsmith
  */
 public final class DataSourceModel {
 
-	private GenericTreeNode<Pair<String, String>> tree = new GenericTreeNode<Pair<String, String>>();
+	private final GenericTreeNode<Pair<String, String>> tree = new GenericTreeNode<>();
 
 	public DataSourceModel(Map<String, Object> model) {
 		//We have to do a depth first traversal here to get all the keys
@@ -55,7 +54,7 @@ public final class DataSourceModel {
 					build(((Map<String, Object>) node).get(key), treeNode);
 				} else {
 					GenericTreeNode<Pair<String, String>> newNode =
-							new GenericTreeNode<Pair<String, String>>(new Pair<String, String>(key, null));
+							new GenericTreeNode<>(new Pair<String, String>(key, null));
 					treeNode.addChild(newNode);
 					build(((Map<String, Object>) node).get(key), newNode);
 				}
@@ -67,7 +66,7 @@ public final class DataSourceModel {
 	}
 
 	public Map<String, Object> toMap() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		for (GenericTreeNode<Pair<String, String>> child : tree.getChildren()) {
 			decompose(map, child);
 		}
@@ -75,7 +74,7 @@ public final class DataSourceModel {
 	}
 
 	public List<Pair<String[], String>> toList() {
-		List<Pair<String[], String>> list = new ArrayList<Pair<String[], String>>();
+		List<Pair<String[], String>> list = new ArrayList<>();
 		//TODO
 		return list;
 	}
@@ -84,7 +83,7 @@ public final class DataSourceModel {
 		if (treeNode.hasChildren()) {
 			//If it's not a leaf node, we need to add a new child to the map. 
 			//However, if the data isn't null, we need to add the data now as a _ key
-			Map<String, Object> map = new HashMap<String, Object>();
+			Map<String, Object> map = new HashMap<>();
 			if (treeNode.getData().getValue() != null) {
 				map.put("_", treeNode.getData().getValue());
 			}
@@ -99,11 +98,11 @@ public final class DataSourceModel {
 	}
 
 	public String get(String[] key) {
-		return getValue(new ArrayList<String>(Arrays.asList(key)), tree);
+		return getValue(new ArrayList<>(Arrays.asList(key)), tree);
 	}
 
 	public void set(String[] key, String value) {
-		setValue(new ArrayList<String>(Arrays.asList(key)), tree, value);
+		setValue(new ArrayList<>(Arrays.asList(key)), tree, value);
 	}
 
 	public void clearKey(String[] key) {
@@ -140,7 +139,7 @@ public final class DataSourceModel {
 				}
 			}
 			if (found == null) {
-				found = new GenericTreeNode<Pair<String, String>>(new Pair<String, String>(key, null));
+				found = new GenericTreeNode<>(new Pair<String, String>(key, null));
 				treeNode.addChild(found);
 			}
 			if (value == null) {
@@ -162,7 +161,7 @@ public final class DataSourceModel {
 	}
 
 	public Set<String[]> keySet() {
-		Set<String[]> keys = new HashSet<String[]>();
+		Set<String[]> keys = new HashSet<>();
 		for (GenericTreeNode child : tree.getChildren()) {
 			traverse(child, new ArrayList<String>(), keys);
 		}

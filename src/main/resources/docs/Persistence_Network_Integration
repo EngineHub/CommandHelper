@@ -1,0 +1,144 @@
+This guide serves as a technical standard for the Persistence Network format. The guide is
+not meant for script writers, but rather those that are trying to write integration tools
+to work with data sources created by the Persistence, or otherwise understand the internals.
+
+== General ==
+
+Data sources are meant to be completely agnostic to the value that they are storing. All data
+must ultimately be able to be stored and read in as strings. The upper level code submits a
+string (typically a json string, in the case of MethodScript data types) and the data source is
+responsible for storing that data in the best way possible, then returning the data
+exactly as originally stored. Each data source may further encode the string sent in,
+but it must decode it first, before returning the data.
+
+Keys are composed of zero or more namespaces, plus the key name. In practice, there
+will always be at least one namespace. Namespaces must follow the regex "[a-zA-Z0-9_]+"
+though namespaces may not be named exactly "_". This is to allow some data sources that
+can use a hierarchy to reserve a place for a value stored at the root of a namespace.
+For instance, assume we want to store a value at "a.b" and "a.b.c".  In a hierarchical
+data source, "a" would be an array, and so would "b", and "c" would be a single value.
+But doing this prevents the single value from being stored in "b". Consider the json:
+
+<pre>
+With just the value in a.b:
+
+{
+	"a": {
+		"b": "value stored at a.b"
+	}
+}
+
+With just the value in a.b.c:
+
+{
+	"a": {
+		"b": {
+			"c": "value stored at a.b.c"
+		}
+	}
+}
+</pre>
+
+As you can see, given this hierarchical data structure, it is impossible to merge
+the two structures as is. Instead, the special key "_" is reserved for "root" values, and
+should be taken to mean "the value stored here is the value for my parent namespace".
+Merging the data shown above yields this json:
+
+<pre>
+{
+	"a": {
+		"b": {
+			"_": "value stored at a.b",
+			"c": "value stored at a.b.c"
+		}
+	}
+}
+</pre>
+
+This hierarchical structure only applies to Data Sources that actually have a hierarchy
+of data, not flat storage, for instance, ini.
+
+When a data source is considered a "flat" data source, the key is a single dot
+separated string, i.e. "a.b.c".
+
+== Data Sources ==
+
+A list of the data source types and any notes specific to that type follow:
+
+=== INI ===
+
+INI data is a flat data structure. INI data follows the standard INI format, i.e. <code>key=value\n</code>. Lines
+starting with any amount of whitespace then <code>#</code> are considered comments, and are ignored, though
+lines with a hash character elsewhere in the line are taken as literal hashes. Since
+keys may not contain non-numeric characters, this will never cause an issue for
+programmatically generated data. Newlines indicate the end of the value, but internally,
+all newlines will have been escaped to "\n" before transmission to the data source, so
+this shouldn't cause an issue either. The value that is grabbed if there are duplicate
+keys is undefined.
+
+=== JSON ===
+
+JSON data is stored using a hierarchy. The values are double encoded with json to prevent
+any issues with differentiating namespace hierarchy vs internal data structures, though
+this causes extra space to be used.
+
+=== MySQL ===
+
+MySQL data is a flat data structure. Data is stored in a table with special column requirements. 
+There are three columns in the table, and the table name is determined by the user.
+
+The columns are defined by the query:
+
+<syntaxhighlighting lang="sql">
+%%MySQL_CREATE_TABLE_QUERY%%
+</syntaxhighlightin>
+
+Selections, inserts, etc, must take the key and binary hash it with the UNHEX and MD5 functions: 
+<code>UNHEX(MD5('key'))</code>. This provides a way for the key to be unlimited length, yet still
+allow the table to be indexed. Though unlikely, collisions are possible, but the plaintext key is
+also used in queries to ensure that the correct row is affected.
+
+=== Redis ===
+
+Redis is a flat data structure. As Redis is a key-value data store, it is an exceptionally good fit
+for the Persistence Network. Keys and values are stored as is, using the standard Redis commands.
+
+Storing a value uses SET, getting a value uses GET, and clearing a value uses DEL. For multi get,
+KEYS is used to determine the keyset (with a filter to reduce the search set), which then uses
+GET to get the individual keys.
+
+=== SQLite ===
+
+SQLite data is a flat data structure. Since TEXT columns can be indexed in SQLite,
+the key column is the primary key. The database may contain multiple tables, but only the table created
+with the query:
+
+<syntaxhighlighting lang="sql">
+%%SQLite_CREATE_TABLE_QUERY%%
+</syntaxhighlighting>
+
+will be used.
+
+=== Serialized Persistence ===
+
+Serialized Persistence is a flat data structure. The data is stored using the 
+[http://docs.oracle.com/javase/6/docs/platform/serialization/spec/protocol.html Java Serialization Protocol].
+There is a single object stored, a HashMap&lt;String, String&gt; of the key/value pairs.
+
+In Java code, this uses the ObjectOutputStream/ObjectInputStream utility classes. As
+Strings are serializable, this method should always work, and is immune to future changes
+in the data itself.
+
+=== Temporary Memory ===
+
+Temporary memory is a flat data structure. Since this data is completely internal,
+no other processes can access the data. However, other code running in the same
+memory space can access the data via the MemoryDataSource static methods. The
+data is stored in a Map<String, String>. All the methods in the MemoryDataSource
+class are thread safe, so multiple threads may concurrently access those databases
+with no issues.
+
+=== YML ===
+
+YML data is stored as a hierarchy. The format follows the standard YML format, which
+is plain text.

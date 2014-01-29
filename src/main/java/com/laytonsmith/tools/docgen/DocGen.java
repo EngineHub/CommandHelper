@@ -23,6 +23,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -108,8 +109,8 @@ public class DocGen {
 				for(ExampleScript es : f.examples()){
 					exampleBuilder.append("====Example ").append(count).append("====\n")
 							.append(es.getDescription()).append("\n\n"
-							+ "Given the following code:\n<pre>");
-					exampleBuilder.append(es.getScript()).append("\n</pre>");
+							+ "Given the following code:\n");
+					exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript())).append("\n");
 					String style = "";
 					if(es.isAutomatic()){
 						style = " style=\"background-color: #BDC7E9\"";

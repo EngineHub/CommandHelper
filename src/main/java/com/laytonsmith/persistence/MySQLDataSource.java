@@ -1,5 +1,6 @@
 package com.laytonsmith.persistence;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
@@ -8,6 +9,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
@@ -21,6 +24,7 @@ public class MySQLDataSource extends SQLDataSource {
 	
 	/* These values may not be changed without creating an upgrade routine */
 
+	private static final String KEY_HASH_COLUMN = "key_hash";
 	private String host;
 	private int port;
 	private String username;
@@ -68,12 +72,30 @@ public class MySQLDataSource extends SQLDataSource {
 		try {
 			connect();
 			//Create the table if it doesn't exist
+			//The columns in the table 
 			Statement statement = getConnection().createStatement();
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + table + "` (`" + getKeyColumn() + "` TEXT, `" + getValueColumn() + "` TEXT)");
+			statement.executeUpdate(getTableCreationQuery(table));
 		} catch (IOException | SQLException ex) {
 			throw new DataSourceException("Could not connect to MySQL data source \"" + uri.toString() + "\": " + ex.getMessage(), ex);
 		}
 		
+	}
+	
+	/**
+	 * Returns the table creation query that should be used to create the table specified.
+	 * This is public for documentation, but is used internally.
+	 * @param table
+	 * @return 
+	 */
+	public final String getTableCreationQuery(String table){
+		return "CREATE TABLE IF NOT EXISTS `" + table + "` (\n"
+					+ " -- This is an UNHEX(MD5('key')) binary hash of the unlimited length key column, so the table may have a primary key.\n"
+					+ " `" + KEY_HASH_COLUMN + "` BINARY(16) PRIMARY KEY NOT NULL,\n"
+					+ " -- This is the key itself, stored for plaintext readability, and for full text searches for getting values\n"
+					+ " `" + getKeyColumn() + "` TEXT NOT NULL,\n"
+					+ " -- The value itself, which may be null\n"
+					+ " `" + getValueColumn() + "` TEXT\n"
+					+ ");";
 	}
 
 	@Override
@@ -85,6 +107,67 @@ public class MySQLDataSource extends SQLDataSource {
 					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"));
 		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
+		}
+	}
+	
+	@Override
+	public String get0(String[] key) throws DataSourceException {
+		try {
+			connect();
+			PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" 
+					+ getEscapedTable() + "` WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))"
+					+ " LIMIT 1");
+			String joinedKey = StringUtils.Join(key, ".");
+			statement.setString(1, joinedKey);
+			String ret = null;
+			try (ResultSet result = statement.executeQuery()) {
+				if(result.next()){
+					ret = result.getString(getValueColumn());
+				}
+			}
+			updateLastConnected();
+			return ret;
+		} catch(SQLException | IOException ex){
+			throw new DataSourceException(ex.getMessage(), ex);
+		}
+	}
+	
+	@Override
+	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
+		try {
+			connect();
+			if(value == null){
+				clearKey0(dm, key);
+			} else {
+				PreparedStatement statement = getConnection().prepareStatement("REPLACE INTO"
+						+ " `" + getEscapedTable() + "`"
+						+ " (`" + KEY_HASH_COLUMN + "`, `" + getValueColumn() + "`) VALUES (UNHEX(MD5(?)), ?)");
+				String joinedKey = StringUtils.Join(key, ".");
+				statement.setString(1, joinedKey);
+				statement.setString(2, value);
+				statement.executeUpdate();
+			}
+			updateLastConnected();
+			return true;
+		} catch (SQLException ex) {
+			throw new DataSourceException(ex.getMessage(), ex);
+		}
+	}
+	
+	@Override
+	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
+		if(hasKey(key)){
+			try{
+				connect();				
+				PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() + "`"
+						+ " WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))");
+				String joinedKey = StringUtils.Join(key, ".");
+				statement.setString(1, joinedKey);
+				statement.executeUpdate();
+				updateLastConnected();
+			} catch(Exception e){
+				throw new DataSourceException(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -100,7 +183,7 @@ public class MySQLDataSource extends SQLDataSource {
 			+ " based data sources, without risking either data corruption,"
 			+ " or extremely low efficiency. The layout of the table"
 			+ " in the database is required to be of a specific format:"
-			+ " CREATE TABLE IF NOT EXISTS `table` (`" + getKeyColumn() + "` TEXT, `" + getValueColumn() + "` TEXT);";
+			+ " " + getTableCreationQuery("testTable");
 	}
 
 	@Override
