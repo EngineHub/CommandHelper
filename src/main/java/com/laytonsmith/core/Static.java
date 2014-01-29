@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,15 +69,15 @@ import java.util.logging.Logger;
 public final class Static {
 
     private Static(){}
-    
+
     private static final Logger logger = Logger.getLogger("CommandHelper");
-    
+
     private static Map<String, String> hostCache = new HashMap<String, String>();
 
 	private static final String consoleName = "~console";
-	
+
 	private static final String blockPrefix = "#"; // Chosen over @ because that does special things when used by the block
-	
+
 	public static CArray getArray(Construct construct, Target t) {
 		if(construct instanceof CArray){
 			return ((CArray)construct);
@@ -84,7 +85,7 @@ public final class Static {
 			throw new ConfigRuntimeException("Expecting array, but received " + construct.val(), ExceptionType.CastException, t);
 		}
 	}
-	
+
 	/**
 	 * Works like the other get* methods, but works in a more generic way for other types of Constructs.
 	 * @param <T> The type expected.
@@ -107,7 +108,7 @@ public final class Static {
      * if it cannot be converted, for instance the string "s" cannot be cast to a number. The number returned
      * will always be a double.
      * @param c
-     * @return 
+     * @return
      */
     public static double getNumber(Construct c, Target t) {
         double d;
@@ -141,7 +142,7 @@ public final class Static {
     /**
      * Alias to getNumber
      * @param c
-     * @return 
+     * @return
      */
     public static double getDouble(Construct c, Target t) {
         try {
@@ -151,10 +152,10 @@ public final class Static {
                     ExceptionType.CastException, t);
         }
     }
-	
+
 	public static float getDouble32(Construct c, Target t){
 		// Use 6 places at most else the imprecisions of float makes this function throw the exception.
-		double delta = 0.0000001; 
+		double delta = 0.0000001;
 		double l = getDouble(c, t);
 		float f = (float)l;
 		if(Math.abs(f - l) > delta){
@@ -166,7 +167,7 @@ public final class Static {
     /**
      * Returns an integer from any given construct.
      * @param c
-     * @return 
+     * @return
      */
     public static long getInt(Construct c, Target t) {
         long i;
@@ -191,7 +192,7 @@ public final class Static {
         }
         return i;
     }
-	
+
 	/**
 	 * Returns a 32 bit int from the construct. Since the backing value is actually
 	 * a long, if the number contained in the construct is not the same after truncating,
@@ -199,7 +200,7 @@ public final class Static {
 	 * method is much preferred over silently truncating.
 	 * @param c
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static int getInt32(Construct c, Target t){
 		long l = getInt(c, t);
@@ -209,7 +210,7 @@ public final class Static {
 		}
 		return i;
 	}
-	
+
 	/**
 	 * Returns a 16 bit int from the construct (a short). Since the backing value is actually
 	 * a long, if the number contained in the construct is not the same after truncating,
@@ -217,7 +218,7 @@ public final class Static {
 	 * method is much preferred over silently truncating.
 	 * @param c
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static short getInt16(Construct c, Target t){
 		long l = getInt(c, t);
@@ -227,7 +228,7 @@ public final class Static {
 		}
 		return s;
 	}
-	
+
 	/**
 	 * Returns an 8 bit int from the construct (a byte). Since the backing value is actually
 	 * a long, if the number contained in the construct is not the same after truncating,
@@ -235,7 +236,7 @@ public final class Static {
 	 * method is much preferred over silently truncating.
 	 * @param c
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static byte getInt8(Construct c, Target t){
 		long l = getInt(c, t);
@@ -245,12 +246,12 @@ public final class Static {
 		}
 		return b;
 	}
-	
+
     /**
      * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows the following rules:
      * If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it is empty, it is false, otherwise it is true.
      * @param c
-     * @return 
+     * @return
      */
     public static boolean getBoolean(Construct c) {
         boolean b = false;
@@ -268,7 +269,7 @@ public final class Static {
         }
         return b;
     }
-	
+
 	public static CByteArray getByteArray(Construct c, Target t){
 		if(c instanceof CByteArray){
 			return (CByteArray)c;
@@ -282,7 +283,7 @@ public final class Static {
     /**
      * Returns true if any of the constructs are a CDouble, false otherwise.
      * @param c
-     * @return 
+     * @return
      */
     public static boolean anyDoubles(Construct... c) {
         for (int i = 0; i < c.length; i++) {
@@ -296,7 +297,7 @@ public final class Static {
     /**
      * Return true if any of the constructs are CStrings, false otherwise.
      * @param c
-     * @return 
+     * @return
      */
     public static boolean anyStrings(Construct... c) {
         for (int i = 0; i < c.length; i++) {
@@ -310,7 +311,7 @@ public final class Static {
     /**
      * Returns true if any of the constructs are CBooleans, false otherwise.
      * @param c
-     * @return 
+     * @return
      */
     public static boolean anyBooleans(Construct... c) {
         for (int i = 0; i < c.length; i++) {
@@ -332,7 +333,7 @@ public final class Static {
     /**
      * Returns the server for this plugin
      * @return
-     * @throws NotInitializedYetException 
+     * @throws NotInitializedYetException
      */
     public static MCServer getServer() throws NotInitializedYetException {
         MCServer s = com.laytonsmith.commandhelper.CommandHelperPlugin.myServer;
@@ -345,7 +346,7 @@ public final class Static {
     /**
      * Gets the reference to the AliasCore for this plugin
      * @return
-     * @throws NotInitializedYetException 
+     * @throws NotInitializedYetException
      */
     public static AliasCore getAliasCore() throws NotInitializedYetException {
         AliasCore ac = com.laytonsmith.commandhelper.CommandHelperPlugin.getCore();
@@ -358,7 +359,7 @@ public final class Static {
     /**
      * Gets the current version of the plugin
      * @return
-     * @throws NotInitializedYetException 
+     * @throws NotInitializedYetException
      */
     public static SimpleVersion getVersion() throws NotInitializedYetException {
         SimpleVersion v = com.laytonsmith.commandhelper.CommandHelperPlugin.version;
@@ -374,7 +375,7 @@ public final class Static {
     /**
      * Returns a file that is most likely ready to write to. The timestamp variables have already been replaced, and parent directories
      * are all created.
-     * @return 
+     * @return
      */
     public static FileWriter debugLogFile(File root) throws IOException {
         String currentFileName = root.getPath() + "/" + DateUtils.ParseCalendarNotation(Prefs.DebugLogFile());
@@ -425,7 +426,7 @@ public final class Static {
         return profilingLogFileHandle;
     }
 
-    
+
 
     public static WorldEditPlugin getWorldEditPlugin(Target t) {
         if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
@@ -463,7 +464,7 @@ public final class Static {
      * type. This takes into account that null, true, and false are keywords.
      * @param val
      * @param line_num
-     * @return 
+     * @return
      */
     public static Construct resolveConstruct(String val, Target t) {
         if (val == null) {
@@ -542,7 +543,7 @@ public final class Static {
 	 * Works like {@link #SendMessage(com.laytonsmith.abstraction.MCCommandSender, java.lang.String, com.laytonsmith.core.constructs.Target)}
 	 * except it doesn't require a target, and ignores the message if the command sender is offline.
 	 * @param m
-	 * @param msg 
+	 * @param msg
 	 */
 	public static void SendMessage(final MCCommandSender m, String msg) {
 		try{
@@ -585,7 +586,7 @@ public final class Static {
      * @param line_num
      * @param f
      * @throws ConfigRuntimeException FormatException if the notation is invalid.
-     * @return 
+     * @return
      */
     public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
         int type = 0;
@@ -614,7 +615,7 @@ public final class Static {
     /**
      * Works in reverse from the other ParseItemNotation
      * @param is
-     * @return 
+     * @return
      */
     public static String ParseItemNotation(MCItemStack is) {
         if (is == null) {
@@ -637,7 +638,7 @@ public final class Static {
     }
 
     private static Map<String, MCPlayer> injectedPlayers = new HashMap<String, MCPlayer>();
-    public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {        
+    public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
         MCPlayer m = null;
 		try{
 			m = Static.getServer().getPlayer(player);
@@ -681,9 +682,28 @@ public final class Static {
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
+		throw new ConfigRuntimeException("That entity (ID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
 	}
-	
+
+	/**
+	 * Returns the entity with the specified unique id. If it doesn't exist, a
+	 * ConfigRuntimeException is thrown.
+	 *
+	 * @param id
+	 * @return
+	 */
+
+	public static MCEntity getEntityByUuid(UUID id, Target t) {
+		for (MCWorld w : Static.getServer().getWorlds()) {
+			for (MCEntity e : w.getEntities()) {
+				if (e.getUniqueId().compareTo(id) == 0) {
+					return StaticLayer.GetCorrectEntity(e);
+				}
+			}
+		}
+		throw new ConfigRuntimeException("That entity (UUID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
+   }
+
 	/**
 	 * Returns the living entity with the specified id. If it doesn't exist or isn't living,
 	 * a ConfigRuntimeException is thrown.
@@ -751,7 +771,7 @@ public final class Static {
 
 	/**
 	 * Returns the system based line seperator character
-	 * @return 
+	 * @return
 	 */
     public static String LF() {
         return System.getProperty("line.separator");
@@ -760,14 +780,14 @@ public final class Static {
     public static void LogDebug(File root, String message) throws IOException {
 		LogDebug(root, message, LogLevel.OFF);
 	}
-	
+
 	/**
 	 * Equivalent to LogDebug(root, message, level, true);
 	 */
     public static synchronized void LogDebug(File root, String message, LogLevel level) throws IOException {
 		LogDebug(root, message, level, true);
 	}
-	
+
 	/**
 	 * Logs an error message, depending on the log level of the message and the user's
 	 * preferences.
@@ -776,7 +796,7 @@ public final class Static {
 	 * @param level
 	 * @param printScreen If true, the message (if otherwise shown) will be printed to the screen. If
 	 * false, it never will be, though it will still be logged to the log file.
-	 * @throws IOException 
+	 * @throws IOException
 	 */
     public static synchronized void LogDebug(File root, String message, LogLevel level, boolean printScreen) throws IOException {
 		//If debug mode is on in the prefs, we want to log this to the screen too
@@ -905,7 +925,7 @@ public final class Static {
         }
         return perm;
     }
-    
+
     public static String Logo(){
         String logo = Installer.parseISToString(Static.class.getResourceAsStream("/mainlogo"));
         logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
@@ -914,7 +934,7 @@ public final class Static {
         String s = logo + TermColors.reset();
         return s;
     }
-    
+
     public static String DataManagerLogo(){
         String logo = Installer.parseISToString(Static.class.getResourceAsStream("/datamanagerlogo"));
         logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
@@ -923,11 +943,11 @@ public final class Static {
         String s = logo + TermColors.reset();
         return s;
     }
-    
+
     public static String GetStringResource(String name){
         return GetStringResource(Static.class, name);
     }
-    
+
     public static String GetStringResource(Class path, String name){
         return Installer.parseISToString(path.getResourceAsStream(name));
     }
@@ -936,7 +956,7 @@ public final class Static {
      * Pulls out the MCChatColors from the string, and replaces them
      * with the nearest match ANSI terminal color.
      * @param mes If null, simply returns null
-     * @return 
+     * @return
      */
     public static String MCToANSIColors(String mes) {
         //Pull out the MC colors
@@ -969,14 +989,14 @@ public final class Static {
                 .replaceAll("§n", TermColors.RESET + TermColors.UNDERLINE)
                 .replaceAll("§o", TermColors.RESET + TermColors.ITALIC)
                 .replaceAll("§r", TermColors.reset());
-                
-                
+
+
     }
 
     public static void InjectPlayer(MCPlayer player) {
         injectedPlayers.put(player.getName(), player);
     }
-    
+
     public static void UninjectPlayer(MCPlayer player){
         injectedPlayers.remove(player.getName());
     }
@@ -987,49 +1007,49 @@ public final class Static {
            public void run(){
                CommandHelperPlugin.hostnameLookupCache.put(p.getName(),
                        p.getAddress().getHostName());
-           } 
+           }
         });
     }
-    
+
     public static void SetPlayerHost(MCPlayer p, String host){
         hostCache.put(p.getName(), host);
     }
     public static String GetHost(MCPlayer p){
         return hostCache.get(p.getName());
     }
-    
+
     public static void AssertPlayerNonNull(MCPlayer p, Target t){
         if(p == null){
             throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
         }
     }
-	
+
 	public static long msToTicks(long ms){
 		return ms / 50;
 	}
-	
+
 	public static long ticksToMs(long ticks){
 		return ticks * 50;
 	}
-	
+
 	public static void AssertNonNull(Object var, String message){
 		if(var == null){
 			throw new NullPointerException(message);
 		}
 	}
-	
+
 	/**
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that
 	 * folder is the root.
 	 * @return
 	 * @throws IOException
 	 * @throws DataSourceException
-	 * @throws URISyntaxException 
+	 * @throws URISyntaxException
 	 */
 	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException{
 		return GenerateStandaloneEnvironment(new PermissionsResolver.PermissiveResolver());
 	}
-	
+
 	/**
 	 * Generates a new environment, using the permissions resolver given. It is assumed that the jar has a folder
 	 * next to it with the name of the platform, and that folder is the root.
@@ -1037,7 +1057,7 @@ public final class Static {
 	 * @return
 	 * @throws IOException
 	 * @throws DataSourceException
-	 * @throws URISyntaxException 
+	 * @throws URISyntaxException
 	 */
 	public static Environment GenerateStandaloneEnvironment(PermissionsResolver permissionsResolver) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException{
 		File jarLocation;
@@ -1050,20 +1070,20 @@ public final class Static {
 		Installer.Install(platformFolder);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(platformFolder);
-		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(), 
+		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace("\\", "/")), options);
-		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"), 
+		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, permissionsResolver, platformFolder,
 				new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}
-	
+
 	/**
 	 * Asserts that all the args are not CNulls. If so, throws a ConfigRuntimeNullPointerException
 	 * @param t
 	 * @param args
-	 * @throws ConfigRuntimeException 
+	 * @throws ConfigRuntimeException
 	 */
 	public static void AssertNonCNull(Target t, Construct ... args) throws ConfigRuntimeException {
 		for(Construct arg : args){
@@ -1072,12 +1092,12 @@ public final class Static {
 			}
 		}
 	}
-	
+
 	public static String GetStacktraceString(Throwable t){
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		t.printStackTrace(pw);
 		return sw.toString();
 	}
-    
+
 }

@@ -136,8 +136,9 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> The type of entity exploding. If null is used here, it will match events that"
-					+ " lack a specific entity, such as using the explosion function} Fires when an explosion occurs."
+			return "{id: <macro> The entityID. If null is used here, it will match events that lack a specific entity,"
+					+ " such as using the explosion function. | type: <macro> The type of entity exploding. Can be null,"
+					+ " as id.} Fires when an explosion occurs."
 					+ " The entity itself may not exist if triggered by a plugin. Cancelling this event only protects blocks,"
 					+ " entities are handled in damage events. {id: entityID, or null if no entity"
 					+ " | type: entitytype, or null if no entity | location: where the explosion occurs | blocks | yield}"
@@ -150,8 +151,17 @@ public class EntityEvents {
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCEntityExplodeEvent) {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
+				if (prefilter.containsKey("id")) {
+					if (e.getEntity() == null) {
+						if (prefilter.get("id") instanceof CNull || prefilter.get("id").val().equals("null")) {
+							return true;
+						}
+						return false;
+					}
+					Prefilters.match(prefilter, "id", e.getEntity().getEntityId(), PrefilterType.MACRO);
+				}
 				if (prefilter.containsKey("type")) {
-					if (e.getEntity() == null){
+					if (e.getEntity() == null) {
 						if (prefilter.get("type") instanceof CNull || prefilter.get("type").val().equals("null")) {
 							return true;
 						}
@@ -242,7 +252,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> the entity type of the projectile}"
+			return "{id: <macro> The entityID | type: <macro> the entity type of the projectile}"
 					+ " Fires when a projectile collides with something."
 					+ " {type | id: the entityID of the projectile |" 
 					+ " location: where it makes contact | shooter}"
@@ -256,6 +266,7 @@ public class EntityEvents {
 				BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCProjectileHitEvent) {
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
+				Prefilters.match(prefilter, "id", e.getEntity().getEntityId(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", e.getEntityType().name(), PrefilterType.MACRO);
 				return true;
 			}
@@ -437,7 +448,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> The type of entity dying.}"
+			return "{id: <macro> The entityID | type: <macro> The type of entity dying.}"
 					+ " Fires when any living entity dies."
 					+ " {type | id: The entityID | drops: an array of item arrays of each stack"
 					+ " | xp | cause: the last entity_damage object for this entity"
@@ -452,6 +463,7 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if (e instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent event = (MCEntityDeathEvent) e;
+				Prefilters.match(prefilter, "id", event.getEntity().getEntityId(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
 				return true;
 			}
@@ -623,10 +635,10 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> The type of entity being damaged | cause: <macro> | world: <string match>}"
-				+ " Fires when any loaded entity takes damage."
+			return "{id: <macro> The entityID | type: <macro> The type of entity being damaged | cause: <macro>"
+				+ " | world: <string match>} Fires when any loaded entity takes damage."
 				+ " {type: The type of entity the got damaged | id: The entityID of the victim"
-				+ " | player: the player who got damaged (only present if type is PLAYER) | world"
+				+ " | player: the player who got damaged (only present if type is PLAYER) | world | location"
 				+ " | cause: The type of damage | amount | damager: If the source of damage is a player this will"
 				+ " contain their name, otherwise it will be the entityID of the damager (only available when"
 				+ " an entity causes damage) | shooter: The name of the player who shot, otherwise the entityID"
@@ -640,6 +652,7 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if(event instanceof MCEntityDamageEvent){
 				MCEntityDamageEvent e = (MCEntityDamageEvent) event;
+				Prefilters.match(prefilter, "id", e.getEntity().getEntityId(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "cause", e.getCause().name(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "world", e.getEntity().getWorld().getName(), Prefilters.PrefilterType.STRING_MATCH);
@@ -944,12 +957,12 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{damager: <string match>} "
+			return "{id: <macro> The entityID | damager: <string match>} "
             		+ "This event is called when a player is damaged by another entity."
                     + "{player: The player being damaged | damager: The type of entity causing damage | "
             		+ "amount: amount of damage caused | cause: the cause of damage | "
                     + "data: the attacking player's name or the shooter if damager is a projectile | "
-            		+ "id: EntityID of the damager} "
+            		+ "id: EntityID of the damager | location} "
                     + "{amount} "
                     + "{player|amount|damager|cause|data|id}";
 		}
@@ -959,6 +972,7 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if (e instanceof MCEntityDamageByEntityEvent) {
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
+				Prefilters.match(prefilter, "id", event.getDamager().getEntityId(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "damager", event.getDamager().getType().name(), PrefilterType.MACRO);
 				return event.getEntity() instanceof MCPlayer;
 			}
@@ -985,7 +999,8 @@ public class EntityEvents {
                 map.put("cause",  new CString(event.getCause().name(), Target.UNKNOWN));
                 map.put("amount",  new CDouble(event.getDamage(), Target.UNKNOWN));
                 map.put("id", new CInt(event.getDamager().getEntityId(), Target.UNKNOWN));
-                
+				map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
+
                 String data = "";
                 if(event.getDamager() instanceof MCPlayer) {
                 	data = ((MCPlayer)event.getDamager()).getName();
@@ -1288,6 +1303,7 @@ public class EntityEvents {
 			map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
 			map.put("amount", new CDouble(event.getDamage(), Target.UNKNOWN));
 			map.put("world", new CString(event.getEntity().getWorld().getName(), Target.UNKNOWN));
+			map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 
 			if (event instanceof MCEntityDamageByEntityEvent) {
 				MCEntity damager = ((MCEntityDamageByEntityEvent) event).getDamager();
