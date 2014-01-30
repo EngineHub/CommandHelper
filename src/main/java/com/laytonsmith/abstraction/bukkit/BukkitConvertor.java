@@ -25,7 +25,11 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBoat;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCreeper;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderDragon;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderDragonPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderSignal;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderman;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFirework;
@@ -80,8 +84,12 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.ComplexEntityPart;
+import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.EnderDragonPart;
 import org.bukkit.entity.EnderSignal;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
@@ -321,6 +329,11 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		
 		// Mobs - Enemies
+		if (be instanceof EnderDragon) {
+			// Must come before ComplexLivingEntity
+			return new BukkitMCEnderDragon((EnderDragon) be);
+		}
+		
 		if (be instanceof Enderman) {
 			return new BukkitMCEnderman((Enderman) be);
 		}
@@ -433,6 +446,12 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(be instanceof LightningStrike){
 			return new BukkitMCLightningStrike((LightningStrike)be);
 		}
+		
+		// Misc
+		if (be instanceof EnderDragonPart) {
+			// Must come before ComplexLivingEntity
+			return new BukkitMCEnderDragonPart((EnderDragonPart) be);
+		}
         
 		// Abstractions
 		if(be instanceof Projectile){
@@ -448,6 +467,15 @@ public class BukkitConvertor extends AbstractConvertor {
 			// Must come before LivingEntity
             return new BukkitMCHumanEntity((HumanEntity)be);
         }
+		
+		if(be instanceof ComplexEntityPart) {
+			return new BukkitMCComplexEntityPart((ComplexEntityPart)be);
+		}
+		
+		if(be instanceof ComplexLivingEntity) {
+			// Must come before LivingEntity
+			return new BukkitMCComplexLivingEntity((ComplexLivingEntity)be);
+		}
         
         if(be instanceof LivingEntity){
             return new BukkitMCLivingEntity(((LivingEntity)be));
