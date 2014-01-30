@@ -77,7 +77,6 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.junit.Assert.fail;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
@@ -787,6 +786,11 @@ public class StaticTest {
 
 		@Override
 		public MCRecipe GetRecipe(MCRecipe unspecific) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCMaterial GetMaterial(String name) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
     }
