@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
@@ -21,12 +22,14 @@ import com.laytonsmith.tools.ExampleLocalPackageInstaller;
 import com.laytonsmith.tools.Interpreter;
 import com.laytonsmith.tools.MSLPMaker;
 import com.laytonsmith.tools.Manager;
+import com.laytonsmith.tools.ProfilerSummary;
 import com.laytonsmith.tools.SyntaxHighlighters;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -64,6 +67,7 @@ public class Main {
 	private static final ArgumentParser cmdlineMode;
 	private static final ArgumentParser extensionDocsMode;
 	private static final ArgumentParser docExportMode;
+	private static final ArgumentParser profilerSummaryMode;
 
 	static {
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -149,6 +153,13 @@ public class Main {
 				.addArgument("extension-dir", ArgumentParser.Type.STRING, "./CommandHelper/extensions", "Provides the path to your extension directory, if not the default, \"./CommandHelper/extensions\"", "extension-dir", false)
 				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated json to. If this parameter is missing, it is simply printed to screen.", "output-file", false);
 		suite.addMode("doc-export", docExportMode);
+		profilerSummaryMode = ArgumentParser.GetParser()
+				.addDescription("Analyzes the output file for a profiler session, and generates a summary report of the results.")
+				.addArgument('i', "ignore-percentage", ArgumentParser.Type.NUMBER, "0", "This value dictates how much of the lower end data is ignored."
+						+ " If the function took less time than this percentage of the total time, it is omitted from the"
+						+ " results.", "ignore-percentage", false)
+				.addArgument("Path to the profiler file to use", "input-file", true);
+		suite.addMode("profiler-summary", profilerSummaryMode);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -186,10 +197,33 @@ public class Main {
 				ArgumentSuite.ArgumentSuiteResults results = ARGUMENT_SUITE.match(args, "help");
 				mode = results.getMode();
 				parsedArgs = results.getResults();
-			} catch (Exception e) {
+			} catch (ArgumentParser.ResultUseException | ArgumentParser.ValidationException e) {
+				System.out.println(TermColors.RED + e.getMessage() + TermColors.RESET);
 				mode = helpMode;
 				parsedArgs = null;
 			}
+			
+			if (mode == helpMode) {
+				String modeForHelp = null;
+				if (parsedArgs != null) {
+					modeForHelp = parsedArgs.getStringArgument();
+				}
+				modeForHelp = ARGUMENT_SUITE.getModeFromAlias(modeForHelp);
+				if (modeForHelp == null) {
+					//Display the general help
+					System.out.println(ARGUMENT_SUITE.getBuiltDescription());
+					System.exit(0);
+					return;
+				} else {
+					//Display the help for this mode
+					System.out.println(ARGUMENT_SUITE.getModeFromName(modeForHelp).getBuiltDescription());
+					return;
+				}
+			}
+			
+			//Gets rid of warnings below. We now know parsedArgs will never be null,
+			//if it were, the help command would have run.
+			assert parsedArgs != null;
 
 			if (mode == managerMode) {
 				Manager.start();
@@ -205,7 +239,7 @@ public class Main {
 				System.exit(0);
 			} else if (mode == docgenMode) {
 				DocGenUI.main(args);
-				return;
+				System.exit(0);
 			} else if (mode == mslpMode) {
 				String mslp = parsedArgs.getStringArgument();
 				if (mslp.isEmpty()) {
@@ -253,12 +287,13 @@ public class Main {
 				}
 				System.exit(0);
 			} else if (mode == docsMode) {
-				DocGen.MarkupType docs = null;
+				DocGen.MarkupType docs;
 				try {
 					docs = DocGen.MarkupType.valueOf(parsedArgs.getStringArgument().toUpperCase());
 				} catch(IllegalArgumentException e){
 					System.out.println("The type of documentation must be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "));
 					System.exit(1);
+					return;
 				}
 				//Documentation generator
 				System.err.print("Creating " + docs + " documentation...");
@@ -326,25 +361,11 @@ public class Main {
 				String optimized = OptimizationUtilities.optimize(plain, source);
 				System.out.println(optimized);
 				System.exit(0);
-			} else if (mode == helpMode) {
-				String modeForHelp = null;
-				if (parsedArgs != null) {
-					modeForHelp = parsedArgs.getStringArgument();
-				}
-				modeForHelp = ARGUMENT_SUITE.getModeFromAlias(modeForHelp);
-				if (modeForHelp == null) {
-					//Display the general help
-					System.out.println(ARGUMENT_SUITE.getBuiltDescription());
-					System.exit(0);
-				} else {
-					//Display the help for this mode
-					System.out.println(ARGUMENT_SUITE.getModeFromName(modeForHelp).getBuiltDescription());
-				}
 			} else if(mode == cmdlineMode){
 				//We actually can't use the parsedArgs, because there may be cmdline switches in
 				//the arguments that we want to ignore here, but otherwise pass through. parsedArgs
 				//will prevent us from seeing those, however.
-				List<String> allArgs = new ArrayList<String>(Arrays.asList(args));
+				List<String> allArgs = new ArrayList<>(Arrays.asList(args));
 				//The 0th arg is the cmdline verb though, so remove that.
 				allArgs.remove(0);
 				if(allArgs.isEmpty()){
@@ -390,6 +411,18 @@ public class Main {
 							+ extensionDirS + ". Continuing anyways.");
 				}
 				new DocGenExportTool(cd, outputFile).export();
+			} else if(mode == profilerSummaryMode){
+				double ignorePercentage = parsedArgs.getNumberArgument("ignore-percentage");
+				String input = parsedArgs.getStringArgument();
+				ProfilerSummary summary = new ProfilerSummary(new FileInputStream(input));
+				try {
+					summary.setIgnorePercentage(ignorePercentage);
+				} catch(IllegalArgumentException ex){
+					System.err.println(TermColors.RED + ex.getMessage() + TermColors.RESET);
+					System.exit(1);
+				}
+				System.out.println(summary.getAnalysis());
+				System.exit(0);
 			} else {
 				throw new Error("Should not have gotten here");
 			}
@@ -411,6 +444,7 @@ public class Main {
 		return ret;
 	}
 
+	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
 	public static String loadSelfVersion() throws Exception {
 		File file = new File(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()), "plugin.yml");
 		ZipReader reader = new ZipReader(file);
@@ -422,9 +456,7 @@ public class Main {
 			Yaml yaml = new Yaml();
 			Map<String, Object> map = (Map<String, Object>)yaml.load(contents);
 			return (String)map.get("version");
-		} catch (IOException ex) {
-			throw new Exception(ex);
-		} catch (Exception ex) {
+		} catch (RuntimeException | IOException ex) {
 			throw new Exception(ex);
 		}
 	}

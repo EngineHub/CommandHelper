@@ -83,8 +83,8 @@ public class SQLiteDataSource extends SQLDataSource {
 	public String docs() {
 		return "SQLite {sqlite://path/to/db/file.db} This type store data in a SQLite database."
 			+ " All the pros and cons of MySQL apply here. The database will contain a lone table,"
-				+ " and the table should be created with the query: "
-				+ getTableCreationQuery();
+				+ " and the table should be created with the query: <syntaxhighlight lang=\"sql\">"
+				+ getTableCreationQuery() + "</syntaxhighlight>";
 	}
 	
 	/**

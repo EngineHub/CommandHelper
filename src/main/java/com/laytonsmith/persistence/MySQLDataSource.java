@@ -183,7 +183,7 @@ public class MySQLDataSource extends SQLDataSource {
 			+ " based data sources, without risking either data corruption,"
 			+ " or extremely low efficiency. The layout of the table"
 			+ " in the database is required to be of a specific format:"
-			+ " " + getTableCreationQuery("testTable");
+			+ " <syntaxhighlight lang=\"sql\">" + getTableCreationQuery("testTable") + "</syntaxhighlight>";
 	}
 
 	@Override

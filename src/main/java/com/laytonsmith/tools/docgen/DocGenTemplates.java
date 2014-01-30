@@ -183,7 +183,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String ... args) {
 			Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
-			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*?)\\s*$");
+			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*)\\s*$");
 			SortedSet<String> set = new TreeSet<String>();
 			for(Class c : classes){
 				if(DataSource.class.isAssignableFrom(c)){
@@ -208,7 +208,10 @@ public class DocGenTemplates {
 							description = m.group(3);
 						}
 						if(name == null || example == null || description == null){
-							throw new Error("Invalid documentation for " + c.getSimpleName());
+							throw new Error("Invalid documentation for " + c.getSimpleName()
+								+ (name==null?" name was null;":"") 
+								+ (example==null?" example was null;":"")
+								+ (description==null?" description was null;":""));
 						}
 						StringBuilder b = new StringBuilder();
 						b.append("|-\n| ").append(name).append(" || ").append(description)
