@@ -59,6 +59,7 @@ import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -2053,6 +2054,11 @@ public class EntityManagement {
 		}
 
 		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{set_entity_spec.class};
+		}
+
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			MCEntity entity = Static.getEntity(id, t);
@@ -2211,6 +2217,11 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityID, specArray} Sets the data in the specArray to the given entity. The specArray must follow the same format than in entity_spec()."
 							+ " All indexes in the specArray are optional.";
+		}
+		
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{entity_spec.class};
 		}
 
 		@Override
