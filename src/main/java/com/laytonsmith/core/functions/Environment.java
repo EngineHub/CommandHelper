@@ -1444,6 +1444,10 @@ public class Environment {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				String cmd = "";
 				if(args.length == 2) {
+					if(!(args[1] instanceof CString)) {
+						throw new ConfigRuntimeException("Parameter 2 of " + getName() + " must be a string",
+								ExceptionType.CastException, t);
+					}
 					cmd = args[1].val();
 				}
 				cb.setCommand(cmd);
