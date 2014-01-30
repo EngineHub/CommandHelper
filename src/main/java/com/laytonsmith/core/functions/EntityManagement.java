@@ -815,11 +815,15 @@ public class EntityManagement {
 			// http://forums.bukkit.org/threads/getnearbyentities-of-a-location.101499/#post-1341141
 			int chunkRadius = dist < 16 ? 1 : (dist - (dist % 16)) / 16;
 
-			Set<Integer> eSet = new HashSet<Integer>();
+			Set<Integer> eSet = new HashSet<>();
 			for (int chX = 0 - chunkRadius; chX <= chunkRadius; chX++) {
 				for (int chZ = 0 - chunkRadius; chZ <= chunkRadius; chZ++) {
 					MCLocation nl = StaticLayer.GetLocation(loc.getWorld(), loc.getX()+(chX*16), loc.getY(), loc.getZ()+(chZ*16));
 					for (MCEntity e : nl.getChunk().getEntities()) {
+						if (!e.getWorld().equals(loc.getWorld())) {
+							// We can't measure entity distances that are in different worlds!
+							continue;
+						}
 						if (e.getLocation().distance(loc) <= dist && e.getLocation().getBlock() != loc.getBlock()) {
 							if (types.isEmpty() || types.contains(e.getType().name())) {
 								eSet.add(e.getEntityId());
