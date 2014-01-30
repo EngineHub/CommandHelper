@@ -2,11 +2,17 @@ package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.TermColors;
-import static com.laytonsmith.PureUtilities.TermColors.*;
+import static com.laytonsmith.PureUtilities.TermColors.BLUE;
+import static com.laytonsmith.PureUtilities.TermColors.RED;
+import static com.laytonsmith.PureUtilities.TermColors.WHITE;
+import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
+import static com.laytonsmith.PureUtilities.TermColors.p;
+import static com.laytonsmith.PureUtilities.TermColors.pl;
+import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCColor;
@@ -527,6 +533,11 @@ public class Interpreter {
 
 		@Override
 		public MCRecipe GetRecipe(MCRecipe unspecific) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCMaterial GetMaterial(String name) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 	}

@@ -2,21 +2,74 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCAgeable;
+import com.laytonsmith.abstraction.MCBlockCommandSender;
+import com.laytonsmith.abstraction.MCChunk;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCEntityEquipment;
+import com.laytonsmith.abstraction.MCExperienceOrb;
+import com.laytonsmith.abstraction.MCFireball;
+import com.laytonsmith.abstraction.MCHumanEntity;
+import com.laytonsmith.abstraction.MCItem;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLightningStrike;
+import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMaterialData;
+import com.laytonsmith.abstraction.MCPainting;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.MCTNT;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCBoat;
+import com.laytonsmith.abstraction.entities.MCCreeper;
+import com.laytonsmith.abstraction.entities.MCEnderman;
+import com.laytonsmith.abstraction.entities.MCFishHook;
+import com.laytonsmith.abstraction.entities.MCHorse;
+import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
+import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
+import com.laytonsmith.abstraction.entities.MCHorse.MCHorseVariant;
+import com.laytonsmith.abstraction.entities.MCIronGolem;
+import com.laytonsmith.abstraction.entities.MCItemFrame;
 import com.laytonsmith.abstraction.entities.MCMinecart;
+import com.laytonsmith.abstraction.entities.MCOcelot;
+import com.laytonsmith.abstraction.entities.MCPig;
+import com.laytonsmith.abstraction.entities.MCPigZombie;
+import com.laytonsmith.abstraction.entities.MCSheep;
+import com.laytonsmith.abstraction.entities.MCSkeleton;
+import com.laytonsmith.abstraction.entities.MCSlime;
+import com.laytonsmith.abstraction.entities.MCThrownPotion;
+import com.laytonsmith.abstraction.entities.MCVillager;
+import com.laytonsmith.abstraction.entities.MCWolf;
+import com.laytonsmith.abstraction.entities.MCZombie;
 import com.laytonsmith.abstraction.enums.MCArt;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCOcelotType;
+import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
+import com.laytonsmith.abstraction.enums.MCRotation;
+import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -1970,6 +2023,719 @@ public class EntityManagement {
 		public String docs() {
 			return "string {entityID} returns the persistent unique id of the entity";
 		}
-		
+	}
+	
+	@api
+	public static class entity_spec extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "entity_spec";
+		}
+
+		@Override
+		public String docs() {
+			String docs = getBundledDocs();
+			docs = docs.replace("%HORSE_COLOR%", StringUtils.Join(MCHorseColor.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%HORSE_STYLE%", StringUtils.Join(MCHorsePattern.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%HORSE_VARIANT%", StringUtils.Join(MCHorseVariant.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%ROTATION%", StringUtils.Join(MCRotation.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%OCELOT_TYPE%", StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%ART%", StringUtils.Join(MCArt.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%DYE_COLOR%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%SKELETON_TYPE%", StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%PROFESSION%", StringUtils.Join(MCProfession.values(), ", ", ", or ", " or "));
+			return docs;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			MCEntity entity = Static.getEntity(id, t);
+			CArray specArray = new CArray(t);
+			
+			switch (entity.getType()) {
+				case CREEPER:
+					MCCreeper creeper = (MCCreeper) entity;
+					specArray.set("powered", new CBoolean(creeper.isPowered(), t), t);
+					break;
+				case DROPPED_ITEM:
+					MCItem item = (MCItem) entity;
+					specArray.set("itemstack", ObjectGenerator.GetGenerator().item(item.getItemStack(), t), t);
+					specArray.set("pickupdelay", new CInt(item.getPickupDelay(), t), t);
+					break;
+				case ENDERMAN:
+					MCEnderman enderman = (MCEnderman) entity;
+					MCMaterialData carried = enderman.getCarriedMaterial();
+					if (carried != null) {
+						specArray.set("carried", new CString(carried.getMaterial().getName(), t), t);
+					} else {
+						specArray.set("carried", new CNull(t), t);
+					}
+					break;
+				case EXPERIENCE_ORB:
+					MCExperienceOrb orb = (MCExperienceOrb) entity;
+					specArray.set("amount", new CInt(orb.getExperience(), t), t);
+					break;
+				case FALLING_BLOCK:
+					MCFallingBlock block = (MCFallingBlock) entity;
+					specArray.set("block", new CInt(block.getMaterial().getName(), t), t);
+					specArray.set("dropitem", new CBoolean(block.getDropItem(), t), t);
+					break;
+				case FIREBALL:
+				case SMALL_FIREBALL:
+				case WITHER_SKULL:
+					MCFireball ball = (MCFireball) entity;
+					specArray.set("direction", ObjectGenerator.GetGenerator().velocity(ball.getDirection(), t), t);
+					break;
+				case FISHING_HOOK:
+					MCFishHook hook = (MCFishHook) entity;
+					specArray.set("chance", new CDouble(hook.getBiteChance(), t), t);
+					break;
+				case HORSE:
+					MCHorse horse = (MCHorse) entity;
+					specArray.set("color", new CString(horse.getColor().name(), t), t);
+					specArray.set("style", new CString(horse.getPattern().name(), t), t);
+					specArray.set("variant", new CString(horse.getVariant().name(), t), t);
+					specArray.set("chest", new CBoolean(horse.hasChest(), t), t);
+					specArray.set("jump", new CDouble(horse.getJumpStrength(), t), t);
+					specArray.set("domestication", new CInt(horse.getDomestication(), t), t);
+					specArray.set("maxdomestication", new CInt(horse.getMaxDomestication(), t), t);
+					specArray.set("armor", ObjectGenerator.GetGenerator().item(horse.getArmor(), t), t);
+					specArray.set("saddle", ObjectGenerator.GetGenerator().item(horse.getSaddle(), t), t);
+					break;
+				case IRON_GOLEM:
+					MCIronGolem golem = (MCIronGolem) entity;
+					specArray.set("playercreated", new CBoolean(golem.isPlayerCreated(), t), t);
+					break;
+				case ITEM_FRAME:
+					MCItemFrame frame = (MCItemFrame) entity;
+					MCItemStack itemstack = frame.getItem();
+					if (itemstack != null) {
+						specArray.set("item", ObjectGenerator.GetGenerator().item(frame.getItem(), t), t);
+					} else {
+						specArray.set("item", new CNull(t), t);
+					}
+					specArray.set("rotation", new CString(frame.getRotation().name(), t), t);
+					break;
+				case LIGHTNING:
+					MCLightningStrike lightning = (MCLightningStrike) entity;
+					specArray.set("effect", new CBoolean(lightning.isEffect(), t), t);
+					break;
+				case MAGMA_CUBE:
+				case SLIME:
+					MCSlime cube = (MCSlime) entity;
+					specArray.set("size", new CInt(cube.getSize(), t), t);
+					break;
+				case OCELOT:
+					MCOcelot ocelot = (MCOcelot) entity;
+					specArray.set("type", new CString(ocelot.getCatType().name(), t), t);
+					specArray.set("sitting", new CBoolean(ocelot.isSitting(), t), t);
+					break;
+				case PAINTING:
+					MCPainting painting = (MCPainting) entity;
+					specArray.set("art", new CString(painting.getArt().name(), t), t);
+					break;
+				case PIG:
+					MCPig pig = (MCPig) entity;
+					specArray.set("saddled", new CBoolean(pig.isSaddled(), t), t);
+					break;
+				case PIG_ZOMBIE:
+					MCPigZombie pigZombie = (MCPigZombie) entity;
+					specArray.set("angry", new CBoolean(pigZombie.isAngry(), t), t);
+					specArray.set("anger", new CInt(pigZombie.getAnger(), t), t);
+					specArray.set("baby", new CBoolean(pigZombie.isBaby(), t), t);
+					specArray.set("villager", new CBoolean(pigZombie.isVillager(), t), t);
+					break;
+				case PRIMED_TNT:
+					MCTNT tnt = (MCTNT) entity;
+					specArray.set("fuseticks", new CInt(tnt.getFuseTicks(), t), t);
+					MCEntity source = tnt.getSource();
+					if (source != null) {
+						specArray.set("source", new CInt(source.getEntityId(), t), t);
+					} else {
+						specArray.set("source", new CNull(t), t);
+					}
+					break;
+				case SHEEP:
+					MCSheep sheep = (MCSheep) entity;
+					specArray.set("color", new CString(sheep.getColor().name(), t), t);
+					specArray.set("sheared", new CBoolean(sheep.isSheared(), t), t);
+					break;
+				case SKELETON:
+					MCSkeleton skeleton = (MCSkeleton) entity;
+					specArray.set("type", new CString(skeleton.getSkeletonType().name(), t), t);
+					break;
+				case SPLASH_POTION:
+					MCThrownPotion potion = (MCThrownPotion) entity;
+					specArray.set("item", ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
+					break;
+				case VILLAGER:
+					MCVillager villager = (MCVillager) entity;
+					specArray.set("profession", new CString(villager.getProfession().name(), t), t);
+					break;
+				case WOLF:
+					MCWolf wolf = (MCWolf) entity;
+					specArray.set("angry", new CBoolean(wolf.isAngry(), t), t);
+					specArray.set("color", new CString(wolf.getCollarColor().name(), t), t);
+					specArray.set("sitting", new CBoolean(wolf.isSitting(), t), t);
+					break;
+				case ZOMBIE:
+					MCZombie zombie = (MCZombie) entity;
+					specArray.set("baby", new CBoolean(zombie.isBaby(), t), t);
+					specArray.set("villager", new CBoolean(zombie.isVillager(), t), t);
+					break;
+			}
+			return specArray;
+		}
+	}
+
+	@api
+	public static class set_entity_spec extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_entity_spec";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.IndexOverflowException, ExceptionType.IndexOverflowException, ExceptionType.RangeException, ExceptionType.FormatException};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityID, specArray} Sets the data in the specArray to the given entity. The specArray must follow the same format than in entity_spec()."
+							+ " All indexes in the specArray are optional.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			MCEntity entity = Static.getEntity(id, t);
+			CArray specArray = Static.getArray(args[1], t);
+			
+			switch (entity.getType()) {
+				case CREEPER:
+					MCCreeper creeper = (MCCreeper) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("powered")) {
+							creeper.setPowered(Static.getBoolean(specArray.get(index)));
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case DROPPED_ITEM:
+					MCItem item = (MCItem) entity;
+					for (String index : specArray.keySet()) {
+						switch (index) {
+							case "itemstack":
+								item.setItemStack(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+								break;
+							case "pickupdelay":
+								item.setPickupDelay(Static.getInt32(specArray.get(index), t));
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case ENDERMAN:
+					MCEnderman enderman = (MCEnderman) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("carried")) {
+							enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index), t).getData());
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case EXPERIENCE_ORB:
+					MCExperienceOrb orb = (MCExperienceOrb) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("amount")) {
+							orb.setExperience(Static.getInt32(specArray.get(index), t));
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case FALLING_BLOCK:
+					MCFallingBlock block = (MCFallingBlock) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("dropitem")) {
+							block.setDropItem(Static.getBoolean(specArray.get(index)));
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case FIREBALL:
+				case SMALL_FIREBALL:
+				case WITHER_SKULL:
+					MCFireball ball = (MCFireball) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("direction")) {
+							ball.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index), t));
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case FISHING_HOOK:
+					MCFishHook hook = (MCFishHook) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("chance")) {
+							try {
+								hook.setBiteChance(Static.getDouble(specArray.get(index), t));
+							} catch (IllegalArgumentException exception) {
+								throw new ConfigRuntimeException("The chance must be between 0.0 and 1.0", ExceptionType.RangeException, t);
+							}
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case HORSE:
+					MCHorse horse = (MCHorse) entity;
+					for (String index : specArray.keySet()) {
+						switch (index) {
+							case "color":
+								try {
+									horse.setColor(MCHorseColor.valueOf(specArray.get(index).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid horse color: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							case "style":
+								try {
+									horse.setPattern(MCHorsePattern.valueOf(specArray.get(index).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid horse style: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							case "variant":
+								try {
+									horse.setVariant(MCHorseVariant.valueOf(specArray.get(index).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid horse variant: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							case "chest":
+								horse.setHasChest(Static.getBoolean(specArray.get(index)));
+								break;
+							case "jump":
+								try {
+									horse.setJumpStrength(Static.getDouble(specArray.get(index), t));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("The jump strength must be between 0.0 and 2.0", ExceptionType.RangeException, t);
+								}
+								break;
+							case "domestication":
+								try {
+									horse.setDomestication(Static.getInt32(specArray.get(index), t));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("The domestication level can not be higher than the max domestication level.", ExceptionType.RangeException, t);
+								}
+								break;
+							case "maxdomestication":
+								horse.setMaxDomestication(Static.getInt32(specArray.get(index), t));
+								break;
+							case "saddle":
+								horse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+								break;
+							case "armor":
+								horse.setArmor(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case IRON_GOLEM:
+					MCIronGolem golem = (MCIronGolem) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("playercreated")) {
+							golem.setPlayerCreated(Static.getBoolean(specArray.get(index)));
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case ITEM_FRAME:
+					MCItemFrame frame = (MCItemFrame) entity;
+					for (String index : specArray.keySet()) {
+						switch (index) {
+							case "item":
+								frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+								if (specArray.get(index) instanceof CNull) {
+									frame.setItem(null);
+								} else {
+									frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+								}
+								break;
+							case "rotation":
+								try {
+									frame.setRotation(MCRotation.valueOf(specArray.get(index).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid rotation type: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case MAGMA_CUBE:
+				case SLIME:
+					MCSlime cube = (MCSlime) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("size")) {
+							cube.setSize(Static.getInt32(specArray.get(index), t));
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case OCELOT:
+					MCOcelot ocelot = (MCOcelot) entity;
+					for (String index : specArray.keySet()) {
+						switch (index) {
+							case "type":
+								try {
+									ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid ocelot type: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							case "sitting":
+								ocelot.setSitting(Static.getBoolean(specArray.get(index)));
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case PAINTING:
+					MCPainting painting = (MCPainting) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("art")) {
+							try {
+								painting.setArt(MCArt.valueOf(specArray.get(index).val().toUpperCase()));
+							} catch (IllegalArgumentException exception) {
+								throw new ConfigRuntimeException("Invalid art type: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+							}
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case PIG:
+					MCPig pig = (MCPig) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("saddled")) {
+							pig.setSaddled(Static.getBoolean(specArray.get(index)));
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case PIG_ZOMBIE:
+					MCPigZombie pigZombie = (MCPigZombie) entity;
+					for (String index : specArray.keySet()) {
+						switch (index) {
+							case "baby":
+								pigZombie.setBaby(Static.getBoolean(specArray.get(index)));
+								break;
+							case "villager":
+								pigZombie.setVillager(Static.getBoolean(specArray.get(index)));
+								break;
+							case "angry":
+								pigZombie.setAngry(Static.getBoolean(specArray.get(index)));
+								break;
+							case "anger":
+								pigZombie.setAnger(Static.getInt32(specArray.get(index), t));
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case PRIMED_TNT:
+					MCTNT tnt = (MCTNT) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("fuseticks")) {
+							tnt.setFuseTicks(Static.getInt32(specArray.get(index), t));
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case SHEEP:
+					MCSheep sheep = (MCSheep) entity;
+					for (String index : specArray.keySet()) {
+						switch (index) {
+							case "color":
+								try {
+									sheep.setColor(MCDyeColor.valueOf(specArray.get(index).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid sheep color: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							case "sheared":
+								sheep.setSheared(Static.getBoolean(specArray.get(index)));
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case SKELETON:
+					MCSkeleton skeleton = (MCSkeleton) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("type")) {
+							try {
+								skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index).val().toUpperCase()));
+							} catch (IllegalArgumentException exception) {
+								throw new ConfigRuntimeException("Invalid skeleton type: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+							}
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case SPLASH_POTION:
+					MCThrownPotion potion = (MCThrownPotion) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("item")) {
+							potion.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case VILLAGER:
+					MCVillager villager = (MCVillager) entity;
+					for (String index : specArray.keySet()) {
+						if (index.equals("profession")) {
+							try {
+								villager.setProfession(MCProfession.valueOf(specArray.get(index).val().toUpperCase()));
+							} catch (IllegalArgumentException exception) {
+								throw new ConfigRuntimeException("Invalid profession: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+							}
+						} else {
+							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case WOLF:
+					MCWolf wolf = (MCWolf) entity;
+					for (String index : specArray.keySet()) {
+						switch (index) {
+							case "angry":
+								wolf.setAngry(Static.getBoolean(specArray.get(index)));
+								break;
+							case "color":
+								try {
+									wolf.setCollarColor(MCDyeColor.valueOf(specArray.get(index).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid collar color: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							case "sitting":
+								wolf.setSitting(Static.getBoolean(specArray.get(index)));
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case ZOMBIE:
+					MCZombie zombie = (MCZombie) entity;
+					for (String index : specArray.keySet()) {
+						switch (index) {
+							case "baby":
+								zombie.setBaby(Static.getBoolean(specArray.get(index)));
+								break;
+							case "villager":
+								zombie.setVillager(Static.getBoolean(specArray.get(index)));
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				default:
+					for (String index : specArray.keySet()) {
+						throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+					}
+			}
+			
+			return new CVoid(t);
+		}
+	}
+
+	@api
+	public static class get_projectile_shooter extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "get_projectile_shooter";
+		}
+
+		@Override
+		public String docs() {
+			return "int {entityID} Returns the shooter of the given projectile, can be null.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			MCEntity entity = Static.getEntity(id, t);
+			
+			if (entity instanceof MCProjectile) {
+				MCLivingEntity shooter = ((MCProjectile) entity).getShooter();
+				
+				if (shooter != null) {
+					return new CInt(shooter.getEntityId(), t);
+				} else {
+					return new CNull(t);
+				}
+			} else {
+				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+			}
+		}
+	}
+
+	@api
+	public static class set_projectile_shooter extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_projectile_shooter";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityID, shooterID} Sets the shooter of the given projectile, can be null.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			MCEntity entity = Static.getEntity(id, t);
+			
+			if (entity instanceof MCProjectile) {
+				if (args[1] instanceof CNull) {
+					((MCProjectile) entity).setShooter(null);
+				} else {
+					int id2 = Static.getInt32(args[1], t);
+					((MCProjectile) entity).setShooter(Static.getLivingEntity(id2, t));
+				}
+			} else {
+				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+			}
+			
+			return new CVoid(t);
+		}
+	}
+
+	@api
+	public static class get_projectile_bounce extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "get_projectile_bounce";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityID} Returns whether or not the given projectile should bounce or not when it hits something.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			MCEntity entity = Static.getEntity(id, t);
+			
+			if (entity instanceof MCProjectile) {
+				return new CBoolean(((MCProjectile) entity).doesBounce(), t);
+			} else {
+				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+			}
+		}
+	}
+
+	@api
+	public static class set_projectile_bounce extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_projectile_bounce";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityID, boolean} Sets whether or not the given projectile should bounce or not when it hits something.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			MCEntity entity = Static.getEntity(id, t);
+			
+			if (entity instanceof MCProjectile) {
+				((MCProjectile) entity).setBounce(Static.getBoolean(args[1]));
+			} else {
+				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+			}
+			
+			return new CVoid(t);
+ 		}
+	}
+	
+	@api
+	public static class damage_entity extends EntityFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, 
+				ExceptionType.BadEntityTypeException, ExceptionType.BadEntityException};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int id = Static.getInt32(args[0], t);
+			MCEntity entity = Static.getEntity(id, t);
+			
+			if (!(entity instanceof MCLivingEntity)) {
+				throw new ConfigRuntimeException("The entity id provided doesn't"
+					+ " belong to a living entity", ExceptionType.BadEntityTypeException, t);
+			}
+			
+			MCLivingEntity living = (MCLivingEntity)entity;
+			
+			double damage = Static.getDouble(args[1], t);
+			living.damage(damage);
+			
+			return new CVoid(t);
+		}
+
+		@Override
+		public String getName() {
+			return "damage_entity";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityId, amount} Damage an entity";
+		}
+	
 	}
 }

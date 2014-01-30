@@ -2,9 +2,34 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCBookMeta;
+import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCFurnaceRecipe;
+import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLeatherArmorMeta;
+import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPotionMeta;
+import com.laytonsmith.abstraction.MCRecipe;
+import com.laytonsmith.abstraction.MCShapedRecipe;
+import com.laytonsmith.abstraction.MCShapelessRecipe;
+import com.laytonsmith.abstraction.MCSkullMeta;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -767,6 +792,18 @@ public class ObjectGenerator {
 			ret.set("ingredients", imap, t);
 		}
 		return ret;
+	}
+	
+	public MCMaterial material(String name, Target t) {
+		try {
+			return StaticLayer.GetMaterial(name.toUpperCase());
+		} catch (IllegalArgumentException exception) {
+			throw new ConfigRuntimeException("Unknown material type: " + name, ExceptionType.FormatException, t);
+		}
+	}
+
+	public MCMaterial material(Construct name, Target t) {
+		return material(name.val(), t);
 	}
 	
 	public MCRecipe recipe(Construct c, Target t) {
