@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.CommandBlock;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
@@ -113,6 +115,16 @@ public class BukkitMCBlock implements MCBlock{
     public boolean isSign() {
         return (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN);
     }
+	
+	@Override
+	public MCCommandBlock getCommandBlock() {
+		return new BukkitMCCommandBlock((CommandBlock)b.getState());
+	}
+	
+	@Override
+	public boolean isCommandBlock() {
+		return(b.getType() == Material.COMMAND);
+	}
 
 	@Override
     public boolean isNull() {

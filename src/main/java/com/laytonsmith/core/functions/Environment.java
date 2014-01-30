@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
@@ -1341,6 +1342,226 @@ public class Environment {
 			MCPlayer psender = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], (psender != null ? psender.getWorld() : null), t);
 			return new CBoolean(location.getWorld().generateTree(location, treeType), t);
+		}
+	}
+	
+	@api
+	public static class get_block_command extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_block_command";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray} Returns the command in the Command Block at the given location.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			if(loc.getBlock().isCommandBlock()) {
+				MCCommandBlock cb = loc.getBlock().getCommandBlock();
+				return new CString(cb.getCommand(), t);
+			} else {
+				throw new ConfigRuntimeException("The block at the specified location is not a command block",
+						ExceptionType.FormatException, t);
+			}
+		}
+	}
+	
+	@api
+	public static class set_block_command extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_block_command";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray, [cmd]} Sets a command to a Command Block at the given location."
+					+ "If no command is given, it sets the Command Block to an empty string.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			if(loc.getBlock().isCommandBlock()) {
+				MCCommandBlock cb = loc.getBlock().getCommandBlock();
+				String cmd = "";
+				if(args.length == 2) {
+					cmd = args[1].val();
+				}
+				cb.setCommand(cmd);
+				return new CVoid(t);
+			} else {
+				throw new ConfigRuntimeException("The block at the specified location is not a command block",
+						ExceptionType.FormatException, t);
+			}
+		}
+	}
+	
+	@api
+	public static class get_command_block_name extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_command_block_name";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray} Returns the name of the Command Block at the given location.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			if(loc.getBlock().isCommandBlock()) {
+				MCCommandBlock cb = loc.getBlock().getCommandBlock();
+				return new CString(cb.getName(), t);
+			} else {
+				throw new ConfigRuntimeException("The block at the specified location is not a command block",
+						ExceptionType.FormatException, t);
+			}
+		}
+	}
+	
+	@api
+	public static class set_command_block_name extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_command_block_name";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray, [name]} Sets the name to the Command Block at the given location."
+					+ "If no name is given, the Command Block's name is set to @.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args
+		) throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			if(loc.getBlock().isCommandBlock()) {
+				MCCommandBlock cb = loc.getBlock().getCommandBlock();
+				String name = "";
+				if(args.length == 2) {
+					name = args[1].val();
+				}
+				cb.setName(name);
+				return new CVoid(t);
+			} else {
+				throw new ConfigRuntimeException("The block at the specified location is not a command block",
+						ExceptionType.FormatException, t);
+			}
 		}
 	}
 }
