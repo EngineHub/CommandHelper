@@ -972,6 +972,12 @@ public class DataHandling {
 			return "Executing function: " + this.getName() + "(" 
 					+ args.get(0).toStringVerbose() + ", <code>)";
 		}
+
+		@Override
+		public boolean allowBraces() {
+			return true;
+		}
+		
 	}
 
 	@api

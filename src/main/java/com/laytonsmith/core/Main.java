@@ -412,8 +412,12 @@ public class Main {
 				}
 				new DocGenExportTool(cd, outputFile).export();
 			} else if(mode == profilerSummaryMode){
-				double ignorePercentage = parsedArgs.getNumberArgument("ignore-percentage");
 				String input = parsedArgs.getStringArgument();
+				if("".equals(input)){
+					System.err.println(TermColors.RED + "No input file specified! Run `help profiler-summary' for usage." + TermColors.RESET);
+					System.exit(1);
+				}
+				double ignorePercentage = parsedArgs.getNumberArgument("ignore-percentage");
 				ProfilerSummary summary = new ProfilerSummary(new FileInputStream(input));
 				try {
 					summary.setIgnorePercentage(ignorePercentage);
