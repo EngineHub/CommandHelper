@@ -557,7 +557,11 @@ public class Exceptions {
 						+ "\treturn(true);\n"
 						+ "});\n\n"
 						+ "@zero = 0;\n"
-						+ "@exception = 1 / @zero; // This should throw an exception\n"),
+						+ "@exception = 1 / @zero; // This should throw an exception\n",
+						// Can't automatically run this, since the examples don't have
+						// the exception handling fully working.
+						"Exception caught!\n" 
+						+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),
 			};
 		}
 		
