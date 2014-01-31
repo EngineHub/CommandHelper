@@ -66,15 +66,18 @@ public class SQLiteDataSource extends SQLDataSource {
 			if(value == null){
 				clearKey0(dm, key);
 			} else {
+				startExclusiveTransaction();
 				PreparedStatement statement = getConnection().prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME 
 						+ "` (`" + getKeyColumn() + "`, `" + getValueColumn() + "`) VALUES (?, ?)");
 				statement.setString(1, StringUtils.Join(key, "."));
 				statement.setString(2, value);
 				statement.executeUpdate();
+				stopExclusiveTransaction();
 			}
 			updateLastConnected();
 			return true;
 		} catch (SQLException ex) {
+			rollbackExclusiveTransaction();
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -101,6 +104,22 @@ public class SQLiteDataSource extends SQLDataSource {
 	@Override
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
+	}
+	
+	private void startExclusiveTransaction() throws SQLException{
+		getConnection().createStatement().execute("BEGIN EXCLUSIVE TRANSACTION");
+	}
+	
+	private void stopExclusiveTransaction() throws SQLException{
+		getConnection().createStatement().execute("COMMIT TRANSACTION");
+	}
+	
+	private void rollbackExclusiveTransaction() {
+		try {
+			getConnection().createStatement().execute("ROLLBACK TRANSACTION");
+		} catch (SQLException ex) {
+			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 	@Override
