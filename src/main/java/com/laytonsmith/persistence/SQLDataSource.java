@@ -161,44 +161,6 @@ public abstract class SQLDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public String get0(String[] key) throws DataSourceException {
-		try {
-			connect();
-			PreparedStatement statement = connection.prepareStatement("SELECT `" + VALUE_COLUMN + "` FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "`=? LIMIT 1");
-			statement.setString(1, StringUtils.Join(key, "."));
-			String ret = null;
-			try (ResultSet result = statement.executeQuery()) {
-				if(result.next()){
-					ret = result.getString(VALUE_COLUMN);
-				}
-			}
-			lastConnected = System.currentTimeMillis();
-			return ret;
-		} catch(SQLException | IOException ex){
-			throw new DataSourceException(ex.getMessage(), ex);
-		}
-	}
-
-	@Override
-	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
-		try {
-			connect();
-			if(value == null){
-				clearKey0(dm, key);
-			} else {
-				PreparedStatement statement = connection.prepareStatement("INSERT INTO `" + getEscapedTable() + "` (`" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "`) VALUES (?, ?)");
-				statement.setString(1, StringUtils.Join(key, "."));
-				statement.setString(2, value);
-				statement.executeUpdate();
-			}
-			lastConnected = System.currentTimeMillis();
-			return true;
-		} catch (SQLException ex) {
-			throw new DataSourceException(ex.getMessage(), ex);
-		}
-	}
-
-	@Override
 	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
 		try {
 			connect();

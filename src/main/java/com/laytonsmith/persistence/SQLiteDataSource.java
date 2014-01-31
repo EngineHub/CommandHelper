@@ -9,8 +9,13 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,16 +35,33 @@ public class SQLiteDataSource extends SQLDataSource {
 		
 	}
 	
+	@SuppressWarnings("SleepWhileInLoop")
 	public SQLiteDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
 		super(uri, options);		
-		mixin = getConnectionMixin();		
+		mixin = getConnectionMixin();	
 		try {
 			Class.forName(org.sqlite.JDBC.class.getName());
 			path = mixin.getPath();
 			connect();
-			Statement statement = getConnection().createStatement();
-			statement.executeUpdate(getTableCreationQuery());
-			updateLastConnected();
+			while(true){
+				try {
+					try (Statement statement = getConnection().createStatement()) {
+						statement.executeUpdate(getTableCreationQuery());
+					}
+					updateLastConnected();
+					break;
+				} catch(SQLException ex){
+					if(ex.getMessage().startsWith("[SQLITE_BUSY]") || ex.getMessage().equals("database is locked")){
+						try {
+							Thread.sleep(getRandomSleepTime());
+						} catch (InterruptedException ex1) {
+							//
+						}
+					} else {
+						throw ex;
+					}
+				}
+			}
 		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
 			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
 		} 
@@ -59,24 +81,152 @@ public class SQLiteDataSource extends SQLDataSource {
 	 * @throws IOException 
 	 */
 	@Override
+	@SuppressWarnings("SleepWhileInLoop")
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		try {
 			connect();
 			if(value == null){
 				clearKey0(dm, key);
 			} else {
-				startTransaction(dm);
-				PreparedStatement statement = getConnection().prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME 
-						+ "` (`" + getKeyColumn() + "`, `" + getValueColumn() + "`) VALUES (?, ?)");
-				statement.setString(1, StringUtils.Join(key, "."));
-				statement.setString(2, value);
-				statement.executeUpdate();
-				stopTransaction(dm, false);
+				while(true){
+					try {
+						try (PreparedStatement statement = getConnection().prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME 
+								+ "` (`" + getKeyColumn() + "`, `" + getValueColumn() + "`) VALUES (?, ?)")) {
+							statement.setString(1, StringUtils.Join(key, "."));
+							statement.setString(2, value);
+							statement.executeUpdate();
+						}
+						break;
+					} catch(SQLException ex){
+						if(ex.getMessage().startsWith("[SQLITE_BUSY]") 
+								// This one only happens with SETs
+								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
+							try {
+								Thread.sleep(getRandomSleepTime());
+							} catch (InterruptedException ex1) {
+								//
+							}
+						} else {
+							throw ex;
+						}
+					}
+				}
 			}
 			updateLastConnected();
 			return true;
 		} catch (SQLException ex) {
-			stopTransaction(dm, true);
+			throw new DataSourceException(ex.getMessage(), ex);
+		}
+	}
+	
+	@Override
+	@SuppressWarnings("SleepWhileInLoop")
+	public Set<String[]> keySet(String[] keyBase) throws DataSourceException {
+		String searchPrefix = StringUtils.Join(keyBase, ".");
+		try {
+			connect();
+			Set<String[]> set = new HashSet<>();
+			while(true){
+				try {
+					try(PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "` FROM `" + getEscapedTable() 
+							+ "` WHERE `" + getKeyColumn() + "` LIKE ?")){
+						statement.setString(1, searchPrefix + "%");
+						try(ResultSet result = statement.executeQuery()){
+							while(result.next()){
+								set.add(result.getString(getKeyColumn()).split("\\."));
+							}
+						}
+					}
+					updateLastConnected();
+					break;
+				} catch(SQLException ex){
+					if(ex.getMessage().startsWith("[SQLITE_BUSY]")){
+						try {
+							Thread.sleep(getRandomSleepTime());
+						} catch (InterruptedException ex1) {
+							//
+						}
+					} else {
+						throw ex;
+					}
+				}
+			}
+			return set;
+		} catch(SQLException | IOException ex){
+			throw new DataSourceException(ex.getMessage(), ex);
+		}
+	}
+
+	@Override
+	@SuppressWarnings("SleepWhileInLoop")
+	public String get0(String[] key) throws DataSourceException {
+		try {
+			connect();
+			String ret = null;
+			while(true){
+				try {
+					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" + getEscapedTable() 
+							+ "` WHERE `" + getKeyColumn() + "`=? LIMIT 1")) {
+						statement.setString(1, StringUtils.Join(key, "."));
+						try (ResultSet result = statement.executeQuery()) {
+							if(result.next()){
+								ret = result.getString(getValueColumn());
+							}
+						}
+					}
+					break;
+				} catch(SQLException ex){
+					if(ex.getMessage().startsWith("[SQLITE_BUSY]")){
+						try {
+							Thread.sleep(getRandomSleepTime());
+						} catch (InterruptedException ex1) {
+							//
+						}
+					} else {
+						throw ex;
+					}
+				}
+			}
+			updateLastConnected();
+			return ret;
+		} catch(SQLException | IOException ex){
+			throw new DataSourceException(ex.getMessage(), ex);
+		}
+	}
+	
+	@Override
+	@SuppressWarnings("SleepWhileInLoop")
+	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
+		try {
+			connect();
+			Map<String[], String> map = new HashMap<>();
+			while(true){
+				try {
+					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "`, `" + getValueColumn() + "` FROM `" 
+							+ getEscapedTable() + "`" + " WHERE `" + getKeyColumn() + "` LIKE ?")){
+						statement.setString(1, StringUtils.Join(leadKey, ".") + "%");
+						try (ResultSet results = statement.executeQuery()){
+							while(results.next()){
+								map.put(results.getString(getKeyColumn()).split("\\."), results.getString(getValueColumn()));
+							}
+						}
+					}
+					break;
+				} catch(SQLException ex){
+					if(ex.getMessage().startsWith("[SQLITE_BUSY]")){
+						try {
+							Thread.sleep(getRandomSleepTime());
+						} catch (InterruptedException ex1) {
+							//
+						}
+					} else {
+						throw ex;
+					}
+				}
+			}
+			updateLastConnected();
+			return map;
+		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -118,7 +268,7 @@ public class SQLiteDataSource extends SQLDataSource {
 	@Override
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		try {
-			if(rollback){
+			if (rollback) {
 				getConnection().prepareStatement("ROLLBACK TRANSACTION").execute();
 			} else {
 				getConnection().prepareStatement("END TRANSACTION").execute();
@@ -137,5 +287,9 @@ public class SQLiteDataSource extends SQLDataSource {
 	@Override
 	protected String getConnectionString() {
 		return "jdbc:sqlite:" + path;
+	}
+	
+	private int getRandomSleepTime(){
+		return ((int)(Math.random() * 10) % 10);
 	}
 }

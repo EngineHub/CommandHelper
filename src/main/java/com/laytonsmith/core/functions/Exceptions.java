@@ -411,6 +411,11 @@ public class Exceptions {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{_throw.class};
+		}
 	}
 
 	@api
@@ -462,6 +467,11 @@ public class Exceptions {
 		@Override
 		public Boolean runAsync() {
 			return null;
+		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{_try.class};
 		}
 
 		//The code: try(throw(...), @ex, ...) doesn't work,
@@ -564,8 +574,11 @@ public class Exceptions {
 						+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),
 			};
 		}
-		
-		
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{_throw.class, _try.class};
+		}
 		
 	}
 }
