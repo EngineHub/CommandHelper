@@ -36,6 +36,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
+import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
@@ -283,6 +284,10 @@ public class BukkitConvertor extends AbstractConvertor {
     	if(be instanceof Boat) {
 			return new BukkitMCBoat((Boat)be);
     	}
+		
+		if(be instanceof CommandMinecart) {
+			return new BukkitMCCommandMinecart((CommandMinecart)be);
+		}
 
     	if(be instanceof Minecart) {
     		return new BukkitMCMinecart((Minecart)be);
