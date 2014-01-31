@@ -8,7 +8,6 @@ import com.laytonsmith.persistence.io.ConnectionMixin;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -66,18 +65,18 @@ public class SQLiteDataSource extends SQLDataSource {
 			if(value == null){
 				clearKey0(dm, key);
 			} else {
-				startExclusiveTransaction();
+				startTransaction(dm);
 				PreparedStatement statement = getConnection().prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME 
 						+ "` (`" + getKeyColumn() + "`, `" + getValueColumn() + "`) VALUES (?, ?)");
 				statement.setString(1, StringUtils.Join(key, "."));
 				statement.setString(2, value);
 				statement.executeUpdate();
-				stopExclusiveTransaction();
+				stopTransaction(dm, false);
 			}
 			updateLastConnected();
 			return true;
 		} catch (SQLException ex) {
-			rollbackExclusiveTransaction();
+			stopTransaction(dm, true);
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -105,27 +104,11 @@ public class SQLiteDataSource extends SQLDataSource {
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
 	}
-	
-	private void startExclusiveTransaction() throws SQLException{
-		getConnection().createStatement().execute("BEGIN EXCLUSIVE TRANSACTION");
-	}
-	
-	private void stopExclusiveTransaction() throws SQLException{
-		getConnection().createStatement().execute("COMMIT TRANSACTION");
-	}
-	
-	private void rollbackExclusiveTransaction() {
-		try {
-			getConnection().createStatement().execute("ROLLBACK TRANSACTION");
-		} catch (SQLException ex) {
-			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
 
 	@Override
 	protected void startTransaction0(DaemonManager dm) {
 		try {
-			getConnection().prepareStatement("BEGIN TRANSACTION").execute();
+			getConnection().prepareStatement("BEGIN EXCLUSIVE TRANSACTION").execute();
 			updateLastConnected();
 		} catch (SQLException ex) {
 			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
