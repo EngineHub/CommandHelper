@@ -230,6 +230,39 @@ public class SQLiteDataSource extends SQLDataSource {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
+	
+	@Override
+	@SuppressWarnings("SleepWhileInLoop")
+	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
+		if(hasKey(key)){
+			try{
+				connect();
+				while(true){
+					try {
+						PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() 
+								+ "` WHERE `" + getKeyColumn() + "`=?");
+						statement.setString(1, StringUtils.Join(key, "."));
+						statement.executeUpdate();
+						updateLastConnected();
+					} catch(SQLException ex){
+						if(ex.getMessage().startsWith("[SQLITE_BUSY]") 
+								// This one only happens with SETs
+								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
+							try {
+								Thread.sleep(getRandomSleepTime());
+							} catch (InterruptedException ex1) {
+								//
+							}
+						} else {
+							throw ex;
+						}
+					}
+				}
+			} catch(IOException | SQLException e){
+				throw new DataSourceException(e.getMessage(), e);
+			}
+		}
+	}
 
 	@Override
 	public String docs() {
