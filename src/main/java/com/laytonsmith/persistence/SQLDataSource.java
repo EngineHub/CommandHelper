@@ -146,7 +146,7 @@ public abstract class SQLDataSource extends AbstractDataSource {
 		try {
 			connect();
 			PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "` FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "` LIKE ?");
-			statement.setString(1, StringUtils.Join(keyBase, ".") + "%");
+			statement.setString(1, searchPrefix + "%");
 			Set<String[]> set = new HashSet<>();
 			try(ResultSet result = statement.executeQuery()){
 				while(result.next()){
