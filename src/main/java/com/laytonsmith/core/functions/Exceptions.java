@@ -9,6 +9,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -551,6 +552,21 @@ public class Exceptions {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "set_uncaught_exception_handler(closure(@ex){\n"
+						+ "\tmsg('Exception caught!');\n"
+						+ "\tmsg(@ex);\n"
+						+ "\treturn(true);\n"
+						+ "});\n\n"
+						+ "@zero = 0;\n"
+						+ "@exception = 1 / @zero; // This should throw an exception\n"),
+			};
+		}
+		
+		
 		
 	}
 }
