@@ -30,6 +30,7 @@ public class RedisDataSource extends AbstractDataSource {
 	private int port;
 	private int timeout;
 	private String password;
+	private long lastConnected = 0;
 	
 	private RedisDataSource(){
 		
@@ -61,10 +62,40 @@ public class RedisDataSource extends AbstractDataSource {
 	}
 	
 	private void connect(){
-		if(connection == null || !connection.isConnected()){
+		boolean needToConnect = false;
+		if(connection == null){
+			needToConnect = true;
+		} else if(!connection.isConnected()){
+			needToConnect = true;
+		} else if(lastConnected < System.currentTimeMillis() - 10000){
+			// If we connected more than 10 seconds ago, we should re-test
+			// the connection explicitely, because isConnected may return true,
+			// even if the connection will fail. The only real way to test
+			// if the connection is actually open is to run a test query, but
+			// doing that too often will cause unneccessary delay, so we
+			// wait an arbitrary amount, in this case, 10 seconds.
+			try {
+				// We don't actually care if this value exists or not, just
+				// that it doesn't break.
+				connection.exists("connection.test");
+				// Nope, don't need to connect.
+			} catch(JedisConnectionException ex){
+				// Need to connect, since this broke.
+				needToConnect = true;
+			}
+		}
+		if(needToConnect){
 			connection = new Jedis(shardInfo);
 		}
 	}
+
+	@Override
+	public void disconnect() throws DataSourceException {
+		if(connection != null){
+			connection.disconnect();
+		}
+	}
+	
 
 	@Override
 	protected boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
@@ -77,6 +108,7 @@ public class RedisDataSource extends AbstractDataSource {
 			} else {
 				status = connection.set(ckey, value);
 			}
+			lastConnected = System.currentTimeMillis();
 		} catch(JedisConnectionException e){
 			throw new DataSourceException(e);
 		}
@@ -93,6 +125,7 @@ public class RedisDataSource extends AbstractDataSource {
 			} else {
 				connection.del(ckey);				
 			}
+			lastConnected = System.currentTimeMillis();
 		} catch(JedisConnectionException e){
 			throw new DataSourceException(e);
 		}
@@ -103,11 +136,14 @@ public class RedisDataSource extends AbstractDataSource {
 		connect();
 		String ckey = StringUtils.Join(key, ".");
 		try{
+			String ret;
 			if(inTransaction()){
-				return transaction.get(ckey).get();
+				ret = transaction.get(ckey).get();
 			} else {
-				return connection.get(ckey);
+				ret =  connection.get(ckey);
 			}
+			lastConnected = System.currentTimeMillis();
+			return ret;
 		} catch(JedisConnectionException e){
 			throw new DataSourceException(e);
 		}
@@ -124,6 +160,7 @@ public class RedisDataSource extends AbstractDataSource {
 			} else {
 				ret = connection.keys(kb);
 			}
+			lastConnected = System.currentTimeMillis();
 		} catch(JedisConnectionException e){
 			throw new DataSourceException(e);
 		}

@@ -1,5 +1,6 @@
 package com.laytonsmith.tools.docgen;
 
+import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
@@ -10,25 +11,25 @@ import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.DataSource;
+import com.laytonsmith.persistence.MySQLDataSource;
+import com.laytonsmith.persistence.SQLiteDataSource;
 import com.laytonsmith.tools.Manager;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +42,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author lsmith
  */
 public class DocGenTemplates {
 	public static interface Generator{
@@ -183,7 +183,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String ... args) {
 			Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
-			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*?)\\s*$");
+			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*)\\s*$");
 			SortedSet<String> set = new TreeSet<String>();
 			for(Class c : classes){
 				if(DataSource.class.isAssignableFrom(c)){
@@ -208,7 +208,10 @@ public class DocGenTemplates {
 							description = m.group(3);
 						}
 						if(name == null || example == null || description == null){
-							throw new Error("Invalid documentation for " + c.getSimpleName());
+							throw new Error("Invalid documentation for " + c.getSimpleName()
+								+ (name==null?" name was null;":"") 
+								+ (example==null?" example was null;":"")
+								+ (description==null?" description was null;":""));
 						}
 						StringBuilder b = new StringBuilder();
 						b.append("|-\n| ").append(name).append(" || ").append(description)
@@ -263,7 +266,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
-			for(Documentation d : ExceptionType.values()){
+			for(SimpleDocumentation d : ExceptionType.values()){
 				b.append("===").append(d.getName()).append("===\n");
 				b.append(d.docs());
 				b.append("\n\nSince: ").append(d.since().toString()).append("\n\n");
@@ -380,148 +383,34 @@ public class DocGenTemplates {
 		}
 	};
 	
-	private static final Map<String, String> classes = new HashMap<String, String>();
-	static{
-		classes.put("comment", "color: #888888;");
-		classes.put("single-string", "color: #FF9900;");
-		classes.put("double-string", "color: #CC9900;");
-		classes.put("var", "color: #009933;");
-		classes.put("dvar", "color: #00CCFF;");
-	}
+	
 	public static Generator CODE = new Generator(){
 		
-
 		@Override
 		public String generate(String... args) {
 			String code = StringUtils.Join(args, "|");
-			String [] lines = code.split("\r\n|\n\r|\n");
-			StringBuilder out = new StringBuilder();
-			boolean blankLine = false;
-			//We're gonna write a mini parser here, so here's our state variables.
-			boolean inDoubleString = false;
-			boolean inSingleString = false;
-			boolean inLineComment = false;
-			boolean inBlockComment = false;
-			boolean inDollarVar = false;
-			boolean inVar = false;
-			for(int i = 0; i < lines.length; i++){
-				if(i == 0 && "".equals(lines[0].trim())){
-					blankLine = true;
-					continue;
-				}
-				StringBuilder lout = new StringBuilder();
-				if(inBlockComment){
-					lout.append("<span style=\"").append(classes.get("comment")).append("\">");
-				}
-				if(inDoubleString){
-					lout.append("<span style=\"").append(classes.get("double-string")).append("\">");
-				}
-				if(inSingleString){
-					lout.append("<span style=\"").append(classes.get("single-string")).append("\">");
-				}
-				String buffer = "";
-				for(int j = 0; j < lines[i].length(); j++){
-					char c = lines[i].charAt(j);
-					char c2 = (j + 1 < lines[i].length()?lines[i].charAt(j + 1):'\0');
-					if(inSingleString){
-						if(c == '\\' && c2 == '\''){
-							buffer += "\\&apos;";
-							j++;
-							continue;
-						} else if(c == '\''){
-							inSingleString = false;
-							lout.append("<span style=\"").append(classes.get("single-string")).append("\">").append(buffer).append("&apos;</span>");
-							buffer = "";
-							continue;
-						}
-					}
-					if(inDoubleString){
-						if(c == '\\' && c2 == '"'){
-							buffer += "\\&quot;";
-							j++;
-							continue;
-						} else if(c == '"'){
-							inDoubleString = false;
-							lout.append("<span style=\"").append(classes.get("double-string")).append("\">").append(buffer).append("&quot;</span>");
-							buffer = "";
-							continue;
-						}
-					}
-					if(inVar){
-						if(!Character.toString(c).matches("[a-zA-Z0-9_]")){
-							lout.append(buffer).append("</span>");
-							buffer = "";
-							inVar = false;
-						}
-					}
-					if(inDollarVar){
-						if(!Character.toString(c).matches("[a-zA-Z0-9_]")){
-							lout.append(buffer).append("</span>");
-							buffer = "";
-							inDollarVar = false;
-						}
-					}
-					if(!inDoubleString && !inSingleString && !inBlockComment && c == '#'){
-						lout.append(buffer).append("<span style=\"").append(classes.get("comment")).append("\">#");
-						buffer = "";
-						inLineComment = true;
-						continue;
-					}
-					if(!inDoubleString && !inSingleString && !inLineComment && c == '/' && c2 == '*'){
-						lout.append(buffer);
-						buffer = "";
-						lout.append("<span style=\"").append(classes.get("comment")).append("\">/*");
-						j++;
-						inBlockComment = true;
-						continue;
-					}
-					if(c == '\'' && !inDoubleString && !inLineComment && !inBlockComment){
-						lout.append(buffer);
-						buffer = "";
-						inSingleString = true;
-					}
-					if(c == '"' && !inSingleString && !inLineComment && !inBlockComment){
-						lout.append(buffer);
-						buffer = "";
-						inDoubleString = true;
-					}
-					if(c == '*' && c2 == '/'){
-						lout.append(buffer).append("*/</span>");
-						buffer = "";
-						j++;
-						inBlockComment = false;
-						continue;
-					}
-					if(!inDoubleString && !inSingleString && !inLineComment && !inBlockComment && c == '@'){
-						lout.append(buffer).append("<span style=\"").append(classes.get("var")).append("\">");
-						buffer = "";
-						inVar = true;
-					}
-					if(!inDoubleString && !inSingleString && !inLineComment && !inBlockComment && c == '$'){
-						lout.append(buffer).append("<span style=\"").append(classes.get("dvar")).append("\">$");
-						buffer = "";
-						if(!Character.toString(c2).matches("[a-zA-Z0-9_]")){
-							//Done, it's final var
-							lout.append("</span>");
-						} else {
-							inDollarVar = true;
-						}
-						continue;
-					}
-					buffer += HTMLUtils.escapeHTML(Character.toString(c)).replace(" ", "&nbsp;");
-				}
-				lout.append(buffer);
-				if(inBlockComment || inVar || inLineComment || inDollarVar || inSingleString || inDoubleString){
-					inVar = false;
-					inLineComment = false;
-					inDollarVar = false;
-					lout.append("</span>");
-				}
-				out.append(blankLine?i:i + 1).append("&nbsp;&nbsp;&nbsp;").append(lout.toString()).append("<br />\n");
-			}
-			return "<div style=\"font-family: 'Consolas','DejaVu Sans','Lucida Console',monospace; background-color: #F9F9F9;"
-					+ " border-color: #A7D7F9; border-style: solid; border-width: 1px 0px 1px 0px; margin: 1em 2em;"
-					+ " padding: 0 0 0 1em;\">\n" + out.toString().replace("\t", "&nbsp;&nbsp;&nbsp;") + "</div>\n";
+			String out = SimpleSyntaxHighlighter.Highlight(code);
+			return out;
+		}
+		
+	};
+	
+	public static Generator MySQL_CREATE_TABLE_QUERY = new Generator(){
+
+		@Override
+		public String generate(String... args) {
+			MySQLDataSource ds = ReflectionUtils.newInstance(MySQLDataSource.class);
+			return ds.getTableCreationQuery("tableName");
+		}
+		
+	};
+	
+	public static Generator SQLite_CREATE_TABLE_QUERY = new Generator(){
+
+		@Override
+		public String generate(String... args) {
+			SQLiteDataSource ds = ReflectionUtils.newInstance(SQLiteDataSource.class);
+			return ds.getTableCreationQuery();
 		}
 		
 	};

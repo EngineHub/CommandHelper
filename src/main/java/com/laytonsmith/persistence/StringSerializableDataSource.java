@@ -16,7 +16,6 @@ import java.util.logging.Logger;
  * be written to file, but it is for sure going to be stored (or at least retrievable)
  * from a UTF-8 encoded string.
  *
- * @author lsmith
  */
 public abstract class StringSerializableDataSource extends AbstractDataSource {
 	/**
@@ -173,4 +172,11 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	protected String getBlankDataModel() {
 		return "";
 	}
+
+	@Override
+	public void disconnect() {
+		// By default, we assume that string based data sources don't need disconnecting.
+		// If this assumption is bad, the subclass can override this method.
+	}
+	
 }

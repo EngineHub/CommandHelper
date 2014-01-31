@@ -114,11 +114,9 @@ public class SyntaxHighlighters {
                 base.add(c.name());
             }
         } else if(datalist.equalsIgnoreCase("keywords")){
-            base.add("null");
-            base.add("false");
-            base.add("true");
-            base.add("case");
-            base.add("default");
+			for(String keyword : SimpleSyntaxHighlighter.KEYWORDS){
+				base.add(keyword);
+			}
         } else if(datalist.equalsIgnoreCase("functions")){
             for(Function f : GetFunctions()){
                 if(!f.appearInDocumentation()){

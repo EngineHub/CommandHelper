@@ -1,23 +1,68 @@
 package com.laytonsmith.core.events.drivers;
 
-import com.laytonsmith.PureUtilities.Geometry.Point3D;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Geometry.Point3D;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCBookMeta;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
+import com.laytonsmith.abstraction.events.MCExpChangeEvent;
+import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
+import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
+import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
+import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
+import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
+import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
+import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
+import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.events.*;
+import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
+import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventBuilder;
+import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -26,7 +71,6 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.StringHandling;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -2316,6 +2360,207 @@ public class PlayerEvents {
 			} else {
 				return false;
 			}
+		}
+	}
+	
+	@api
+	public static class player_toggle_flight extends AbstractEvent {
+		@Override
+		public String getName() {
+			return "player_toggle_flight";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_TOGGLE_FLIGHT;
+		}
+
+		@Override
+		public String docs() {
+			return "{player: <macro> The player who toggled their flying state | flying: <boolean match> Whether or not the player is trying to start or stop flying | world: <macro>}"
+					+ " Called when a player toggles their flying state."
+					+ " {player: The player who toggled their flying state | flying: Whether or not the player is trying to start or stop flying |"
+					+ " location: Where the player is}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPlayerToggleFlightEvent) {
+				MCPlayerToggleFlightEvent ptfe = (MCPlayerToggleFlightEvent) event;
+				MCPlayer player = ptfe.getPlayer();
+				Prefilters.match(prefilter, "player", player.getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "flying", ptfe.isFlying(), PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "world", player.getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPlayerToggleFlightEvent) {
+				MCPlayerToggleFlightEvent ptfe = (MCPlayerToggleFlightEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCPlayer player = ptfe.getPlayer();
+				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("flying", new CBoolean(ptfe.isFlying(), Target.UNKNOWN));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to PlayerToggleFlightEvent");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class player_toggle_sneak extends AbstractEvent {
+		@Override
+		public String getName() {
+			return "player_toggle_sneak";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_TOGGLE_SNEAK;
+		}
+
+		@Override
+		public String docs() {
+			return "{player: <macro> The player who toggled their sneaking state | sneaking: <boolean match> Whether or not the player is now sneaking | world: <macro>}"
+					+ " Called when a player toggles their sneaking state."
+					+ " {player: The player who toggled their sneaking state | sneaking: Whether or not the player is now sneaking |"
+					+ " location: Where the player is}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPlayerToggleSneakEvent) {
+				MCPlayerToggleSneakEvent ptse = (MCPlayerToggleSneakEvent) event;
+				MCPlayer player = ptse.getPlayer();
+				Prefilters.match(prefilter, "player", player.getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "sneaking", ptse.isSneaking(), PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "world", player.getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPlayerToggleSneakEvent) {
+				MCPlayerToggleSneakEvent ptse = (MCPlayerToggleSneakEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCPlayer player = ptse.getPlayer();
+				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("sneaking", new CBoolean(ptse.isSneaking(), Target.UNKNOWN));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to PlayerToggleSneakEvent");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class player_toggle_sprint extends AbstractEvent {
+		@Override
+		public String getName() {
+			return "player_toggle_sprint";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_TOGGLE_SPRINT;
+		}
+
+		@Override
+		public String docs() {
+			return "{player: <macro> The player who toggled their sprinting state | sprinting: <boolean match> Whether or not the player is now sprinting | world: <macro>}"
+					+ " Called when a player toggles their sprinting state."
+					+ " {player: The player who toggled their sprinting state | sprinting: Whether or not the player is now sprinting |"
+					+ " location: Where the player is}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCPlayerToggleSprintEvent) {
+				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
+				MCPlayer player = ptse.getPlayer();
+				Prefilters.match(prefilter, "player", player.getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "sprinting", ptse.isSprinting(), PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "world", player.getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCPlayerToggleSprintEvent) {
+				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				MCPlayer player = ptse.getPlayer();
+				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("sprinting", new CBoolean(ptse.isSprinting(), Target.UNKNOWN));
+				return mapEvent;
+			} else {
+				throw new EventException("Cannot convert event to PlayerToggleSprintEvent");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
 		}
 	}
 }

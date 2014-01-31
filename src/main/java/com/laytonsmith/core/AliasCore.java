@@ -25,6 +25,7 @@ import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
+import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.MemoryDataSource;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
@@ -375,6 +376,9 @@ public class AliasCore {
  
 			StaticLayer.GetConvertor().runShutdownHooks();
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
+			
+			//Clear out the data source cache
+			DataSourceFactory.DisconnectAll();
 			
 			if (reloadExtensions) {
 				ExtensionManager.Startup();

@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author lsmith
  */
 public abstract class AbstractDataSource implements DataSource {
 
@@ -54,6 +53,11 @@ public abstract class AbstractDataSource implements DataSource {
 		}
 	}
 	
+	/**
+	 * Gets the connection mixin for this connection type.
+	 * @return
+	 * @throws DataSourceException 
+	 */
 	protected ConnectionMixin getConnectionMixin() throws DataSourceException{
 		if(connectionMixin == null){
 			connectionMixin = ConnectionMixinFactory.GetConnectionMixin(uri, modifiers, mixinOptions, getBlankDataModel());
@@ -330,11 +334,6 @@ public abstract class AbstractDataSource implements DataSource {
 		}
 		b.append(uri.toString());
 		return b.toString();
-	}
-
-	@Override
-	public URL getSourceJar() {
-		throw new UnsupportedOperationException("TODO: Not supported yet.");
 	}
 	
 }

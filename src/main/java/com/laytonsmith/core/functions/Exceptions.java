@@ -71,7 +71,7 @@ public class Exceptions {
 	}
 
 	@MEnum("ExceptionType")
-	public enum ExceptionType implements Documentation {
+	public enum ExceptionType implements SimpleDocumentation {
 
 		/**
 		 * This exception is thrown if a value cannot be cast into an
@@ -269,11 +269,6 @@ public class Exceptions {
 		@Override
 		public CHVersion since() {
 			return since;
-		}
-
-		@Override
-		public URL getSourceJar() {
-			return null;
 		}
 		
 	}

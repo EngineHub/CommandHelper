@@ -14,7 +14,6 @@ import java.util.Properties;
 
 /**
  * 
- * @author lsmith
  */
 @datasource("ini")
 public class INIDataSource extends StringSerializableDataSource {
@@ -35,11 +34,11 @@ public class INIDataSource extends StringSerializableDataSource {
         } catch (IOException ex) {
             //Won't ever happen, but sure.
             throw new DataSourceException(null, ex);
-        }
+			}
         List<Pair<String, String>> list = new ArrayList<Pair<String, String>>();
         for(String key : props.stringPropertyNames()){
             list.add(new Pair<String, String>(key, props.getProperty(key)));
-        }
+			}
         model = new DataSourceModel(list);
     }
 

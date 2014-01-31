@@ -3,7 +3,7 @@ package com.laytonsmith.persistence;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.MustUseOverride;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.SimpleDocumentation;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.Set;
  * @author lsmith
  */
 @MustUseOverride
-public interface DataSource extends Documentation {
+public interface DataSource extends SimpleDocumentation {
 
 	/**
 	 * Returns a list of keys stored in this interface. If keyBase is empty,
@@ -50,7 +50,8 @@ public interface DataSource extends Documentation {
 	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException;
 
 	/**
-	 * Retrieves a single value from the data source.
+	 * Retrieves a single value from the data source. If the value doesn't exist
+	 * at all, null should be returned.
 	 * @param key
 	 * @return 
 	 */
@@ -175,13 +176,23 @@ public interface DataSource extends Documentation {
 	 * @throws DataSourceException If any other exception occurs
 	 */
 	public void stopTransaction(DaemonManager dm, boolean rollback) throws DataSourceException, IOException;
+	
+	/**
+	 * Disconnects the Data Source. This may not do anything for some connection types, but
+	 * for streaming connection types, this will close the connection. Regardless, after
+	 * calling this method, it should be assumed that future calls to this data source
+	 * will be invalid, and might throw errors if used.
+	 * @throws DataSourceException In the event that some kind of internal error occurs, this
+	 * may be thrown.
+	 */
+	public void disconnect() throws DataSourceException;
 
 	/**
 	 * These are the valid modifiers for a generic connection. Not all data
 	 * sources can support all of these, and some are inherently present or
 	 * unsupportable on certain connection types.
 	 */
-	public enum DataSourceModifier implements Documentation {
+	public enum DataSourceModifier implements SimpleDocumentation {
 
 		READONLY("Makes the connection read-only. That is to say, calls to store_data() on the keys mapped to this data source will always fail.", CHVersion.V3_3_1),
 		TRANSIENT("The data from this source is not cached. Note that for file based data sources, this makes it incredibly inefficient for large data sources,"
@@ -227,11 +238,6 @@ public interface DataSource extends Documentation {
 		@Override
 		public CHVersion since() {
 			return since;
-		}
-		
-		@Override
-		public URL getSourceJar() {
-			return null;
 		}
 
 		public static boolean isModifier(String scheme) {

@@ -1,0 +1,62 @@
+
+In CommandHelper, there are two types of variables, variables (start with $) and ivariables (start with @).
+
+==Variables==
+Variables are set in a command, like so:
+
+/cmd $var1 $var2 $ = msg($var1 $var2 $)
+
+These variables are used when it comes to ''matching'' a command, however, when the script is running, they are thought of as constants. 
+This is because you, as the programmer, can't change them. They may change from run to run of the command, so they are still technically 
+variables. The variable $ is a special variable, and matches any parameter after, which also means that it must be the final thing in a 
+command definition. This is why it is referred to as the final var. It is treated as a string. However, if you wish to treat it as an 
+array (for example, to parse the arguments individually), use parse_args($) to return an array of individual items. Here is a more complex, 
+but valid scenario:
+
+/cmd one $var1 const $var2 const $var3 $ = ...
+
+In this case, if the user types "/cmd one two three four five six", it would match, and the defined variables would be as follows:
+{|
+|-
+|$var1: || two
+|-
+|$var2: || three
+|-
+|$var3: || four
+|-
+|$: || five six
+|}
+
+As you can see, constants are only used to determine if a command matches, but otherwise not used.
+
+==IVariables==
+
+IVariables are defined by the programmer, and are a pure mscript feature. To create a variable, you simply use it, 
+the default value in the variable is an empty string. Usually however, you want to define it with a value before you 
+use it. This can be done with the {{function|assign}} function. <code>assign</code> takes an ivariable, and any other 
+parameter. Unlike most functions, it does require an actual variable, which most functions will never return. 
+(<code>assign</code> or <code>=</code> does, however, so it is possible to chain an assignment with another function)
+%%CODE|
+@var = 2;
+msg(@var);
+%%
+This code will send the player "2".
+
+Here is an example of a chained assignment:
+%%CODE|
+for(@i = 0, @i < 10, @i++){ 
+    msg(@i);
+}
+%%
+
+Because assign/= returns the actual ivariable that was set, and {{function|for}} requires an ivar as the first argument, this works ok. 
+In addition, this is possible:
+
+%%CODE|
+@var1 = @var2 = 6;
+%%
+In this case, both @var1 and @var2 get assigned to 6. This is because the ivar is returned, and then resolved 
+to the value 6, which is then stored in @var1. This resolution behavior is typical, but a few functions have 
+special functionality to handle this, such as assign/=, and if, and loops, so the variable isn't resolved immediately.
+
+{{LearningTrail}}

@@ -1,4 +1,3 @@
-{{unimplemented}}
 
 The Persistence Network allows for a flexible, efficient, and intuitive way to store your persistence data. 
 The general idea is that your code doesn't need to know exactly where the data is stored, it simply needs to
@@ -59,8 +58,8 @@ For a full rundown of the speed comparisons, see the chart below.
 
 There are special implementation considerations you must take into account if you are writing 
 an external system that integrates with the persistence network, (including if you edit the 
-files by hand), so you should read up on the [[CommandHelper/Persistence_Network_Integration|Persistence Network Integration]] 
-guide before you attempt to edit the output files.
+files by hand), so you should read up on the [[CommandHelper/Staged/Persistence_Network_Integration|Persistence Network Integration]] 
+guide before you attempt to edit the output files, or otherwise care about the internal storage specifications.
 
 ===Connection Aliases===
 Often times you will want to re-use a connection, but you don't want to have to re-specify the 
@@ -74,7 +73,7 @@ Then, elsewhere, instead of rewriting the entire connection string, you may simp
 
 ==Filters==
 
-Filters are what map namespaces to connections. The configuration file (persistence_network.ini) 
+Filters are what map namespaces to connections. The configuration file (persistence.ini) 
 is used to specify the actual filters. (An example is shown below). It is important to note that 
 the namespace conventions followed by the filter system map to the REAL namespace conventions, not 
 the namespaces you use in code. For instance, if you were to make a call to 
@@ -115,31 +114,31 @@ case you can use the data manager tools to do so. This should be done while the 
 is off, to ensure corruption does not occur, though it is possible to do this with the 
 server running if you're careful. To transfer data, simply specify the keys to match, 
 and the destination connection. The data will be transferred appropriately. If a 
-conflict would occur, you will interactively be prompted with an action. Additionally, 
-when you re-map these keys, your persistence_network.ini file will AUTOMATICALLY be 
-updated to reflect the new mappings. This is the appropriate way to make modifications 
+conflict would occur, you will interactively be prompted with an action. After transferring, 
+these keys, you should update your persistence.ini file to reflect the new mappings. 
+This is the appropriate way to make modifications 
 to your data mappings, while ensuring that no data is lost in the process. Consider the 
 following scenario:
 
 We have data stored in a file, persistence.ser, and we want to change the mapping of 
 storage.player.** over to a database. If we simply changed it in the mapping file, all 
-the existing data would be hidden. We would then have to manually export/import the 
-individual data beforehand, then change the mappings; a tedious process. Instead, we 
-can use the transfer tool. The tool will move the data from the persistence.ser file, 
-into the database, delete the data in the persistence.ser file, then add an entry into 
-the mapping file (or change the existing one): <code>storage.player.**=$mysql</code>. 
-All this is done for you, in one step.
+the existing data would be hidden. Instead, you must export/import the 
+individual data beforehand, then change the mappings. Instead, we 
+can use the transfer tool.
 
 Sometimes, however, you have data in a source that isn't currently mapped in. In this 
-case, you want to use the import tool, not the transfer tool. Accordingly, if you want 
-to copy data, and not move it, you want to use the export tool. You can also use the 
+case, you want to use the merge tool. Accordingly, if you want 
+to copy data, and not move it, you also want to use the merge tool. You can also use the 
 data manager to show hidden data, that is, data that is stored in the data store 
 somewhere, but isn't accessible due to bad mappings.
 
+For more information on these tools and more, [[CommandHelper/Staged/Data_Manager|see this article]].
+
 ==Usage==
 
-Your code will not change. To use this feature, you simply need to change the key -> 
-connection mappings in the persistence_network.ini file. In the configuration file, 
+Your code will not need to change to change where data ends up being stored. 
+To use this feature, you simply need to change the key -> connection mappings in 
+the persistence.ini file. In the configuration file, 
 mappings and connection aliases are stored INI style, as shown below. Local file 
 paths are relative to the configuration file itself.
 
@@ -168,25 +167,25 @@ storage.server_info.**=$remote
 So, now, let's go over what would happen when we run our code.
 
 %%CODE|
-#First call
-store_value('server_info.start_time', time())
-...
-#Second call
-store_value('players.' . player() . 'info', pinfo())
-...
-#Third call
-store_value('other.data', 12345)
+// First call
+store_value('server_info.start_time', time());
+//...
+// Second call
+store_value('players.' . player() . 'info', pinfo());
+//...
+// Third call
+store_value('other.data', 12345);
 %%
 
 The first call would fail, because we are trying to write to a readonly connection.
 
 The second call would store the data in the SQLite database, stored in the file persistence.db.
-The key will be the full key 'players.player.info' though, it does not presume that the file is
+The key will be the full key 'storage.players.player.info' though, it does not presume that the file is
 inherently aware of the key prefix, even if it is unique to this file.
 
 The third call will store the data in persistence.ser, in the Serialized Persistence format.
 Notice that our code doesn't care at all where data is actually being stored, or in what format,
-it is a transparent routing layer on top of the global key=>value storage system.
+it is a routing layer on top of the global key=>value storage system.
 
 == Data Source Comparisons ==
 
@@ -227,29 +226,35 @@ Take what information you will from the data, and feel free to run it on your sy
 not just relative to each other on the test system.
 
 <pre style='font-family: monospace'>
-       | 10 values | 100 values | 1000 values | 5000 values | file size with 5000 values
--------+---------------------------------------------------------------------------------
-ini    |   67 ms   |   29 ms    |    139 ms   | 174.644 sec |          144 K
--------+---------------------------------------------------------------------------------
-mem    |    4 ms   |    22 ms   |    74 ms    |    124 ms   |           N/A
--------+---------------------------------------------------------------------------------
-sqlite |   177 ms  |   319 ms   |  4.891 sec  |  46.780 sec |          364 K
--------+---------------------------------------------------------------------------------
-json   |    8 ms   |    15 ms   |    373 ms   |  5.406 sec  |          116 K
--------+---------------------------------------------------------------------------------
-ser    |   16 ms   |    23 ms   |    83 ms    |    114 ms   |          164 K
--------+---------------------------------------------------------------------------------
-yml    |   33 ms   |    14 ms   |  2.105 sec  |  46.640 sec |          112 K 
--------+---------------------------------------------------------------------------------
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+| iterations: |    1   |   10  |   100  |    1000   |     5000     | File size with 5000 values |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     yml     |  59 ms | 15 ms | 268 ms | 1.958 sec |    40 sec    |          103.7 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|    redis    |  24 ms |  3 ms |  17 ms |   184 ms  |    602 ms    |           Unknown          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|    sqlite   | 163 ms | 18 ms | 139 ms | 2.890 sec |    36 sec    |          360.4 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|    mysql    | 160 ms | 29 ms | 185 ms | 1.588 sec |   9.770 sec  |           Unknown          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     ini     |  1 ms  |  1 ms |  28 ms | 2.061 sec | 3.06 minutes |          138.9 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     mem     |  0 ms  |  1 ms |  2 ms  |   26 ms   |    107 ms    |             N/A            |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     json    |  2 ms  |  1 ms |  18 ms |   293 ms  |   5.274 sec  |          108.9 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     ser     |  3 ms  |  0 ms |  4 ms  |   36 ms   |    117 ms    |           31.0 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
 </pre>
 
 An important observation that could be made based on this data is that SQLite is 
-considerably slower than any of the other protocols. This is because SQLite
+considerably slower than many of the other protocols. This is because SQLite
 is less prone to data corruption, and is multiprocess safe. SQLite manages its own
 locking and journaling systems, so it is unlikely to corrupt if a bad write
 occurs, or if multiple processes are accessing it at once. Due to this, it is the
 default storage mechanism, despite its slower runtime. The tradeoff of data protection
-vs. script speed vs. interoperability is not something that can be generically decided
+vs. script speed vs. inter-operability is not something that can be generically decided
 in all cases though, so feel free to change defaults as you see fit. Each protocol
 has pros and cons, so you must decide which one to use.
+
 {{LearningTrail}}

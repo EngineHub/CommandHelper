@@ -57,7 +57,7 @@ public class Manager {
 	private static PersistenceNetwork persistenceNetwork;
 	public static PrintStream out = System.out;
 	public static final String[] options = new String[]{
-		"refactor", "upgrade", "print", "cleardb", "edit", "interpreter", "merge", "hidden-keys"
+		"refactor", "print", "cleardb", "edit", "interpreter", "merge", "hidden-keys"
 	};
 
 	public static void start() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
@@ -100,8 +100,6 @@ public class Manager {
 				cleardb();
 			} else if (input.equalsIgnoreCase("edit")) {
 				edit();
-			} else if (input.equalsIgnoreCase("upgrade")) {
-				upgrade();
 			} else if (input.equalsIgnoreCase("merge")) {
 				merge();
 			} else if (input.equalsIgnoreCase("interpreter")) {
@@ -301,7 +299,6 @@ public class Manager {
 		if (args.length < 1 || args[0].isEmpty()) {
 			pl("Currently, your options are:\n"
 					+ "\t" + GREEN + "refactor" + WHITE + " - Allows you to shuffle data around in the persistence network more granularly than the merge tool.\n"
-					+ "\t" + GREEN + "upgrade" + WHITE + " - Runs upgrade scripts on your persisted data\n"
 					+ "\t" + GREEN + "print" + WHITE + " - Prints out the information from your persisted data\n"
 					+ "\t" + GREEN + "cleardb" + WHITE + " - Clears out your database of persisted data\n"
 					+ "\t" + GREEN + "edit" + WHITE + " - Allows you to edit individual fields\n"
@@ -494,107 +491,6 @@ public class Manager {
 			pl(BLUE + count + " items found");
 		} catch(Exception e){
 			pl(RED + e.getMessage());
-		}
-	}
-
-	public static void upgrade() {
-		pl("\nThis will automatically detect and upgrade your persisted data. Though this will"
-				+ " create a backup for you, you should manually back up your data before running"
-				+ " this utility. You should not use this utility unless you are instructed to do"
-				+ " so in the release notes.");
-		pl("Would you like to continue? [" + GREEN + "Y" + WHITE + "/"
-				+ RED + "N" + WHITE + "]");
-		String choice = prompt();
-		pl();
-		if (choice.equalsIgnoreCase("y")) {
-			//First we have to read in the preferences file, and see what persistence type they are using
-			//Only serialization is supported right now
-			String backingType = "serialization";
-			if (backingType.equals("serialization")) {
-				try {
-					//Back up the persistence.ser file
-					File db = new File("CommandHelper/persistence.ser");
-					if (!db.exists()) {
-						pl("Looks like you haven't used your persistence file yet.");
-						return;
-					}
-					FileUtil.copy(db, new File("CommandHelper/persistence.ser.bak"), null);
-					//Now, load in all the data
-					SerializedPersistence sp;
-					try {
-						sp = new SerializedPersistence(db);
-						try {
-							sp.load();
-						} catch (Exception ex) {
-							pl(RED + ex.getMessage());
-						}
-						Map<String, String> data = sp.rawData();
-						if (data.isEmpty()) {
-							pl("Looks like you haven't used your persistence file yet.");
-							return;
-						}
-						sp.clearAllData(); //Bye bye!
-						//Ok, now we need to determine the type of data we're currently working with
-						p(WHITE + "Working");
-						int counter = 0;
-						int changes = 0;
-						Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA};
-						DaemonManager dm = new DaemonManager();
-						for (String key : data.keySet()) {
-							counter++;
-							int c = counter / 20;
-							if (c == ((double) counter / 20.0)) {
-								p(color(colors[c % 6]) + ".");
-							}
-							if (key.matches("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.commandhelper\\.function\\.storage\\..*")) {
-								//We're in version 1, and we need to upgrade to version 2
-								String newKey = "storage." + key.replaceFirst("plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.commandhelper\\.function\\.storage\\.", "");
-								sp.rawData().put(newKey, data.get(key));
-								changes++;
-							} else if (key.matches("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\..*?\\.aliases\\.\\d+$")) {
-								//Pull out the parts we need
-								Pattern p = Pattern.compile("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.(.*?)\\.aliases\\.(\\d+)$");
-								Matcher m = p.matcher(key);
-								String newKey = null;
-								if (m.find()) {
-									String username = m.group(1);
-									String id = m.group(2);
-									newKey = "user." + username + ".aliases." + id;
-								}
-								//If something went wrong, just put the old one back in
-								if (newKey == null) {
-									sp.rawData().put(key, data.get(key));
-								} else {
-									sp.rawData().put(newKey, data.get(key));
-									changes++;
-								}
-							} else {
-								sp.rawData().put(key, data.get(key));
-							}
-						}
-						try {
-							sp.save(dm);
-						} catch (Exception ex) {
-							pl(RED + ex.getMessage());
-						}
-						try {
-							dm.waitForThreads();
-						} catch (InterruptedException ex) {
-							//
-						}
-						pl();
-						pl(GREEN + "Assuming there are no error messages above, it should be upgraded now! (Use print to verify)");
-						pl(CYAN.toString() + changes + " change" + (changes == 1 ? " was" : "s were") + " made");
-					} catch (DataSourceException ex) {
-						Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
-					}
-
-				} catch (IOException ex) {
-					pl(RED + ex.getMessage());
-				}
-			}
-		} else {
-			pl(RED + "Upgrade Cancelled");
 		}
 	}
 	

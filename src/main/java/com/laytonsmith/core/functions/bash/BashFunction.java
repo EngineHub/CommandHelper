@@ -27,5 +27,12 @@ public abstract class BashFunction implements FunctionBase, CompiledFunction, Do
 	public URL getSourceJar() {
 		return ClassDiscovery.GetClassContainer(this.getClass());
 	}
+
+	private static final Class[] EMPTY_CLASS = new Class[0];
+	
+	@Override
+	public Class<? extends Documentation>[] seeAlso() {
+		return EMPTY_CLASS;
+	}
 	
 }

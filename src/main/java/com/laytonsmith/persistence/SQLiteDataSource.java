@@ -1,7 +1,7 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistence.io.ConnectionMixin;
@@ -9,15 +9,9 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,178 +20,82 @@ import java.util.logging.Logger;
  * @author lsmith
  */
 @datasource("sqlite")
-public class SQLiteDataSource extends AbstractDataSource{
+public class SQLiteDataSource extends SQLDataSource {
 	
 	/* These values may not be changed without creating an upgrade routine */
-	private static final String KEY_COLUMN = "key";
-	private static final String VALUE_COLUMN = "value";
 	private static final String TABLE_NAME = "persistance"; //Note the misspelling!
-	Connection connection;
-	String path;
-	ConnectionMixin mixin;
+	private String path;
+	private ConnectionMixin mixin;
 	
 	private SQLiteDataSource(){
 		
 	}
+	
 	public SQLiteDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
 		super(uri, options);		
 		mixin = getConnectionMixin();		
 		try {
-			try{
-				Class.forName(org.sqlite.JDBC.class.getName());
-				path = mixin.getPath();
-				connect();
-				Statement statement = connection.createStatement();
-				statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + TABLE_NAME + "` (`" + KEY_COLUMN + "` TEXT PRIMARY KEY,"
-						+ " `" + VALUE_COLUMN + "` TEXT)");
-			}finally {
-				disconnect();
-			}
-		} catch (Exception ex) {
+			Class.forName(org.sqlite.JDBC.class.getName());
+			path = mixin.getPath();
+			connect();
+			Statement statement = getConnection().createStatement();
+			statement.executeUpdate(getTableCreationQuery());
+			updateLastConnected();
+		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
 			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
 		} 
 	}
 	
 	/**
-	 * All calls to connect must have a corresponding call to disconnect() in
-	 * a finally block.
+	 * {@inheritDoc}
+	 * 
+	 * SQLite connections support INSERT OR REPLACE, which prevents duplicate keys from mattering, so this method needs to be overridden for
+	 * SQLite.
+	 * @param dm
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws ReadOnlyException
+	 * @throws DataSourceException
+	 * @throws IOException 
 	 */
-	private void connect() throws IOException, SQLException{
-		connection = DriverManager.getConnection("jdbc:sqlite:" + mixin.getPath());		
-	}
-	
-	private void disconnect() throws SQLException{
-		if(connection != null){
-			connection.close();
-		}
-	}
-
-	@Override
-	public Set<String[]> keySet(String[] keyBase) throws DataSourceException{
-		try{
-			try {
-				connect();
-				Statement statement = connection.createStatement();
-				ResultSet rs = statement.executeQuery("SELECT `" + KEY_COLUMN + "` FROM `" + TABLE_NAME + "` WHERE `" 
-						+ KEY_COLUMN + "` LIKE '" + StringUtils.Join(keyBase, ".") + "%'");
-				Set<String[]> list = new HashSet<>();
-				while(rs.next()){
-					list.add(rs.getString(KEY_COLUMN).split("\\."));
-				}
-				return list;
-			} finally{
-				disconnect();
-			}
-		} catch (IOException | SQLException ex) {
-			throw new DataSourceException("Could not retrieve key set from SQLite connection " + path, ex);
-		}
-	}
-
-	@Override
-	public String get0(String[] key) throws DataSourceException {
-		try{
-			try{
-				connect();
-				PreparedStatement statement = connection.prepareStatement("SELECT `" + VALUE_COLUMN + "` FROM `" + TABLE_NAME + "` WHERE `" + KEY_COLUMN + "`=?");
-				statement.setString(1, StringUtils.Join(key, "."));
-				ResultSet rs = statement.executeQuery();
-				if(rs.next()){
-					return rs.getString(VALUE_COLUMN);
-				} else {
-					return null;
-				}
-			} finally {
-				disconnect();
-			}
-		} catch(IOException | SQLException e){
-			throw new DataSourceException("Could not get key from SQLite connection " + path, e);
-		}
-	}
-
-	@Override
-	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
-		try {
-			try {
-				connect();
-				PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + TABLE_NAME
-					+ "` WHERE `" + KEY_COLUMN + "` LIKE '" + StringUtils.Join(leadKey, ".") + "%'");
-				ResultSet rs = statement.executeQuery();
-				Map<String[], String> ret = new HashMap<>();
-				while(rs.next()){
-					String key = rs.getString(KEY_COLUMN);
-					String value = rs.getString(VALUE_COLUMN);
-					ret.put(key.split("\\."), value);
-				}
-				return ret;
-			} finally {
-				disconnect();
-			}
-		} catch(IOException | SQLException e){
-			throw new DataSourceException("Could not get key from SQLite connection " + path, e);
-		}
-	}
-
 	@Override
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
-		if(value == null){
-			clearKey(dm, key);
-			return true;
-		}
-		try{
-			try{
-				connect();
-				PreparedStatement statement = connection.prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME + "` (`" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "`) VALUES (?, ?)");
+		try {
+			connect();
+			if(value == null){
+				clearKey0(dm, key);
+			} else {
+				PreparedStatement statement = getConnection().prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME 
+						+ "` (`" + getKeyColumn() + "`, `" + getValueColumn() + "`) VALUES (?, ?)");
 				statement.setString(1, StringUtils.Join(key, "."));
 				statement.setString(2, value);
-				return statement.executeUpdate() > 0;
-			} finally {
-				disconnect();
+				statement.executeUpdate();
 			}
-		} catch(Exception e){
-			throw new DataSourceException("Could not set key in SQLite connection " + path, e);			
+			updateLastConnected();
+			return true;
+		} catch (SQLException ex) {
+			throw new DataSourceException(ex.getMessage(), ex);
 		}
-	}
-
-	@Override
-	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
-		if(hasKey(key)){
-			try{
-				try{
-					connect();				
-					PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + TABLE_NAME + "` WHERE `" + KEY_COLUMN + "`=?");
-					statement.setString(1, StringUtils.Join(key, "."));
-					statement.executeUpdate();
-				} finally{
-					disconnect();
-				}
-			} catch(Exception e){
-				throw new DataSourceException("Could not clear key in SQLite connection " + path, e);
-			}
-		}
-	}		
-
-	@Override
-	public void populate() throws DataSourceException {
-		//All data is transient
-	}
-
-	@Override
-	public DataSourceModifier[] implicitModifiers() {
-		return new DataSourceModifier[]{DataSourceModifier.TRANSIENT};
-	}
-
-	@Override
-	public DataSourceModifier[] invalidModifiers() {
-		return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.SSH,
-			DataSourceModifier.PRETTYPRINT
-		};
 	}
 
 	@Override
 	public String docs() {
 		return "SQLite {sqlite://path/to/db/file.db} This type store data in a SQLite database."
-			+ " All the pros and cons of MySQL apply here. The database will contain a lone table"
-				+ " named " + TABLE_NAME + ", with two columns, " + KEY_COLUMN + " and " + VALUE_COLUMN;
+			+ " All the pros and cons of MySQL apply here. The database will contain a lone table,"
+				+ " and the table should be created with the query: <syntaxhighlight lang=\"sql\">"
+				+ getTableCreationQuery() + "</syntaxhighlight>";
+	}
+	
+	/**
+	 * Returns the table creation query that should be used to create the table specified.
+	 * This is public for documentation, but is used internally.
+	 * @param table
+	 * @return 
+	 */
+	public final String getTableCreationQuery(){
+		return "CREATE TABLE IF NOT EXISTS `" + TABLE_NAME + "` (`" + getKeyColumn() + "` TEXT PRIMARY KEY,"
+					+ " `" + getValueColumn() + "` TEXT)";
 	}
 
 	@Override
@@ -208,7 +106,8 @@ public class SQLiteDataSource extends AbstractDataSource{
 	@Override
 	protected void startTransaction0(DaemonManager dm) {
 		try {
-			connection.prepareStatement("BEGIN TRANSACTION").execute();
+			getConnection().prepareStatement("BEGIN TRANSACTION").execute();
+			updateLastConnected();
 		} catch (SQLException ex) {
 			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -218,12 +117,23 @@ public class SQLiteDataSource extends AbstractDataSource{
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		try {
 			if(rollback){
-				connection.prepareStatement("ROLLBACK TRANSACTION").execute();
+				getConnection().prepareStatement("ROLLBACK TRANSACTION").execute();
 			} else {
-				connection.prepareStatement("END TRANSACTION").execute();
+				getConnection().prepareStatement("END TRANSACTION").execute();
 			}
+			updateLastConnected();
 		} catch (SQLException ex) {
 			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
+	}
+
+	@Override
+	protected String getTable() {
+		return TABLE_NAME;
+	}
+
+	@Override
+	protected String getConnectionString() {
+		return "jdbc:sqlite:" + path;
 	}
 }

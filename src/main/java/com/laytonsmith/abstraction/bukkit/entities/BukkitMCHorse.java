@@ -1,14 +1,15 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import org.bukkit.entity.Horse;
-
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTameable;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.annotations.abstractionenum;
+import org.bukkit.entity.Horse;
 
 /**
  * 
@@ -94,6 +95,26 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	@Override
 	public void setMaxDomestication(int level) {
 		h.setMaxDomestication(level);
+	}
+
+	@Override
+	public void setSaddle(MCItemStack stack) {
+		h.getInventory().setSaddle(((BukkitMCItemStack)stack).asItemStack());
+	}
+
+	@Override
+	public MCItemStack getSaddle() {
+		return new BukkitMCItemStack(h.getInventory().getSaddle());
+	}
+
+	@Override
+	public void setArmor(MCItemStack stack) {
+		h.getInventory().setArmor(((BukkitMCItemStack)stack).asItemStack());
+	}
+
+	@Override
+	public MCItemStack getArmor() {
+		return new BukkitMCItemStack(h.getInventory().getArmor());
 	}
 	
 	@abstractionenum(

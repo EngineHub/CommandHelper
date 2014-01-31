@@ -1,7 +1,7 @@
 package com.laytonsmith.core.snapins;
 
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.SimpleDocumentation;
 import java.net.URL;
 
 /**
@@ -10,7 +10,7 @@ import java.net.URL;
  * so extensions can later provide different permissions, while 
  * @author Layton
  */
-public interface PackagePermission extends Documentation {
+public interface PackagePermission extends SimpleDocumentation {
 	
 	/**
 	 * This is a specially defined PackagePermission that should be used by
@@ -44,11 +44,6 @@ public interface PackagePermission extends Documentation {
 		public CHVersion since() {
 			return null;
 		}
-
-		@Override
-		public URL getSourceJar() {
-			return null;
-		}
 		
 	};
 	
@@ -77,7 +72,7 @@ public interface PackagePermission extends Documentation {
 	 * PackagePermission can be defined by a package to have a certain requirement level.
 	 * The strings in the manifest should match one of the values in this enum.
 	 */
-	public static enum Requirement implements Documentation {
+	public static enum Requirement implements SimpleDocumentation {
 		/**
 		 * If this permission is not granted, the package will not be installed
 		 */
@@ -117,17 +112,13 @@ public interface PackagePermission extends Documentation {
 			return since;
 		}
 		
-		@Override
-		public URL getSourceJar() {
-			return null;
-		}
 	}
 	
 	/**
 	 * Each permission must define its own threat level. This is used by the UI
 	 * to display various information about the 
 	 */
-	public static enum ThreatLevel implements Documentation{
+	public static enum ThreatLevel implements SimpleDocumentation {
 		/**
 		 * No security risks could be introduced by granting this permission 
 		 */
@@ -167,11 +158,6 @@ public interface PackagePermission extends Documentation {
 		@Override
 		public CHVersion since() {
 			return since;
-		}
-		
-		@Override
-		public URL getSourceJar() {
-			return null;
 		}
 		
 	}
