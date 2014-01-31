@@ -21,7 +21,7 @@ import java.util.Set;
 public abstract class SQLDataSource extends AbstractDataSource {
 	private static final String KEY_COLUMN = "key";
 	private static final String VALUE_COLUMN = "value";
-	private Connection connection;
+	protected Connection connection;
 	private long lastConnected = 0;
 
 	protected SQLDataSource() {
@@ -145,15 +145,17 @@ public abstract class SQLDataSource extends AbstractDataSource {
 		String searchPrefix = StringUtils.Join(keyBase, ".");
 		try {
 			connect();
-			PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "` FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "` LIKE ?");
-			statement.setString(1, searchPrefix + "%");
-			Set<String[]> set = new HashSet<>();
-			try(ResultSet result = statement.executeQuery()){
-				while(result.next()){
-					set.add(result.getString(KEY_COLUMN).split("\\."));
+			Set<String[]> set;
+			try(PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "` FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "` LIKE ?")){
+				statement.setString(1, searchPrefix + "%");
+				set = new HashSet<>();
+				try(ResultSet result = statement.executeQuery()){
+					while(result.next()){
+						set.add(result.getString(KEY_COLUMN).split("\\."));
+					}
 				}
+				lastConnected = System.currentTimeMillis();
 			}
-			lastConnected = System.currentTimeMillis();
 			return set;
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
@@ -164,16 +166,18 @@ public abstract class SQLDataSource extends AbstractDataSource {
 	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
 		try {
 			connect();
-			PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + getEscapedTable() + "`"
-					+ " WHERE `" + KEY_COLUMN + "` LIKE ?");
-			statement.setString(1, StringUtils.Join(leadKey, ".") + "%");
-			Map<String[], String> map = new HashMap<>();
-			try (ResultSet results = statement.executeQuery()){
-				while(results.next()){
-					map.put(results.getString(KEY_COLUMN).split("\\."), results.getString(VALUE_COLUMN));
+			Map<String[], String> map;
+			try (PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + getEscapedTable() + "`"
+					+ " WHERE `" + KEY_COLUMN + "` LIKE ?")){
+				statement.setString(1, StringUtils.Join(leadKey, ".") + "%");
+				map = new HashMap<>();
+				try (ResultSet results = statement.executeQuery()){
+					while(results.next()){
+						map.put(results.getString(KEY_COLUMN).split("\\."), results.getString(VALUE_COLUMN));
+					}
 				}
+				lastConnected = System.currentTimeMillis();
 			}
-			lastConnected = System.currentTimeMillis();
 			return map;
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
@@ -185,9 +189,10 @@ public abstract class SQLDataSource extends AbstractDataSource {
 		if(hasKey(key)){
 			try{
 				connect();				
-				PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "`=?");
-				statement.setString(1, StringUtils.Join(key, "."));
-				statement.executeUpdate();
+				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "`=?")) {
+					statement.setString(1, StringUtils.Join(key, "."));
+					statement.executeUpdate();
+				}
 				lastConnected = System.currentTimeMillis();
 			} catch(Exception e){
 				throw new DataSourceException(e.getMessage(), e);

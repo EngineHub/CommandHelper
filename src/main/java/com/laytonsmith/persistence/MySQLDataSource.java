@@ -72,9 +72,10 @@ public class MySQLDataSource extends SQLDataSource {
 		try {
 			connect();
 			//Create the table if it doesn't exist
-			//The columns in the table 
-			Statement statement = getConnection().createStatement();
-			statement.executeUpdate(getTableCreationQuery(table));
+			//The columns in the table
+			try (Statement statement = getConnection().createStatement()) {
+				statement.executeUpdate(getTableCreationQuery(table));
+			}
 		} catch (IOException | SQLException ex) {
 			throw new DataSourceException("Could not connect to MySQL data source \"" + uri.toString() + "\": " + ex.getMessage(), ex);
 		}
@@ -114,15 +115,17 @@ public class MySQLDataSource extends SQLDataSource {
 	public String get0(String[] key) throws DataSourceException {
 		try {
 			connect();
-			PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" 
+			String ret; 
+			try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" 
 					+ getEscapedTable() + "` WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))"
-					+ " LIMIT 1");
-			String joinedKey = StringUtils.Join(key, ".");
-			statement.setString(1, joinedKey);
-			String ret = null;
-			try (ResultSet result = statement.executeQuery()) {
-				if(result.next()){
-					ret = result.getString(getValueColumn());
+					+ " LIMIT 1")) {
+				String joinedKey = StringUtils.Join(key, ".");
+				statement.setString(1, joinedKey);
+				ret = null;
+				try (ResultSet result = statement.executeQuery()) {
+					if(result.next()){
+						ret = result.getString(getValueColumn());
+					}
 				}
 			}
 			updateLastConnected();
@@ -139,15 +142,16 @@ public class MySQLDataSource extends SQLDataSource {
 			if(value == null){
 				clearKey0(dm, key);
 			} else {
-				PreparedStatement statement = getConnection().prepareStatement("REPLACE INTO"
+				try (PreparedStatement statement = getConnection().prepareStatement("REPLACE INTO"
 						+ " `" + getEscapedTable() + "`"
 						+ " (`" + KEY_HASH_COLUMN + "`, `" + getKeyColumn() + "`, `" + getValueColumn() + "`)"
-						+ " VALUES (UNHEX(MD5(?)), ?, ?)");
-				String joinedKey = StringUtils.Join(key, ".");
-				statement.setString(1, joinedKey);
-				statement.setString(2, joinedKey);
-				statement.setString(3, value);
-				statement.executeUpdate();
+						+ " VALUES (UNHEX(MD5(?)), ?, ?)")) {
+					String joinedKey = StringUtils.Join(key, ".");
+					statement.setString(1, joinedKey);
+					statement.setString(2, joinedKey);
+					statement.setString(3, value);
+					statement.executeUpdate();
+				}
 			}
 			updateLastConnected();
 			return true;
@@ -161,11 +165,12 @@ public class MySQLDataSource extends SQLDataSource {
 		if(hasKey(key)){
 			try{
 				connect();				
-				PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() + "`"
-						+ " WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))");
-				String joinedKey = StringUtils.Join(key, ".");
-				statement.setString(1, joinedKey);
-				statement.executeUpdate();
+				try (PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() + "`"
+						+ " WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))")) {
+					String joinedKey = StringUtils.Join(key, ".");
+					statement.setString(1, joinedKey);
+					statement.executeUpdate();
+				}
 				updateLastConnected();
 			} catch(Exception e){
 				throw new DataSourceException(e.getMessage(), e);
@@ -196,7 +201,9 @@ public class MySQLDataSource extends SQLDataSource {
 	@Override
 	protected void startTransaction0(DaemonManager dm) {
 		try {
-			getConnection().createStatement().execute("START TRANSACTION");
+			try(Statement statement = getConnection().createStatement()){
+				statement.execute("START TRANSACTION");
+			}
 		} catch (SQLException ex) {
 			Logger.getLogger(MySQLDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -205,11 +212,16 @@ public class MySQLDataSource extends SQLDataSource {
 	@Override
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		try {
-			if(rollback){
-				getConnection().createStatement().execute("ROLLBACK");
+			if (rollback) {
+				try(PreparedStatement statement = getConnection().prepareStatement("ROLLBACK")){
+					statement.execute();
+				}
 			} else {
-				getConnection().createStatement().execute("COMMIT");
+				try(PreparedStatement statement = getConnection().prepareStatement("COMMIT")){
+					statement.execute();
+				}
 			}
+			updateLastConnected();
 		} catch (SQLException ex) {
 			Logger.getLogger(MySQLDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}

@@ -8,6 +8,8 @@ import com.laytonsmith.persistence.io.ConnectionMixin;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -64,8 +66,26 @@ public class SQLiteDataSource extends SQLDataSource {
 			}
 		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
 			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
-		} 
+		} finally {
+			disconnect();
+		}
 	}
+
+	@Override
+	protected Connection getConnection() {
+		return connection;
+	}
+
+	@Override
+	protected void connect() throws IOException, SQLException {
+		//Speculative fix. Just kill the connection each time, then renew it.
+		if(connection != null){
+			connection.close();
+		}
+		connection = DriverManager.getConnection(getConnectionString());
+	}
+	
+	
 	
 	/**
 	 * {@inheritDoc}
@@ -116,6 +136,8 @@ public class SQLiteDataSource extends SQLDataSource {
 			return true;
 		} catch (SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
+		} finally {
+			disconnect();
 		}
 	}
 	
@@ -154,6 +176,8 @@ public class SQLiteDataSource extends SQLDataSource {
 			return set;
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
+		} finally {
+			disconnect();
 		}
 	}
 
@@ -191,6 +215,8 @@ public class SQLiteDataSource extends SQLDataSource {
 			return ret;
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
+		} finally {
+			disconnect();
 		}
 	}
 	
@@ -228,39 +254,42 @@ public class SQLiteDataSource extends SQLDataSource {
 			return map;
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
+		} finally {
+			disconnect();
 		}
 	}
 	
 	@Override
 	@SuppressWarnings("SleepWhileInLoop")
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
-		if(hasKey(key)){
-			try{
-				connect();
-				while(true){
-					try {
-						PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() 
-								+ "` WHERE `" + getKeyColumn() + "`=?");
+		try{
+			connect();
+			while(true){
+				try {
+					try (PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() 
+							+ "` WHERE `" + getKeyColumn() + "`=?")) {
 						statement.setString(1, StringUtils.Join(key, "."));
 						statement.executeUpdate();
 						updateLastConnected();
-					} catch(SQLException ex){
-						if(ex.getMessage().startsWith("[SQLITE_BUSY]") 
-								// This one only happens with SETs
-								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
-							try {
-								Thread.sleep(getRandomSleepTime());
-							} catch (InterruptedException ex1) {
-								//
-							}
-						} else {
-							throw ex;
+					}
+				} catch(SQLException ex){
+					if(ex.getMessage().startsWith("[SQLITE_BUSY]") 
+							// This one only happens with SETs
+							|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
+						try {
+							Thread.sleep(getRandomSleepTime());
+						} catch (InterruptedException ex1) {
+							//
 						}
+					} else {
+						throw ex;
 					}
 				}
-			} catch(IOException | SQLException e){
-				throw new DataSourceException(e.getMessage(), e);
 			}
+		} catch(IOException | SQLException e){
+			throw new DataSourceException(e.getMessage(), e);
+		} finally {
+			disconnect();
 		}
 	}
 
@@ -275,7 +304,6 @@ public class SQLiteDataSource extends SQLDataSource {
 	/**
 	 * Returns the table creation query that should be used to create the table specified.
 	 * This is public for documentation, but is used internally.
-	 * @param table
 	 * @return 
 	 */
 	public final String getTableCreationQuery(){
@@ -291,7 +319,9 @@ public class SQLiteDataSource extends SQLDataSource {
 	@Override
 	protected void startTransaction0(DaemonManager dm) {
 		try {
-			getConnection().prepareStatement("BEGIN EXCLUSIVE TRANSACTION").execute();
+			try (PreparedStatement statement = getConnection().prepareStatement("BEGIN EXCLUSIVE TRANSACTION")) {
+				statement.execute();
+			}
 			updateLastConnected();
 		} catch (SQLException ex) {
 			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
@@ -302,9 +332,13 @@ public class SQLiteDataSource extends SQLDataSource {
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		try {
 			if (rollback) {
-				getConnection().prepareStatement("ROLLBACK TRANSACTION").execute();
+				try(PreparedStatement statement = getConnection().prepareStatement("ROLLBACK TRANSACTION")){
+					statement.execute();
+				}
 			} else {
-				getConnection().prepareStatement("END TRANSACTION").execute();
+				try(PreparedStatement statement = getConnection().prepareStatement("END TRANSACTION")){
+					statement.execute();
+				}
 			}
 			updateLastConnected();
 		} catch (SQLException ex) {
