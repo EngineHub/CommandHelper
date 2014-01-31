@@ -141,10 +141,12 @@ public class MySQLDataSource extends SQLDataSource {
 			} else {
 				PreparedStatement statement = getConnection().prepareStatement("REPLACE INTO"
 						+ " `" + getEscapedTable() + "`"
-						+ " (`" + KEY_HASH_COLUMN + "`, `" + getValueColumn() + "`) VALUES (UNHEX(MD5(?)), ?)");
+						+ " (`" + KEY_HASH_COLUMN + "`, `" + getKeyColumn() + "`, `" + getValueColumn() + "`)"
+						+ " VALUES (UNHEX(MD5(?)), ?, ?)");
 				String joinedKey = StringUtils.Join(key, ".");
 				statement.setString(1, joinedKey);
-				statement.setString(2, value);
+				statement.setString(2, joinedKey);
+				statement.setString(3, value);
 				statement.executeUpdate();
 			}
 			updateLastConnected();
