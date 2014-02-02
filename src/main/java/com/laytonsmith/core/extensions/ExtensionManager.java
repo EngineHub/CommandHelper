@@ -578,7 +578,7 @@ public class ExtensionManager {
 						} catch (Throwable e) {
 							Logger log = Static.getLogger();
 							log.log(Level.SEVERE, ext.getClass().getName()
-									+ "'s onStartup caused an exception:");
+									+ "'s onShutdown caused an exception:");
 							log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 						}
 					}
