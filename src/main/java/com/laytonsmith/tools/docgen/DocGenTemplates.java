@@ -344,7 +344,12 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			StringBuilder b = new StringBuilder();
+			boolean colorsDisabled = TermColors.ColorsDisabled();
+			TermColors.DisableColors();
 			b.append("<pre style=\"white-space: pre-wrap;\">\n").append(Main.ARGUMENT_SUITE.getBuiltDescription()).append("\n</pre>\n");
+			if(!colorsDisabled){
+				TermColors.EnableColors();
+			}
 			for(Field f : Main.class.getDeclaredFields()){
 				if(f.getType() == ArgumentParser.class){
 					b.append("==== ").append(StringUtils.replaceLast(f.getName(), "(?i)mode", "")).append(" ====\n<pre style=\"white-space: pre-wrap;\">");
