@@ -1,5 +1,4 @@
 
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -481,15 +480,18 @@ public class BukkitConvertor extends AbstractConvertor {
             return new BukkitMCLivingEntity(((LivingEntity)be));
         }
         
-        throw new Error("While trying to find the correct entity type for " + be.getClass().getName() + ", was unable"
-                + " to find the appropriate implementation. Please alert the developers of this stack trace.");
+        throw new Error("Entity not known to Bukkit.");
     }
 
 	@Override
     public MCEntity GetCorrectEntity(MCEntity e) {
 
         Entity be = ((BukkitMCEntity)e).asEntity();
-        return BukkitConvertor.BukkitGetCorrectEntity(be);
+        try {
+        	return BukkitConvertor.BukkitGetCorrectEntity(be);
+        } catch (Error err) {
+        	return e;
+        }
     }
 
 	@Override
