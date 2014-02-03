@@ -71,11 +71,12 @@ public class SQLiteDataSource extends SQLDataSource {
 		}
 	}
 
-	@Override
-	protected Connection getConnection() {
-		return connection;
-	}
-
+	/**
+	 * SQLite doesn't benefit from caching the connections. It just breaks things,
+	 * so we always disconnect and renew the connection.
+	 * @throws IOException
+	 * @throws SQLException 
+	 */
 	@Override
 	protected void connect() throws IOException, SQLException {
 		//Speculative fix. Just kill the connection each time, then renew it.
