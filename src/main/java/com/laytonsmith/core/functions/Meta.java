@@ -11,6 +11,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -23,6 +24,9 @@ import com.laytonsmith.persistence.DataSourceException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -421,7 +425,7 @@ public class Meta {
 	}
 
 	@api
-	public static class eval extends AbstractFunction {
+	public static class eval extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -497,6 +501,24 @@ public class Meta {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1){
+				throw new ConfigCompileException(getName() + " expects only one argument", t);
+			}
+			if(children.get(0).isConst()){
+				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
+						+ " hardcoded code in " + getName() + " is much less efficient.", t);
+			}
+			return null;
+		}
+		
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
