@@ -50,7 +50,11 @@ public class YMLDataSource extends StringSerializableDataSource{
     @Override
     protected void populateModel(String data) throws DataSourceException {
         Yaml yaml = new Yaml();
-        model = new DataSourceModel((Map<String, Object>)yaml.load(data));
+		try {
+			model = new DataSourceModel((Map<String, Object>)yaml.load(data));
+		} catch(Exception e){
+			throw new DataSourceException("Could not load data source for " + uri + ": " + e.getMessage(), e);
+		}
     }
 
     @Override

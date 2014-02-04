@@ -2,6 +2,7 @@ package com.laytonsmith.persistence;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistence.io.ConnectionMixin;
@@ -31,7 +32,19 @@ public class SQLiteDataSource extends SQLDataSource {
 	private static final String TABLE_NAME = "persistance"; //Note the misspelling!
 	private String path;
 	private ConnectionMixin mixin;
-	private final static boolean doDisconnects = false;
+	/**
+	 * If true, the connection will not be recycled, and will be disconnected
+	 * after each call, and re-established before each call. If false, the
+	 * connection is recycled using the AbstractDataSource connect logic.
+	 */
+	private final static boolean DO_DISCONNECTS = false;
+	/**
+	 * If the connection takes this long to connect, it will give up, throw an exception,
+	 * and continue on. This timeout should be large enough to never cause false positives,
+	 * but small enough that the host itself won't decide the connection has completely stalled
+	 * out.
+	 */
+	private final static int TIMEOUT = 30000;
 	
 	private SQLiteDataSource(){
 		
@@ -45,7 +58,12 @@ public class SQLiteDataSource extends SQLDataSource {
 			Class.forName(org.sqlite.JDBC.class.getName());
 			path = mixin.getPath();
 			connect();
+			long startTime = System.currentTimeMillis();
 			while(true){
+				if(System.currentTimeMillis() - TIMEOUT > startTime){
+					throw new DataSourceException("Data source at " + uri + " could not connect for " 
+							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
+				}
 				try {
 					try (Statement statement = getConnection().createStatement()) {
 						statement.executeUpdate(getTableCreationQuery());
@@ -67,7 +85,7 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
 			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
 		} finally {
-			if(doDisconnects){
+			if(DO_DISCONNECTS){
 				disconnect();
 			}
 		}
@@ -75,7 +93,7 @@ public class SQLiteDataSource extends SQLDataSource {
 
 	@Override
 	protected void connect() throws IOException, SQLException {
-		if(doDisconnects){
+		if(DO_DISCONNECTS){
 			//Speculative fix. Just kill the connection each time, then renew it.
 			if(connection != null){
 				connection.close();
@@ -109,7 +127,12 @@ public class SQLiteDataSource extends SQLDataSource {
 			if(value == null){
 				clearKey0(dm, key);
 			} else {
-				while(true){
+				long startTime = System.currentTimeMillis();
+				while (true) {
+					if (System.currentTimeMillis() - TIMEOUT > startTime) {
+						throw new DataSourceException("Data source at " + uri + " could not connect for "
+								+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
+					}
 					try {
 						try (PreparedStatement statement = getConnection().prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME 
 								+ "` (`" + getKeyColumn() + "`, `" + getValueColumn() + "`) VALUES (?, ?)")) {
@@ -122,6 +145,7 @@ public class SQLiteDataSource extends SQLDataSource {
 						if(ex.getMessage().startsWith("[SQLITE_BUSY]") 
 								// This one only happens with SETs
 								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
+							System.out.println(TermColors.RED + " RETRYING");
 							try {
 								Thread.sleep(getRandomSleepTime());
 							} catch (InterruptedException ex1) {
@@ -138,7 +162,7 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch (SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			if(doDisconnects){
+			if(DO_DISCONNECTS){
 				disconnect();
 			}
 		}
@@ -151,7 +175,12 @@ public class SQLiteDataSource extends SQLDataSource {
 		try {
 			connect();
 			Set<String[]> set = new HashSet<>();
-			while(true){
+			long startTime = System.currentTimeMillis();
+			while (true) {
+				if (System.currentTimeMillis() - TIMEOUT > startTime) {
+					throw new DataSourceException("Data source at " + uri + " could not connect for "
+							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
+				}
 				try {
 					try(PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "` FROM `" + getEscapedTable() 
 							+ "` WHERE `" + getKeyColumn() + "` LIKE ?")){
@@ -180,7 +209,7 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			if(doDisconnects){
+			if(DO_DISCONNECTS){
 				disconnect();
 			}
 		}
@@ -192,7 +221,12 @@ public class SQLiteDataSource extends SQLDataSource {
 		try {
 			connect();
 			String ret = null;
-			while(true){
+			long startTime = System.currentTimeMillis();
+			while (true) {
+				if (System.currentTimeMillis() - TIMEOUT > startTime) {
+					throw new DataSourceException("Data source at " + uri + " could not connect for "
+							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
+				}
 				try {
 					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" + getEscapedTable() 
 							+ "` WHERE `" + getKeyColumn() + "`=? LIMIT 1")) {
@@ -206,6 +240,7 @@ public class SQLiteDataSource extends SQLDataSource {
 					break;
 				} catch(SQLException ex){
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]")){
+						System.out.println(TermColors.RED + " RETRYING"); 
 						try {
 							Thread.sleep(getRandomSleepTime());
 						} catch (InterruptedException ex1) {
@@ -221,7 +256,7 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			if(doDisconnects){
+			if(DO_DISCONNECTS){
 				disconnect();
 			}
 		}
@@ -233,7 +268,12 @@ public class SQLiteDataSource extends SQLDataSource {
 		try {
 			connect();
 			Map<String[], String> map = new HashMap<>();
-			while(true){
+			long startTime = System.currentTimeMillis();
+			while (true) {
+				if (System.currentTimeMillis() - TIMEOUT > startTime) {
+					throw new DataSourceException("Data source at " + uri + " could not connect for "
+							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
+				}
 				try {
 					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "`, `" + getValueColumn() + "` FROM `" 
 							+ getEscapedTable() + "`" + " WHERE `" + getKeyColumn() + "` LIKE ?")){
@@ -262,7 +302,7 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			if(doDisconnects){
+			if(DO_DISCONNECTS){
 				disconnect();
 			}
 		}
@@ -273,7 +313,12 @@ public class SQLiteDataSource extends SQLDataSource {
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		try{
 			connect();
-			while(true){
+			long startTime = System.currentTimeMillis();
+			while (true) {
+				if (System.currentTimeMillis() - TIMEOUT > startTime) {
+					throw new DataSourceException("Data source at " + uri + " could not connect for "
+							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
+				}
 				try {
 					try (PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() 
 							+ "` WHERE `" + getKeyColumn() + "`=?")) {
@@ -299,7 +344,7 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch(IOException | SQLException e){
 			throw new DataSourceException(e.getMessage(), e);
 		} finally {
-			if(doDisconnects){
+			if(DO_DISCONNECTS){
 				disconnect();
 			}
 		}
