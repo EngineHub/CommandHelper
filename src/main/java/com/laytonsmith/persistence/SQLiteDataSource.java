@@ -145,7 +145,6 @@ public class SQLiteDataSource extends SQLDataSource {
 						if(ex.getMessage().startsWith("[SQLITE_BUSY]") 
 								// This one only happens with SETs
 								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
-							System.out.println(TermColors.RED + " RETRYING");
 							try {
 								Thread.sleep(getRandomSleepTime());
 							} catch (InterruptedException ex1) {
@@ -240,7 +239,6 @@ public class SQLiteDataSource extends SQLDataSource {
 					break;
 				} catch(SQLException ex){
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]")){
-						System.out.println(TermColors.RED + " RETRYING"); 
 						try {
 							Thread.sleep(getRandomSleepTime());
 						} catch (InterruptedException ex1) {
