@@ -36,6 +36,14 @@ public class SQLiteDataSource extends SQLDataSource {
 	 * If true, the connection will not be recycled, and will be disconnected
 	 * after each call, and re-established before each call. If false, the
 	 * connection is recycled using the AbstractDataSource connect logic.
+	 * 
+	 * It appears as though this needs to remain true for connections to work correctly
+	 * if multiple connections are established. Further research may need to be done
+	 * to establish if this is a Windows only problem, or if there is some other
+	 * complicating factor that causes connections to have to continually retry.
+	 * Additionally, it may be that the issue could be solved using a more complex
+	 * transaction system. Regardless, it seems to work in all cases without transactions,
+	 * so long as this remains true.
 	 */
 	private final static boolean DO_DISCONNECTS = true;
 	/**

@@ -52,7 +52,11 @@ public final class Globals {
 	 */
     public static synchronized void SetGlobal(String name, Construct value){
         Map<String, Construct> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
-        vars.put(name, value);
+		if(value instanceof CNull){
+			vars.remove(name);
+		} else {
+			vars.put(name, value);
+		}
     }
 	
 	/**
