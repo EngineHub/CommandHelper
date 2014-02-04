@@ -37,7 +37,7 @@ public class SQLiteDataSource extends SQLDataSource {
 	 * after each call, and re-established before each call. If false, the
 	 * connection is recycled using the AbstractDataSource connect logic.
 	 */
-	private final static boolean DO_DISCONNECTS = false;
+	private final static boolean DO_DISCONNECTS = true;
 	/**
 	 * If the connection takes this long to connect, it will give up, throw an exception,
 	 * and continue on. This timeout should be large enough to never cause false positives,
