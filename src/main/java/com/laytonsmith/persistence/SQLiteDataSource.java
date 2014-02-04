@@ -8,7 +8,6 @@ import com.laytonsmith.persistence.io.ConnectionMixin;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,6 +31,7 @@ public class SQLiteDataSource extends SQLDataSource {
 	private static final String TABLE_NAME = "persistance"; //Note the misspelling!
 	private String path;
 	private ConnectionMixin mixin;
+	private final static boolean doDisconnects = false;
 	
 	private SQLiteDataSource(){
 		
@@ -67,23 +67,23 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
 			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
 		} finally {
-			disconnect();
+			if(doDisconnects){
+				disconnect();
+			}
 		}
 	}
 
-	/**
-	 * SQLite doesn't benefit from caching the connections. It just breaks things,
-	 * so we always disconnect and renew the connection.
-	 * @throws IOException
-	 * @throws SQLException 
-	 */
 	@Override
 	protected void connect() throws IOException, SQLException {
-		//Speculative fix. Just kill the connection each time, then renew it.
-		if(connection != null){
-			connection.close();
+		if(doDisconnects){
+			//Speculative fix. Just kill the connection each time, then renew it.
+			if(connection != null){
+				connection.close();
+			}
+			connection = DriverManager.getConnection(getConnectionString());
+		} else {
+			super.connect();
 		}
-		connection = DriverManager.getConnection(getConnectionString());
 	}
 	
 	
@@ -138,7 +138,9 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch (SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			disconnect();
+			if(doDisconnects){
+				disconnect();
+			}
 		}
 	}
 	
@@ -178,7 +180,9 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			disconnect();
+			if(doDisconnects){
+				disconnect();
+			}
 		}
 	}
 
@@ -217,7 +221,9 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			disconnect();
+			if(doDisconnects){
+				disconnect();
+			}
 		}
 	}
 	
@@ -256,7 +262,9 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch(SQLException | IOException ex){
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			disconnect();
+			if(doDisconnects){
+				disconnect();
+			}
 		}
 	}
 	
@@ -273,6 +281,7 @@ public class SQLiteDataSource extends SQLDataSource {
 						statement.executeUpdate();
 						updateLastConnected();
 					}
+					break;
 				} catch(SQLException ex){
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]") 
 							// This one only happens with SETs
@@ -290,7 +299,9 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch(IOException | SQLException e){
 			throw new DataSourceException(e.getMessage(), e);
 		} finally {
-			disconnect();
+			if(doDisconnects){
+				disconnect();
+			}
 		}
 	}
 
