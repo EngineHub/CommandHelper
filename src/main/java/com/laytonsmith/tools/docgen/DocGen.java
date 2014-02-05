@@ -363,7 +363,7 @@ public class DocGen {
                 if (type == MarkupType.HTML) {
                     out.append("</table>\n");
                 } else if (type == MarkupType.WIKI) {
-                    out.append("|}\n");
+                    out.append("|}\n{{Back to top}}\n");
                 } else if (type == MarkupType.TEXT) {
                     out.append("\n");
                 }
@@ -383,7 +383,7 @@ public class DocGen {
                     + " if you notice an error in the documentation, please file a bug report for the"
                     + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]"
                     + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page, " + workingExamples + " of which"
-					+ " have examples.</div>\n\n{{LearningTrail}}\n");
+					+ " have examples.</div>\n\n{{Back to top}}\n{{LearningTrail}}\n");
         }
 		return out.toString();
     }
