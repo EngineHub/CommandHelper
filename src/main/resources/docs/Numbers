@@ -1,0 +1,17 @@
+
+Numeric literals in MethodScript source are handled as 64 bit values. 
+For floating point values, that is, numbers with a decimal, the max value is
+%%CONST|java.lang.Double.MAX_VALUE%% and the minimum value is 
+%%CONST|java.lang.Double.MIN_VALUE%%. For integral values, the max value is
+%%CONST|java.lang.Long.MAX_VALUE%% and the minimum value is
+%%CONST|java.lang.Long.MIN_VALUE%%. Undefined numbers and Infinite values
+are not supported.
+
+Integral numbers may be written in source as binary or hexadecimal values.
+For instance, 15 may be written as either <code>15</code>, <code>0b1111</code>,
+or <code>0xF</code>. Binary values must start with "0b" and may only contain
+the numbers "1" or "0". Hexadecimal numbers start with "0x" and may only contain
+the numbers 0-9, and a-f, either lowercase or uppercase. Binary and hexadecimal
+values may only be integral values.
+
+{{LearningTrail}}

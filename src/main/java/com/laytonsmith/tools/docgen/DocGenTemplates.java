@@ -3,7 +3,6 @@ package com.laytonsmith.tools.docgen;
 import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -50,7 +49,7 @@ public class DocGenTemplates {
 	
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		System.out.println(Generate("Data_Manager"));
+		System.out.println(Generate("Numbers"));
 	}
 	
 	public static String Generate(String forPage){
@@ -418,5 +417,40 @@ public class DocGenTemplates {
 			return ds.getTableCreationQuery();
 		}
 		
+	};
+	
+	public static Generator CONST = new Generator() {
+
+		@Override
+		public String generate(String... args) {
+			String value = args[0];
+			String[] v = value.split("\\.");
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < v.length - 1; i++){
+				if(i != 0){
+					b.append(".");
+				}
+				b.append(v[i]);
+			}
+			String clazz = b.toString();
+			String constant = v[v.length - 1];
+			Class c;
+			try {
+				c = Class.forName(clazz);
+			} catch (ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+			Field f;
+			try {
+				f = c.getField(constant);
+			} catch (NoSuchFieldException | SecurityException ex) {
+				throw new RuntimeException(ex);
+			}
+			try {
+				return f.get(null).toString();
+			} catch (IllegalArgumentException | IllegalAccessException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
 	};
 }
