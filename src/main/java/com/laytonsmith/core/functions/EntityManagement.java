@@ -252,6 +252,34 @@ public class EntityManagement {
 			return "boolean {entityID} Returns true if entity exists, otherwise false.";
 		}
 	}
+	
+	@api
+	public static class is_entity_living extends EntityGetterFunction {
+
+		@Override
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity e;
+			
+			try {
+				e = Static.getEntity(Static.getInt32(args[0], t), t);
+			} catch (ConfigRuntimeException cre) {
+				return new CBoolean(false, t);
+			}
+			
+			return new CBoolean(e instanceof MCLivingEntity, t);
+		}
+
+		@Override
+		public String getName() {
+			return "is_entity_living";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityID} Returns true if entity is living, otherwise false.";
+		}
+	}
 
 	@api
 	public static class entity_loc extends EntityGetterFunction {
