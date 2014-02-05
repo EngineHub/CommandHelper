@@ -462,10 +462,12 @@ public final class Static {
      * Given a string input, creates and returns a Construct of the appropriate
      * type. This takes into account that null, true, and false are keywords.
      * @param val
-     * @param line_num
+	 * @param t
      * @return 
+	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid
+	 * characters in it.
      */
-    public static Construct resolveConstruct(String val, Target t) {
+    public static Construct resolveConstruct(String val, Target t) throws ConfigRuntimeException {
         if (val == null) {
             return new CString("", t);
         }
@@ -476,6 +478,22 @@ public final class Static {
         } else if (val.equalsIgnoreCase("false")) {
             return new CBoolean(false, t);
         } else {
+			if(val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")){
+				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.", 
+						ExceptionType.FormatException, t);
+			}
+			if(val.matches("0x[a-fA-F0-9]+")){
+				//Hex number
+				return new CInt(Long.parseLong(val.substring(2), 16), t);
+			}
+			if(val.matches("0b[0-1]*[^0-1]+[0-1]*")){
+				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.", 
+						ExceptionType.FormatException, t);
+			}
+			if(val.matches("0b[0-1]+")){
+				//Binary number
+				return new CInt(Long.parseLong(val.substring(2), 2), t);
+			}
             try {
                 return new CInt(Long.parseLong(val), t);
             } catch (NumberFormatException e) {
