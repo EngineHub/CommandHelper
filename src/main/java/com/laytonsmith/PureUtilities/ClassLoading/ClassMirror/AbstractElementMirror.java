@@ -4,6 +4,8 @@ package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,17 @@ class AbstractElementMirror implements Serializable {
 	protected ClassReferenceMirror type;
 	protected List<AnnotationMirror> annotations;
 	
+	private Field underlyingField = null;
+	private Method underlyingMethod = null;
+	
+	protected AbstractElementMirror(Field field){
+		this.underlyingField = field;
+	}
+	
+	protected AbstractElementMirror(Method method){
+		this.underlyingMethod = method;
+	}
+	
 	protected AbstractElementMirror(List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name){
 		this.annotations = annotations;
 		this.modifiers = modifiers;
@@ -29,6 +42,12 @@ class AbstractElementMirror implements Serializable {
 	 * @return 
 	 */
 	public ModifierMirror getModifiers(){
+		if(underlyingField != null){
+			return new ModifierMirror(underlyingField.getModifiers());
+		}
+		if(underlyingMethod != null){
+			return new ModifierMirror(underlyingMethod.getModifiers());
+		}
 		return modifiers;
 	}
 	
@@ -37,6 +56,12 @@ class AbstractElementMirror implements Serializable {
 	 * @return 
 	 */
 	public String getName(){
+		if(underlyingField != null){
+			return underlyingField.getName();
+		}
+		if(underlyingMethod != null){
+			return underlyingMethod.getName();
+		}
 		return name;
 	}
 	
@@ -46,6 +71,12 @@ class AbstractElementMirror implements Serializable {
 	 * @return 
 	 */
 	public ClassReferenceMirror getType(){
+		if(underlyingField != null){
+			return ClassReferenceMirror.fromClass(underlyingField.getType());
+		}
+		if(underlyingMethod != null){
+			return ClassReferenceMirror.fromClass(underlyingMethod.getReturnType());
+		}
 		return type;
 	}
 	
@@ -54,7 +85,21 @@ class AbstractElementMirror implements Serializable {
 	 * @return 
 	 */
 	public List<AnnotationMirror> getAnnotations(){
-		return new ArrayList<AnnotationMirror>(annotations);
+		if(underlyingField != null){
+			List<AnnotationMirror> list = new ArrayList<>();
+			for(Annotation a : underlyingField.getDeclaredAnnotations()){
+				list.add(new AnnotationMirror(a));
+			}
+			return list;
+		}
+		if(underlyingMethod != null){
+			List<AnnotationMirror> list = new ArrayList<>();
+			for(Annotation a : underlyingMethod.getDeclaredAnnotations()){
+				list.add(new AnnotationMirror(a));
+			}
+			return list;
+		}
+		return new ArrayList<>(annotations);
 	}
 	
 	/**
@@ -64,7 +109,7 @@ class AbstractElementMirror implements Serializable {
 	 */
 	public AnnotationMirror getAnnotation(Class<? extends Annotation> annotation){
 		String jvmName = ClassUtils.getJVMName(annotation);
-		for(AnnotationMirror a : annotations){
+		for(AnnotationMirror a : getAnnotations()){
 			if(a.getType().getJVMName().equals(jvmName)){
 				return a;
 			}
@@ -72,6 +117,11 @@ class AbstractElementMirror implements Serializable {
 		return null;
 	}
 	
+	/**
+	 * Returns true if this element has the specified annotation attached to it.
+	 * @param annotation
+	 * @return 
+	 */
 	public boolean hasAnnotation(Class<? extends Annotation> annotation){
 		return getAnnotation(annotation) != null;
 	}

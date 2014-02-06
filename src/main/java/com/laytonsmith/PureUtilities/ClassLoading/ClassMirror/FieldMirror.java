@@ -2,8 +2,11 @@
 package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class gathers information about a field, without actually loading 
@@ -14,11 +17,34 @@ public class FieldMirror extends AbstractElementMirror {
 	private static final long serialVersionUID = 1L;
 	private final Object value;
 	
+	public FieldMirror(Field field){
+		super(field);
+		Object _value = null;
+		try {
+			_value = field.get(null);
+		} catch (IllegalArgumentException | IllegalAccessException ex) {
+			//
+		}
+		this.value = _value;
+	}
+	
 	public FieldMirror(List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value){
 		super(annotations, modifiers, type, name);
 		this.value = value;
 	}
 	
+	/**
+	 * Gets the initial value of this field. If various conditions are not met, this
+	 * returns null. Namely, if the field does not have an initial value,
+	 * it is not an Integer, a Float, a Long, a Double or a String (for int, float, 
+	 * long or String fields respectively), or the field is not static.
+	 * 
+	 * <p>
+	 * For FieldMirrors created with an actual Field, the value is simply the current
+	 * static field's value, and doesn't follow the rules listed above.
+	 * 
+	 * @return 
+	 */
 	public Object getValue(){
 		return value;
 	}
@@ -33,7 +59,7 @@ public class FieldMirror extends AbstractElementMirror {
 	/* package */ FieldMirror(ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value){
 		super(null, modifiers, type, name);
 		this.value = value;
-		this.annotations = new ArrayList<AnnotationMirror>();
+		this.annotations = new ArrayList<>();
 	}
 
 }

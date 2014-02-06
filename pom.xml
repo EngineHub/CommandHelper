@@ -772,6 +772,7 @@
 					<processors>
 						<processor>com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>
 						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
+						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>
 				</configuration>
 			</plugin>

@@ -40,7 +40,7 @@ public class CheckOverrides extends AbstractProcessor {
 	private static final boolean enabled = true;
 
 	private static Map<Class, Set<Method>> methods = null;
-	private static Set<Class> interfacesWithMustUseOverride = new HashSet<Class>();
+	private static final Set<Class> interfacesWithMustUseOverride = new HashSet<>();
 	private static final Pattern METHOD_SIGNATURE = Pattern.compile("[a-zA-Z0-9_]+\\((.*)\\)");
 	private static final Pattern CLASS_TEMPLATES = Pattern.compile("^.*?<(.*)>?$");
 
@@ -112,12 +112,12 @@ public class CheckOverrides extends AbstractProcessor {
 								if (mm.find()) {
 									String[] templates = removeGenerics(mm.group(1)).split(",");
 									String baseClass = args[i].replaceAll("\\[\\]", "");
-									for (int j = 0; j < templates.length; j++) {
-										if (baseClass.equals(templates[j])) {
+									for (String template : templates) {
+										if (baseClass.equals(template)) {
 											//Ok, it's found.
 											isTemplate = true;
 											found = true;
-											args[i] = args[i].replaceFirst(Pattern.quote(templates[j]), "java.lang.Object");
+											args[i] = args[i].replaceFirst(Pattern.quote(template), "java.lang.Object");
 											break;
 										}
 									}
@@ -166,9 +166,7 @@ public class CheckOverrides extends AbstractProcessor {
 									it.remove();
 								}
 							}
-						} catch (NoSuchMethodException ex) {
-							Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
-						} catch (SecurityException ex) {
+						} catch (NoSuchMethodException | SecurityException ex) {
 							Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -180,17 +178,17 @@ public class CheckOverrides extends AbstractProcessor {
 			//Now all the overridden methods have been removed from the list of methods in all the
 			//classes. We now need to go through and find out which of the remaining methods *could*
 			//be overriden, as many may not be overrides anyways.
-			Set<Method> methodsInError = new HashSet<Method>();
+			Set<Method> methodsInError = new HashSet<>();
 			for (Class c : methods.keySet()) {
 				Set<Method> mm = methods.get(c);
 				for (Method m : mm) {
 					//Get the superclass/superinterfaces that this class extends/implements
 					//all the way up to Object
-					Set<Class> supers = new HashSet<Class>();
+					Set<Class> supers = new HashSet<>();
 					getAllSupers(c, supers, true);
 					//Ok, now look through all the superclasses' methods, and find any that
 					//match the signature. If they do, it's an error.
-					List<Method> compare = new ArrayList<Method>();
+					List<Method> compare = new ArrayList<>();
 					for (Class s : supers) {
 						compare.addAll(getOverridableMethods(s));
 					}
@@ -214,7 +212,7 @@ public class CheckOverrides extends AbstractProcessor {
 					"java.io"
 				});
 				//Build a sorted set, so these go in order.
-				SortedSet<String> stringMethodsInError = new TreeSet<String>();
+				SortedSet<String> stringMethodsInError = new TreeSet<>();
 				for (Method m : methodsInError) {
 					stringMethodsInError.add(m.getDeclaringClass().getName() + "."
 							+ m.getName() + "(" + StringUtils.Join(Arrays.asList(m.getParameterTypes()), ", ", ", ", ", ", "", new StringUtils.Renderer<Class<?>>() {
@@ -320,7 +318,7 @@ public class CheckOverrides extends AbstractProcessor {
 
 	private static void setup() {
 		if (methods == null) {
-			methods = new HashMap<Class, Set<Method>>();
+			methods = new HashMap<>();
 			
 			List<ClassMirror<?>> classes = ClassDiscovery.getDefaultInstance().getKnownClasses(ClassDiscovery.GetClassContainer(CheckOverrides.class));
 			for (ClassMirror cm : classes) {
@@ -344,7 +342,7 @@ public class CheckOverrides extends AbstractProcessor {
 	 * @return
 	 */
 	private static Set<Method> getPotentiallyOverridingMethods(Class c) {
-		Set<Method> methodList = new HashSet<Method>();
+		Set<Method> methodList = new HashSet<>();
 		for (Method m : c.getDeclaredMethods()) {
 			//Ignore static or public methods, since those can't override anything
 			if ((m.getModifiers() & Modifier.PRIVATE) == 0 && (m.getModifiers() & Modifier.STATIC) == 0
@@ -363,7 +361,7 @@ public class CheckOverrides extends AbstractProcessor {
 	 * @return
 	 */
 	private static List<Method> getOverridableMethods(Class c) {
-		List<Method> methodList = new ArrayList<Method>();
+		List<Method> methodList = new ArrayList<>();
 		for (Method m : c.getDeclaredMethods()) {
 			if ((m.getModifiers() & Modifier.PRIVATE) == 0
 					&& (m.getModifiers() & Modifier.STATIC) == 0

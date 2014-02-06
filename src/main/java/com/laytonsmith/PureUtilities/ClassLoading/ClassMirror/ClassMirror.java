@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,6 +103,9 @@ public class ClassMirror<T> implements Serializable {
 	 * @return 
 	 */
 	public URL getContainer() {
+		if(this.underlyingClass != null){
+			this.underlyingClass.getProtectionDomain().getCodeSource().getLocation();
+		}
 		return originalURL;
 	}
 	
@@ -140,6 +145,10 @@ public class ClassMirror<T> implements Serializable {
 		return info.name.replaceAll("[/$]", ".");
 	}
 	
+	/**
+	 * Returns true if this class is an enum
+	 * @return 
+	 */
 	public boolean isEnum(){
 		if(underlyingClass != null){
 			return underlyingClass.isEnum();
@@ -147,6 +156,10 @@ public class ClassMirror<T> implements Serializable {
 		return info.isEnum;
 	}
 	
+	/**
+	 * Returns true if this class is an interface.
+	 * @return 
+	 */
 	public boolean isInterface(){
 		if(underlyingClass != null){
 			return underlyingClass.isInterface();
@@ -154,6 +167,21 @@ public class ClassMirror<T> implements Serializable {
 		return info.isInterface;
 	}
 	
+	/**
+	 * Returns true iff the underlying class is an abstract class (not an interface).
+	 * @return 
+	 */
+	public boolean isAbstract() {
+		if(underlyingClass != null){
+			return (underlyingClass.getModifiers() & Modifier.ABSTRACT) > 0;
+		}
+		return info.modifiers.isAbstract();
+	}
+	
+	/**
+	 * Returns a {@link ClassReferenceMirror} to the class's superclass.
+	 * @return 
+	 */
 	public ClassReferenceMirror getSuperClass(){
 		if(underlyingClass != null){
 			return ClassReferenceMirror.fromClass(underlyingClass.getSuperclass());
@@ -161,8 +189,13 @@ public class ClassMirror<T> implements Serializable {
 		return new ClassReferenceMirror("L" + info.superClass + ";");
 	}
 	
+	/**
+	 * Returns a list of {@link ClassReferenceMirror}s of all the interfaces that
+	 * this implements.
+	 * @return 
+	 */
 	public List<ClassReferenceMirror> getInterfaces(){
-		List<ClassReferenceMirror> l = new ArrayList<ClassReferenceMirror>();
+		List<ClassReferenceMirror> l = new ArrayList<>();
 		if(underlyingClass != null){
 			for(Class inter : underlyingClass.getInterfaces()){
 				l.add(ClassReferenceMirror.fromClass(inter));
@@ -230,7 +263,7 @@ public class ClassMirror<T> implements Serializable {
 			if(ann == null){
 				return null;
 			}
-			return new AnnotationMirror(ClassReferenceMirror.fromClass(ann.getClass()), true);
+			return new AnnotationMirror(ann);
 		}
 		String name = ClassUtils.getJVMName(clazz);
 		for(AnnotationMirror a : info.annotations){
@@ -247,13 +280,13 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public List<AnnotationMirror> getAnnotations(){
 		if(underlyingClass != null){
-			List<AnnotationMirror> list = new ArrayList<AnnotationMirror>();
+			List<AnnotationMirror> list = new ArrayList<>();
 			for(Annotation a : underlyingClass.getAnnotations()){
 				list.add(new AnnotationMirror(ClassReferenceMirror.fromClass(a.getClass()), true));
 			}
 			return list;
 		}
-		return new ArrayList<AnnotationMirror>(info.annotations);
+		return new ArrayList<>(info.annotations);
 	}
 	
 	/**
@@ -286,7 +319,12 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public FieldMirror[] getFields(){
 		if(underlyingClass != null){
-			throw new UnsupportedOperationException("Not yet supported");
+			FieldMirror[] fields = new FieldMirror[this.underlyingClass.getDeclaredFields().length];
+			for(int i = 0; i < fields.length; i++){
+				Field f = this.underlyingClass.getDeclaredFields()[i];
+				fields[i] = new FieldMirror(f);
+			}
+			return fields;
 		}
 		return info.fields.toArray(new FieldMirror[info.fields.size()]);
 	}
@@ -299,10 +337,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @throws java.lang.NoSuchFieldException 
 	 */
 	public FieldMirror getField(String name) throws NoSuchFieldException {
-		if(underlyingClass != null){
-			throw new UnsupportedOperationException("Not yet supported");
-		}
-		for(FieldMirror m : info.fields){
+		for(FieldMirror m : getFields()){
 			if(m.getName().equals(name)){
 				return m;
 			}
@@ -318,7 +353,11 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public MethodMirror[] getMethods(){
 		if(underlyingClass != null){
-			throw new UnsupportedOperationException("Not yet supported");
+			MethodMirror[] mirrors = new MethodMirror[underlyingClass.getDeclaredMethods().length];
+			for(int i = 0; i < mirrors.length; i++){
+				mirrors[i] = new MethodMirror(underlyingClass.getDeclaredMethods()[i]);
+			}
+			return mirrors;
 		}
 		return info.methods.toArray(new MethodMirror[info.methods.size()]);
 	}
@@ -333,9 +372,6 @@ public class ClassMirror<T> implements Serializable {
 	 * @throws java.lang.NoSuchMethodException 
 	 */
 	public MethodMirror getMethod(String name, Class...params) throws NoSuchMethodException{
-		if(underlyingClass != null){
-			throw new UnsupportedOperationException("Not yet supported");
-		}
 		ClassReferenceMirror mm [] = new ClassReferenceMirror[params.length];
 		for(int i = 0; i < params.length; i++){
 			mm[i] = new ClassReferenceMirror(ClassUtils.getJVMName(params[i]));
@@ -353,10 +389,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @throws NoSuchMethodException 
 	 */
 	public MethodMirror getMethod(String name, ClassReferenceMirror... params) throws NoSuchMethodException {
-		if(underlyingClass != null){
-			throw new UnsupportedOperationException("Not yet supported");
-		}
-		List<ClassReferenceMirror> crmParams = new ArrayList<ClassReferenceMirror>();
+		List<ClassReferenceMirror> crmParams = new ArrayList<>();
 		crmParams.addAll(Arrays.asList(params));
 		for(MethodMirror m : getMethods()){
 			if(m.getName().equals(name) && m.getParams().equals(crmParams)){
@@ -419,7 +452,7 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public boolean directlyExtendsFrom(Class superClass){
 		if(underlyingClass != null){
-			throw new UnsupportedOperationException("Not yet supported");
+			return (underlyingClass.getSuperclass() == superClass);
 		}
 		String name = superClass.getName().replace(".", "/");
 		if(info.superClass.equals(name)){
@@ -440,7 +473,7 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public PackageMirror getPackage(){
 		if(underlyingClass != null){
-			throw new UnsupportedOperationException("Not yet supported");
+			return new PackageMirror(underlyingClass.getPackage().getName());
 		}
 		String[] split = getClassName().split("\\.");
 		if(split.length == 1){
@@ -462,10 +495,18 @@ public class ClassMirror<T> implements Serializable {
 	 * @return 
 	 */
 	public String getSimpleName(){
+		if(underlyingClass != null){
+			return underlyingClass.getSimpleName();
+		}
 		String[] split = getClassName().split("\\.");
 		return split[split.length - 1];
 	}
 
+	/**
+	 * Returns a string representation of this object. The string will match the toString
+	 * that would be generated by that of the Class object.
+	 * @return 
+	 */
 	@Override
 	public String toString() {
 		return (isInterface()?
@@ -474,7 +515,16 @@ public class ClassMirror<T> implements Serializable {
 				+ " " + getClassName();
 	}
 
+	/**
+	 * Returns a {@link ClassReferenceMirror} to the object. This is useful
+	 * for classes that may not exist, as it doesn't require an actual known
+	 * reference to the class to exist.
+	 * @return 
+	 */
 	public ClassReferenceMirror getClassReference() {
+		if(underlyingClass != null){
+			return ClassReferenceMirror.fromClass(underlyingClass);
+		}
 		return new ClassReferenceMirror("L" + getJVMClassName() + ";");
 	}
 	
