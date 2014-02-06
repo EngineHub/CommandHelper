@@ -88,15 +88,24 @@ public class MySQLDataSource extends SQLDataSource {
 	 * @param table
 	 * @return 
 	 */
-	public final String getTableCreationQuery(String table){
+	public final String getTableCreationQuery(String table) {
 		return "CREATE TABLE IF NOT EXISTS `" + table + "` (\n"
-					+ " -- This is an UNHEX(MD5('key')) binary hash of the unlimited length key column, so the table may have a primary key.\n"
-					+ " `" + KEY_HASH_COLUMN + "` BINARY(16) PRIMARY KEY NOT NULL,\n"
-					+ " -- This is the key itself, stored for plaintext readability, and for full text searches for getting values\n"
-					+ " `" + getKeyColumn() + "` TEXT NOT NULL,\n"
-					+ " -- The value itself, which may be null\n"
-					+ " `" + getValueColumn() + "` TEXT\n"
-					+ ");";
+				+ " -- This is an UNHEX(MD5('key')) binary hash of the unlimited length key column, so the table may have a primary key.\n"
+				+ " `" + KEY_HASH_COLUMN + "` BINARY(16) PRIMARY KEY NOT NULL,\n"
+				+ " -- This is the key itself, stored for plaintext readability, and for full text searches for getting values\n"
+				+ " `" + getKeyColumn() + "` TEXT NOT NULL,\n"
+				+ " -- The value itself, which may be null\n"
+				+ " `" + getValueColumn() + "` MEDIUMTEXT\n"
+				+ ")\n"
+				+ " -- The engine is InnoDB, to support transactions\n"
+				+ "ENGINE = InnoDB,\n"
+				+ " -- The charset is utf8, since all keys are utf8, and values are utf8 json\n"
+				+ "CHARACTER SET = utf8,\n"
+				+ " -- The collation is case sensitive\n"
+				+ "COLLATE = utf8_bin,\n"
+				+ " -- Table comment\n"
+				+ "COMMENT = 'MethodScript storage table'\n"
+				+ ";";
 	}
 
 	@Override
