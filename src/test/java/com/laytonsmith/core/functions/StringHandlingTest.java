@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
@@ -10,6 +11,7 @@ import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import org.junit.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.verify;
 
 /**
  *
@@ -17,6 +19,8 @@ import static org.junit.Assert.*;
  */
 public class StringHandlingTest {
 
+	MCPlayer fakePlayer;
+	
     public StringHandlingTest() {
     }
 
@@ -31,6 +35,7 @@ public class StringHandlingTest {
 
     @Before
     public void setUp() {
+		fakePlayer = StaticTest.GetOnlinePlayer();
     }
 
     @After
@@ -192,74 +197,113 @@ public class StringHandlingTest {
 	}
 	
 	//Double string tests
-//	@Test public void testDoubleStringSimple() throws Exception {
-//		assertEquals("A var", SRun("@v = 'var';\n"
-//				+ "msg(\"A @v\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringSimpleUsingBraces() throws Exception {
-//		assertEquals("A var here", SRun("@v = 'var';\n"
-//				+ "msg(\"A @{var} here\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringSimpleUsingBracesAndImmediateFollowingCharacters() throws Exception {
-//		assertEquals("A varhere", SRun("@v = 'var';\n"
-//				+ "msg(\"A @{var}here\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringWithArrayWithNumericIndex() throws Exception {
-//		assertEquals("1", SRun("@a = array(1, 2, 3);\n"
-//				+ "msg(\"@{a[0]}\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringWithArrayWithStringIndex() throws Exception {
-//		assertEquals("1", SRun("@a = array('one': 1, 'two': 2);\n"
-//				+ "msg(\"@{a['one']}\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringWithArrayWithStringIndexWithInnerQuote() throws Exception {
-//		assertEquals("", SRun("@a = array('\\'q\\'': 'hi');\n"
-//				+ "msg(\"@{a['\\'q\\'']}\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringWithMultiDimensionalArrayAndNumericIndexes() throws Exception {
-//		assertEquals("2", SRun("@a = array(\n"
-//				+ "array(1, 2, 3),\n"
-//				+ "array(4, 5, 6)\n"
-//				+ ");\n"
-//				+ "msg(\"@{a[0][1]}\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexes() throws Exception {
-//		assertEquals("3", SRun("@a = array(\n"
-//				+ "'one': array('a': 1, 'b': 2, 'c': 3),\n"
-//				+ "'two': array('x': 4, 'y': 5, 'z': 6)\n"
-//				+ ");\n"
-//				+ "msg(\"@{a['one']['c']}\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringAndNumericIndexes() throws Exception {
-//		assertEquals("3", SRun("@a = array(\n"
-//				+ "'one': array(1, 2, 3),"
-//				+ "'two': array(4, 5, 6)"
-//				+ ");\n"
-//				+ "msg(\"@{a['one'][2]}\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuote() throws Exception {
-//		assertEquals("3", SRun("@a = array(\n"
-//				+ "'\\'q\\'': array(1, 2, '\\'m\\'': 3),"
-//				+ "'\\'r\\'': array(4, 5, 6)"
-//				+ ");\n"
-//				+ "msg(\"@{a['\\'q\\'']['\\'m\\'']}\");", null));
-//	}
-//	
-//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuoteAndNumericIndex() throws Exception {
-//		assertEquals("2", SRun("@a = array(\n"
-//				+ "'\\'q\\'': array(1, 2, 3),"
-//				+ "'\\'r\\'': array(4, 5, 6)"
-//				+ ");\n"
-//				+ "msg(\"@{a['\\'q\\''][1]}\");", null));
-//	}
+	@Test
+	public void testDoubleStringWithNoControlCharacters() throws Exception {
+		SRun("msg(\"hi\");", fakePlayer);
+		verify(fakePlayer).sendMessage("hi");
+	}
+	
+	@Test
+	public void testDoubleStringWithLiteral() throws Exception {
+		SRun("msg(\"\\@literal\");", fakePlayer);
+		verify(fakePlayer).sendMessage("@literal");
+	}
+	
+	@Test
+	public void testDoubleStringWithOnlyVariable() throws Exception {
+		SRun("@v = 'hi'; msg(\"@v\");", fakePlayer);
+		verify(fakePlayer).sendMessage("hi");
+	}
+	
+	@Test(expected = ConfigCompileException.class)
+	public void testDoubleStringWithError() throws Exception {
+		SRun("msg(\"@ invalid\");", null);
+	}
+	
+	@Test public void testDoubleStringSimple() throws Exception {
+		SRun("@v = 'var';\n"
+				+ "msg(\"A @v!\");", fakePlayer);
+		verify(fakePlayer).sendMessage("A var!");
+	}
+	
+	@Test public void testDoubleStringSimpleUsingBraces() throws Exception {
+		SRun("@var = 'var';\n"
+				+ "msg(\"A @{var} here\");", fakePlayer);
+		verify(fakePlayer).sendMessage("A var here");
+	}
+	
+	@Test(expected = ConfigCompileException.class)
+	public void testDoubleStringUnendedBrace() throws Exception {
+		SRun("msg(\"@{unfinished\");", null);
+	}
+	
+	@Test public void testDoubleStringSimpleUsingBracesAndImmediateFollowingCharacters() throws Exception {
+		SRun("@var = 'var';\n"
+				+ "msg(\"A @{var}here\");", fakePlayer);
+		verify(fakePlayer).sendMessage("A varhere");
+	}
+	
+	@Test public void testDoubleStringWithArrayWithNumericIndex() throws Exception {
+		SRun("@a = array(1, 2, 3);\n"
+				+ "msg(\"@{a[0]}\");", fakePlayer);
+		verify(fakePlayer).sendMessage("1");
+	}
+	
+	@Test public void testDoubleStringWithArrayWithStringIndex() throws Exception {
+		SRun("@a = array('one': 1, 'two': 2);\n"
+				+ "msg(\"@{a['one']}\");", fakePlayer);
+		verify(fakePlayer).sendMessage("1");
+	}
+	
+	@Test public void testDoubleStringWithArrayWithStringIndexWithInnerQuote() throws Exception {
+		SRun("@a = array('\\'q\\'': 'hi');\n"
+				+ "msg(\"@{a['\\'q\\'']}\");", fakePlayer);
+		verify(fakePlayer).sendMessage("hi");
+	}
+	
+	@Test public void testDoubleStringWithMultiDimensionalArrayAndNumericIndexes() throws Exception {
+		SRun("@a = array(\n"
+				+ "array(1, 2, 3),\n"
+				+ "array(4, 5, 6)\n"
+				+ ");\n"
+				+ "msg(\"@{a[0][1]}\");", fakePlayer);
+		verify(fakePlayer).sendMessage("2");
+	}
+	
+	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexes() throws Exception {
+		SRun("@a = array(\n"
+				+ "'one': array('a': 1, 'b': 2, 'c': 3),\n"
+				+ "'two': array('x': 4, 'y': 5, 'z': 6)\n"
+				+ ");\n"
+				+ "msg(\"@{a['one']['c']}\");", fakePlayer);
+		verify(fakePlayer).sendMessage("3");
+	}
+	
+	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringAndNumericIndexes() throws Exception {
+		SRun("@a = array(\n"
+				+ "'one': array(1, 2, 3),"
+				+ "'two': array(4, 5, 6)"
+				+ ");\n"
+				+ "msg(\"@{a['one'][2]}\");", fakePlayer);
+		verify(fakePlayer).sendMessage("3");
+	}
+	
+	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuote() throws Exception {
+		SRun("@a = array(\n"
+				+ "'\\'q\\'': array(1, 2, '\\'m\\'': 3),"
+				+ "'\\'r\\'': array(4, 5, 6)"
+				+ ");\n"
+				+ "msg(\"@{a['\\'q\\'']['\\'m\\'']}\");", fakePlayer);
+		verify(fakePlayer).sendMessage("3");
+	}
+	
+	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuoteAndNumericIndex() throws Exception {
+		SRun("@a = array(\n"
+				+ "'\\'q\\'': array(1, 2, 3),"
+				+ "'\\'r\\'': array(4, 5, 6)"
+				+ ");\n"
+				+ "msg(\"@{a['\\'q\\''][1]}\");", fakePlayer);
+		verify(fakePlayer).sendMessage("2");
+	}
 	
 }

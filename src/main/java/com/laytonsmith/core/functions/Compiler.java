@@ -625,8 +625,72 @@ public class Compiler {
 				throw new ConfigCompileException(getName() + " can only take one parameter", t);
 			}
 			String value = children.get(0).getData().val();
-			//TODO Finish this, and uncomment the tests from StringHandlingTest
-			throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
+			
+			StringBuilder b = new StringBuilder();
+			boolean inBrace = false;
+			boolean inSimpleVar = false;
+			ParseTree root = new ParseTree(new CFunction(new StringHandling.concat().getName(), t), fileOptions);
+			for(int i = 0; i < value.length(); i++){
+				char c = value.charAt(i);
+				char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
+				if(c == '\\' && c2 == '@'){
+					b.append("@");
+					i++;
+					continue;
+				}
+				if(c == '@'){
+					if(c2 == '{'){
+						//Start of a complex variable
+						inBrace = true;
+						i++; // Don't include this
+					} else if(Character.isLetterOrDigit(c2) || c2 == '_'){
+						//Start of a simple variable
+						inSimpleVar = true;
+					} else {
+						// Loose @, this is a compile error
+						throw new ConfigCompileException("Unexpected \"@\" in string. If you want a literal at sign, escape it with \"\\@\".", t);
+					}
+					if(b.length() > 0){
+						root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
+						b = new StringBuilder();
+					}
+					continue;
+				}
+				if(inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')){
+					// End of simple var. The buffer is the variable name.
+					String vname = b.toString();
+					b = new StringBuilder();
+					root.addChild(new ParseTree(new IVariable("@" + vname, t), fileOptions));
+					inSimpleVar = false;
+				}
+				if(inBrace && c == '}'){
+					// End of complex var. Still more parsing to be done though.
+					String complex = b.toString().trim();
+					b = new StringBuilder();
+					inBrace = false;
+					if(complex.matches("[a-zA-Z0-9_]+")){
+						//This is a simple variable name.
+						root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
+					} else {
+						//Complex variable name, with arrays (or perhaps an error case)
+					}
+					continue;
+				}
+				b.append(c);
+			}
+			if(inBrace){
+				throw new ConfigCompileException("Missing end brace (}) in double string", t);
+			}
+			if(inSimpleVar){
+				root.addChild(new ParseTree(new IVariable("@" + b.toString(), t), fileOptions));
+			} else if(b.length() > 0){
+				root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
+			}
+			if(root.numberOfChildren() == 1){
+				return root.getChildAt(0);
+			}
+			//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
+			return root;
 		}
 		
 	}
