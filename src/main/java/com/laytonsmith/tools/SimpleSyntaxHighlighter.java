@@ -91,29 +91,34 @@ public class SimpleSyntaxHighlighter {
 			for (int j = 0; j < lines[i].length(); j++) {
 				char c = lines[i].charAt(j);
 				char c2 = (j + 1 < lines[i].length() ? lines[i].charAt(j + 1) : '\0');
-				if (inSingleString) {
-					if (c == '\\' && c2 == '\'') {
+				if(inSingleString || inDoubleString){
+					if(c == '\\' && c2 == '\''){
 						buffer += "\\&apos;";
 						j++;
 						continue;
-					} else if (c == '\'') {
-						inSingleString = false;
-						lout.append("<span style=\"").append(getColor(ElementTypes.SINGLE_STRING)).append("\">").append(buffer).append("&apos;</span>");
-						buffer = "";
-						continue;
 					}
-				}
-				if (inDoubleString) {
 					if (c == '\\' && c2 == '"') {
 						buffer += "\\&quot;";
 						j++;
 						continue;
-					} else if (c == '"') {
-						inDoubleString = false;
-						lout.append("<span style=\"").append(getColor(ElementTypes.DOUBLE_STRING)).append("\">").append(buffer).append("&quot;</span>");
-						buffer = "";
+					}
+					if(c == '\\' && c2 == '\\'){
+						buffer += "\\\\";
+						j++;
 						continue;
 					}
+				}
+				if (inSingleString && c == '\'') {
+					inSingleString = false;
+					lout.append("<span style=\"").append(getColor(ElementTypes.SINGLE_STRING)).append("\">").append(buffer).append("&apos;</span>");
+					buffer = "";
+					continue;
+				}
+				if (inDoubleString && c == '"') {
+					inDoubleString = false;
+					lout.append("<span style=\"").append(getColor(ElementTypes.DOUBLE_STRING)).append("\">").append(buffer).append("&quot;</span>");
+					buffer = "";
+					continue;
 				}
 				if (inVar) {
 					if (!Character.toString(c).matches("[a-zA-Z0-9_]")) {
@@ -151,13 +156,15 @@ public class SimpleSyntaxHighlighter {
 				}
 				if (c == '\'' && !inDoubleString && !inLineComment && !inBlockComment) {
 					lout.append(processBuffer(buffer));
-					buffer = "";
+					buffer = "&apos;";
 					inSingleString = true;
+					continue;
 				}
 				if (c == '"' && !inSingleString && !inLineComment && !inBlockComment) {
 					lout.append(processBuffer(buffer));
-					buffer = "";
+					buffer = "&quot;";
 					inDoubleString = true;
+					continue;
 				}
 				if (c == '*' && c2 == '/') {
 					lout.append(buffer).append("*/</span>");
