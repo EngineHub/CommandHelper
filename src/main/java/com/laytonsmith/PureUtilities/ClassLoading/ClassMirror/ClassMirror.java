@@ -1,6 +1,7 @@
 
 package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.File;
@@ -17,6 +18,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.objectweb.asm.AnnotationVisitor;
@@ -89,7 +91,7 @@ public class ClassMirror<T> implements Serializable {
 	public ClassMirror(Class c){
 		this.underlyingClass = c;
 		reader = null;
-		throw new UnsupportedOperationException("This has not yet been implemented.");
+		originalURL = ClassDiscovery.GetClassContainer(c);
 	}
 	
 	private void parse(){
@@ -103,9 +105,6 @@ public class ClassMirror<T> implements Serializable {
 	 * @return 
 	 */
 	public URL getContainer() {
-		if(this.underlyingClass != null){
-			this.underlyingClass.getProtectionDomain().getCodeSource().getLocation();
-		}
 		return originalURL;
 	}
 	
@@ -130,7 +129,7 @@ public class ClassMirror<T> implements Serializable {
 		if(underlyingClass != null){
 			return ClassUtils.getJVMName(underlyingClass);
 		}
-		return info.name;
+		return "L" + info.name + ";";
 	}
 	
 	/**
@@ -282,7 +281,7 @@ public class ClassMirror<T> implements Serializable {
 		if(underlyingClass != null){
 			List<AnnotationMirror> list = new ArrayList<>();
 			for(Annotation a : underlyingClass.getAnnotations()){
-				list.add(new AnnotationMirror(ClassReferenceMirror.fromClass(a.getClass()), true));
+				list.add(new AnnotationMirror(ClassReferenceMirror.fromClass(a.annotationType()), true));
 			}
 			return list;
 		}
@@ -525,8 +524,29 @@ public class ClassMirror<T> implements Serializable {
 		if(underlyingClass != null){
 			return ClassReferenceMirror.fromClass(underlyingClass);
 		}
-		return new ClassReferenceMirror("L" + getJVMClassName() + ";");
+		return new ClassReferenceMirror(getJVMClassName());
 	}
+
+
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 97 * hash + Objects.hashCode(this.getJVMClassName());
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final ClassMirror<?> other = (ClassMirror<?>) obj;
+		return Objects.equals(this.getJVMClassName(), other.getJVMClassName());
+	}
+
 	
 	private static class ClassInfo implements ClassVisitor, Serializable {
 		private static final long serialVersionUID = 1L;
@@ -588,7 +608,7 @@ public class ClassMirror<T> implements Serializable {
 
 		@Override
 		public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-			final FieldMirror fm = new FieldMirror(new ModifierMirror(ModifierMirror.Type.FIELD, access),
+			final FieldMirror fm = new FieldMirror(classReferenceMirror, new ModifierMirror(ModifierMirror.Type.FIELD, access),
 					new ClassReferenceMirror(desc), name, value);
 			fields.add(fm);
 			return new FieldVisitor() {

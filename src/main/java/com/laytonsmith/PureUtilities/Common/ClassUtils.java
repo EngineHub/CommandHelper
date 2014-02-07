@@ -66,30 +66,39 @@ public class ClassUtils {
 		String simpleName = className.replaceAll("\\[\\]", "");
 		String primitiveID = null;
 		Class primitiveClass = null;
-		if("boolean".equals(simpleName)){
-			primitiveID = "Z";
-			primitiveClass = boolean.class;
-		} else if("byte".equals(simpleName)){
-			primitiveID = "B";
-			primitiveClass = byte.class;
-		} else if("short".equals(simpleName)){			
-			primitiveID = "S";
-			primitiveClass = short.class;
-		} else if("int".equals(simpleName)){			
-			primitiveID = "I";
-			primitiveClass = int.class;
-		} else if("long".equals(simpleName)){			
-			primitiveID = "J";
-			primitiveClass = long.class;
-		} else if("float".equals(simpleName)){			
-			primitiveID = "F";
-			primitiveClass = float.class;
-		} else if("double".equals(simpleName)){			
-			primitiveID = "D";
-			primitiveClass = double.class;
-		} else if("char".equals(simpleName)){			
-			primitiveID = "C";
-			primitiveClass = char.class;
+		if(null != simpleName)switch (simpleName) {
+			case "boolean":
+				primitiveID = "Z";
+				primitiveClass = boolean.class;
+				break;
+			case "byte":
+				primitiveID = "B";
+				primitiveClass = byte.class;
+				break;
+			case "short":
+				primitiveID = "S";
+				primitiveClass = short.class;
+				break;
+			case "int":
+				primitiveID = "I";
+				primitiveClass = int.class;
+				break;
+			case "long":
+				primitiveID = "J";
+				primitiveClass = long.class;
+				break;
+			case "float":
+				primitiveID = "F";
+				primitiveClass = float.class;
+				break;
+			case "double":
+				primitiveID = "D";
+				primitiveClass = double.class;
+				break;
+			case "char":
+				primitiveID = "C";
+				primitiveClass = char.class;
+				break;
 		}
 		if(primitiveClass != null){
 			if(arrays > 0){
@@ -141,7 +150,7 @@ public class ClassUtils {
 	 * Returns the name of the class, as the JVM would output it. For instance,
 	 * for an int, "I" is returned, for an array of Objects, "[Ljava/lang/Object;" is
 	 * returned.
-	 * @param className
+	 * @param clazz
 	 * @return 
 	 */
 	public static String getJVMName(Class clazz){

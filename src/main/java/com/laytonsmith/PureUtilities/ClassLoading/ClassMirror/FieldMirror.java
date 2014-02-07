@@ -5,8 +5,6 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class gathers information about a field, without actually loading 
@@ -17,6 +15,10 @@ public class FieldMirror extends AbstractElementMirror {
 	private static final long serialVersionUID = 1L;
 	private final Object value;
 	
+	/**
+	 * Creates a new FieldMirror based on an actual field, for easy comparisons.
+	 * @param field 
+	 */
 	public FieldMirror(Field field){
 		super(field);
 		Object _value = null;
@@ -28,8 +30,17 @@ public class FieldMirror extends AbstractElementMirror {
 		this.value = _value;
 	}
 	
-	public FieldMirror(List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value){
-		super(annotations, modifiers, type, name);
+	/**
+	 * Creates a new FieldMirror based on the specified parameters.
+	 * @param annotations
+	 * @param modifiers
+	 * @param type
+	 * @param name
+	 * @param value
+	 * @param parent 
+	 */
+	public FieldMirror(ClassReferenceMirror parent, List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value){
+		super(parent, annotations, modifiers, type, name);
 		this.value = value;
 	}
 	
@@ -56,8 +67,8 @@ public class FieldMirror extends AbstractElementMirror {
 	}
 	
 	// Package methods/constructor
-	/* package */ FieldMirror(ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value){
-		super(null, modifiers, type, name);
+	/* package */ FieldMirror(ClassReferenceMirror parent, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value){
+		super(parent, null, modifiers, type, name);
 		this.value = value;
 		this.annotations = new ArrayList<>();
 	}

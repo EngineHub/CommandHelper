@@ -587,7 +587,7 @@ public class ClassDiscovery {
 				} else {
 					try {
 						//Again, have to check Class.forName
-						Class clazz = ClassUtils.forCanonicalName(in.toString());
+						Class clazz = ClassUtils.forCanonicalName(in.toString(), false, getDefaultClassLoader());
 						if (superClass.isAssignableFrom(clazz)) {
 							return true;
 						}

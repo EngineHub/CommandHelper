@@ -15,7 +15,6 @@ public class MethodMirror extends AbstractElementMirror {
 	private static final long serialVersionUID = 1L;
 	
 	private final List<ClassReferenceMirror> params;
-	private final ClassReferenceMirror parentClass;
 	private boolean isVararg = false;
 	private boolean isSynthetic = false;
 	
@@ -23,8 +22,7 @@ public class MethodMirror extends AbstractElementMirror {
 	
 	public MethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers, 
 			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){
-		super(annotations, modifiers, type, name);
-		this.parentClass = parentClass;
+		super(parentClass, annotations, modifiers, type, name);
 		this.params = params;
 		this.isVararg = isVararg;
 		this.isSynthetic = isSynthetic;
@@ -34,14 +32,12 @@ public class MethodMirror extends AbstractElementMirror {
 		super(method);
 		this.underlyingMethod = method;
 		this.params = null;
-		this.parentClass = null;
 	}
 	
 	/* package */ MethodMirror(ClassReferenceMirror parentClass, ModifierMirror modifiers, ClassReferenceMirror type, 
 			String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){
-		super(null, modifiers, type, name);
+		super(parentClass, null, modifiers, type, name);
 		annotations = new ArrayList<>();
-		this.parentClass = parentClass;
 		this.params = params;
 		this.isVararg = isVararg;
 		this.isSynthetic = isSynthetic;
@@ -113,7 +109,7 @@ public class MethodMirror extends AbstractElementMirror {
 		if(underlyingMethod != null){
 			return underlyingMethod;
 		}
-		Class parent = parentClass.loadClass(loader, initialize);
+		Class parent = getDeclaringClass().loadClass(loader, initialize);
 		List<Class> cParams = new ArrayList<Class>();
 		for(ClassReferenceMirror c : params){
 			cParams.add(c.loadClass(loader, initialize));
@@ -124,17 +120,6 @@ public class MethodMirror extends AbstractElementMirror {
 			//There's really no way for any exception to happen here, so just rethrow
 			throw new RuntimeException(ex);
 		}
-	}
-	
-	/**
-	 * Returns a {@link ClassReferenceMirror} to the parent class.
-	 * @return 
-	 */
-	public ClassReferenceMirror getDeclaringClass(){
-		if(underlyingMethod != null){
-			return ClassReferenceMirror.fromClass(underlyingMethod.getDeclaringClass());
-		}
-		return parentClass;
 	}
 
 	@Override
@@ -153,36 +138,5 @@ public class MethodMirror extends AbstractElementMirror {
 		return StringUtils.Join(annotations, "\n") + (annotations.isEmpty()?"":"\n") + (modifiers.toString() 
 				+ " " + type).trim() + " " + name + "(" + StringUtils.Join(sParams, ", ") + "){}";
 	}
-
-	@Override
-	public int hashCode() {
-		if(underlyingMethod != null){
-			return underlyingMethod.hashCode();
-		}
-		int hash = 7;
-		hash = 31 * hash + (this.params != null ? this.params.hashCode() : 0);
-		hash = 31 * hash + (this.parentClass != null ? this.parentClass.hashCode() : 0);
-		return hash;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if(underlyingMethod != null){
-			return underlyingMethod.equals(obj);
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final MethodMirror other = (MethodMirror) obj;
-		if (this.params != other.params && (this.params == null || !this.params.equals(other.params))) {
-			return false;
-		}
-		return this.parentClass == other.parentClass || (this.parentClass != null && this.parentClass.equals(other.parentClass));
-	}
-	
-	
 	
 }
