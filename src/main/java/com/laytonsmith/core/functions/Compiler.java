@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
@@ -565,5 +566,68 @@ public class Compiler {
 			}
 			return new ParseTree(new CBrace(node), fileOptions);
 		}
+	}
+	
+	@api
+	@hide("This is more of a compiler feature, rather than a function, and so it is hidden from normal"
+			+ " documentation.")
+	public static class smart_string extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException(getName() + " should have been compiled out. If you are reaching this, an error has occured in the parser."
+					+ " Please report this error to the developers.");
+		}
+
+		@Override
+		public String getName() {
+			return "smart_string";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "none {string} This is a compiler construct, and is not normally used directly. It is created via double quoted strings.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1){
+				throw new ConfigCompileException(getName() + " can only take one parameter", t);
+			}
+			String value = children.get(0).getData().val();
+			//TODO Finish this, and uncomment the tests from StringHandlingTest
+			throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
+		}
+		
 	}
 }

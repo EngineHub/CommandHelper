@@ -190,4 +190,76 @@ public class StringHandlingTest {
 	@Test public void testCharFromUnicodeToChar() throws Exception {
 		assertEquals("a", SRun("char_from_unicode(unicode_from_char('a'))", null));
 	}
+	
+	//Double string tests
+//	@Test public void testDoubleStringSimple() throws Exception {
+//		assertEquals("A var", SRun("@v = 'var';\n"
+//				+ "msg(\"A @v\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringSimpleUsingBraces() throws Exception {
+//		assertEquals("A var here", SRun("@v = 'var';\n"
+//				+ "msg(\"A @{var} here\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringSimpleUsingBracesAndImmediateFollowingCharacters() throws Exception {
+//		assertEquals("A varhere", SRun("@v = 'var';\n"
+//				+ "msg(\"A @{var}here\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringWithArrayWithNumericIndex() throws Exception {
+//		assertEquals("1", SRun("@a = array(1, 2, 3);\n"
+//				+ "msg(\"@{a[0]}\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringWithArrayWithStringIndex() throws Exception {
+//		assertEquals("1", SRun("@a = array('one': 1, 'two': 2);\n"
+//				+ "msg(\"@{a['one']}\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringWithArrayWithStringIndexWithInnerQuote() throws Exception {
+//		assertEquals("", SRun("@a = array('\\'q\\'': 'hi');\n"
+//				+ "msg(\"@{a['\\'q\\'']}\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringWithMultiDimensionalArrayAndNumericIndexes() throws Exception {
+//		assertEquals("2", SRun("@a = array(\n"
+//				+ "array(1, 2, 3),\n"
+//				+ "array(4, 5, 6)\n"
+//				+ ");\n"
+//				+ "msg(\"@{a[0][1]}\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexes() throws Exception {
+//		assertEquals("3", SRun("@a = array(\n"
+//				+ "'one': array('a': 1, 'b': 2, 'c': 3),\n"
+//				+ "'two': array('x': 4, 'y': 5, 'z': 6)\n"
+//				+ ");\n"
+//				+ "msg(\"@{a['one']['c']}\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringAndNumericIndexes() throws Exception {
+//		assertEquals("3", SRun("@a = array(\n"
+//				+ "'one': array(1, 2, 3),"
+//				+ "'two': array(4, 5, 6)"
+//				+ ");\n"
+//				+ "msg(\"@{a['one'][2]}\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuote() throws Exception {
+//		assertEquals("3", SRun("@a = array(\n"
+//				+ "'\\'q\\'': array(1, 2, '\\'m\\'': 3),"
+//				+ "'\\'r\\'': array(4, 5, 6)"
+//				+ ");\n"
+//				+ "msg(\"@{a['\\'q\\'']['\\'m\\'']}\");", null));
+//	}
+//	
+//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuoteAndNumericIndex() throws Exception {
+//		assertEquals("2", SRun("@a = array(\n"
+//				+ "'\\'q\\'': array(1, 2, 3),"
+//				+ "'\\'r\\'': array(4, 5, 6)"
+//				+ ");\n"
+//				+ "msg(\"@{a['\\'q\\''][1]}\");", null));
+//	}
+	
 }
