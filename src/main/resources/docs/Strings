@@ -169,6 +169,7 @@ it, using a backslash:
 %%CODE|
 msg("Not a \@variable"); // == 'Not a @variable'
 msg("Still not a \@{variable['one']}"); // == 'Still not a @{variable['one']}'
+msg("email\@email.com"); // == 'email@email.com'
 %%
 
 Double strings with variables in them are considered dynamic values, and cannot
