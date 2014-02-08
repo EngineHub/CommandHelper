@@ -116,6 +116,7 @@ public class SimpleSyntaxHighlighter {
 				}
 				if (inDoubleString && c == '"') {
 					inDoubleString = false;
+					buffer = processDoubleString(buffer);
 					lout.append("<span style=\"").append(getColor(ElementTypes.DOUBLE_STRING)).append("\">").append(buffer).append("&quot;</span>");
 					buffer = "";
 					continue;
@@ -226,6 +227,99 @@ public class SimpleSyntaxHighlighter {
 		}
 		buffer = buffer.replaceAll(FUNCTION_PATTERN, "$1<span style=\"font-style: italic; " + getColor(ElementTypes.FUNCTION) + "\">$2</span>$3");
 		return buffer;
+	}
+	
+	/**
+	 * Processes and highlights double strings
+	 * @param buffer
+	 * @return 
+	 */
+	private String processDoubleString(String value){
+		StringBuilder b = new StringBuilder();
+		StringBuilder brace = new StringBuilder();
+		boolean inSimpleVar = false;
+		boolean inBrace = false;
+		for(int i = 0; i < value.length(); i++){
+			char c = value.charAt(i);
+			char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
+			if(c == '\\' && c2 == '@'){
+				b.append("\\@");
+				i++;
+				continue;
+			}
+			if(c == '@'){
+				if(Character.isLetterOrDigit(c2) || c2 == '_'){
+					inSimpleVar = true;
+					b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">@");
+					continue;
+				} else if(c2 == '{'){
+					inBrace = true;
+					b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">@{</span>");
+					i++;
+					continue;
+				}
+			}
+			if(inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')){
+				inSimpleVar = false;
+				b.append("</span>");
+			}
+			if(inBrace && c == '}'){
+				inBrace = false;
+				b.append(processBraceString(brace.toString()));
+				brace = new StringBuilder();
+				b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">}</span>");
+				continue;
+			}
+			if(!inBrace){
+				b.append(HTMLUtils.escapeHTML(Character.toString(c)));
+			} else {
+				brace.append(HTMLUtils.escapeHTML(Character.toString(c)));
+			}
+		}
+		if(inSimpleVar || inBrace){
+			b.append("</span>");
+		}
+		return b.toString();
+	}
+	
+	/**
+	 * Brace strings are more complicated, so do this processing separately.
+	 * @param v
+	 * @return 
+	 */
+	private String processBraceString(String value){
+		StringBuilder b = new StringBuilder();
+		boolean inVarName = true;
+		boolean inString = false;
+		b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">");
+		for(int i = 0; i < value.length(); i++){
+			char c = value.charAt(i);
+			char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
+			if(c == '[' && inVarName){
+				inVarName = false;
+				b.append("</span>");
+			}
+			if(c == '[' && !inString){
+				b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">[</span>");
+				continue;
+			}
+			if(c == ']' && !inString){
+				b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">]</span>");
+				continue;
+			}
+			if(c == '\\' && c2 == '\'' && inString){
+				b.append("\\'");
+				continue;
+			}
+			if(c == '\''){
+				inString = !inString;
+			}
+			b.append(c);
+		}
+		if(inVarName){
+			b.append("</span>");
+		}
+		return b.toString();
 	}
 
 	/**

@@ -84,7 +84,6 @@ Other escape sequences are supported:
 
 All other escapes are invalid, and will cause a compile error.
 
-<!-- This section is currently under development, and is not ready yet.
 
 === Double Quoted Strings ===
 
@@ -126,6 +125,8 @@ msg("A @{variable} Here"); // == 'A ' . @variable . ' Here'
 msg("A@{variable}Here"); // == 'A' . @variable . 'Here'
 %%
 
+<!-- This section is currently under development, and is not ready yet.
+
 The braces are optional in cases where the end of the variable can be distinguished
 without them, but are required for other cases, including when using arrays.
 
@@ -161,6 +162,7 @@ msg("Inner value: @{array[0][2]}"); // == 'Inner value: ' . @array[0][2]
 msg("Inner value: @{array['one'][1]}"); // == 'Inner value: ' . @array['one'][1]
 %%
 
+-->
 In double quoted strings only, if you need a literal at sign, you must escape
 it, using a backslash:
 
@@ -174,6 +176,5 @@ be used in cases where a static value is required, for instance, array labels.
 If the string does not contain any variables, it works the same as a singly quoted
 string.
 
--->
 
 {{LearningTrail}}
