@@ -9,6 +9,7 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
@@ -88,8 +89,8 @@ public class FileHandling {
 				s = s.replaceAll("\n|\r\n", "\n");
 				return new CString(s, t);
 			} catch (Exception ex) {
-				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + new File(location).getAbsolutePath()
-					+ "\nFile " + (new File(location).exists() ? "exists" : "does not exist"));
+				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find " + new File(location).getAbsolutePath()
+					+ "\nFile " + (new File(location).exists() ? "exists" : "does not exist"), t);
 				throw new ConfigRuntimeException("File could not be read in.",
 					Exceptions.ExceptionType.IOException, t);
 			}

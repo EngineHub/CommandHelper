@@ -9,6 +9,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -410,6 +411,11 @@ public class Exceptions {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{_throw.class};
+		}
 	}
 
 	@api
@@ -461,6 +467,11 @@ public class Exceptions {
 		@Override
 		public Boolean runAsync() {
 			return null;
+		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{_try.class};
 		}
 
 		//The code: try(throw(...), @ex, ...) doesn't work,
@@ -545,6 +556,28 @@ public class Exceptions {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "set_uncaught_exception_handler(closure(@ex){\n"
+						+ "\tmsg('Exception caught!');\n"
+						+ "\tmsg(@ex);\n"
+						+ "\treturn(true);\n"
+						+ "});\n\n"
+						+ "@zero = 0;\n"
+						+ "@exception = 1 / @zero; // This should throw an exception\n",
+						// Can't automatically run this, since the examples don't have
+						// the exception handling fully working.
+						"Exception caught!\n" 
+						+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),
+			};
+		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{_throw.class, _try.class};
 		}
 		
 	}

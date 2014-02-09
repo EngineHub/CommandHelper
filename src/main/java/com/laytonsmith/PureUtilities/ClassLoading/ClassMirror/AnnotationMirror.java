@@ -6,29 +6,44 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
- *
+ * Represents an Annotation. Most features available to annotations are available here,
+ * though finding the default value of an annotation does require loading the annotation.
  */
 public class AnnotationMirror implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private ClassReferenceMirror type;
-	private boolean visible;
-	private List<AnnotationValue> values;
+	private final ClassReferenceMirror type;
+	private final boolean visible;
+	private final List<AnnotationValue> values;
 	
-	public AnnotationMirror(ClassReferenceMirror type, boolean visible, List<AnnotationValue> values){
-		this(type, visible);
-		this.values = values;
+	/**
+	 * Creates a new AnnotationMirror based an a loaded {@link Annotation}.
+	 * @param annotation 
+	 */
+	public AnnotationMirror(Annotation annotation){
+		this.type = ClassReferenceMirror.fromClass(annotation.annotationType());
+		this.visible = true;
+		values = new ArrayList<>();
+		for(Method m : annotation.annotationType().getDeclaredMethods()){
+			try {
+				values.add(new AnnotationValue(m.getName(), m.invoke(annotation)));
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
 	}
 	
 	/* package */ AnnotationMirror(ClassReferenceMirror type, boolean visible){
 		this.type = type;
 		this.visible = visible;
-		this.values = new ArrayList<AnnotationValue>();
+		this.values = new ArrayList<>();
 	}
 	
 	/* package */ void addAnnotationValue(String name, Object value){
@@ -60,7 +75,7 @@ public class AnnotationMirror implements Serializable {
 	 * @return 
 	 */
 	public List<String> getDefinedValues(){
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		for(AnnotationValue value : values){
 			list.add(value.name);
 		}
@@ -73,8 +88,9 @@ public class AnnotationMirror implements Serializable {
 	 * Class into memory, and finding the default, and returning that. Calling
 	 * this method doesn't guarantee that the class will be loaded, however.
 	 * If the value doesn't exist, at all, this will return null.
-	 * @param value
+	 * @param forName
 	 * @return 
+	 * @throws java.lang.ClassNotFoundException 
 	 */
 	public Object getValueWithDefault(String forName) throws ClassNotFoundException{
 		Object value = getValue(forName);
@@ -102,7 +118,7 @@ public class AnnotationMirror implements Serializable {
 	 * @throws ClassNotFoundException 
 	 */
 	public List<String> getDefinedValuesWithDefault() throws ClassNotFoundException{
-		List<String> ret = new ArrayList<String>();
+		List<String> ret = new ArrayList<>();
 		Class c = type.loadClass();
 		for(Method m : c.getDeclaredMethods()){
 			ret.add(m.getName());
@@ -128,8 +144,12 @@ public class AnnotationMirror implements Serializable {
 	
 	/**
 	 * Gets a proxy annotation. When retrieving the annotation value,
-	 * getValueWithDefault is called, though the class will for sure have
+	 * getValueWithDefault is called, and the annotation's Class will for sure have
 	 * already been loaded.
+	 * 
+	 * This allows for annotation values to be read from an element without having
+	 * to actually load that element (just the annotation Class is loaded), and
+	 * allowing the type safe checks of compile time.
 	 * @param <T>
 	 * @param type
 	 * @return 
@@ -140,21 +160,75 @@ public class AnnotationMirror implements Serializable {
 		if(!this.type.getJVMName().equals(ClassUtils.getJVMName(type))){
 			throw new IllegalArgumentException();
 		}
+		
 		return (T) Proxy.newProxyInstance(AnnotationMirror.class.getClassLoader(), new Class[]{type}, new InvocationHandler() {
 
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+				if(("equals".equals(method.getName()) && matches(args, Object.class))
+						|| ("hashCode".equals(method.getName()) && matches(args))
+						|| ("toString".equals(method.getName()) && matches(args))
+						|| ("wait".equals(method.getName()) && matches(args))
+						|| ("wait".equals(method.getName()) && matches(args, long.class))
+						|| ("wait".equals(method.getName()) && matches(args, long.class, int.class))
+						|| ("getClass".equals(method.getName()) && matches(args))
+						|| ("notify".equals(method.getName()) && matches(args))
+						|| ("notifyAll".equals(method.getName()) && matches(args))
+						|| ("finalize".equals(method.getName()) && matches(args))
+						|| ("clone".equals(method.getName()) && matches(args))
+					){
+					// Currently, we just throw an exception, because they are
+					// actual methods defined in Object, not annotation values.
+					// I don't know how to make this work correctly yet.
+					throw new RuntimeException("The " + method.getName() + " method cannot be called on Annotation Proxies yet.");
+				}
 				return getValueWithDefault(method.getName());
 			}
 		});
+	}
+	
+	private static boolean matches(Object[] args, Class ... types){
+		if(args.length != types.length){
+			return false;
+		}
+		for(int i = 0; i < args.length; i++){
+			//Can't just use == here, since the class might be a subclass
+			if(!types[i].isAssignableFrom(args[i].getClass())){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
 	public String toString() {
 		return "@" + type + "(" + StringUtils.Join(values, ", ") + ")";
 	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 37 * hash + Objects.hashCode(this.type);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final AnnotationMirror other = (AnnotationMirror) obj;
+		if (!Objects.equals(this.type, other.type)) {
+			return false;
+		}
+		return true;
+	}
 	
-	public static class AnnotationValue implements Serializable {
+	
+	private static class AnnotationValue implements Serializable {
 		private static final long serialVersionUID = 1L;
 		private String name;
 		private Object value;
@@ -172,6 +246,34 @@ public class AnnotationMirror implements Serializable {
 				return name + " = " + value.toString();
 			}
 		}
+
+		@Override
+		public int hashCode() {
+			int hash = 7;
+			hash = 29 * hash + Objects.hashCode(this.name);
+			hash = 29 * hash + Objects.hashCode(this.value);
+			return hash;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final AnnotationValue other = (AnnotationValue) obj;
+			if (!Objects.equals(this.name, other.name)) {
+				return false;
+			}
+			if (!Objects.equals(this.value, other.value)) {
+				return false;
+			}
+			return true;
+		}
+		
+		
 		
 	}
 }

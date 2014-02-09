@@ -972,6 +972,12 @@ public class DataHandling {
 			return "Executing function: " + this.getName() + "(" 
 					+ args.get(0).toStringVerbose() + ", <code>)";
 		}
+
+		@Override
+		public boolean allowBraces() {
+			return true;
+		}
+		
 	}
 
 	@api
@@ -3166,9 +3172,17 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("To a hex string", "to_radix(15, 16)"),
-				new ExampleScript("To a binary string", "to_radix(15, 2)")
+				new ExampleScript("To a binary string", "to_radix(15, 2)"),
+				new ExampleScript("Using hex value in source", "to_radix(0xff, 16)"),
+				new ExampleScript("Using binary value in source", "to_radix(0b10101010, 2)")
 			};
 		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{parse_int.class};
+		}
+		
 	}
 	
 	@api public static class parse_int extends AbstractFunction {
@@ -3233,6 +3247,11 @@ public class DataHandling {
 				new ExampleScript("From hex string", "parse_int('F', 16)"),
 				new ExampleScript("From binary string", "parse_int('1111', 2)")
 			};
+		}
+
+		@Override
+		public Class<? extends Documentation>[] seeAlso() {
+			return new Class[]{to_radix.class};
 		}
 		
 	}

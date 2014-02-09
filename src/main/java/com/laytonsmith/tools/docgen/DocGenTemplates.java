@@ -3,7 +3,6 @@ package com.laytonsmith.tools.docgen;
 import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -50,7 +49,7 @@ public class DocGenTemplates {
 	
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		System.out.println(Generate("Data_Manager"));
+		System.out.println(Generate("Numbers"));
 	}
 	
 	public static String Generate(String forPage){
@@ -183,7 +182,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String ... args) {
 			Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
-			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*?)\\s*$");
+			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*)\\s*$");
 			SortedSet<String> set = new TreeSet<String>();
 			for(Class c : classes){
 				if(DataSource.class.isAssignableFrom(c)){
@@ -208,7 +207,10 @@ public class DocGenTemplates {
 							description = m.group(3);
 						}
 						if(name == null || example == null || description == null){
-							throw new Error("Invalid documentation for " + c.getSimpleName());
+							throw new Error("Invalid documentation for " + c.getSimpleName()
+								+ (name==null?" name was null;":"") 
+								+ (example==null?" example was null;":"")
+								+ (description==null?" description was null;":""));
 						}
 						StringBuilder b = new StringBuilder();
 						b.append("|-\n| ").append(name).append(" || ").append(description)
@@ -341,7 +343,12 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			StringBuilder b = new StringBuilder();
+			boolean colorsDisabled = TermColors.ColorsDisabled();
+			TermColors.DisableColors();
 			b.append("<pre style=\"white-space: pre-wrap;\">\n").append(Main.ARGUMENT_SUITE.getBuiltDescription()).append("\n</pre>\n");
+			if(!colorsDisabled){
+				TermColors.EnableColors();
+			}
 			for(Field f : Main.class.getDeclaredFields()){
 				if(f.getType() == ArgumentParser.class){
 					b.append("==== ").append(StringUtils.replaceLast(f.getName(), "(?i)mode", "")).append(" ====\n<pre style=\"white-space: pre-wrap;\">");
@@ -410,5 +417,40 @@ public class DocGenTemplates {
 			return ds.getTableCreationQuery();
 		}
 		
+	};
+	
+	public static Generator CONST = new Generator() {
+
+		@Override
+		public String generate(String... args) {
+			String value = args[0];
+			String[] v = value.split("\\.");
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < v.length - 1; i++){
+				if(i != 0){
+					b.append(".");
+				}
+				b.append(v[i]);
+			}
+			String clazz = b.toString();
+			String constant = v[v.length - 1];
+			Class c;
+			try {
+				c = Class.forName(clazz);
+			} catch (ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+			Field f;
+			try {
+				f = c.getField(constant);
+			} catch (NoSuchFieldException | SecurityException ex) {
+				throw new RuntimeException(ex);
+			}
+			try {
+				return f.get(null).toString();
+			} catch (IllegalArgumentException | IllegalAccessException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
 	};
 }

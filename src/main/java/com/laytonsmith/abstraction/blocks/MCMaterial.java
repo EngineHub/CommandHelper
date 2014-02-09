@@ -13,7 +13,8 @@ public interface MCMaterial {
 
     public int getType();
 	public MCMaterialData getData();
-
+	public String getName();
+	
     public int getMaxStackSize();
 
 	public boolean hasGravity();

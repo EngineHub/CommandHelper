@@ -595,13 +595,10 @@ public final class MethodScriptCompiler {
 				}
 			} else if (c == '"') {
 				if (state_in_quote && in_smart_quote) {
-					//For now, since this feature isn't fully implemented, just throw an exception
-					if (true) {
-						throw new ConfigCompileException("Doubly quoted strings are not yet supported.", target);
-					}
 					token_list.add(new Token(TType.SMART_STRING, buf.toString(), target));
 					buf = new StringBuilder();
 					state_in_quote = false;
+					in_smart_quote = false;
 					continue;
 				} else if (!state_in_quote) {
 					state_in_quote = true;
@@ -621,12 +618,18 @@ public final class MethodScriptCompiler {
 				if (state_in_quote) {
 					if (c2 == '\\') {
 						buf.append("\\");
-					} else if (c2 == '\'' && !in_smart_quote) {
+					} else if (c2 == '\'') {
 						buf.append("'");
-					} else if (c2 == '"' && in_smart_quote) {
+					} else if (c2 == '"') {
 						buf.append('"');
 					} else if (c2 == 'n') {
 						buf.append("\n");
+					} else if (c2 == 'r'){
+						buf.append("\r");
+					} else if(c2 == 't'){
+						buf.append("\t");
+					} else if(c2 == '@' && in_smart_quote){
+						buf.append("\\@");
 					} else if (c2 == 'u') {
 						//Grab the next 4 characters, and check to see if they are numbers
 						StringBuilder unicode = new StringBuilder();
@@ -1103,7 +1106,7 @@ public final class MethodScriptCompiler {
 			//Smart strings
 			if (t.type == TType.SMART_STRING) {
 				ParseTree function = new ParseTree(fileOptions);
-				//function.setData(new CFunction(new smart_string().getName(), t.target));
+				function.setData(new CFunction(new Compiler.smart_string().getName(), t.target));
 				ParseTree string = new ParseTree(fileOptions);
 				string.setData(new CString(t.value, t.target));
 				function.addChild(string);

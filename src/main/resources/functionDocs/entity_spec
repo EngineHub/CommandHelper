@@ -1,0 +1,131 @@
+array {entityID} Returns an associative array containing all the data of the given entity that are too specific to have its own function. ----
+
+{| width="80%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="10%" | Entity type
+! scope="col" width="70%" | Data
+|-
+| CREEPER
+| 
+* powered: If the creeper is powered or not.
+|-
+| DROPPED_ITEM
+| 
+* itemstack: An array representing the item.
+* pickupdelay: The delay before the item is available to be picked up.
+|-
+| ENDERMAN
+| 
+* carried: Tthe block that the Enderman is carring.
+|-
+| EXPERIENCE_ORB
+| 
+* amount: How much experience is contained within the orb.
+|-
+| FALLING_BLOCK
+| 
+* block: The falling block.
+* dropitem: If the falling block will break into an item if it cannot be placed. Not editable.
+|-
+| FIREBALL
+| 
+* direction: The direction the fireball is heading toward.
+|-
+| FISHING_HOOK
+| 
+* chance: The chance of a fish biting (between 0.0 and 1.0, 0.0: no chance, 1.0: instant catch).
+|-
+| HORSE
+| 
+* color: The horse's color (can be %HORSE_COLOR%).
+* chest: Whether the horse has a chest equipped.
+* domestication: The domestication level of the horse (can't be higher than the maximum domestication level).
+* jump: The jump strength (between 1.0 and 2.0).
+* maxdomestication: The maximum domestication level of the horse.
+* style: The horse's style (can be %HORSE_STYLE%).
+* variant: The horse's variant (can be %HORSE_VARIANT%).
+* armor: An item pertaining to the armor a horse has put on.
+* saddle: An item pertaining to the saddle a horse has put on. Can be anything.
+|-
+| IRON_GOLEM
+| 
+* playercreated: Whether the iron golem was built by a player or not.
+|-
+| ITEM_FRAME
+| 
+* item: The item in the frame.
+* rotation: The rotation of the frame's item (can be %ROTATION%).
+|-
+| LIGHTNING
+| 
+* effect: Whether the strike is an effect that does no damage. Not editable.
+|-
+| MAGMA_CUBE
+| 
+* size: The size of the magma cube.
+|- 
+| OCELOT
+| 
+* sitting: If the ocelot is sitting.
+* type: The type of the ocelot (can be %OCELOT_TYPE%).
+|- 
+| PAINTING
+| 
+* type: The art on the painting (can be %ART%).
+|- 
+| PIG
+| 
+* saddled: If the pig has a saddle.
+|- 
+| PIG_ZOMBIE
+| 
+* anger: The pig zombie's anger level.
+* angry: Whether the zombie is angry.
+* baby: Whether the pig zombie is a baby.
+* villager: Whether the pig zombie is a villager.
+|- 
+| PRIMED_TNT
+| 
+* fuseticks: The number of ticks until the explosion.
+* source: The source of the primed TNT. Not editable.
+|- 
+| SHEEP
+| 
+* color: The color of the sheep (can be %DYE_COLOR%).
+* sheared: Whether the sheep is sheared.
+|-
+| SKELETON
+| 
+* direction: The type of the skeleton (can be %SKELETON_TYPE%).
+|-
+| SLIME
+| 
+* size: The size of the slime.
+|-
+| SMALL_FIREBALL
+| 
+* direction: The direction the small fireball is heading toward.
+|-
+| SPLASH_POTION
+| 
+* item: The item for the thrown potion.
+|-
+| VILLAGER
+| 
+* profession: The profession of the villager (can be %PROFESSION%).
+|-
+| WITHER_SKULL
+| 
+* direction: The direction the wither skull is heading toward.
+|- 
+| WOLF
+| 
+* angry: If the wolf is angry.
+* color: The collar color of the wolf (can be %DYE_COLOR%).
+* sitting: If the wolf is sitting.
+|- 
+| ZOMBIE
+| 
+* baby: Whether the zombie is a baby.
+* villager: Whether the zombie is a villager.
+|}
