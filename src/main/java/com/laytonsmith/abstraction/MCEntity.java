@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCDamageCause;
@@ -28,6 +27,47 @@ public interface MCEntity extends MCMetadatable {
 			this.x = x;
 			this.y = y;
 			this.z = z;
+		}
+
+		public Velocity add(Velocity vec) {
+			this.x += vec.x;
+			this.y += vec.y;
+			this.z += vec.z;
+			return this;
+		}
+
+		public Velocity multiply(Velocity vec) {
+			this.x *= vec.x;
+			this.y *= vec.y;
+			this.z *= vec.z;
+			return this;
+		}
+
+		public Velocity multiply(double m) {
+			this.x *= m;
+			this.y *= m;
+			this.z *= m;
+			return this;
+		}
+
+		public Velocity normalize() {
+			double length = length();
+
+			this.x /= length;
+			this.y /= length;
+			this.z /= length;
+			return this;
+		}
+
+		public Velocity subtract(Velocity vec) {
+			this.x -= vec.x;
+			this.y -= vec.y;
+			this.z -= vec.z;
+			return this;
+		}
+
+		public double length() {
+			return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
 		}
 	}
 

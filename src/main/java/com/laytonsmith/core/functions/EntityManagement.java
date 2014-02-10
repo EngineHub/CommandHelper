@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCExperienceOrb;
 import com.laytonsmith.abstraction.MCFireball;
@@ -81,6 +82,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  *
@@ -796,45 +798,146 @@ public class EntityManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException,
-					ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException,
+				ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
+		public Construct exec(Target t, Environment env,
 				Construct... args) throws ConfigRuntimeException {
-			MCCommandSender cmdsr = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCLivingEntity ent = null;
-			int id;
-			MCProjectileType toShoot = MCProjectileType.FIREBALL;
+
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+
+			MCLivingEntity shooter = null;
+			MCLivingEntity target = null;
+
+			int shooter_id = 0;
+			int target_id = 0;
+
+			MCLocation from = null;
+			MCLocation to = null;
+
+			MCLocation shifted_from = null;
+
+			MCEntityType entity_shoot = null;
+			MCProjectileType projectile_shoot = null;
+
+			double speed = 0.0;
+
 			if (args.length >= 1) {
 				try {
-					id = Static.GetPlayer(args[0], t).getEntityId();
+					shooter_id = Static.GetPlayer(args[0], t).getEntityId();
 				} catch (ConfigRuntimeException notPlayer) {
 					try {
-						id = Static.getInt32(args[0], t);
-					} catch (ConfigRuntimeException notEntIDEither) {
-						throw new ConfigRuntimeException("Could not find an entity matching " + args[0] + "!",
-								ExceptionType.BadEntityException, t);
+						shooter_id = Static.getInt32(args[0], t);
+					} catch (ConfigRuntimeException notEntIdEither) {
+					}
+				}
+
+				if (shooter_id == 0) {
+					try {
+						from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
+					} catch (ConfigRuntimeException badLocation) {
+					}
+				}
+
+				if (shooter_id == 0 && from == null) {
+					throw new ConfigRuntimeException("Could not find an entity or location matching " + args[0] + "!",
+							ExceptionType.FormatException, t);
+				}
+			} else {
+				shooter_id = ((MCLivingEntity) p).getEntityId();
+				Static.AssertPlayerNonNull((MCPlayer) p, t);
+			}
+
+			if (args.length >= 3) {
+
+				try {
+					target_id = Static.GetPlayer(args[2], t).getEntityId();
+				} catch (ConfigRuntimeException notPlayer) {
+					try {
+						target_id = Static.getInt32(args[2], t);
+					} catch (ConfigRuntimeException notEntIdEither) {
+					}
+				}
+
+				if (target_id == 0) {
+					try {
+						to = ObjectGenerator.GetGenerator().location(args[2], null, t);
+					} catch (ConfigRuntimeException badLocation) {
+					}
+				}
+
+				if (target_id == 0 && to == null) {
+					throw new ConfigRuntimeException("Could not find an entity or location matching " + args[2] + " for target!",
+							ExceptionType.FormatException, t);
+				}
+			}
+
+			if (args.length == 4) {
+				speed = Static.getDouble(args[3], t);
+			}
+
+			if (shooter_id > 0) {
+				shooter = Static.getLivingEntity(shooter_id, t);
+				from = shooter.getEyeLocation();
+			}
+
+			if (target_id > 0) {
+				target = Static.getLivingEntity(target_id, t);
+				to = target.getEyeLocation();
+			}
+
+			if (args.length >= 2) {
+
+				if (shooter_id > 0 && to == null) {
+					try {
+						projectile_shoot = MCProjectileType.valueOf(args[1].val().toUpperCase());
+					} catch (IllegalArgumentException badEnum) {
+						throw new ConfigRuntimeException(args[1] + " is not a valid Projectile", ExceptionType.FormatException, t);
+					}
+				} else {
+					try {
+						entity_shoot = MCEntityType.valueOf(args[1].val().toUpperCase());
+					} catch (IllegalArgumentException badEnum) {
+						throw new ConfigRuntimeException(args[1] + " is not a valid entity type", ExceptionType.BadEntityTypeException, t);
 					}
 				}
 			} else {
-				if (cmdsr instanceof MCPlayer) {
-					id = ((MCLivingEntity) cmdsr).getEntityId();
-					Static.AssertPlayerNonNull((MCPlayer) cmdsr, t);
+				if (shooter_id > 0 && to == null) {
+					projectile_shoot = MCProjectileType.FIREBALL;
 				} else {
-					throw new ConfigRuntimeException("A player was expected!", ExceptionType.PlayerOfflineException, t);
+					entity_shoot = MCEntityType.FIREBALL;
 				}
 			}
-			if (args.length == 2) {
-				try {
-					toShoot = MCProjectileType.valueOf(args[1].toString().toUpperCase());
-				} catch (IllegalArgumentException badEnum) {
-					throw new ConfigRuntimeException(args[1] + " is not a valid Projectile", ExceptionType.FormatException, t);
-				}
+
+			if (args.length < 3 && shooter_id == 0) {
+				throw new ConfigRuntimeException("You must specify target location if you want shoot from location, not entity.", ExceptionType.FormatException, t);
 			}
-			ent = Static.getLivingEntity(id, t);
-			return new CInt(ent.launchProjectile(toShoot).getEntityId(), t);
+
+			if (shooter_id > 0 && to == null) {
+				MCProjectile projectile = shooter.launchProjectile(projectile_shoot);
+
+				return new CInt(projectile.getEntityId(), t);
+			} else {
+				Velocity velocity = to.toVector().subtract(from.toVector()).normalize();
+
+				if (shooter_id > 0) {
+					shifted_from = from.add(velocity);
+				} else {
+					shifted_from = from;
+				}
+
+				MCEntity entity = from.getWorld().spawn(shifted_from, entity_shoot);
+
+				if (speed == 0.0) {
+					entity.setVelocity(velocity);
+				} else {
+					entity.setVelocity(velocity.multiply(speed));
+				}
+
+				return new CInt(entity.getEntityId(), t);
+			}
 		}
 
 		@Override
@@ -844,15 +947,18 @@ public class EntityManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0, 1, 2};
+			return new Integer[]{0, 1, 2, 3, 4};
 		}
 
 		@Override
 		public String docs() {
-			return "int {[player[, projectile]] | [entityID[, projectile]]} shoots a projectile from the entity or player"
-					+ " specified, or the current player if no arguments are passed. If no projectile is specified,"
-					+ " it defaults to a fireball. Returns the EntityID of the projectile. Valid projectiles: "
-					+ StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
+			return "int {[entity[, projectile]] | player, projectile, target[, speed]} shoots an entity from the"
+					+ " specified location (can be entityID, player name or location array), or the current player"
+					+ " if no arguments are passed. If no entity type is specified, it defaults to a fireball."
+					+ " If provide three arguments, with target (entityID, player name or location array), entity will"
+					+ " shoot to target location. Last, fourth argument, is double and specifies the speed"
+					+ " of projectile. Returns the EntityID of the entity. Valid entities types: "
+					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ", " or ");
 		}
 	}
 
@@ -2095,7 +2201,28 @@ public class EntityManagement {
 			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).hasLineOfSight(Static.getEntity(Static.getInt32(args[1], t), t)), t);
 		}
 	}
-	
+
+	@api
+	public static class entity_id extends EntityGetterFunction {
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntityByUuid(UUID.fromString(args[0].val()), t);
+			return new CInt(entity.getEntityId(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "entity_id";
+		}
+
+		@Override
+		public String docs() {
+			return "string {entityUUID} returns the entity id for unique persistent UUID";
+		}
+
+	}
+
 	@api
 	public static class entity_uuid extends EntityGetterFunction {
 
