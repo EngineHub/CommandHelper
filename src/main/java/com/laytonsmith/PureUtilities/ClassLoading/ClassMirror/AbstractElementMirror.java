@@ -39,6 +39,7 @@ class AbstractElementMirror implements Serializable {
 	protected final ClassReferenceMirror parent;
 	
 	protected AbstractElementMirror(Field field){
+		Objects.requireNonNull(field);
 		this.type = ClassReferenceMirror.fromClass(field.getType());
 		this.modifiers = new ModifierMirror(field.getModifiers());
 		this.name = field.getName();
@@ -51,6 +52,7 @@ class AbstractElementMirror implements Serializable {
 	}
 	
 	protected AbstractElementMirror(Method method){
+		Objects.requireNonNull(method);
 		this.type = ClassReferenceMirror.fromClass(method.getReturnType());
 		this.modifiers = new ModifierMirror(method.getModifiers());
 		this.name = method.getName();
@@ -68,6 +70,11 @@ class AbstractElementMirror implements Serializable {
 		this.type = type;
 		this.name = name;
 		this.parent = parent;
+		Objects.requireNonNull(parent);
+		Objects.requireNonNull(annotations);
+		Objects.requireNonNull(modifiers);
+		Objects.requireNonNull(type);
+		Objects.requireNonNull(name);
 	}
 
 	/**
