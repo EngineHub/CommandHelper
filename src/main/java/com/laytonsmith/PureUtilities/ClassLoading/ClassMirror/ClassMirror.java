@@ -555,12 +555,12 @@ public class ClassMirror<T> implements Serializable {
 		public String name;
 		public String superClass;
 		public String[] interfaces;
-		public List<AnnotationMirror> annotations = new ArrayList<AnnotationMirror>();
+		public List<AnnotationMirror> annotations = new ArrayList<>();
 		public boolean isInterface = false;
 		public boolean isEnum = false;
 		public ClassReferenceMirror classReferenceMirror;
-		public List<FieldMirror> fields = new ArrayList<FieldMirror>();
-		public List<MethodMirror> methods = new ArrayList<MethodMirror>();
+		public List<FieldMirror> fields = new ArrayList<>();
+		public List<MethodMirror> methods = new ArrayList<>();
 
 		@Override
 		public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {

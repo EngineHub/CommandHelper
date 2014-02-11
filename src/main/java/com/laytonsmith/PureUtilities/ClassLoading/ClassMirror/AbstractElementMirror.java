@@ -66,12 +66,14 @@ class AbstractElementMirror implements Serializable {
 	
 	protected AbstractElementMirror(ClassReferenceMirror parent, List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name){
 		this.annotations = annotations;
+		if(this.annotations == null){
+			this.annotations = new ArrayList<>();
+		}
 		this.modifiers = modifiers;
 		this.type = type;
 		this.name = name;
 		this.parent = parent;
 		Objects.requireNonNull(parent);
-		Objects.requireNonNull(annotations);
 		Objects.requireNonNull(modifiers);
 		Objects.requireNonNull(type);
 		Objects.requireNonNull(name);

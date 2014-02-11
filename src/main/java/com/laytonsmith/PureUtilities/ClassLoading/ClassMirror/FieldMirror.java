@@ -70,7 +70,6 @@ public class FieldMirror extends AbstractElementMirror {
 	/* package */ FieldMirror(ClassReferenceMirror parent, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value){
 		super(parent, null, modifiers, type, name);
 		this.value = value;
-		this.annotations = new ArrayList<>();
 	}
 
 }
