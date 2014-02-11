@@ -13,14 +13,14 @@ You can copy and paste the single properties, into the pom.xml file and the IDE 
 That way multiple projects can share the same settings (useful for formatting rules for example).
 Any value defined here will override the pom.xml file value but is only applicable to the current project.
 -->
-        <netbeans.compile.on.save>none</netbeans.compile.on.save>
+        <netbeans.compile.on.save>all</netbeans.compile.on.save>
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
         <org-netbeans-modules-editor-indent.CodeStyle.usedProfile>project</org-netbeans-modules-editor-indent.CodeStyle.usedProfile>
         <org-netbeans-modules-editor-indent.CodeStyle.project.spaces-per-tab>4</org-netbeans-modules-editor-indent.CodeStyle.project.spaces-per-tab>
         <org-netbeans-modules-editor-indent.CodeStyle.project.tab-size>4</org-netbeans-modules-editor-indent.CodeStyle.project.tab-size>
         <org-netbeans-modules-editor-indent.CodeStyle.project.indent-shift-width>4</org-netbeans-modules-editor-indent.CodeStyle.project.indent-shift-width>
         <org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>false</org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>
-        <org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>80</org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>
+        <org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>120</org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>
         <org-netbeans-modules-editor-indent.CodeStyle.project.text-line-wrap>none</org-netbeans-modules-editor-indent.CodeStyle.project.text-line-wrap>
         <com-junichi11-netbeans-changelf.use-project>true</com-junichi11-netbeans-changelf.use-project>
         <com-junichi11-netbeans-changelf.enable>true</com-junichi11-netbeans-changelf.enable>
@@ -34,5 +34,6 @@ Any value defined here will override the pom.xml file value but is only applicab
         <org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.expand-tabs>false</org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.expand-tabs>
         <org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.text-limit-width>80</org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.text-limit-width>
         <org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.text-line-wrap>none</org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.text-line-wrap>
+		<netbeans.hint.licensePath>LICENSE.txt</netbeans.hint.licensePath>
     </properties>
 </project-shared-configuration>

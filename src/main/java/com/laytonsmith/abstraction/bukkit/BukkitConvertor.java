@@ -32,6 +32,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderDragon;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderDragonPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderSignal;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderman;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntityProjectileSource;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFirework;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHorse;
@@ -62,7 +63,10 @@ import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Target;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -139,6 +143,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
+import org.bukkit.projectiles.ProjectileSource;
 
 /**
  *
@@ -480,17 +485,28 @@ public class BukkitConvertor extends AbstractConvertor {
         if(be instanceof LivingEntity){
             return new BukkitMCLivingEntity(((LivingEntity)be));
         }
-        
-        throw new Error("While trying to find the correct entity type for " + be.getClass().getName() + ", was unable"
-                + " to find the appropriate implementation. Please alert the developers of this stack trace.");
-    }
+		
+		if (be instanceof ProjectileSource) {
+			return new BukkitMCEntityProjectileSource(be);
+		}
+		
+		throw new IllegalArgumentException("While trying to find the correct entity type for " + be.getClass().getName()
+				+ ", was unable to find the appropriate implementation. If the named entity is not provided by mods,"
+				+ " please alert the developers of this stack trace. This is not necessarily an error,"
+				+ " we just don't have any special handling for this entity yet, and will treat it generically.");
+	}
 
 	@Override
-    public MCEntity GetCorrectEntity(MCEntity e) {
+	public MCEntity GetCorrectEntity(MCEntity e) {
 
-        Entity be = ((BukkitMCEntity)e).asEntity();
-        return BukkitConvertor.BukkitGetCorrectEntity(be);
-    }
+		Entity be = ((BukkitMCEntity)e).asEntity();
+		try {
+			return BukkitConvertor.BukkitGetCorrectEntity(be);
+		} catch (IllegalArgumentException iae) {
+			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.INFO, iae.getMessage(), Target.UNKNOWN);
+			return e;
+		}
+	}
 
 	@Override
 	public MCItemMeta GetCorrectMeta(MCItemMeta im) {

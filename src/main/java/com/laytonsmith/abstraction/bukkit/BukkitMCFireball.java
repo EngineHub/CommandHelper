@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCFireball;
+import com.laytonsmith.abstraction.Velocity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.util.Vector;
 
