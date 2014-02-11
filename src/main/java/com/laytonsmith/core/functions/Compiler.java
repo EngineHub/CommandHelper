@@ -673,6 +673,7 @@ public class Compiler {
 						root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
 					} else {
 						//Complex variable name, with arrays (or perhaps an error case)
+						
 					}
 					continue;
 				}

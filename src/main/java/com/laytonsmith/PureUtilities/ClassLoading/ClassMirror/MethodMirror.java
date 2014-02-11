@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class gathers information about a method, without actually loading 
@@ -109,8 +110,10 @@ public class MethodMirror extends AbstractElementMirror {
 		if(underlyingMethod != null){
 			return underlyingMethod;
 		}
-		Class parent = getDeclaringClass().loadClass(loader, initialize);
-		List<Class> cParams = new ArrayList<Class>();
+		ClassReferenceMirror p = getDeclaringClass();
+		Objects.requireNonNull(p, "Declaring class is null!");
+		Class parent = p.loadClass(loader, initialize);
+		List<Class> cParams = new ArrayList<>();
 		for(ClassReferenceMirror c : params){
 			cParams.add(c.loadClass(loader, initialize));
 		}
