@@ -32,6 +32,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Cmdline;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.Profiler;
@@ -1116,6 +1117,50 @@ public final class Static {
 		PrintWriter pw = new PrintWriter(sw);
 		t.printStackTrace(pw);
 		return sw.toString();
+	}
+	
+	/**
+	 * Returns the actual file location, given the script's partial (or absolute)
+	 * file path, and depending on the context, the correct File object. Security
+	 * checking is not done at this stage, this merely transforms the path into
+	 * the correct File object. Additionally, if arg is null, then the default
+	 * is returned. If it is known that the arg won't ever be null, null may be
+	 * set as the default. Except in cases where both arg and def are null, this
+	 * function will never return null. If the arg starts with ~, it is replaced
+	 * with the user's home directory, as defined by the system property user.home.
+	 * 
+	 * This generally condenses a 5 or 6 line operation into 1 line.
+	 * @param arg
+	 * @return 
+	 */
+	public static File GetFileFromArgument(String arg, Environment env, Target t, File def){
+		if(arg == null){
+			return def;
+		}
+		if(arg.startsWith("~")){
+			arg = System.getProperty("user.home") + arg.substring(1);
+		}
+		File f = new File(arg);
+		if(f.isAbsolute()){
+			return f;
+		}
+		//Ok, it's not absolute, so we need to see if we're in cmdline mode or not.
+		//If so, we use the root directory, not the target.
+		if(InCmdLine(env)){
+			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
+		} else {
+			return new File(t.file().getParent(), arg);
+		}
+	}
+	
+	/**
+	 * Returns true if currently running in cmdline mode.
+	 * @param environment
+	 * @return 
+	 */
+	public static boolean InCmdLine(Environment environment){
+		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
+					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
 	}
     
 }

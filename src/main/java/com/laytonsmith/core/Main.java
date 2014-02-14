@@ -84,9 +84,10 @@ public class Main {
 				.addDescription("Launches the built in interactive data manager, which will allow command line access to the full persistence database.");
 		suite.addMode("manager", managerMode);
 		interpreterMode = ArgumentParser.GetParser()
-				.addDescription("Launches the minimal cmdline interpreter. Note that many things don't work properly, and this feature is mostly experimental"
-				+ " at this time.")
-				.addArgument("FIXME", "FIXME", false);
+				.addDescription("Launches the minimal cmdline interpreter.")
+				.addArgument("location-----", ArgumentParser.Type.STRING, ".", "Sets the initial working directory of the interpreter. This is optional, but"
+						+ " is automatically set by the mscript program. The option name is strange, to avoid any conflicts with"
+						+ " script arguments.", "location-----", false);
 		suite.addMode("interpreter", interpreterMode);
 		mslpMode = ArgumentParser.GetParser()
 				.addDescription("Creates an MSLP file based on the directory specified.")
@@ -164,6 +165,7 @@ public class Main {
 		ARGUMENT_SUITE = suite;
 	}
 
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void main(String[] args) throws Exception {
 		try {
 			Implementation.setServerType(Implementation.Type.SHELL);
@@ -182,7 +184,9 @@ public class Main {
 			ClassDiscoveryCache cdcCache 
 					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
 			cd.setClassDiscoveryCache(cdcCache);
+			cd.addAllJarsInFolder(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 			
+			ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
 			ExtensionManager.Initialize(cd);
 			
@@ -229,7 +233,7 @@ public class Main {
 				Manager.start();
 				System.exit(0);
 			} else if (mode == interpreterMode) {
-				Interpreter.start(parsedArgs.getStringListArgument());
+				new Interpreter(parsedArgs.getStringListArgument(), parsedArgs.getStringArgument("location-----"));
 				System.exit(0);
 			} else if (mode == installCmdlineMode) {
 				Interpreter.install();

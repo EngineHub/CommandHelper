@@ -154,4 +154,20 @@ public class MethodScriptFileLocations extends FileLocations {
 	public File getLoggerPreferencesFile(){
 		return new File(getPreferencesDirectory(), "logger-preferences.ini");
 	}
+
+	/**
+	 * Returns the location of the cmdline interpreter folder.
+	 * @return 
+	 */
+	public File getCmdlineInterpreterDirectory() {
+		return new File(System.getProperty("user.home") + "/.mscript");
+	}
+	
+	/**
+	 * Returns the location of the cmdline interpreter auto_include file.
+	 * @return 
+	 */
+	public File getCmdlineInterpreterAutoIncludeFile(){
+		return new File(getCmdlineInterpreterDirectory(), "auto_include.ms");
+	}
 }

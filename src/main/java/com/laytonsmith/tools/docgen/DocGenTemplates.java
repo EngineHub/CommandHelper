@@ -1,6 +1,5 @@
 package com.laytonsmith.tools.docgen;
 
-import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
@@ -14,14 +13,18 @@ import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.SimpleDocumentation;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.persistence.DataSource;
 import com.laytonsmith.persistence.MySQLDataSource;
 import com.laytonsmith.persistence.SQLiteDataSource;
 import com.laytonsmith.tools.Manager;
+import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -114,13 +117,31 @@ public class DocGenTemplates {
 	}
 	
 	/**
+	 * Returns all the generators defined in this class.
+	 * @return 
+	 */
+	public static Map<String, Generator> GetGenerators(){
+		Map<String, Generator> generators = new HashMap<>();
+		for(Field f : DocGenTemplates.class.getDeclaredFields()){
+			if(Generator.class.isAssignableFrom(f.getType())){
+				try {
+					generators.put(f.getName(), (Generator) f.get(null));
+				} catch (IllegalArgumentException | IllegalAccessException ex) {
+					Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+		}
+		return generators;
+	}
+	
+	/**
 	 * A utility method to replace all template methods in a generic template string.
 	 * @param template The template string on which to perform the replacements
 	 * @param generators The list of String-Generator entries, where the String is the template
 	 * name, and the Generator is the replacement to use.
 	 * @return 
 	 */
-	public static String doTemplateReplacement(String template, Map<String, Generator> generators){
+	public static String DoTemplateReplacement(String template, Map<String, Generator> generators){
 		try {
 			Prefs.init(null);
 		} catch (IOException ex) {
@@ -451,6 +472,15 @@ public class DocGenTemplates {
 			} catch (IllegalArgumentException | IllegalAccessException ex) {
 				throw new RuntimeException(ex);
 			}
+		}
+	};
+	
+	public static Generator DATE = new Generator() {
+
+		@Override
+		public String generate(String... args) {
+			String template = args[0];
+			return new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString(template, Target.UNKNOWN)).val();
 		}
 	};
 }

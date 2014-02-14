@@ -28,6 +28,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -237,6 +238,11 @@ public class Script {
     }
 
     public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
+		if(env.getEnv(GlobalEnv.class).IsInterrupted()){
+			//First things first, if we're interrupted, kill the script
+			//unconditionally.
+			throw new CancelCommandException("", Target.UNKNOWN);
+		}
         final Construct m = c.getData();
         CurrentEnv = env;
 		//TODO: Reevaluate if this line is needed. The script doesn't know the label inherently, the
@@ -339,9 +345,12 @@ public class Script {
 					}
 				//We want to catch and rethrow the ones we know how to catch, and then
 				//catch and report anything else.
-				} catch(ConfigRuntimeException e){
+				} catch(ConfigRuntimeException | ProgramFlowManipulationException e){
 					throw e;
-				} catch(ProgramFlowManipulationException e){
+				} catch(InvalidEnvironmentException e){
+					if(!e.isDataSet()){
+						e.setData(f.getName());
+					}
 					throw e;
 				} catch(Exception e){
 					String version = "Unknown";

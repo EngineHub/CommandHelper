@@ -1640,6 +1640,22 @@ public final class MethodScriptCompiler {
 
 		//It doesn't know how to optimize. Oh well.
 	}
+	
+	/**
+	 * Shorthand for lexing, compiling, and executing a script.
+	 * @param script The textual script to execute
+	 * @param file The file it was located in
+	 * @param inPureMScript If it is pure MScript, or aliases
+	 * @param env The execution environment
+	 * @param done The MethodScriptComplete callback (may be null)
+	 * @param s A script object (may be null)
+	 * @param vars Any $vars (may be null)
+	 * @return
+	 * @throws ConfigCompileException 
+	 */
+	public static Construct execute(String script, File file, boolean inPureMScript, Environment env, MethodScriptComplete done, Script s, List<Variable> vars) throws ConfigCompileException{
+		return execute(compile(lex(script, file, inPureMScript)), env, done, s, vars);
+	}
 
 	/**
 	 * Executes a pre-compiled MethodScript, given the specified Script

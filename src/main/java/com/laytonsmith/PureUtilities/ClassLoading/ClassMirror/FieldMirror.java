@@ -3,7 +3,6 @@ package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

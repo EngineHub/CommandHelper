@@ -2160,7 +2160,8 @@ public class DataHandling {
 			ParseTree tree = nodes[0];
 			Construct arg = parent.seval(tree, env);
 			String location = arg.val();
-			ParseTree include = IncludeCache.get(new File(t.file().getParent(), location), t);
+			File file = Static.GetFileFromArgument(location, env, t, null);
+			ParseTree include = IncludeCache.get(file, t);
 			parent.eval(include.getChildAt(0), env);
 			return new CVoid(t);
 		}

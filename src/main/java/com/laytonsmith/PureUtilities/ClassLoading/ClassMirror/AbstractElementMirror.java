@@ -13,8 +13,15 @@ import java.util.Objects;
 /**
  * This is the superclass of any element type, such as a field or method.
  */
-class AbstractElementMirror implements Serializable {
-	private static final long serialVersionUID = 1L;
+abstract class AbstractElementMirror implements Serializable {
+	/**
+	 * Version History:
+	 * 1 - Initial version
+	 * 2 - Parent was added, and it cannot be null. This is an incompatible change, and
+	 * all extensions will need to be recompiled to get the compilation caching benefit.
+	 * (Old caches will fail, and cause a re-scan, but will work.)
+	 */
+	private static final long serialVersionUID = 2L;
 	/**
 	 * Any modifiers on the element
 	 */
@@ -36,7 +43,7 @@ class AbstractElementMirror implements Serializable {
 	/**
 	 * The parent class of the element
 	 */
-	protected final ClassReferenceMirror parent;
+	private final ClassReferenceMirror parent;
 	
 	protected AbstractElementMirror(Field field){
 		Objects.requireNonNull(field);
@@ -49,6 +56,7 @@ class AbstractElementMirror implements Serializable {
 		}
 		this.annotations = list;
 		this.parent = ClassReferenceMirror.fromClass(field.getDeclaringClass());
+		Objects.requireNonNull(this.parent);
 	}
 	
 	protected AbstractElementMirror(Method method){
@@ -62,6 +70,7 @@ class AbstractElementMirror implements Serializable {
 		}
 		this.annotations = list;
 		this.parent = ClassReferenceMirror.fromClass(method.getDeclaringClass());
+		Objects.requireNonNull(this.parent);
 	}
 	
 	protected AbstractElementMirror(ClassReferenceMirror parent, List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name){
@@ -157,8 +166,8 @@ class AbstractElementMirror implements Serializable {
 	 * Returns the class that this is declared in.
 	 * @return 
 	 */
-	public ClassReferenceMirror getDeclaringClass(){
-		return parent;
+	public final ClassReferenceMirror getDeclaringClass(){
+		return this.parent;
 	}
 	
 	/* package */ void addAnnotation(AnnotationMirror annotation){

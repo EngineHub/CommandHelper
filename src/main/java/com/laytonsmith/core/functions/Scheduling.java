@@ -474,7 +474,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public CString exec(Target t, Environment env, Construct... args) {
 			Date now = new Date();
 			if (args.length >= 2 && !(args[1] instanceof CNull)) {
 				now = new Date(Static.getInt(args[1], t));

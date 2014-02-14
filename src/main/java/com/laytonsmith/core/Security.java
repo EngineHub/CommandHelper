@@ -13,7 +13,8 @@ public final class Security {
 	private static boolean on = true;
     
     /**
-     * Returns true if this filepath is accessible to CH, false otherwise.
+     * Returns true if this file path is accessible via normal script
+	 * circumstances, false otherwise.
      * @param location
      * @return 
      */
@@ -34,6 +35,16 @@ public final class Security {
 			return true;
 		}
     }
+	
+	 /**
+     * Returns true if this file path is accessible via normal script
+	 * circumstances, false otherwise.
+     * @param location
+     * @return 
+     */
+	public static boolean CheckSecurity(File location){
+		return CheckSecurity(location.getAbsolutePath());
+	}
 	
 	/**
 	 * Turns security on or off. In general, this shouldn't be off, though for

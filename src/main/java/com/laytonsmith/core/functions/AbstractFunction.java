@@ -188,7 +188,7 @@ public abstract class AbstractFunction implements Function {
 		if(map == null){
 			map = new HashMap<String, DocGenTemplates.Generator>();
 		}
-		return DocGenTemplates.doTemplateReplacement(template, map);
+		return DocGenTemplates.DoTemplateReplacement(template, map);
 	}
 
 	@Override

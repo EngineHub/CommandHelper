@@ -433,7 +433,7 @@ public class ClassMirror<T> implements Serializable {
 		try{
 			return info.classReferenceMirror.loadClass(loader, initialize);
 		} catch(ClassNotFoundException ex){
-			throw new NoClassDefFoundError();
+			throw new NoClassDefFoundError(ex.getMessage());
 		}
 	}
 	

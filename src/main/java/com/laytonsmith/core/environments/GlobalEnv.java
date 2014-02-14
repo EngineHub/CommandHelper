@@ -1,5 +1,6 @@
 package com.laytonsmith.core.environments;
 
+import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
@@ -26,25 +27,44 @@ import java.util.Map;
  */
 public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
+	//Fields that are MutableObjects are shared among all environments.
+	//This makes some things "system wide", for instance, the uncaught
+	//exception handler should not be different for closures vs outside
+	//of closures. This only applies to things that can change during runtime
+	//via a script, and should be totally global. 
+	//Anything else varies based on the particular needs of
+	//that field.
+	
 	private ExecutionQueue executionQueue = null;
 	private Profiler profiler = null;
 	//This is changed reflectively in a test, please don't rename.
 	private PersistenceNetwork persistenceNetwork = null;
 	private PermissionsResolver permissionsResolver = null;
-	private Map<String, Boolean> flags = new HashMap<String, Boolean>();
-	private Map<String, Object> custom = new HashMap<String, Object>();
+	private final Map<String, Boolean> flags = new HashMap<>();
+	private final Map<String, Object> custom = new HashMap<>();
 	private Script script = null;
-	private File root;
-	private CClosure uncaughtExceptionHandler;
+	private final MutableObject<File> root;
+	private final MutableObject<CClosure> uncaughtExceptionHandler = new MutableObject<>();
 	private Map<String, Procedure> procs = null;
 	private IVariableList iVariableList = null;
 	private String label = null;
-	private DaemonManager daemonManager = new DaemonManager();
+	private final DaemonManager daemonManager = new DaemonManager();
 	private boolean dynamicScriptingMode = false;
-	private Profiles profiles;
+	private final Profiles profiles;
 	private BoundEvent.ActiveEvent event = null;
+	private boolean interrupt = false;
 
-	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network, PermissionsResolver resolver, File root, Profiles profiles) {
+	/**
+	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
+	 * @param queue The ExecutionQueue object to use
+	 * @param profiler The Profiler to use
+	 * @param network The pre-configured PersistenecNetwork object to use
+	 * @param resolver The PermissionsResolver to use
+	 * @param root The root working directory to use
+	 * @param profiles The SQL Profiles object to use
+	 */
+	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network, PermissionsResolver resolver, 
+			File root, Profiles profiles) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
 		Static.AssertNonNull(profiler, "Profiler cannot be null");
 		Static.AssertNonNull(network, "PersistenceNetwork cannot be null");
@@ -54,7 +74,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		this.profiler = profiler;
 		this.persistenceNetwork = network;
 		this.permissionsResolver = resolver;
-		this.root = root;
+		this.root = new MutableObject(root);
 		if (this.executionQueue instanceof MethodScriptExecutionQueue) {
 			((MethodScriptExecutionQueue) executionQueue).setEnvironment(this);
 		}
@@ -152,9 +172,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public EnvironmentImpl clone() throws CloneNotSupportedException {
 		GlobalEnv clone = (GlobalEnv) super.clone();
 		if (procs != null) {
-			clone.procs = new HashMap<String, Procedure>(procs);
+			clone.procs = new HashMap<>(procs);
 		} else {
-			clone.procs = new HashMap<String, Procedure>();
+			clone.procs = new HashMap<>();
 		}
 		if (iVariableList != null) {
 			clone.iVariableList = (IVariableList) iVariableList.clone();
@@ -163,15 +183,24 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	public File GetRootFolder() {
-		return root;
+		return root.getObject();
+	}
+	
+	/**
+	 * Sets the root working directory. It cannot be null.
+	 * @param file 
+	 */
+	public void SetRootFolder(File file){
+		Static.AssertNonNull(file, "Root file cannot be null");
+		this.root.setObject(file);
 	}
 
 	public void SetExceptionHandler(CClosure construct) {
-		uncaughtExceptionHandler = construct;
+		uncaughtExceptionHandler.setObject(construct);
 	}
 
 	public CClosure GetExceptionHandler() {
-		return uncaughtExceptionHandler;
+		return uncaughtExceptionHandler.getObject();
 	}
 
 	/**
@@ -179,12 +208,11 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * procedures is currently empty, a new one is created and stored in the
 	 * environment.
 	 *
-	 * @param env
 	 * @return
 	 */
 	public Map<String, Procedure> GetProcs() {
 		if (procs == null) {
-			procs = new HashMap<String, Procedure>();
+			procs = new HashMap<>();
 		}
 		return procs;
 	}
@@ -198,7 +226,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * environment doesn't contain a variable list, an empty one is created, and
 	 * stored in the environment.
 	 *
-	 * @param env
 	 * @return
 	 */
 	public IVariableList GetVarList() {
@@ -259,4 +286,20 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
     public BoundEvent.ActiveEvent GetEvent(){
         return event;
     }
+	
+	/**
+	 * Sets the interrupted flag. Interrupted scripts should halt immediately.
+	 * @param interrupted 
+	 */
+	public synchronized void SetInterrupt(boolean interrupted){
+		interrupt = interrupted;
+	}
+	
+	/**
+	 * Returns true if this script has been interrupted, and should immediately halt execution.
+	 * @return 
+	 */
+	public synchronized boolean IsInterrupted(){
+		return interrupt;
+	}
 }

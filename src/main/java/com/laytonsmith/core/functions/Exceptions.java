@@ -521,8 +521,13 @@ public class Exceptions {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CClosure){
+				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
-				return new CVoid(t);
+				if(old == null){
+					return new CNull();
+				} else {
+					return old;
+				}
 			} else {
 				throw new CastException("Expecting arg 1 of " + getName() + " to be a Closure, but it was " + args[0].val(), t);
 			}
@@ -540,7 +545,8 @@ public class Exceptions {
 
 		@Override
 		public String docs() {
-			return "void {closure(@ex)} Sets the uncaught exception handler. If code throws an exception, instead of doing"
+			return "closure {closure(@ex)} Sets the uncaught exception handler, returning the currently set one, or null if none has been"
+					+ " set yet. If code throws an exception, instead of doing"
 					+ " the default (displaying the error to the user/console) it will run your code instead. The exception"
 					+ " that was thrown will be passed to the closure, and it is expected that the closure returns either null,"
 					+ " true, or false. ---- If null is returned, the default handling will occur. If false is returned, it will"

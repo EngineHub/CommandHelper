@@ -398,6 +398,26 @@ public class ClassDiscovery {
 	}
 	
 	/**
+	 * Searches one deep, finding all jar files, and adds them, using
+	 * addDiscoveryLocation. If folder doesn't exist, is null,
+	 * doesn't contain any jars, or otherwise can't be read, nothing happens.
+	 * @param folder 
+	 */
+	public void addAllJarsInFolder(File folder){
+		if(folder != null && folder.exists() && folder.isDirectory()){
+			for(File f : folder.listFiles()){
+				if(f.getName().endsWith(".jar")){
+					try {
+						addDiscoveryLocation(f.toURI().toURL());
+					} catch (MalformedURLException ex) {
+						//
+					}
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Remove a discovery URL. Will invalidate caches.
 	 * 
 	 * @param url

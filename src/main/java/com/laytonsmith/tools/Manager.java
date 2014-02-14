@@ -60,6 +60,7 @@ public class Manager {
 		"refactor", "print", "cleardb", "edit", "interpreter", "merge", "hidden-keys"
 	};
 
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void start() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		Implementation.useAbstractEnumThread(false);
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
@@ -103,7 +104,7 @@ public class Manager {
 			} else if (input.equalsIgnoreCase("merge")) {
 				merge();
 			} else if (input.equalsIgnoreCase("interpreter")) {
-				Interpreter.start(null);
+				new Interpreter(null, System.getProperty("user.dir"));
 			} else if (input.equalsIgnoreCase("hidden-keys")){
 				hiddenKeys();
 			} else if (input.equalsIgnoreCase("exit")) {
