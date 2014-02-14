@@ -3,7 +3,12 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.MCProjectileSource;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockProjectileSource;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
+import org.bukkit.projectiles.BlockProjectileSource;
+import org.bukkit.projectiles.ProjectileSource;
 
 public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	
@@ -19,11 +24,18 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	}
 
 	@Override
-	public MCLivingEntity getShooter() {
-		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj.getShooter());
+	public MCProjectileSource getShooter() {
+		ProjectileSource source = proj.getShooter();
 		
-		if (e instanceof MCLivingEntity) {
-			return (MCLivingEntity)e;
+		if (source instanceof BlockProjectileSource) {
+			return new BukkitMCBlockProjectileSource((BlockProjectileSource) source);
+		}
+		
+		if (source instanceof Entity) {
+			MCEntity e = BukkitConvertor.BukkitGetCorrectEntity((Entity) source);
+			if (e instanceof MCProjectileSource) {
+				return (MCProjectileSource) e;
+			}
 		}
 		
 		return null;
@@ -35,11 +47,11 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	}
 
 	@Override
-	public void setShooter(MCLivingEntity shooter) {
-		proj.setShooter(((BukkitMCLivingEntity)shooter).asLivingEntity());
+	public void setShooter(MCProjectileSource shooter) {
+		proj.setShooter((ProjectileSource) shooter.getHandle());
 	}
 
-    public Projectile asProjectile() {
-        return proj;
-    }
+	public Projectile asProjectile() {
+		return proj;
+	}
 }

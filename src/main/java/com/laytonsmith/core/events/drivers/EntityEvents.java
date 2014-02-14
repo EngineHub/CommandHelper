@@ -9,8 +9,10 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
@@ -296,11 +298,14 @@ public class EntityEvents {
 				ret.put("type", new CString(pro.getType().name(), t));
 				CArray loc = ObjectGenerator.GetGenerator().location(pro.getLocation());
 				ret.put("location", loc);
-				MCLivingEntity shooter = pro.getShooter();
-				if (shooter == null) {
-					ret.put("shooter", new CNull(t));
+				MCProjectileSource shooter = pro.getShooter();
+				if (shooter instanceof MCBlockProjectileSource) {
+					ret.put("shooter", ObjectGenerator.GetGenerator().location(
+							((MCBlockProjectileSource) shooter).getBlock().getLocation()));
+				} else if (shooter instanceof MCEntity) {
+					ret.put("shooter", new CInt(((MCEntity) shooter).getEntityId(), t));
 				} else {
-					ret.put("shooter", new CInt(shooter.getEntityId(), t));
+					ret.put("shooter", new CNull(t));
 				}
 				return ret;
 			} else {
@@ -354,8 +359,9 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> The entity type of the projectile | shootertype: <macro> The entity type of the shooter | world: <macro>}"
-					+ " This event is called when a projectile is launched."
+			return "{type: <macro> The entity type of the projectile | world: <macro>"
+					+ " | shootertype: <macro> The entity type of the shooter, or 'block', or 'null'}"
+  					+ " This event is called when a projectile is launched."
 					+ " Cancelling the event will only cancel the launching of the projectile."
 					+ " For instance when a player shoots an arrow with a bow, if the event is cancelled the bow will still take damage from use."
 					+ " {id: The entityID of the projectile | type: The entity type of the projectile |"
@@ -377,9 +383,13 @@ public class EntityEvents {
 			if (event instanceof MCProjectileLaunchEvent) {
 				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
 				Prefilters.match(prefilter, "type", projectileLaunchEvent.getEntityType().name(), PrefilterType.MACRO);
-				MCLivingEntity shooter = projectileLaunchEvent.getEntity().getShooter();
+				MCProjectileSource shooter = projectileLaunchEvent.getEntity().getShooter();
 				if (shooter != null) {
-					Prefilters.match(prefilter, "shootertype", shooter.getType().name(), PrefilterType.MACRO);
+					if (shooter instanceof MCBlockProjectileSource) {
+						Prefilters.match(prefilter, "shootertype", "block", PrefilterType.MACRO);
+					} else if (shooter instanceof MCEntity) {
+						Prefilters.match(prefilter, "shootertype", ((MCEntity) shooter).getType().name(), PrefilterType.MACRO);
+					}
 				} else {
 					Prefilters.match(prefilter, "shootertype", "null", PrefilterType.MACRO);
 				}
@@ -403,15 +413,21 @@ public class EntityEvents {
 				MCProjectile projectile = projectileLaunchEvent.getEntity();
 				mapEvent.put("id", new CInt(projectile.getEntityId(), Target.UNKNOWN));
 				mapEvent.put("type", new CString(projectileLaunchEvent.getEntityType().name(), Target.UNKNOWN));
-				MCLivingEntity shooter = projectile.getShooter();
-				if (shooter != null) {
-					mapEvent.put("shooter", new CInt(shooter.getEntityId(), Target.UNKNOWN));
-					mapEvent.put("shootertype", new CString(shooter.getType().name(), Target.UNKNOWN));
-					if (shooter instanceof MCPlayer) {
-						mapEvent.put("player", new CString(((MCPlayer) shooter).getName(), Target.UNKNOWN));
-					} else {
+				MCProjectileSource shooter = projectile.getShooter();
+				if (shooter instanceof MCEntity) {
+					MCEntity es = (MCEntity) shooter;
+					mapEvent.put("shooter", new CInt(es.getEntityId(), Target.UNKNOWN));
+					mapEvent.put("shootertype", new CString(es.getType().name(), Target.UNKNOWN));
+					if (es instanceof MCPlayer) {
+						mapEvent.put("player", new CString(((MCPlayer) es).getName(), Target.UNKNOWN));
+  					} else {
 						mapEvent.put("player", new CNull(Target.UNKNOWN));
 					}
+				} else if (shooter instanceof MCBlockProjectileSource) {
+					mapEvent.put("shooter", ObjectGenerator.GetGenerator().location(
+							((MCBlockProjectileSource) shooter).getBlock().getLocation()));
+					mapEvent.put("shootertype", new CString("BLOCK", Target.UNKNOWN));
+					mapEvent.put("player", new CNull(Target.UNKNOWN));
 				} else {
 					mapEvent.put("shooter", new CNull(Target.UNKNOWN));
 					mapEvent.put("shootertype", new CNull(Target.UNKNOWN));
@@ -990,30 +1006,33 @@ public class EntityEvents {
 			if(e instanceof MCEntityDamageByEntityEvent){
                 MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
                 
                 // Guaranteed to be a player via matches
                 String name = ((MCPlayer)event.getEntity()).getName();
-                map.put("player", new CString(name, Target.UNKNOWN));
+                map.put("player", new CString(name, t));
                 String dtype = event.getDamager().getType().name();
-                map.put("damager",  new CString(dtype, Target.UNKNOWN));
-                map.put("cause",  new CString(event.getCause().name(), Target.UNKNOWN));
-                map.put("amount",  new CDouble(event.getDamage(), Target.UNKNOWN));
-                map.put("id", new CInt(event.getDamager().getEntityId(), Target.UNKNOWN));
+                map.put("damager",  new CString(dtype, t));
+                map.put("cause",  new CString(event.getCause().name(), t));
+                map.put("amount",  new CDouble(event.getDamage(), t));
+                map.put("id", new CInt(event.getDamager().getEntityId(), t));
 				map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 
-                String data = "";
-                if(event.getDamager() instanceof MCPlayer) {
-                	data = ((MCPlayer)event.getDamager()).getName();
-                } else if (event.getDamager() instanceof MCProjectile) {
-                	MCEntity shooter = ((MCProjectile)event.getDamager()).getShooter();
-                	
-                	if(shooter instanceof MCPlayer) {
-                		data = ((MCPlayer)shooter).getName();
-                	} else if(shooter instanceof MCEntity) {
-                		data = ((MCEntity)shooter).getType().name().toUpperCase();
-                	}
-                }
-                map.put("data",  new CString(data, Target.UNKNOWN));
+                Construct data = new CNull(t);
+				if(event.getDamager() instanceof MCPlayer) {
+					data = new CString(((MCPlayer)event.getDamager()).getName(), t);
+				} else if (event.getDamager() instanceof MCProjectile) {
+					MCProjectileSource shooter = ((MCProjectile)event.getDamager()).getShooter();
+					
+					if(shooter instanceof MCPlayer) {
+						data = new CString(((MCPlayer)shooter).getName(), t);
+					} else if(shooter instanceof MCEntity) {
+						data = new CString(((MCEntity)shooter).getType().name().toUpperCase(), t);
+					} else if(shooter instanceof MCBlockProjectileSource) {
+						data = ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation());
+					}
+				}
+                map.put("data",  data);
                 
                 return map;
             } else {
@@ -1313,12 +1332,14 @@ public class EntityEvents {
 					map.put("damager", new CInt(damager.getEntityId(), Target.UNKNOWN));
 				}
 				if (damager instanceof MCProjectile) {
-					MCEntity shooter = ((MCProjectile) damager).getShooter();
+					MCProjectileSource shooter = ((MCProjectile) damager).getShooter();
 					if (shooter instanceof MCPlayer) {
 						map.put("shooter", new CString(((MCPlayer) shooter).getName(), Target.UNKNOWN));
 					} else if (shooter instanceof MCEntity) {
-						map.put("shooter", new CInt(shooter.getEntityId(), Target.UNKNOWN));
-					}
+						map.put("shooter", new CInt(((MCEntity) shooter).getEntityId(), Target.UNKNOWN));
+					} else if (shooter instanceof MCBlockProjectileSource) {
+						map.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation()));
+  					}
 				}
 			}
 		}
