@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.core.constructs.CArray;
@@ -638,7 +639,7 @@ public class ObjectGenerator {
 		}
 	}
 	
-	public CArray velocity(MCEntity.Velocity v, Target t) {
+	public CArray velocity(Velocity v, Target t) {
 		double x,y,z,mag;
 		x = y = z = mag = 0;
 		if (v != null) {
@@ -655,7 +656,7 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	public MCEntity.Velocity velocity(Construct c, Target t) {
+	public Velocity velocity(Construct c, Target t) {
 		CArray va;
 		double x, y, z, mag;
 		x = y = z = mag = 0;
@@ -685,7 +686,7 @@ public class ObjectGenerator {
 					x = Static.getDouble(va.get(0), t);
 				}
 			}
-			return new MCEntity.Velocity(mag, x, y, z);
+			return new Velocity(mag, x, y, z);
 		} else {
 			throw new Exceptions.FormatException("Expected an array but recieved " + c, t);
 		}

@@ -7,7 +7,7 @@ import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCEntity.Velocity;
+import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCExperienceOrb;
 import com.laytonsmith.abstraction.MCFireball;
@@ -21,11 +21,13 @@ import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCPainting;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCTNT;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.entities.MCCreeper;
@@ -2807,7 +2809,9 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityID} Returns the shooter of the given projectile, can be null.";
+			return "mixed {entityID} Returns the shooter of the given projectile, can be null."
+					+ " If the shooter is an entity, that entity's ID will be return, but if it is a block,"
+					+ " that block's location will be returned.";
 		}
 
 		@Override
@@ -2816,10 +2820,12 @@ public class EntityManagement {
 			MCEntity entity = Static.getEntity(id, t);
 			
 			if (entity instanceof MCProjectile) {
-				MCLivingEntity shooter = ((MCProjectile) entity).getShooter();
+				MCProjectileSource shooter = ((MCProjectile) entity).getShooter();
 				
-				if (shooter != null) {
-					return new CInt(shooter.getEntityId(), t);
+				if (shooter instanceof MCBlockProjectileSource) {
+					return ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation());
+				} else if (shooter instanceof MCEntity) {
+					return new CInt(((MCEntity) shooter).getEntityId(), t);
 				} else {
 					return new CNull(t);
 				}
@@ -2850,9 +2856,15 @@ public class EntityManagement {
 			if (entity instanceof MCProjectile) {
 				if (args[1] instanceof CNull) {
 					((MCProjectile) entity).setShooter(null);
+				} else if (args[1] instanceof CInt) {
+  					int id2 = Static.getInt32(args[1], t);
+  					((MCProjectile) entity).setShooter(Static.getLivingEntity(id2, t));
+				} else if (args[1] instanceof CArray) {
+					throw new ConfigRuntimeException("Setting a block as a shooter is not yet supported",
+							ExceptionType.FormatException, t);
 				} else {
-					int id2 = Static.getInt32(args[1], t);
-					((MCProjectile) entity).setShooter(Static.getLivingEntity(id2, t));
+					throw new ConfigRuntimeException("Unable to determine intended shooter from arg 2.",
+							ExceptionType.FormatException, t);
 				}
 			} else {
 				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);

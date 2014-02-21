@@ -1,7 +1,7 @@
 
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.MCEntity.Velocity;
+import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 
 /**

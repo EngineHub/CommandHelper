@@ -3466,7 +3466,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			CArray vector = CArray.GetAssociativeArray(t);
-			MCPlayer.Velocity velocity = p.getVelocity();
+			Velocity velocity = p.getVelocity();
 			vector.set("magnitude", new CDouble(velocity.magnitude, t), t);
 			vector.set("x", new CDouble(velocity.x, t), t);
 			vector.set("y", new CDouble(velocity.y, t), t);
@@ -3537,7 +3537,7 @@ public class PlayerManagement {
 				default:
 					throw new RuntimeException();
 			}
-			MCEntity.Velocity v = new MCEntity.Velocity(x, y, z);
+			Velocity v = new Velocity(x, y, z);
 			if (v.magnitude > 10) {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
 						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."

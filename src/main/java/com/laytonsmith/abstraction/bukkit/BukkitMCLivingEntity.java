@@ -6,10 +6,9 @@ import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.enums.MCProjectileType;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntityProjectileSource;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -22,10 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creature;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -35,7 +31,7 @@ import org.bukkit.util.BlockIterator;
  *
  * @author layton
  */
-public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEntity {
+public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource implements MCLivingEntity {
 
 	LivingEntity le;
 
@@ -276,21 +272,6 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 			effects.add(e);
 		}
 		return effects;
-	}
-
-	@Override
-	public MCProjectile launchProjectile(MCProjectileType projectile) {
-		EntityType et = EntityType.valueOf(projectile.name());
-		Class<? extends Entity> c = et.getEntityClass();
-		Projectile proj = le.launchProjectile(c.asSubclass(Projectile.class));
-
-		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj);
-
-		if (e instanceof MCProjectile) {
-			return (MCProjectile) e;
-		} else {
-			return null;
-		}
 	}
 
 	@Override

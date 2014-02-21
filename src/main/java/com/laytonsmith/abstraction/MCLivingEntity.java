@@ -2,7 +2,6 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.core.constructs.Target;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.List;
  *
  * @author layton
  */
-public interface MCLivingEntity extends MCEntity {
+public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	public void addEffect(int potionID, int strength, int seconds, boolean ambient, Target t);
 	public boolean removeEffect(int potionID);
@@ -47,7 +46,6 @@ public interface MCLivingEntity extends MCEntity {
     public int getRemainingAir();
 	public boolean isCustomNameVisible();
 	public boolean isLeashed();
-    public MCProjectile launchProjectile(MCProjectileType projectile);
 	public void resetMaxHealth();
 	public void setCanPickupItems(boolean pickup);
 	public void setRemoveWhenFarAway(boolean remove);
