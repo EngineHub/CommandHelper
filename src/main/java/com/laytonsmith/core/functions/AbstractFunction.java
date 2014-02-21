@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
@@ -209,9 +210,20 @@ public abstract class AbstractFunction implements Function {
 	
 	private final static Class[] EMPTY_CLASS = new Class[0];
 
+	/**
+	 * Checks for the &#64;seealso annotation on this class, and returns
+	 * the value listed there. This is to prevent subclasses from inheriting
+	 * the list from super classes.
+	 * @return 
+	 */
 	@Override
-	public Class<? extends Documentation>[] seeAlso() {
-		return EMPTY_CLASS;
+	public final Class<? extends Documentation>[] seeAlso() {
+		seealso see = this.getClass().getAnnotation(seealso.class);
+		if(see == null){
+			return EMPTY_CLASS;
+		} else {
+			return see.value();
+		}
 	}
 	
 	

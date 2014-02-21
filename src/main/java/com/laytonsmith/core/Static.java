@@ -17,6 +17,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlugin;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -35,6 +36,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Cmdline;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
 import com.laytonsmith.persistence.DataSourceException;
@@ -1161,6 +1163,38 @@ public final class Static {
 	public static boolean InCmdLine(Environment environment){
 		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
 					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
+	}
+	
+	/**
+	 * This verifies that the type required is actually present, and returns the value,
+	 * cast to the appropriate type, or, if not the correct type, a CRE.
+	 * <p>
+	 * Note that this does not do type coersion, and therefore does not work on primitives,
+	 * and is only meant for arrays, closures, and other complex types.
+	 * @param <T> The type desired to be cast to
+	 * @param type The type desired to be cast to
+	 * @param args The array of arguments.
+	 * @param argNumber The argument number, used both for grabbing the correct argument from
+	 * args, and building the error message if the cast cannot occur.
+	 * @param func The function, in case this errors out, to build the error message.
+	 * @param t The code target
+	 * @return The value, cast to the desired type.
+	 */
+	public static <T extends Construct> T AssertType(Class<T> type, Construct [] args, int argNumber, Function func, Target t){
+		Construct value = args[argNumber];
+		if(!type.isAssignableFrom(value.getClass())){
+			typeof todesired = type.getAnnotation(typeof.class);
+			String toactual = value.typeof();
+			if(todesired != null){
+				throw new ConfigRuntimeException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a " +
+						todesired.value() + ", but " + toactual + " \"" + value.val() + "\" was found.", ExceptionType.CastException, t);
+			} else {
+				//If the typeof annotation isn't present, this is a programming error.
+				throw new IllegalArgumentException("");
+			}
+		} else {
+			return (T) value;
+		}
 	}
     
 }

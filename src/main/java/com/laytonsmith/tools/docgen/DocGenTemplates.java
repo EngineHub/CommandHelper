@@ -52,7 +52,7 @@ public class DocGenTemplates {
 	
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		System.out.println(Generate("Numbers"));
+		System.out.println(Generate("Federation"));
 	}
 	
 	public static String Generate(String forPage){
@@ -481,6 +481,19 @@ public class DocGenTemplates {
 		public String generate(String... args) {
 			String template = args[0];
 			return new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString(template, Target.UNKNOWN)).val();
+		}
+	};
+	
+	public static Generator DOCLINK = new Generator() {
+
+		@Override
+		public String generate(String... args) {
+			String page = args[0];
+			String text = null;
+			if(args.length >= 2){
+				text = args[1];
+			}
+			return "[[CommandHelper/Staged/" + page + (text != null ? "|" + text : "") + "]]";
 		}
 	};
 }

@@ -84,14 +84,17 @@ storage.MyKey: "MyValue"
 The <code>storage</code> namespace is reserved for values that are created and accessible from our script's store_value and get_value functions. If you manually edit the data from the data manager, or import other external data, if you want this data to be accessible from your scripts, you must include the correct namespace in the key name. The following namespaces are reserved for future use, and should not be used outside of their given scope:
 
 * storage.**: Values accessible from your main script's store_value and get_value functions. 
+* federation.**: The Federation system stores values here. The namespace should never be set to read only, and should be in a transient data source.
+* custom.**: CommandHelper will not ever touch any values stored in here, and you may use this however you wish with external scripts.
+<!-- These are "reserved" but not listed.
 * snapin.**: Data about snapins resides here.
 * global.**: Values accessible from any script using the store_gvalue and get_gvalue functions. All scripts have access to this namespace, which provides a way for snap ins and other scripts to share data. Child namespaces are allowed to be created here, but are not managed by CommandHelper.
-* custom.**: CommandHelper will not ever touch any values stored in here, and you may use this however you wish with external scripts.
 * prefs.**: If CommandHelper stores preferences, it would use this namespace.
 * user.**: Automatically managed data about users are stored here
 * user.*.aliases.*: User aliases are stored here
 * user.*.**: Data about a particular user is stored here.
 * history.**: Journaling meta data for databases, to allow for database change events.
+-->
 
 If you intend on putting in your own values, the only namespace you should use is custom. All other namespaces are not currently planned to hold data, but are not guaranteed to remain unused in the future.
 

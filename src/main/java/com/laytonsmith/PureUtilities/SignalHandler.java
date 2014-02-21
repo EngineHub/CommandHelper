@@ -18,11 +18,19 @@ public class SignalHandler {
 	
 	/**
 	 * Registers a new signal handler, and returns the last one 
-	 * @param type
-	 * @param handler
-	 * @return 
+	 * @param type The signal type to register for
+	 * @param handler The handler, which will be called when the signal occurs.
+	 * @return The last handler that was registered for this signal, or null if
+	 * no previous handler was registered.
+	 * @throws IllegalArgumentException If the signal cannot be registered, for instance,
+	 * if the signal is already registered by the VM or the OS, it won't be possible to
+	 * register for this signal. Also, if the signal type itself is uncatchable, this
+	 * is also thrown.
 	 */
 	public static SignalCallback addHandler(final SignalType type, SignalCallback handler){
+		if(!type.isCatchable()){
+			throw new IllegalArgumentException(type.getSignalName() + " cannot be caught, and therefore cannot be registered.");
+		}
 		SignalCallback last = null;
 		if(handlers.containsKey(type)){
 			last = handlers.get(type);

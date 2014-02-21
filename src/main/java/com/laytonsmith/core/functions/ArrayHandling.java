@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.LinkedComparatorSet;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
@@ -93,6 +94,7 @@ public class ArrayHandling {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@seealso({array_set.class, array.class})
 	public static class array_get extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -313,15 +315,11 @@ public class ArrayHandling {
 				OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
-
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{array_set.class, array.class};
-		}
 	
 	}
 
 	@api
+	@seealso({array_get.class, array.class})
 	public static class array_set extends AbstractFunction {
 
 		@Override
@@ -402,11 +400,6 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates usage", "assign(@array, array(null))\nmsg(@array)\narray_set(@array, 0, 'value0')\nmsg(@array)"),
 				new ExampleScript("Demonstrates using assign", "assign(@array, array(null))\nmsg(@array)\nassign(@array[0], 'value0')\nmsg(@array)"),
 			};
-		}
-		
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{array_get.class, array.class};
 		}
 	}
 

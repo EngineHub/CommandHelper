@@ -59,6 +59,7 @@ import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ObjectGenerator;
@@ -2244,6 +2245,7 @@ public class EntityManagement {
 	}
 	
 	@api
+	@seealso(set_entity_spec.class)
 	public static class entity_spec extends EntityGetterFunction {
 
 		@Override
@@ -2264,11 +2266,6 @@ public class EntityManagement {
 			docs = docs.replace("%SKELETON_TYPE%", StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PROFESSION%", StringUtils.Join(MCProfession.values(), ", ", ", or ", " or "));
 			return docs;
-		}
-
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{set_entity_spec.class};
 		}
 
 		@Override
@@ -2414,6 +2411,7 @@ public class EntityManagement {
 	}
 
 	@api
+	@seealso(entity_spec.class)
 	public static class set_entity_spec extends EntitySetterFunction {
 
 		@Override
@@ -2430,11 +2428,6 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityID, specArray} Sets the data in the specArray to the given entity. The specArray must follow the same format than in entity_spec()."
 							+ " All indexes in the specArray are optional.";
-		}
-		
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{entity_spec.class};
 		}
 
 		@Override

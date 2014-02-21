@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -274,6 +275,7 @@ public class Exceptions {
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
+	@seealso(_throw.class)
 	public static class _try extends AbstractFunction {
 
 		@Override
@@ -412,13 +414,10 @@ public class Exceptions {
 			return true;
 		}
 
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{_throw.class};
-		}
 	}
 
 	@api
+	@seealso(_try.class)
 	public static class _throw extends AbstractFunction {
 
 		@Override
@@ -469,11 +468,6 @@ public class Exceptions {
 			return null;
 		}
 
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{_try.class};
-		}
-
 		//The code: try(throw(...), @ex, ...) doesn't work,
 		//because it sees throw, then kills the other children to try.
 		//Blah.
@@ -501,6 +495,7 @@ public class Exceptions {
 	}
 	
 	@api
+	@seealso({_throw.class, _try.class})
 	public static class set_uncaught_exception_handler extends AbstractFunction{
 
 		@Override
@@ -579,11 +574,6 @@ public class Exceptions {
 						"Exception caught!\n" 
 						+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),
 			};
-		}
-
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{_throw.class, _try.class};
 		}
 		
 	}

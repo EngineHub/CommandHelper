@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Optimizable;
@@ -536,6 +537,7 @@ public class Math {
 	}
 
 	@api
+	@seealso(dec.class)
 	public static class inc extends AbstractFunction implements Optimizable{
 
 		@Override
@@ -645,11 +647,6 @@ public class Math {
 			return EnumSet.of(
 						OptimizationOption.OPTIMIZE_CONSTANT
 			);
-		}
-
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{dec.class};
 		}
 	}
 
@@ -762,6 +759,7 @@ public class Math {
 	}
 
 	@api
+	@seealso(inc.class)
 	public static class dec extends AbstractFunction implements Optimizable{
 
 		@Override
@@ -870,11 +868,6 @@ public class Math {
 								+ "msg(@x);\n"
 								+ "(--@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
 								+ "msg(@x);"),};
-		}
-
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{inc.class};
 		}
 		
 	}

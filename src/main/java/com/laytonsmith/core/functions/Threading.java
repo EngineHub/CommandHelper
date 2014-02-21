@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHVersion;
@@ -47,7 +48,7 @@ public class Threading {
 		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(!(args[1] instanceof CClosure)){
-				throw new Exceptions.CastException("Expected closure for arg 1", t);
+				throw new Exceptions.CastException("Expected closure for arg 2", t);
 			}
 			final CClosure closure = (CClosure) args[1];
 			new Thread(new Runnable() {
@@ -59,7 +60,7 @@ public class Threading {
 					closure.execute();
 					dm.deactivateThread(Thread.currentThread());
 				}
-			}, id).start();
+			}, "(" + Implementation.GetServerType().getBranding() + ") " + id).start();
 			return new CVoid(t);
 		}
 

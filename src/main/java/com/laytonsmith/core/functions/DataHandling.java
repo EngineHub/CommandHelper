@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
@@ -3111,7 +3112,9 @@ public class DataHandling {
 		}
 	}
 	
-	@api public static class to_radix extends AbstractFunction {
+	@api
+	@seealso(parse_int.class)
+	public static class to_radix extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -3178,15 +3181,12 @@ public class DataHandling {
 				new ExampleScript("Using binary value in source", "to_radix(0b10101010, 2)")
 			};
 		}
-
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{parse_int.class};
-		}
 		
 	}
 	
-	@api public static class parse_int extends AbstractFunction {
+	@api
+	@seealso(to_radix.class)
+	public static class parse_int extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -3249,12 +3249,6 @@ public class DataHandling {
 				new ExampleScript("From binary string", "parse_int('1111', 2)")
 			};
 		}
-
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{to_radix.class};
-		}
-		
 	}
 
 	/**

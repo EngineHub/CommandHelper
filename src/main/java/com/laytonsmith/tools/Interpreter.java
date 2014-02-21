@@ -14,10 +14,6 @@ import static com.laytonsmith.PureUtilities.TermColors.RED;
 import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
 import static com.laytonsmith.PureUtilities.TermColors.p;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
-import static com.laytonsmith.PureUtilities.TermColors.pl;
-import static com.laytonsmith.PureUtilities.TermColors.pl;
-import static com.laytonsmith.PureUtilities.TermColors.pl;
-import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Implementation;
@@ -63,7 +59,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -84,7 +79,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jline.console.ConsoleReader;
 import jline.console.completer.ArgumentCompleter;
-import jline.console.completer.Completer;
 import jline.console.completer.StringsCompleter;
 
 /**
@@ -102,6 +96,7 @@ public final class Interpreter {
 	 */
 	private static final String INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/mscript";
 	
+	private boolean inTTYMode = false;
 	private boolean multilineMode = false;
 	private String script = "";
 	private Environment env;
@@ -130,8 +125,7 @@ public final class Interpreter {
 
 	public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File fromFile = new File(file).getCanonicalFile();
-		Interpreter interpreter = new Interpreter(args, fromFile.getPath());
-		interpreter.doStartup();
+		Interpreter interpreter = new Interpreter(args, fromFile.getPath(), true);
 		try {
 			interpreter.execute(FileUtil.read(fromFile), args, fromFile);
 		} catch (ConfigCompileException ex) {
@@ -151,7 +145,7 @@ public final class Interpreter {
 		}
 		return msg;
 	}
-
+	
 	/**
 	 * Creates a new Interpreter object. This object can then be manipulated via
 	 * the cmdline interactively, or standalone, via the execute method.
@@ -163,8 +157,16 @@ public final class Interpreter {
 	 * @throws URISyntaxException
 	 */
 	public Interpreter(List<String> args, String cwd) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		this(args, cwd, false);
+	}
+
+	private Interpreter(List<String> args, String cwd, boolean inTTYMode) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		doStartup();
 		env.getEnv(GlobalEnv.class).SetRootFolder(new File(cwd));
+		if(inTTYMode){
+			//Ok, done. They'll have to execute from here.
+			return;
+		}
 		//We have two modes here, piped input, or interactive console.
 		if (System.console() == null) {
 			Scanner scanner = new Scanner(System.in);
@@ -453,8 +455,16 @@ public final class Interpreter {
 				return true;
 			}
 		};
-		SignalHandler.addHandler(Signals.SIGTERM, signalHandler);
-		SignalHandler.addHandler(Signals.SIGINT, signalHandler);
+		try {
+			SignalHandler.addHandler(Signals.SIGTERM, signalHandler);
+		} catch(IllegalArgumentException ex){
+			// Oh well.
+		}
+		try {
+			SignalHandler.addHandler(Signals.SIGINT, signalHandler);
+		} catch (IllegalArgumentException ex){
+			// Oh well again.
+		}
 	}
 
 	private boolean textLine(String line) throws IOException {

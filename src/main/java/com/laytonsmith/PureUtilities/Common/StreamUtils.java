@@ -35,7 +35,9 @@ public class StreamUtils {
 	
 	/**
 	 * Given an input stream, a UTF-8 encoded string is returned, which
-	 * is a reasonable assumption for most textual data.
+	 * is a reasonable assumption for most textual data. This assumes
+	 * that the stream is finite, i.e. not a streaming socket, for instance, and
+	 * reads until the stream reaches the end.
 	 * @param out
 	 * @return 
 	 */
@@ -48,7 +50,9 @@ public class StreamUtils {
 	}
 	
 	/**
-	 * Gets a string from an input stream, assuming the given encoding.
+	 * Gets a string from an input stream, assuming the given encoding. This assumes
+	 * that the stream is finite, i.e. not a streaming socket, for instance, and
+	 * reads until the stream reaches the end.
 	 * @param in
 	 * @param encoding
 	 * @return
