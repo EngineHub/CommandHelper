@@ -1322,6 +1322,7 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<List<Procedure>>();
 		procs.add(new ArrayList<Procedure>());
 		optimize(tree, procs);
+		link(tree);
 		checkLabels(tree);
 		parents.pop();
 		tree = parents.pop();
