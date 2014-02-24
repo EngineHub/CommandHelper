@@ -349,7 +349,11 @@ public class ExtensionManager {
 			
 			try {
 				extcls = extmirror.loadClass(dcl, true);
-			} catch (NoClassDefFoundError ex) {
+			} catch (Throwable ex) {
+				// May throw anything, and kill the loading process. 
+				// Lets prevent that!
+				Static.getLogger().log(Level.SEVERE, "Could not load class '"
+						+ extmirror.getClassName() + "'");
 				ex.printStackTrace();
 				continue;
 			}
@@ -403,7 +407,19 @@ public class ExtensionManager {
 
 			if (cd.doesClassExtend(klass, Event.class)
 					|| cd.doesClassExtend(klass, Function.class)) {
-				Class c = klass.loadClass(dcl, true);
+				
+				Class c;
+				
+				try {
+					c = klass.loadClass(dcl, true);
+				} catch (Throwable ex) {
+					// May throw anything, and kill the loading process. 
+					// Lets prevent that!
+					Static.getLogger().log(Level.SEVERE, "Could not load class '"
+							+ klass.getClassName() + "'");
+					ex.printStackTrace();
+					continue;
+				}
 
 				ExtensionTracker trk = extensions.get(url);
 
