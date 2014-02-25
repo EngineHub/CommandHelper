@@ -240,7 +240,10 @@ public class ExtensionManager {
 			URL plugURL = klass.getContainer();
 
 			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
-				File f = new File(plugURL.toString());
+				// The substring(6) gets rid of the "file:/" which will be at the front of the URL.
+				// We aren't using URL.toURI(), because paths with spaces in them won't work properly,
+				// and that's a valid, though non-recommended file path.
+				File f = new File(plugURL.toString().substring(6));
 
 				// Skip files already processed.
 				if (done.contains(f)) {
