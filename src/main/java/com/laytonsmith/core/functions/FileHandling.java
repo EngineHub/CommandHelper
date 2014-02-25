@@ -28,6 +28,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -365,6 +366,71 @@ public class FileHandling {
 			return "byte_array {file} Reads in a gzipped file, and returns a byte_array for it. The file is returned"
 					+ " exactly as is on disk, no conversions are done. base-dir restrictions are enforced for the"
 					+ " path, the same as read(). If file is relative, it is assumed to be relative to this file.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class read_binary extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
+			if(!Static.InCmdLine(env)){
+				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
+				//Cmdline mode doesn't currently have this restriction.
+				if (!Security.CheckSecurity(location)) {
+					throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
+						Exceptions.ExceptionType.SecurityException, t);
+				}
+			}
+			try {
+				InputStream stream = new BufferedInputStream(new FileInputStream(location));
+				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
+			} catch (IOException ex) {
+				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
+					+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
+				throw new ConfigRuntimeException("File could not be read in.",
+					Exceptions.ExceptionType.IOException, t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "read_binary";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "byte_array {file} Reads in a file, and returns a byte_array for it. The file is returned"
+					+ " exactly as is on disk, no conversions are done. base-dir restrictions are enforced for the"
+					+ " path, the same as read(). If file is relative, it is assumed to be relative to this file."
+					+ " This is useful for managing binary files.";
 		}
 
 		@Override
