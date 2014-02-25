@@ -178,14 +178,10 @@ public class ExtensionManager {
 
 			// Get the internal name that this extension exposes.
 			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
-				File f;
-
-				try {
-					f = new File(plugURL.toURI());
-				} catch (URISyntaxException ex) {
-					Static.getLogger().log(Level.SEVERE, null, ex);
-					continue;
-				}
+				// The substring(6) gets rid of the "file:/" which will be at the front of the URL.
+				// We aren't using URL.toURI(), because paths with spaces in them won't work properly,
+				// and that's a valid, though non-recommended file path.
+				File f = new File(plugURL.toString().substring(6));
 
 				// Skip extensions that originate from commandhelpercore.
 				if (plugURL.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
