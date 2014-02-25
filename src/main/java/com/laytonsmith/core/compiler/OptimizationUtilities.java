@@ -3,6 +3,7 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
@@ -77,6 +78,23 @@ public class OptimizationUtilities {
             return ((IVariable)node.getData()).getName();
 		} else if(node.getData() instanceof Variable){
 			return ((Variable)node.getData()).getName();
+		} else if(node.getData() instanceof CArray){
+			//It's a hardcoded array. This only happens in the course of optimization, if
+			//the optimizer adds a new array. We still need to handle it appropriately though.
+			//The values in the array will be constant, guaranteed.
+			StringBuilder b = new StringBuilder();
+			b.append("array(");
+			boolean first = true;
+			CArray n = (CArray)node.getData();
+			for(String key : n.keySet()){
+				if(!first){
+					b.append(",");
+				}
+				first = false;
+				b.append(optimize0(new ParseTree(n.get(key), node.getFileOptions())));
+			}
+			b.append(")");
+			return b.toString();
         } else {
             //static
             return node.getData().toString();

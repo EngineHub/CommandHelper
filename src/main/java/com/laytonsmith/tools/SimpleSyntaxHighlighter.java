@@ -14,6 +14,10 @@ import java.util.regex.Pattern;
  */
 public class SimpleSyntaxHighlighter {
 	
+	public static void main(String[] args){
+		System.out.println(SimpleSyntaxHighlighter.Highlight("'<escape>'"));
+	}
+	
 	/**
 	 * A list of keywords in the MethodScript language.
 	 */
@@ -110,14 +114,17 @@ public class SimpleSyntaxHighlighter {
 				}
 				if (inSingleString && c == '\'') {
 					inSingleString = false;
-					lout.append("<span style=\"").append(getColor(ElementTypes.SINGLE_STRING)).append("\">").append(buffer).append("&apos;</span>");
+					lout.append("<span style=\"").append(getColor(ElementTypes.SINGLE_STRING)).append("\">&apos;").append(HTMLUtils.escapeHTML(buffer))
+							.append("&apos;</span>");
 					buffer = "";
 					continue;
 				}
 				if (inDoubleString && c == '"') {
 					inDoubleString = false;
+					//This also escapes html internally.
 					buffer = processDoubleString(buffer);
-					lout.append("<span style=\"").append(getColor(ElementTypes.DOUBLE_STRING)).append("\">").append(buffer).append("&quot;</span>");
+					lout.append("<span style=\"").append(getColor(ElementTypes.DOUBLE_STRING)).append("\">&quot;").append(buffer)
+							.append("&quot;</span>");
 					buffer = "";
 					continue;
 				}
@@ -157,13 +164,13 @@ public class SimpleSyntaxHighlighter {
 				}
 				if (c == '\'' && !inDoubleString && !inLineComment && !inBlockComment) {
 					lout.append(processBuffer(buffer));
-					buffer = "&apos;";
+					buffer = "";
 					inSingleString = true;
 					continue;
 				}
 				if (c == '"' && !inSingleString && !inLineComment && !inBlockComment) {
 					lout.append(processBuffer(buffer));
-					buffer = "&quot;";
+					buffer = "";
 					inDoubleString = true;
 					continue;
 				}
