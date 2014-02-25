@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import java.io.*;
 import java.net.URL;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -119,7 +120,7 @@ public class ZipReader {
                 }
             } catch (ZipException ex) {
                 //This is fine, it's just not a zip file
-            } catch (IOException ex) {
+            } catch (IOException | AccessControlException ex) {
                 //This is fine too, it may mean we don't have permission to access this directory,
                 //but that's ok, we don't need access yet.
             }
