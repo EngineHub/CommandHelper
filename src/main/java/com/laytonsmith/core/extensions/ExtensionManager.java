@@ -30,10 +30,12 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -243,10 +245,9 @@ public class ExtensionManager {
 				File f;
 
 				try {
-					f = new File(plugURL.toURI());
-				} catch (URISyntaxException ex) {
-					Static.getLogger().log(Level.SEVERE, null, ex);
-					continue;
+					f = new File(URLEncoder.encode(plugURL.toString(), "UTF-8"));
+				} catch (UnsupportedEncodingException ex) {
+					throw new Error(ex);
 				}
 
 				// Skip files already processed.
