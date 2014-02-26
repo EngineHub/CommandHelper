@@ -43,50 +43,69 @@ get will specify function names.
 |-
 | ''Postfix''
 | ++ --
-| [[CommandHelper/API#postinc|postinc]]/[[CommandHelper/API#postdec|postdec]]
+| {{function|postinc}}/{{function|postdec}}
 | This is only considered postfix when it comes after an identifier: @i++
 |-
 | ''Unary''
 | ! ++ --
-| [[CommandHelper/API#not|not]]/[[CommandHelper/API#inc|inc]]/[[CommandHelper/API#dec|dec]]
+| {{function|not}}/{{function|inc}}/{{function|dec}}
 | These are ''unary'' operators, they only operate on one identifier
+|-
+|-
+| ''Exponential''
+| **
+| {{function|pow}}
+| 
 |-
 | ''Multiplicative''
 | * / %
-| [[CommandHelper/API#multiply|multiply]]/[[CommandHelper/API#divide|divide]]/[[CommandHelper/API#mod|mod]]
+| {{function|multiply}}/{{function|divide}}/{{function|mod}}
 |
 |-
 | ''Additive''
 | + - .
-| [[CommandHelper/API#add|add]]/[[CommandHelper/API#subtract|subtract]]/[[CommandHelper/API#concat|concat]]
+| {{function|add}}/{{function|subtract}}/{{function|concat}}
 | If a minus or plus sign is used to denote the sign of a number, it is handled slightly differently, for instance, ''2 + -1'' does not use any subtraction
 |-
 | ''Relational''
 | < > <= >=
-| [[CommandHelper/API#lt|lt]]/[[CommandHelper/API#gt|gt]]/[[CommandHelper/API#lte|lte]]/[[CommandHelper/API#gte|gte]]
+| {{function|lt}}/{{function|gt}}/{{function|lte}}/{{function|gte}}
 |
 |-
 | ''Equality''
 | == != === !==
-| [[CommandHelper/API#equals|equals]]/[[CommandHelper/API#nequals|nequals]]/[[CommandHelper/API#sequals|sequals]]/[[CommandHelper/API#snequals|snequals]]
+| {{function|equals}}/{{function|nequals}}/{{function|sequals}}/{{function|snequals}}
 | There is no operational equivalent for equals_ic
 |-
 | ''Logical AND''
 | &&
-| [[CommandHelper/API#and|and]]
+| {{function|and}}
 |
 |-
 | ''Logical OR''
 | <nowiki>||</nowiki>
-| [[CommandHelper/API#or|or]]
+| {{function|or}}
 |
 |-
 | ''Assignment''
 | = += -= *= /= .=
-| [[CommandHelper/API#assign|assign]]
+| {{function|assign}}
 | There is no single functional equivalent except for = per se, <code>@var += 1</code> is equivalent to 
 <code>assign(@var, add(@var, 1))</code>, etc. += uses {{function|add}}, 
 -= uses {{function|subtract}}, *= uses {{function|multiply}}, /= uses {{function|divide}}, and .= uses {{function|concat}}. 
+|-
+| ''Array Sub-indices''
+| <nowiki>[ ]</nowiki>
+| {{function|array_get}}/{{function|array_set}}/{{function|array_push}}
+| Using square braces allows for array accesses, and in combination with the <code>=</code> sign, setting sub-indices.
+If the array set appears on the right hand side of an assignment, or in a general statement without an assign, it is an
+array_get operation. If it appears on the left hand side of an assignment, it is an array_set operation. The brackets
+apply to the element just preceeding, for instance with <code>@var['index']</code>, it is assumed that <code>@var</code>
+is an array or array like value. Empty braces, <code>[]</code>, when on the left hand side works as an array push, and
+when on the right hand side, or in a general statement without an assign, it is an array clone operation (which ultimately
+still uses array_get). Sub-strings within strings may be pulled out using the bracket notation as well, and slices are supported.
+<code>array(1, 2, 3)[1..2]</code> returns an array with 2 elements in it, namely 2 and 3. <code>'string'[0]</code> returns
+'s', and <code>'string'[0..1]</code> returns 'st'.
 |}
 
 Note the lack of bitwise operators, which are usually standard in other languages. These are not provided, because the 

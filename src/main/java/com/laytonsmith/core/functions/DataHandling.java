@@ -206,7 +206,10 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "ivariable {ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it. Returns the variable that was assigned.";
+			return "ivariable {ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it."
+					+ " Returns the variable that was assigned. Operator syntax is also supported: <code>@a = 5;</code>. Other"
+					+ " Other forms are supported as well, +=, -=, *=, /=, .=, which do multiple operations at once. Array assigns"
+					+ " are also supported: @array[5] = 'new value in index 5';";
 		}
 
 		@Override
@@ -285,8 +288,14 @@ public class DataHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@variable, 5)\nmsg(@variable)"),
-				new ExampleScript("Array assignment", "assign(@variable['associative'], 5) #This creates the array for us\nmsg(@variable)"),
+				new ExampleScript("Basic usage", "assign(@variable, 5);\nmsg(@variable);"),
+				new ExampleScript("Array assignment", "assign(@variable, associative_array());\nassign(@variable['associative'], 5);\nmsg(@variable);"),
+				new ExampleScript("Operator syntax", "@variable = 5;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 'string';\n@variable .= ' more string';\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable += 10;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable -= 10;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable *= 10;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable /= 10;\nmsg(@variable);"),
 			};
 		}
 	}

@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
@@ -455,7 +456,6 @@ public class BasicLogic {
 					//Loop forward until we get to the next case
 					if (inCase || inDefault) {
 						lastCodeBlock.add(c1);
-						continue;
 					}
 				}
 				if (conditions.size() > 0) {
@@ -707,7 +707,7 @@ public class BasicLogic {
 			}
 			ParseTree node = new ParseTree(new CFunction(this.getName(), t), options);
 			node.setOptimized(true);
-			List<ParseTree> optimizedTree = new ArrayList<ParseTree>();
+			List<ParseTree> optimizedTree = new ArrayList<>();
 			//We have to cache the return value if even if we find it, so we can check for syntax errors
 			//in all the branches, not just the ones before the first hardcoded true
 			ParseTree toReturn = null;
@@ -852,9 +852,10 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({nequals.class, sequals.class, snequals.class})
 	public static class equals extends AbstractFunction implements Optimizable {
 
-		private static equals self = new equals();
+		private static final equals self = new equals();
 
 		/**
 		 * Returns the results that this function would provide, but in a java
@@ -943,7 +944,8 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "boolean {var1, var2[, varX...]} Returns true or false if all the arguments are equal";
+			return "boolean {var1, var2[, varX...]} Returns true or false if all the arguments are equal. Operator syntax is"
+					+ " also supported: @a == @b";
 		}
 
 		@Override
@@ -973,12 +975,13 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "equals(1, 1.0, '1')"),
-				new ExampleScript("Symbolic usage", "1 == 1"),
+				new ExampleScript("Operator syntax", "1 == 1"),
 				new ExampleScript("Not equivalent", "'one' == 'two'"),};
 		}
 	}
 
 	@api
+	@seealso({equals.class, nequals.class, snequals.class})
 	public static class sequals extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -997,7 +1000,8 @@ public class BasicLogic {
 					+ " two values are not only equal, but also the same type. So, while"
 					+ " equals('1', 1) returns true, sequals('1', 1) returns false, because"
 					+ " the first one is a string, and the second one is an int. More often"
-					+ " than not, you want to use plain equals().";
+					+ " than not, you want to use plain equals(). Operator syntax is also"
+					+ " supportd: @a === @b";
 		}
 
 		@Override
@@ -1063,7 +1067,8 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "boolean {val1, val2} Equivalent to not(sequals(val1, val2))";
+			return "boolean {val1, val2} Equivalent to not(sequals(val1, val2)). Operator syntax"
+					+ " is also supported: @a !== @b";
 		}
 
 		@Override
@@ -1103,11 +1108,15 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "snequals('1', 1)"),
-				new ExampleScript("Basic usage", "snequals('1', '1')"),};
+				new ExampleScript("Basic usage", "snequals('1', '1')"),
+				new ExampleScript("Operator syntax", "'1' !== '1'"),
+				new ExampleScript("Operator syntax", "'1' !== 1"),
+			};
 		}
 	}
 
 	@api
+	@seealso({equals.class, sequals.class, snequals.class})
 	public static class nequals extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1123,7 +1132,8 @@ public class BasicLogic {
 		@Override
 		public String docs() {
 			return "boolean {val1, val2} Returns true if the two values are NOT equal, or false"
-					+ " otherwise. Equivalent to not(equals(val1, val2))";
+					+ " otherwise. Equivalent to not(equals(val1, val2)). Operator syntax is also"
+					+ " supported: @a != @b";
 		}
 
 		@Override
@@ -1165,7 +1175,10 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "nequals('one', 'two')"),
-				new ExampleScript("Basic usage", "nequals(1, 1)"),};
+				new ExampleScript("Basic usage", "nequals(1, 1)"),
+				new ExampleScript("Operator syntax", "1 != 1"),
+				new ExampleScript("Operator syntax", "1 != 2"),
+			};
 		}
 	}
 
@@ -1399,6 +1412,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({gt.class, lte.class, gte.class})
 	public static class lt extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1425,7 +1439,8 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "boolean {var1, var2} Returns the results of a less than operation";
+			return "boolean {var1, var2} Returns the results of a less than operation. Operator syntax"
+					+ " is also supported: @a < @b";
 		}
 
 		@Override
@@ -1455,12 +1470,13 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "lt(4, 5)"),
-				new ExampleScript("Symbolic usage, true condition", "4 < 5"),
-				new ExampleScript("Symbolic usage, false condition", "5 < 4"),};
+				new ExampleScript("Operator syntax, true condition", "4 < 5"),
+				new ExampleScript("Operator syntax, false condition", "5 < 4"),};
 		}
 	}
 
 	@api
+	@seealso({lt.class, lte.class, gte.class})
 	public static class gt extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1487,7 +1503,8 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "boolean {var1, var2} Returns the result of a greater than operation";
+			return "boolean {var1, var2} Returns the result of a greater than operation. Operator syntax is also supported:"
+					+ " @a > @b";
 		}
 
 		@Override
@@ -1517,12 +1534,13 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "gt(5, 4)"),
-				new ExampleScript("Symbolic usage, true condition", "5 > 4"),
-				new ExampleScript("Symbolic usage, false condition", "4 > 5"),};
+				new ExampleScript("Operator syntax, true condition", "5 > 4"),
+				new ExampleScript("Operator syntax, false condition", "4 > 5"),};
 		}
 	}
 
 	@api
+	@seealso({lt.class, gt.class, gte.class})
 	public static class lte extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1549,7 +1567,8 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "boolean {var1, var2} Returns the result of a less than or equal to operation";
+			return "boolean {var1, var2} Returns the result of a less than or equal to operation. Operator"
+					+ " syntax is also supported: @a <= @b";
 		}
 
 		@Override
@@ -1579,13 +1598,14 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "lte(4, 5)"),
-				new ExampleScript("Symbolic usage, true condition", "4 <= 5"),
-				new ExampleScript("Symbolic usage, true condition", "5 <= 5"),
-				new ExampleScript("Symbolic usage, false condition", "5 <= 4"),};
+				new ExampleScript("Operator syntax, true condition", "4 <= 5"),
+				new ExampleScript("Operator syntax, true condition", "5 <= 5"),
+				new ExampleScript("Operator syntax, false condition", "5 <= 4"),};
 		}
 	}
 
 	@api
+	@seealso({lt.class, gt.class, lte.class})
 	public static class gte extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1612,7 +1632,8 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "boolean {var1, var2} Returns the result of a greater than or equal to operation";
+			return "boolean {var1, var2} Returns the result of a greater than or equal to operation. Operator"
+					+ " sytnax is also supported: @a >= @b";
 		}
 
 		@Override
@@ -1642,12 +1663,13 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "gte(5, 4)"),
-				new ExampleScript("Symbolic usage, true condition", "4 >= 4"),
-				new ExampleScript("Symbolic usage, false condition", "4 >= 5"),};
+				new ExampleScript("Operator syntax, true condition", "4 >= 4"),
+				new ExampleScript("Operator syntax, false condition", "4 >= 5"),};
 		}
 	}
 
 	@api(environments = {GlobalEnv.class})
+	@seealso({or.class})
 	public static class and extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1692,7 +1714,8 @@ public class BasicLogic {
 		@Override
 		public String docs() {
 			return "boolean {var1, [var2...]} Returns the boolean value of a logical AND across all arguments. Uses lazy determination, so once "
-					+ "an argument returns false, the function returns.";
+					+ "an argument returns false, the function returns. Operator syntax is supported:"
+					+ " @a && @b";
 		}
 
 		@Override
@@ -1737,8 +1760,8 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "and(true, true)"),
-				new ExampleScript("Symbolic usage, true condition", "true && true"),
-				new ExampleScript("Symbolic usage, false condition", "true && false"),
+				new ExampleScript("Operator syntax, true condition", "true && true"),
+				new ExampleScript("Operator syntax, false condition", "true && false"),
 				new ExampleScript("Short circuit", "false && msg('This will not show')"),};
 		}
 
@@ -1749,6 +1772,7 @@ public class BasicLogic {
 	}
 
 	@api(environments = {GlobalEnv.class})
+	@seealso({and.class})
 	public static class or extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1792,7 +1816,7 @@ public class BasicLogic {
 		@Override
 		public String docs() {
 			return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy determination, so once an "
-					+ "argument resolves to true, the function returns.";
+					+ "argument resolves to true, the function returns. Operator syntax is also supported: @a || @b";
 		}
 
 		@Override
@@ -1837,8 +1861,8 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "or(false, true)"),
-				new ExampleScript("Symbolic usage, true condition", "true || false"),
-				new ExampleScript("Symbolic usage, false condition", "false || false"),
+				new ExampleScript("Operator syntax, true condition", "true || false"),
+				new ExampleScript("Operator syntax, false condition", "false || false"),
 				new ExampleScript("Short circuit", "true || msg('This will not show')"),};
 		}
 
@@ -1873,7 +1897,7 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "boolean {var1} Returns the boolean value of a logical NOT for this argument";
+			return "boolean {var1} Returns the boolean value of a logical NOT for this argument. Operator syntax is also supported: !@var";
 		}
 
 		@Override
@@ -1903,8 +1927,10 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "not(false)"),
-				new ExampleScript("Symbolic usage, true condition", "!false"),
-				new ExampleScript("Symbolic usage, false condition", "!true"),};
+				new ExampleScript("Operator syntax, true condition", "!false"),
+				new ExampleScript("Operator syntax, false condition", "!true"),
+				new ExampleScript("Operator syntax, using variable", "!@var"),
+			};
 		}
 	}
 

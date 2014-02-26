@@ -319,7 +319,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	@seealso({array_get.class, array.class})
+	@seealso({array_get.class, array.class, array_push.class})
 	public static class array_set extends AbstractFunction {
 
 		@Override
@@ -404,6 +404,7 @@ public class ArrayHandling {
 	}
 
 	@api
+	@seealso({array_set.class})
 	public static class array_push extends AbstractFunction {
 
 		@Override

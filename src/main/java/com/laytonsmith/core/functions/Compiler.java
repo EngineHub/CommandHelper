@@ -289,6 +289,7 @@ public class Compiler {
 						}
 					}
 
+					//Exponential
 					for (int i = 0; i < list.size() - 1; i++) {
 						ParseTree next = list.get(i + 1);
 						if (next.getData() instanceof CSymbol) {

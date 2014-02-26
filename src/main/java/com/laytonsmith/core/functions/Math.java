@@ -41,6 +41,7 @@ public class Math {
 	}
 
 	@api
+	@seealso({subtract.class, multiply.class, divide.class})
 	public static class add extends AbstractFunction implements Optimizable{
 
 		@Override
@@ -77,7 +78,8 @@ public class Math {
 
 		@Override
 		public String docs() {
-			return "mixed {var1, [var2...]} Adds all the arguments together, and returns either a double or an integer";
+			return "mixed {var1, [var2...]} Adds all the arguments together, and returns either a double or an integer."
+					+ " Operator syntax is also supported: @a + @b";
 		}
 
 		@Override
@@ -98,11 +100,11 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates adding two numbers together", "msg(add(2, 2))"),
-						new ExampleScript("Demonstrates adding two numbers together, using the symbol notation", "2 + 2"),
-						new ExampleScript("Demonstrates grouping with parenthesis", "(2 + 5) * 2"),
-						new ExampleScript("Demonstrates order of operations", "2 + 5 * 2")
-					};
+				new ExampleScript("Demonstrates adding two numbers together", "msg(add(2, 2))"),
+				new ExampleScript("Demonstrates adding two numbers together, using the operator syntax", "2 + 2"),
+				new ExampleScript("Demonstrates grouping with parenthesis", "(2 + 5) * 2"),
+				new ExampleScript("Demonstrates order of operations", "2 + 5 * 2"),
+			};
 		}
 
 		@Override
@@ -122,6 +124,7 @@ public class Math {
 	}
 
 	@api
+	@seealso({add.class, multiply.class, divide.class})
 	public static class subtract extends AbstractFunction implements Optimizable{
 
 		@Override
@@ -158,7 +161,8 @@ public class Math {
 
 		@Override
 		public String docs() {
-			return "mixed {var1, [var2...]} Subtracts the arguments from left to right, and returns either a double or an integer";
+			return "mixed {var1, [var2...]} Subtracts the arguments from left to right, and returns either a double or an integer."
+					+ " Operator syntax is also supported: @a - @b";
 		}
 
 		@Override
@@ -180,7 +184,7 @@ public class Math {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Demonstrates basic usage", "subtract(4 - 3)"),
-						new ExampleScript("Demonstrates symbolic usage", "12 - 5"),};
+						new ExampleScript("Demonstrates operator syntax", "12 - 5"),};
 		}
 
 		@Override
@@ -193,6 +197,7 @@ public class Math {
 	}
 
 	@api
+	@seealso({divide.class, add.class, subtract.class})
 	public static class multiply extends AbstractFunction implements Optimizable{
 
 		@Override
@@ -229,7 +234,8 @@ public class Math {
 
 		@Override
 		public String docs() {
-			return "mixed {var1, [var2...]} Multiplies the arguments together, and returns either a double or an integer";
+			return "mixed {var1, [var2...]} Multiplies the arguments together, and returns either a double or an integer. Operator syntax"
+					+ " is also supported: 2 * 2";
 		}
 
 		@Override
@@ -256,8 +262,8 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates basic usage", "multiply(8, 8)"),
-						new ExampleScript("Demonstrates symbolic usage", "8 * 8"),};
+						new ExampleScript("Functional usage", "multiply(8, 8)"),
+						new ExampleScript("Operator syntax", "8 * 8"),};
 		}
 		
 		@Override
@@ -271,6 +277,7 @@ public class Math {
 	}
 
 	@api
+	@seealso({multiply.class, add.class, subtract.class})
 	public static class divide extends AbstractFunction implements Optimizable{
 
 		@Override
@@ -308,7 +315,8 @@ public class Math {
 		@Override
 		public String docs() {
 			return "mixed {var1, [var2...]} Divides the arguments from left to right, and returns either a double or an integer."
-					+ " If you divide by zero, a RangeException is thrown.";
+					+ " If you divide by zero, a RangeException is thrown. Operator syntax is also supported:"
+					+ " 2 / 2";
 		}
 
 		@Override
@@ -329,10 +337,10 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates basic usage", "divide(4, 2)"),
+						new ExampleScript("Functional usage", "divide(4, 2)"),
 						new ExampleScript("Demonstrates double return", "divide(2, 4)"),
-						new ExampleScript("Demonstrates symbolic usage", "2 / 4"),
-						new ExampleScript("Demonstrates divide by zero error", "assign(@zero, 0)\nmsg(1 / @zero)"),};
+						new ExampleScript("Operator syntax", "2 / 4"),
+						new ExampleScript("Demonstrates divide by zero error", "@zero = 0;\nmsg(1 / @zero);"),};
 		}
 		
 		@Override
@@ -371,7 +379,7 @@ public class Math {
 
 		@Override
 		public String docs() {
-			return "int {x, n} Returns x modulo n";
+			return "int {x, n} Returns x modulo n. Operator syntax is also supported: @x % @n";
 		}
 
 		@Override
@@ -392,8 +400,8 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates basic usage", "mod(2, 2)"),
-						new ExampleScript("Demonstrates symbolic usage", "2 % 2"),};
+						new ExampleScript("Functional usage", "mod(2, 2)"),
+						new ExampleScript("Operator syntax", "2 % 2"),};
 		}
 		
 		@Override
@@ -427,7 +435,7 @@ public class Math {
 
 		@Override
 		public String docs() {
-			return "double {x, n} Returns x to the power of n";
+			return "double {x, n} Returns x to the power of n. Operator syntax is also supported: @x ** @n";
 		}
 
 		@Override
@@ -453,8 +461,8 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates basic usage", "pow(2, 4)"),
-						new ExampleScript("Demonstrates symbolic usage", "2 ** 4"),};
+						new ExampleScript("Functional usage", "pow(2, 4)"),
+						new ExampleScript("Operator syntax", "2 ** 4"),};
 		}
 		
 		@Override
@@ -537,7 +545,7 @@ public class Math {
 	}
 
 	@api
-	@seealso(dec.class)
+	@seealso({dec.class, postdec.class, postinc.class})
 	public static class inc extends AbstractFunction implements Optimizable{
 
 		@Override
@@ -595,7 +603,8 @@ public class Math {
 		@Override
 		public String docs() {
 			return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to ++var in other languages. Expects ivar to be a variable, then"
-					+ " returns the ivar, or, if var is a constant number, simply adds x to it, and returns the new number.";
+					+ " returns the ivar, or, if var is a constant number, simply adds x to it, and returns the new number. Operator syntax"
+					+ " is also supported: ++@var";
 		}
 
 		@Override
@@ -651,6 +660,7 @@ public class Math {
 	}
 
 	@api
+	@seealso({postdec.class, inc.class, dec.class})
 	public static class postinc extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -713,7 +723,8 @@ public class Math {
 		@Override
 		public String docs() {
 			return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to var++ in other languages. Expects ivar to be a variable, then"
-					+ " returns a copy of the old ivar, or, if var is a constant number, simply adds x to it, and returns the new number.";
+					+ " returns a copy of the old ivar, or, if var is a constant number, simply adds x to it, and returns the new number. Operator"
+					+ " notation is also supported: @var++";
 		}
 
 		@Override
@@ -756,10 +767,26 @@ public class Math {
 						OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic functional usage", "@a = 5;\n"
+						+ "msg(postinc(@a));\n"
+						+ "msg(@a);"),
+				new ExampleScript("Basic functional usage, with optional value set", "@a = 5;\n"
+						+ "msg(postinc(@a, 6));\n"
+						+ "msg(@a);"),
+				new ExampleScript("Operator syntax", "@a = 5;\n"
+						+ "msg(@a++);\n"
+						+ "msg(@a);"),
+			};
+		}
+		
 	}
 
 	@api
-	@seealso(inc.class)
+	@seealso({inc.class, postdec.class, postinc.class})
 	public static class dec extends AbstractFunction implements Optimizable{
 
 		@Override
@@ -816,7 +843,8 @@ public class Math {
 		@Override
 		public String docs() {
 			return "ivar {var, [value]} Subtracts value from var, and stores the new value. Value defaults to 1. Equivalent to --var (or var -= value) in other languages. Expects ivar to be a variable, then"
-					+ " returns the ivar, or if var is a constant number, simply adds x to it, and returns the new number.";
+					+ " returns the ivar, or if var is a constant number, simply adds x to it, and returns the new number. Operator"
+					+ " syntax is also supported: --@var";
 		}
 
 		@Override
@@ -873,6 +901,7 @@ public class Math {
 	}
 
 	@api
+	@seealso({postinc.class, inc.class, dec.class})
 	public static class postdec extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -935,7 +964,8 @@ public class Math {
 		@Override
 		public String docs() {
 			return "ivar {var, [x]} Subtracts x from var, and stores the new value. Equivalent to var-- in other languages. Expects ivar to be a variable, then"
-					+ " returns a copy of the old ivar, , or, if var is a constant number, simply adds x to it, and returns the new number.";
+					+ " returns a copy of the old ivar, , or, if var is a constant number, simply adds x to it, and returns the new number."
+					+ " Operator syntax is also supported: @var--";
 		}
 
 		@Override
@@ -977,6 +1007,20 @@ public class Math {
 			return EnumSet.of(
 						OptimizationOption.OPTIMIZE_CONSTANT
 			);
+		}
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic functional usage", "@a = 5;\n"
+						+ "msg(postdec(@a));\n"
+						+ "msg(@a);"),
+				new ExampleScript("Basic functional usage, with optional value set", "@a = 5;\n"
+						+ "msg(postdec(@a, 6));\n"
+						+ "msg(@a);"),
+				new ExampleScript("Operator syntax", "@a = 5;\n"
+						+ "msg(@a--);\n"
+						+ "msg(@a);"),
+			};
 		}
 	}
 
