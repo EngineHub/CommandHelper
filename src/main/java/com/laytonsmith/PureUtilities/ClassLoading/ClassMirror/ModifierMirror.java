@@ -10,6 +10,8 @@ import org.objectweb.asm.Opcodes;
 
 /**
  * This is a mirror for the {@link java.lang.reflect.Modifier} class.
+ * This provides is* methods for all the modifiers, instead of requiring
+ * bitwise logic to determine if various modifiers are present.
  */
 public class ModifierMirror implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -18,7 +20,19 @@ public class ModifierMirror implements Serializable {
 	/**
 	 * This is the canonical order of modifiers, used in the toString method.
 	 */
-	private static transient final Object[] order = new Object[]{Modifier.PUBLIC, "public", Modifier.PRIVATE, "private", Modifier.PROTECTED, "protected", Modifier.STATIC, "static", Modifier.FINAL, "final", Modifier.SYNCHRONIZED, "synchronized", Modifier.VOLATILE, "volatile", Modifier.TRANSIENT, "transient", Modifier.NATIVE, "native", Modifier.INTERFACE, "interface", Modifier.ABSTRACT, "abstract", Modifier.STRICT, "strict"};
+	private static transient final Object[] order = new Object[]{
+		Modifier.PUBLIC, "public", 
+		Modifier.PRIVATE, "private", 
+		Modifier.PROTECTED, "protected", 
+		Modifier.STATIC, "static", 
+		Modifier.FINAL, "final", 
+		Modifier.SYNCHRONIZED, "synchronized", 
+		Modifier.VOLATILE, "volatile", 
+		Modifier.TRANSIENT, "transient", 
+		Modifier.NATIVE, "native", 
+		Modifier.INTERFACE, "interface", 
+		Modifier.ABSTRACT, "abstract", 
+		Modifier.STRICT, "strictfp"};
 	
 	/**
 	 * This constructor is used when mirroring an already loaded class. The modifier
@@ -106,46 +120,105 @@ public class ModifierMirror implements Serializable {
 		return (modifiers & Modifier.ABSTRACT) > 0;
 	}
 
+	/**
+	 * Returns true if the final modifier was present
+	 * @return 
+	 */
 	public boolean isFinal() {
 		return (modifiers & Modifier.FINAL) > 0;
 	}
 
+	/**
+	 * Returns true if the class is an interface
+	 * @return 
+	 */
 	public boolean isInterface() {
 		return (modifiers & Modifier.ABSTRACT) > 0;
 	}
 
+	/**
+	 * Returns true if the native modifier was present
+	 * @return 
+	 */
 	public boolean isNative() {
 		return (modifiers & Modifier.NATIVE) > 0;
 	}
 
+	/**
+	 * Returns true if the private modifier was present
+	 * @return 
+	 */
 	public boolean isPrivate() {
 		return (modifiers & Modifier.PRIVATE) > 0;
 	}
 
+	/**
+	 * Returns true if the protected modifier was present
+	 * @return 
+	 */
 	public boolean isProtected() {
 		return (modifiers & Modifier.PROTECTED) > 0;
 	}
 
+	/**
+	 * Returns true if the public modifier was present
+	 * @return 
+	 */
 	public boolean isPublic() {
 		return (modifiers & Modifier.PUBLIC) > 0;
 	}
+	
+	/**
+	 * Returns true if this is package private, that is,
+	 * it is not public, private, or protected. No access
+	 * modifier is present, rather this is the lack of
+	 * the other three modifiers.
+	 * @return 
+	 */
+	public boolean isPackagePrivate(){
+		return !(
+					isPrivate()
+				|| isProtected()
+				|| isPublic()
+				);
+	}
 
+	/**
+	 * Returns true if the static modifier was present
+	 * @return 
+	 */
 	public boolean isStatic() {
 		return (modifiers & Modifier.STATIC) > 0;
 	}
 
+	/**
+	 * Returns true if the strictfp modifier was present
+	 * @return 
+	 */
 	public boolean isStrict() {
 		return (modifiers & Modifier.STRICT) > 0;
 	}
 
+	/**
+	 * Returns true if the synchronized modifier was present
+	 * @return 
+	 */
 	public boolean isSynchronized() {
 		return (modifiers & Modifier.SYNCHRONIZED) > 0;
 	}
 
+	/**
+	 * Returns true if the transient modifier was present
+	 * @return 
+	 */
 	public boolean isTransient() {
 		return (modifiers & Modifier.TRANSIENT) > 0;
 	}
 
+	/**
+	 * Returns true if the volatile modifier was present
+	 * @return 
+	 */
 	public boolean isVolatile() {
 		return (modifiers & Modifier.VOLATILE) > 0;
 	}

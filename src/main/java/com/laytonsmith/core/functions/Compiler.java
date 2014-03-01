@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
@@ -288,6 +289,7 @@ public class Compiler {
 						}
 					}
 
+					//Exponential
 					for (int i = 0; i < list.size() - 1; i++) {
 						ParseTree next = list.get(i + 1);
 						if (next.getData() instanceof CSymbol) {
@@ -565,5 +567,133 @@ public class Compiler {
 			}
 			return new ParseTree(new CBrace(node), fileOptions);
 		}
+	}
+	
+	@api
+	@hide("This is more of a compiler feature, rather than a function, and so it is hidden from normal"
+			+ " documentation.")
+	public static class smart_string extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException(getName() + " should have been compiled out. If you are reaching this, an error has occured in the parser."
+					+ " Please report this error to the developers.");
+		}
+
+		@Override
+		public String getName() {
+			return "smart_string";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "none {string} This is a compiler construct, and is not normally used directly. It is created via double quoted strings.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1){
+				throw new ConfigCompileException(getName() + " can only take one parameter", t);
+			}
+			String value = children.get(0).getData().val();
+			
+			StringBuilder b = new StringBuilder();
+			boolean inBrace = false;
+			boolean inSimpleVar = false;
+			ParseTree root = new ParseTree(new CFunction(new StringHandling.concat().getName(), t), fileOptions);
+			for(int i = 0; i < value.length(); i++){
+				char c = value.charAt(i);
+				char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
+				if(c == '\\' && c2 == '@'){
+					b.append("@");
+					i++;
+					continue;
+				}
+				if(c == '@'){
+					if(c2 == '{'){
+						//Start of a complex variable
+						inBrace = true;
+						i++; // Don't include this
+					} else if(Character.isLetterOrDigit(c2) || c2 == '_'){
+						//Start of a simple variable
+						inSimpleVar = true;
+					} else {
+						// Loose @, this is a compile error
+						throw new ConfigCompileException("Unexpected \"@\" in string. If you want a literal at sign, escape it with \"\\@\".", t);
+					}
+					if(b.length() > 0){
+						root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
+						b = new StringBuilder();
+					}
+					continue;
+				}
+				if(inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')){
+					// End of simple var. The buffer is the variable name.
+					String vname = b.toString();
+					b = new StringBuilder();
+					root.addChild(new ParseTree(new IVariable("@" + vname, t), fileOptions));
+					inSimpleVar = false;
+				}
+				if(inBrace && c == '}'){
+					// End of complex var. Still more parsing to be done though.
+					String complex = b.toString().trim();
+					b = new StringBuilder();
+					inBrace = false;
+					if(complex.matches("[a-zA-Z0-9_]+")){
+						//This is a simple variable name.
+						root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
+					} else {
+						//Complex variable name, with arrays (or perhaps an error case)
+						
+					}
+					continue;
+				}
+				b.append(c);
+			}
+			if(inBrace){
+				throw new ConfigCompileException("Missing end brace (}) in double string", t);
+			}
+			if(inSimpleVar){
+				root.addChild(new ParseTree(new IVariable("@" + b.toString(), t), fileOptions));
+			} else if(b.length() > 0){
+				root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
+			}
+			if(root.numberOfChildren() == 1){
+				return root.getChildAt(0);
+			}
+			//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
+			return root;
+		}
+		
 	}
 }

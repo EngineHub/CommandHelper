@@ -3,19 +3,70 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.AbstractConvertor;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCCommand;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCFireworkBuilder;
+import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNote;
+import com.laytonsmith.abstraction.MCPluginMeta;
+import com.laytonsmith.abstraction.MCRecipe;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
-import com.laytonsmith.abstraction.bukkit.entities.*;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBoat;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCreeper;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderDragon;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderDragonPart;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderSignal;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderman;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntityProjectileSource;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFirework;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHorse;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCIronGolem;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItemFrame;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCMagmaCube;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCMinecart;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCOcelot;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPigZombie;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSheep;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSkeleton;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSlime;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCVillager;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCWolf;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCZombie;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
-import com.laytonsmith.abstraction.bukkit.events.drivers.*;
+import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitBlockListener;
+import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitEntityListener;
+import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitInventoryListener;
+import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitPlayerListener;
+import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitServerListener;
+import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitVehicleListener;
+import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWeatherListener;
+import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWorldListener;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Target;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +86,47 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.*;
-import org.bukkit.entity.minecart.CommandMinecart;
+import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.ComplexEntityPart;
+import org.bukkit.entity.ComplexLivingEntity;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.EnderDragonPart;
+import org.bukkit.entity.EnderSignal;
+import org.bukkit.entity.Enderman;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Firework;
+import org.bukkit.entity.Fish;
+import org.bukkit.entity.Hanging;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.IronGolem;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.LightningStrike;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.MagmaCube;
+import org.bukkit.entity.Minecart;
+import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Painting;
+import org.bukkit.entity.Pig;
+import org.bukkit.entity.PigZombie;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.ThrownPotion;
+import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.Villager;
+import org.bukkit.entity.Wolf;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
@@ -44,8 +134,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
-import org.bukkit.inventory.meta.*;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.FireworkEffectMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
+import org.bukkit.projectiles.ProjectileSource;
 
 /**
  *
@@ -199,38 +297,107 @@ public class BukkitConvertor extends AbstractConvertor {
     	if (be == null) {
     		return null;
     	}
+		
     	//TODO: Change this to a reflection mechanism, this is getting tiresome to do.
-		//truth.
-    	if (be instanceof EnderSignal) {
-    		return new BukkitMCEnderSignal((EnderSignal) be);
-    	}
     	
-		if (be instanceof Firework) {
-			return new BukkitMCFirework((Firework) be);
+		// Steve!
+        if(be instanceof Player){
+			// Must come before HumanEntity
+            return new BukkitMCPlayer((Player)be);
+        }
+		
+		// Mobs - Passive / Tamable
+		if(be instanceof Villager){
+            return new BukkitMCVillager((Villager)be);
+        }
+		
+		if(be instanceof Wolf){
+            return new BukkitMCWolf(be);
+        }
+		
+		if(be instanceof Ocelot){
+            return new BukkitMCOcelot(be);
+        }
+		
+		if (be instanceof Sheep) {
+			return new BukkitMCSheep((Sheep) be);
 		}
 		
+		if (be instanceof Horse) {
+			// Must come before Vehicle
+			return new BukkitMCHorse((Horse) be);
+		}
+		
+		if (be instanceof Pig) {
+			// Must come before Vehicle
+			return new BukkitMCPig((Pig) be);
+		}
+		
+		// Mobs - Enemies
+		if (be instanceof EnderDragon) {
+			// Must come before ComplexLivingEntity
+			return new BukkitMCEnderDragon((EnderDragon) be);
+		}
+		
+		if (be instanceof Enderman) {
+			return new BukkitMCEnderman((Enderman) be);
+		}
+		
+		if (be instanceof Creeper) {
+    		return new BukkitMCCreeper((Creeper) be);
+    	}
+		
+		if (be instanceof IronGolem) {
+    		return new BukkitMCIronGolem((IronGolem) be);
+    	}
+		
+		if (be instanceof Skeleton) {
+    		return new BukkitMCSkeleton((Skeleton) be);
+    	}
+		
+		if (be instanceof MagmaCube) {
+			// Must come before Slime
+    		return new BukkitMCMagmaCube((MagmaCube) be);
+    	}
+		
+		if (be instanceof Slime) {
+    		return new BukkitMCSlime((Slime) be);
+    	}
+		
+		if (be instanceof PigZombie) {
+			// Must come before Zombie
+			return new BukkitMCPigZombie((PigZombie) be);
+		}
+		
+		if (be instanceof Zombie) {
+			return new BukkitMCZombie((Zombie) be);
+		}
+		
+		// Block entities
 		if(be instanceof FallingBlock){
 			return new BukkitMCFallingBlock((FallingBlock) be);
 		}
 		
-		if(be instanceof Item){
-			return new BukkitMCItem((Item)be);
-		}
-		
-		if(be instanceof LightningStrike){
-			return new BukkitMCLightningStrike((LightningStrike)be);
-		}
-		
-		if(be instanceof ExperienceOrb){
-			return new BukkitMCExperienceOrb((ExperienceOrb)be);
+		if(be instanceof TNTPrimed){
+			return new BukkitMCTNT((TNTPrimed)be);
 		}
 		
 		if(be instanceof EnderCrystal){
 			return new BukkitMCEnderCrystal((EnderCrystal)be);
 		}
 		
-		if(be instanceof TNTPrimed){
-			return new BukkitMCTNT((TNTPrimed)be);
+		// Pickups
+		if(be instanceof Item){
+			return new BukkitMCItem((Item)be);
+		}
+		
+		if(be instanceof ExperienceOrb){
+			return new BukkitMCExperienceOrb((ExperienceOrb)be);
+		}
+		
+		// Projectiles
+		if (be instanceof ThrownPotion) {
+			return new BukkitMCThrownPotion((ThrownPotion)be);
 		}
 		
 		if (be instanceof Fish) {
@@ -241,84 +408,105 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCFireball((Fireball) be);
 		}
 		
-    	if(be instanceof Projectile){
-            return new BukkitMCProjectile((Projectile)be);
-        }
+		if (be instanceof Firework) { 
+			// Not really a projectile, but it fits here.
+			return new BukkitMCFirework((Firework) be);
+		}
     	
+		// Static / Hanging
+		if (be instanceof EnderSignal) {
+    		return new BukkitMCEnderSignal((EnderSignal) be);
+    	}
+		
+		if (be instanceof ItemFrame) {
+			// Must come before Hanging
+    		return new BukkitMCItemFrame((ItemFrame) be);
+    	}
+		
 		if(be instanceof Painting){
+			// Must come before Hanging
 			return new BukkitMCPainting((Painting)be);
 		}
 		
     	if(be instanceof Hanging){
     		return new BukkitMCHanging(be);
     	}
-    	
-    	if(be instanceof Wolf){
-            return new BukkitMCWolf(be);
-        }
-    	
-    	if(be instanceof Ocelot){
-            return new BukkitMCOcelot(be);
-        }
-    	
-		if (be instanceof Enderman) {
-			return new BukkitMCEnderman((Enderman) be);
-		}
 		
-		if (be instanceof Sheep) {
-			return new BukkitMCSheep((Sheep) be);
-		}
-		
-		if (be instanceof Horse) {
-			return new BukkitMCHorse((Horse) be);
-		}
-		
-		if (be instanceof Pig) {
-			return new BukkitMCPig((Pig) be);
-		}
-		
-    	if(be instanceof Ageable){
-    		return new BukkitMCAgeable(be);
-    	}
-    	
-    	if(be instanceof Boat) {
-			return new BukkitMCBoat((Boat)be);
-    	}
-		
-		if(be instanceof CommandMinecart) {
-			return new BukkitMCCommandMinecart((CommandMinecart)be);
-		}
-
+		// Vehicles
     	if(be instanceof Minecart) {
+			// Must come before Vehicle
     		return new BukkitMCMinecart((Minecart)be);
+    	}
+		
+		if(be instanceof Boat) {
+			// Must come before Vehicle
+			return new BukkitMCBoat((Boat)be);
     	}
 
     	if(be instanceof Vehicle){
     		return new BukkitMCVehicle(be);
     	}
         
-        if(be instanceof Player){
-            return new BukkitMCPlayer((Player)be);
-        }
+		// Weather
+		if(be instanceof LightningStrike){
+			return new BukkitMCLightningStrike((LightningStrike)be);
+		}
+		
+		// Misc
+		if (be instanceof EnderDragonPart) {
+			// Must come before ComplexLivingEntity
+			return new BukkitMCEnderDragonPart((EnderDragonPart) be);
+		}
         
+		// Abstractions
+		if(be instanceof Projectile){
+            return new BukkitMCProjectile((Projectile)be);
+        }
+		
+    	if(be instanceof Ageable){
+			// Must come before LivingEntity
+    		return new BukkitMCAgeable(be);
+    	}
+		
         if(be instanceof HumanEntity){
+			// Must come before LivingEntity
             return new BukkitMCHumanEntity((HumanEntity)be);
         }
+		
+		if(be instanceof ComplexEntityPart) {
+			return new BukkitMCComplexEntityPart((ComplexEntityPart)be);
+		}
+		
+		if(be instanceof ComplexLivingEntity) {
+			// Must come before LivingEntity
+			return new BukkitMCComplexLivingEntity((ComplexLivingEntity)be);
+		}
         
         if(be instanceof LivingEntity){
             return new BukkitMCLivingEntity(((LivingEntity)be));
         }
-        
-        throw new Error("While trying to find the correct entity type for " + be.getClass().getName() + ", was unable"
-                + " to find the appropriate implementation. Please alert the developers of this stack trace.");
-    }
+		
+		if (be instanceof ProjectileSource) {
+			return new BukkitMCEntityProjectileSource(be);
+		}
+		
+		throw new IllegalArgumentException("While trying to find the correct entity type for " + be.getClass().getName()
+				+ ", was unable to find the appropriate implementation. If the named entity is not provided by mods,"
+				+ " please alert the developers of this stack trace. This is not necessarily an error,"
+				+ " we just don't have any special handling for this entity yet, and will treat it generically.");
+	}
 
 	@Override
-    public MCEntity GetCorrectEntity(MCEntity e) {
+	public MCEntity GetCorrectEntity(MCEntity e) {
 
-        Entity be = ((BukkitMCEntity)e).asEntity();
-        return BukkitConvertor.BukkitGetCorrectEntity(be);
-    }
+		Entity be = ((BukkitMCEntity)e).asEntity();
+		try {
+			return BukkitConvertor.BukkitGetCorrectEntity(be);
+		} catch (IllegalArgumentException iae) {
+			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.INFO, iae.getMessage(), Target.UNKNOWN);
+			return e;
+		}
+	}
 
 	@Override
 	public MCItemMeta GetCorrectMeta(MCItemMeta im) {
@@ -559,5 +747,10 @@ public class BukkitConvertor extends AbstractConvertor {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public MCMaterial GetMaterial(String name) {
+		return new BukkitMCMaterial(Material.valueOf(name));
 	}
 }

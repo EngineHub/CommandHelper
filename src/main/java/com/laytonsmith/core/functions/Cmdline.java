@@ -206,7 +206,7 @@ public class Cmdline {
             if (args.length == 1) {
                 exit_code = Static.getInt32(args[0], t);
             }
-            if (inCmdLine(environment)) {
+            if (Static.InCmdLine(environment)) {
                 System.exit(exit_code);
             }
             return new Echoes.die().exec(t, environment, args);
@@ -482,7 +482,7 @@ public class Cmdline {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!inCmdLine(environment)){
+			if(!Static.InCmdLine(environment)){
 				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
 			}
 			boolean mask = true;
@@ -555,9 +555,7 @@ public class Cmdline {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!inCmdLine(environment)){
-				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
-			}
+			requireCmdlineMode(environment, this, t);
 			
 			String prompt = args[0].val();
 			System.out.print(Static.MCToANSIColors(prompt));
@@ -623,7 +621,7 @@ public class Cmdline {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!inCmdLine(environment)){
+			if(!Static.InCmdLine(environment)){
 				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
 			}
 			
@@ -734,7 +732,7 @@ public class Cmdline {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(inCmdLine(environment)){
+			if(Static.InCmdLine(environment)){
 				try {
 					new jline.console.ConsoleReader().clearScreen();
 				} catch (IOException ex) {
@@ -787,7 +785,7 @@ public class Cmdline {
 
 		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!inCmdLine(environment)){
+			if(!Static.InCmdLine(environment)){
 				if(!Prefs.AllowShellCommands()){
 					throw new ConfigRuntimeException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
 				}
@@ -1006,7 +1004,7 @@ public class Cmdline {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!inCmdLine(environment)){
+			if(!Static.InCmdLine(environment)){
 				if(!Prefs.AllowShellCommands()){
 					throw new ConfigRuntimeException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
 				}
@@ -1139,7 +1137,7 @@ public class Cmdline {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!inCmdLine(environment)){
+			if(!Static.InCmdLine(environment)){
 				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
 			}
 			if(System.console() != null){
@@ -1203,8 +1201,239 @@ public class Cmdline {
 		
 	}
 	
-	public static boolean inCmdLine(Environment environment){
-		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
-					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
+	@api
+	public static class pwd extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			File root;
+			if(Static.InCmdLine(environment)){
+				root = environment.getEnv(GlobalEnv.class).GetRootFolder();
+			} else {
+				root = t.file().getParentFile();
+			}
+			try {
+				String ret = root.getCanonicalPath();
+				return new CString(ret, t);
+			} catch (IOException ex) {
+				//This shouldn't happen, because the current working directory will only be
+				//set programmatically.
+				throw new RuntimeException(ex);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "pwd";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "string {} Returns the path to the current working directory. This is available outside cmdline mode, but"
+					+ " is probably only useful for debugging, meta, or informational purposes when not in cmdline interpreter mode,"
+					+ " as the current working directory is known simply by knowing what file this is running from.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
+	
+	@api
+	public static class cd extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			requireCmdlineMode(environment, this, t);
+			File cd = Static.GetFileFromArgument(args.length == 0 ? null : args[0].val(), environment, t, new File(System.getProperty("user.home")));
+			if(!cd.exists()){
+				throw new ConfigRuntimeException("No such file or directory: " + cd.getPath(), ExceptionType.IOException, t);
+			}
+			environment.getEnv(GlobalEnv.class).SetRootFolder(cd);
+			return new CVoid(t);
+		}
+
+		@Override
+		public String getName() {
+			return "cd";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[dir]} Changes the current working directory to the path specified, or the user's home"
+					+ " directory if omitted. This only works from cmdline mode.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class ls extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			requireCmdlineMode(environment, this, t);
+			CArray ca = new CArray(t);
+			File cwd = Static.GetFileFromArgument(args.length > 0 ? args[0].val() : null, environment, t, environment.getEnv(GlobalEnv.class).GetRootFolder());
+			if(cwd.exists()){
+				for(File f : cwd.listFiles()){
+					ca.push(new CString(f.getName(), t));
+				}
+			} else {
+				throw new ConfigRuntimeException("No such file or directory: " + cwd.getPath(), 
+						ExceptionType.IOException, t);
+			}
+			return ca;
+		}
+
+		@Override
+		public String getName() {
+			return "ls";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[directory]} Returns an array of files in the current working directory, including \"hidden\" files, or"
+					+ "if directory is specified, the files in that directory. This is only available in cmdline mode.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class set_cmdline_prompt extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			requireCmdlineMode(environment, this, t);
+			if(!(args[0] instanceof CClosure)){
+				throw new Exceptions.CastException("Expecting a closure for argument 1 of " + getName(), t);
+			}
+			environment.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);
+			return new CVoid(t);
+		}
+
+		@Override
+		public String getName() {
+			return "set_cmdline_prompt";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {closure} Sets the cmdline prompt. This is only usable or useful in cmdline interpreter mode. The closure should"
+					+ " return a string, that string will be used as the prompt. The closure is called each time a prompt needs generating,"
+					+ " thereby allowing for dynamic prompts.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	/**
+	 * Requires cmdline mode. If not currently in cmdline mode, a proper CRE is thrown.
+	 * @param environment
+	 * @param f The function this is being called from.
+	 * @param t
+	 * @throws ConfigRuntimeException If not in cmdline mode.
+	 */
+	public static void requireCmdlineMode(Environment environment, Function f, Target t) throws ConfigRuntimeException {
+		if(!Static.InCmdLine(environment)){
+			throw new ConfigRuntimeException(f.getName() + " cannot be used outside of cmdline mode.", 
+					ExceptionType.InsufficientPermissionException, t);
+		}
+	}
+
 }

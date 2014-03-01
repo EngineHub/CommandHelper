@@ -89,9 +89,9 @@ There are three columns in the table, and the table name is determined by the us
 
 The columns are defined by the query:
 
-<syntaxhighlighting lang="sql">
+<syntaxhighlight lang="sql">
 %%MySQL_CREATE_TABLE_QUERY%%
-</syntaxhighlightin>
+</syntaxhighlight>
 
 Selections, inserts, etc, must take the key and binary hash it with the UNHEX and MD5 functions: 
 <code>UNHEX(MD5('key'))</code>. This provides a way for the key to be unlimited length, yet still
@@ -113,9 +113,9 @@ SQLite data is a flat data structure. Since TEXT columns can be indexed in SQLit
 the key column is the primary key. The database may contain multiple tables, but only the table created
 with the query:
 
-<syntaxhighlighting lang="sql">
+<syntaxhighlight lang="sql">
 %%SQLite_CREATE_TABLE_QUERY%%
-</syntaxhighlighting>
+</syntaxhighlight>
 
 will be used.
 

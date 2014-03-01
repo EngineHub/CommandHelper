@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
@@ -205,7 +206,10 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "ivariable {ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it. Returns the variable that was assigned.";
+			return "ivariable {ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it."
+					+ " Returns the variable that was assigned. Operator syntax is also supported: <code>@a = 5;</code>. Other"
+					+ " Other forms are supported as well, +=, -=, *=, /=, .=, which do multiple operations at once. Array assigns"
+					+ " are also supported: @array[5] = 'new value in index 5';";
 		}
 
 		@Override
@@ -284,8 +288,14 @@ public class DataHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@variable, 5)\nmsg(@variable)"),
-				new ExampleScript("Array assignment", "assign(@variable['associative'], 5) #This creates the array for us\nmsg(@variable)"),
+				new ExampleScript("Basic usage", "assign(@variable, 5);\nmsg(@variable);"),
+				new ExampleScript("Array assignment", "assign(@variable, associative_array());\nassign(@variable['associative'], 5);\nmsg(@variable);"),
+				new ExampleScript("Operator syntax", "@variable = 5;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 'string';\n@variable .= ' more string';\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable += 10;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable -= 10;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable *= 10;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable /= 10;\nmsg(@variable);"),
 			};
 		}
 	}
@@ -972,6 +982,12 @@ public class DataHandling {
 			return "Executing function: " + this.getName() + "(" 
 					+ args.get(0).toStringVerbose() + ", <code>)";
 		}
+
+		@Override
+		public boolean allowBraces() {
+			return true;
+		}
+		
 	}
 
 	@api
@@ -2154,7 +2170,8 @@ public class DataHandling {
 			ParseTree tree = nodes[0];
 			Construct arg = parent.seval(tree, env);
 			String location = arg.val();
-			ParseTree include = IncludeCache.get(new File(t.file().getParent(), location), t);
+			File file = Static.GetFileFromArgument(location, env, t, null);
+			ParseTree include = IncludeCache.get(file, t);
 			parent.eval(include.getChildAt(0), env);
 			return new CVoid(t);
 		}
@@ -3104,7 +3121,9 @@ public class DataHandling {
 		}
 	}
 	
-	@api public static class to_radix extends AbstractFunction {
+	@api
+	@seealso(parse_int.class)
+	public static class to_radix extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -3166,12 +3185,17 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("To a hex string", "to_radix(15, 16)"),
-				new ExampleScript("To a binary string", "to_radix(15, 2)")
+				new ExampleScript("To a binary string", "to_radix(15, 2)"),
+				new ExampleScript("Using hex value in source", "to_radix(0xff, 16)"),
+				new ExampleScript("Using binary value in source", "to_radix(0b10101010, 2)")
 			};
 		}
+		
 	}
 	
-	@api public static class parse_int extends AbstractFunction {
+	@api
+	@seealso(to_radix.class)
+	public static class parse_int extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -3234,7 +3258,6 @@ public class DataHandling {
 				new ExampleScript("From binary string", "parse_int('1111', 2)")
 			};
 		}
-		
 	}
 
 	/**

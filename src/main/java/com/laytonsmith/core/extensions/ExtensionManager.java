@@ -178,14 +178,10 @@ public class ExtensionManager {
 
 			// Get the internal name that this extension exposes.
 			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
-				File f;
-
-				try {
-					f = new File(plugURL.toURI());
-				} catch (URISyntaxException ex) {
-					Static.getLogger().log(Level.SEVERE, null, ex);
-					continue;
-				}
+				// The substring(6) gets rid of the "file:/" which will be at the front of the URL.
+				// We aren't using URL.toURI(), because paths with spaces in them won't work properly,
+				// and that's a valid, though non-recommended file path.
+				File f = new File(plugURL.toString().substring(6));
 
 				// Skip extensions that originate from commandhelpercore.
 				if (plugURL.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
@@ -240,14 +236,10 @@ public class ExtensionManager {
 			URL plugURL = klass.getContainer();
 
 			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
-				File f;
-
-				try {
-					f = new File(plugURL.toURI());
-				} catch (URISyntaxException ex) {
-					Static.getLogger().log(Level.SEVERE, null, ex);
-					continue;
-				}
+				// The substring(6) gets rid of the "file:/" which will be at the front of the URL.
+				// We aren't using URL.toURI(), because paths with spaces in them won't work properly,
+				// and that's a valid, though non-recommended file path.
+				File f = new File(plugURL.toString().substring(6));
 
 				// Skip files already processed.
 				if (done.contains(f)) {
@@ -349,7 +341,11 @@ public class ExtensionManager {
 			
 			try {
 				extcls = extmirror.loadClass(dcl, true);
-			} catch (NoClassDefFoundError ex) {
+			} catch (Throwable ex) {
+				// May throw anything, and kill the loading process. 
+				// Lets prevent that!
+				Static.getLogger().log(Level.SEVERE, "Could not load class '"
+						+ extmirror.getClassName() + "'");
 				ex.printStackTrace();
 				continue;
 			}
@@ -403,7 +399,19 @@ public class ExtensionManager {
 
 			if (cd.doesClassExtend(klass, Event.class)
 					|| cd.doesClassExtend(klass, Function.class)) {
-				Class c = klass.loadClass(dcl, true);
+				
+				Class c;
+				
+				try {
+					c = klass.loadClass(dcl, true);
+				} catch (Throwable ex) {
+					// May throw anything, and kill the loading process. 
+					// Lets prevent that!
+					Static.getLogger().log(Level.SEVERE, "Could not load class '"
+							+ klass.getClassName() + "'");
+					ex.printStackTrace();
+					continue;
+				}
 
 				ExtensionTracker trk = extensions.get(url);
 
@@ -578,7 +586,7 @@ public class ExtensionManager {
 						} catch (Throwable e) {
 							Logger log = Static.getLogger();
 							log.log(Level.SEVERE, ext.getClass().getName()
-									+ "'s onStartup caused an exception:");
+									+ "'s onShutdown caused an exception:");
 							log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 						}
 					}

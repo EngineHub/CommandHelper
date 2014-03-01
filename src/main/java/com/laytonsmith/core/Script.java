@@ -8,18 +8,43 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CEntry;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Command;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.exceptions.*;
+import com.laytonsmith.core.environments.InvalidEnvironmentException;
+import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.LoopBreakException;
+import com.laytonsmith.core.exceptions.LoopContinueException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -213,6 +238,11 @@ public class Script {
     }
 
     public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
+		if(env.getEnv(GlobalEnv.class).IsInterrupted()){
+			//First things first, if we're interrupted, kill the script
+			//unconditionally.
+			throw new CancelCommandException("", Target.UNKNOWN);
+		}
         final Construct m = c.getData();
         CurrentEnv = env;
 		//TODO: Reevaluate if this line is needed. The script doesn't know the label inherently, the
@@ -249,6 +279,14 @@ public class Script {
 				
 				ArrayList<Construct> args = new ArrayList<Construct>();
                 try{
+					if (f.isRestricted()) {
+						boolean perm = Static.hasCHPermission(f.getName(), env);
+						if (!perm) {
+							throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
+									ExceptionType.InsufficientPermissionException, m.getTarget());
+						}
+					}
+					
 					if(f.useSpecialExec()){
 						ProfilePoint p = null;
 						if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
@@ -267,13 +305,6 @@ public class Script {
 
 					for (ParseTree c2 : c.getChildren()) {
 						args.add(eval(c2, env));
-					}
-					if (f.isRestricted()) {
-						boolean perm = Static.hasCHPermission(f.getName(), env);
-						if (!perm) {
-							throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
-									ExceptionType.InsufficientPermissionException, m.getTarget());
-						}
 					}
 					Object[] a = args.toArray();
 					Construct[] ca = new Construct[a.length];
@@ -314,9 +345,12 @@ public class Script {
 					}
 				//We want to catch and rethrow the ones we know how to catch, and then
 				//catch and report anything else.
-				} catch(ConfigRuntimeException e){
+				} catch(ConfigRuntimeException | ProgramFlowManipulationException e){
 					throw e;
-				} catch(ProgramFlowManipulationException e){
+				} catch(InvalidEnvironmentException e){
+					if(!e.isDataSet()){
+						e.setData(f.getName());
+					}
 					throw e;
 				} catch(Exception e){
 					String version = "Unknown";

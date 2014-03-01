@@ -95,8 +95,8 @@
 		</contributor>
 	</contributors>
 	<issueManagement>
-		<system>sk89q's Redmine</system>
-		<url>http://redmine.sk89q.com/projects/commandhelper/</url>
+		<system>sk89q's Youtrack</system>
+		<url>http://youtrack.sk89q.com/issues/CMDHELPER</url>
 	</issueManagement>
 	<ciManagement>
 		<system>TeamCity</system>
@@ -177,7 +177,7 @@
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.7.2-R0.1-SNAPSHOT</version>
+			<version>1.7.2-R0.3-SNAPSHOT</version>
 		</dependency>
         
 		<!-- CraftBukkit Dependency for experimental features
@@ -395,6 +395,14 @@
 			<id>sk89q-docs-upload</id>
 			<url>ftp://sk89q-maven-deploy/commandhelper/</url>
 		</site>
+		<repository>
+			<id>maven.sk89q.com</id>
+			<url>http://maven.sk89q.com/artifactory/libs-release-local</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven.sk89q.com-snapshot</id>
+			<url>http://maven.sk89q.com/artifactory/libs-snapshot-local</url>
+		</snapshotRepository>
 	</distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
@@ -414,8 +422,16 @@
 				<filtering>true</filtering>
 				<directory>${basedir}/src/main/resources/</directory>
 				<includes>
-					<include>**</include>
+					<include>plugin.yml</include>
 				</includes>
+			</resource>
+			<resource>
+				<targetPath>.</targetPath>
+				<filtering>false</filtering>
+				<directory>${basedir}/src/main/resources/</directory>
+				<excludes>
+					<exclude>plugin.yml</exclude>
+				</excludes>
 			</resource>
 		</resources>
 		<testResources>
@@ -436,6 +452,7 @@
 					<showDeprecation>true</showDeprecation>
 					<source>1.7</source>
 					<target>1.7</target>
+					<compilerArgument>-XDignore.symbol.file</compilerArgument>
 				</configuration>
 			</plugin>
 
@@ -764,6 +781,7 @@
 					<processors>
 						<processor>com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>
 						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
+						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>
 				</configuration>
 			</plugin>

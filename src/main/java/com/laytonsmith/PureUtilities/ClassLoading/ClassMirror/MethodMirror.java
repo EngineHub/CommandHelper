@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class gathers information about a method, without actually loading 
@@ -15,23 +16,29 @@ public class MethodMirror extends AbstractElementMirror {
 	private static final long serialVersionUID = 1L;
 	
 	private final List<ClassReferenceMirror> params;
-	private final ClassReferenceMirror parentClass;
 	private boolean isVararg = false;
 	private boolean isSynthetic = false;
+	
+	private Method underlyingMethod = null;
+	
 	public MethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers, 
 			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){
-		super(annotations, modifiers, type, name);
-		this.parentClass = parentClass;
+		super(parentClass, annotations, modifiers, type, name);
 		this.params = params;
 		this.isVararg = isVararg;
 		this.isSynthetic = isSynthetic;
 	}
 	
+	public MethodMirror(Method method){
+		super(method);
+		this.underlyingMethod = method;
+		this.params = null;
+	}
+	
 	/* package */ MethodMirror(ClassReferenceMirror parentClass, ModifierMirror modifiers, ClassReferenceMirror type, 
 			String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){
-		super(null, modifiers, type, name);
-		annotations = new ArrayList<AnnotationMirror>();
-		this.parentClass = parentClass;
+		super(parentClass, null, modifiers, type, name);
+		annotations = new ArrayList<>();
 		this.params = params;
 		this.isVararg = isVararg;
 		this.isSynthetic = isSynthetic;
@@ -42,7 +49,14 @@ public class MethodMirror extends AbstractElementMirror {
 	 * @return 
 	 */
 	public List<ClassReferenceMirror> getParams(){
-		return new ArrayList<ClassReferenceMirror>(params);
+		if(underlyingMethod != null){
+			List<ClassReferenceMirror> list = new ArrayList<>();
+			for(Class p : underlyingMethod.getParameterTypes()){
+				list.add(ClassReferenceMirror.fromClass(p));
+			}
+			return list;
+		}
+		return new ArrayList<>(params);
 	}
 	
 	/**
@@ -50,6 +64,9 @@ public class MethodMirror extends AbstractElementMirror {
 	 * @return 
 	 */
 	public boolean isVararg(){
+		if(underlyingMethod != null){
+			return underlyingMethod.isVarArgs();
+		}
 		return isVararg;
 	}
 	
@@ -58,29 +75,45 @@ public class MethodMirror extends AbstractElementMirror {
 	 * @return 
 	 */
 	public boolean isSynthetic(){
+		if(underlyingMethod != null){
+			return underlyingMethod.isSynthetic();
+		}
 		return isSynthetic;
 	}
 	
 	/**
 	 * This loads the parent class, and returns the {@link Method} object.
 	 * This also loads all parameter type's classes as well.
+	 * <p>
+	 * If this class was created with an actual Method, then that is simply returned.
 	 * @return 
+	 * @throws java.lang.ClassNotFoundException 
 	 */
 	public Method loadMethod() throws ClassNotFoundException{
+		if(underlyingMethod != null){
+			return underlyingMethod;
+		}
 		return loadMethod(MethodMirror.class.getClassLoader(), true);
 	}
 	
 	/**
 	 * This loads the parent class, and returns the {@link Method} object.
 	 * This also loads all parameter type's classes as well.
+	 * <p>
+	 * If this class was created with an actual Method, then that is simply returned.
 	 * @param loader
 	 * @param initialize
 	 * @return
 	 * @throws ClassNotFoundException 
 	 */
 	public Method loadMethod(ClassLoader loader, boolean initialize) throws ClassNotFoundException{
-		Class parent = parentClass.loadClass(loader, initialize);
-		List<Class> cParams = new ArrayList<Class>();
+		if(underlyingMethod != null){
+			return underlyingMethod;
+		}
+		ClassReferenceMirror p = getDeclaringClass();
+		Objects.requireNonNull(p, "Declaring class is null!");
+		Class parent = p.loadClass(loader, initialize);
+		List<Class> cParams = new ArrayList<>();
 		for(ClassReferenceMirror c : params){
 			cParams.add(c.loadClass(loader, initialize));
 		}
@@ -91,18 +124,13 @@ public class MethodMirror extends AbstractElementMirror {
 			throw new RuntimeException(ex);
 		}
 	}
-	
-	/**
-	 * Returns a ClassReferenceMirror to the parent class.
-	 * @return 
-	 */
-	public ClassReferenceMirror getDeclaringClass(){
-		return parentClass;
-	}
 
 	@Override
 	public String toString() {
-		List<String> sParams = new ArrayList<String>();
+		if(underlyingMethod != null){
+			return underlyingMethod.toString();
+		}
+		List<String> sParams = new ArrayList<>();
 		for(int i = 0; i < params.size(); i++){
 			if(i == params.size() - 1 && isVararg){
 				sParams.add(params.get(i).getComponentType().toString() + "...");
@@ -113,33 +141,5 @@ public class MethodMirror extends AbstractElementMirror {
 		return StringUtils.Join(annotations, "\n") + (annotations.isEmpty()?"":"\n") + (modifiers.toString() 
 				+ " " + type).trim() + " " + name + "(" + StringUtils.Join(sParams, ", ") + "){}";
 	}
-
-	@Override
-	public int hashCode() {
-		int hash = 7;
-		hash = 31 * hash + (this.params != null ? this.params.hashCode() : 0);
-		hash = 31 * hash + (this.parentClass != null ? this.parentClass.hashCode() : 0);
-		return hash;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final MethodMirror other = (MethodMirror) obj;
-		if (this.params != other.params && (this.params == null || !this.params.equals(other.params))) {
-			return false;
-		}
-		if (this.parentClass != other.parentClass && (this.parentClass == null || !this.parentClass.equals(other.parentClass))) {
-			return false;
-		}
-		return true;
-	}
-	
-	
 	
 }

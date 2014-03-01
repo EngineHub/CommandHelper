@@ -146,21 +146,21 @@ public class ArgumentSuite {
 		}
 		b.append("Modes: (a mode must be the first argument) \n");
 		for(String mode : suite.keySet()){
-			b.append("\t").append(mode);
+			b.append("\t").append(TermColors.BOLD).append(mode);
 			if(aliases.containsValue(mode)){
-				List<String> keys = new ArrayList<String>();
+				List<String> keys = new ArrayList<>();
 				for(String alias : aliases.keySet()){
 					if(aliases.get(alias).equals(mode)){
 						keys.add(alias);
 					}
 				}
-				b.append(" (Alias");
+				b.append(TermColors.RESET).append(" (Alias");
 				if(keys.size() != 1){
 					b.append("es");
 				}
 				b.append(": ").append(StringUtils.Join(keys, ", ")).append(")");
 			}
-			b.append(": ").append(suite.get(mode).getDescription()).append("\n");
+			b.append(TermColors.RESET).append(": ").append(suite.get(mode).getDescription()).append("\n");
 		}
 		return b.toString();
 	}

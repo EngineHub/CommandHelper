@@ -1,0 +1,33 @@
+.\" This is the man page for mscript, which is optionally installed during cmdline-installation
+
+.TH mscript 1 "%%DATE|MMMMM d, y%%" "version %%CONST|com.laytonsmith.core.CHVersion.LATEST%%" "USER COMMANDS"
+
+.SH NAME
+mscript \- Unix frontend for the MethodScript programming language
+
+.SH SYNOPSIS
+.B mscript
+.PP
+.B mscript \fB[\fISCRIPT\fB]\fR
+.PP
+.B mscript \-\- \fB[\fIOPTION\fB]\fR
+
+.SH DESCRIPTION
+.PP
+\fImscript\fP is a frontend for MethodScript, which wraps the native jar, for easier access to
+commandline tools, interpreter mode, and script execution.
+.TP
+All commands listed could be otherwise run from the jar directly, but this offers a more
+convenient and unix friendly frontend.
+.SH OPTIONS
+.PP
+If invoked without options, the interactive interpreter will be launched. Typing \fB\-\fP
+on a line by itself will exit the interpreter, as will the exit() function.
+.PP
+If invoked with a single argument, this is interpreted as a script, and it the script
+at that location will be executed.
+.PP
+If the first argument is \fB\-\-\fP, then all proceeding arguments are passed as is
+to the jar. This will be as if you ran java -jar NameOfJar.jar <arguments>. This
+is shorthand for launching the command line tools. For further details on the command
+line tools, run \fBmscript \-\- help\fP.

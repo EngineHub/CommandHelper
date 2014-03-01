@@ -9,13 +9,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author Layton
+ * This class provides installation methods. They create the appropriate folders and files, if
+ * they aren't already there.
  */
 public final class Installer {
     
@@ -64,6 +63,15 @@ public final class Installer {
 			}
 		}
     }
+	
+	public static void InstallCmdlineInterpreter(){
+		MethodScriptFileLocations.getDefault().getCmdlineInterpreterDirectory().mkdir();
+		try {
+			MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile().createNewFile();
+		} catch (IOException ex) {
+			Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
 
     public static String parseISToString(java.io.InputStream is) {
         BufferedReader din = new BufferedReader(new InputStreamReader(is));

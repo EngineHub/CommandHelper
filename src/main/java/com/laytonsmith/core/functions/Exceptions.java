@@ -3,12 +3,14 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -273,6 +275,7 @@ public class Exceptions {
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
+	@seealso(_throw.class)
 	public static class _try extends AbstractFunction {
 
 		@Override
@@ -410,9 +413,11 @@ public class Exceptions {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
 	}
 
 	@api
+	@seealso(_try.class)
 	public static class _throw extends AbstractFunction {
 
 		@Override
@@ -490,6 +495,7 @@ public class Exceptions {
 	}
 	
 	@api
+	@seealso({_throw.class, _try.class})
 	public static class set_uncaught_exception_handler extends AbstractFunction{
 
 		@Override
@@ -510,8 +516,13 @@ public class Exceptions {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CClosure){
+				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
-				return new CVoid(t);
+				if(old == null){
+					return new CNull();
+				} else {
+					return old;
+				}
 			} else {
 				throw new CastException("Expecting arg 1 of " + getName() + " to be a Closure, but it was " + args[0].val(), t);
 			}
@@ -529,7 +540,8 @@ public class Exceptions {
 
 		@Override
 		public String docs() {
-			return "void {closure(@ex)} Sets the uncaught exception handler. If code throws an exception, instead of doing"
+			return "closure {closure(@ex)} Sets the uncaught exception handler, returning the currently set one, or null if none has been"
+					+ " set yet. If code throws an exception, instead of doing"
 					+ " the default (displaying the error to the user/console) it will run your code instead. The exception"
 					+ " that was thrown will be passed to the closure, and it is expected that the closure returns either null,"
 					+ " true, or false. ---- If null is returned, the default handling will occur. If false is returned, it will"
@@ -545,6 +557,23 @@ public class Exceptions {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "set_uncaught_exception_handler(closure(@ex){\n"
+						+ "\tmsg('Exception caught!');\n"
+						+ "\tmsg(@ex);\n"
+						+ "\treturn(true);\n"
+						+ "});\n\n"
+						+ "@zero = 0;\n"
+						+ "@exception = 1 / @zero; // This should throw an exception\n",
+						// Can't automatically run this, since the examples don't have
+						// the exception handling fully working.
+						"Exception caught!\n" 
+						+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),
+			};
 		}
 		
 	}

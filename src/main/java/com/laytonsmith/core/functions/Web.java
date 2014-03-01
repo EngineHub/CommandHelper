@@ -319,7 +319,7 @@ public class Web {
 						settings.setDownloadTo(null);
 					} else {
 						//TODO: Remove this check and tie into the VFS once that is complete.
-						if(Cmdline.inCmdLine(environment)){
+						if(Static.InCmdLine(environment)){
 							File file = new File(download.val());
 							if(!file.isAbsolute()){
 								file = new File(t.file(), file.getPath());

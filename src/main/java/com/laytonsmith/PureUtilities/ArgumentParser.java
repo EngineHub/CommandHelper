@@ -123,7 +123,7 @@ public class ArgumentParser {
         }
 
         private void setValue(List<String> val) {
-            arrayVal = new ArrayList<String>(val);
+            arrayVal = new ArrayList<>(val);
         }
 
         public boolean modelEquals(Argument obj) {
@@ -793,11 +793,6 @@ public class ArgumentParser {
             parts.add("[--" + s + "]");
         }
 
-        //Now, if the default switch exists, put it here too
-        if (getArgument() != null) {
-            parts.add("<" + getArgument().usageName + ", ...>");
-        }
-
         List<Argument> usageList = new ArrayList<Argument>();
         for (Character c : shortArguments) {
             usageList.add(getArgument(c));
@@ -825,10 +820,27 @@ public class ArgumentParser {
             }
             usage.append(">");
 
+			if(a.defaultVal != null && !"".equals(a.defaultVal)){
+				usage.append(" (default ");
+				if(a.argType == Type.STRING){
+					usage.append("\"");
+				}
+				usage.append(a.defaultVal);
+				if(a.argType == Type.STRING){
+					usage.append("\"");
+				}
+				usage.append(")");
+			}
+			
             if (!a.required) {
                 usage.append("]");
             }
             parts.add(usage.toString());
+        }
+		
+        //Now, if the default switch exists, put it here too
+        if (getArgument() != null) {
+            parts.add("<" + getArgument().usageName + ", ...>");
         }
 
         {
@@ -1059,21 +1071,13 @@ public class ArgumentParser {
                 }
                 continue;
             }
-
-            //It's just a loose arg, so we'll add it to the list and deal with it at the end
-            looseArgs.add(arg);
+			
+			//It's just a loose arg, so we'll add it to the list and deal with it at the end
+			looseArgs.add(arg);
         }
 
         //Finish up the last argument
         results.updateArgument(validateArgument(lastArg, looseArgs));
-        if (!looseArgs.isEmpty()) {
-            //If there are still loose args left, they
-            //belong to the default arg list, so let's put them
-            //there now.
-            Argument a = new Argument(ArgumentParser.this.getArgument());
-            a.setValue(looseArgs);
-            results.updateArgument(a);
-        }
 
         //TODO: Check to see if all the required values are here
 
@@ -1082,6 +1086,15 @@ public class ArgumentParser {
 
     private Argument validateArgument(Argument arg, List<String> looseArgs) throws ValidationException {
         if (arg == null) {
+			if(!looseArgs.isEmpty()){
+				//All the loose arguments are accounted for. Either we're done with the arguments,
+				//or we just hit a -(-)specifier, so we can stop parsing these, and go ahead and
+				//add them to the results.
+				Argument a = new Argument(ArgumentParser.this.getArgument());
+				a.setValue(looseArgs);
+				looseArgs.clear();
+				return a;
+			}
             return null;
         }
         Argument finishedArgument = new Argument(arg);

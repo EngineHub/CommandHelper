@@ -1103,7 +1103,8 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
-					+ " or if the type is invalid, a FormatException is thrown.";
+					+ " or if the type is invalid, a FormatException is thrown. The type may be one of either " 
+					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ");
 		}
 
 		@Override

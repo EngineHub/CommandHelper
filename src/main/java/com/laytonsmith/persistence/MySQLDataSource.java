@@ -72,9 +72,10 @@ public class MySQLDataSource extends SQLDataSource {
 		try {
 			connect();
 			//Create the table if it doesn't exist
-			//The columns in the table 
-			Statement statement = getConnection().createStatement();
-			statement.executeUpdate(getTableCreationQuery(table));
+			//The columns in the table
+			try (Statement statement = getConnection().createStatement()) {
+				statement.executeUpdate(getTableCreationQuery(table));
+			}
 		} catch (IOException | SQLException ex) {
 			throw new DataSourceException("Could not connect to MySQL data source \"" + uri.toString() + "\": " + ex.getMessage(), ex);
 		}
@@ -87,15 +88,24 @@ public class MySQLDataSource extends SQLDataSource {
 	 * @param table
 	 * @return 
 	 */
-	public final String getTableCreationQuery(String table){
+	public final String getTableCreationQuery(String table) {
 		return "CREATE TABLE IF NOT EXISTS `" + table + "` (\n"
-					+ " -- This is an UNHEX(MD5('key')) binary hash of the unlimited length key column, so the table may have a primary key.\n"
-					+ " `" + KEY_HASH_COLUMN + "` BINARY(16) PRIMARY KEY NOT NULL,\n"
-					+ " -- This is the key itself, stored for plaintext readability, and for full text searches for getting values\n"
-					+ " `" + getKeyColumn() + "` TEXT NOT NULL,\n"
-					+ " -- The value itself, which may be null\n"
-					+ " `" + getValueColumn() + "` TEXT\n"
-					+ ");";
+				+ " -- This is an UNHEX(MD5('key')) binary hash of the unlimited length key column, so the table may have a primary key.\n"
+				+ " `" + KEY_HASH_COLUMN + "` BINARY(16) PRIMARY KEY NOT NULL,\n"
+				+ " -- This is the key itself, stored for plaintext readability, and for full text searches for getting values\n"
+				+ " `" + getKeyColumn() + "` TEXT NOT NULL,\n"
+				+ " -- The value itself, which may be null\n"
+				+ " `" + getValueColumn() + "` MEDIUMTEXT\n"
+				+ ")\n"
+				+ " -- The engine is InnoDB, to support transactions\n"
+				+ "ENGINE = InnoDB,\n"
+				+ " -- The charset is utf8, since all keys are utf8, and values are utf8 json\n"
+				+ "CHARACTER SET = utf8,\n"
+				+ " -- The collation is case sensitive\n"
+				+ "COLLATE = utf8_bin,\n"
+				+ " -- Table comment\n"
+				+ "COMMENT = 'MethodScript storage table'\n"
+				+ ";";
 	}
 
 	@Override
@@ -114,15 +124,17 @@ public class MySQLDataSource extends SQLDataSource {
 	public String get0(String[] key) throws DataSourceException {
 		try {
 			connect();
-			PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" 
+			String ret; 
+			try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" 
 					+ getEscapedTable() + "` WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))"
-					+ " LIMIT 1");
-			String joinedKey = StringUtils.Join(key, ".");
-			statement.setString(1, joinedKey);
-			String ret = null;
-			try (ResultSet result = statement.executeQuery()) {
-				if(result.next()){
-					ret = result.getString(getValueColumn());
+					+ " LIMIT 1")) {
+				String joinedKey = StringUtils.Join(key, ".");
+				statement.setString(1, joinedKey);
+				ret = null;
+				try (ResultSet result = statement.executeQuery()) {
+					if(result.next()){
+						ret = result.getString(getValueColumn());
+					}
 				}
 			}
 			updateLastConnected();
@@ -139,13 +151,16 @@ public class MySQLDataSource extends SQLDataSource {
 			if(value == null){
 				clearKey0(dm, key);
 			} else {
-				PreparedStatement statement = getConnection().prepareStatement("REPLACE INTO"
+				try (PreparedStatement statement = getConnection().prepareStatement("REPLACE INTO"
 						+ " `" + getEscapedTable() + "`"
-						+ " (`" + KEY_HASH_COLUMN + "`, `" + getValueColumn() + "`) VALUES (UNHEX(MD5(?)), ?)");
-				String joinedKey = StringUtils.Join(key, ".");
-				statement.setString(1, joinedKey);
-				statement.setString(2, value);
-				statement.executeUpdate();
+						+ " (`" + KEY_HASH_COLUMN + "`, `" + getKeyColumn() + "`, `" + getValueColumn() + "`)"
+						+ " VALUES (UNHEX(MD5(?)), ?, ?)")) {
+					String joinedKey = StringUtils.Join(key, ".");
+					statement.setString(1, joinedKey);
+					statement.setString(2, joinedKey);
+					statement.setString(3, value);
+					statement.executeUpdate();
+				}
 			}
 			updateLastConnected();
 			return true;
@@ -159,11 +174,12 @@ public class MySQLDataSource extends SQLDataSource {
 		if(hasKey(key)){
 			try{
 				connect();				
-				PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() + "`"
-						+ " WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))");
-				String joinedKey = StringUtils.Join(key, ".");
-				statement.setString(1, joinedKey);
-				statement.executeUpdate();
+				try (PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() + "`"
+						+ " WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))")) {
+					String joinedKey = StringUtils.Join(key, ".");
+					statement.setString(1, joinedKey);
+					statement.executeUpdate();
+				}
 				updateLastConnected();
 			} catch(Exception e){
 				throw new DataSourceException(e.getMessage(), e);
@@ -183,7 +199,7 @@ public class MySQLDataSource extends SQLDataSource {
 			+ " based data sources, without risking either data corruption,"
 			+ " or extremely low efficiency. The layout of the table"
 			+ " in the database is required to be of a specific format:"
-			+ " " + getTableCreationQuery("testTable");
+			+ " <syntaxhighlight lang=\"sql\">" + getTableCreationQuery("testTable") + "</syntaxhighlight>";
 	}
 
 	@Override
@@ -194,7 +210,9 @@ public class MySQLDataSource extends SQLDataSource {
 	@Override
 	protected void startTransaction0(DaemonManager dm) {
 		try {
-			getConnection().createStatement().execute("START TRANSACTION");
+			try(Statement statement = getConnection().createStatement()){
+				statement.execute("START TRANSACTION");
+			}
 		} catch (SQLException ex) {
 			Logger.getLogger(MySQLDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -203,11 +221,16 @@ public class MySQLDataSource extends SQLDataSource {
 	@Override
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		try {
-			if(rollback){
-				getConnection().createStatement().execute("ROLLBACK");
+			if (rollback) {
+				try(PreparedStatement statement = getConnection().prepareStatement("ROLLBACK")){
+					statement.execute();
+				}
 			} else {
-				getConnection().createStatement().execute("COMMIT");
+				try(PreparedStatement statement = getConnection().prepareStatement("COMMIT")){
+					statement.execute();
+				}
 			}
+			updateLastConnected();
 		} catch (SQLException ex) {
 			Logger.getLogger(MySQLDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}

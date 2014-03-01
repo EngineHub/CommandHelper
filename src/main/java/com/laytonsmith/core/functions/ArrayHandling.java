@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.LinkedComparatorSet;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
@@ -93,6 +94,7 @@ public class ArrayHandling {
 	}
 
 	@api(environments={GlobalEnv.class})
+	@seealso({array_set.class, array.class})
 	public static class array_get extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -313,15 +315,11 @@ public class ArrayHandling {
 				OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
-
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{array_set.class, array.class};
-		}
 	
 	}
 
 	@api
+	@seealso({array_get.class, array.class, array_push.class})
 	public static class array_set extends AbstractFunction {
 
 		@Override
@@ -403,14 +401,10 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates using assign", "assign(@array, array(null))\nmsg(@array)\nassign(@array[0], 'value0')\nmsg(@array)"),
 			};
 		}
-		
-		@Override
-		public Class<? extends Documentation>[] seeAlso() {
-			return new Class[]{array_get.class, array.class};
-		}
 	}
 
 	@api
+	@seealso({array_set.class})
 	public static class array_push extends AbstractFunction {
 
 		@Override
@@ -755,9 +749,9 @@ public class ArrayHandling {
 
 		@Override
 		public String docs() {
-			return "void {array, size, [fill]} Resizes the given array so that it is at least of size size, filling the blank spaces with"
+			return "array {array, size, [fill]} Resizes the given array so that it is at least of size size, filling the blank spaces with"
 					+ " fill, or null by default. If the size of the array is already at least size, nothing happens; in other words this"
-					+ " function can only be used to increase the size of the array.";
+					+ " function can only be used to increase the size of the array. A reference to the array is returned, for easy chaining.";
 			//+ " If the array is an associative array, the non numeric values are simply copied over.";
 		}
 
@@ -782,7 +776,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray && args[1] instanceof CInt) {
 				CArray original = (CArray) args[0];
 				int size = (int) ((CInt) args[1]).getInt();
@@ -796,7 +790,7 @@ public class ArrayHandling {
 			} else {
 				throw new ConfigRuntimeException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", ExceptionType.CastException, t);
 			}
-			return new CVoid(t);
+			return (CArray)args[0];
 		}
 		
 		@Override

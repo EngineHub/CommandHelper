@@ -13,13 +13,13 @@ import java.util.Set;
  */
 public class DaemonManager {
 	private final Object lock = new Object();
-	private final Set<Thread> threads = new HashSet<Thread>();
+	private final Set<Thread> threads = new HashSet<>();
 	private int count = 0;
 	
 	/**
 	 * Sets a thread to "daemon" mode, meaning it is currently
-	 * active. Null may be sent, in which case a simple count is kept,
-	 * but otherwise isn't added to the active threads list. You should
+	 * active. Null may be sent, in which case the current thread
+	 * is used. You should
 	 * always put a deactivateThread call for every activateThread call.
 	 * @param t The thread to activate
 	 */
@@ -27,6 +27,8 @@ public class DaemonManager {
 		synchronized(lock){
 			if(t != null){
 				threads.add(t);
+			} else {
+				threads.add(Thread.currentThread());
 			}
 			++count;
 		}
@@ -34,13 +36,15 @@ public class DaemonManager {
 	
 	/**
 	 * Sets a thread to "non daemon" mode, meaning it is currently
-	 * inactive.
+	 * inactive. If null, the current thread is used.
 	 * @param t The thread to deactivate
 	 */
 	public void deactivateThread(Thread t){
 		synchronized(lock){
 			if(t != null){
 				threads.remove(t);
+			} else {
+				threads.remove(Thread.currentThread());
 			}
 			--count;
 			lock.notify();
@@ -48,9 +52,7 @@ public class DaemonManager {
 	}
 	
 	/**
-	 * Returns an array of all active threads. Threads may have started
-	 * themselves with null, so they won't be listed here. This is for informational
-	 * purposes only.
+	 * Returns an array of all active threads.
 	 * @return 
 	 */
 	public Thread[] getActiveThreads(){

@@ -6,6 +6,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import java.util.ArrayList;
@@ -105,9 +106,13 @@ public class CClosure extends Construct {
 	 * also bubble up past this, since an execution mechanism may need to do custom
 	 * handling.
      *
-     * @param values
+     * @param values The values to be passed to the closure
+	 * @throws ConfigRuntimeException If any call inside the closure causes a CRE
+	 * @throws ProgramFlowManipulationException If any ProgramFlowManipulationException is thrown
+	 * (other than a LoopManipulationException) within the closure
+	 * @throws FunctionReturnException If the closure has a return() call in it.
      */
-    public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException {
+    public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException {
 		if(node == null){
 			return;
 		}

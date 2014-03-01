@@ -9,6 +9,7 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
@@ -27,6 +28,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -65,17 +67,8 @@ public class FileHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			String location = args[0].val();
-			if(!new File(location).isAbsolute()){
-				try {
-					location = new File(t.file().getParentFile(), location).getCanonicalPath();
-				} catch (IOException ex) {
-					throw new ConfigRuntimeException("Bad file location '" 
-							+ location + "' (" + ex.getMessage() + ")",
-						Exceptions.ExceptionType.IOException, t);
-				}
-			}
-			if(!Cmdline.inCmdLine(env)){
+			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
+			if(!Static.InCmdLine(env)){
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
@@ -84,12 +77,13 @@ public class FileHandling {
 				}
 			}
 			try {
-				String s = file_get_contents(location);
+				String s = file_get_contents(location.getAbsolutePath());
 				s = s.replaceAll("\n|\r\n", "\n");
 				return new CString(s, t);
 			} catch (Exception ex) {
-				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + new File(location).getAbsolutePath()
-					+ "\nFile " + (new File(location).exists() ? "exists" : "does not exist"));
+				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find " 
+					+ location.getAbsolutePath()
+					+ "\nFile " + (location.exists() ? "exists" : "does not exist"), t);
 				throw new ConfigRuntimeException("File could not be read in.",
 					Exceptions.ExceptionType.IOException, t);
 			}
@@ -183,7 +177,7 @@ public class FileHandling {
 			} else {
 				callback = ((CClosure)args[1]);
 			}
-			if(!Cmdline.inCmdLine(environment)){
+			if(!Static.InCmdLine(environment)){
 				if(!Security.CheckSecurity(file)){
 					throw new ConfigRuntimeException("You do not have permission to access the file '" + file + "'", ExceptionType.SecurityException, t);
 				}
@@ -204,11 +198,8 @@ public class FileHandling {
 					} else {
 						try {
 							//It's a local file read
-							String _file = file;
-							if(!new File(_file).isAbsolute()){
-								_file = new File(t.file().getParentFile(), _file).getAbsolutePath();
-							}
-							returnString = FileUtil.read(new File(t.file().getParentFile(), _file));
+							File _file = Static.GetFileFromArgument(file, environment, t, null);
+							returnString = FileUtil.read(_file);
 						} catch (IOException ex) {
 							exception = new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 						}
@@ -290,12 +281,12 @@ public class FileHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String location = args[0].val();
+			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			if(!Security.CheckSecurity(location)){
 				throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'", 
 						ExceptionType.SecurityException, t);
 			}
-			return new CInt(new File(t.file().getParentFile(), location).length(), t);
+			return new CInt(location.length(), t);
 		}
 
 		@Override
@@ -340,17 +331,8 @@ public class FileHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			String location = args[0].val();
-			if(!new File(location).isAbsolute()){
-				try {
-					location = new File(t.file().getParentFile(), location).getCanonicalPath();
-				} catch (IOException ex) {
-					throw new ConfigRuntimeException("Bad file location '" 
-							+ location + "' (" + ex.getMessage() + ")",
-						Exceptions.ExceptionType.IOException, t);
-				}
-			}
-			if(!Cmdline.inCmdLine(env)){
+			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
+			if(!Static.InCmdLine(env)){
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
@@ -362,8 +344,8 @@ public class FileHandling {
 				InputStream stream = new GZIPInputStream(new FileInputStream(location));
 				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
 			} catch (IOException ex) {
-				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + new File(location).getAbsolutePath()
-					+ "\nFile " + (new File(location).exists() ? "exists" : "does not exist"));
+				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
+					+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
 				throw new ConfigRuntimeException("File could not be read in.",
 					Exceptions.ExceptionType.IOException, t);
 			}
@@ -384,6 +366,71 @@ public class FileHandling {
 			return "byte_array {file} Reads in a gzipped file, and returns a byte_array for it. The file is returned"
 					+ " exactly as is on disk, no conversions are done. base-dir restrictions are enforced for the"
 					+ " path, the same as read(). If file is relative, it is assumed to be relative to this file.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class read_binary extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
+			if(!Static.InCmdLine(env)){
+				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
+				//Cmdline mode doesn't currently have this restriction.
+				if (!Security.CheckSecurity(location)) {
+					throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
+						Exceptions.ExceptionType.SecurityException, t);
+				}
+			}
+			try {
+				InputStream stream = new BufferedInputStream(new FileInputStream(location));
+				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
+			} catch (IOException ex) {
+				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
+					+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
+				throw new ConfigRuntimeException("File could not be read in.",
+					Exceptions.ExceptionType.IOException, t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "read_binary";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "byte_array {file} Reads in a file, and returns a byte_array for it. The file is returned"
+					+ " exactly as is on disk, no conversions are done. base-dir restrictions are enforced for the"
+					+ " path, the same as read(). If file is relative, it is assumed to be relative to this file."
+					+ " This is useful for managing binary files.";
 		}
 
 		@Override
@@ -414,6 +461,7 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			//TODO: Doesn't work yet.
+			//TODO: Be sure to change over to Static.GetFileFromArgument
 			String path = args[0].val().trim().replace("\\", "/");
 			//Remove duplicate /
 			path = path.replaceAll("(/)(?=.*?/)", path);

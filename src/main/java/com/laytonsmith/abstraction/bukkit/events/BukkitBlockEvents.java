@@ -3,7 +3,7 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.*;
-import com.laytonsmith.abstraction.MCEntity.Velocity;
+import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
@@ -290,7 +290,7 @@ public class BukkitBlockEvents {
 		}
 
 		@Override
-		public void setVelocity(MCEntity.Velocity vel) {
+		public void setVelocity(Velocity vel) {
 			Vector v = new Vector(vel.x, vel.y, vel.z);
 			bde.setVelocity(v);
 		}

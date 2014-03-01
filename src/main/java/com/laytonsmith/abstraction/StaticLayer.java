@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -76,6 +77,10 @@ public final class StaticLayer {
     public static MCEnchantment GetEnchantmentByName(String name){
         return convertor.GetEnchantmentByName(name);
     }
+	
+	public static MCMaterial GetMaterial(String name) {
+		return convertor.GetMaterial(name);
+	}
     
     public static MCEnchantment[] GetEnchantmentValues(){
         return convertor.GetEnchantmentValues();

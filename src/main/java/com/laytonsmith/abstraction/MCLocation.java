@@ -1,7 +1,7 @@
 
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.MCEntity.Velocity;
+import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 
 /**
@@ -22,6 +22,14 @@ public interface MCLocation extends AbstractionObject{
     public int getBlockZ();
 	public MCChunk getChunk();
     public MCBlock getBlock();
+	public MCLocation add(MCLocation vec);
+	public MCLocation add(Velocity vec);
+	public MCLocation add(double x, double y, double z);
+	public MCLocation multiply(double m);
+	public Velocity toVector();
+	public MCLocation subtract(MCLocation vec);
+	public MCLocation subtract(Velocity vec);
+	public MCLocation subtract(double x, double y, double z);
 
 	public void setX(double x);
 	public void setY(double y);

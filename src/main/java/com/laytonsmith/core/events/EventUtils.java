@@ -266,7 +266,8 @@ public final class EventUtils {
 		}
 		return ca;
 	}
-
+	
+	@Deprecated // Use TriggerListener instead!
 	public static void TriggerExternal(BindableEvent mce) {
 		for (Method m : ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(event.class)) {
 			Class<?>[] params = m.getParameterTypes();

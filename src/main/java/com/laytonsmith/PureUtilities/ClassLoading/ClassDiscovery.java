@@ -398,6 +398,26 @@ public class ClassDiscovery {
 	}
 	
 	/**
+	 * Searches one deep, finding all jar files, and adds them, using
+	 * addDiscoveryLocation. If folder doesn't exist, is null,
+	 * doesn't contain any jars, or otherwise can't be read, nothing happens.
+	 * @param folder 
+	 */
+	public void addAllJarsInFolder(File folder){
+		if(folder != null && folder.exists() && folder.isDirectory()){
+			for(File f : folder.listFiles()){
+				if(f.getName().endsWith(".jar")){
+					try {
+						addDiscoveryLocation(f.toURI().toURL());
+					} catch (MalformedURLException ex) {
+						//
+					}
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Remove a discovery URL. Will invalidate caches.
 	 * 
 	 * @param url
@@ -505,7 +525,7 @@ public class ClassDiscovery {
 	}
 	
 	/**
-	 * Returns true iff subClass extends, implements, or is superClass.
+	 * Returns true if subClass extends, implements, or is superClass.
 	 * This searches the entire known class ecosystem, including the known ClassMirrors
 	 * for this information.
 	 * @param subClass
@@ -514,90 +534,90 @@ public class ClassDiscovery {
 	 */
 	public boolean doesClassExtend(ClassMirror subClass, Class superClass){
 		if (subClass.directlyExtendsFrom(superClass)) {
-				//Trivial case, so just add this now, then continue.
+			//Trivial case, so just add this now, then continue.
+			return true;
+		}
+		//Well, crap, more complicated. Ok, so, the list of supers
+		//can probably be walked up even further, so we need to find
+		//the supers of these (and make sure it's not in the ClassMirror
+		//cache, to avoid loading classes unneccessarily) and then load
+		//the actual Class object for them. Essentially, this falls back
+		//to loading the class when it
+		//can't be found in the mirrors pool.
+		Set<ClassReferenceMirror> supers = new HashSet<ClassReferenceMirror>();
+		//Get the superclass. If it's java.lang.Object, we're done.
+		ClassReferenceMirror su = subClass.getSuperClass();
+		while (!su.getJVMName().equals("Ljava/lang/Object;")) {
+			supers.add(su);
+			ClassMirror find = getClassMirrorFromJVMName(su.getJVMName());
+			if (find == null) {
+				try {
+					//Ok, have to Class.forName this one
+					Class clazz = ClassUtils.forCanonicalName(su.toString(), false, defaultClassLoader);
+					//We can just use isAssignableFrom now
+					if (superClass.isAssignableFrom(clazz)) {
+						return true;
+					} else {
+						//We need to add change the reference to su
+						su = new ClassReferenceMirror("L" + clazz.getSuperclass().getName().replace(".", "/") + ";");
+					}
+				} catch (ClassNotFoundException ex) {
+					//Hmm, ok? I guess something bad happened, so let's break
+					//the loop and give up on this class.
+					return false;
+				}
+			} else {
+				su = find.getSuperClass();
+			}
+		}
+		//Same thing now, but for interfaces
+		Deque<ClassReferenceMirror> interfaces = new ArrayDeque<ClassReferenceMirror>();
+		Set<ClassReferenceMirror> handled = new HashSet<ClassReferenceMirror>();
+		interfaces.addAll(subClass.getInterfaces());
+		//Also have to add all the supers' interfaces too
+		for (ClassReferenceMirror r : supers) {
+			ClassMirror find = getClassMirrorFromJVMName(r.getJVMName());
+			if (find == null) {
+				try {
+					Class clazz = Class.forName(r.toString());
+					for (Class c : clazz.getInterfaces()) {
+						interfaces.add(new ClassReferenceMirror("L" + c.getName().replace(".", "/") + ";"));
+					}
+				} catch (ClassNotFoundException ex) {
+					return false;
+				}
+			} else {
+				interfaces.addAll(find.getInterfaces());
+			}
+		}
+		while (!interfaces.isEmpty()) {
+			ClassReferenceMirror in = interfaces.pop();
+			if(ClassUtils.getJVMName(superClass).equals(in.getJVMName())){
+				//Early short circuit. We know it's in the the list already.
 				return true;
 			}
-			//Well, crap, more complicated. Ok, so, the list of supers
-			//can probably be walked up even further, so we need to find
-			//the supers of these (and make sure it's not in the ClassMirror
-			//cache, to avoid loading classes unneccessarily) and then load
-			//the actual Class object for them. Essentially, this falls back
-			//to loading the class when it
-			//can't be found in the mirrors pool.
-			Set<ClassReferenceMirror> supers = new HashSet<ClassReferenceMirror>();
-			//Get the superclass. If it's java.lang.Object, we're done.
-			ClassReferenceMirror su = subClass.getSuperClass();
-			while (!su.getJVMName().equals("Ljava/lang/Object;")) {
-				supers.add(su);
-				ClassMirror find = getClassMirrorFromJVMName(su.getJVMName());
-				if (find == null) {
-					try {
-						//Ok, have to Class.forName this one
-						Class clazz = ClassUtils.forCanonicalName(su.toString());
-						//We can just use isAssignableFrom now
-						if (superClass.isAssignableFrom(clazz)) {
-							return true;
-						} else {
-							//We need to add change the reference to su
-							su = new ClassReferenceMirror("L" + clazz.getSuperclass().getName().replace(".", "/") + ";");
-						}
-					} catch (ClassNotFoundException ex) {
-						//Hmm, ok? I guess something bad happened, so let's break
-						//the loop and give up on this class.
-						return false;
+			if (handled.contains(in)) {
+				continue;
+			}
+			handled.add(in);
+			supers.add(in);
+			ClassMirror find = getClassMirrorFromJVMName(in.getJVMName());
+			if (find != null) {
+				interfaces.addAll(find.getInterfaces());
+			} else {
+				try {
+					//Again, have to check Class.forName
+					Class clazz = ClassUtils.forCanonicalName(in.toString(), false, getDefaultClassLoader());
+					if (superClass.isAssignableFrom(clazz)) {
+						return true;
 					}
-				} else {
-					su = find.getSuperClass();
+				} catch (ClassNotFoundException ex) {
+					return false;
 				}
 			}
-			//Same thing now, but for interfaces
-			Deque<ClassReferenceMirror> interfaces = new ArrayDeque<ClassReferenceMirror>();
-			Set<ClassReferenceMirror> handled = new HashSet<ClassReferenceMirror>();
-			interfaces.addAll(subClass.getInterfaces());
-			//Also have to add all the supers' interfaces too
-			for (ClassReferenceMirror r : supers) {
-				ClassMirror find = getClassMirrorFromJVMName(r.getJVMName());
-				if (find == null) {
-					try {
-						Class clazz = Class.forName(r.toString());
-						for (Class c : clazz.getInterfaces()) {
-							interfaces.add(new ClassReferenceMirror("L" + c.getName().replace(".", "/") + ";"));
-						}
-					} catch (ClassNotFoundException ex) {
-						return false;
-					}
-				} else {
-					interfaces.addAll(find.getInterfaces());
-				}
-			}
-			while (!interfaces.isEmpty()) {
-				ClassReferenceMirror in = interfaces.pop();
-				if(ClassUtils.getJVMName(superClass).equals(in.getJVMName())){
-					//Early short circuit. We know it's in the the list already.
-					return true;
-				}
-				if (handled.contains(in)) {
-					continue;
-				}
-				handled.add(in);
-				supers.add(in);
-				ClassMirror find = getClassMirrorFromJVMName(in.getJVMName());
-				if (find != null) {
-					interfaces.addAll(find.getInterfaces());
-				} else {
-					try {
-						//Again, have to check Class.forName
-						Class clazz = ClassUtils.forCanonicalName(in.toString());
-						if (superClass.isAssignableFrom(clazz)) {
-							return true;
-						}
-					} catch (ClassNotFoundException ex) {
-						return false;
-					}
-				}
-			}
-			//Nope.
-			return false;
+		}
+		//Nope.
+		return false;
 	}
 
 	/**

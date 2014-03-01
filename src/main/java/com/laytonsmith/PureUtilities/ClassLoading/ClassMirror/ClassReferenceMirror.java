@@ -46,6 +46,7 @@ public class ClassReferenceMirror<T> implements Serializable {
 	 * call to succeed, the class must otherwise be on the class path. The standard
 	 * class loader is used, and the class is initialized.
 	 * @return 
+	 * @throws java.lang.ClassNotFoundException If the class can't be found
 	 */
 	public Class<T> loadClass() throws ClassNotFoundException{
 		return loadClass(ClassReferenceMirror.class.getClassLoader(), true);
@@ -103,10 +104,7 @@ public class ClassReferenceMirror<T> implements Serializable {
 			return false;
 		}
 		final ClassReferenceMirror other = (ClassReferenceMirror) obj;
-		if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
-			return false;
-		}
-		return true;
+		return !((this.name == null) ? (other.name != null) : !this.name.equals(other.name));
 	}
 	
 	

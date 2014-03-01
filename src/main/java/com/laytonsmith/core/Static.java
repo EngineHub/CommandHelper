@@ -17,6 +17,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlugin;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -32,8 +33,10 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Cmdline;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
 import com.laytonsmith.persistence.DataSourceException;
@@ -53,6 +56,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -462,10 +466,12 @@ public final class Static {
      * Given a string input, creates and returns a Construct of the appropriate
      * type. This takes into account that null, true, and false are keywords.
      * @param val
-     * @param line_num
+	 * @param t
      * @return 
+	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid
+	 * characters in it.
      */
-    public static Construct resolveConstruct(String val, Target t) {
+    public static Construct resolveConstruct(String val, Target t) throws ConfigRuntimeException {
         if (val == null) {
             return new CString("", t);
         }
@@ -476,6 +482,22 @@ public final class Static {
         } else if (val.equalsIgnoreCase("false")) {
             return new CBoolean(false, t);
         } else {
+			if(val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")){
+				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.", 
+						ExceptionType.FormatException, t);
+			}
+			if(val.matches("0x[a-fA-F0-9]+")){
+				//Hex number
+				return new CInt(Long.parseLong(val.substring(2), 16), t);
+			}
+			if(val.matches("0b[0-1]*[^0-1]+[0-1]*")){
+				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.", 
+						ExceptionType.FormatException, t);
+			}
+			if(val.matches("0b[0-1]+")){
+				//Binary number
+				return new CInt(Long.parseLong(val.substring(2), 2), t);
+			}
             try {
                 return new CInt(Long.parseLong(val), t);
             } catch (NumberFormatException e) {
@@ -637,7 +659,7 @@ public final class Static {
     }
 
     private static Map<String, MCPlayer> injectedPlayers = new HashMap<String, MCPlayer>();
-    public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {        
+    public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {  
         MCPlayer m = null;
 		try{
 			m = Static.getServer().getPlayer(player);
@@ -681,9 +703,28 @@ public final class Static {
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
+		throw new ConfigRuntimeException("That entity (ID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
 	}
-	
+
+	/**
+	 * Returns the entity with the specified unique id. If it doesn't exist, a
+	 * ConfigRuntimeException is thrown.
+	 *
+	 * @param id
+	 * @return
+	 */
+
+	public static MCEntity getEntityByUuid(UUID id, Target t) {
+		for (MCWorld w : Static.getServer().getWorlds()) {
+			for (MCEntity e : w.getEntities()) {
+				if (e.getUniqueId().compareTo(id) == 0) {
+					return StaticLayer.GetCorrectEntity(e);
+				}
+			}
+		}
+		throw new ConfigRuntimeException("That entity (UUID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
+   }
+
 	/**
 	 * Returns the living entity with the specified id. If it doesn't exist or isn't living,
 	 * a ConfigRuntimeException is thrown.
@@ -1078,6 +1119,82 @@ public final class Static {
 		PrintWriter pw = new PrintWriter(sw);
 		t.printStackTrace(pw);
 		return sw.toString();
+	}
+	
+	/**
+	 * Returns the actual file location, given the script's partial (or absolute)
+	 * file path, and depending on the context, the correct File object. Security
+	 * checking is not done at this stage, this merely transforms the path into
+	 * the correct File object. Additionally, if arg is null, then the default
+	 * is returned. If it is known that the arg won't ever be null, null may be
+	 * set as the default. Except in cases where both arg and def are null, this
+	 * function will never return null. If the arg starts with ~, it is replaced
+	 * with the user's home directory, as defined by the system property user.home.
+	 * 
+	 * This generally condenses a 5 or 6 line operation into 1 line.
+	 * @param arg
+	 * @return 
+	 */
+	public static File GetFileFromArgument(String arg, Environment env, Target t, File def){
+		if(arg == null){
+			return def;
+		}
+		if(arg.startsWith("~")){
+			arg = System.getProperty("user.home") + arg.substring(1);
+		}
+		File f = new File(arg);
+		if(f.isAbsolute()){
+			return f;
+		}
+		//Ok, it's not absolute, so we need to see if we're in cmdline mode or not.
+		//If so, we use the root directory, not the target.
+		if(InCmdLine(env)){
+			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
+		} else {
+			return new File(t.file().getParent(), arg);
+		}
+	}
+	
+	/**
+	 * Returns true if currently running in cmdline mode.
+	 * @param environment
+	 * @return 
+	 */
+	public static boolean InCmdLine(Environment environment){
+		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
+					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
+	}
+	
+	/**
+	 * This verifies that the type required is actually present, and returns the value,
+	 * cast to the appropriate type, or, if not the correct type, a CRE.
+	 * <p>
+	 * Note that this does not do type coersion, and therefore does not work on primitives,
+	 * and is only meant for arrays, closures, and other complex types.
+	 * @param <T> The type desired to be cast to
+	 * @param type The type desired to be cast to
+	 * @param args The array of arguments.
+	 * @param argNumber The argument number, used both for grabbing the correct argument from
+	 * args, and building the error message if the cast cannot occur.
+	 * @param func The function, in case this errors out, to build the error message.
+	 * @param t The code target
+	 * @return The value, cast to the desired type.
+	 */
+	public static <T extends Construct> T AssertType(Class<T> type, Construct [] args, int argNumber, Function func, Target t){
+		Construct value = args[argNumber];
+		if(!type.isAssignableFrom(value.getClass())){
+			typeof todesired = type.getAnnotation(typeof.class);
+			String toactual = value.typeof();
+			if(todesired != null){
+				throw new ConfigRuntimeException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a " +
+						todesired.value() + ", but " + toactual + " \"" + value.val() + "\" was found.", ExceptionType.CastException, t);
+			} else {
+				//If the typeof annotation isn't present, this is a programming error.
+				throw new IllegalArgumentException("");
+			}
+		} else {
+			return (T) value;
+		}
 	}
     
 }
