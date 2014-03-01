@@ -30,10 +30,11 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -179,11 +180,10 @@ public class ExtensionManager {
 			// Get the internal name that this extension exposes.
 			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
 				File f;
-
 				try {
-					f = new File(plugURL.toURI());
-				} catch (URISyntaxException ex) {
-					Static.getLogger().log(Level.SEVERE, null, ex);
+					f = new File(URLDecoder.decode(plugURL.getFile(), "UTF8"));
+				} catch (UnsupportedEncodingException ex) {
+					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
 				}
 
@@ -242,11 +242,10 @@ public class ExtensionManager {
 
 			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
 				File f;
-
 				try {
-					f = new File(plugURL.toURI());
-				} catch (URISyntaxException ex) {
-					Static.getLogger().log(Level.SEVERE, null, ex);
+					f = new File(URLDecoder.decode(plugURL.getFile(), "UTF8"));
+				} catch (UnsupportedEncodingException ex) {
+					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
 				}
 
