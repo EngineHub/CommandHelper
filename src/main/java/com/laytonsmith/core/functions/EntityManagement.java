@@ -30,6 +30,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCBoat;
+import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
 import com.laytonsmith.abstraction.entities.MCEnderman;
 import com.laytonsmith.abstraction.entities.MCFishHook;
@@ -2349,6 +2350,11 @@ public class EntityManagement {
 					MCSlime cube = (MCSlime) entity;
 					specArray.set("size", new CInt(cube.getSize(), t), t);
 					break;
+				case MINECART_COMMAND:
+					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
+					specArray.set("command", new CString(commandminecart.getCommand(), t), t);
+					specArray.set("customname", new CString(commandminecart.getName(), t), t);
+					break;
 				case OCELOT:
 					MCOcelot ocelot = (MCOcelot) entity;
 					specArray.set("type", new CString(ocelot.getCatType().name(), t), t);
@@ -2618,6 +2624,29 @@ public class EntityManagement {
 							cube.setSize(Static.getInt32(specArray.get(index), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
+				case MINECART_COMMAND:
+					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
+					for (String index : specArray.keySet()) {
+						switch (index) {
+							case "customname":
+								if(specArray.get(index) instanceof CNull) {
+									commandminecart.setName(null);
+								} else {
+									commandminecart.setName(specArray.get(index).val());
+								}
+								break;
+							case "command":
+								if(specArray.get(index) instanceof CNull) {
+									commandminecart.setCommand(null);
+								} else {
+									commandminecart.setCommand(specArray.get(index).val());
+								}
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
 					}
 					break;

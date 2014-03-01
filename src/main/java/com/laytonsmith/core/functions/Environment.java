@@ -3,7 +3,6 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -12,8 +11,6 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
-import com.laytonsmith.abstraction.entities.MCCommandMinecart;
-import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
@@ -1363,7 +1360,7 @@ public class Environment {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.BadEntityTypeException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
 		@Override
@@ -1378,8 +1375,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "string {locationArray | entityID} Returns the command string in the Command Block at the"
-					+ " given location or command minecart entityID.";
+			return "string {locationArray} Returns the command string in the Command Block at the given location.";
 		}
 
 		@Override
@@ -1390,22 +1386,13 @@ public class Environment {
 		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
 				throws ConfigRuntimeException {
-			if(args[0] instanceof CArray) {
-				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-				if(loc.getBlock().isCommandBlock()) {
-					MCCommandBlock cb = loc.getBlock().getCommandBlock();
-					return new CString(cb.getCommand(), t);
-				}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			if(loc.getBlock().isCommandBlock()) {
+				MCCommandBlock cb = loc.getBlock().getCommandBlock();
+				return new CString(cb.getCommand(), t);
+			} else {
 				throw new ConfigRuntimeException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);
-			} else {
-				int id = Static.getInt32(args[0], t);
-				MCEntity ent = Static.getEntity(id, t);
-				if(ent instanceof MCCommandMinecart) {
-					return new CString(((MCCommandMinecart) ent).getCommand(), t);
-				}
-				throw new ConfigRuntimeException("The entity must be a command minecart", 
-						ExceptionType.BadEntityTypeException, t);
 			}
 		}
 	}
@@ -1425,8 +1412,7 @@ public class Environment {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, 
-				ExceptionType.BadEntityTypeException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
 		@Override
@@ -1441,9 +1427,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, [cmd] | entityID, [cmd]} Sets a command to a Command Block at the given "
-					+ "location or in the command minecart of the given entityID. If no command is given or "
-					+ "parameter is null, it clears the Command Block.";
+			return "void {locationArray, [cmd]} Sets a command to a Command Block at the given location."
+					+ "If no command is given or parameter is null, it clears the Command Block.";
 		}
 
 		@Override
@@ -1463,26 +1448,14 @@ public class Environment {
 				cmd = args[1].val();
 			}
 			
-			if(args[0] instanceof CArray) {
-				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-				if(loc.getBlock().isCommandBlock()) {
-					MCCommandBlock cb = loc.getBlock().getCommandBlock();
-					cb.setCommand(cmd);
-					return new CVoid(t);
-				}
-				
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			if(loc.getBlock().isCommandBlock()) {
+				MCCommandBlock cb = loc.getBlock().getCommandBlock();
+				cb.setCommand(cmd);
+				return new CVoid(t);
+			} else {
 				throw new ConfigRuntimeException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);
-			} else {
-				int id = Static.getInt32(args[0], t);
-				MCEntity e = Static.getEntity(id, t);
-				if(e instanceof MCCommandMinecart) {
-					((MCCommandMinecart) e).setCommand(cmd);
-					return new CVoid(t);
-				}
-				
-				throw new ConfigRuntimeException("The entity must be a command minecart", 
-						ExceptionType.BadEntityTypeException, t);
 			}
 		}
 	}
@@ -1554,7 +1527,7 @@ public class Environment {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.BadEntityTypeException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
 		@Override
@@ -1569,9 +1542,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, [name] | entityID, [name]} Sets the name of the Command Block at the given "
-					+ "location or in the command minecart of the given entityID. If no name is given or name is "
-					+ "null, the Command Block's name is reset to @.";
+			return "void {locationArray, [name]} Sets the name of the Command Block at the given location."
+					+ "If no name is given or name is null, the Command Block's name is reset to @.";
 		}
 
 		@Override
@@ -1591,27 +1563,14 @@ public class Environment {
 				name = args[1].val();
 			}
 			
-			if(args[0] instanceof CArray) {
-				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-				if(loc.getBlock().isCommandBlock()) {
-					MCCommandBlock cb = loc.getBlock().getCommandBlock();
-
-					cb.setName(name);
-					return new CVoid(t);
-				} else {
-					throw new ConfigRuntimeException("The block at the specified location is not a command block",
-							ExceptionType.FormatException, t);
-				}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			if(loc.getBlock().isCommandBlock()) {
+				MCCommandBlock cb = loc.getBlock().getCommandBlock();
+				cb.setName(name);
+				return new CVoid(t);
 			} else {
-				int id = Static.getInt32(args[0], t);
-				MCEntity e = Static.getEntity(id, t);
-				if(e instanceof MCCommandMinecart) {
-					((MCCommandMinecart) e).setName(name);
-					return new CVoid(t);
-				}
-				
-				throw new ConfigRuntimeException("The entity must be a command minecart", 
-						ExceptionType.BadEntityTypeException, t);	
+				throw new ConfigRuntimeException("The block at the specified location is not a command block",
+						ExceptionType.FormatException, t);
 			}
 		}
 	}

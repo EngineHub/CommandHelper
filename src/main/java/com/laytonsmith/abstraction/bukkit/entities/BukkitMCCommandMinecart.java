@@ -16,6 +16,11 @@ public class BukkitMCCommandMinecart extends BukkitMCMinecart
 	public String getCommand() {
 		return cm.getCommand();
 	}
+	
+	@Override
+	public String getName() {
+		return cm.getName();
+	}
 
 	@Override
 	public void setName(String name) {
