@@ -190,6 +190,7 @@ public class ExtensionManager {
 				// Skip extensions that originate from commandhelpercore.
 				if (plugURL.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
 					done.add(f);
+					continue;
 				}
 
 				// Skip files already processed.
