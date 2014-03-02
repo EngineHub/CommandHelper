@@ -442,10 +442,6 @@ public class BukkitConvertor extends AbstractConvertor {
 			// Must come before Vehicle
 			return new BukkitMCBoat((Boat)be);
     	}
-
-    	if(be instanceof Vehicle){
-    		return new BukkitMCVehicle(be);
-    	}
         
 		// Weather
 		if(be instanceof LightningStrike){
@@ -489,6 +485,10 @@ public class BukkitConvertor extends AbstractConvertor {
 		if (be instanceof ProjectileSource) {
 			return new BukkitMCEntityProjectileSource(be);
 		}
+		
+    	if(be instanceof Vehicle){
+    		return new BukkitMCVehicle(be);
+    	}
 		
 		throw new IllegalArgumentException("While trying to find the correct entity type for " + be.getClass().getName()
 				+ ", was unable to find the appropriate implementation. If the named entity is not provided by mods,"
