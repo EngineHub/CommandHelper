@@ -2095,7 +2095,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "array {[player]} Returns an array of effects that are currently active on a given player."
-					+ " The array will be full of playerEffect objects, which contain three fields, \"potionID\","
+					+ " The array will be full of playerEffect objects, which contain three fields, \"id\","
 					+ " \"strength\", \"seconds\" remaining, and whether the effect is \"ambient\".";
 		}
 
