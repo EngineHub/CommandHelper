@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -78,14 +79,19 @@ public class ClassDiscoveryCache {
 	public ClassDiscoveryURLCache getURLCache(URL fromClassLocation){
 		if(fromClassLocation.toString().endsWith(".jar")){
 			File cacheOutputName = null;
+			
 			try {
-				File jarFile = new File(fromClassLocation.getFile());
-				FileInputStream fis = new FileInputStream(jarFile);
-				byte[] data = new byte[READ_SIZE];
-				fis.read(data);
-				fis.close();
+				File jarFile = new File(URLDecoder.decode(fromClassLocation.getFile(), "UTF8"));
+				
+				byte[] data;
+				try (FileInputStream fis = new FileInputStream(jarFile)) {
+					data = new byte[READ_SIZE];
+					fis.read(data);
+				}
+				
 				MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
 				digest.update(data);
+				
 				String fileName = StringUtils.toHex(digest.digest());
 				cacheOutputName = new File(cacheDir, fileName);
 				if(cacheOutputName.exists()){
@@ -101,9 +107,10 @@ public class ClassDiscoveryCache {
 			} catch (Exception ex) {
 				//Hmm. Ok, well, we'll just regenerate.
 			}
+			
 			JarFile jfile;
 			try {
-				jfile = new JarFile(fromClassLocation.getFile());
+				jfile = new JarFile(URLDecoder.decode(fromClassLocation.getFile(), "UTF8"));
 				
 				for (Enumeration<JarEntry> ent = jfile.entries(); ent.hasMoreElements();) {
 					JarEntry entry = ent.nextElement();
@@ -130,10 +137,10 @@ public class ClassDiscoveryCache {
 			
 			if(cacheOutputName != null){
 				try {
-					ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(cacheOutputName, false));
-					zos.putNextEntry(new ZipEntry("data"));
-					cache.writeDescriptor(zos);
-					zos.close();
+					try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(cacheOutputName, false))) {
+						zos.putNextEntry(new ZipEntry("data"));
+						cache.writeDescriptor(zos);
+					}
 				} catch (IOException ex) {
 					//Well, we couldn't write it out, so report the error, but continue anyways.
 					if(logger != null){

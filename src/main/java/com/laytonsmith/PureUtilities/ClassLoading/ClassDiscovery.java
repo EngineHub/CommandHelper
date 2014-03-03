@@ -247,7 +247,14 @@ public class ClassDiscovery {
 				ClassDiscoveryURLCache cduc = classDiscoveryCache.getURLCache(rootLocation);
 				preCaches.put(rootLocation, cduc);
 			}
-			String url = rootLocation.toString();
+			
+			String url;
+			try {
+				url = URLDecoder.decode(rootLocation.toString(), "UTF8");
+			} catch (UnsupportedEncodingException ex) {
+				url = URLDecoder.decode(rootLocation.toString());
+			}
+			
 			if (url == null) {
 				url = GetClassContainer(ClassDiscovery.class).toString();
 			}

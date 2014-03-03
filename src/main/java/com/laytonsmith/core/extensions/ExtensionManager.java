@@ -30,10 +30,11 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -178,14 +179,18 @@ public class ExtensionManager {
 
 			// Get the internal name that this extension exposes.
 			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
-				// The substring(6) gets rid of the "file:/" which will be at the front of the URL.
-				// We aren't using URL.toURI(), because paths with spaces in them won't work properly,
-				// and that's a valid, though non-recommended file path.
-				File f = new File(plugURL.toString().substring(6));
+				File f;
+				try {
+					f = new File(URLDecoder.decode(plugURL.getFile(), "UTF8"));
+				} catch (UnsupportedEncodingException ex) {
+					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
+					continue;
+				}
 
 				// Skip extensions that originate from commandhelpercore.
 				if (plugURL.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
 					done.add(f);
+					continue;
 				}
 
 				// Skip files already processed.
@@ -236,10 +241,13 @@ public class ExtensionManager {
 			URL plugURL = klass.getContainer();
 
 			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
-				// The substring(6) gets rid of the "file:/" which will be at the front of the URL.
-				// We aren't using URL.toURI(), because paths with spaces in them won't work properly,
-				// and that's a valid, though non-recommended file path.
-				File f = new File(plugURL.toString().substring(6));
+				File f;
+				try {
+					f = new File(URLDecoder.decode(plugURL.getFile(), "UTF8"));
+				} catch (UnsupportedEncodingException ex) {
+					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
+					continue;
+				}
 
 				// Skip files already processed.
 				if (done.contains(f)) {
