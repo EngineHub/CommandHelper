@@ -481,7 +481,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			}
 			return true;
 		} else if (sender instanceof Player && java.util.Arrays.asList(new String[]{"commandhelper", "repeat",
-				"viewalias", "delalias", "interpreter"}).contains(cmdName)) {
+				"viewalias", "delalias", "interpreter", "alias"}).contains(cmdName)) {
 			try {
 				return runCommand(new BukkitMCPlayer((Player) sender), cmdName, args);
 			} catch (DataSourceException ex) {
@@ -534,14 +534,14 @@ public class CommandHelperPlugin extends JavaPlugin {
 			}
 
 			// Save alias
-		} else if (cmd.equalsIgnoreCase("alias") || cmd.equalsIgnoreCase("commandhelper") /*&& player.canUseCommand("/alias")*/) {
+		} else if (cmd.equalsIgnoreCase("alias")) {
 			if (!permissionsResolver.hasPermission(player.getName(), "commandhelper.useralias") && !permissionsResolver.hasPermission(player.getName(), "ch.useralias")) {
 				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the alias command");
 				commandRunning.remove(player);
 				return true;
 			}
+			
 			if (args.length > 0) {
-
 				String alias = CommandHelperPlugin.joinString(args, " ");
 				try {
 					int id = um.addAlias(alias, persistenceNetwork);
@@ -571,7 +571,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			int page = 0;
 			try {
 				page = Integer.parseInt(args[0]);
-			} catch (NumberFormatException e) {
+			} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
 				//Meh. Index out of bounds, or number format exception. Whatever, show page 1
 			}
 			Static.SendMessage(player, um.getAllAliases(page, persistenceNetwork));
