@@ -12,6 +12,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -576,17 +577,19 @@ public class DataHandling {
 					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
 				}
 			}
-			if (arr instanceof CArray) {
+			if (arr instanceof ArrayAccess) {
 				if (iv instanceof IVariable) {
-					CArray one = (CArray) arr;
+					ArrayAccess one = (ArrayAccess) arr;
 					IVariable kkey = (IVariable) ik;
 					IVariable two = (IVariable) iv;
-					if (!one.inAssociativeMode()) {
+					//Special optimization for CArrays in associative mode is used below. All other ArrayAccesses (and
+					//CArrays in normal mode) use this logic.
+					if ((one instanceof CArray && !((CArray)one).inAssociativeMode()) || !(one instanceof CArray)) {
 						for (int i = 0; i < one.size(); i++) {
 							if(kkey != null){
 								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CInt(i, t), t));
 							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(Integer.toString(i), t), t));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -603,7 +606,7 @@ public class DataHandling {
 						}
 					} else {
 						for (int i = 0; i < one.size(); i++) {
-							String index = one.keySet().toArray(new String[]{})[i];
+							String index = ((CArray)one).keySet().toArray(new String[]{})[i];
 							if(kkey != null){
 								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CString(index, t), t));
 							}
@@ -627,7 +630,7 @@ public class DataHandling {
 					throw new ConfigRuntimeException("Parameter " + (2 +offset) + " of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
 				}
 			} else {
-				throw new ConfigRuntimeException("Parameter 1 of " + getName() + " must be an array", ExceptionType.CastException, t);
+				throw new ConfigRuntimeException("Parameter 1 of " + getName() + " must be an array or array like data structure", ExceptionType.CastException, t);
 			}
 			return new CVoid(t);
 		}

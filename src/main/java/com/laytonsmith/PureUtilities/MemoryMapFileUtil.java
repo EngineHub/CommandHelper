@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * @author Layton
  */
 public class MemoryMapFileUtil {
-	private static Map<String, MemoryMapFileUtil> instances = new HashMap<String, MemoryMapFileUtil>();
+	private static final Map<String, MemoryMapFileUtil> instances = new HashMap<>();
 	/**
 	 * The minimum delay between FS writes. In milliseconds.
 	 */
@@ -42,7 +42,7 @@ public class MemoryMapFileUtil {
 		byte[] getData();
 	}
 	
-	private String file;
+	private final String file;
 	private DataGrabber grabber;
 	private boolean modelDirty = false;
 	private boolean fileDirty = false;
@@ -86,6 +86,7 @@ public class MemoryMapFileUtil {
 					
 					synchronized(this){
 						FileUtil.write(data, permanent, FileUtil.OVERWRITE, true);
+						lastWrite = System.currentTimeMillis();
 						fileDirty = false;
 					}
 //					synchronized(this){

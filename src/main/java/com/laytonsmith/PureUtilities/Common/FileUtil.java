@@ -1,6 +1,5 @@
 package com.laytonsmith.PureUtilities.Common;
 
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +9,7 @@ import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
 /**
- *
- * @author layton
+ * 
  */
 public class FileUtil {
 
@@ -20,8 +18,8 @@ public class FileUtil {
 	public static final int OVERWRITE = 0;
 	public static final int APPEND = 1;
 		
-	private static final Map<String, Object> fileLocks = new HashMap<String, Object>();
-	private static final Map<String, Integer> fileLockCounter = new HashMap<String, Integer>();
+	private static final Map<String, Object> fileLocks = new HashMap<>();
+	private static final Map<String, Integer> fileLockCounter = new HashMap<>();
 	/**
 	 * A more complicated mechanism is required to ensure global access across the JVM
 	 * is synchronized, so file system accesses do not throw OverlappingFileLockExceptions.
@@ -65,13 +63,33 @@ public class FileUtil {
 	/**
 	 * Returns the contents of this file as a string
 	 *
-	 * @param f The file to read
+	 * @param file The file to read
 	 * @return a string with the contents of the file
 	 * @throws FileNotFoundException
 	 */
 	public static InputStream readAsStream(File file) throws IOException {
-		byte[] bytes = org.apache.commons.io.FileUtils.readFileToByteArray(file);
-		return new ByteArrayInputStream(bytes);
+		try {
+			byte[] bytes = org.apache.commons.io.FileUtils.readFileToByteArray(file);
+			return new ByteArrayInputStream(bytes);
+		} catch(IOException ex){
+			//Apache IO has an interesting feature/bug where the error message "Unexpected readed size" is thrown.
+			//If this is the case, we're going to try using a normal java file connection. Other IOExceptions
+			//are just going be rethrown.
+			if(ex.getMessage().startsWith("Unexpected readed size.")){
+				FileInputStream fis = new FileInputStream(file);
+				try{
+					byte [] bytes = StreamUtils.GetBytes(fis);
+					return new ByteArrayInputStream(bytes);
+				} finally {
+					//JVM bug with files
+					fis.close();
+					fis = null;
+					System.gc();
+				}
+			} else {
+				throw ex;
+			}
+		}
 //		try{
 //			synchronized (getLock(file)) {
 //				RandomAccessFile raf = new RandomAccessFile(file, "rw");

@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -16,7 +17,7 @@ import java.util.SortedMap;
  * @author lsmith
  */
 @typeof("byte_array")
-public class CByteArray extends Construct implements Sizable {
+public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	
 	/**
 	 * Initial size of the ByteBuffer
@@ -433,6 +434,22 @@ public class CByteArray extends Construct implements Sizable {
 		byte[] dest = new byte[maxValue];
 		System.arraycopy(src, 0, dest, 0, maxValue);
 		return dest;
+	}
+
+	@Override
+	public Construct get(String index, Target t) throws ConfigRuntimeException {
+		byte b = getByte(Integer.parseInt(index));
+		return new CInt(b, t);
+	}
+
+	@Override
+	public boolean canBeAssociative() {
+		return false;
+	}
+
+	@Override
+	public Construct slice(int begin, int end, Target t) {
+		return getBytes(end - begin, begin);
 	}
 	
 	/**
