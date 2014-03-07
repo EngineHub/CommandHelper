@@ -441,7 +441,7 @@ public class InventoryManagement {
             }
             CArray array = (CArray)arg;
 			Static.AssertPlayerNonNull(m, t);
-            for(String key : array.keySet()){
+            for(String key : array.stringKeySet()){
                 try{
                     int index = -2;
                     try{
@@ -1055,7 +1055,7 @@ public class InventoryManagement {
 			
 			Static.AssertPlayerNonNull(m, t);
 			
-			for (String key : array.keySet()) {
+			for (String key : array.stringKeySet()) {
 				try {
 					int index = -2;
 					
@@ -1613,7 +1613,7 @@ public class InventoryManagement {
 
 			CArray array = (CArray) args[1];
 
-			for (String key : array.keySet()) {
+			for (String key : array.stringKeySet()) {
 				try {
 					int index;
 					try {

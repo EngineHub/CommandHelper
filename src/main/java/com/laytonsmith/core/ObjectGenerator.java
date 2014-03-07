@@ -309,7 +309,7 @@ public class ObjectGenerator {
                 throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, t, e);
             }
 
-            for (String index : enchantArray.keySet()) {
+            for (String index : enchantArray.stringKeySet()) {
                 try {
                     CArray enchantment = (CArray) enchantArray.get(index);
                     String setype = null;
@@ -705,7 +705,7 @@ public class ObjectGenerator {
 	
 	public Map<MCEnchantment,Integer> enchants(CArray enchantArray, Target t) {
 		Map<MCEnchantment,Integer> ret = new HashMap<MCEnchantment,Integer>();
-		for (String key : enchantArray.keySet()) {
+		for (String key : enchantArray.stringKeySet()) {
 			try {
 				CArray ea = (CArray) enchantArray.get(key, t);
 				MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(ea.get("etype", t).val());
@@ -737,7 +737,7 @@ public class ObjectGenerator {
 	
 	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t) {
 		List<MCLivingEntity.MCEffect> ret = new ArrayList<MCLivingEntity.MCEffect>();
-		for (String key : ea.keySet()) {
+		for (String key : ea.stringKeySet()) {
 			if (ea.get(key, t) instanceof CArray) {
 				CArray effect = (CArray) ea.get(key, t);
 				int potionID = 0, strength = 0, seconds = 30;
@@ -856,7 +856,7 @@ public class ObjectGenerator {
 						if(recipe.containsKey("ingredients") && (recipe.get("ingredients") instanceof CArray)) {
 							CArray ingredients = (CArray) recipe.get("ingredients");
 							if(ingredients.inAssociativeMode()) {
-								for(String key : ingredients.keySet()) {
+								for(String key : ingredients.stringKeySet()) {
 									int type = 0;
 									int data = 0;
 									if (ingredients.get(key) instanceof CString) {

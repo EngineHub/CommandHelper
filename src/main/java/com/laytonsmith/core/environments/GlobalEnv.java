@@ -12,11 +12,15 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.events.BoundEvent;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.Profiles;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,7 +37,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	//of closures. This only applies to things that can change during runtime
 	//via a script, and should be totally global. 
 	//Anything else varies based on the particular needs of
-	//that field.
+	//that field. Note that lists, maps, and other reference based objects don't
+	//need to use MutableObjects, as they are inherently Mutable themselves.
 	
 	private ExecutionQueue executionQueue = null;
 	private Profiler profiler = null;
@@ -53,6 +58,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private final Profiles profiles;
 	private BoundEvent.ActiveEvent event = null;
 	private boolean interrupt = false;
+	private final List<ArrayAccess.ArrayAccessIterator> arrayAccessList = Collections.synchronizedList(new ArrayList<ArrayAccess.ArrayAccessIterator>());
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
@@ -301,5 +307,31 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public synchronized boolean IsInterrupted(){
 		return interrupt;
+	}
+	
+	/**
+	 * Returns the array access list. Note that the returned array is threadsafe,
+	 * though iteration over the list requires manual synchronization on the list.
+	 * @return 
+	 */
+	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIterators(){
+		return arrayAccessList;
+	}
+	
+	/**
+	 * Returns a list of all ArrayAccessIterators for the specified array. 
+	 * @param array
+	 * @return 
+	 */
+	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIteratorsFor(ArrayAccess array){
+		List<ArrayAccess.ArrayAccessIterator> list = new ArrayList<>();
+		synchronized(arrayAccessList){
+			for(ArrayAccess.ArrayAccessIterator value : arrayAccessList){
+				if(value.underlyingArray() == array){
+					list.add(value);
+				}
+			}
+		}
+		return list;
 	}
 }

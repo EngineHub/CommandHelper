@@ -22,7 +22,6 @@ import java.util.*;
  * overridden methods. There are several overloaded methods in this
  * class, you need only to override the non-final ones for the
  * same effect.
- * @author layton
  */
 @typeof("array")
 public class CArray extends Construct implements ArrayAccess{
@@ -49,7 +48,7 @@ public class CArray extends Construct implements ArrayAccess{
 	 * Returns if this array is in associative mode or not.
 	 * @return 
 	 */
-	protected boolean isAssociative(){
+	public boolean isAssociative(){
 		return associative_mode;
 	}
 	
@@ -253,21 +252,42 @@ public class CArray extends Construct implements ArrayAccess{
     
     /**
      * Returns the key set for this array. If it's an associative array, it simply returns
-     * the key set of the map, otherwise it generates a set real quick from 0 - size-1, and
+     * the key set of the map, otherwise it generates a set of CInts from 0 to size-1, and
      * returns that.
      * @return 
      */
-    public Set<String> keySet(){
-        Set<String> set = !associative_mode?new LinkedHashSet<String>(array.size()):new HashSet<String>(associative_array.size());
+	@Override
+    public Set<Construct> keySet(){
+        Set<Construct> set = !associative_mode?new LinkedHashSet<Construct>(array.size()):new HashSet<Construct>(associative_array.size());
+        if(!associative_mode){            
+            for(int i = 0; i < array.size(); i++){
+                set.add(new CInt(i, Target.UNKNOWN));
+            }
+        } else {
+            for(String key : associative_array.keySet()){
+				set.add(new CString(key, Target.UNKNOWN));
+			}
+        }
+        return set;
+    }
+	
+	/**
+	 * Returns the string based key set for this array. If it's an associative array, it
+	 * simply returns the key set of the map, otherwise it generates a set from 0 to size-1,
+	 * toStrings the integers, and returns that.
+	 * @return 
+	 */
+	public Set<String> stringKeySet(){
+		Set<String> set = !associative_mode?new LinkedHashSet<String>(array.size()):new HashSet<String>(associative_array.size());
         if(!associative_mode){            
             for(int i = 0; i < array.size(); i++){
                 set.add(Integer.toString(i));
             }
         } else {
             set = associative_array.keySet();
-        }        
+        }
         return set;
-    }
+	}
 
     /**
      * 
@@ -345,6 +365,11 @@ public class CArray extends Construct implements ArrayAccess{
     }
     
     public final Construct get(long index, Target t){
+        return this.get(new CInt(index, t), t);
+    }
+	
+	@Override
+    public final Construct get(int index, Target t){
         return this.get(new CInt(index, t), t);
     }
     
@@ -470,7 +495,7 @@ public class CArray extends Construct implements ArrayAccess{
 			}
 		} else {
 			boolean first = true;
-			for(String key : this.keySet()){
+			for(String key : this.stringKeySet()){
 				if(!first){
 					b.append(", ");
 				}

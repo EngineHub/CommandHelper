@@ -225,7 +225,7 @@ public class EntityEvents {
 					if (value instanceof CArray) {
 						CArray ba = (CArray) value;
 						List<MCBlock> blocks = new ArrayList<MCBlock>();
-						for (String b : ba.keySet()) {
+						for (String b : ba.stringKeySet()) {
 							MCWorld w = e.getLocation().getWorld();
 							MCLocation loc = ObjectGenerator.GetGenerator().location(ba.get(b), w, Target.UNKNOWN);
 							blocks.add(loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
@@ -544,7 +544,7 @@ public class EntityEvents {
 					}
 					e.clearDrops();
 					CArray drops = (CArray) value;
-					for(String dropID : drops.keySet()){
+					for(String dropID : drops.stringKeySet()){
 						e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID), Target.UNKNOWN));
 					}
 					return true;

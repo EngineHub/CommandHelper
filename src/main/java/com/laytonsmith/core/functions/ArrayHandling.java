@@ -125,7 +125,7 @@ public class ArrayHandling {
 						if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
 							//Special exception, we want to clone the whole array
 							CArray na = CArray.GetAssociativeArray(t);
-							for (String key : ca.keySet()) {
+							for (Construct key : ca.keySet()) {
 								try {
 									na.set(key, ca.get(key, t).clone(), t);
 								} catch (CloneNotSupportedException ex) {
@@ -195,7 +195,7 @@ public class ArrayHandling {
 						throw e;
 					}
 				}
-			} else if (args[0] instanceof CString) {
+			} else if (args[0] instanceof ArrayAccess) {
 				if (index instanceof CSlice) {
 					ArrayAccess aa = (ArrayAccess) args[0];
 					//It's a range
@@ -245,8 +245,6 @@ public class ArrayHandling {
 						throw new ConfigRuntimeException("No index at " + index, ExceptionType.RangeException, t);
 					}
 				}
-			} else if (args[0] instanceof ArrayAccess) {
-				throw ConfigRuntimeException.CreateUncatchableException("Wat. How'd you get here? This isn't supposed to be implemented yet.", t);
 			} else {
 				throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
 			}
@@ -423,8 +421,16 @@ public class ArrayHandling {
 				if (args.length < 2) {
 					throw new ConfigRuntimeException("At least 2 arguments must be provided to array_push", ExceptionType.InsufficientArgumentsException, t);
 				}
+				CArray array = (CArray)args[0];
+				int initialSize = (int)array.size();
 				for (int i = 1; i < args.length; i++) {
 					((CArray) args[0]).push(args[i]);
+					for(ArrayAccess.ArrayAccessIterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess)args[0]))){
+						//This is always pushing after the current index.
+						//Given that this is the last one, we don't need to waste
+						//time with a call to increment the blacklist items either.
+						iterator.addToBlacklist(initialSize + i - 1);
+					}
 				}
 				return new CVoid(t);
 			}
@@ -438,7 +444,10 @@ public class ArrayHandling {
 
 		@Override
 		public String docs() {
-			return "void {array, value, [value2...]} Pushes the specified value(s) onto the end of the array";
+			return "void {array, value, [value2...]} Pushes the specified value(s) onto the end of the array. Unlike calling"
+					+ " array_set(@array, array_size(@array), @value) on a normal array, the size of the array is increased first."
+					+ " This will therefore never cause an IndexOverflowException. The special operator syntax @array[] = 'value' is"
+					+ " also supported, as shorthand for array_push().";
 		}
 
 		@Override
@@ -461,6 +470,9 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates usage", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0)\nmsg(@array)"),
 				new ExampleScript("Demonstrates pushing multiple values", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0, 1, 2)\nmsg(@array)"),
+				new ExampleScript("Operator syntax. Note the difference between this and the array clone"
+						+ " operator is that this occurs on the Left Hand Side (LHS) of the assignment.", 
+						"@array = array();\n@array[] = 'new value';"),
 			};
 		}
 	}
@@ -490,6 +502,20 @@ public class ArrayHandling {
 			int index = Static.getInt32(args[2], t);
 			try{
 				array.push(value, index);
+				//If the push succeeded (actually an insert) we need to check to see if we are currently iterating
+				//and act appropriately.
+				for(ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)){
+					if(index <= iterator.getCurrent()){
+						//The insertion happened before (or at) this index, so we need to increment the
+						//iterator, as well as increment all the blacklist items above this one.
+						iterator.incrementCurrent();
+					} else {
+						//The insertion happened after this index, so we need to increment the
+						//blacklist values after this one, and add this index to the blacklist
+						iterator.incrementBlacklistAfter(index);
+						iterator.addToBlacklist(index);
+					}
+				}
 			} catch(IllegalArgumentException e){
 				throw new Exceptions.CastException(e.getMessage(), t);
 			} catch(IndexOutOfBoundsException ex){
@@ -922,11 +948,11 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				CArray ca = (CArray) args[0];
+			if (args[0] instanceof ArrayAccess) {
+				ArrayAccess ca = (ArrayAccess) args[0];
 				CArray ca2 = new CArray(t);
-				for (String c : ca.keySet()) {
-					ca2.push(new CString(c, t));
+				for (Construct c : ca.keySet()) {
+					ca2.push(c);
 				}
 				return ca2;
 			} else {
@@ -984,11 +1010,11 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				CArray ca = (CArray) args[0];
+			if (args[0] instanceof ArrayAccess) {
+				ArrayAccess ca = (ArrayAccess) args[0];
 				CArray ca2 = new CArray(t);
-				for (String c : ca.keySet()) {
-					ca2.push(ca.get(c, t));
+				for (Construct c : ca.keySet()) {
+					ca2.push(ca.get(c.val(), t));
 				}
 				return ca2;
 			} else {
@@ -1051,16 +1077,20 @@ public class ArrayHandling {
 			if (args.length < 2) {
 				throw new ConfigRuntimeException("array_merge must be called with at least two parameters", ExceptionType.InsufficientArgumentsException, t);
 			}
-			for (int i = 0; i < args.length; i++) {
-				if (args[i] instanceof CArray) {
-					CArray cur = (CArray) args[i];
-					if (!cur.inAssociativeMode()) {
+			for (Construct arg : args) {
+				if (arg instanceof ArrayAccess) {
+					ArrayAccess cur = (ArrayAccess) arg;
+					if (!cur.isAssociative()) {
 						for (int j = 0; j < cur.size(); j++) {
 							newArray.push(cur.get(j, t));
 						}
 					} else {
-						for (String key : cur.keySet()) {
-							newArray.set(key, cur.get(key, t), t);
+						for (Construct key : cur.keySet()) {
+							if(key instanceof CInt){
+								newArray.set(key, cur.get((int)((CInt)key).getInt(), t), t);
+							} else {
+								newArray.set(key, cur.get(key.val(), t), t);
+							}
 						}
 					}
 				} else {
@@ -1123,11 +1153,19 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				CArray ca = (CArray) args[0];
-				return ca.remove(args[1]);
+			CArray array = Static.getArray(args[0], t);
+			if(array.isAssociative()){
+				return array.remove(args[1]);
 			} else {
-				throw new ConfigRuntimeException("Argument 1 of array_remove should be an array", ExceptionType.CastException, t);
+				int index = Static.getInt32(args[1], t);
+				Construct removed = array.remove(args[1]);
+				//If the removed index is <= the current index, we need to decrement the counter.
+				for(ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)){
+					if(index <= iterator.getCurrent()){
+						iterator.decrementCurrent();
+					}
+				}
+				return removed;
 			}
 		}
 		
@@ -1177,18 +1215,18 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (!(args[0] instanceof CArray)) {
+			if (!(args[0] instanceof ArrayAccess)) {
 				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
 			}
 			StringBuilder b = new StringBuilder();
-			CArray ca = (CArray) args[0];
+			ArrayAccess ca = (ArrayAccess) args[0];
 			String glue = " ";
 			if (args.length == 2) {
 				glue = args[1].val();
 			}
 			boolean first = true;
-			for (String key : ca.keySet()) {
-				Construct value = ca.get(key, t);
+			for (Construct key : ca.keySet()) {
+				Construct value = ca.get(key.val(), t);
 				if (!first) {
 					b.append(glue).append(value.val());
 				} else {
@@ -1476,10 +1514,20 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!(args[0] instanceof CArray)){
-				throw new ConfigRuntimeException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
+			CArray array = Static.getArray(args[0], t);
+			//This needs to be in terms of array_remove, to ensure that the iteration
+			//logic is followed. We will iterate backwards, however, to make the 
+			//process more efficient, unless this is an associative array.
+			if(array.isAssociative()){
+				array.removeValues(args[1]);
+			} else {
+				for(long i = array.size(); i >= 0; i--){
+					if(BasicLogic.equals.doEquals(array.get(i), args[1])){
+						new array_remove().exec(t, environment, array, new CInt(i, t));
+					}
+				}
 			}
-			((CArray)args[0]).removeValues(args[1]);
+			
 			return new CVoid(t);
 		}
 
@@ -1733,10 +1781,10 @@ public class ArrayHandling {
 			while(randoms.size() < number){
 				randoms.add(java.lang.Math.abs(r.nextInt() % (int)array.size()));
 			}
-			List<String> keySet = new ArrayList<String>(array.keySet());
+			List<Construct> keySet = new ArrayList<Construct>(array.keySet());
 			for(Integer i : randoms){
 				if(getKeys){
-					newArray.push(new CString(keySet.get(i), t));
+					newArray.push(keySet.get(i));
 				} else {
 					newArray.push(array.get(keySet.get(i), t));
 				}

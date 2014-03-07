@@ -86,7 +86,7 @@ public class OptimizationUtilities {
 			b.append("array(");
 			boolean first = true;
 			CArray n = (CArray)node.getData();
-			for(String key : n.keySet()){
+			for(String key : n.stringKeySet()){
 				if(!first){
 					b.append(",");
 				}

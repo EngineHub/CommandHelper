@@ -85,6 +85,7 @@ The <code>storage</code> namespace is reserved for values that are created and a
 
 * storage.**: Values accessible from your main script's store_value and get_value functions. 
 * federation.**: The Federation system stores values here. The namespace should never be set to read only, and should be in a transient data source.
+* extension.<extension name>.**: Extensions may store data in this namespace.
 * custom.**: CommandHelper will not ever touch any values stored in here, and you may use this however you wish with external scripts.
 <!-- These are "reserved" but not listed.
 * snapin.**: Data about snapins resides here.

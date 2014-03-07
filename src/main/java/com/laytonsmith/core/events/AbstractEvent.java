@@ -169,7 +169,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      */
     public static Object DoConvert(CArray manualObject){
         Map<String, Construct> map = new HashMap<String, Construct>();
-        for(String key : manualObject.keySet()){
+        for(String key : manualObject.stringKeySet()){
             map.put(key, manualObject.get(key, Target.UNKNOWN));
         }
         return map;        

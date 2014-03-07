@@ -1206,7 +1206,7 @@ public class Minecraft {
 					//It's a single custom color
 					colors.add(parseColor(ca, t));
 				} else {
-					for(String key : ca.keySet()){
+					for(String key : ca.stringKeySet()){
 						Construct val = ca.get(key);
 						if(val instanceof CArray){
 							colors.add(parseColor(((CArray)val), t));

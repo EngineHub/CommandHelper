@@ -257,7 +257,7 @@ public class BasicLogic {
 							}
 						}
 					} else if (evalStatement instanceof CArray) {
-						for (String index : ((CArray) evalStatement).keySet()) {
+						for (String index : ((CArray) evalStatement).stringKeySet()) {
 							Construct inner = ((CArray) evalStatement).get(index);
 							if (inner instanceof CSlice) {
 								long rangeLeft = ((CSlice) inner).getStart();

@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import java.util.Set;
 
 /**
  *
@@ -67,5 +68,20 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
 	@Override
 	public String getQuote(){
 		return super.getQuote();
+	}
+
+	@Override
+	public Construct get(int index, Target t) throws ConfigRuntimeException {
+		return get(Integer.toString(index), t);
+	}
+
+	@Override
+	public boolean isAssociative() {
+		return false;
+	}
+
+	@Override
+	public Set<Construct> keySet() {
+		throw new UnsupportedOperationException("Not supported.");
 	}
 }

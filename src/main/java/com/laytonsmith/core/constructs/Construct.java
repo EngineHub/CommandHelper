@@ -161,7 +161,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
                 return list;
             } else {
                 Map<String, Object> map = new HashMap<String, Object>();
-                for(String key : ca.keySet()){
+                for(String key : ca.stringKeySet()){
                     map.put(key, json_encode0(ca.get(key, t), t));
                 }
                 return map;
@@ -339,7 +339,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             if(ca.inAssociativeMode()){
                 //HashMap
                 HashMap<String, Object> map = new HashMap<String, Object>((int)ca.size());
-                for(String key : ca.keySet()){
+                for(String key : ca.stringKeySet()){
                     map.put(key, GetPOJO(ca.get(key)));
                 }
                 return map;

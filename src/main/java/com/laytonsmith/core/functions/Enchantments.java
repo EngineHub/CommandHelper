@@ -238,7 +238,7 @@ public class Enchantments {
 			} else {
 				levelArray = (CArray) args[3 - offset];
 			}
-			for (String key : enchantArray.keySet()) {
+			for (String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()).toUpperCase());
 				if (e == null) {
 					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
@@ -325,7 +325,7 @@ public class Enchantments {
 			} else {
 				enchantArray = (CArray) args[2 - offset];
 			}
-			for (String key : enchantArray.keySet()) {
+			for (String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(enchantArray.get(key, t).val().toUpperCase());
 				is.removeEnchantment(e);
 			}

@@ -78,7 +78,7 @@ public class SQL {
 				Profiles.Profile profile;
 				if (args[0] instanceof CArray) {
 					Map<String, String> data = new HashMap<String, String>();
-					for (String key : ((CArray) args[0]).keySet()) {
+					for (String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key).val());
 					}
 					profile = Profiles.getProfile(data);

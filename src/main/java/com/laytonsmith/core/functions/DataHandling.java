@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -28,7 +29,7 @@ import java.util.logging.Logger;
  * @author Layton
  */
 public class DataHandling {
-	
+
 	private static final String array_get = new ArrayHandling.array_get().getName();
 	private static final String array_set = new ArrayHandling.array_set().getName();
 	private static final String array_push = new ArrayHandling.array_push().getName();
@@ -79,20 +80,19 @@ public class DataHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)"),
-				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)"),
-			};
+				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)"),};
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
-		
+
 		FileOptions lastFileOptions = null;
 
 		@Override
@@ -100,20 +100,20 @@ public class DataHandling {
 			//We need to check here to ensure that
 			//we aren't getting a slice in a label, which is used in switch
 			//statements, but doesn't make sense here.
-			for(ParseTree child : children){
-				if(child.getData() instanceof CFunction && new Compiler.centry().getName().equals(child.getData().val())){
-					if(((CLabel)child.getChildAt(0).getData()).cVal() instanceof CSlice){
+			for (ParseTree child : children) {
+				if (child.getData() instanceof CFunction && new Compiler.centry().getName().equals(child.getData().val())) {
+					if (((CLabel) child.getChildAt(0).getData()).cVal() instanceof CSlice) {
 						throw new ConfigCompileException("Slices cannot be used as array indices", child.getChildAt(0).getTarget());
 					}
 				}
 			}
 			return null;
 		}
-		
+
 	}
-	
+
 	@api
-	public static class associative_array extends AbstractFunction{
+	public static class associative_array extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -164,12 +164,9 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Usage with an empty array", "assign(@array, associative_array())\nmsg(is_associative(@array))"),
 				new ExampleScript("Usage with an array with sequential keys", "assign(@array, array(0: '0', 1: '1'))\nmsg(is_associative(@array))\n"
-					+ "assign(@array, associative_array(0: '0', 1: '1'))\nmsg(is_associative(@array))"),
-			};
+				+ "assign(@array, associative_array(0: '0', 1: '1'))\nmsg(is_associative(@array))"),};
 		}
-		
-		
-		
+
 	}
 
 	@api
@@ -236,8 +233,8 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_CONSTANT,
-						OptimizationOption.OPTIMIZE_DYNAMIC
+					OptimizationOption.OPTIMIZE_CONSTANT,
+					OptimizationOption.OPTIMIZE_DYNAMIC
 			);
 		}
 
@@ -253,23 +250,23 @@ public class DataHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.get(0).getData() instanceof IVariable
-					&& children.get(1).getData() instanceof IVariable){
-				if(((IVariable)children.get(0).getData()).getName().equals(
-						((IVariable)children.get(1).getData()).getName())){
+			if (children.get(0).getData() instanceof IVariable
+					&& children.get(1).getData() instanceof IVariable) {
+				if (((IVariable) children.get(0).getData()).getName().equals(
+						((IVariable) children.get(1).getData()).getName())) {
 					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
 				}
 			}
-			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())){
-				if(children.get(0).getChildAt(1).getData() instanceof CSlice){
+			if (children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
+				if (children.get(0).getChildAt(1).getData() instanceof CSlice) {
 					CSlice cs = (CSlice) children.get(0).getChildAt(1).getData();
-					if(cs.getStart() == 0 && cs.getFinish() == -1){
+					if (cs.getStart() == 0 && cs.getFinish() == -1) {
 						//Turn this into an array_push
 						ParseTree tree = new ParseTree(new CFunction(array_push, t), children.get(0).getFileOptions());
 						tree.addChild(children.get(0).getChildAt(0));
 						tree.addChild(children.get(1));
 						return tree;
-					} 
+					}
 					//else, not really sure what's going on, so we'll just carry on, and probably there
 					//will be an error generated elsewhere
 				} else {
@@ -283,9 +280,7 @@ public class DataHandling {
 			}
 			return null;
 		}
-		
-		
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -296,8 +291,7 @@ public class DataHandling {
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable += 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable -= 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable *= 10;\nmsg(@variable);"),
-				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable /= 10;\nmsg(@variable);"),
-			};
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable /= 10;\nmsg(@variable);"),};
 		}
 	}
 
@@ -363,19 +357,18 @@ public class DataHandling {
 		public boolean allowBraces() {
 			return true;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 5, @i++,\n\tmsg(@i)\n)"),
 				new ExampleScript("With braces", "for(assign(@i, 0), @i < 2, @i++){\n\tmsg(@i)\n}"),
 				new ExampleScript("With continue. (See continue() for more examples)", "for(assign(@i, 0), @i < 2, @i++){\n"
-					+ "\tif(@i == 1, continue())\n"
-					+ "\tmsg(@i)\n"
-					+ "}"),
-			};
+				+ "\tif(@i == 1, continue())\n"
+				+ "\tmsg(@i)\n"
+				+ "}"),};
 		}
-		
+
 		@Override
 		public LogLevel profileAt() {
 			return LogLevel.WARNING;
@@ -383,7 +376,7 @@ public class DataHandling {
 
 		@Override
 		public String profileMessageS(List<ParseTree> args) {
-			return "Executing function: " + this.getName() + "(" 
+			return "Executing function: " + this.getName() + "("
 					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
 					+ ", " + args.get(2).toStringVerbose() + ", <code>)";
 		}
@@ -394,39 +387,40 @@ public class DataHandling {
 			//it is commonplace to use postfix operations, so if the condition is in fact that simple,
 			//let's reverse it.
 			boolean isInc;
-			try{
-				if(children.get(2).getData() instanceof CFunction &&
-						((isInc = children.get(2).getData().val().equals("postinc"))
+			try {
+				if (children.get(2).getData() instanceof CFunction
+						&& ((isInc = children.get(2).getData().val().equals("postinc"))
 						|| children.get(2).getData().val().equals("postdec"))
-						&& children.get(2).getChildAt(0).getData() instanceof IVariable){
-					ParseTree pre = new ParseTree(new CFunction(isInc?"inc":"dec", t), children.get(2).getFileOptions());
+						&& children.get(2).getChildAt(0).getData() instanceof IVariable) {
+					ParseTree pre = new ParseTree(new CFunction(isInc ? "inc" : "dec", t), children.get(2).getFileOptions());
 					pre.addChild(children.get(2).getChildAt(0));
 					children.set(2, pre);
 				}
-			} catch(IndexOutOfBoundsException e){
+			} catch (IndexOutOfBoundsException e) {
 				//Just ignore it. It's a compile error, but we'll let the rest of the
 				//existing system sort that out.
 			}
-			
+
 			return null;
 		}
-		
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
-				
+
 	}
-	
+
 	@api
 	@noboilerplate
-	public static class forelse extends AbstractFunction{
-		
-		public forelse(){ }
-		
+	public static class forelse extends AbstractFunction {
+
+		public forelse() {
+		}
+
 		boolean runAsFor = false;
-		forelse(boolean runAsFor){
+
+		forelse(boolean runAsFor) {
 			this.runAsFor = runAsFor;
 		}
 
@@ -444,7 +438,7 @@ public class DataHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean useSpecialExec() {
 			return true;
@@ -453,7 +447,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return null;
-		}				
+		}
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
@@ -462,7 +456,7 @@ public class DataHandling {
 			ParseTree expression = nodes[2];
 			ParseTree runnable = nodes[3];
 			ParseTree elseCode = null;
-			if(!runAsFor){
+			if (!runAsFor) {
 				elseCode = nodes[4];
 			}
 			boolean hasRunOnce = false;
@@ -499,7 +493,7 @@ public class DataHandling {
 				}
 				parent.eval(expression, env);
 			}
-			if(!hasRunOnce && !runAsFor && elseCode != null){
+			if (!hasRunOnce && !runAsFor && elseCode != null) {
 				parent.eval(elseCode, env);
 			}
 			return new CVoid(t);
@@ -526,10 +520,10 @@ public class DataHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class foreach extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -552,7 +546,7 @@ public class DataHandling {
 			ParseTree array = nodes[0];
 			ParseTree key = null;
 			int offset = 0;
-			if(nodes.length == 4){
+			if (nodes.length == 4) {
 				//Key and value provided
 				key = nodes[1];
 				offset = 1;
@@ -561,9 +555,9 @@ public class DataHandling {
 			ParseTree code = nodes[2 + offset];
 			Construct arr = parent.seval(array, env);
 			Construct ik = null;
-			if(key != null){
+			if (key != null) {
 				ik = parent.eval(key, env);
-				if(!(ik instanceof IVariable)){
+				if (!(ik instanceof IVariable)) {
 					throw new ConfigRuntimeException("Parameter 2 of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
 				}
 			}
@@ -577,60 +571,110 @@ public class DataHandling {
 					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
 				}
 			}
-			if (arr instanceof ArrayAccess) {
-				if (iv instanceof IVariable) {
-					ArrayAccess one = (ArrayAccess) arr;
-					IVariable kkey = (IVariable) ik;
-					IVariable two = (IVariable) iv;
-					//Special optimization for CArrays in associative mode is used below. All other ArrayAccesses (and
-					//CArrays in normal mode) use this logic.
-					if ((one instanceof CArray && !((CArray)one).inAssociativeMode()) || !(one instanceof CArray)) {
-						for (int i = 0; i < one.size(); i++) {
-							if(kkey != null){
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CInt(i, t), t));
-							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(Integer.toString(i), t), t));
-							try {
-								parent.eval(code, env);
-							} catch (LoopBreakException e) {
-								int num = e.getTimes();
-								if (num > 1) {
-									e.setTimes(--num);
-									throw e;
-								}
-								return new CVoid(t);
-							} catch (LoopContinueException e) {
-								i += e.getTimes() - 1;
-								continue;
-							}
-						}
-					} else {
-						for (int i = 0; i < one.size(); i++) {
-							String index = ((CArray)one).keySet().toArray(new String[]{})[i];
-							if(kkey != null){
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CString(index, t), t));
-							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
-							try {
-								parent.eval(code, env);
-							} catch (LoopBreakException e) {
-								int num = e.getTimes();
-								if (num > 1) {
-									e.setTimes(--num);
-									throw e;
-								}
-								return new CVoid(t);
-							} catch (LoopContinueException e) {
-								i += e.getTimes() - 1;
-								continue;
-							}
-						}
-					}
-				} else {
-					throw new ConfigRuntimeException("Parameter " + (2 +offset) + " of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
-				}
-			} else {
+			if (!(arr instanceof ArrayAccess)) {
 				throw new ConfigRuntimeException("Parameter 1 of " + getName() + " must be an array or array like data structure", ExceptionType.CastException, t);
+			}
+			if (!(iv instanceof IVariable)) {
+				throw new ConfigRuntimeException("Parameter " + (2 + offset) + " of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
+			}
+			ArrayAccess one = (ArrayAccess) arr;
+			IVariable kkey = (IVariable) ik;
+			IVariable two = (IVariable) iv;
+			if (one.isAssociative()) {
+					//Iteration of an associative array is much easier, and we have
+				//special logic here to decrease the complexity.
+
+					//Clone the set, so changes in the array won't cause changes in
+				//the iteration order.
+				Set<Construct> keySet = new HashSet<>(one.keySet());
+					//Continues in an associative array are slightly different, so
+				//we have to track this differently. Basically, we skip the
+				//next element in the array key set.
+				int continues = 0;
+				for (Construct c : keySet) {
+					if (continues > 0) {
+							//If continues is greater than 0, continue in the loop,
+						//however many times necessary to make it 0.
+						continues--;
+						continue;
+					}
+					//If the key isn't null, set that in the variable table.
+					if (kkey != null) {
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), c, t));
+					}
+					//Set the value in the variable table
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(c.val(), t), t));
+					try {
+						//Execute the code
+						parent.eval(code, env);
+						//And handle any break/continues.
+					} catch (LoopBreakException e) {
+						int num = e.getTimes();
+						if (num > 1) {
+							e.setTimes(--num);
+							throw e;
+						}
+						return new CVoid(t);
+					} catch (LoopContinueException e) {
+						continues += e.getTimes() - 1;
+					}
+				}
+				return new CVoid(t);
+			} else {
+					//It's not associative, so we have more complex handling. We will create an ArrayAccessIterator,
+				//and store that in the environment. As the array is iterated, underlying changes in the array
+				//will be reflected in the object, and we will adjust as necessary. The reason we use this mechanism
+				//is to avoid cloning the array, and iterating that. Arrays may be extremely large, and cloning the
+				//entire array is wasteful in that case. We are essentially tracking deltas this way, which prevents
+				//memory usage from getting out of hand.
+				ArrayAccess.ArrayAccessIterator iterator = new ArrayAccess.ArrayAccessIterator(one);
+				List<ArrayAccess.ArrayAccessIterator> arrayAccessList = env.getEnv(GlobalEnv.class).GetArrayAccessIterators();
+				try {
+					arrayAccessList.add(iterator);
+					int continues = 0;
+					while (true) {
+						int current = iterator.getCurrent();
+						if (continues > 0) {
+								//We have some continues to handle. Blacklisted
+							//values don't count for the continuing count, so
+							//we have to consider that when counting.
+							iterator.incrementCurrent();
+							if (iterator.isBlacklisted(current)) {
+								continue;
+							} else {
+								--continues;
+								continue;
+							}
+						}
+						if (current >= one.size()) {
+							//Done with the iterations.
+							break;
+						}
+						//If the item is blacklisted, we skip it.
+						if (!iterator.isBlacklisted(current)) {
+							if (kkey != null) {
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CInt(current, t), t));
+							}
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(current, t), t));
+							try {
+								parent.eval(code, env);
+							} catch (LoopBreakException e) {
+								int num = e.getTimes();
+								if (num > 1) {
+									e.setTimes(--num);
+									throw e;
+								}
+								return new CVoid(t);
+							} catch (LoopContinueException e) {
+								continues += e.getTimes() - 1;
+								continue;
+							}
+						}
+						iterator.incrementCurrent();
+					}
+				} finally {
+					arrayAccessList.remove(iterator);
+				}
 			}
 			return new CVoid(t);
 		}
@@ -652,7 +696,8 @@ public class DataHandling {
 					+ " the behavior of the loop easier. The \"as\" keyword reads less plainly, and so is not recommended for use, but is"
 					+ " allowed. Note that the array and value are reversed with the \"as\" keyword. An \"else\" block may be used after"
 					+ " the foreach, which will only run if the array provided is empty, that is, the loop code would never run. This provides"
-					+ " a good way to provide \"default\" handling.";
+					+ " a good way to provide \"default\" handling. Array modifications while iterating are supported, and are well defined."
+					+ " See [[CommandHelper/Staged/Array_iteration|the page documenting array iterations]] for full details.";
 		}
 
 		@Override
@@ -680,40 +725,39 @@ public class DataHandling {
 		public boolean allowBraces() {
 			return true;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Using \"in\" keyword", "@array = array(1, 2, 3);\n"
-						+ "foreach(@value in @array){\n"
-						+ "\tmsg(@value);\n"
-						+ "}"),
+				+ "foreach(@value in @array){\n"
+				+ "\tmsg(@value);\n"
+				+ "}"),
 				new ExampleScript("Using \"in\" keyword, with a key", "@array = array(1, 2, 3);\n"
-						+ "foreach(@key: @value in @array){\n"
-						+ "\tmsg(@key . ': ' . @value);\n"
-						+ "}"),
+				+ "foreach(@key: @value in @array){\n"
+				+ "\tmsg(@key . ': ' . @value);\n"
+				+ "}"),
 				new ExampleScript("Using \"a\" keyword", "@array = array(1, 2, 3);\n"
-						+ "foreach(@array as @value){\n"
-						+ "\tmsg(@value);\n"
-						+ "}"),
+				+ "foreach(@array as @value){\n"
+				+ "\tmsg(@value);\n"
+				+ "}"),
 				new ExampleScript("Using \"as\" keyword, with a key", "@array = array(1, 2, 3);\n"
-						+ "foreach(@array as @key: @value){\n"
-						+ "\tmsg(@key . ': ' . @value);\n"
-						+ "}"),
+				+ "foreach(@array as @key: @value){\n"
+				+ "\tmsg(@key . ': ' . @value);\n"
+				+ "}"),
 				new ExampleScript("With else clause", "@array = array() # Note empty array\n"
-						+ "foreach(@value in @array){\n"
-						+ "\tmsg(@value);\n"
-						+ "} else {\n"
-						+ "\tmsg('No values were in the array');\n"
-						+ "}"),
+				+ "foreach(@value in @array){\n"
+				+ "\tmsg(@value);\n"
+				+ "} else {\n"
+				+ "\tmsg('No values were in the array');\n"
+				+ "}"),
 				new ExampleScript("Basic functional usage", "assign(@array, array(1, 2, 3))\nforeach(@array, @i,\n\tmsg(@i)\n)"),
 				new ExampleScript("With braces", "assign(@array, array(1, 2, 3))\nforeach(@array, @i){\n\tmsg(@i)\n}"),
-				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),				
-				new ExampleScript("With a slice, counting down", "foreach(3..1, @i){\n\tmsg(@i)\n}"),				
-				new ExampleScript("With array keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}"),
-			};
+				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),
+				new ExampleScript("With a slice, counting down", "foreach(3..1, @i){\n\tmsg(@i)\n}"),
+				new ExampleScript("With array keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}"),};
 		}
-		
+
 		@Override
 		public LogLevel profileAt() {
 			return LogLevel.WARNING;
@@ -721,7 +765,7 @@ public class DataHandling {
 
 		@Override
 		public String profileMessageS(List<ParseTree> args) {
-			return "Executing function: " + this.getName() + "(" 
+			return "Executing function: " + this.getName() + "("
 					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
 					+ ", <code>)";
 		}
@@ -730,29 +774,29 @@ public class DataHandling {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
-		
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() < 2){
+			if (children.size() < 2) {
 				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
 			}
-			if(children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new Compiler.centry().getName())){
+			if (children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new Compiler.centry().getName())) {
 				// This is what "@key: @value in @array" looks like initially. We'll refactor this so the next segment can take over properly.
 				ParseTree sconcat = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), fileOptions);
 				sconcat.addChild(children.get(0).getChildAt(0));
-				for(int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++){
+				for (int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++) {
 					sconcat.addChild(children.get(0).getChildAt(1).getChildAt(i));
 				}
 				children.set(0, sconcat);
 			}
-			if(children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new StringHandling.sconcat().getName())){
+			if (children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new StringHandling.sconcat().getName())) {
 				// We may be looking at a "@value in @array" or "@array as @value" type 
 				// structure, so we need to re-arrange this into the standard format.
 				ParseTree array = null;
 				ParseTree key = null;
 				ParseTree value = null;
 				List<ParseTree> c = children.get(0).getChildren();
-				if(c.size() == 3){
+				if (c.size() == 3) {
 					// No key specified
 					switch (c.get(1).getData().val()) {
 						case "in":
@@ -766,41 +810,41 @@ public class DataHandling {
 							array = c.get(0);
 							break;
 					}
-				} else if(c.size() == 4){
-					if("in".equals(c.get(2).getData().val())){
+				} else if (c.size() == 4) {
+					if ("in".equals(c.get(2).getData().val())) {
 						// @key: @value in @array
 						key = c.get(0);
 						value = c.get(1);
 						array = c.get(3);
-					} else if("as".equals(c.get(1).getData().val())){
+					} else if ("as".equals(c.get(1).getData().val())) {
 						// @array as @key: @value
 						array = c.get(0);
 						key = c.get(2);
 						value = c.get(3);
 					}
 				}
-				if(key != null && key.getData() instanceof CLabel){
-					if(!(((CLabel)key.getData()).cVal() instanceof IVariable)){
+				if (key != null && key.getData() instanceof CLabel) {
+					if (!(((CLabel) key.getData()).cVal() instanceof IVariable)) {
 						throw new ConfigCompileException("Expected a variable for key, but \"" + key.getData().val() + "\" was found", t);
 					}
-					key.setData(((CLabel)key.getData()).cVal());
+					key.setData(((CLabel) key.getData()).cVal());
 				}
 				// Now set up the new tree, and return that. Since foreachelse overrides us, we
 				// need to accept all the arguments after the first, and put those in.
 				List<ParseTree> newChildren = new ArrayList<>();
 				newChildren.add(array);
-				if(key != null){
+				if (key != null) {
 					newChildren.add(key);
 				}
 				newChildren.add(value);
-				for(int i = 1; i < children.size(); i++){
+				for (int i = 1; i < children.size(); i++) {
 					newChildren.add(children.get(i));
 				}
 				children.clear();
 				children.addAll(newChildren);
 				// Change foreach(){ ... } else { ... } to a foreachelse.
-				if(children.get(children.size() - 1).getData() instanceof CFunction 
-						&& children.get(children.size() - 1).getData().val().equals("else")){
+				if (children.get(children.size() - 1).getData() instanceof CFunction
+						&& children.get(children.size() - 1).getData().val().equals("else")) {
 					ParseTree foreachelse = new ParseTree(new CFunction(new foreachelse().getName(), t), fileOptions);
 					children.set(children.size() - 1, children.get(children.size() - 1).getChildAt(0));
 					foreachelse.setChildren(children);
@@ -810,12 +854,11 @@ public class DataHandling {
 			return null;
 		}
 
-		
 	}
-	
+
 	@api
 	@noboilerplate
-	public static class foreachelse extends foreach{
+	public static class foreachelse extends foreach {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
@@ -824,15 +867,15 @@ public class DataHandling {
 			ParseTree elseCode = nodes[nodes.length - 1];
 
 			Construct data = parent.seval(array, env);
-			
-			if(!(data instanceof CArray) && !(data instanceof CSlice)){
+
+			if (!(data instanceof CArray) && !(data instanceof CSlice)) {
 				throw new Exceptions.CastException(getName() + " expects an array for parameter 1", t);
 			}
-			
-			if(((CArray)data).isEmpty()){
+
+			if (((CArray) data).isEmpty()) {
 				parent.eval(elseCode, env);
 			} else {
-				ParseTree pass [] = new ParseTree[nodes.length - 1];
+				ParseTree pass[] = new ParseTree[nodes.length - 1];
 				System.arraycopy(nodes, 0, pass, 0, nodes.length - 1);
 				nodes[0] = new ParseTree(data, null);
 				return super.execs(t, env, parent, pass);
@@ -840,8 +883,6 @@ public class DataHandling {
 
 			return new CVoid(t);
 		}
-		
-		
 
 		@Override
 		public String getName() {
@@ -867,24 +908,22 @@ public class DataHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage, with the else code not running", 
-					"@array = array(1, 2, 3)\n"
-					+ "foreachelse(@array, @val,\n"
-					+ "    msg(@val)\n"
-					+ ", #else \n"
-					+ "    msg('No values in the array')\n"
-					+ ")"),
-				new ExampleScript("Empty array, so else block running", 
-					"@array = array()\n"
-					+ "foreachelse(@array, @val,\n"
-					+ "    msg(@val)\n"
-					+ ", #else \n"
-					+ "    msg('No values in the array')\n"
-					+ ")"),
-			};
+				new ExampleScript("Basic usage, with the else code not running",
+				"@array = array(1, 2, 3)\n"
+				+ "foreachelse(@array, @val,\n"
+				+ "    msg(@val)\n"
+				+ ", #else \n"
+				+ "    msg('No values in the array')\n"
+				+ ")"),
+				new ExampleScript("Empty array, so else block running",
+				"@array = array()\n"
+				+ "foreachelse(@array, @val,\n"
+				+ "    msg(@val)\n"
+				+ ", #else \n"
+				+ "    msg('No values in the array')\n"
+				+ ")"),};
 		}
-		
-		
+
 	}
 
 	@api
@@ -934,7 +973,7 @@ public class DataHandling {
 				while (Static.getBoolean(parent.seval(nodes[0], env))) {
 					//We allow while(thing()); to be done. This makes certain
 					//types of coding styles possible.
-					if(nodes.length > 1){
+					if (nodes.length > 1) {
 						try {
 							parent.seval(nodes[1], env);
 						} catch (LoopContinueException e) {
@@ -959,22 +998,21 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull();
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@i, 5)\nwhile(@i > 0,\n"
-					+ "\tmsg(@i)\n"
-					+ "\t@i--\n"
-					+ ")"),
+				+ "\tmsg(@i)\n"
+				+ "\t@i--\n"
+				+ ")"),
 				new ExampleScript("With a break", "assign(@i, 0)\nwhile(true,\n"
-					+ "\tmsg(@i)\n"
-					+ "\t@i++\n"
-					+ "\tif(@i > 5, break())\n"
-					+ ")"),
-			};
+				+ "\tmsg(@i)\n"
+				+ "\t@i++\n"
+				+ "\tif(@i > 5, break())\n"
+				+ ")"),};
 		}
-		
+
 		@Override
 		public LogLevel profileAt() {
 			return LogLevel.WARNING;
@@ -982,7 +1020,7 @@ public class DataHandling {
 
 		@Override
 		public String profileMessageS(List<ParseTree> args) {
-			return "Executing function: " + this.getName() + "(" 
+			return "Executing function: " + this.getName() + "("
 					+ args.get(0).toStringVerbose() + ", <code>)";
 		}
 
@@ -990,7 +1028,7 @@ public class DataHandling {
 		public boolean allowBraces() {
 			return true;
 		}
-		
+
 	}
 
 	@api
@@ -1062,17 +1100,16 @@ public class DataHandling {
 			}
 			return new CVoid(t);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "dowhile(\n"
-					+ "\tmsg('This will only run once')\n"
-					+ ", #while\n"
-					+ "false)"),
-			};
+				+ "\tmsg('This will only run once')\n"
+				+ ", #while\n"
+				+ "false)"),};
 		}
-		
+
 		@Override
 		public LogLevel profileAt() {
 			return LogLevel.WARNING;
@@ -1080,7 +1117,7 @@ public class DataHandling {
 
 		@Override
 		public String profileMessageS(List<ParseTree> args) {
-			return "Executing function: " + this.getName() + "(<code>, " 
+			return "Executing function: " + this.getName() + "(<code>, "
 					+ args.get(1).toStringVerbose() + ")";
 		}
 	}
@@ -1134,28 +1171,27 @@ public class DataHandling {
 			}
 			throw new LoopBreakException(num, t);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 1000, @i++,\n"
-					+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
-					+ "\t\tmsg('This will only display once')\n"
-					+ "\t\tbreak(2)\n"
-					+ "\t)"
-					+ ")"),
+				+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
+				+ "\t\tmsg('This will only display once')\n"
+				+ "\t\tbreak(2)\n"
+				+ "\t)"
+				+ ")"),
 				new ExampleScript("Invalid number", "for(assign(@i, 0), @i < 1000, @i++,\n"
-					+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
-					+ "\t\tbreak(3) #There are only 2 loops to break out of\n"
-					+ "\t)"
-					+ ")"),
-			};
+				+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
+				+ "\t\tbreak(3) #There are only 2 loops to break out of\n"
+				+ "\t)"
+				+ ")"),};
 		}
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() == 1){
-				if(children.get(0).isDynamic()){
+			if (children.size() == 1) {
+				if (children.get(0).isDynamic()) {
 					//This is absolutely a bad design, if there is a variable here
 					//in the break, HOWEVER, it is not an error, we will simply
 					//issue a compiler warning. break() parameters should
@@ -1174,12 +1210,11 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC
-					//, OptimizationOption.TERMINAL This can't be added yet, because of things like switch, where code
-					//branches aren't considered correctly.
+			//, OptimizationOption.TERMINAL This can't be added yet, because of things like switch, where code
+			//branches aren't considered correctly.
 			);
 		}
-		
-		
+
 	}
 
 	@api
@@ -1230,19 +1265,18 @@ public class DataHandling {
 			}
 			throw new LoopContinueException(num, t);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 5, @i++){\n"
-					+ "\tif(@i == 2, continue())\n"
-					+ "\tmsg(@i)\n"
-					+ "}"),
+				+ "\tif(@i == 2, continue())\n"
+				+ "\tmsg(@i)\n"
+				+ "}"),
 				new ExampleScript("Argument specified", "for(assign(@i, 0), @i < 5, @i++){\n"
-					+ "\tif(@i == 2, continue(2))\n"
-					+ "\tmsg(@i)\n"
-					+ "}"),
-			};
+				+ "\tif(@i == 2, continue(2))\n"
+				+ "\tmsg(@i)\n"
+				+ "}"),};
 		}
 	}
 
@@ -1292,21 +1326,20 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_stringable('yes')"),
 				new ExampleScript("True condition", "is_stringable(1) #This can be used as a string, yes"),
-				new ExampleScript("False condition", "is_stringable(array(1))"),
-			};
+				new ExampleScript("False condition", "is_stringable(array(1))"),};
 		}
 	}
-	
+
 	@api
 	public static class is_string extends AbstractFunction implements Optimizable {
 
@@ -1354,17 +1387,16 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_string('yes')"),
-				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here"),
-			};
+				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here"),};
 		}
 	}
 
@@ -1414,18 +1446,17 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_bytearray(string_get_bytes('yay'))"),
 				new ExampleScript("False condition", "is_bytearray('Nay')"),
-				new ExampleScript("False condition", "is_bytearray(123)"),
-			};
+				new ExampleScript("False condition", "is_bytearray(123)"),};
 		}
 	}
 
@@ -1475,18 +1506,17 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_array(array(1))"),
 				new ExampleScript("True condition", "is_array(array(one: 1))"),
-				new ExampleScript("False condition", "is_array('no')"),
-			};
+				new ExampleScript("False condition", "is_array('no')"),};
 		}
 	}
 
@@ -1538,17 +1568,16 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_double(1.0)"),
-				new ExampleScript("False condition", "is_double(1)"),
-			};
+				new ExampleScript("False condition", "is_double(1)"),};
 		}
 	}
 
@@ -1600,17 +1629,16 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_integer(1)"),
-				new ExampleScript("False condition", "is_integer(1.0)"),
-			};
+				new ExampleScript("False condition", "is_integer(1.0)"),};
 		}
 	}
 
@@ -1661,17 +1689,16 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_boolean(false)"),
-				new ExampleScript("False condition", "is_boolean(0)"),
-			};
+				new ExampleScript("False condition", "is_boolean(0)"),};
 		}
 	}
 
@@ -1721,17 +1748,16 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_null(null)"),
-				new ExampleScript("False condition", "is_null(0)"),
-			};
+				new ExampleScript("False condition", "is_null(0)"),};
 		}
 	}
 
@@ -1788,11 +1814,11 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -1801,8 +1827,7 @@ public class DataHandling {
 				new ExampleScript("True condition", "is_numeric(1)"),
 				new ExampleScript("True condition", "is_numeric(1.5)"),
 				new ExampleScript("False condition", "is_numeric('string')"),
-				new ExampleScript("True condition, because null is coerced to 0.0, which is numeric.", "is_numeric(null)"),
-			};
+				new ExampleScript("True condition, because null is coerced to 0.0, which is numeric.", "is_numeric(null)"),};
 		}
 	}
 
@@ -1863,11 +1888,11 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -1876,8 +1901,7 @@ public class DataHandling {
 				new ExampleScript("True condition", "is_integral('5.0')"),
 				new ExampleScript("True condition", "is_integral('6')"),
 				new ExampleScript("False condition", "is_integral(1.5)"),
-				new ExampleScript("True condition, because null is coerced to 0, which is integral", "is_integral(null)"),
-			};
+				new ExampleScript("True condition, because null is coerced to 0, which is integral", "is_integral(null)"),};
 		}
 	}
 
@@ -1964,9 +1988,9 @@ public class DataHandling {
 								IVariable ivar = null;
 								try {
 									Construct c = cons;
-									if(c instanceof IVariable){
-										String varName = ((IVariable)c).getName();
-										if(varNames.contains(varName)){
+									if (c instanceof IVariable) {
+										String varName = ((IVariable) c).getName();
+										if (varNames.contains(varName)) {
 											throw new ConfigRuntimeException("Same variable name defined twice in " + name, ExceptionType.InvalidProcedureException, t);
 										}
 										varNames.add(varName);
@@ -1974,7 +1998,7 @@ public class DataHandling {
 									while (c instanceof IVariable) {
 										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
 									}
-									if(!thisNodeIsAssign){
+									if (!thisNodeIsAssign) {
 										//This is required because otherwise a default value that's already in the environment
 										//would end up getting set to the existing value, thereby leaking in the global env
 										//into this proc, if the call to the proc didn't have a value in this slot.
@@ -2024,7 +2048,7 @@ public class DataHandling {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
 					FileOptions options = new FileOptions(new HashMap<String, String>());
-					if(!children.isEmpty()){
+					if (!children.isEmpty()) {
 						options = children.get(0).getFileOptions();
 					}
 					ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), options);
@@ -2070,7 +2094,7 @@ public class DataHandling {
 		public boolean allowBraces() {
 			return true;
 		}
-		
+
 	}
 
 	@api
@@ -2114,9 +2138,9 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.TERMINAL
+					OptimizationOption.TERMINAL
 			);
-		}				
+		}
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
@@ -2187,7 +2211,7 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_CONSTANT
+					OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
 
@@ -2271,35 +2295,35 @@ public class DataHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() < 1){
+			if (children.size() < 1) {
 				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
-			if(children.get(0).isConst()){
+			if (children.get(0).isConst()) {
 				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Hardcoding procedure name in " + getName() + ", which is inefficient."
 						+ " Consider calling the procedure directly if the procedure name is known at compile time.", t);
 			}
 			return null;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class call_proc_array extends call_proc {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[1], t);
-			if(ca.inAssociativeMode()){
+			if (ca.inAssociativeMode()) {
 				throw new Exceptions.CastException("Expected the array passed to " + getName() + " to be non-associative.", t);
 			}
-			Construct [] args2 = new Construct[(int)ca.size() + 1];
+			Construct[] args2 = new Construct[(int) ca.size() + 1];
 			args2[0] = args[0];
-			for(int i = 1; i < args2.length; i++){
+			for (int i = 1; i < args2.length; i++) {
 				args2[i] = ca.get(i - 1);
 			}
 			return super.exec(t, environment, args2);
 		}
-		
+
 		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidProcedureException, ExceptionType.CastException};
@@ -2332,10 +2356,10 @@ public class DataHandling {
 			//If they hardcode the name, that's fine, because the variables may just be the only thing that's variable.
 			return null;
 		}
-		
+
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class is_proc extends AbstractFunction {
 
 		@Override
@@ -2430,17 +2454,16 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_associative(array(one: 1, two: 2))"),
-				new ExampleScript("False condition", "is_associative(array(1, 2, 3))"),
-			};
+				new ExampleScript("False condition", "is_associative(array(1, 2, 3))"),};
 		}
 	}
 
@@ -2487,13 +2510,12 @@ public class DataHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_closure(closure(msg('code')))"),
-				new ExampleScript("False condition", "is_closure('a string')"),
-			};
+				new ExampleScript("False condition", "is_closure('a string')"),};
 		}
 	}
 
@@ -2575,18 +2597,18 @@ public class DataHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 2){
+			if (children.size() > 2) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
-							+ " Use import('my.namespace') instead of import('my', 'namespace')", t);
+						+ " Use import('my.namespace') instead of import('my', 'namespace')", t);
 			}
-			if(children.get(0).getData() instanceof IVariable){
+			if (children.get(0).getData() instanceof IVariable) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "import(@ivar) usage is deprecated. Please use the @ivar = import('custom.name') format,"
-							+ " as this feature WILL be removed in the future.", t);
+						+ " as this feature WILL be removed in the future.", t);
 			}
 			//Just a compiler warning
 			return null;
 		}
-		
+
 	}
 
 	@api
@@ -2665,23 +2687,23 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Deprecated usage", "@var = 2\n"
-					+ "export(@var)\n"
-					+ "@var = 0\n"
-					+ "# In other code, perhaps inside a proc, or another execution unit\n"
-					+ "import(@var)\n"
-					+ "msg(@var)"),
+				+ "export(@var)\n"
+				+ "@var = 0\n"
+				+ "# In other code, perhaps inside a proc, or another execution unit\n"
+				+ "import(@var)\n"
+				+ "msg(@var)"),
 				new ExampleScript("Preferred usage", "@var = 2\n"
-					+ "export('custom.name', @var)\n"
-					+ "@var2 = import('custom.name')\n"
-					+ "msg(@var2)"),
+				+ "export('custom.name', @var)\n"
+				+ "@var2 = import('custom.name')\n"
+				+ "msg(@var2)"),
 				new ExampleScript("Storage of references", "@array = array(1, 2, 3)\n"
-					+ "export('array', @array)\n"
-					+ "@array[0] = 4\n"
-					+ "@array2 = import('array')\n"
-					+ "msg(@array2)")
+				+ "export('array', @array)\n"
+				+ "@array[0] = 4\n"
+				+ "@array2 = import('array')\n"
+				+ "msg(@array2)")
 			};
 		}
-		
+
 		@Override
 		public Set<Optimizable.OptimizationOption> optimizationOptions() {
 			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
@@ -2689,21 +2711,21 @@ public class DataHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 2){
+			if (children.size() > 2) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
-							+ " Use export('my.namespace', @var) instead of export('my', 'namespace', @var)", t);
+						+ " Use export('my.namespace', @var) instead of export('my', 'namespace', @var)", t);
 			}
-			if(children.get(0).getData() instanceof IVariable){
+			if (children.get(0).getData() instanceof IVariable) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "export(@ivar) usage is deprecated. Please use the export('custom.name', @ivar) format,"
-							+ " as this feature WILL be removed in the future.", t);
+						+ " as this feature WILL be removed in the future.", t);
 			}
 			//Just a compiler warning
 			return null;
 		}
-		
+
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class closure extends AbstractFunction {
 
 		@Override
@@ -2759,7 +2781,7 @@ public class DataHandling {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if(nodes.length == 0){
+			if (nodes.length == 0) {
 				//Empty closure, do nothing.
 				return new CClosure(null, env, new String[]{}, new Construct[]{}, t);
 			}
@@ -2800,7 +2822,7 @@ public class DataHandling {
 		@Override
 		public boolean allowBraces() {
 			return true;
-		}		
+		}
 	}
 
 	@api
@@ -2845,9 +2867,9 @@ public class DataHandling {
 				Construct[] vals = new Construct[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
 				CClosure closure = (CClosure) args[args.length - 1];
-				try{
+				try {
 					closure.execute(vals);
-				} catch(FunctionReturnException e){
+				} catch (FunctionReturnException e) {
 					return e.getReturn();
 				}
 			} else {
@@ -2910,11 +2932,11 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -2924,8 +2946,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "boolean(array())"),
 				new ExampleScript("Basic usage", "boolean(null)"),
 				new ExampleScript("Basic usage", "boolean('string')"),
-				new ExampleScript("Basic usage", "boolean('')"),
-			};
+				new ExampleScript("Basic usage", "boolean('')"),};
 		}
 	}
 
@@ -2980,18 +3001,17 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "integer(1.0)"),
 				new ExampleScript("Basic usage", "integer(1.5)"),
-				new ExampleScript("Failure", "assign(@var, 'string')\ninteger(@var)"),
-			};
+				new ExampleScript("Failure", "assign(@var, 'string')\ninteger(@var)"),};
 		}
 	}
 
@@ -3043,17 +3063,16 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "double(1)"),
-				new ExampleScript("Failure", "assign(@var, 'string')\ndouble(@var)"),
-			};
+				new ExampleScript("Failure", "assign(@var, 'string')\ndouble(@var)"),};
 		}
 	}
 
@@ -3106,11 +3125,11 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -3119,11 +3138,10 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "string(false)"),
 				new ExampleScript("Basic usage", "string(null)"),
 				new ExampleScript("Basic usage", "string(array(1, 2))"),
-				new ExampleScript("Basic usage", "string(array(one: 'one', two: 'two'))"),
-			};
+				new ExampleScript("Basic usage", "string(array(one: 'one', two: 'two'))"),};
 		}
 	}
-	
+
 	@api
 	@seealso(parse_int.class)
 	public static class to_radix extends AbstractFunction {
@@ -3146,7 +3164,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int radix = Static.getInt32(args[1], t);
-			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX){
+			if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new Exceptions.RangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
 			return new CString(Long.toString(Static.getInt(args[0], t), radix), t);
@@ -3183,7 +3201,7 @@ public class DataHandling {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -3193,9 +3211,9 @@ public class DataHandling {
 				new ExampleScript("Using binary value in source", "to_radix(0b10101010, 2)")
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	@seealso(to_radix.class)
 	public static class parse_int extends AbstractFunction {
@@ -3219,13 +3237,13 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String value = args[0].val();
 			int radix = Static.getInt32(args[1], t);
-			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX){
+			if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new Exceptions.RangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
 			long ret;
-			try{
+			try {
 				ret = Long.parseLong(value, radix);
-			} catch(NumberFormatException ex){
+			} catch (NumberFormatException ex) {
 				throw new Exceptions.FormatException("The input string: \"" + value + "\" is improperly formatted. (Perhaps you're using a character greater than"
 						+ " the radix specified?)", t);
 			}
@@ -3290,7 +3308,7 @@ public class DataHandling {
 		}
 		return b.toString();
 	}
-	
+
 	@api
 	public static class typeof extends AbstractFunction implements Optimizable {
 
@@ -3313,7 +3331,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return new CString(args[0].typeof(), t);
-			} catch(IllegalArgumentException ex){
+			} catch (IllegalArgumentException ex) {
 				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 						+ " error to the developers.");
 			}
@@ -3346,17 +3364,14 @@ public class DataHandling {
 				new ExampleScript("Basic usage, typeof string", "typeof('value')"),
 				new ExampleScript("Basic usage, typeof int", "typeof(1)"),
 				new ExampleScript("Basic usage, typeof double", "typeof(1.0)"),
-				new ExampleScript("Basic usage, typeof closure", "typeof(closure(){ msg('test') })"),
-			};
+				new ExampleScript("Basic usage, typeof closure", "typeof(closure(){ msg('test') })"),};
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
 		}
-		
-		
+
 	}
+
 }
-
-

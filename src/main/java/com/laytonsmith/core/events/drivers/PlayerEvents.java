@@ -1225,7 +1225,7 @@ public class PlayerEvents {
             List<MCItemStack> list = new ArrayList<MCItemStack>();
             String deathMessage = manual.get("death_message").val();
             CArray clist = (CArray)manual.get("drops");
-            for(String key : clist.keySet()){
+            for(String key : clist.stringKeySet()){
                 list.add(ObjectGenerator.GetGenerator().item(clist.get(key), clist.getTarget()));
             }
             MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer, Target.UNKNOWN), list,
@@ -1442,7 +1442,7 @@ public class PlayerEvents {
                 if("recipients".equals(key)){
                     if(value instanceof CArray){
                         List<MCPlayer> list = new ArrayList<MCPlayer>();
-                        for(String index : ((CArray)value).keySet()){
+                        for(String index : ((CArray)value).stringKeySet()){
                             Construct v = ((CArray)value).get(index);
                             try{
                                 list.add(Static.GetPlayer(v, Target.UNKNOWN));

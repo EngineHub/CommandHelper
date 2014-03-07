@@ -155,7 +155,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 
         this.prefilter = new HashMap<String, Construct>();
         if (prefilter != null) {
-            for (String key : prefilter.keySet()) {
+            for (String key : prefilter.stringKeySet()) {
                 this.prefilter.put(key, prefilter.get(key, Target.UNKNOWN));
             }
         }
@@ -291,7 +291,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             Environment env = originalEnv.clone();
             env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(eventObjName, event, Target.UNKNOWN));
             Map<String, Construct> map = new HashMap<String, Construct>();
-            for(String key : event.keySet()){
+            for(String key : event.stringKeySet()){
                 map.put(key, event.get(key, Target.UNKNOWN));
             }
             ActiveEvent activeEvent = new ActiveEvent(null);

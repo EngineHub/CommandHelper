@@ -1177,7 +1177,7 @@ public class EntityManagement {
 				return new CVoid(t);
 			} else if (args[1] instanceof CArray) {
 				CArray ea = (CArray) args[1];
-				for (String key : ea.keySet()) {
+				for (String key : ea.stringKeySet()) {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
@@ -1694,7 +1694,7 @@ public class EntityManagement {
 				}
 			} else if (args[1] instanceof CArray) {
 				CArray ea = (CArray) args[1];
-				for (String key : ea.keySet()) {
+				for (String key : ea.stringKeySet()) {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), Static.getDouble32(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
@@ -2441,7 +2441,7 @@ public class EntityManagement {
 			switch (entity.getType()) {
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("powered")) {
 							creeper.setPowered(Static.getBoolean(specArray.get(index)));
 						} else {
@@ -2451,7 +2451,7 @@ public class EntityManagement {
 					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "itemstack":
 								item.setItemStack(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
@@ -2466,7 +2466,7 @@ public class EntityManagement {
 					break;
 				case ENDERMAN:
 					MCEnderman enderman = (MCEnderman) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("carried")) {
 							enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index), t).getData());
 						} else {
@@ -2476,7 +2476,7 @@ public class EntityManagement {
 					break;
 				case EXPERIENCE_ORB:
 					MCExperienceOrb orb = (MCExperienceOrb) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("amount")) {
 							orb.setExperience(Static.getInt32(specArray.get(index), t));
 						} else {
@@ -2486,7 +2486,7 @@ public class EntityManagement {
 					break;
 				case FALLING_BLOCK:
 					MCFallingBlock block = (MCFallingBlock) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("dropitem")) {
 							block.setDropItem(Static.getBoolean(specArray.get(index)));
 						} else {
@@ -2498,7 +2498,7 @@ public class EntityManagement {
 				case SMALL_FIREBALL:
 				case WITHER_SKULL:
 					MCFireball ball = (MCFireball) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("direction")) {
 							ball.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index), t));
 						} else {
@@ -2508,7 +2508,7 @@ public class EntityManagement {
 					break;
 				case FISHING_HOOK:
 					MCFishHook hook = (MCFishHook) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("chance")) {
 							try {
 								hook.setBiteChance(Static.getDouble(specArray.get(index), t));
@@ -2522,7 +2522,7 @@ public class EntityManagement {
 					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "color":
 								try {
@@ -2578,7 +2578,7 @@ public class EntityManagement {
 					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("playercreated")) {
 							golem.setPlayerCreated(Static.getBoolean(specArray.get(index)));
 						} else {
@@ -2588,7 +2588,7 @@ public class EntityManagement {
 					break;
 				case ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "item":
 								frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
@@ -2613,7 +2613,7 @@ public class EntityManagement {
 				case MAGMA_CUBE:
 				case SLIME:
 					MCSlime cube = (MCSlime) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("size")) {
 							cube.setSize(Static.getInt32(specArray.get(index), t));
 						} else {
@@ -2623,7 +2623,7 @@ public class EntityManagement {
 					break;
 				case OCELOT:
 					MCOcelot ocelot = (MCOcelot) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "type":
 								try {
@@ -2642,7 +2642,7 @@ public class EntityManagement {
 					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("art")) {
 							try {
 								painting.setArt(MCArt.valueOf(specArray.get(index).val().toUpperCase()));
@@ -2656,7 +2656,7 @@ public class EntityManagement {
 					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("saddled")) {
 							pig.setSaddled(Static.getBoolean(specArray.get(index)));
 						} else {
@@ -2666,7 +2666,7 @@ public class EntityManagement {
 					break;
 				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "baby":
 								pigZombie.setBaby(Static.getBoolean(specArray.get(index)));
@@ -2687,7 +2687,7 @@ public class EntityManagement {
 					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("fuseticks")) {
 							tnt.setFuseTicks(Static.getInt32(specArray.get(index), t));
 						} else {
@@ -2697,7 +2697,7 @@ public class EntityManagement {
 					break;
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "color":
 								try {
@@ -2716,7 +2716,7 @@ public class EntityManagement {
 					break;
 				case SKELETON:
 					MCSkeleton skeleton = (MCSkeleton) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("type")) {
 							try {
 								skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index).val().toUpperCase()));
@@ -2730,7 +2730,7 @@ public class EntityManagement {
 					break;
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("item")) {
 							potion.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
 						} else {
@@ -2740,7 +2740,7 @@ public class EntityManagement {
 					break;
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						if (index.equals("profession")) {
 							try {
 								villager.setProfession(MCProfession.valueOf(specArray.get(index).val().toUpperCase()));
@@ -2754,7 +2754,7 @@ public class EntityManagement {
 					break;
 				case WOLF:
 					MCWolf wolf = (MCWolf) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "angry":
 								wolf.setAngry(Static.getBoolean(specArray.get(index)));
@@ -2776,7 +2776,7 @@ public class EntityManagement {
 					break;
 				case ZOMBIE:
 					MCZombie zombie = (MCZombie) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "baby":
 								zombie.setBaby(Static.getBoolean(specArray.get(index)));
@@ -2790,7 +2790,7 @@ public class EntityManagement {
 					}
 					break;
 				default:
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 					}
 			}

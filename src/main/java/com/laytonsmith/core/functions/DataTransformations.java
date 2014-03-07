@@ -278,7 +278,7 @@ public class DataTransformations {
 			if(!arr.inAssociativeMode()){
 				throw new Exceptions.CastException("Expecting an associative array", t);
 			}
-			for(String key : arr.keySet()){
+			for(String key : arr.stringKeySet()){
 				Construct c = arr.get(key);
 				String val;
 				if(c instanceof CNull){

@@ -2116,7 +2116,7 @@ public class Math {
 				int i = 0;
 				da = new double[(int)vars.size()];
 				varNames = new String[(int)vars.size()];
-				for (String key : vars.keySet()) {
+				for (String key : vars.stringKeySet()) {
 					varNames[i] = key;
 					da[i] = Static.getDouble(vars.get(key, t), t);
 					i++;

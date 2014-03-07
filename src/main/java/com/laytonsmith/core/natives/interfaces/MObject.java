@@ -134,7 +134,7 @@ public class MObject {
 					} else if(fType == MMap.class){
 						CArray ca = Static.getArray(value, t);
 						MMap m = new MMap();
-						for(String key : ca.keySet()){
+						for(String key : ca.stringKeySet()){
 							m.put(key, ca.get(key));
 						}
 						val = m;

@@ -986,7 +986,7 @@ public class Environment {
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
 				if (args[2] instanceof CArray) {
-					for (String key : ((CArray) args[2]).keySet())
+					for (String key : ((CArray) args[2]).stringKeySet())
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
@@ -1078,7 +1078,7 @@ public class Environment {
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
 				if (args[2] instanceof CArray) {
-					for (String key : ((CArray) args[2]).keySet())
+					for (String key : ((CArray) args[2]).stringKeySet())
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
 				} else {
 					players.add(Static.GetPlayer(args[2], t));

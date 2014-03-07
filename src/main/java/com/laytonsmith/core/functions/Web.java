@@ -98,7 +98,7 @@ public class Web {
 	
 	private static CookieJar getCookieJar(CArray cookieJar, Target t){
 		CookieJar ret = new CookieJar();
-		for(String key : cookieJar.keySet()){
+		for(String key : cookieJar.stringKeySet()){
 			CArray cookie = Static.getArray(cookieJar.get(key), t);
 			String name;
 			String value;
@@ -206,11 +206,11 @@ public class Web {
 				if(csettings.containsKey("headers") && !(csettings.get("headers") instanceof CNull)){
 					CArray headers = Static.getArray(csettings.get("headers"), t);
 					Map<String, List<String>> mheaders = new HashMap<String, List<String>>();
-					for(String key : headers.keySet()){
+					for(String key : headers.stringKeySet()){
 						List<String> h = new ArrayList<String>();
 						Construct c = headers.get(key);
 						if(c instanceof CArray){
-							for(String kkey : ((CArray)c).keySet()){
+							for(String kkey : ((CArray)c).stringKeySet()){
 								h.add(((CArray)c).get(kkey).val());
 							}
 						} else {
@@ -238,11 +238,11 @@ public class Web {
 					if(csettings.get("params") instanceof CArray){
 						CArray params = Static.getArray(csettings.get("params"), t);
 						Map<String, List<String>> mparams = new HashMap<String, List<String>>();
-						for(String key : params.keySet()){
+						for(String key : params.stringKeySet()){
 							Construct c = params.get(key);
 							List<String> l = new ArrayList<String>();
 							if(c instanceof CArray){
-								for(String kkey : ((CArray)c).keySet()){
+								for(String kkey : ((CArray)c).stringKeySet()){
 									l.add(((CArray)c).get(kkey).val());
 								}
 							} else {

@@ -10,6 +10,7 @@ import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 
 /**
@@ -438,8 +439,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 
 	@Override
 	public Construct get(String index, Target t) throws ConfigRuntimeException {
-		byte b = getByte(Integer.parseInt(index));
-		return new CInt(b, t);
+		return get(Integer.parseInt(index), t);
 	}
 
 	@Override
@@ -450,6 +450,22 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	@Override
 	public Construct slice(int begin, int end, Target t) {
 		return getBytes(end - begin, begin);
+	}
+
+	@Override
+	public Construct get(int index, Target t) throws ConfigRuntimeException {
+		byte b = getByte(index);
+		return new CInt(b, t);
+	}
+
+	@Override
+	public boolean isAssociative() {
+		return false;
+	}
+
+	@Override
+	public Set<Construct> keySet() {
+		throw new UnsupportedOperationException("Not supported.");
 	}
 	
 	/**

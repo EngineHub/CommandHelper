@@ -81,6 +81,12 @@ public final class Static {
 	
 	private static final String blockPrefix = "#"; // Chosen over @ because that does special things when used by the block
 	
+	/**
+	 * Returns a CArray object from a given construct, throwing a common error message if not.
+	 * @param construct
+	 * @param t
+	 * @return 
+	 */
 	public static CArray getArray(Construct construct, Target t) {
 		if(construct instanceof CArray){
 			return ((CArray)construct);
