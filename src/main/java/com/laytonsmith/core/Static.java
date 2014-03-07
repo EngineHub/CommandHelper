@@ -556,7 +556,7 @@ public final class Static {
 				//We have terminal colors, we need to reset them at the end
 				msg += TermColors.reset();
 			}
-			getLogger().log(Level.INFO, msg);
+			System.out.println(msg);
 		}
 	}
 

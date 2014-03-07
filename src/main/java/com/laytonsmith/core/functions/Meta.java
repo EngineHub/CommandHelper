@@ -445,7 +445,7 @@ public class Meta {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
 		@Override
@@ -465,6 +465,9 @@ public class Meta {
 			try {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
 				Construct script = parent.seval(node, env);
+				if(script instanceof CClosure){
+					throw new Exceptions.CastException("Closures cannot be eval'd directly. Use execute() instead.", t);
+				}
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
 				StringBuilder b = new StringBuilder();
 				int count = 0;

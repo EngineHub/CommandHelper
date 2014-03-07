@@ -49,9 +49,9 @@ public class Echoes {
                 throw new CancelCommandException("", t);
             }
             StringBuilder b = new StringBuilder();
-            for(int i = 0; i < args.length; i++){
-                b.append(args[i].val());
-            }
+			for (Construct arg : args) {
+				b.append(arg.val());
+			}
             try{
 				if(env.hasEnv(CommandHelperEnvironment.class)){
 					Static.SendMessage(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), b.toString(), t);
