@@ -13,7 +13,17 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * A class that represents a dynamic array.
@@ -599,7 +609,7 @@ public class CArray extends Construct implements ArrayAccess{
 	 * from this array
 	 * @param construct 
 	 */
-	public void removeValues(Construct construct){
+	public void removeValues(Construct construct){	
 		if(associative_mode){
 			Iterator<Construct> it;
 			it = associative_array.values().iterator();
@@ -624,6 +634,15 @@ public class CArray extends Construct implements ArrayAccess{
 
 		@Override
         public int compare(String o1, String o2) {
+			// Null checks!
+			if (o1 == null && o2 != null) {
+				return -1;
+			} else if (o1 == null && o2 == null) {
+				return 0;
+			} else if (o1 != null && o2 == null) {
+				return 1;
+			}
+			
             //Due to a dumb behavior in Double.parseDouble, 
             //we need to check to see if there are non-digit characters in
             //the keys, and if so, do a string comparison.
