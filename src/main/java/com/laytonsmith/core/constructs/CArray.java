@@ -258,7 +258,7 @@ public class CArray extends Construct implements ArrayAccess{
      */
 	@Override
     public Set<Construct> keySet(){
-        Set<Construct> set = !associative_mode?new LinkedHashSet<Construct>(array.size()):new HashSet<Construct>(associative_array.size());
+        Set<Construct> set = !associative_mode?new LinkedHashSet<Construct>(array.size()):new LinkedHashSet<Construct>(associative_array.size());
         if(!associative_mode){            
             for(int i = 0; i < array.size(); i++){
                 set.add(new CInt(i, Target.UNKNOWN));

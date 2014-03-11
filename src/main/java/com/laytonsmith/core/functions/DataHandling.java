@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -586,7 +587,7 @@ public class DataHandling {
 
 					//Clone the set, so changes in the array won't cause changes in
 				//the iteration order.
-				Set<Construct> keySet = new HashSet<>(one.keySet());
+				Set<Construct> keySet = new LinkedHashSet<>(one.keySet());
 					//Continues in an associative array are slightly different, so
 				//we have to track this differently. Basically, we skip the
 				//next element in the array key set.
