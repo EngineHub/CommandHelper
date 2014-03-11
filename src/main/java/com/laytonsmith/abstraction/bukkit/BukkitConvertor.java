@@ -25,6 +25,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBoat;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCreeper;
@@ -112,6 +113,7 @@ import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Minecart;
+import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Painting;
 import org.bukkit.entity.Pig;
@@ -433,6 +435,10 @@ public class BukkitConvertor extends AbstractConvertor {
     	}
 		
 		// Vehicles
+		if(be instanceof CommandMinecart) {
+			return new BukkitMCCommandMinecart((CommandMinecart)be);
+		}
+		
     	if(be instanceof Minecart) {
 			// Must come before Vehicle
     		return new BukkitMCMinecart((Minecart)be);

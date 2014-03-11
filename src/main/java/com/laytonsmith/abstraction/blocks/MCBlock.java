@@ -40,6 +40,10 @@ public interface MCBlock {
 	public MCLocation getLocation();
 
     public boolean isSign();
+	
+	public MCCommandBlock getCommandBlock();
+	
+	public boolean isCommandBlock();
 
     public boolean isNull();
 	
