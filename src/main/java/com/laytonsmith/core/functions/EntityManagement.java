@@ -2629,7 +2629,7 @@ public class EntityManagement {
 					break;
 				case MINECART_COMMAND:
 					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
-					for (String index : specArray.keySet()) {
+					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "customname":
 								if(specArray.get(index) instanceof CNull) {
