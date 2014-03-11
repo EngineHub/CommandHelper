@@ -251,6 +251,159 @@ public class World {
 	}
 	
 	@api(environments=CommandHelperEnvironment.class)
+	public static class load_chunk extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world;
+			int x;
+			int z;
+			if (args.length == 1) {
+				//Location array provided                
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
+				world = l.getWorld();
+				x = l.getBlockX();
+				z = l.getBlockZ();
+			} else if (args.length == 2) {
+				//Either location array and world provided, or x and z. Test for array at pos 2
+				if (args[1] instanceof CArray) {
+					world = Static.getServer().getWorld(args[0].val());
+					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
+					x = l.getBlockX();
+					z = l.getBlockZ();
+				} else {
+					if (m == null) {
+						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+					}
+					world = m.getWorld();
+					x = Static.getInt32(args[0], t);
+					z = Static.getInt32(args[1], t);
+				}
+			} else {
+				//world, x and z provided
+				world = Static.getServer().getWorld(args[0].val());
+				x = Static.getInt32(args[1], t);
+				z = Static.getInt32(args[2], t);
+			}
+			world.loadChunk(x, z);
+			return new CVoid(t);
+		}
+
+		@Override
+		public String getName() {
+			return "load_chunk";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+		
+		@Override
+		public String docs() {
+			return "void {[world], x, z | [world], locationArray} Loads the chunk, using the specified world, or the current"
+					+ " players world if not provided.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api(environments=CommandHelperEnvironment.class)
+	public static class unload_chunk extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world;
+			int x;
+			int z;
+			if (args.length == 1) {
+				//Location array provided                
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
+				world = l.getWorld();
+				x = l.getBlockX();
+				z = l.getBlockZ();
+			} else if (args.length == 2) {
+				//Either location array and world provided, or x and z. Test for array at pos 2
+				if (args[1] instanceof CArray) {
+					world = Static.getServer().getWorld(args[0].val());
+					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
+					x = l.getBlockX();
+					z = l.getBlockZ();
+				} else {
+					if (m == null) {
+						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+					}
+					world = m.getWorld();
+					x = Static.getInt32(args[0], t);
+					z = Static.getInt32(args[1], t);
+				}
+			} else {
+				//world, x and z provided
+				world = Static.getServer().getWorld(args[0].val());
+				x = Static.getInt32(args[1], t);
+				z = Static.getInt32(args[2], t);
+			}
+			world.unloadChunk(x, z);
+			return new CVoid(t);
+		}
+
+		@Override
+		public String getName() {
+			return "unload_chunk";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+		
+		@Override
+		public String docs() {
+			return "void {[world], x, z | [world], locationArray} Unloads the chunk, using the specified world, or the current"
+					+ " players world if not provided.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api(environments=CommandHelperEnvironment.class)
 	public static class regen_chunk extends AbstractFunction {
 
 		@Override

@@ -1,5 +1,4 @@
 
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
@@ -273,6 +272,14 @@ public class BukkitMCWorld implements MCWorld {
     public void refreshChunk(int x, int z) {
         w.refreshChunk(x, z);
     }
+	
+	public void loadChunk(int x, int z) {
+		w.loadChunk(x, z);
+	}
+	
+	public void unloadChunk(int x, int z) {
+		w.unloadChunk(x, z);
+	}
 
 	@Override
     public void setTime(long time) {
