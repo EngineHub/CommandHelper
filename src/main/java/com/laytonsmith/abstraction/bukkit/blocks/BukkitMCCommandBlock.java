@@ -29,10 +29,12 @@ public class BukkitMCCommandBlock extends BukkitMCBlockState implements
 	@Override
 	public void setCommand(String command) {
 		cb.setCommand(command);
+		cb.update();
 	}
 
 	@Override
 	public void setName(String name) {
 		cb.setName(name);
+		cb.update();
 	}
 }

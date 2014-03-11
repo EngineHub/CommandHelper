@@ -1521,7 +1521,7 @@ public class ArrayHandling {
 			if(array.isAssociative()){
 				array.removeValues(args[1]);
 			} else {
-				for(long i = array.size(); i >= 0; i--){
+				for(long i = array.size() - 1; i >= 0; i--){
 					if(BasicLogic.equals.doEquals(array.get(i), args[1])){
 						new array_remove().exec(t, environment, array, new CInt(i, t));
 					}

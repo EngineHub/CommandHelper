@@ -78,6 +78,8 @@ public interface MCWorld extends AbstractionObject{
     public void setSpawnLocation(int x, int y, int z);
 
     public void refreshChunk(int x, int z);
+	public void loadChunk(int x, int z);
+ 	public void unloadChunk(int x, int z);
 
     public void setTime(long time);
 
