@@ -4,6 +4,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
@@ -338,7 +339,9 @@ public class Regex {
         
     }
     
-    @api public static class reg_split extends AbstractFunction implements Optimizable{
+    @api
+	@seealso({StringHandling.split.class, ArrayHandling.array_implode.class})
+	public static class reg_split extends AbstractFunction implements Optimizable{
 		
 		private final static String split = new StringHandling.split().getName();
 

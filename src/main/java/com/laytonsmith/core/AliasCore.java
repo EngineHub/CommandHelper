@@ -286,7 +286,6 @@ public class AliasCore {
 				.addFlag('t', "tasks", "Specifies the tasks registered with set_interval/set_timeout.")
 				.addFlag('e', "execution-queue", "Specifies the tasks registered in execution queues.")
 				.addFlag('r', "persistence-config", "Specifies that the persistence config file should be reloaded.")
-				.addFlag('p', "preferences", "Specifies that the preferences should not be reloaded.")
 				.addFlag('f', "profiler", "Specifies the profiler config should not be reloaded.")
 				.addFlag('s', "scripts", "Specifies that the scripts should not be reloaded.")
 				.addFlag('x', "extensions", "Specifies that extensions should be reloaded.")
@@ -306,7 +305,6 @@ public class AliasCore {
 		boolean reloadTimeouts = true;
 		boolean reloadExecutionQueue = true;
 		boolean reloadPersistenceConfig = true;
-		boolean reloadPreferences = true;
 		boolean reloadProfiler = true;
 		boolean reloadScripts = true;
 		boolean reloadExtensions = true;
@@ -333,7 +331,6 @@ public class AliasCore {
 				reloadTimeouts = false;
 				reloadExecutionQueue = false;
 				reloadPersistenceConfig = false;
-				reloadPreferences = false;
 				reloadProfiler = false;
 				reloadScripts = false;
 				reloadExtensions = false;
@@ -349,9 +346,6 @@ public class AliasCore {
 			}
 			if (results.isFlagSet('r') || results.isFlagSet("persistence-config")) {
 				reloadPersistenceConfig = !reloadPersistenceConfig;
-			}
-			if (results.isFlagSet('p')) {
-				reloadPreferences = !reloadPreferences;
 			}
 			if (results.isFlagSet('f')) {
 				reloadProfiler = !reloadProfiler;
@@ -371,8 +365,8 @@ public class AliasCore {
 			
 			// Allow new-style extensions know we are about to reload aliases.
 			ExtensionManager.PreReloadAliases(reloadGlobals, reloadTimeouts, 
-				reloadExecutionQueue, reloadPersistenceConfig, reloadPreferences,
-				reloadProfiler, reloadScripts, reloadExtensions);
+				reloadExecutionQueue, reloadPersistenceConfig, true, // TODO: This should be an object, not a bunch of booleans
+				reloadProfiler, reloadScripts, reloadExtensions);    // and this hardcoded true should be removed then.
  
 			StaticLayer.GetConvertor().runShutdownHooks();
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
@@ -442,7 +436,7 @@ public class AliasCore {
 				}
 			}
 
-			if (!Prefs.isInitialized() || reloadPreferences) {
+			if (!Prefs.isInitialized()) {
 				Prefs.init(prefFile);
 			}
 

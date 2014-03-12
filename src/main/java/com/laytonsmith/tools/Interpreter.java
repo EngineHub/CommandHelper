@@ -162,7 +162,7 @@ public final class Interpreter {
 
 	private Interpreter(List<String> args, String cwd, boolean inTTYMode) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		doStartup();
-		env.getEnv(GlobalEnv.class).SetRootFolder(new File(cwd));
+		env.getEnv(GlobalEnv.class).SetRootFolder(new File(cwd).getParentFile());
 		if(inTTYMode){
 			//Ok, done. They'll have to execute from here.
 			return;

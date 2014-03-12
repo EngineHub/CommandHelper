@@ -1179,6 +1179,7 @@ public class ArrayHandling {
 	}
 
 	@api
+	@seealso({StringHandling.split.class, Regex.reg_split.class})
 	public static class array_implode extends AbstractFunction {
 
 		@Override

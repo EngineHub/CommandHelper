@@ -345,7 +345,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		ac.reload(null, null);
 
 		//Clear out our hostname cache
-		hostnameLookupCache = new ConcurrentHashMap<String, String>();
+		hostnameLookupCache = new ConcurrentHashMap<>();
 		//Create a new thread pool, with a custom ThreadFactory,
 		//so we can more clearly name our threads.
 		hostnameLookupThreadPool = Executors.newFixedThreadPool(3, new ThreadFactory() {

@@ -3,9 +3,19 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.StaticLayer;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public final class Prefs {
@@ -21,6 +31,7 @@ public final class Prefs {
     }
     
     private static Preferences prefs;
+	private static Thread watcherThread;
     
     private static enum PNames{
         DEBUG_MODE("debug-mode"),
@@ -54,8 +65,15 @@ public final class Prefs {
         }
     }
 
-    public static void init(File f) throws IOException {
-        ArrayList<Preferences.Preference> a = new ArrayList<Preferences.Preference>();
+	/**
+	 * Initializes the global Prefs to this file. A file change watcher is registered at this
+	 * point as well, and changes to the file specified will result in the preferences immediately
+	 * updated.
+	 * @param f
+	 * @throws IOException 
+	 */
+    public static void init(final File f) throws IOException {
+        ArrayList<Preferences.Preference> a = new ArrayList<>();
         //a.add(new Preference("check-for-updates", "false", Type.BOOLEAN, "Whether or not to check to see if there's an update for CommandHelper"));
         a.add(new Preference(PNames.DEBUG_MODE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to display debug information in the console"));
         a.add(new Preference(PNames.SHOW_WARNINGS.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to display warnings in the console, while compiling"));
@@ -92,6 +110,90 @@ public final class Prefs {
 				+ " server security, and require a \"two step\" authentication for interpreter mode."));
         prefs = new Preferences("CommandHelper", Static.getLogger(), a);
         prefs.init(f);
+
+		// Set up a watcher on this file to watch for changes to it. Once the changes
+		// take effect, we want to reparse the prefs
+		if(watcherThread != null){
+			watcherThread.interrupt();
+		}
+		final WatchService watcher = FileSystems.getDefault().newWatchService();
+		final Path path = f.getParentFile().toPath();
+		path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+		watcherThread = new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				while(true){
+					WatchKey key;
+					try {
+						key = watcher.take();
+					} catch(InterruptedException ex){
+						return;
+					}
+					if(Thread.currentThread().isInterrupted()){
+						return;
+					}
+					for(WatchEvent<?> event : key.pollEvents()){
+						WatchEvent.Kind kind = event.kind();
+						if(kind == StandardWatchEventKinds.OVERFLOW){
+							continue;
+						}
+						
+						WatchEvent<Path> ev = ((WatchEvent<Path>)event);
+						Path name = ev.context();
+						Path child = path.resolve(name);
+						if(child.toFile().equals(f)){
+							try {
+								prefs.init(f);
+							} catch (IOException ex) {
+								Logger.getLogger(Prefs.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
+					}
+					key.reset();
+				}
+			}
+		}, Implementation.GetServerType().getBranding() + "-PrefsWatcher");
+		watcherThread.setDaemon(true);
+		watcherThread.start();
+		//The convertor may not have been set up yet, so we need to kick off a new
+		//thread and try over and over until this is valid. This may not ever
+		//actually register in cmdline mode, which is fine, this whole operation
+		//is merely to kill the daemon thread properly. If the whole server dies
+		//and this doesn't run, that's ok.
+		new Thread(new Runnable() {
+
+			@Override
+			@SuppressWarnings("SleepWhileInLoop")
+			public void run() {
+				try {
+					//Not registered yet, sleep
+					Thread.sleep(500);
+				} catch (InterruptedException ex1) {
+
+				}
+				while(true){
+					try {
+						StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+
+							@Override
+							public void run() {
+								watcherThread.interrupt();
+								watcherThread = null;
+							}
+						});
+						break;
+					} catch(Exception ex){
+						try {
+							//Not registered yet, sleep
+							Thread.sleep(500);
+						} catch (InterruptedException ex1) {
+							
+						}
+					}
+				}
+			}
+		}, Implementation.GetServerType().getBranding() + "-PrefsWatcherShutdownRegistration").start();
     }
 	
 	public static boolean isInitialized(){

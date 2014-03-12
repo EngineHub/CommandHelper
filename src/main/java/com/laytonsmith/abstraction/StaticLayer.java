@@ -24,7 +24,7 @@ public final class StaticLayer {
         InitConvertor();
     }        
     
-    private static void InitConvertor(){
+    private static synchronized void InitConvertor(){
         Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(convert.class);
         for(Class c : classes){
             if(!Convertor.class.isAssignableFrom(c)){
@@ -146,7 +146,7 @@ public final class StaticLayer {
 		return convertor.GetNewRecipe(type, result);
 	}
 	
-	public static Convertor GetConvertor(){
+	public static synchronized Convertor GetConvertor(){
 		return convertor;
 	}
 }

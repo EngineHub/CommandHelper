@@ -230,7 +230,7 @@ public class Debug {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if (Prefs.DebugMode()) {
                 try {
-                    Static.LogDebug(environment.getEnv(GlobalEnv.class).GetRootFolder(), args[0].val());
+                    Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
                 } catch (IOException ex) {
                     throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
                 }

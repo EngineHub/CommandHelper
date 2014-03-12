@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
@@ -951,6 +952,7 @@ public class StringHandling {
 	}
 
 	@api
+	@seealso({ArrayHandling.array_implode.class})
 	public static class split extends AbstractFunction implements Optimizable {
 
 		@Override
