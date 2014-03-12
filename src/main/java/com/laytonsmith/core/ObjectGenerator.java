@@ -826,21 +826,16 @@ public class ObjectGenerator {
 					switch(recipeType) {
 						case SHAPED:
 						ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPED, result);
-						String[] shape = {"AAA", "AAA", "AAA"};
 						
 						if(recipe.containsKey("shape") && (recipe.get("shape") instanceof CArray)) {
 							CArray sh = (CArray) recipe.get("shape");
-							
-							if (sh.size() == 3 && !sh.inAssociativeMode()) {
+							String[] shape = new String[(int) sh.size()];
+							if (sh.size() >= 1 && sh.size() <= 3 && !sh.inAssociativeMode()) {
 								int i = 0;
 								for(Construct row : sh.asList()) {
-									if(row instanceof CString && ((CString) row).val().length() == 3) {
+									if(row instanceof CString && ((CString) row).val().length() >= 1 && ((CString) row).val().length() <= 3) {
 										shape[i] = row.val();
-										if (i > 3) {
-											break;
-										} else {
-											i++;
-										}
+										i++;
 									} else {
 										throw new ConfigRuntimeException("Shape array is invalid.", ExceptionType.FormatException, t);
 									}
@@ -848,10 +843,10 @@ public class ObjectGenerator {
 							} else {
 								throw new ConfigRuntimeException("Shape array is invalid.", ExceptionType.FormatException, t);
 							}
+							((MCShapedRecipe) ret).setShape(shape);
 						} else {
 							throw new ConfigRuntimeException("Could not find recipe shape array.", ExceptionType.FormatException, t);
 						}
-						((MCShapedRecipe) ret).setShape(shape);
 						
 						if(recipe.containsKey("ingredients") && (recipe.get("ingredients") instanceof CArray)) {
 							CArray ingredients = (CArray) recipe.get("ingredients");
