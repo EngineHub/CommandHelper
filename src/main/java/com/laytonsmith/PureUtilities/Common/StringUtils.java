@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities.Common;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,7 +11,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author lsmith
  */
 public final class StringUtils {
 
@@ -171,7 +171,7 @@ public final class StringUtils {
 	public static String Join(Set set, String glue, String lastGlue, String glueForTwoItems, String empty) {
 		return Join(set, glue, lastGlue, glueForTwoItems, empty, null);
 	}
-	
+
 	/**
 	 * Joins a set together (using StringBuilder's {
 	 *
@@ -279,6 +279,7 @@ public final class StringUtils {
 	public static String Join(Object[] list, String glue, String lastGlue, String glueForTwoItems, String empty) {
 		return Join(list, glue, lastGlue, glueForTwoItems, empty, null);
 	}
+
 	/**
 	 * Joins an array together (using StringBuilder's {
 	 *
@@ -294,8 +295,8 @@ public final class StringUtils {
 	 * is used instead. If it is null, then lastGlue is used instead.
 	 * @param empty If the array is completely empty, this string is simply
 	 * returned. If null, an empty string is used.
-	 * @param renderer The item renderer. This renders each item in the list, one at a time.
-	 * If null, toString will be used by default on each item.
+	 * @param renderer The item renderer. This renders each item in the list,
+	 * one at a time. If null, toString will be used by default on each item.
 	 * @return The concatenated string
 	 */
 	public static String Join(final Object[] list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<Object> renderer) {
@@ -387,7 +388,7 @@ public final class StringUtils {
 	public static String Join(final List list, String glue, String lastGlue, String glueForTwoItems, String empty) {
 		return Join(list, glue, lastGlue, glueForTwoItems, empty, null);
 	}
-	
+
 	/**
 	 * Joins a list together (using StringBuilder's {
 	 *
@@ -403,8 +404,8 @@ public final class StringUtils {
 	 * is used instead. If it is null, then lastGlue is used instead.
 	 * @param empty If the list is completely empty, this string is simply
 	 * returned. If null, an empty string is used.
-	 * @param renderer The item renderer. This renders each item in the list, one at a time.
-	 * If null, toString will be used by default on each item.
+	 * @param renderer The item renderer. This renders each item in the list,
+	 * one at a time. If null, toString will be used by default on each item.
 	 * @return The concatenated string
 	 */
 	public static <T> String Join(final List<T> list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer) {
@@ -426,9 +427,10 @@ public final class StringUtils {
 			}
 		}, glue, lastGlue, glueForTwoItems, empty, renderer);
 	}
-	
+
 	/**
 	 * Abstracted version of the join algorithm.
+	 *
 	 * @param <T>
 	 * @param items
 	 * @param glue
@@ -436,15 +438,15 @@ public final class StringUtils {
 	 * @param glueForTwoItems
 	 * @param empty
 	 * @param renderer
-	 * @return 
+	 * @return
 	 */
-	private static <T> String doJoin(ItemGetter<T> items, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer){
-		if(renderer == null){
+	private static <T> String doJoin(ItemGetter<T> items, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer) {
+		if (renderer == null) {
 			renderer = new Renderer<T>() {
 
 				@Override
 				public String toString(T item) {
-					if(item == null){
+					if (item == null) {
 						return "null";
 					} else {
 						return item.toString();
@@ -481,23 +483,25 @@ public final class StringUtils {
 			return b.toString();
 		}
 	}
-	
+
 	private static interface ItemGetter<T> {
 		T get(int index);
+
 		int size();
+
 		boolean isEmpty();
 	}
-	
+
 	/**
-	 * Used to provide a renderer for each item when glueing the items
-	 * together.
+	 * Used to provide a renderer for each item when glueing the items together.
+	 *
 	 * @param <T> The type of each item
 	 */
 	public static interface Renderer<T> {
 		/**
-		 * 
+		 *
 		 * @param item
-		 * @return 
+		 * @return
 		 */
 		String toString(T item);
 	}
@@ -539,7 +543,7 @@ public final class StringUtils {
 
 		return distance[str1.length()][str2.length()];
 	}
-	
+
 	/**
 	 * Splits an argument string into arguments. It is expected that the string:
 	 *
@@ -581,7 +585,7 @@ public final class StringUtils {
 					// all escapes outside quotes which are supported simply output the
 					// second character, as we aren't handling special ones like \t or \n
 					buf.append(ch);
-					escape=0;
+					escape = 0;
 					continue;
 				} else { // outside of quotes and escapes
 					switch (ch) {
@@ -702,18 +706,20 @@ public final class StringUtils {
 
 	/**
 	 * Convenience method for HumanReadableByteCount(bytes, true).
+	 *
 	 * @param bytes
-	 * @return 
+	 * @return
 	 */
-	public static String HumanReadableByteCount(long bytes){
+	public static String HumanReadableByteCount(long bytes) {
 		return HumanReadableByteCount(bytes, true);
 	}
-	
+
 	/**
 	 * Returns a human readable byte count, given a byte count.
+	 *
 	 * @param bytes
 	 * @param si
-	 * @return 
+	 * @return
 	 */
 	public static String HumanReadableByteCount(long bytes, boolean si) {
 		int unit = si ? 1000 : 1024;
@@ -724,148 +730,213 @@ public final class StringUtils {
 		String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
 		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
-	
+
 	/**
-	 * Returns a properly agreeing subject verb clause given a count, and singular
-	 * subject. This version assumes that the plural subject can be made simply by appending
-	 * <code>s</code> to the singular subject, which is not always true. 
-	 * This is useful in cases where forming a sentence
-	 * requires different wording depending on the count. Usually, you might use a fairly
-	 * complex tertiary statement, for instance: <code>String message = "There " + (count==1?"is":"are") +
-	 * " " + count + " test failure" + (count==1?"":"s");</code> This is time consuming, and easy to mess up
-	 * or accidentally reverse. Instead, you can use this function. Note that this will add <code>is</code>
-	 * or </code>are</code> for you. You need only to provide the count, singular subject, and plural subject.
-	 * If the subject cannot be made plural with just an <code>s</code>, use {@link #PluralHelper(int, java.lang.String, java.lang.String)}
-	 * instead. Usage example:
-	 * 
+	 * Returns a properly agreeing subject verb clause given a count, and
+	 * singular subject. This version assumes that the plural subject can be
+	 * made simply by appending <code>s</code> to the singular subject, which is
+	 * not always true. This is useful in cases where forming a sentence
+	 * requires different wording depending on the count. Usually, you might use
+	 * a fairly complex tertiary statement, for instance: <code>String message = "There " + (count==1?"is":"are") +
+	 * " " + count + " test failure" + (count==1?"":"s");</code> This is time
+	 * consuming, and easy to mess up or accidentally reverse. Instead, you can
+	 * use this function. Note that this will add <code>is</code> or
+	 * </code>are</code> for you. You need only to provide the count, singular
+	 * subject, and plural subject. If the subject cannot be made plural with
+	 * just an <code>s</code>, use
+	 * {@link #PluralHelper(int, java.lang.String, java.lang.String)} instead.
+	 * Usage example:
+	 *
 	 * <pre>
 	 * String message = "There " + PluralHelper(count, "test failure");
 	 * //If count is 1: There is 1 test failure
 	 * //If count is not 1: There are 2 test failures
 	 * </pre>
-	 * 
+	 *
 	 * @param count The count of items
 	 * @param singular The subject of the sentence, as a singular
 	 * @return The properly formatted clause.
 	 */
-	public static String PluralHelper(int count, String singular){
+	public static String PluralHelper(int count, String singular) {
 		return PluralHelper(count, singular, singular + "s");
 	}
-	
+
 	/**
 	 * Returns a properly agreeing subject verb clause given a count, singular
-	 * subject, and plural subject. This is useful in cases where forming a sentence
-	 * requires different wording depending on the count. Usually, you might use a fairly
-	 * complex tertiary statement, for instance: <code>String message = "There " + (count==1?"is":"are") +
-	 * " " + count + " test failure" + (count==1?"":"s");</code> This is time consuming, and easy to mess up
-	 * or accidentally reverse. Instead, you can use this function. Note that this will add <code>is</code>
-	 * or </code>are</code> for you. You need only to provide the count, singular subject, and plural subject.
-	 * If the subject can be made plural with just an <code>s</code>, use {@link #PluralHelper(int, java.lang.String)}
+	 * subject, and plural subject. This is useful in cases where forming a
+	 * sentence requires different wording depending on the count. Usually, you
+	 * might use a fairly complex tertiary statement, for instance: <code>String message = "There " + (count==1?"is":"are") +
+	 * " " + count + " test failure" + (count==1?"":"s");</code> This is time
+	 * consuming, and easy to mess up or accidentally reverse. Instead, you can
+	 * use this function. Note that this will add <code>is</code> or
+	 * </code>are</code> for you. You need only to provide the count, singular
+	 * subject, and plural subject. If the subject can be made plural with just
+	 * an <code>s</code>, use {@link #PluralHelper(int, java.lang.String)}
 	 * instead. Usage example:
-	 * 
+	 *
 	 * <pre>
 	 * String message = "There " + PluralHelper(count, "fish", "fish");
 	 * //If count is 1: There is 1 fish
 	 * //If count is not 1: There are 2 fish
 	 * </pre>
-	 * 
+	 *
 	 * @param count The count of items
 	 * @param singular The subject of the sentence, as a singular
 	 * @param plural The subject of the sentence, as a plural
 	 * @return The properly formatted clause.
 	 */
-	public static String PluralHelper(int count, String singular, String plural){
-		return (count==1?"is":"are") + " " + count + " " + (count==1?singular:plural);
+	public static String PluralHelper(int count, String singular, String plural) {
+		return (count == 1 ? "is" : "are") + " " + count + " " + (count == 1 ? singular : plural);
 	}
-	
+
 	/**
-	 * For even more complex sentences, it may just be easiest to provide a template,
-	 * which will be replaced, if the count is singular or plural. Both singularTemplate
-	 * and pluralTemplate are expected to be String.format templates with a %d in them, which will
-	 * be replaced with the actual count number. If the count == 1, then the singularTemplate will
-	 * be used, else the pluralTemplate will be used.
-	 * Usage example:
-	 * 
+	 * For even more complex sentences, it may just be easiest to provide a
+	 * template, which will be replaced, if the count is singular or plural.
+	 * Both singularTemplate and pluralTemplate are expected to be String.format
+	 * templates with a %d in them, which will be replaced with the actual count
+	 * number. If the count == 1, then the singularTemplate will be used, else
+	 * the pluralTemplate will be used. Usage example:
+	 *
 	 * <pre>
 	 * String message = PluralTemplateHelper(count, "I will buy %d car if it has a good price",
 	 * "I will buy %d cars if they have a good price");
 	 * </pre>
+	 *
 	 * @param count The count of items
 	 * @param singularTemplate The singular template
 	 * @param pluralTemplate The plural template
-	 * @return 
+	 * @return
 	 */
-	public static String PluralTemplateHelper(int count, String singularTemplate, String pluralTemplate){
-		if(count == 1){
+	public static String PluralTemplateHelper(int count, String singularTemplate, String pluralTemplate) {
+		if (count == 1) {
 			return String.format(singularTemplate, count);
 		} else {
 			return String.format(pluralTemplate, count);
 		}
 	}
-	
+
 	/**
 	 * This is the system newline string. For instance, on windows, this would
 	 * likely be \r\n, and unix systems would likely be \n.
 	 */
 	public static final String nl = System.getProperty("line.separator");
-	
+
 	/**
-	 * This returns the system newline string. For instance, on windows, this would
-	 * likely return \r\n, and unix systems would likely return \n.
+	 * This returns the system newline string. For instance, on windows, this
+	 * would likely return \r\n, and unix systems would likely return \n.
+	 *
 	 * @return The system newline string.
 	 */
-	public static String nl(){
+	public static String nl() {
 		return nl;
 	}
-	
+
 	/**
-	 * Multiplies a string. For instance, stringMultiply(3, "abc") would
-	 * return "abcabcabc". If count is 0, an empty string is returned, and
-	 * if count is 1, the character sequence itself is returned.
+	 * Multiplies a string. For instance, stringMultiply(3, "abc") would return
+	 * "abcabcabc". If count is 0, an empty string is returned, and if count is
+	 * 1, the character sequence itself is returned.
+	 *
 	 * @param count The repeat count
 	 * @param s The sequence to repeat
 	 * @return The multiplied string
 	 * @throws IllegalArgumentException If count is less than 0.
 	 */
-	public static String stringMultiply(int count, CharSequence s){
-		if(count < 0){
+	public static String stringMultiply(int count, CharSequence s) {
+		if (count < 0) {
 			throw new IllegalArgumentException("Count must be greater than or equal to 0");
 		}
-		if(count == 0){
+		if (count == 0) {
 			return "";
 		}
-		if(count == 1){
+		if (count == 1) {
 			return s.toString();
 		}
 		//Ok, actually have to do the multiply now.
 		StringBuilder b = new StringBuilder(s.length() * count);
-		for(int i = 0; i < count; i++){
+		for (int i = 0; i < count; i++) {
 			b.append(s);
 		}
 		return b.toString();
 	}
-	
+
 	/**
 	 * Given a string, returns a string that could be printed out in Java source
-	 * code. That is, all escapable characters are reversed. The returned string will
-	 * already be surrounded by quotes.
+	 * code. That is, all escapable characters are reversed. The returned string
+	 * will already be surrounded by quotes.
+	 *
 	 * @param s
-	 * @return 
+	 * @return
 	 */
-	public static String toCodeString(String s){
+	public static String toCodeString(String s) {
 		return "\"" + s.replace("\\", "\\\\")
 				.replace("\"", "\\\"")
 				.replace("\n", "\\n")
 				.replace("\t", "\\t") + "\"";
 	}
-	
+
 	/**
 	 * Takes a byte array, and returns a string hex representation.
+	 *
 	 * @param bytes
-	 * @return 
+	 * @return
 	 */
 	public static String toHex(byte[] bytes) {
-        BigInteger bi = new BigInteger(1, bytes);
-        return String.format("%0" + (bytes.length << 1) + "X", bi);
-    }
+		BigInteger bi = new BigInteger(1, bytes);
+		return String.format("%0" + (bytes.length << 1) + "X", bi);
+	}
+
+
+	/**
+	 * Splits a string on word boundries.
+	 * @param text
+	 * @param len
+	 * @return 
+	 */
+	public static List<String> lineSplit(String text, int len) {
+		// return empty array for null text
+		if (text == null) {
+			return new ArrayList<>();
+		}
+
+		// return text if len is zero or less
+		// or text is less than length
+		if (len <= 0 || text.length() <= len) {
+			return new ArrayList<>(Arrays.asList(new String[]{text}));
+		}
+
+		char[] chars = text.toCharArray();
+		List<String> lines = new ArrayList<>();
+		StringBuilder line = new StringBuilder();
+		StringBuilder word = new StringBuilder();
+
+		for (int i = 0; i < chars.length; i++) {
+			word.append(chars[i]);
+
+			if (chars[i] == ' ') {
+				if ((line.length() + word.length()) > len) {
+					lines.add(line.toString());
+					line.delete(0, line.length());
+				}
+
+				line.append(word);
+				word.delete(0, word.length());
+			}
+		}
+
+		// handle any extra chars in current word
+		if (word.length() > 0) {
+			if ((line.length() + word.length()) > len) {
+				lines.add(line.toString());
+				line.delete(0, line.length());
+			}
+			line.append(word);
+		}
+
+		// handle extra line
+		if (line.length() > 0) {
+			lines.add(line.toString());
+		}
+
+		return lines;
+	}
 }

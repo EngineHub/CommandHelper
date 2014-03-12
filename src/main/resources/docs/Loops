@@ -169,26 +169,27 @@ foreach(@array, @key, @value,
 )
 %%
 
+{{TakeNote|text=Modifications to the array being iterated are handled specially. Read the page on %%DOCLINK|Array Iteration|array iteration%% for
+full details.}}
+
 ===while===
 
 Sometimes you don't know how many times you want to do something, or the "counter" variable is otherwise too difficult to write using the for() syntax,
 and you aren't using an array. 
 In that case, you can use a while loop, and you control all the conditions except for loop decision value.
 
-{{TakeNote|text=while() and dowhile() do not currently support brace syntax. This feature will be added later.}}
-
 %%CODE|
 @times = 10;
-while(@times > 0,
+while(@times > 0){
     @times = @times - rand(2);
     msg(@times);
-)
+}
 %%
 
 
 You can also make an "infinite" loop with a while(true) loop, and control stopping the loop with {{function|continue}} and {{function|break}}.
 %%CODE|
-while(true,
+while(true){
     if(rand(5) == 0){
         msg('rand returned 0, breaking!');
         break();
@@ -197,7 +198,7 @@ while(true,
         continue();
     }
     msg('Looping!');
-)
+}
 %%
 
 The above example will take an indefinite period of time, but once the first rand() 
@@ -207,7 +208,7 @@ which restarts the loop. (And in for() and foreach(), continue() moves to the ne
 
 ===dowhile===
 
-{{TakeNote|text=while() and dowhile() do not currently support brace syntax. This feature will be added later.}}
+{{TakeNote|text=dowhile() does not currently support brace syntax. This feature will be added later.}}
 
 Once you understand while(), dowhile is trivial to understand. while() checks the condition THEN runs the code, 
 whereas dowhile() runs the code THEN checks the condition. In both cases, if the condition is true, it runs again. 

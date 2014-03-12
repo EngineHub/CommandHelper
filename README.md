@@ -28,11 +28,10 @@ We'll look at it, make comments, and merge it into CommandHelper if
 everything works out.
 
 By submitting code, you agree to dual license your code under the 
-the MIT License, barring the special restriction regarding code submissions,
+the MIT License and GPL, barring the special restriction regarding code submissions,
 explained in the SPECIAL_LICENSE.txt file, which is attached.
 
 For details about code formatting standards, and other basic information for
 contributors, please see the CONTRIBUTING.txt file.
 
-Portions of CommandHelper are copyright: wraithguard01, sk89q, Deaygo, 
-t3hk0d3, zml2008, EntityReborn, and albatrossen
+Portions of CommandHelper are copyright by various contributors.

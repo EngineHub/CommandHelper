@@ -2,6 +2,7 @@
 package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -25,6 +26,8 @@ public class Preferences {
     private File prefFile;
     
     private String header = "";
+	
+	private int lineLength = 120;
     
     /**
      * The type a particular preference can be. The value will be cast to the given type
@@ -222,15 +225,16 @@ public class Preferences {
             StringBuilder b = new StringBuilder();
             String nl = System.getProperty("line.separator");
             
-            b.append("#This file is generated automatically. Changes made to the values of this file")
+            b.append("# This file is generated automatically. Changes made to the values of this file")
                     .append(nl)
-                    .append("#will persist, but changes to comments will not.")
+                    .append("# will persist, but changes to comments will not.")
                     .append(nl).append(nl);
             if(!header.trim().isEmpty()){
                 b.append(header).append(nl).append(nl);
             }
-			for (Map.Entry<String, Preference> e : prefs.entrySet()) {
-				Preference p = e.getValue();
+			SortedSet<String> keys = new TreeSet<String>(prefs.keySet()) {};
+			for (String key : keys) {
+				Preference p = prefs.get(key);
 				String description = "This value is not used in " + appName;
 				if(!p.description.trim().isEmpty()){
 					description = p.description;
@@ -238,11 +242,13 @@ public class Preferences {
 				StringBuilder c = new StringBuilder();
 				boolean first = true;
 				for(String line : description.split("\n|\r\n|\n\r")){
-					if(first){
-						c.append("#").append(line);
-						first = false;
-					} else {
-						c.append(nl).append("#").append(line);
+					for(String line2 : StringUtils.lineSplit(line, lineLength)){
+						if(first){
+							c.append("# ").append(line2);
+							first = false;
+						} else {
+							c.append(nl).append("# ").append(line2);
+						}
 					}
 				}
 				b.append(c).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
@@ -258,5 +264,17 @@ public class Preferences {
             logger.log(Level.WARNING, "[" + appName + "] Could not write out preferences file: " + (prefFile!=null?prefFile.getAbsolutePath():"null"), ex);
         }
     }
+	
+	/**
+	 * Sets the comment line length.
+	 * @param lineLength The length, an integer greater than 0.
+	 * @throws IllegalArgumentException If {@code lineLength} is less than 1.
+	 */
+	public void setLineLength(int lineLength){
+		if(lineLength < 1){
+			throw new IllegalArgumentException();
+		}
+		this.lineLength = lineLength;
+	}
     
 }

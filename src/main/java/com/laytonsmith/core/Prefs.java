@@ -106,11 +106,16 @@ public final class Prefs {
 				+ " handlers, error logging turned off, etc. This is meant as a last ditch effort to diagnosing an error. This implicitely turns debug mode"
 				+ " on as well, which will cause even more error logging to occur."));
 		a.add(new Preference(PNames.INTERPRETER_TIMEOUT.config(), "15", Preferences.Type.INT, "Sets the time (in minutes) that interpreter mode is unlocked for when /interpreter-on is run from console. Set to 0 (or a negative number)"
-				+ " to disable this feature, and allow interpreter mode all the time. It is highly recommended that you leave this set to some number greater than 0, to enahnce"
+				+ " to disable this feature, and allow interpreter mode all the time. It is highly recommended that you leave this set to some number greater than 0, to enhance"
 				+ " server security, and require a \"two step\" authentication for interpreter mode."));
         prefs = new Preferences("CommandHelper", Static.getLogger(), a);
         prefs.init(f);
 
+		if(f == null){
+			//Skip all this, it's running in a special condition, for instance, docgen or something
+			//else. We won't support this feature.
+			return;
+		}
 		// Set up a watcher on this file to watch for changes to it. Once the changes
 		// take effect, we want to reparse the prefs
 		if(watcherThread != null){

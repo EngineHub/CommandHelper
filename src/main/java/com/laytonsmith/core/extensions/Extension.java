@@ -1,6 +1,7 @@
 package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.environments.Environment;
 import java.io.File;
 
 /**
