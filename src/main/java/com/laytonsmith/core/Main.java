@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
+import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.ZipReader;
@@ -68,6 +69,7 @@ public class Main {
 	private static final ArgumentParser extensionDocsMode;
 	private static final ArgumentParser docExportMode;
 	private static final ArgumentParser profilerSummaryMode;
+	private static final ArgumentParser rsaKeyGenMode;
 
 	static {
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -161,6 +163,12 @@ public class Main {
 						+ " results.", "ignore-percentage", false)
 				.addArgument("Path to the profiler file to use", "input-file", true);
 		suite.addMode("profiler-summary", profilerSummaryMode);
+		rsaKeyGenMode = ArgumentParser.GetParser()
+				.addDescription("Creates an ssh compatible rsa key pair. This is used with the Federation system, but is useful with other tools as well.")
+				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "Output file for the keys. For instance, \"/home/user/.ssh/id_rsa\"."
+						+ " The public key will have the same name, with \".pub\" appended.", "output-file", true)
+				.addArgument('l', "label", ArgumentParser.Type.STRING, "Label for the public key. For instance, \"user@localhost\"", "label", true);
+		suite.addMode("key-gen", rsaKeyGenMode);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -430,6 +438,19 @@ public class Main {
 					System.exit(1);
 				}
 				System.out.println(summary.getAnalysis());
+				System.exit(0);
+			} else if(mode == rsaKeyGenMode){
+				String outputFileString = parsedArgs.getStringArgument('o');
+				File privOutputFile = new File(outputFileString);
+				File pubOutputFile = new File(outputFileString + ".pub");
+				String label = parsedArgs.getStringArgument('l');
+				if(privOutputFile.exists() || pubOutputFile.exists()){
+					System.err.println("Either the public key or private key file already exists. This utility will not overwrite any existing files.");
+					System.exit(1);
+				}
+				RSAEncrypt enc = RSAEncrypt.generateKey(label);
+				FileUtil.write(enc.getPrivateKey(), privOutputFile);
+				FileUtil.write(enc.getPublicKey(), pubOutputFile);
 				System.exit(0);
 			} else {
 				throw new Error("Should not have gotten here");
