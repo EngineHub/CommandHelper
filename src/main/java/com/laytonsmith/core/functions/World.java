@@ -250,6 +250,7 @@ public class World {
 		}
 	}
 	
+	@api
 	public static class load_chunk extends AbstractFunction {
  
  		@Override

@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,7 +10,7 @@ import java.sql.PreparedStatement;
  */
 public class MainSandbox {
 
-	public static void main(String[] argv) throws Exception {
+	public static void main(String[] argv) throws Exception {	
 //		URL url = ClassDiscovery.GetClassContainer(MainSandbox.class);
 //		long start;
 //		start = System.currentTimeMillis();
@@ -130,10 +131,10 @@ public class MainSandbox {
 //		DB db = new MySQLProfile();
 //		db.connect(conn);
 //		Object o = db.query("SELECT * FROM test;");
-		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/test?generateSimpleParameterMetadata=true");
-		PreparedStatement ps = conn.prepareStatement("SELECT * FROM test WHERE c1=?");
-		System.out.println(ps.getParameterMetaData().getParameterType(1));
-		System.exit(0);
+//		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/test?generateSimpleParameterMetadata=true");
+//		PreparedStatement ps = conn.prepareStatement("SELECT * FROM test WHERE c1=?");
+//		System.out.println(ps.getParameterMetaData().getParameterType(1));
+//		System.exit(0);
 //		if(o instanceof ResultSet){
 //			ResultSet rs = (ResultSet)o;
 //			while(rs.next()){
