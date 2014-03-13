@@ -271,17 +271,37 @@ public class Cmdline {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if (args.length == 1) {
                 String propName = args[0].val();
-                String prop = System.getProperty(propName);
+                String prop;
+				if(propName.startsWith("methodscript.")){
+					prop = getMethodScriptProperties().get(propName);
+				} else {
+					prop = System.getProperty(propName);
+				}
+				if(prop == null){
+					return new CNull();
+				}
                 return new CString(prop, t);
             } else {
                 CArray ca = new CArray(t);
                 for (String key : System.getProperties().stringPropertyNames()) {
                     ca.set(key, System.getProperty(key));
                 }
+				Map<String, String> msProps = getMethodScriptProperties();
+				for(String key : msProps.keySet()){
+					ca.set(key, msProps.get(key));
+				}
                 return ca;
             }
 
         }
+		
+		private Map<String, String> getMethodScriptProperties(){
+			Map<String, String> map = new HashMap<>();
+			for(Prefs.PNames name : Prefs.PNames.values()){
+				map.put("methodscript.preference." + name.config(), Prefs.pref(name).toString());
+			}
+			return map;
+		}
 
 		@Override
         public String getName() {
@@ -298,7 +318,8 @@ public class Cmdline {
             return "mixed {[propertyName]} If propertyName is set, that single property is returned, or null if that property doesn't exist. If propertyName is not set, an"
                     + " associative array with all the system properties is returned. This mechanism hooks into Java's system property mechanism, and is just a wrapper for"
                     + " that. System properties are more reliable than environmental variables, and so are preferred in cases where they exist. For more information about system"
-                    + " properties, see http://docs.oracle.com/javase/tutorial/essential/environment/sysprop.html";
+                    + " properties, see http://docs.oracle.com/javase/tutorial/essential/environment/sysprop.html. In addition, known preferences listed in preferences.ini"
+					+ " are also included, starting with the prefix \"methodscript.preference.\"";
         }
 
 		@Override
@@ -311,6 +332,7 @@ public class Cmdline {
 			return new ExampleScript[]{
 				new ExampleScript("Gets all properties", "array_size(sys_properties())"),
 				new ExampleScript("Gets a single property", "sys_properties('java.specification.vendor')"),
+				new ExampleScript("Gets a single property", "sys_properties('methodscript.preference.debug-mode')"),
 			};
 		}
     }

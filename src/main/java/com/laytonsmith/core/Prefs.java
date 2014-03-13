@@ -22,7 +22,12 @@ public final class Prefs {
     
     private Prefs(){}
     
-    private static Object pref(PNames name){
+	/**
+	 * Given a preference name, returns the preference value.
+	 * @param name
+	 * @return 
+	 */
+    public static Object pref(PNames name){
         if(prefs == null){
             //Uh oh.
             throw new RuntimeException("Preferences have not been initialized!");
@@ -33,7 +38,11 @@ public final class Prefs {
     private static Preferences prefs;
 	private static Thread watcherThread;
     
-    private static enum PNames{
+	/**
+	 * A list of preferences that are known to MethodScript. Additional preferences
+	 * may be set in the preferences table, but they will not be listed here.
+	 */
+    public static enum PNames{
         DEBUG_MODE("debug-mode"),
         SHOW_WARNINGS("show-warnings"),
         CONSOLE_LOG_COMMANDS("console-log-commands"),
@@ -56,10 +65,15 @@ public final class Prefs {
 		ALLOW_DYNAMIC_SHELL("allow-dynamic-shell"),
 		SCREAM_ERRORS("scream-errors"),
 		INTERPRETER_TIMEOUT("interpreter-timeout");
-        String name;
+        private String name;
         private PNames(String name){
             this.name = name;
         }
+		/**
+		 * Returns the name that will be listed in the config, not the name
+		 * of the enum.
+		 * @return 
+		 */
         public String config(){
             return name;
         }
