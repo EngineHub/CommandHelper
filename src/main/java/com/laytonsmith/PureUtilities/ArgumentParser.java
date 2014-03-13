@@ -1016,7 +1016,7 @@ public class ArgumentParser {
             }
         }
         //These are arguments that are not flags. 
-        List<String> looseArgs = new ArrayList<String>();
+        List<String> looseArgs = new ArrayList<>();
         Argument lastArg = null;
         for (String arg : args) {
             if (arg.matches("^[\\\\]+-.*$")) {
@@ -1078,7 +1078,10 @@ public class ArgumentParser {
 
         //Finish up the last argument
         results.updateArgument(validateArgument(lastArg, looseArgs));
-
+		if(looseArgs.size() > 0){
+			//There are loose arguments left, so add them to the loose argument list.
+			results.updateArgument(validateArgument(null, looseArgs));
+		}
         //TODO: Check to see if all the required values are here
 
         return results;

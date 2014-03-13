@@ -170,7 +170,7 @@ public class ArgumentParserTest {
 			.addArgument("This is the default argument", "arguments", true)
 			.addDescription("This is the \ndescription");
 		String expected = "\tThis is the \ndescription\n\n"
-			+ "Usage:\n\t[-xyz] [--flag] <arguments, ...> [-a <array, ...>] -i <input> -n <#number> --numbers <#numbers, ...>\n\n"
+			+ "Usage:\n\t[-xyz] [--flag] [-a <array, ...>] -i <input> -n <#number> --numbers <#numbers, ...> <arguments, ...>\n\n"
 			+ "Options:\n\n"
 			+ "\t<arguments>: This is the default argument\n"
 			+ "Flags (Short flags may be combined):\n"			
