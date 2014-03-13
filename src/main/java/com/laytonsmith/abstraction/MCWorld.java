@@ -44,6 +44,7 @@ public interface MCWorld extends AbstractionObject{
 	public MCChunk getChunkAt(int x, int z);
 	public MCChunk getChunkAt(MCBlock b);
 	public MCChunk getChunkAt(MCLocation l);
+	public MCChunk[] getLoadedChunks();
 
 	public boolean regenerateChunk(int x, int y);
 
