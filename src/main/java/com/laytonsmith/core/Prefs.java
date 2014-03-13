@@ -197,8 +197,10 @@ public final class Prefs {
 
 							@Override
 							public void run() {
-								watcherThread.interrupt();
-								watcherThread = null;
+								if(watcherThread != null){
+									watcherThread.interrupt();
+									watcherThread = null;
+								}
 							}
 						});
 						break;
