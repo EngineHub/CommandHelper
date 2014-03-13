@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -403,6 +404,73 @@ public class World {
  			return CHVersion.V3_3_1;
  		}
  	}
+	
+	@api
+	public static class get_loaded_chunks extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+ 			MCWorld world;
+ 			if (args.length == 1) {
+ 				// World Provided           
+ 				world = Static.getServer().getWorld(args[0].val());
+ 			} else {
+				if (m == null) {
+ 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+ 					}
+ 				world = m.getWorld();
+			}
+ 			MCChunk[] chunks = world.getLoadedChunks();
+			CArray ret = new CArray(t);
+			for (int i = 0; i < chunks.length; i++) {
+				CArray chunk = new CArray(t);
+				chunk.set("x", new CInt(chunks[i].getX(), t), t);
+				chunk.set("z", new CInt(chunks[i].getZ(), t), t);
+				chunk.set("world", chunks[i].getWorld().getName(), t);
+				ret.set(i, chunk, t);
+			}
+			
+ 			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_loaded_chunks";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[] {0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[world]} Gets all currently loaded chunks, in the specified world, or the current"
+					+ " players world if not provided.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 	
 	@api(environments=CommandHelperEnvironment.class)
 	public static class regen_chunk extends AbstractFunction {
@@ -917,10 +985,14 @@ public class World {
 				}
 			}
 
-			return new CArray(t,
-				new CInt(l.getChunk().getX(), t),
-				new CInt(l.getChunk().getZ(), t),
+			CArray chunk =  new CArray(t,
+				new CInt(l.getBlockX(), t),
+				new CInt(l.getBlockZ(), t),
 				new CString(l.getChunk().getWorld().getName(), t));
+			chunk.set("x", new CInt(l.getBlockX(), t), t);
+			chunk.set("y", new CInt(l.getBlockY(), t), t);
+			chunk.set("world", l.getWorld().getName(), t);
+			return chunk;
 		}
 
 		@Override

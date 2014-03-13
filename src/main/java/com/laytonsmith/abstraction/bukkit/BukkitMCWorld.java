@@ -44,6 +44,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.Chunk;
 
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -662,6 +663,16 @@ public class BukkitMCWorld implements MCWorld {
 	@Override
 	public MCChunk getChunkAt(MCLocation l) {
 		return new BukkitMCChunk(w.getChunkAt(((BukkitMCLocation) l).asLocation()));
+	}
+	
+	@Override
+	public MCChunk[] getLoadedChunks() {
+		Chunk[] chunks = w.getLoadedChunks();
+		MCChunk[] MCChunks = new MCChunk[chunks.length];
+		for (int i = 0; i < chunks.length; i++) {
+			MCChunks[i] = new BukkitMCChunk(chunks[i]);
+		}
+		return MCChunks;
 	}
 
 	@Override
