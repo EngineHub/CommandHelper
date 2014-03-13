@@ -91,7 +91,7 @@ public class MethodScriptCompilerTest {
 
         String[] badConfigs = {
             "'\\q'", //Bad escape sequences
-            "'\\r'",};
+            "'\\m'",};
         for (String c : badConfigs) {
             try {
                 MethodScriptCompiler.lex(c, null, false);
@@ -102,13 +102,7 @@ public class MethodScriptCompilerTest {
             }
         }
     }
-    @Test(expected=ConfigCompileException.class)
-    public void testSmartStrings() throws ConfigCompileException{
-        
-        SRun("assign(@word, 'word')\n"
-                + "msg(\"@word\")", fakePlayer);
 
-    }
     @Test
     public void testCompile() throws ConfigCompileException {
         MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)", null, false)).get(0).compileRight();

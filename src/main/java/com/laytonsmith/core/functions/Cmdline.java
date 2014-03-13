@@ -1288,7 +1288,7 @@ public class Cmdline {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.InsufficientPermissionException};
 		}
 
 		@Override
@@ -1340,7 +1340,7 @@ public class Cmdline {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.InsufficientPermissionException};
 		}
 
 		@Override
@@ -1397,7 +1397,7 @@ public class Cmdline {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientPermissionException};
 		}
 
 		@Override

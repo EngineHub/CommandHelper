@@ -617,7 +617,7 @@ public class DataHandling {
 						}
 						return new CVoid(t);
 					} catch (LoopContinueException e) {
-						continues += e.getTimes() - 1;
+						continues += e.getTimes();
 					}
 				}
 				return new CVoid(t);
@@ -667,7 +667,7 @@ public class DataHandling {
 								}
 								return new CVoid(t);
 							} catch (LoopContinueException e) {
-								continues += e.getTimes() - 1;
+								continues += e.getTimes();
 								continue;
 							}
 						}

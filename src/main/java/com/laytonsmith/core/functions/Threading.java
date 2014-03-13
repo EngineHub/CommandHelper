@@ -20,7 +20,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
  *
  */
 public class Threading {
-	public String docs(){
+	public static String docs(){
 		return "This experimental and private API is subject to removal, or incompatible changes, and should not"
 				+ " be used in normal development.";
 	}

@@ -125,9 +125,9 @@ public final class Prefs {
         prefs = new Preferences("CommandHelper", Static.getLogger(), a);
         prefs.init(f);
 
-		if(f == null){
-			//Skip all this, it's running in a special condition, for instance, docgen or something
-			//else. We won't support this feature.
+		if(f == null || f.getParentFile() == null){
+			//Skip all this, it's running in a special condition, for instance, docgen or tests or something
+			//else. We won't support this feature in that case.
 			return;
 		}
 		// Set up a watcher on this file to watch for changes to it. Once the changes

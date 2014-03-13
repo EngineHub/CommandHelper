@@ -5,6 +5,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Variable;
@@ -78,6 +79,8 @@ public class OptimizationUtilities {
             return ((IVariable)node.getData()).getName();
 		} else if(node.getData() instanceof Variable){
 			return ((Variable)node.getData()).getName();
+		} else if(node.getData() instanceof CSlice){
+			return node.getData().val();
 		} else if(node.getData() instanceof CArray){
 			//It's a hardcoded array. This only happens in the course of optimization, if
 			//the optimizer adds a new array. We still need to handle it appropriately though.

@@ -15,7 +15,6 @@ import org.bukkit.util.Vector;
 
 /**
  * Workaround class to accommodate for the likelihood of non-living entities that can shoot stuff.
- * Why did I bother doing this? Because such things already exist.
  * 
  * @author jb_aero
  */
@@ -60,4 +59,21 @@ public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MC
 			return null;
 		}
 	}
+
+	@Override
+	public String toString() {
+		return eps.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return eps.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return eps.equals(obj);
+	}
+	
+	
 }
