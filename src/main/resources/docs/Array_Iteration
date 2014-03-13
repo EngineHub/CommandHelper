@@ -100,4 +100,15 @@ assumption is that newly inserted values have already been "processed" by user c
 Also of note, if a continue() is used, this will account for and skip these blacklisted values, including if a number
 greater than 1 is used.
 
+The behavior of other languages can be matched by using the following code:
+
+%%CODE|
+@array = _some_array();
+for(@i = 0, @i <= length(@array), @i++){
+	if(_some_condition()){
+		@array[] = 'value';
+	}
+}
+%%
+
 {{LearningTrail}}

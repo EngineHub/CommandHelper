@@ -36,8 +36,12 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.extensions.Extension;
+import com.laytonsmith.core.extensions.ExtensionManager;
+import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import java.util.ArrayList;
@@ -237,6 +241,13 @@ public class Script {
         return ret;
     }
 
+	/**
+	 * Given the parse tree and environment, executes the tree.
+	 * @param c
+	 * @param env
+	 * @return
+	 * @throws CancelCommandException 
+	 */
     public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
 		if(env.getEnv(GlobalEnv.class).IsInterrupted()){
 			//First things first, if we're interrupted, kill the script
@@ -359,12 +370,25 @@ public class Script {
 					} catch(Exception ex){
 						//Ignored
 					}
-					String emsg = TermColors.RED + "Uh oh! You've found an error in " + Implementation.GetServerType().getBranding()
-							 + ". This is an error caused by your code, so you may be able to find a workaround,"
-							+ " but is ultimately an error in " + Implementation.GetServerType().getBranding()
-							+ " itself. The line of code that caused the error was this:\n" + TermColors.WHITE;
-					List<String> args2 = new ArrayList<String>();
-					Map<String, String> vars = new HashMap<String, String>();
+					String brand = Implementation.GetServerType().getBranding();
+					outer: for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
+						for(FunctionBase b : tracker.getFunctions()){
+							if(b.getName().equals(f.getName())){
+								//This extension provided the function, so its the culprit. Report this
+								//name instead of the core plugin's name.
+								for(Extension extension : tracker.getExtensions()){
+									brand = extension.getName();
+									break outer;
+								}
+							}
+						}
+					}
+					String emsg = TermColors.RED + "Uh oh! You've found an error in " + TermColors.CYAN + brand + TermColors.RED
+							 + ".\nThis is an error caused while running your code, so you may be able to find a workaround,"
+							+ " but is ultimately an error in " + brand
+							+ " itself.\nThe line of code that caused the error was this:\n" + TermColors.WHITE;
+					List<String> args2 = new ArrayList<>();
+					Map<String, String> vars = new HashMap<>();
 					
 					for(Construct cc : args){
 						if(cc instanceof IVariable){
@@ -395,11 +419,27 @@ public class Script {
 					if(!vars.isEmpty()){
 						emsg += StringUtils.Join(vars, " = ", "\n") + "\n";
 					}
+					String extensionData = "";
+					for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
+						for(Extension extension : tracker.getExtensions()){
+							extensionData += TermColors.CYAN + extension.getName() + TermColors.RED 
+									+ " (version " + TermColors.RESET + extension.getVersion() + TermColors.RED + ");\n";
+						}
+					}
+					if(extensionData.equals("")){
+						extensionData = "No extensions are loaded.\n";
+					}
 					emsg += f.getName() + "(";
 					emsg += StringUtils.Join(args2, ", ");
-					emsg += ")\n" + TermColors.RED + "on or around " + m.getTarget() + ".\nPlease report this error to the developers, and be sure to include the version numbers: Server version: "
-							+ modVersion + "; "
-							+ Implementation.GetServerType().getBranding() + " version: " + version + ". Here's the stacktrace:\n" + TermColors.RESET;
+					emsg += ")\n" + TermColors.RED + "on or around " 
+							+ TermColors.YELLOW + m.getTarget().file() + TermColors.WHITE + ":" + TermColors.CYAN + m.getTarget().line() + TermColors.RED
+							+ ".\nPlease report this error to the developers, and be sure to include the version numbers:\n"
+							+ TermColors.CYAN + "Server " + TermColors.RED + "version: " + TermColors.RESET + modVersion + TermColors.RED + ";\n"
+							+ TermColors.CYAN + Implementation.GetServerType().getBranding() + TermColors.RED + " version: " + TermColors.RESET 
+								+ version + TermColors.RED + ";\n"
+							+ "Loaded extensions and versions:\n"
+							+ extensionData
+							+ "Here's the stacktrace:\n" + TermColors.RESET;
 					emsg += Static.GetStacktraceString(e);
 					Static.getLogger().log(Level.SEVERE, emsg);
 					throw new CancelCommandException(null, Target.UNKNOWN);
