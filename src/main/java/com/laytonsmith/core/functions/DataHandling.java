@@ -2,8 +2,10 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
@@ -298,6 +300,7 @@ public class DataHandling {
 
 	@api
 	@noboilerplate
+	@breakable
 	public static class _for extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -414,6 +417,7 @@ public class DataHandling {
 
 	@api
 	@noboilerplate
+	@breakable
 	public static class forelse extends AbstractFunction {
 
 		public forelse() {
@@ -525,6 +529,7 @@ public class DataHandling {
 	}
 
 	@api(environments = CommandHelperEnvironment.class)
+	@breakable
 	public static class foreach extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -859,6 +864,7 @@ public class DataHandling {
 
 	@api
 	@noboilerplate
+	@breakable
 	public static class foreachelse extends foreach {
 
 		@Override
@@ -929,6 +935,7 @@ public class DataHandling {
 
 	@api
 	@noboilerplate
+	@breakable
 	public static class _while extends AbstractFunction {
 
 		@Override
@@ -1034,6 +1041,7 @@ public class DataHandling {
 
 	@api
 	@noboilerplate
+	@breakable
 	public static class _dowhile extends AbstractFunction {
 
 		@Override
@@ -1906,6 +1914,7 @@ public class DataHandling {
 	}
 
 	@api
+	@unbreakable
 	public static class proc extends AbstractFunction {
 
 		@Override
@@ -2726,6 +2735,7 @@ public class DataHandling {
 	}
 
 	@api(environments = CommandHelperEnvironment.class)
+	@unbreakable
 	public static class closure extends AbstractFunction {
 
 		@Override

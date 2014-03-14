@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.*;
@@ -180,6 +181,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@breakable
 	public static class _switch extends AbstractFunction implements Optimizable {
 
 		@Override

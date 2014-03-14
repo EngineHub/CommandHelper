@@ -1,5 +1,7 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.annotations.breakable;
+import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CFunction;
@@ -1376,19 +1378,18 @@ public final class MethodScriptCompiler {
 	 * @throws ConfigCompileException 
 	 */
 	private static void checkBreaks(ParseTree tree) throws ConfigCompileException {
-		checkBreaks0(tree, 0);
+		checkBreaks0(tree, 0, null);
 	}
 	
-	private static void checkBreaks0(ParseTree tree, long currentLoops) throws ConfigCompileException {
+	private static void checkBreaks0(ParseTree tree, long currentLoops, String lastUnbreakable) throws ConfigCompileException {
 		if(!(tree.getData() instanceof CFunction)){
 			//Don't care about these
 			return;
 		}
-		CFunction func = (CFunction)tree.getData();
+		Function func = ((CFunction)tree.getData()).getFunction();
 		// We have special handling for procs and closures, and of course break and the loops. 
 		// If any of these are here, we kick into special handling mode. Otherwise, we recurse.
-		switch(func.val()){
-			case "break":
+		if(func instanceof DataHandling._break){
 				// First grab the counter in the break function. If the break function doesn't
 				// have any children, then 1 is implied. break() requires the argument to be
 				// a CInt, so if it weren't, there would already have been a compile error, so
@@ -1401,32 +1402,28 @@ public final class MethodScriptCompiler {
 					// Throw an exception, as this would break above a loop. Different error messages
 					// are applied to different cases
 					if(currentLoops == 0){
-						throw new ConfigCompileException("The break() function can only break out of loops.", tree.getTarget());
+						throw new ConfigCompileException("The break() function can only break out of loops" + (lastUnbreakable == null ? "." :
+								", but an attempt to break out of a " + lastUnbreakable + " was detected."), tree.getTarget());
 					} else {
 						throw new ConfigCompileException("Too many breaks"
 								+ " detected. Check your loop nesting, and set the break count to an appropriate value.", tree.getTarget());
 					}
 				}
-				break;
-			case "proc":
-			case "closure":				
+				return;
+		} 
+		if(func.getClass().getAnnotation(unbreakable.class) != null){		
 				// Parse the children like normal, but reset the counter to 0.
 				for(ParseTree child : tree.getChildren()){
-					checkBreaks0(child, 0);
-				}
-				break;
-			case "switch":	// switch is considered a loop, basically.			
-			case "for":
-			case "foreach":
-			case "while":
-			case "dowhile":
-				// Don't break, still recurse, but up our current loops counter.
-				currentLoops++;
-			default:
-				for(ParseTree child : tree.getChildren()){
-					checkBreaks0(child, currentLoops);
+					checkBreaks0(child, 0, func.getName());
 				}
 				return;
+		}
+		if(func.getClass().getAnnotation(breakable.class) != null){
+				// Don't break yet, still recurse, but up our current loops counter.
+				currentLoops++;
+		}
+		for(ParseTree child : tree.getChildren()){
+			checkBreaks0(child, currentLoops, lastUnbreakable);
 		}
 	}
 	
