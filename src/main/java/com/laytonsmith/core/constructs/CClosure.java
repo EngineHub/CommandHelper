@@ -151,7 +151,7 @@ public class CClosure extends Construct {
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException)e);
 				Target t = lme.getTarget();
-				ConfigRuntimeException.React(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
 			}
         }

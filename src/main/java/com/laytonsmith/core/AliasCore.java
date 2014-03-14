@@ -197,7 +197,7 @@ public class AliasCore {
 							}
 						} catch (ConfigRuntimeException ex) {
 							ex.setEnv(env);
-							ConfigRuntimeException.React(ex, env);
+							ConfigRuntimeException.HandleUncaughtException(ex, env);
 						} catch (Throwable e) {
 							//This is not a simple user script error, this is a deeper problem, so we always handle this.
 							System.err.println("An unexpected exception occured: " + e.getClass().getSimpleName());
@@ -253,7 +253,7 @@ public class AliasCore {
 							//env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
 							Static.getAliasCore().removePlayerReference(player);
 							e.setEnv(env);
-							ConfigRuntimeException.React(e, env);
+							ConfigRuntimeException.HandleUncaughtException(e, env);
 							match = true;
 						} catch (ConfigCompileException e) {
 							//Something strange happened, and a bad alias was added
@@ -652,7 +652,7 @@ public class AliasCore {
 								s.checkAmbiguous((ArrayList<Script>) scripts);
 								scripts.add(s);
 							} catch (ConfigCompileException e) {
-								ConfigRuntimeException.React(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+								ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", player);
 							}
 						} catch (RuntimeException ee) {
 							throw new RuntimeException("While processing a script, "
@@ -661,7 +661,7 @@ public class AliasCore {
 						}
 					}
 				} catch (ConfigCompileException e) {
-					ConfigRuntimeException.React(e, "Could not compile file " + fi.file + " compilation will halt.", player);
+					ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file + " compilation will halt.", player);
 					return;
 				}
 			}
@@ -693,17 +693,17 @@ public class AliasCore {
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
 				} catch (ConfigCompileException e) {
 					exception = true;
-					ConfigRuntimeException.React(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
+					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
 				} catch (ConfigRuntimeException e) {
 					exception = true;
-					ConfigRuntimeException.React(e, env);
+					ConfigRuntimeException.HandleUncaughtException(e, env);
 				} catch (CancelCommandException e) {
 					if (e.getMessage() != null && !"".equals(e.getMessage().trim())) {
 						logger.log(Level.INFO, e.getMessage());
 					}
 				} catch (ProgramFlowManipulationException e) {
 					exception = true;
-					ConfigRuntimeException.React(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in main files.", e.getTarget()), env);
+					ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in main files.", e.getTarget()), env);
 				} finally {
 					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(null);
 				}

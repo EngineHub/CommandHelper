@@ -71,7 +71,7 @@ public class ExecutionQueue {
 							try {
 								c.execute();
 							} catch(ConfigRuntimeException ex){
-								ConfigRuntimeException.React(ex, environment);
+								ConfigRuntimeException.HandleUncaughtException(ex, environment);
 							}
 						}
 					});
@@ -144,7 +144,7 @@ public class ExecutionQueue {
 							try {
 								c.execute();
 							} catch(ConfigRuntimeException ex){
-								ConfigRuntimeException.React(ex, environment);
+								ConfigRuntimeException.HandleUncaughtException(ex, environment);
 							}
 						}
 					});

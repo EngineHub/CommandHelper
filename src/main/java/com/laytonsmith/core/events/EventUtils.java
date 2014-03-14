@@ -138,7 +138,7 @@ public final class EventUtils {
 							try {
 								convertedEvent = driver.convert(object);
 							} catch (ConfigRuntimeException e) {
-								ConfigRuntimeException.React(e, b.getEnvironment());
+								ConfigRuntimeException.HandleUncaughtException(e, b.getEnvironment());
 								continue;
 							}
 							if (driver.matches(b.getPrefilter(), convertedEvent)) {
@@ -192,7 +192,7 @@ public final class EventUtils {
 						//handled properly. This would happen if, for instance, a
 						//prefilter was configured improperly with bad runtime data.
 						//We use the environment from the bound event.
-						ConfigRuntimeException.React(ex, b.getEnvironment());
+						ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());
 					}
 					if (b.getEventName().equals(eventName) && matches) {
 						toRun.add(b);
@@ -240,7 +240,7 @@ public final class EventUtils {
 					throw new ConfigRuntimeException(ex.getMessage(), null, Target.UNKNOWN);
 				} catch (ConfigRuntimeException ex) {
 					//An exception has bubbled all the way up
-					ConfigRuntimeException.React(ex, b.getEnvironment());
+					ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());
 				}
 			}
 		}

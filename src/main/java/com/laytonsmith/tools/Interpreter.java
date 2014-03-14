@@ -129,7 +129,7 @@ public final class Interpreter {
 		try {
 			interpreter.execute(FileUtil.read(fromFile), args, fromFile);
 		} catch (ConfigCompileException ex) {
-			ConfigRuntimeException.React(ex, null, null);
+			ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 			System.out.println(TermColors.reset());
 			System.exit(1);
 		}
@@ -185,7 +185,7 @@ public final class Interpreter {
 				System.out.print(TermColors.reset());
 				System.exit(0);
 			} catch (ConfigCompileException ex) {
-				ConfigRuntimeException.React(ex, null, null);
+				ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 				System.out.print(TermColors.reset());
 				System.exit(1);
 			}
@@ -403,7 +403,7 @@ public final class Interpreter {
 				String val = ex.getReturn().val();
 				return Static.MCToANSIColors(val) + TermColors.RESET;
 			} catch(ConfigRuntimeException ex){
-				ConfigRuntimeException.React(ex, env);
+				ConfigRuntimeException.HandleUncaughtException(ex, env);
 			}
 		}
 		return BLUE + ":" + TermColors.RESET;
@@ -426,7 +426,7 @@ public final class Interpreter {
 		try {
 			MethodScriptCompiler.execute(auto_include, MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile(), true, env, null, null, null);
 		} catch (ConfigCompileException ex) {
-			ConfigRuntimeException.React(ex, "Interpreter will continue to run, however.", null);
+			ConfigRuntimeException.HandleUncaughtException(ex, "Interpreter will continue to run, however.", null);
 		}
 		//Install our signal handlers.
 		SignalHandler.SignalCallback signalHandler = new SignalHandler.SignalCallback() {
@@ -487,7 +487,7 @@ public final class Interpreter {
 					execute(script, null);
 					script = "";
 				} catch (ConfigCompileException e) {
-					ConfigRuntimeException.React(e, null, null);
+					ConfigRuntimeException.HandleUncaughtException(e, null, null);
 				}	break;
 			default:
 				if (multilineMode) {
@@ -498,7 +498,7 @@ public final class Interpreter {
 						//Execute single line
 						execute(line, null);
 					} catch (ConfigCompileException ex) {
-						ConfigRuntimeException.React(ex, null, null);
+						ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 					}
 				}	break;
 		}
@@ -587,7 +587,7 @@ public final class Interpreter {
 							//the interrupt flag. But we do that unconditionally below, in the finally,
 							//in the other thread.
 						} catch (ConfigRuntimeException e) {
-							ConfigRuntimeException.React(e, env);
+							ConfigRuntimeException.HandleUncaughtException(e, env);
 							//No need for the full stack trace
 							if (System.console() == null) {
 								System.exit(1);

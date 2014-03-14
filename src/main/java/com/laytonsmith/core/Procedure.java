@@ -6,6 +6,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
@@ -20,21 +21,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *
- * @author Layton
+ * A procedure is a user defined function, essentially. Unlike a closure, however, it does not
+ * clone a reference to the environment when it is defined. It takes on the environment characteristics
+ * of the executing environment, not the defining environment.
  */
 public class Procedure implements Cloneable {
 
-    private String name;
+    private final String name;
     private Map<String, IVariable> varList;
-    private Map<String, Construct> originals = new HashMap<String, Construct>();
-    private List<IVariable> varIndex = new ArrayList<IVariable>();
+    private final Map<String, Construct> originals = new HashMap<>();
+    private final List<IVariable> varIndex = new ArrayList<>();
     private ParseTree tree;
     private boolean possiblyConstant = false;
 	/**
 	 * The line the procedure is defined at (for stacktraces)
 	 */
-	private Target definedAt;
+	private final Target definedAt;
 
     public Procedure(String name, List<IVariable> varList, ParseTree tree, Target t) {
         this.name = name;
@@ -139,10 +141,11 @@ public class Procedure implements Cloneable {
      *
      * @param args
      * @param env
+	 * @param t
      * @return
      */
     public Construct cexecute(List<ParseTree> args, Environment env, Target t) {
-        List<Construct> list = new ArrayList<Construct>();
+        List<Construct> list = new ArrayList<>();
         for (ParseTree arg : args) {
             list.add(env.getEnv(GlobalEnv.class).GetScript().seval(arg, env));
         }
@@ -154,6 +157,7 @@ public class Procedure implements Cloneable {
      *
      * @param args
      * @param env
+	 * @param t
      * @return
      */
     public Construct execute(List<Construct> args, Environment env, Target t) {
@@ -195,6 +199,11 @@ public class Procedure implements Cloneable {
 			}
         } catch (FunctionReturnException e) {
             return e.getReturn();
+		} catch(LoopManipulationException ex){
+			// These cannot bubble up past procedure calls. This will eventually be
+			// a compile error.
+			throw ConfigRuntimeException.CreateUncatchableException("Loop manipulation operations (e.g. break() or continue()) cannot"
+					+ " bubble up past procedures.", t);
         } catch(ConfigRuntimeException e){
 			e.addStackTraceTrail(new ConfigRuntimeException.StackTraceElement("proc " + name, e.getTarget()), t);
 			throw e;
@@ -210,7 +219,7 @@ public class Procedure implements Cloneable {
     public Procedure clone() throws CloneNotSupportedException {
         Procedure clone = (Procedure) super.clone();
         if (this.varList != null) {
-            clone.varList = new HashMap<String, IVariable>(this.varList);
+            clone.varList = new HashMap<>(this.varList);
         }
         if (this.tree != null) {
             clone.tree = this.tree.clone();

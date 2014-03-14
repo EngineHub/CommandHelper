@@ -215,4 +215,56 @@ whereas dowhile() runs the code THEN checks the condition. In both cases, if the
 So, <code>while(false, &lt;code&gt;)</code> will never run the code, whereas 
 <code>dowhile(&lt;code&gt;, false)</code> will run the code only once.
 
+=== break() and continue() ===
+
+Breaking and continuing in a loop works will all 4 loop types, for, foreach, while, and dowhile. A break causes
+the loop to exit immediately, and a continue causes that particular iteration to finish, and the loop restarts.
+Both break and continue can be given a counter as well, and they will do that operation that many times. break()
+must have a hardcoded integer value, however, as a dynamic value prevents code flow analysis and optimizations.
+Continuing can be done a dynamic number of times, and essentially works like this:
+
+%%CODE|
+@cont = 0;
+for(@i = 0, @i < 10, @i++){
+	if(@cont > 0){
+		@cont--;
+		continue();
+	} else if(@i == 1){
+		@cont = 2;
+		continue();
+	}
+	msg(@i);
+}
+// This would message out 0, 4, 5, 6, 7, 8, 9
+// But the same code can be written in less code, and less confusingly with:
+
+for(@i = 0, @i < 10, @i++){
+	if(@i == 1){
+		continue(3);
+	}
+	msg(@i);
+}
+%%
+
+Breaks with more than 1 break out of multiple loops.
+
+%%CODE|
+@output = array();
+for(@i = 0, @i < 5, @i++){
+	for(@j = 0, @j < 5, @j++){
+		if(@i == 2 && @j == 3){
+			break(2);
+		}
+		@output[] = "@i @j";
+	}
+}
+msg(@output); // {0 0, 0 1, 0 2, 0 3, 0 4, 1 0, 1 1, 1 2, 1 3, 1 4, 2 0, 2 1, 2 2}
+%%
+
+Breaks follow special rules, however. Breaks cannot bubble up past procedures, closures, or the root of the script. Since
+the break count must be hardcoded, the compiler will catch this at compile time, and cause an error.
+
+Break may also be used with switch statements. In this case, breaks work the same as if switch were a loop, even though
+it is technically a conditional, and not a loop.
+
 {{LearningTrail}}

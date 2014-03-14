@@ -433,7 +433,7 @@ public class Federation {
 //								try {
 //									HandleReadOnlyException(ex);
 //								} catch (ConfigRuntimeException ee) {
-//									ConfigRuntimeException.React(ee, environment);
+//									ConfigRuntimeException.HandleUncaughtException(ee, environment);
 //								}
 //							}
 //							break;

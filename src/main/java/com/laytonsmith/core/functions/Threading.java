@@ -14,6 +14,8 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
@@ -45,7 +47,7 @@ public class Threading {
 		}
 
 		@Override
-		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(!(args[1] instanceof CClosure)){
 				throw new Exceptions.CastException("Expected closure for arg 2", t);
@@ -57,8 +59,18 @@ public class Threading {
 				public void run() {
 					DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 					dm.activateThread(Thread.currentThread());
-					closure.execute();
-					dm.deactivateThread(Thread.currentThread());
+					try {
+						closure.execute();
+					} catch(FunctionReturnException ex){
+						// Do nothing
+					} catch(LoopManipulationException ex){
+						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
+								+ " operation was triggered inside the closure.", t), environment);
+					} catch(ConfigRuntimeException ex){
+						ConfigRuntimeException.HandleUncaughtException(ex, environment);
+					} finally {
+						dm.deactivateThread(Thread.currentThread());
+					}
 				}
 			}, "(" + Implementation.GetServerType().getBranding() + ") " + id).start();
 			return new CVoid(t);

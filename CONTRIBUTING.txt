@@ -61,3 +61,11 @@ Before committing, be sure to go through this checklist:
 	  All other files should access the abstraction layer.
 	* Be sure that enums that map server values have a EnumConvertor class as well. Never do enum lookups directly
 	  by name.
+
+* Method Naming
+Methods should be named using standard camel case, in most cases. Exceptions exist where convention dictates otherwise.
+Static methods in a class should start with uppercase letters, and member methods should start with lowercase letters.
+
+* Comments
+Please document public methods using javadoc, unless they are boilerplate and completely obvious based on the method name.
+Potentially confusing code should have inline comments explaining what is happening.

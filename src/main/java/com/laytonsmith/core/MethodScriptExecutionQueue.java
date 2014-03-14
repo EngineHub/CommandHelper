@@ -37,7 +37,7 @@ public class MethodScriptExecutionQueue extends ExecutionQueue {
 				Environment env = Environment.createEnvironment(MethodScriptExecutionQueue.this.env);
 				if(e instanceof ConfigRuntimeException){
 					//This should be handled by the default UEH
-					ConfigRuntimeException.React(((ConfigRuntimeException)e), env);
+					ConfigRuntimeException.HandleUncaughtException(((ConfigRuntimeException)e), env);
 				} else if(e instanceof FunctionReturnException){
 					//If they return void, fine, but if they return any other value, it will be
 					//ignored, so we want to warn them, but not trigger a flat out error.

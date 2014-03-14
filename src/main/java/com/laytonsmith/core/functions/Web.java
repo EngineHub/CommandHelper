@@ -374,7 +374,7 @@ public class Web {
 								}
 							});
 						} else {
-							ConfigRuntimeException.React(ex, environment);
+							ConfigRuntimeException.HandleUncaughtException(ex, environment);
 						}
 					} catch(Exception e){
 						e.printStackTrace();
@@ -400,7 +400,7 @@ public class Web {
 				//This is an error
 				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Only return may be used inside the closure.", t);
 			} catch(ConfigRuntimeException e){
-				ConfigRuntimeException.React(e, environment);
+				ConfigRuntimeException.HandleUncaughtException(e, environment);
 			} catch(Throwable e){
 				//Other throwables we just need to report
 				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "An unexpected exception has occurred. No extra"

@@ -4,6 +4,7 @@ import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CPreIdentifier;
@@ -25,7 +26,11 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
+import com.laytonsmith.database.Profiles;
+import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
@@ -39,8 +44,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- *
- * @author Layton
+ * The MethodScriptCompiler class handles the various stages of compilation and
+ * provides helper methods for execution of the compiled trees.
  */
 public final class MethodScriptCompiler {
 	
@@ -51,10 +56,22 @@ public final class MethodScriptCompiler {
 	private MethodScriptCompiler() {
 	}
 
-	public static List<Token> lex(String config, File file, boolean inPureMScript) throws ConfigCompileException {
-		config = config.replaceAll("\r\n", "\n");
-		config = config + "\n";
-		List<Token> token_list = new ArrayList<Token>();
+	/**
+	 * Lexes the script, and turns it into a token stream. This looks through the script
+	 * character by character.
+	 * @param script The script to lex
+	 * @param file The file this script came from, or potentially null if the code is from
+	 * a dynamic source
+	 * @param inPureMScript If the script is in pure MethodScript, this should be true. Pure
+	 * MethodScript is defined as code that doesn't have command alias wrappers.
+	 * @return A stream of tokens
+	 * @throws ConfigCompileException If compilation fails due to bad syntax
+	 */
+	@SuppressWarnings("UnnecessaryContinue")
+	public static List<Token> lex(String script, File file, boolean inPureMScript) throws ConfigCompileException {
+		script = script.replaceAll("\r\n", "\n");
+		script = script + "\n";
+		List<Token> token_list = new ArrayList<>();
 		//Set our state variables
 		boolean state_in_quote = false;
 		int quoteLineNumberStart = 1;
@@ -64,7 +81,7 @@ public final class MethodScriptCompiler {
 		int commentLineNumberStart = 1;
 		boolean comment_is_block = false;
 		boolean in_opt_var = false;
-		boolean inCommand = (inPureMScript?false:true);
+		boolean inCommand = (!inPureMScript);
 		boolean inMultiline = false;
 		StringBuilder buf = new StringBuilder();
 		int line_num = 1;
@@ -72,15 +89,15 @@ public final class MethodScriptCompiler {
 		int lastColumn = 0;
 		Target target = Target.UNKNOWN;
 		//first we lex
-		for (int i = 0; i < config.length(); i++) {
-			Character c = config.charAt(i);
+		for (int i = 0; i < script.length(); i++) {
+			Character c = script.charAt(i);
 			Character c2 = null;
 			Character c3 = null;
-			if (i < config.length() - 1) {
-				c2 = config.charAt(i + 1);
+			if (i < script.length() - 1) {
+				c2 = script.charAt(i + 1);
 			}
-			if (i < config.length() - 2) {
-				c3 = config.charAt(i + 2);
+			if (i < script.length() - 2) {
+				c3 = script.charAt(i + 2);
 			}
 
 			column += i - lastColumn;
@@ -634,7 +651,7 @@ public final class MethodScriptCompiler {
 						//Grab the next 4 characters, and check to see if they are numbers
 						StringBuilder unicode = new StringBuilder();
 						for (int m = 0; m < 4; m++) {
-							unicode.append(config.charAt(i + 2 + m));
+							unicode.append(script.charAt(i + 2 + m));
 						}
 						try {
 							Integer.parseInt(unicode.toString(), 16);
@@ -737,6 +754,9 @@ public final class MethodScriptCompiler {
 	 * @throws ConfigCompileException
 	 */
 	public static List<Script> preprocess(List<Token> tokenStream) throws ConfigCompileException {
+		if(tokenStream == null || tokenStream.isEmpty()){
+			return new ArrayList<>();
+		}
 		//First, pull out the duplicate newlines
 		ArrayList<Token> temp = new ArrayList<>();
 		for (int i = 0; i < tokenStream.size(); i++) {
@@ -760,7 +780,7 @@ public final class MethodScriptCompiler {
 		tokenStream = temp;
 
 		//Handle multiline constructs
-		ArrayList<Token> tokens1_1 = new ArrayList<Token>();
+		ArrayList<Token> tokens1_1 = new ArrayList<>();
 		boolean inside_multiline = false;
 		Token thisToken = null;
 		for (int i = 0; i < tokenStream.size(); i++) {
@@ -795,13 +815,15 @@ public final class MethodScriptCompiler {
 				tokens1_1.add(thisToken);
 			}
 		}
+		
+		assert thisToken != null;
 
 		if (inside_multiline) {
 			throw new ConfigCompileException("Expecting a multiline end symbol, but your last multiline alias appears to be missing one.", thisToken.target);
 		}
 
 		//take out newlines that are behind a \
-		ArrayList<Token> tokens2 = new ArrayList<Token>();
+		ArrayList<Token> tokens2 = new ArrayList<>();
 		for (int i = 0; i < tokens1_1.size(); i++) {
 			if (!tokens1_1.get(i).type.equals(TType.STRING) && tokens1_1.get(i).val().equals("\\") && tokens1_1.size() > i
 					&& tokens1_1.get(i + 1).type.equals(TType.NEWLINE)) {
@@ -815,12 +837,11 @@ public final class MethodScriptCompiler {
 		//Now that we have all lines minified, we should be able to split
 		//on newlines, and easily find the left and right sides
 
-		List<Token> left = new ArrayList<Token>();
-		List<Token> right = new ArrayList<Token>();
-		List<Script> scripts = new ArrayList<Script>();
+		List<Token> left = new ArrayList<>();
+		List<Token> right = new ArrayList<>();
+		List<Script> scripts = new ArrayList<>();
 		boolean inLeft = true;
-		for (int i = 0; i < tokens2.size(); i++) {
-			Token t = tokens2.get(i);
+		for (Token t : tokens2) {
 			if (inLeft) {
 				if (t.type == TType.ALIAS_END) {
 					inLeft = false;
@@ -851,7 +872,22 @@ public final class MethodScriptCompiler {
 		return scripts;
 	}
 
+	/**
+	 * Compiles the token stream into a valid ParseTree. This also includes optimization
+	 * and reduction.
+	 * @param stream The token stream, as generated by {@link #lex()}
+	 * @return A fully compiled, optimized, and reduced parse tree. If {@code stream} is
+	 * null or empty, null is returned.
+	 * @throws ConfigCompileException If the script contains syntax errors. Additionally,
+	 * during optimization, certain methods may cause compile errors. Any function that
+	 * can optimize static occurrences and throws a {@link ConfigRuntimeException} will
+	 * have that exception converted to a ConfigCompileException.
+	 */
+	@SuppressWarnings("UnnecessaryContinue")
 	public static ParseTree compile(List<Token> stream) throws ConfigCompileException {
+		if(stream == null || stream.isEmpty()){
+			return null;
+		}
 		Target unknown;
 		try {
 			//Instead of using Target.UNKNOWN, we can at least set the file.
@@ -860,8 +896,8 @@ public final class MethodScriptCompiler {
 			unknown = Target.UNKNOWN;
 		}
 
-		List<Token> tempStream = new ArrayList<Token>(stream.size());
-		List<Integer> irrelevantWhitespace = new ArrayList<Integer>();
+		List<Token> tempStream = new ArrayList<>(stream.size());
+		List<Integer> irrelevantWhitespace = new ArrayList<>();
 		int startingRelevant = -1;
 		int endingRelevant = -1;
 		int bracketBlocks = 0;
@@ -961,14 +997,14 @@ public final class MethodScriptCompiler {
 
 		ParseTree tree = new ParseTree(fileOptions);
 		tree.setData(new CNull(unknown));
-		Stack<ParseTree> parents = new Stack<ParseTree>();
+		Stack<ParseTree> parents = new Stack<>();
 		/**
 		 * constructCount is used to determine if we need to use autoconcat
 		 * when reaching a FUNC_END. The previous constructs, if the count
 		 * is greater than 1, will be moved down into an autoconcat.
 		 */
-		Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
-		Stack<AtomicBoolean> usesBraces = new Stack<AtomicBoolean>();
+		Stack<AtomicInteger> constructCount = new Stack<>();
+		Stack<AtomicBoolean> usesBraces = new Stack<>();
 		constructCount.push(new AtomicInteger(0));
 		parents.push(tree);
 
@@ -981,7 +1017,7 @@ public final class MethodScriptCompiler {
 		 * The array stack is used to keep track of the number
 		 * of square braces in use.
 		 */
-		Stack<AtomicInteger> arrayStack = new Stack<AtomicInteger>();
+		Stack<AtomicInteger> arrayStack = new Stack<>();
 		arrayStack.add(new AtomicInteger(-1));
 
 		int parens = 0;
@@ -1143,7 +1179,7 @@ public final class MethodScriptCompiler {
 					Function f;
 					try {
 						f = (Function) FunctionList.getFunction(function.getData());
-					} catch (Exception e) {
+					} catch (ConfigCompileException e) {
 						throw new ConfigCompileException("Could not find function " + function.getData().val(), t.target);
 					}
 					if (!f.allowBraces()) {
@@ -1155,13 +1191,13 @@ public final class MethodScriptCompiler {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
 					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
-					List<ParseTree> subChildren = new ArrayList<ParseTree>();
+					List<ParseTree> subChildren = new ArrayList<>();
 					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
 					}
 					c.setChildren(subChildren);
 					if (replaceAt > 0) {
-						List<ParseTree> firstChildren = new ArrayList<ParseTree>();
+						List<ParseTree> firstChildren = new ArrayList<>();
 						for (int d = 0; d < replaceAt; d++) {
 							firstChildren.add(tree.getChildAt(d));
 						}
@@ -1191,13 +1227,13 @@ public final class MethodScriptCompiler {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
 					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
-					List<ParseTree> subChildren = new ArrayList<ParseTree>();
+					List<ParseTree> subChildren = new ArrayList<>();
 					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
 					}
 					c.setChildren(subChildren);
 					if (replaceAt > 0) {
-						List<ParseTree> firstChildren = new ArrayList<ParseTree>();
+						List<ParseTree> firstChildren = new ArrayList<>();
 						for (int d = 0; d < replaceAt; d++) {
 							firstChildren.add(tree.getChildAt(d));
 						}
@@ -1312,6 +1348,9 @@ public final class MethodScriptCompiler {
 			}
 			
 		}
+		
+		assert t != null;
+		
 		if (arrayStack.size() != 1) {
 			throw new ConfigCompileException("Mismatched square brackets", t.target);
 		}
@@ -1319,14 +1358,76 @@ public final class MethodScriptCompiler {
 			throw new ConfigCompileException("Mismatched parenthesis", t.target);
 		}
 
-		Stack<List<Procedure>> procs = new Stack<List<Procedure>>();
+		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<Procedure>());
 		optimize(tree, procs);
 		link(tree);
 		checkLabels(tree);
+		checkBreaks(tree);
 		parents.pop();
 		tree = parents.pop();
 		return tree;
+	}
+	
+	/**
+	 * Recurses down the tree and ensures that breaks don't bubble up past
+	 * procedures or the root code tree.
+	 * @param tree
+	 * @throws ConfigCompileException 
+	 */
+	private static void checkBreaks(ParseTree tree) throws ConfigCompileException {
+		checkBreaks0(tree, 0);
+	}
+	
+	private static void checkBreaks0(ParseTree tree, long currentLoops) throws ConfigCompileException {
+		if(!(tree.getData() instanceof CFunction)){
+			//Don't care about these
+			return;
+		}
+		CFunction func = (CFunction)tree.getData();
+		// We have special handling for procs and closures, and of course break and the loops. 
+		// If any of these are here, we kick into special handling mode. Otherwise, we recurse.
+		switch(func.val()){
+			case "break":
+				// First grab the counter in the break function. If the break function doesn't
+				// have any children, then 1 is implied. break() requires the argument to be
+				// a CInt, so if it weren't, there would already have been a compile error, so
+				// we can assume it will be a CInt.
+				long breakCounter = 1;
+				if(tree.getChildren().size() == 1){
+					breakCounter = ((CInt)tree.getChildAt(0).getData()).getInt();
+				}
+				if(breakCounter > currentLoops){
+					// Throw an exception, as this would break above a loop. Different error messages
+					// are applied to different cases
+					if(currentLoops == 0){
+						throw new ConfigCompileException("The break() function can only break out of loops.", tree.getTarget());
+					} else {
+						throw new ConfigCompileException("Too many breaks"
+								+ " detected. Check your loop nesting, and set the break count to an appropriate value.", tree.getTarget());
+					}
+				}
+				break;
+			case "proc":
+			case "closure":				
+				// Parse the children like normal, but reset the counter to 0.
+				for(ParseTree child : tree.getChildren()){
+					checkBreaks0(child, 0);
+				}
+				break;
+			case "switch":	// switch is considered a loop, basically.			
+			case "for":
+			case "foreach":
+			case "while":
+			case "dowhile":
+				// Don't break, still recurse, but up our current loops counter.
+				currentLoops++;
+			default:
+				for(ParseTree child : tree.getChildren()){
+					checkBreaks0(child, currentLoops);
+				}
+				return;
+		}
 	}
 	
 	/**
@@ -1465,11 +1566,11 @@ public final class MethodScriptCompiler {
 		//is a branch (branches always use execs, though using execs doesn't strictly
 		//mean you are a branch type function).
 		
-		outer: for(int i = 0; i < children.size(); i++){
+		for(int i = 0; i < children.size(); i++){
 			ParseTree t = children.get(i);			
 			if(t.getData() instanceof CFunction){
 				if(t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())){
-					continue outer;
+					continue;
 				}
 				Function f = (Function)FunctionList.getFunction(t.getData());
 				Set<OptimizationOption> options = NO_OPTIMIZATIONS;
@@ -1484,15 +1585,14 @@ public final class MethodScriptCompiler {
 						for(int j = children.size() - 1; j > i; j--){
 							children.remove(j);							
 						}
-						break outer;
+						break;
 					}
 				}
 			}
 		}
 		boolean fullyStatic = true;
 		boolean hasIVars = false;
-		for (int i = 0; i < children.size(); i++) {
-			ParseTree node = children.get(i);
+		for (ParseTree node : children) {
 			if (node.getData() instanceof CFunction) {
 				optimize(node, procs);
 			}
@@ -1515,8 +1615,8 @@ public final class MethodScriptCompiler {
 			//I break to the loop label, which makes it jump to the bottom of
 			//that loop.
 			loop:
-			for (int i = 0; i < procs.size(); i++) {
-				for (Procedure pp : procs.get(i)) {
+			for (List<Procedure> proc : procs) {
+				for (Procedure pp : proc) {
 					if (pp.getName().equals(cFunction.val())) {
 						p = pp;
 						break loop;
@@ -1552,7 +1652,7 @@ public final class MethodScriptCompiler {
 				Environment env = null;
 				try{
 					env = Static.GenerateStandaloneEnvironment();
-				} catch(Exception e){
+				} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e){
 					//
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
@@ -1665,8 +1765,10 @@ public final class MethodScriptCompiler {
 	 * as a Construct, so this one function may be used synchronously also.
 	 *
 	 * @param root
+	 * @param env
 	 * @param done
 	 * @param script
+	 * @return 
 	 */
 	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script) {
 		return execute(root, env, done, script, null);
@@ -1689,7 +1791,7 @@ public final class MethodScriptCompiler {
 			script = new Script(null, null);
 		}
 		if (vars != null) {
-			Map<String, Variable> varMap = new HashMap<String, Variable>();
+			Map<String, Variable> varMap = new HashMap<>();
 			for (Variable v : vars) {
 				varMap.put(v.getName(), v);
 			}

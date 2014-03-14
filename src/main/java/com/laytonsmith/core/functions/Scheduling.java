@@ -266,7 +266,7 @@ public class Scheduling {
 							p.stop();
 						}
 					} catch (ConfigRuntimeException e) {
-						ConfigRuntimeException.React(e, environment);
+						ConfigRuntimeException.HandleUncaughtException(e, environment);
 					} catch (CancelCommandException e) {
 						//Ok
 					} catch (ProgramFlowManipulationException e) {
@@ -339,7 +339,7 @@ public class Scheduling {
 							p.stop();
 						}
 					} catch (ConfigRuntimeException e) {
-						ConfigRuntimeException.React(e, environment);
+						ConfigRuntimeException.HandleUncaughtException(e, environment);
 					} catch (CancelCommandException e) {
 						//Ok
 					} catch (ProgramFlowManipulationException e) {
@@ -612,7 +612,7 @@ public class Scheduling {
 														try {
 															f.job.execute();
 														} catch(ConfigRuntimeException ex){
-															ConfigRuntimeException.React(ex, f.job.getEnv());
+															ConfigRuntimeException.HandleUncaughtException(ex, f.job.getEnv());
 														}
 													}
 												});

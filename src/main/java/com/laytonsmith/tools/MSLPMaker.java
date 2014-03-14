@@ -42,7 +42,7 @@ public class MSLPMaker {
                 MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents(), fi.file(), true));
             } catch(ConfigCompileException e){
                 error = true;
-                ConfigRuntimeException.React(e, "Compile error in script. Compilation will attempt to continue, however.", null);
+                ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
             }
         }
         List<Script> allScripts = new ArrayList<Script>();
@@ -57,12 +57,12 @@ public class MSLPMaker {
                         allScripts.add(s);
                     } catch (ConfigCompileException e) {
                         error = true;
-                        ConfigRuntimeException.React(e, "Compile error in script. Compilation will attempt to continue, however.", null);
+                        ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
                     }
                 }
             } catch(ConfigCompileException e){
                 error = true;
-                ConfigRuntimeException.React(e, "Could not compile file " + fi.file() + " compilation will halt.", null);
+                ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file() + " compilation will halt.", null);
             }
         }
         
