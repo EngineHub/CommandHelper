@@ -1,5 +1,6 @@
 package com.laytonsmith.core.extensions;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -27,6 +28,18 @@ public abstract class AbstractExtension implements Extension {
         }
         
         return "<unknown>";
+    }
+	
+	/**
+	 * Return the extension tracker used to manage this extension.
+	 * EXPERIMENTAL! Could have bad side-effects! The use of this function is
+	 * for really advanced users. There is no guarantee of the fitness of this
+	 * function for ANY use. You have been warned.
+	 * @return
+	 */
+	@Override
+	public final ExtensionTracker getExtensionTracker() {
+        return ExtensionManager.getTrackers().get(ClassDiscovery.GetClassContainer(getClass()));
     }
 
 	/**

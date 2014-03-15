@@ -1,7 +1,6 @@
 package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.core.environments.Environment;
 import java.io.File;
 
 /**
@@ -9,7 +8,15 @@ import java.io.File;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public interface Extension {
-
+	/**
+	 * Return the extension tracker used to manage this extension.
+	 * EXPERIMENTAL! Could have bad side-effects! The use of this function is
+	 * for really advanced users. There is no guarantee of the fitness of this
+	 * function for ANY use. You have been warned.
+	 * @return
+	 */
+	ExtensionTracker getExtensionTracker();
+	
 	/**
 	 * Create and return a valid data directory for this extension's use.
 	 * @return
