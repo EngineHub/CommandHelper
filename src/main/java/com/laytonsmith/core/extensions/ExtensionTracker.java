@@ -40,6 +40,7 @@ public class ExtensionTracker {
     /* package */ final Map<String, Set<api.Platforms>> supportedPlatforms;
 	/* package */ final Map<Driver, Set<Event>> events;
 	/* package */ final URL container;
+	/* package */ boolean isShutdown;
 
 	public ExtensionTracker(URL container, ClassDiscovery cd, DynamicClassLoader dcl) {
 		functions  = new EnumMap<>(api.Platforms.class);
@@ -60,9 +61,15 @@ public class ExtensionTracker {
 
 	public void shutdownTracker() {
 		// Remove as much as possible from memory.
+		if (isShutdown) {
+			return;
+		}
+		
 		cd.removeDiscoveryLocation(container);
 		cd.removePreCache(container);
 		dcl.removeJar(container);
+		
+		isShutdown = true;
 	}
 
 	/**
