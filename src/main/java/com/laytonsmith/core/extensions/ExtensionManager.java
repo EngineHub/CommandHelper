@@ -54,6 +54,52 @@ import java.util.logging.Logger;
 public class ExtensionManager {
 	private static final Map<URL, ExtensionTracker> extensions = new HashMap<>();
 	private static final List<File> locations = new ArrayList<>();
+	
+	/**
+	 * Allow an external source (such as a Bukkit plugin) register it's own 
+	 * functions and events.
+	 * EXPERIMENTAL! Could have bad side-effects! The use of this function is
+	 * for really advanced users. There is no guarantee of the fitness of this
+	 * function for ANY use. You have been warned.
+	 * @param url
+	 * @param tracker
+	 */
+	public static void RegisterTracker(URL url, ExtensionTracker tracker) {
+		if (extensions.containsKey(url) || extensions.containsValue(tracker)) {
+			return;
+		}
+		
+		extensions.put(url, tracker);
+	}
+	
+	/**
+	 * Allow external sources to unregister their own trackers.
+	 * EXPERIMENTAL! Could have bad side-effects! The use of this function is
+	 * for really advanced users. There is no guarantee of the fitness of this
+	 * function for ANY use. You have been warned.
+	 * @param url
+	 * @return 
+	 */
+	public static ExtensionTracker UnregisterTracker(URL url) {
+		if (!url.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
+			ExtensionTracker trk = extensions.remove(url);
+			trk.shutdownTracker();
+			
+			return trk;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * EXPERIMENTAL! could have bad side-effects!
+	 * Allow external sources to unregister their own trackers.
+	 * @param tracker
+	 * @return 
+	 */
+	public static ExtensionTracker UnregisterTracker(ExtensionTracker tracker) {
+		return UnregisterTracker(tracker.container);
+	}
 
 	/**
 	 * Process the given location for any jars. If the location is a jar, add it
