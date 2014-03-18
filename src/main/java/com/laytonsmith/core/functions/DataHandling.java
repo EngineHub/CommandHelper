@@ -865,6 +865,7 @@ public class DataHandling {
 	@api
 	@noboilerplate
 	@breakable
+	@seealso({foreach.class})
 	public static class foreachelse extends foreach {
 
 		@Override
@@ -904,7 +905,8 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "void {array, ivar, code, else} Works like a foreach, except if the array is empty, the else code runs instead. That is, if the code"
-					+ " would not run at all, the else condition would.";
+					+ " would not run at all, the else condition would. In general, brace syntax and use of foreach(){ } else { } syntax is preferred, instead"
+					+ " of using foreachelse directly.";
 		}
 
 		@Override

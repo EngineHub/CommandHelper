@@ -209,10 +209,8 @@ public class DocGen {
                     + "and make the plugin a fully "
                     + "[http://en.wikipedia.org/wiki/Turing_Complete Turing Complete] language. "
                     + "There are several functions defined, and they are grouped into \"classes\". \n");
-            out.append("<p>Each function has its own page for documentation, where you can put examples for how to use"
-                    + " particular functions. Because this is a wiki, it is encouraged that you edit the pages if you see errors, "
-                    + "or can think of a better example to show. Please copy over [[CommandHelper/API/Function Template|this template]]"
-                    + " and use it.\n");
+            out.append("<p>Each function has its own page for documentation, where you can view examples for how to use a"
+                    + " particular function.\n");
         } else if (type == MarkupType.TEXT) {
             out.append("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
                     + "and make the plugin a fully "

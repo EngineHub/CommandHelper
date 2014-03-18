@@ -1386,6 +1386,13 @@ public final class MethodScriptCompiler {
 			//Don't care about these
 			return;
 		}
+		if(tree.getData().val().startsWith("_")){
+			//It's a proc. We need to recurse, but not check this "function"
+			for(ParseTree child : tree.getChildren()){
+				checkBreaks0(child, currentLoops, lastUnbreakable);
+			}
+			return;
+		}
 		Function func = ((CFunction)tree.getData()).getFunction();
 		// We have special handling for procs and closures, and of course break and the loops. 
 		// If any of these are here, we kick into special handling mode. Otherwise, we recurse.
