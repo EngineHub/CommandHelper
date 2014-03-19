@@ -17,6 +17,7 @@ import com.laytonsmith.annotations.shutdown;
 import com.laytonsmith.annotations.startup;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.LifeCycle;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
@@ -732,14 +733,69 @@ public class ExtensionManager {
 		return retn;
 	}
 	
-	public static Event GetEvent(Driver type, String name) {
-		for (ExtensionTracker trk: extensions.values()) {
-			Set<Event> events = trk.getEvents(type);
+	private static Event GetEvent(ExtensionTracker trk, Driver type, String name) {
+		Set<Event> events;
 			
-			for (Event event: events) {
-				if (event.getName().equalsIgnoreCase(name)) {
-					return event;
-				}
+		if (type == null) {
+			events = trk.getEvents();
+		} else {
+			events = trk.getEvents(type);
+		}
+
+		for (Event event: events) {
+			if (event.getName().equalsIgnoreCase(name)) {
+				return event;
+			}
+		}
+
+		return null;
+	}
+	
+	public static Event GetEvent(Driver type, String name) {
+		// Have a preference to allow extensions globally overwrite core things.
+		// Later we'll do it on a per-function/event basis, but this will suffice
+		// for now. We will need to remove the core from the iteration if extensions
+		// can override, as the list order is indeterminate.
+		ExtensionTracker core = null;
+		// Tests break if this isn't checked!
+		if (LifeCycle.getInstance() != null) {
+			core = LifeCycle.getInstance().getExtensionTracker();
+		}
+		
+		Event possible;
+		boolean canOverride = Prefs.ExtensionsOverwriteCore();
+		
+		// Check core first, if extensions can't overwrite.
+		if (!canOverride && core != null) {
+			possible = GetEvent(core, type, name);
+			
+			if (possible != null) {
+				return possible;
+			}
+		}
+		
+		// Not found yet, lets remove the core and parse just extensions if overwriting
+		// is enabled.
+		Set<ExtensionTracker> extensionlist = new HashSet<>(extensions.values());
+		if (canOverride && core != null) {
+			extensionlist.remove(core);
+		}
+			
+		for (ExtensionTracker trk: extensionlist) {
+			possible = GetEvent(trk, type, name);
+			
+			if (possible != null) {
+				return possible;
+			}
+		}
+		
+		// STILL not found, lets parse core if extensions are allowed to overwrite
+		// core functionality.
+		if(canOverride && core != null) {
+			possible = GetEvent(core, type, name);
+			
+			if (possible != null) {
+				return possible;
 			}
 		}
 		
@@ -747,17 +803,7 @@ public class ExtensionManager {
 	}
 	
 	public static Event GetEvent(String name) {
-		for (ExtensionTracker trk: extensions.values()) {
-			Set<Event> events = trk.getEvents();
-			
-			for (Event event: events) {
-				if (event.getName().equalsIgnoreCase(name)) {
-					return event;
-				}
-			}
-		}
-		
-		return null;
+		return GetEvent(null, name);
 	}
 	
 	/**
@@ -779,14 +825,51 @@ public class ExtensionManager {
         }
 		
         if (c instanceof CFunction) {
-			for (ExtensionTracker trk: extensions.values()) {
-				if(trk.functions.get(platform).containsKey(c.val()) 
-						&& trk.supportedPlatforms.get(c.val()).contains(platform)){
-					return trk.functions.get(platform).get(c.val());  
+			// Have a preference to allow extensions globally overwrite core things.
+			// Later we'll do it on a per-function/event basis, but this will suffice
+			// for now. We will need to remove the core from the iteration if extensions
+			// can override, as the list order is indeterminate.
+			ExtensionTracker core = null;
+			// Tests break if this isn't checked!
+			if (LifeCycle.getInstance() != null) {
+				core = LifeCycle.getInstance().getExtensionTracker();
+			}
+			
+			boolean canOverwrite = Prefs.ExtensionsOverwriteCore();
+			String funcName = c.val();
+			
+			// Check core first, if extensions can't overwrite.
+			if (!canOverwrite && core != null) {
+				if(core.functions.get(platform).containsKey(funcName) 
+						&& core.supportedPlatforms.get(funcName).contains(platform)){
+					return core.functions.get(platform).get(funcName);  
 				}
 			}
 			
-			throw new ConfigCompileException("The function \"" + c.val() + 
+			// Not found yet, lets remove the core and parse just extensions if overwriting
+			// is enabled.
+			Set<ExtensionTracker> extensionlist = new HashSet<>(extensions.values());
+			if (canOverwrite && core != null) {
+				extensionlist.remove(core);
+			}
+			
+			// Check for the desired thing.
+			for (ExtensionTracker trk: extensionlist) {
+				if(trk.functions.get(platform).containsKey(funcName) 
+						&& trk.supportedPlatforms.get(funcName).contains(platform)){
+					return trk.functions.get(platform).get(funcName);  
+				}
+			}
+			
+			// STILL not found, lets parse core if extensions are allowed to overwrite
+			// core functionality.
+			if(canOverwrite && core != null 
+					&& core.functions.get(platform).containsKey(funcName) 
+					&& core.supportedPlatforms.get(funcName).contains(platform)){
+				return core.functions.get(platform).get(funcName);  
+			}
+			
+			throw new ConfigCompileException("The function \"" + funcName + 
 					"\" does not exist in the " + platform.platformName(),
 							c.getTarget());
         } else {

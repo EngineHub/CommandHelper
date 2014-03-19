@@ -64,7 +64,8 @@ public final class Prefs {
 		ALLOW_SHELL_COMMANDS("allow-shell-commands"),
 		ALLOW_DYNAMIC_SHELL("allow-dynamic-shell"),
 		SCREAM_ERRORS("scream-errors"),
-		INTERPRETER_TIMEOUT("interpreter-timeout");
+		INTERPRETER_TIMEOUT("interpreter-timeout"),
+		EXTENSIONS_OVERWRITE_CORE("extensions-overwrite-core");
         private String name;
         private PNames(String name){
             this.name = name;
@@ -122,6 +123,8 @@ public final class Prefs {
 		a.add(new Preference(PNames.INTERPRETER_TIMEOUT.config(), "15", Preferences.Type.INT, "Sets the time (in minutes) that interpreter mode is unlocked for when /interpreter-on is run from console. Set to 0 (or a negative number)"
 				+ " to disable this feature, and allow interpreter mode all the time. It is highly recommended that you leave this set to some number greater than 0, to enhance"
 				+ " server security, and require a \"two step\" authentication for interpreter mode."));
+		a.add(new Preference(PNames.EXTENSIONS_OVERWRITE_CORE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to allow extensions to re-implement core events and functions."));
+        
         prefs = new Preferences("CommandHelper", Static.getLogger(), a);
         prefs.init(f);
 
@@ -250,6 +253,10 @@ public final class Prefs {
     
     public static Boolean EnableInterpreter(){
         return (Boolean)pref(PNames.ENABLE_INTERPRETER);
+    }
+	
+	public static Boolean ExtensionsOverwriteCore(){
+        return (Boolean)pref(PNames.EXTENSIONS_OVERWRITE_CORE);
     }
     
     public static String BaseDir(){
