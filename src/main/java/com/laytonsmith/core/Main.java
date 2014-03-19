@@ -197,6 +197,7 @@ public class Main {
 			ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
 			ExtensionManager.Initialize(cd);
+			ExtensionManager.Startup();
 			
 			if (args.length == 0) {
 				args = new String[]{"--help"};
