@@ -68,4 +68,13 @@ public interface MCServer extends AbstractionObject{
 	
 
 	public void shutdown();
+	
+	/**
+	 * Dispatches a command like {@link #dispatchCommand(com.laytonsmith.abstraction.MCCommandSender, java.lang.String) }, but
+	 * attempts to capture the output of the command, and returns that.
+	 * @param commandSender The command sender
+	 * @param cmd The command
+	 * @return The command's captured output, if possible, otherwise an empty string, never null.
+	 */
+	public String dispatchAndCaptureCommand(MCCommandSender commandSender, String cmd);
 }

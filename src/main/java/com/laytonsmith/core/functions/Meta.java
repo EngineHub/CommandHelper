@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
@@ -24,6 +25,7 @@ import com.laytonsmith.persistence.DataSourceException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -781,34 +783,6 @@ public class Meta {
 		}
 	}
 
-	public static class CommandSenderIntercepter implements InvocationHandler {
-
-		MCCommandSender sender;
-		StringBuilder buffer;
-
-		public CommandSenderIntercepter(MCCommandSender sender) {
-			this.sender = sender;
-			buffer = new StringBuilder();
-		}
-
-		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			System.out.println("---------------> Invoking proxy");
-			if ("sendMessage".equals(method.getName())) {
-				System.out.println("---------------> Intercepting sendMessage()");
-				buffer.append(args[0].toString());
-				return Void.TYPE;
-			} else {
-				System.out.println("---------------> Bypassing intercepter, and calling real's " + method.getName());
-				return method.invoke(sender, args);
-			}
-		}
-
-		public String getBuffer() {
-			return buffer.toString();
-		}
-	}
-
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class capture_runas extends AbstractFunction {
 
@@ -829,32 +803,18 @@ public class Meta {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			System.out.println("---------------> Executing capture_runas(" + args[0].val() + ", " + args[1].val() + ")");
-			MCCommandSender oldCommandSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCCommandSender operator;
-			if ("~op".equals(args[0].val()) || "~console".equals(args[0].val())) {
-				System.out.println("---------------> Using ~op or ~console, so retrieving operator from environment");
-				operator = oldCommandSender;
-			} else {
-				System.out.println("---------------> Using player, so retrieving operator from args: " + args[0].val());
-				operator = Static.GetPlayer(args[0], t);
+			String player = args[0].val();
+			String cmd = args[1].val();
+			if(!cmd.startsWith("/")){
+				throw new Exceptions.FormatException("Command must begin with a /", t);
 			}
-			if (operator instanceof MCPlayer) {
-				Static.UninjectPlayer(((MCPlayer) operator));
-			}
-			CommandSenderIntercepter intercepter = new CommandSenderIntercepter(operator);
-			MCCommandSender newCommandSender = (MCCommandSender) Proxy.newProxyInstance(Meta.class.getClassLoader(), new Class[]{MCCommandSender.class, MCPlayer.class}, intercepter);
-			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(newCommandSender);
-			if (operator instanceof MCPlayer) {
-				Static.InjectPlayer(((MCPlayer) newCommandSender));
-			}
-			new runas().exec(t, environment, args);
-			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(oldCommandSender);
-			if (operator instanceof MCPlayer) {
-				Static.UninjectPlayer(((MCPlayer) newCommandSender));
-				Static.InjectPlayer(((MCPlayer) operator));
-			}
-			return new CString(intercepter.getBuffer(), t);
+			cmd = cmd.substring(1);
+			
+			MCCommandSender operator = Static.GetCommandSender(player, t);
+			
+			String ret = Static.getServer().dispatchAndCaptureCommand(operator, cmd);
+			
+			return new CString(ret, t);
 		}
 
 		@Override

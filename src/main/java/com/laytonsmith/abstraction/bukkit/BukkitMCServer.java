@@ -5,6 +5,11 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Target;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +21,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -79,6 +85,59 @@ public class BukkitMCServer implements MCServer {
 		}
         return s.dispatchCommand(cs, command);
     }
+
+	private class CommandSenderInterceptor implements InvocationHandler {
+		private final StringBuilder buffer;
+		private final CommandSender sender;
+		
+		public CommandSenderInterceptor(CommandSender sender){
+			this.buffer = new StringBuilder();
+			this.sender = sender;
+		}
+		
+		@Override
+		public Object invoke(Object o, Method method, Object[] args) throws Throwable {
+			if ("sendMessage".equals(method.getName())) {
+				buffer.append(args[0].toString());
+				return Void.TYPE;
+			} else {
+				return method.invoke(sender, args);
+			}
+		}
+		
+		public String getBuffer(){
+			return buffer.toString();
+		}
+	}
+	
+	@Override
+	public String dispatchAndCaptureCommand(MCCommandSender commandSender, String cmd) {
+		// Grab the CommandSender object from the abstraction layer
+		CommandSender sender = (CommandSender)commandSender.getHandle();
+		
+		// Create the interceptor
+		CommandSenderInterceptor interceptor = new CommandSenderInterceptor(sender);
+		
+		// Create a new proxy and abstraction layer wrapper around the proxy
+		CommandSender newCommandSender = (CommandSender)Proxy.newProxyInstance(BukkitMCServer.class.getClassLoader(), new Class[]{CommandSender.class}, interceptor);
+		BukkitMCCommandSender aCommandSender = new BukkitMCCommandSender(newCommandSender);
+		
+		MCCommandSender oldSender = Static.UninjectPlayer(commandSender);
+		// Inject our new wrapped object
+		Static.InjectPlayer(aCommandSender);
+		
+		// Dispatch the command now
+		s.dispatchCommand(newCommandSender, cmd);
+		
+		// Clean up
+		Static.UninjectPlayer(aCommandSender);
+		if(oldSender != null){
+			Static.InjectPlayer(oldSender);
+		}
+		
+		// Return the buffered text (if any)
+		return interceptor.getBuffer();
+	}
 
 	@Override
     public MCPluginManager getPluginManager() {
@@ -263,7 +322,8 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
     public void runasConsole(String cmd) {
-        s.dispatchCommand(s.getConsoleSender(), cmd);
+		CommandSender sender = (CommandSender)Static.GetCommandSender("~console", Target.UNKNOWN).getHandle();
+		s.dispatchCommand(sender, cmd);
     }
 	
 	@Override

@@ -7,7 +7,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -375,5 +377,30 @@ public class ReflectionUtils {
 				output.println("(" + f.getType() + ") " + f.getName() + ": " + value);
 			}
 		} while (!instanceOnly && (iClass = iClass.getSuperclass()) != null);
+	}
+	
+	/**
+	 * Gets a set of all classes that this class extends or implements. In other words,
+	 * {@link Class#isAssignableFrom(java.lang.Class)} will return true for
+	 * all returned classes.
+	 * @param c
+	 * @return 
+	 */
+	public static Set<Class> getAllExtensions(Class c){
+		Set<Class> cs = new HashSet<>();
+		Class cc = c.getSuperclass();
+		while(cc != null){
+			cs.add(cc);
+			for(Class ccc : cc.getInterfaces()){
+				cs.addAll(getAllExtensions(ccc));
+			}
+			cc = cc.getSuperclass();
+			
+		}
+		for(Class i : c.getInterfaces()){
+			cs.addAll(getAllExtensions(i));
+			cs.add(i);
+		}
+		return cs;
 	}
 }

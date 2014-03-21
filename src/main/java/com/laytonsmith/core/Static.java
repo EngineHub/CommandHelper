@@ -664,24 +664,59 @@ public final class Static {
         return b.getTypeId() + (b.getData() == 0 ? "" : ":" + Byte.toString(b.getData()));
     }
 
-    private static Map<String, MCPlayer> injectedPlayers = new HashMap<String, MCPlayer>();
+    private static Map<String, MCCommandSender> injectedPlayers = new HashMap<String, MCCommandSender>();
+	/**
+	 * Returns the player specified by name. Injected players also are returned in this list.
+	 * @param player
+	 * @param t
+	 * @return
+	 * @throws ConfigRuntimeException 
+	 */
     public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {  
-        MCPlayer m = null;
-		try{
-			m = Static.getServer().getPlayer(player);
-		} catch(Exception e){
-			//Apparently bukkit can occasionally throw exceptions here, so instead of rethrowing
-			//a NPE or whatever, we'll assume that the player just isn't online, and
-			//throw a CRE instead.
+        MCCommandSender m = GetCommandSender(player, t);
+		if(m == null){
+            throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
 		}
+		if(!(m instanceof MCPlayer)){
+            throw new ConfigRuntimeException("Expecting a player name, but \"" + player + "\" was found.", ExceptionType.PlayerOfflineException, t);
+		}
+		MCPlayer p = (MCPlayer)m;
+		if(!p.isOnline()){
+            throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
+		}
+		return p;
+    }
+	
+	/**
+	 * Returns the specified command sender. Players are suppored, as is the special ~console user. The special
+	 * ~console user will always return a user.
+	 * @param player
+	 * @param t
+	 * @return
+	 * @throws ConfigRuntimeException 
+	 */
+	public static MCCommandSender GetCommandSender(String player, Target t) throws ConfigRuntimeException {
+        MCCommandSender m = null;
         if(injectedPlayers.containsKey(player)){
             m = injectedPlayers.get(player);
-        }
-        if (m == null || (!m.isOnline() && !injectedPlayers.containsKey(player))) {
+        } else {
+			if("~console".equals(player)){
+				m = Static.getServer().getConsole();
+			} else {
+				try{
+					m = Static.getServer().getPlayer(player);
+				} catch(Exception e){
+					//Apparently bukkit can occasionally throw exceptions here, so instead of rethrowing
+					//a NPE or whatever, we'll assume that the player just isn't online, and
+					//throw a CRE instead.
+				}
+			}
+		}
+        if (m == null || (m instanceof MCPlayer && (!((MCPlayer)m).isOnline() && !injectedPlayers.containsKey(player)))) {
             throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
         }
         return m;
-    }
+	}
 
     public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
         return GetPlayer(player.val(), t);
@@ -1020,12 +1055,26 @@ public final class Static {
                 
     }
 
-    public static void InjectPlayer(MCPlayer player) {
-        injectedPlayers.put(player.getName(), player);
+    public static void InjectPlayer(MCCommandSender player) {
+		String name = player.getName();
+		if("CONSOLE".equals(name)){
+			name = "~console";
+		}
+        injectedPlayers.put(name, player);
     }
     
-    public static void UninjectPlayer(MCPlayer player){
-        injectedPlayers.remove(player.getName());
+	/**
+	 * Removes a player into the global player proxy system. Returns the player
+	 * removed (or null if none were injected).
+	 * @param player
+	 * @return 
+	 */
+    public static MCCommandSender UninjectPlayer(MCCommandSender player){
+		String name = player.getName();
+		if("CONSOLE".equals(name)){
+			name = "~console";
+		}
+        return injectedPlayers.remove(name);
     }
 
     public static void HostnameCache(final MCPlayer p) {
