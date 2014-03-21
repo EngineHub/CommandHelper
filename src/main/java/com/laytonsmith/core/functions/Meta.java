@@ -1,11 +1,9 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
@@ -25,7 +23,6 @@ import com.laytonsmith.persistence.DataSourceException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -788,7 +785,7 @@ public class Meta {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
 		@Override
