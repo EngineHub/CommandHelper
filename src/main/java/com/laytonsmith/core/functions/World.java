@@ -986,12 +986,12 @@ public class World {
 			}
 
 			CArray chunk =  new CArray(t,
-				new CInt(l.getBlockX(), t),
-				new CInt(l.getBlockZ(), t),
+				new CInt(l.getChunk().getX(), t),
+				new CInt(l.getChunk().getZ(), t),
 				new CString(l.getChunk().getWorld().getName(), t));
-			chunk.set("x", new CInt(l.getBlockX(), t), t);
-			chunk.set("y", new CInt(l.getBlockY(), t), t);
-			chunk.set("world", l.getWorld().getName(), t);
+			chunk.set("x", new CInt(l.getChunk().getX(), t), t);
+			chunk.set("z", new CInt(l.getChunk().getZ(), t), t);
+			chunk.set("world", l.getChunk().getWorld().getName(), t);
 			return chunk;
 		}
 
