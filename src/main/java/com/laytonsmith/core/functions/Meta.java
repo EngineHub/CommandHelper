@@ -788,7 +788,7 @@ public class Meta {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException, ExceptionType.PluginInternalException};
 		}
 
 		@Override
@@ -802,6 +802,7 @@ public class Meta {
 		}
 
 		@Override
+		@SuppressWarnings({"BroadCatchBlock", "TooBroadCatch"})
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			String cmd = args[1].val();
@@ -812,7 +813,14 @@ public class Meta {
 			
 			MCCommandSender operator = Static.GetCommandSender(player, t);
 			
-			String ret = Static.getServer().dispatchAndCaptureCommand(operator, cmd);
+			String ret;
+			try {
+				ret = Static.getServer().dispatchAndCaptureCommand(operator, cmd);
+			} catch(Exception ex){
+				// In the event something didn't work, we want to re-throw a PluginInternalException, instead of just allowing
+				// it to bubble up as is. This is such a fragile method anyways, and so it may happen in many cases.
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.PluginInternalException, t, ex);
+			}
 			
 			return new CString(ret, t);
 		}
@@ -832,13 +840,33 @@ public class Meta {
 			return "string {player, command} Works like runas, except any messages sent to the command sender during command execution are attempted to be"
 					+ " intercepted, and are then returned as a string, instead of being sent to the command sender. Note that this is VERY easy"
 					+ " for plugins to get around in such a way that this function will not work, this is NOT a bug in CommandHelper, nor is it necessarily"
-					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly.";
+					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly."
+					+ " A PluginInternalException is thrown if something goes wrong. Any number of things may go wrong that aren't necessarily"
+					+ " this function's fault, and in those cases, this exception is thrown.";
 		}
 
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage, with builtin command", "msg('Beginning capture');\n"
+						+ "msg('---------------');\n"
+						+ "@capture = capture_runas('~console', '/version');\n"
+						+ "msg('---------------');\n"
+						+ "msg('End of capture');\n"
+						+ "msg('Recieved: ' . @capture);\n", 
+						"Beginning capture\n"
+								+ "---------------\n"
+								+ "---------------\n"
+								+ "End of capture\n"
+								+ "This server is running version X\n")
+			};
+		}
+		
 	}
 	
 	@api(environments={CommandHelperEnvironment.class})
