@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.LinkedComparatorSet;
 import com.laytonsmith.PureUtilities.RunnableQueue;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
@@ -14,6 +15,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.DataHandling.array;
@@ -1908,6 +1910,119 @@ public class ArrayHandling {
 				new ExampleScript("Removal of different datatypes, by setting compareTypes to false", "array_unique(array(1, '1'), false)"),
 			};
 		}				
+		
+	}
+	
+	@api
+	public static class array_filter extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			ArrayAccess array;
+			CClosure closure;
+			if(!(args[0] instanceof ArrayAccess)){
+				throw new Exceptions.CastException("Expecting an array for argument 1", t);
+			}
+			if(!(args[1] instanceof CClosure)){
+				throw new Exceptions.CastException("Expecting a closure for argument 2", t);
+			}
+			array = (ArrayAccess) args[0];
+			closure = (CClosure) args[1];
+			CArray newArray;
+			if(array.isAssociative()){
+				newArray = CArray.GetAssociativeArray(t);
+				for(Construct key : array.keySet()){
+					Construct value = array.get(key, t);
+					Construct ret = null;
+					try {
+						closure.execute(key, value);
+					} catch(FunctionReturnException ex){
+						ret = ex.getReturn();
+					}
+					if(ret == null){
+						ret = CBoolean.FALSE;
+					}
+					boolean bret = Static.getBoolean(ret);
+					if(bret){
+						newArray.set(key, value, t);
+					}
+				}
+			} else {
+				newArray = new CArray(t);
+				for(int i = 0; i < array.size(); i++){
+					Construct key = new CInt(i, t);
+					Construct value = array.get(i, t);
+					Construct ret = null;
+					try {
+						closure.execute(key, value);
+					} catch(FunctionReturnException ex){
+						ret = ex.getReturn();
+					}
+					if(ret == null){
+						ret = CBoolean.FALSE;
+					}
+					boolean bret = Static.getBoolean(ret);
+					if(bret){
+						newArray.push(value);
+					}
+				}
+			}
+			return newArray;
+		}
+
+		@Override
+		public String getName() {
+			return "array_filter";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array, boolean closure(key, value)} Filters an array by callback. The items in the array are iterated over, each"
+					+ " one sent to the closure one at a time, as key, value. The closure should return true if the item should be included in the array,"
+					+ " or false if not. The filtered array is then returned by the function. If the array is associative, the keys will continue"
+					+ " to map to the same values, however a normal array, the values are simply pushed onto the new array, and won't correspond"
+					+ " to the same values per se.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Pulls out only the odd numbers", "@array = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);\n"
+						+ "@newArray = array_filter(@array, closure(@key, @value){\n"
+						+ "\treturn(@value % 2 == 1);\n"
+						+ "});\n"),
+				new ExampleScript("Pulls out only the odd numbers in an associative array", 
+						"@array = array('one': 1, 'two': 2, 'three': 3, 'four': 4);\n"
+						+ "@newArray = array_filter(@array, closure(@key, @value){\n"
+						+ "\treturn(@value % 2 == 1);\n"
+						+ "});\n")
+			};
+		}
 		
 	}
 }

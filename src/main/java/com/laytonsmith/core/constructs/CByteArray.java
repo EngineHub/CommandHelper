@@ -467,6 +467,12 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	public Set<Construct> keySet() {
 		throw new UnsupportedOperationException("Not supported.");
 	}
+
+	@Override
+	public Construct get(Construct index, Target t) throws ConfigRuntimeException {
+		int i = Static.getInt32(index, t);
+		return get(i, t);
+	}
 	
 	/**
 	 * This is a more efficient implementation of CArray for the backing byte arrays.
