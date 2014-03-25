@@ -72,7 +72,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void damage(double amount, MCEntity source) {
-		le.damage(amount, ((BukkitMCEntity) source).asEntity());
+		le.damage(amount, ((BukkitMCEntity) source).getHandle());
 	}
 
 	@Override
@@ -128,7 +128,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public boolean hasLineOfSight(MCEntity other) {
-		return le.hasLineOfSight(((BukkitMCEntity) other).asEntity());
+		return le.hasLineOfSight(((BukkitMCEntity) other).getHandle());
 	}
 
 	@Override
@@ -385,6 +385,6 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void setLeashHolder(MCEntity holder) {
-		le.setLeashHolder(holder == null ? null : ((BukkitMCEntity) holder).asEntity());
+		le.setLeashHolder(holder == null ? null : ((BukkitMCEntity) holder).getHandle());
 	}
 }

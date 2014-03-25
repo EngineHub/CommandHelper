@@ -60,11 +60,12 @@ import org.bukkit.material.MaterialData;
  *
  * @author layton
  */
-public class BukkitMCWorld implements MCWorld {
+public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
     World w;
 
     public BukkitMCWorld(World w) {
+		super(w);
         this.w = w;
     }
 
@@ -93,7 +94,7 @@ public class BukkitMCWorld implements MCWorld {
     }
 
 	@Override
-    public Object getHandle(){
+    public World getHandle(){
         return w;
     }
 
@@ -438,8 +439,8 @@ public class BukkitMCWorld implements MCWorld {
                 e.setPassenger(l.getWorld().spawn(l, Skeleton.class));
             }
 			if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all 
-				if (((BukkitMCEntity)e).asEntity() instanceof Sheep) {
-					Sheep s = (Sheep) ((BukkitMCEntity)e).asEntity();
+				if (((BukkitMCEntity)e).getHandle() instanceof Sheep) {
+					Sheep s = (Sheep) ((BukkitMCEntity)e).getHandle();
 					MCDyeColor color = MCDyeColor.WHITE;
 					for (String type : subTypes) {
 						try {
@@ -451,8 +452,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Ocelot){
-					Ocelot o = (Ocelot)((BukkitMCEntity)e).asEntity();
+				if(((BukkitMCEntity)e).getHandle() instanceof Ocelot){
+					Ocelot o = (Ocelot)((BukkitMCEntity)e).getHandle();
 					MCOcelotType otype = MCOcelotType.WILD_OCELOT;
 					for (String type : subTypes) {
 						try {
@@ -464,8 +465,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Creeper){
-					Creeper c = (Creeper)((BukkitMCEntity)e).asEntity();
+				if(((BukkitMCEntity)e).getHandle() instanceof Creeper){
+					Creeper c = (Creeper)((BukkitMCEntity)e).getHandle();
 					for (String type : subTypes) {
 						try {
 							MCCreeperType ctype = MCCreeperType.valueOf(type);
@@ -482,8 +483,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Wolf){
-					Wolf w = (Wolf)((BukkitMCEntity)e).asEntity();
+				if(((BukkitMCEntity)e).getHandle() instanceof Wolf){
+					Wolf w = (Wolf)((BukkitMCEntity)e).getHandle();
 					for (String type : subTypes) {
 						try {
 							MCWolfType wtype = MCWolfType.valueOf(type);
@@ -503,8 +504,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if (((BukkitMCEntity)e).asEntity() instanceof Villager) {
-					Villager v = (Villager) ((BukkitMCEntity)e).asEntity();
+				if (((BukkitMCEntity)e).getHandle() instanceof Villager) {
+					Villager v = (Villager) ((BukkitMCEntity)e).getHandle();
 					MCProfession job = MCProfession.FARMER;
 					for (String type : subTypes){
 						try {
@@ -516,8 +517,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if (((BukkitMCEntity)e).asEntity() instanceof Enderman) {
-					Enderman en = (Enderman) ((BukkitMCEntity)e).asEntity();
+				if (((BukkitMCEntity)e).getHandle() instanceof Enderman) {
+					Enderman en = (Enderman) ((BukkitMCEntity)e).getHandle();
 					for (String type : subTypes){
 						try {
 							MaterialData held = new MaterialData(Material.valueOf(type));
@@ -528,8 +529,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Slime){
-					Slime sl = (Slime)((BukkitMCEntity)e).asEntity();
+				if(((BukkitMCEntity)e).getHandle() instanceof Slime){
+					Slime sl = (Slime)((BukkitMCEntity)e).getHandle();
 					for (String type : subTypes) {
 						if(!"".equals(type)){
 							try{
@@ -541,8 +542,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Skeleton){
-					Skeleton sk = (Skeleton)((BukkitMCEntity)e).asEntity();
+				if(((BukkitMCEntity)e).getHandle() instanceof Skeleton){
+					Skeleton sk = (Skeleton)((BukkitMCEntity)e).getHandle();
 					MCSkeletonType stype = MCSkeletonType.NORMAL;
 					for (String type : subTypes) {
 						try {
@@ -554,8 +555,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Zombie){
-					Zombie z = (Zombie)((BukkitMCEntity)e).asEntity();
+				if(((BukkitMCEntity)e).getHandle() instanceof Zombie){
+					Zombie z = (Zombie)((BukkitMCEntity)e).getHandle();
 					for (String type : subTypes) {
 						try {
 							MCZombieType ztype = MCZombieType.valueOf(type);
@@ -582,8 +583,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity)e).asEntity() instanceof Pig){
-					Pig p = (Pig)((BukkitMCEntity)e).asEntity();
+				if(((BukkitMCEntity)e).getHandle() instanceof Pig){
+					Pig p = (Pig)((BukkitMCEntity)e).getHandle();
 					for (String type : subTypes) {
 						try {
 							MCPigType ptype = MCPigType.valueOf(type);
@@ -600,8 +601,8 @@ public class BukkitMCWorld implements MCWorld {
 						}
 					}
 				}
-				if(((BukkitMCEntity) e).asEntity() instanceof Horse) {
-					Horse h = (Horse) ((BukkitMCEntity) e).asEntity();
+				if(((BukkitMCEntity) e).getHandle() instanceof Horse) {
+					Horse h = (Horse) ((BukkitMCEntity) e).getHandle();
 					for (String type : subTypes) {
 						try {
 							MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);

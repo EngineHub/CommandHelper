@@ -25,7 +25,9 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCNote;
+import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
@@ -887,6 +889,11 @@ public final class Interpreter {
 
 		@Override
 		public MCMaterial GetMaterial(String name) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 	}

@@ -11,13 +11,19 @@ import org.bukkit.block.Sign;
  *
  * @author layton
  */
-public class BukkitMCSign implements MCSign {
+public class BukkitMCSign extends BukkitMCBlockState implements MCSign {
     
     Sign s;
 
     public BukkitMCSign(Sign sign) {
+		super(sign);
         this.s = sign;
     }
+
+	@Override
+	public Sign getHandle() {
+		return s;
+	}
 
 	@Override
     public void setLine(int i, String line1) {

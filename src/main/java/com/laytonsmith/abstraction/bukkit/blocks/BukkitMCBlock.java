@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import java.util.ArrayList;
@@ -29,9 +30,12 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author layton
  */
-public class BukkitMCBlock implements MCBlock{
+public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
+
     Block b;
+
     public BukkitMCBlock(Block b){
+		super(b);
         this.b = b;
     }
     

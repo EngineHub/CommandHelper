@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAgeable;
+import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -49,6 +50,7 @@ import com.laytonsmith.abstraction.entities.MCSkeleton;
 import com.laytonsmith.abstraction.entities.MCSlime;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCVillager;
+import com.laytonsmith.abstraction.entities.MCWitherSkull;
 import com.laytonsmith.abstraction.entities.MCWolf;
 import com.laytonsmith.abstraction.entities.MCZombie;
 import com.laytonsmith.abstraction.enums.MCArt;
@@ -64,7 +66,6 @@ import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -2278,6 +2279,11 @@ public class EntityManagement {
 			CArray specArray = new CArray(t);
 			
 			switch (entity.getType()) {
+				case ARROW:
+					MCArrow arrow = (MCArrow) entity;
+					specArray.set("critical", new CBoolean(arrow.isCritical(), t), t);
+					specArray.set("knockback", new CInt(arrow.getKnockbackStrength(), t), t);
+					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set("powered", new CBoolean(creeper.isPowered(), t), t);
@@ -2307,7 +2313,6 @@ public class EntityManagement {
 					break;
 				case FIREBALL:
 				case SMALL_FIREBALL:
-				case WITHER_SKULL:
 					MCFireball ball = (MCFireball) entity;
 					specArray.set("direction", ObjectGenerator.GetGenerator().velocity(ball.getDirection(), t), t);
 					break;
@@ -2402,6 +2407,11 @@ public class EntityManagement {
 					MCVillager villager = (MCVillager) entity;
 					specArray.set("profession", new CString(villager.getProfession().name(), t), t);
 					break;
+				case WITHER_SKULL:
+					MCWitherSkull skull = (MCWitherSkull) entity;
+					specArray.set("charged", new CBoolean(skull.isCharged(), t), t);
+					specArray.set("direction", ObjectGenerator.GetGenerator().velocity(skull.getDirection(), t), t);
+					break;
 				case WOLF:
 					MCWolf wolf = (MCWolf) entity;
 					specArray.set("angry", new CBoolean(wolf.isAngry(), t), t);
@@ -2445,10 +2455,25 @@ public class EntityManagement {
 			CArray specArray = Static.getArray(args[1], t);
 			
 			switch (entity.getType()) {
+				case ARROW:
+					MCArrow arrow = (MCArrow) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case "critical":
+								arrow.setCritical(Static.getBoolean(specArray.get(index)));
+								break;
+							case "knockback":
+								arrow.setKnockbackStrength(Static.getInt32(specArray.get(index), t));
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("powered")) {
+						if (index.equalsIgnoreCase("powered")) {
 							creeper.setPowered(Static.getBoolean(specArray.get(index)));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2458,7 +2483,7 @@ public class EntityManagement {
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
+						switch (index.toLowerCase()) {
 							case "itemstack":
 								item.setItemStack(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
 								break;
@@ -2473,7 +2498,7 @@ public class EntityManagement {
 				case ENDERMAN:
 					MCEnderman enderman = (MCEnderman) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("carried")) {
+						if (index.equalsIgnoreCase("carried")) {
 							enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index), t).getData());
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2483,7 +2508,7 @@ public class EntityManagement {
 				case EXPERIENCE_ORB:
 					MCExperienceOrb orb = (MCExperienceOrb) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("amount")) {
+						if (index.equalsIgnoreCase("amount")) {
 							orb.setExperience(Static.getInt32(specArray.get(index), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2493,7 +2518,7 @@ public class EntityManagement {
 				case FALLING_BLOCK:
 					MCFallingBlock block = (MCFallingBlock) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("dropitem")) {
+						if (index.equalsIgnoreCase("dropitem")) {
 							block.setDropItem(Static.getBoolean(specArray.get(index)));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2502,10 +2527,9 @@ public class EntityManagement {
 					break;
 				case FIREBALL:
 				case SMALL_FIREBALL:
-				case WITHER_SKULL:
 					MCFireball ball = (MCFireball) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("direction")) {
+						if (index.equalsIgnoreCase("direction")) {
 							ball.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2515,7 +2539,7 @@ public class EntityManagement {
 				case FISHING_HOOK:
 					MCFishHook hook = (MCFishHook) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("chance")) {
+						if (index.equalsIgnoreCase("chance")) {
 							try {
 								hook.setBiteChance(Static.getDouble(specArray.get(index), t));
 							} catch (IllegalArgumentException exception) {
@@ -2529,7 +2553,7 @@ public class EntityManagement {
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
+						switch (index.toLowerCase()) {
 							case "color":
 								try {
 									horse.setColor(MCHorseColor.valueOf(specArray.get(index).val().toUpperCase()));
@@ -2585,7 +2609,7 @@ public class EntityManagement {
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("playercreated")) {
+						if (index.equalsIgnoreCase("playercreated")) {
 							golem.setPlayerCreated(Static.getBoolean(specArray.get(index)));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2595,7 +2619,7 @@ public class EntityManagement {
 				case ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
+						switch (index.toLowerCase()) {
 							case "item":
 								frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
 								if (specArray.get(index) instanceof CNull) {
@@ -2620,7 +2644,7 @@ public class EntityManagement {
 				case SLIME:
 					MCSlime cube = (MCSlime) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("size")) {
+						if (index.equalsIgnoreCase("size")) {
 							cube.setSize(Static.getInt32(specArray.get(index), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2630,7 +2654,7 @@ public class EntityManagement {
 				case MINECART_COMMAND:
 					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
+						switch (index.toLowerCase()) {
 							case "customname":
 								if(specArray.get(index) instanceof CNull) {
 									commandminecart.setName(null);
@@ -2653,7 +2677,7 @@ public class EntityManagement {
 				case OCELOT:
 					MCOcelot ocelot = (MCOcelot) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
+						switch (index.toLowerCase()) {
 							case "type":
 								try {
 									ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index).val().toUpperCase()));
@@ -2672,7 +2696,7 @@ public class EntityManagement {
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("art")) {
+						if (index.equalsIgnoreCase("art")) {
 							try {
 								painting.setArt(MCArt.valueOf(specArray.get(index).val().toUpperCase()));
 							} catch (IllegalArgumentException exception) {
@@ -2686,7 +2710,7 @@ public class EntityManagement {
 				case PIG:
 					MCPig pig = (MCPig) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("saddled")) {
+						if (index.equalsIgnoreCase("saddled")) {
 							pig.setSaddled(Static.getBoolean(specArray.get(index)));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2696,7 +2720,7 @@ public class EntityManagement {
 				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
+						switch (index.toLowerCase()) {
 							case "baby":
 								pigZombie.setBaby(Static.getBoolean(specArray.get(index)));
 								break;
@@ -2717,7 +2741,7 @@ public class EntityManagement {
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("fuseticks")) {
+						if (index.equalsIgnoreCase("fuseticks")) {
 							tnt.setFuseTicks(Static.getInt32(specArray.get(index), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2727,7 +2751,7 @@ public class EntityManagement {
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
+						switch (index.toLowerCase()) {
 							case "color":
 								try {
 									sheep.setColor(MCDyeColor.valueOf(specArray.get(index).val().toUpperCase()));
@@ -2746,7 +2770,7 @@ public class EntityManagement {
 				case SKELETON:
 					MCSkeleton skeleton = (MCSkeleton) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("type")) {
+						if (index.equalsIgnoreCase("type")) {
 							try {
 								skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index).val().toUpperCase()));
 							} catch (IllegalArgumentException exception) {
@@ -2760,7 +2784,7 @@ public class EntityManagement {
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("item")) {
+						if (index.equalsIgnoreCase("item")) {
 							potion.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2770,7 +2794,7 @@ public class EntityManagement {
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("profession")) {
+						if (index.equalsIgnoreCase("profession")) {
 							try {
 								villager.setProfession(MCProfession.valueOf(specArray.get(index).val().toUpperCase()));
 							} catch (IllegalArgumentException exception) {
@@ -2781,10 +2805,25 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case WITHER_SKULL:
+					MCWitherSkull skull = (MCWitherSkull) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case "charged":
+								skull.setCharged(Static.getBoolean(specArray.get(index)));
+								break;
+							case "direction":
+								skull.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index), t));
+								break;
+							default:
+								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						}
+					}
+					break;
 				case WOLF:
 					MCWolf wolf = (MCWolf) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
+						switch (index.toLowerCase()) {
 							case "angry":
 								wolf.setAngry(Static.getBoolean(specArray.get(index)));
 								break;
@@ -2806,7 +2845,7 @@ public class EntityManagement {
 				case ZOMBIE:
 					MCZombie zombie = (MCZombie) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
+						switch (index.toLowerCase()) {
 							case "baby":
 								zombie.setBaby(Static.getBoolean(specArray.get(index)));
 								break;

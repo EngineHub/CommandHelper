@@ -44,7 +44,7 @@ public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlo
 	}
 
 	@Override
-	public Object getHandle() {
+	public FallingBlock getHandle() {
 		return f;
 	}
 	

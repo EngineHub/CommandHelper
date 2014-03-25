@@ -4,6 +4,11 @@ array {entityID} Returns an associative array containing all the data of the giv
 |-
 ! scope="col" width="10%" | Entity type
 ! scope="col" width="70%" | Data
+| ARROW
+| 
+* critical: If this arrow is critical.
+* knockback: The knockback strength.
+|-
 |-
 | CREEPER
 | 
@@ -16,7 +21,7 @@ array {entityID} Returns an associative array containing all the data of the giv
 |-
 | ENDERMAN
 | 
-* carried: Tthe block that the Enderman is carring.
+* carried: The block that the Enderman is carring.
 |-
 | EXPERIENCE_ORB
 | 
@@ -24,8 +29,8 @@ array {entityID} Returns an associative array containing all the data of the giv
 |-
 | FALLING_BLOCK
 | 
-* block: The falling block.
-* dropitem: If the falling block will break into an item if it cannot be placed. Not editable.
+* block: The falling block. Not editable.
+* dropitem: If the falling block will break into an item if it cannot be placed.
 |-
 | FIREBALL
 | 
@@ -116,6 +121,7 @@ array {entityID} Returns an associative array containing all the data of the giv
 |-
 | WITHER_SKULL
 | 
+* charged: Whether or not the wither skull is charged.
 * direction: The direction the wither skull is heading toward.
 |- 
 | WOLF

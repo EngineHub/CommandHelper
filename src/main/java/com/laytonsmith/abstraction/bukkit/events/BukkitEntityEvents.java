@@ -508,7 +508,7 @@ public class BukkitEntityEvents {
         }
 
         public static BukkitMCTargetEvent _instantiate(Entity entity, LivingEntity target, EntityTargetEvent.TargetReason reason) {
-            return new BukkitMCTargetEvent(new EntityTargetEvent(( (BukkitMCEntity) entity ).asEntity(),
+            return new BukkitMCTargetEvent(new EntityTargetEvent(( (BukkitMCEntity) entity ).getHandle(),
                     (LivingEntity) ( (BukkitMCLivingEntity) target ).getLivingEntity(), reason));
         }
 
@@ -527,7 +527,7 @@ public class BukkitEntityEvents {
         	if (target == null) {
         		pie.setTarget(null);
         	} else {
-        		pie.setTarget(((BukkitMCEntity)target).asEntity());
+        		pie.setTarget(((BukkitMCEntity)target).getHandle());
         	}
         }
 
