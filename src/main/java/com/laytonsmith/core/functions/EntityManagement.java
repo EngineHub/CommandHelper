@@ -2463,7 +2463,12 @@ public class EntityManagement {
 								arrow.setCritical(Static.getBoolean(specArray.get(index)));
 								break;
 							case "knockback":
-								arrow.setKnockbackStrength(Static.getInt32(specArray.get(index), t));
+								int k = Static.getInt32(specArray.get(index), t);
+								if (k < 0) {
+									throw new ConfigRuntimeException("Knockback can not be negative.", ExceptionType.RangeException, t);
+								} else {
+									arrow.setKnockbackStrength(k);
+								}
 								break;
 							default:
 								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);

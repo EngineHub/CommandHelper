@@ -1448,7 +1448,7 @@ public final class Static {
 		} else if (construct instanceof CInt) {
 			return ((CInt) construct).getInt();
 		} else if (construct instanceof CDouble) {
-			return ((CDouble) construct);
+			return ((CDouble) construct).getDouble();
 		} else if (construct instanceof CByteArray) {
 			return ((CByteArray) construct).asByteArrayCopy();
 		} else if (construct instanceof CResource) {

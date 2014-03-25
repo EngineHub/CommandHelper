@@ -49,7 +49,7 @@ public class BukkitMetadata {
 
 		@Override
 		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException, ExceptionType.InvalidPluginException, ExceptionType.InvalidWorldException, ExceptionType.PlayerOfflineException};
+			return new Exceptions.ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidPluginException, ExceptionType.InvalidWorldException, ExceptionType.PlayerOfflineException};
 		}
 
 		@Override
@@ -194,7 +194,7 @@ public class BukkitMetadata {
 				value = args[2];
 				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : Static.getServer().getPluginManager().getPlugin("CommandHelper");
 			}
-			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin, t));
+			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin));
 			return new CVoid(t);
 		}
 	}

@@ -943,10 +943,20 @@ public class ObjectGenerator {
 	 *
 	 * @param value
 	 * @param plugin
-	 * @param t
 	 * @return
 	 */
-	public MCMetadataValue metadataValue(Construct value, MCPlugin plugin, Target t) {
-		return StaticLayer.GetMetadataValue(Static.getJavaObject(value), plugin);
+	public MCMetadataValue metadataValue(Construct value, MCPlugin plugin) {
+		return metadataValue(Static.getJavaObject(value), plugin);
+	}
+
+	/**
+	 * Gets a MetadataValue, given an object and a plugin.
+	 *
+	 * @param value
+	 * @param plugin
+	 * @return
+	 */
+	public MCMetadataValue metadataValue(Object value, MCPlugin plugin) {
+		return StaticLayer.GetMetadataValue(value, plugin);
 	}
 }
