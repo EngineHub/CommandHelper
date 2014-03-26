@@ -76,7 +76,7 @@ public class BukkitMetadata {
 					+ " (a string that represent the plugin name), the function simply returns the value of the metadata registered"
 					+ " by the plugin with this key, or null if no metadata is found. ---"
 					+ " The Bukkit metadata allow to attach informations to entities, blocks and worlds, and allow plugins"
-					+ " to exchange this information between us without requiring one to be dependant on each other."
+					+ " to exchange these informations between them without requiring one to be dependant on each other."
 					+ " The metadata are persistent across server reloads, but not across server restarts. The metadata attached"
 					+ " to a player are also persistent between logins.";
 		}

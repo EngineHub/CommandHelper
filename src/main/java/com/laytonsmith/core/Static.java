@@ -52,11 +52,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -1405,27 +1407,20 @@ public final class Static {
 				r.push(new CDouble(d, t));
 			}
 			return r;
-		} else if (object instanceof Byte[]) {
-				Byte[] array = (Byte[]) object;
-				CByteArray r = new CByteArray(t, array.length);
-				for (int i = 0 ; i < array.length ; i++) {
-					r.putByte(array[i], i);
-				}
-				return r;
-		} else if ((object instanceof Object[]) || (object instanceof Collection)) {
-			if (object instanceof Collection) {
-				object = ((Collection) object).toArray();
-			}
+		} else if (object instanceof Object[]) {
 			CArray r = new CArray(t);
 			for (Object o : (Object[]) object) {
-				r.push(getMSObject(o, t));
+				r.push((o == object) ? r : getMSObject(o, t));
 			}
 			return r;
+		} else if (object instanceof Collection) {
+			return getMSObject(((Collection) object).toArray(), t);
 		} else if (object instanceof Map) {
 			Map map = ((Map) object);
 			CArray r = new CArray(t);
 			for (Object key : map.keySet()) {
-				r.set(key.toString(), getMSObject(map.get(key), t), t);
+				Object o = map.get(key);
+				r.set(key.toString(), (o == object) ? r : getMSObject(o, t), t);
 			}
 			return r;
 		} else {
@@ -1438,7 +1433,7 @@ public final class Static {
 	 * @param construct
 	 * @return 
 	 */
-	public static Object getJavaObject(final Construct construct) {
+	public static Object getJavaObject(Construct construct) {
 		if ((construct == null) || (construct instanceof CNull)) {
 			return null;
 		} else if (construct instanceof CVoid) {
@@ -1449,6 +1444,8 @@ public final class Static {
 			return ((CInt) construct).getInt();
 		} else if (construct instanceof CDouble) {
 			return ((CDouble) construct).getDouble();
+		} else if (construct instanceof CString) {
+			return construct.val();
 		} else if (construct instanceof CByteArray) {
 			return ((CByteArray) construct).asByteArrayCopy();
 		} else if (construct instanceof CResource) {
@@ -1462,53 +1459,61 @@ public final class Static {
 				}
 				return map;
 			} else {
-				int test = 0b0000;
-				for (Construct c : array.asList()) {
-					 if (c instanceof CBoolean) {
-						test = test | 0b0001;
-						if (test != 0b0001) {
-							break;
-						}
-					} else if (c instanceof CInt) {
-						test = test | 0b0010;
-						if (test != 0b0010) {
-							break;
-						}
-					} else if (c instanceof CDouble) {
-						test = test | 0b0100;
-						if (test != 0b0100) {
-							break;
-						}
+				Object[] a = new Object[(int) array.size()];
+				boolean similar = true;
+				boolean nullable = false;
+				Class<?> clazz = null;
+				for (int i = 0 ; i < array.size() ; i++) {
+					Construct c = array.get(i);
+					if (c == array) {
+						a[i] = a;//avoid infinite loops due to recursion
+						similar = false;
 					} else {
-						test = test | 0b1000;
-						break;
+						a[i] = getJavaObject(array.get(i));
+					}
+					if (similar) {//to test if it is possible to returns something more specific than Object[]
+						if (a[i] != null) {
+							Class<?> cl = a[i].getClass();
+							if (clazz == null) {
+								clazz = cl;
+							} else if (!clazz.isAssignableFrom(cl)) {
+								if (cl.isInstance(clazz)) {
+									clazz = cl;
+								} else {
+									similar = false;
+								}
+							}
+						} else {
+							nullable = true;
+						}
 					}
 				}
-				switch (test) {
-					case 0b0001:
-						boolean[] ba = new boolean[(int) array.size()];
-						for (int i = 0 ; i < array.size() ; i++) {
-							ba[i] = ((CBoolean) array.get(i)).getBoolean();
+				if (similar && (clazz != null)) {
+					if (clazz.equals(Boolean.class) && !nullable) {
+						boolean[] r = new boolean[a.length];
+						for (int i = 0 ; i < a.length ; i++) {
+							r[i] = (boolean) a[i];
 						}
-						return ba;
-					case 0b0010:
-						long[] la = new long[(int) array.size()];
-						for (int i = 0 ; i < array.size() ; i++) {
-							la[i] = ((CInt) array.get(i)).getInt();
+						return r;
+					} if (clazz.equals(Long.class) && !nullable) {
+						long[] r = new long[a.length];
+						for (int i = 0 ; i < a.length ; i++) {
+							r[i] = (long) a[i];
 						}
-						return la;
-					case 0b0100:
-						double[] da = new double[(int) array.size()];
-						for (int i = 0 ; i < array.size() ; i++) {
-							da[i] = ((CDouble) array.get(i)).getDouble();
+						return r;
+					} else if (clazz.equals(Double.class) && !nullable) {
+						double[] r = new double[a.length];
+						for (int i = 0 ; i < a.length ; i++) {
+							r[i] = (double) a[i];
 						}
-						return da;
-					default:
-						Object[] oa = new Object[(int) array.size()];
-						for (int i = 0 ; i < array.size() ; i++) {
-							oa[i] = getJavaObject(array.get(i));
-						}
-						return oa;
+						return r;
+					} else {
+						Object[] r = (Object[]) Array.newInstance(clazz, a.length);
+						System.arraycopy(a, 0, r, 0, a.length);
+						return r;
+					}
+				} else {
+					return a;
 				}
 			}
 		} else {
