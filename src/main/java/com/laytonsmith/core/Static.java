@@ -1363,6 +1363,13 @@ public final class Static {
 			return new CResource<>((XMLDocument) object, t);
 		} else if (object instanceof Construct) {
 			return (Construct) object;
+		} else if (object instanceof boolean[]) {
+			boolean[] array = (boolean[]) object;
+			CArray r = new CArray(t);
+			for (boolean b : array) {
+				r.push(new CBoolean(b, t));
+			}
+			return r;
 		} else if (object instanceof byte[]) {
 			return CByteArray.wrap((byte[]) object, t);
 		} else if (object instanceof char[]) {
@@ -1455,40 +1462,36 @@ public final class Static {
 			if (array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();
 				for (Construct key : array.keySet()) {
-					map.put(key.val(), getJavaObject(array.get(key.val())));
+					Construct c = array.get(key.val());
+					map.put(key.val(), (c == array) ? map : getJavaObject(c));
 				}
 				return map;
 			} else {
 				Object[] a = new Object[(int) array.size()];
-				boolean similar = true;
 				boolean nullable = false;
 				Class<?> clazz = null;
 				for (int i = 0 ; i < array.size() ; i++) {
 					Construct c = array.get(i);
 					if (c == array) {
-						a[i] = a;//avoid infinite loops due to recursion
-						similar = false;
+						a[i] = a;
 					} else {
 						a[i] = getJavaObject(array.get(i));
 					}
-					if (similar) {//to test if it is possible to returns something more specific than Object[]
-						if (a[i] != null) {
+					if (a[i] != null) {
+						if (clazz == null) {
+							clazz = a[i].getClass();
+						} else if (!clazz.equals(Object.class)) {
+							//to test if it is possible to return something more specific than Object[]
 							Class<?> cl = a[i].getClass();
-							if (clazz == null) {
-								clazz = cl;
-							} else if (!clazz.isAssignableFrom(cl)) {
-								if (cl.isInstance(clazz)) {
-									clazz = cl;
-								} else {
-									similar = false;
-								}
+							while (!clazz.isAssignableFrom(cl)) {
+								clazz = clazz.getSuperclass();
 							}
-						} else {
-							nullable = true;
 						}
+					} else {
+						nullable = true;
 					}
 				}
-				if (similar && (clazz != null)) {
+				if ((clazz != null) && (!clazz.equals(Object.class))) {
 					if (clazz.equals(Boolean.class) && !nullable) {
 						boolean[] r = new boolean[a.length];
 						for (int i = 0 ; i < a.length ; i++) {
