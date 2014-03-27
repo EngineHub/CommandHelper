@@ -571,7 +571,7 @@ public class Crypto {
 
 		@Override
 		public CHVersion since() {
-			return CHVersion.V0_0_0;
+			return CHVersion.V3_3_1;
 		}
 
 		@Override
@@ -633,7 +633,7 @@ public class Crypto {
 
 		@Override
 		public CHVersion since() {
-			return CHVersion.V0_0_0;
+			return CHVersion.V3_3_1;
 		}
 
 		@Override

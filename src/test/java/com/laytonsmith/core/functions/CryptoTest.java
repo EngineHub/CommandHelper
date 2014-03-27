@@ -49,12 +49,12 @@ public class CryptoTest {
 
 	@Test(timeout=10000)
 	public void testMd5() throws ConfigCompileException {
-		assertEquals("61c95854c1cd8179128b54c19ac01c28", SRun("md5('hello world')", null));
+		assertEquals("61c95854c1cd8179128b54c19ac01c28", SRun("hmac_md5('hello world')", null));
 	}
 
 	@Test(timeout=10000)
 	public void testSha1() throws ConfigCompileException {
-		assertEquals("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed", SRun("sha1('hello world')", null));
+		assertEquals("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed", SRun("hmac_sha1('hello world')", null));
 	}
 
 }
