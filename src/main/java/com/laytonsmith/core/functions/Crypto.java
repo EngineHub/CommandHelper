@@ -18,10 +18,13 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.EnumSet;
 import java.util.Set;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -539,6 +542,130 @@ public class Crypto {
 			};
 		}
 		
+	}
+
+	@api
+	public static class hmac_md5 extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "hmac_md5";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "string {key, val} Returns the md5 HMAC of the specified string using the provided key.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			try {
+				SecretKeySpec signingKey = new SecretKeySpec(args[0].val().getBytes(), "HmacMD5");
+				Mac mac = Mac.getInstance("HmacMD5");
+				mac.init(signingKey);
+				byte[] hmac = mac.doFinal(args[1].val().getBytes());
+				String hash = StringUtils.toHex(hmac).toLowerCase();
+				return new CString(hash, t);
+			} catch (NoSuchAlgorithmException ex) {
+				throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+			}  catch (InvalidKeyException ex) {
+				throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+			}
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "hmac_md5('secret_key', 'string')"),
+			};
+		}
+	}
+
+	@api
+	public static class hmac_sha1 extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "hmac_sha1";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "string {key, val} Returns the sha1 HMAC of the specified string using the provided key.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			try {
+				SecretKeySpec signingKey = new SecretKeySpec(args[0].val().getBytes(), "HmacSHA1");
+				Mac mac = Mac.getInstance("HmacSHA1");
+				mac.init(signingKey);
+				byte[] hmac = mac.doFinal(args[1].val().getBytes());
+				String hash = StringUtils.toHex(hmac).toLowerCase();
+				return new CString(hash, t);
+			} catch (NoSuchAlgorithmException ex) {
+				throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+			}  catch (InvalidKeyException ex) {
+				throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+			}
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "hmac_sha1('secret_key', 'string')"),
+			};
+		}
 	}
 
 }
