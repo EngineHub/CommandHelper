@@ -282,12 +282,12 @@ public class ClassDiscovery {
 			}
 			if (url.startsWith("file:") && !url.endsWith(".jar")) {
 				final AtomicInteger id = new AtomicInteger(0);
-				ExecutorService service = Executors.newFixedThreadPool(10, new ThreadFactory() {
-					@Override
-					public Thread newThread(Runnable r) {
-						return new Thread(r, "ClassDiscovery-Async-" + id.incrementAndGet());
-					}
-				});
+//				ExecutorService service = Executors.newFixedThreadPool(10, new ThreadFactory() {
+//					@Override
+//					public Thread newThread(Runnable r) {
+//						return new Thread(r, "ClassDiscovery-Async-" + id.incrementAndGet());
+//					}
+//				});
 				
 				//Remove file: from the front
 				String root = url.substring(5);
@@ -319,13 +319,13 @@ public class ClassDiscovery {
 						}
 					}
 				}
-				service.shutdown();
-				try {
-					//Doesn't look like 0 is an option, so we'll just wait a day.
-					service.awaitTermination(1, TimeUnit.DAYS);
-				} catch (InterruptedException ex) {
-					Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-				}
+//				service.shutdown();
+//				try {
+//					//Doesn't look like 0 is an option, so we'll just wait a day.
+//					service.awaitTermination(1, TimeUnit.DAYS);
+//				} catch (InterruptedException ex) {
+//					Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+//				}
 			} else if (url.startsWith("file:") && url.endsWith(".jar")) {
 				//We are running from a jar
 				url = url.replaceFirst("file:", "");
@@ -707,7 +707,7 @@ public class ClassDiscovery {
 	 * @return A set of class mirrors that match the criteria
 	 */
 	public <T> Set<ClassMirror<T>> getClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass){
-		Set<ClassMirror<T>> mirrors = new HashSet<ClassMirror<T>>();
+		Set<ClassMirror<T>> mirrors = new HashSet<>();
 		for(ClassMirror<?> c : getClassesWithAnnotation(annotation)){
 			if(doesClassExtend(c, superClass)){
 				mirrors.add((ClassMirror<T>)c);

@@ -12,6 +12,8 @@ syn match linecomment /\/\/.*/
 syn region blockcomment start=/\/\*/ end=/\*\//
 syn region stringlit start=/'/ skip=/\\'/ end=/'/
 syn region smartstring start=/"/ skip=/\\"/ end=/"/
+	\ contains=ivariable,smartIVariable
+syn region smartIVariable start="@{" end="}" contained
 syn match ivariable /@[a-zA-Z0-9_]\+/
 syn match variable /\$[a-zA-Z0-9_]\+/
 syn match finalvar /\$[^a-zA-Z0-9_]/
@@ -27,8 +29,9 @@ highlight unsymboledkeywords ctermfg=LightBlue guifg=LightBlue
 highlight linecomment ctermfg=LightGray guifg=LightGray
 highlight blockcomment ctermfg=LightGray guifg=LightGray
 highlight stringlit ctermfg=3 guifg=orange
-highlight smartstring ctermfg=white ctermbg=red guifg=white guibg=red
+highlight smartstring ctermfg=3 guifg=orange
 highlight ivariable ctermfg=green guifg=green
+highlight smartIVariable ctermfg=green guifg=green
 highlight variable ctermfg=LightCyan guifg=LightCyan
 highlight finalvar ctermfg=6 guifg=6
 highlight label ctermfg=yellow guifg=yellow
