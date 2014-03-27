@@ -49,7 +49,7 @@ public class CryptoTest {
 
 	@Test(timeout=10000)
 	public void testMd5() throws ConfigCompileException {
-		assertEquals("5eb63bbbe01eeed093cb22bb8f5acdc3", SRun("md5('hello world')", null));
+		assertEquals("61c95854c1cd8179128b54c19ac01c28", SRun("md5('hello world')", null));
 	}
 
 	@Test(timeout=10000)
