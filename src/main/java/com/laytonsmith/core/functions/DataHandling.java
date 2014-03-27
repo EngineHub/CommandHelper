@@ -3,7 +3,9 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.*;
@@ -2801,13 +2803,13 @@ public class DataHandling {
 			for (int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
 				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
-				List<ParseTree> children = new ArrayList<ParseTree>();
+				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, env.getEnv(GlobalEnv.class).GetLabel());
 				Construct ret = MethodScriptCompiler.execute(newNode, env, null, fakeScript);
 				if (!(ret instanceof IVariable)) {
-					throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, t);
+					throw new ConfigRuntimeException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
 				}
 				names[i] = ((IVariable) ret).getName();
 				try {
@@ -2834,6 +2836,33 @@ public class DataHandling {
 		public boolean allowBraces() {
 			return true;
 		}
+	}
+	
+	@api
+	@hide("Until the Federation system is finished, this is hidden")
+	@unbreakable
+	@nolinking
+	public static class rclosure extends closure {
+
+		@Override
+		public String getName() {
+			return "rclosure";
+		}
+
+		@Override
+		public String docs() {
+			return "closure {[varNames...], code} Returns a non-linking closure on the provided code. The same rules apply"
+					+ " for closures, except the top level internal code does not check for proper linking at compile time,"
+					+ " and instead links at runtime. Lexer errors and some other compile time checks ARE done however, but"
+					+ " functions are not optimized or linked. This is used for remote code execution, since the remote platform"
+					+ " may have some functionality unavailable on this current platform.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 
 	@api

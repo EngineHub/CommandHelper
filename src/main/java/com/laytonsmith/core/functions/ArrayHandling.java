@@ -2015,14 +2015,69 @@ public class ArrayHandling {
 				new ExampleScript("Pulls out only the odd numbers", "@array = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);\n"
 						+ "@newArray = array_filter(@array, closure(@key, @value){\n"
 						+ "\treturn(@value % 2 == 1);\n"
-						+ "});\n"),
+						+ "});\n"
+						+ "msg(@newArray);\n"),
 				new ExampleScript("Pulls out only the odd numbers in an associative array", 
 						"@array = array('one': 1, 'two': 2, 'three': 3, 'four': 4);\n"
 						+ "@newArray = array_filter(@array, closure(@key, @value){\n"
 						+ "\treturn(@value % 2 == 1);\n"
-						+ "});\n")
+						+ "});\n"
+						+ "msg(@newArray);\n")
 			};
 		}
 		
 	}
+	
+//	@api
+//	public static class array_deep_clone extends AbstractFunction {
+//
+//		@Override
+//		public ExceptionType[] thrown() {
+//			return new ExceptionType[]{ExceptionType.CastException};
+//		}
+//
+//		@Override
+//		public boolean isRestricted() {
+//			return false;
+//		}
+//
+//		@Override
+//		public Boolean runAsync() {
+//			return null;
+//		}
+//
+//		@Override
+//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//			throw new UnsupportedOperationException("TODO: Not supported yet.");
+//		}
+//
+//		@Override
+//		public String getName() {
+//			return "array_deep_clone";
+//		}
+//
+//		@Override
+//		public Integer[] numArgs() {
+//			return new Integer[]{1};
+//		}
+//
+//		@Override
+//		public String docs() {
+//			return "array {array} Performs a deep clone on an array (as opposed to a shallow clone). This is useful"
+//					+ " for multidimensional arrays. See the examples for more info.";
+//		}
+//
+//		@Override
+//		public Version since() {
+//			return CHVersion.V3_3_1;
+//		}
+//
+//		@Override
+//		public ExampleScript[] examples() throws ConfigCompileException {
+//			return new ExampleScript[]{
+//				new ExampleScript("", "")
+//			};
+//		}
+//		
+//	}
 }

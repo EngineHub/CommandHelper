@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.annotations.breakable;
+import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -26,6 +27,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.database.Profiles;
@@ -1394,6 +1396,10 @@ public final class MethodScriptCompiler {
 			return;
 		}
 		Function func = ((CFunction)tree.getData()).getFunction();
+		if(func.getClass().getAnnotation(nolinking.class) != null){
+			// Don't link here
+			return;
+		}
 		// We have special handling for procs and closures, and of course break and the loops. 
 		// If any of these are here, we kick into special handling mode. Otherwise, we recurse.
 		if(func instanceof DataHandling._break){
@@ -1463,11 +1469,22 @@ public final class MethodScriptCompiler {
 	 * @param tree 
 	 */
 	private static void link(ParseTree tree) throws ConfigCompileException{
+		try {
+			FunctionBase treeFunction = FunctionList.getFunction(tree.getData());
+			if(treeFunction.getClass().getAnnotation(nolinking.class) != null){
+				//Don't link children of a nolinking function.
+				return;
+			}
+		} catch(ConfigCompileException ex){
+			//This can happen if the treeFunction isn't a function, is a proc, etc,
+			//but we don't care, we just want to continue.
+		}
 		for(ParseTree child : tree.getChildren()){
 			if(child.getData() instanceof CFunction){
+				FunctionBase f = null;
 				if (!child.getData().val().matches("^_[^_].*")) {
-					FunctionList.getFunction(child.getData());
-					Integer[] numArgs = FunctionList.getFunction(child.getData()).numArgs();
+					f = FunctionList.getFunction(child.getData());
+					Integer[] numArgs = f.numArgs();
 					if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && 
 							!Arrays.asList(numArgs).contains(child.getChildren().size())) {
 						throw new ConfigCompileException("Incorrect number of arguments passed to " 
@@ -1525,6 +1542,12 @@ public final class MethodScriptCompiler {
 			func = (Function) FunctionList.getFunction(cFunction);
 		} catch (ConfigCompileException e) {
 			func = null;
+		}
+		if(func != null){
+			if(func.getClass().getAnnotation(nolinking.class) != null){
+				//It's an unlinking function, so we need to stop at this point
+				return;
+			}
 		}
 		if(cFunction instanceof CIdentifier){
 			//Add the child to the identifier

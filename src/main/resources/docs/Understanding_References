@@ -17,13 +17,13 @@ other variables.
 
 This code demonstrates assignment by value of primitives.
 %%CODE|
-	assign(@a, 1)
-	assign(@b, @a) # Note we are assigning @b to @a
-	msg(@a) # Msg's 1
-	msg(@b) # Also msg's 1
-	assign(@a, 5) # Now we are assigning something different to @a
-	msg(@a) # Msg's 5
-	msg(@b) # Msg's 1 still
+	@a = 1;
+	@b = @a; # Note we are assigning @b to @a
+	msg(@a); # Msg's 1
+	msg(@b); # Also msg's 1
+	@a = 5; # Now we are assigning something different to @a
+	msg(@a); # Msg's 5
+	msg(@b); # Msg's 1 still
 %%
 
 As you can see, even though @b is assigned to @a, since it is actually assigned by
@@ -31,13 +31,13 @@ value, changing the value of @a does not affect @b. This mechanism works in all 
 as well.
 
 %%CODE|
-	assign(@a, array(1, 2, 3))
-	assign(@b, @a)
-	msg(array_implode(@a, ', ')) # Msg's 1, 2, 3
-	msg(array_implode(@b, ', ')) # Msg's 1, 2, 3
-	assign(@a, array(4, 5, 6))
-	msg(array_implode(@a, ', ')) # Msg's 4, 5, 6
-	msg(array_implode(@b, ', ')) # Still msg's 1, 2, 3
+	@a = array(1, 2, 3);
+	@b = @a;
+	msg(array_implode(@a, ', ')); # Msg's 1, 2, 3
+	msg(array_implode(@b, ', ')); # Msg's 1, 2, 3
+	@a = array(4, 5, 6);
+	msg(array_implode(@a, ', ')); # Msg's 4, 5, 6
+	msg(array_implode(@b, ', ')); # Still msg's 1, 2, 3
 %%
 
 When we do the second assignment to @a, we aren't changing the ''value'' of what's
@@ -46,31 +46,31 @@ being pointed to, we are simply changing what we are pointing to.
 Now, let's look at changing the underlying value of an array.
 
 %%CODE|
-	assign(@a, array(1, 2, 3))
-	assign(@b, @a)
-	msg(array_implode(@a, ', ')) # Msg's 1, 2, 3
-	msg(array_implode(@b, ', ')) # Msg's 1, 2, 3
-	array_set(@a, 0, 4)
-	array_set(@a, 1, 5)
-	array_set(@a, 2, 6)
-	msg(array_implode(@a, ', ')) # Msg's 4, 5, 6
-	msg(array_implode(@b, ', ')) # Now msg's 4, 5, 6
+	@a = array(1, 2, 3);
+	@b = @a;
+	msg(array_implode(@a, ', ')); # Msg's 1, 2, 3
+	msg(array_implode(@b, ', ')); # Msg's 1, 2, 3
+	array_set(@a, 0, 4);
+	array_set(@a, 1, 5);
+	array_set(@a, 2, 6);
+	msg(array_implode(@a, ', ')); # Msg's 4, 5, 6
+	msg(array_implode(@b, ', ')); # Now msg's 4, 5, 6
 %%
 
 As you can see, we are now changing the underlying value, instead of completely changing what
-value as a whole @a references. What might be confusing is that assign() provides a convenience method
+value as a whole @a references. What might be confusing is that assignments provide a convenience method
 for setting values in arrays, so this code performs the same way:
 
 %%CODE|
-	assign(@a, array(1, 2, 3))
-	assign(@b, @a)
-	msg(array_implode(@a, ', ')) # Msg's 1, 2, 3
-	msg(array_implode(@b, ', ')) # Msg's 1, 2, 3
-	assign(@a[0], 4)
-	assign(@a[1], 5)
-	assign(@a[2], 6)
-	msg(array_implode(@a, ', ')) # Msg's 4, 5, 6
-	msg(array_implode(@b, ', ')) # Now msg's 4, 5, 6
+	@a = array(1, 2, 3);
+	@b = @a;
+	msg(array_implode(@a, ', ')); # Msg's 1, 2, 3
+	msg(array_implode(@b, ', ')); # Msg's 1, 2, 3
+	@a[0] = 4;
+	@a[1] = 5;
+	@a[2] = 6;
+	msg(array_implode(@a, ', ')); # Msg's 4, 5, 6
+	msg(array_implode(@b, ', ')); # Now msg's 4, 5, 6
 %%
 
 Keep in mind that it's not ''really'' an assign, however, it's simply an array_set() wrapped
@@ -81,24 +81,24 @@ how the same concept applies to a proc as well.
 
 %%CODE|
 
-proc(_myProc, @a, @b,
-	assign(@a, array('a', 'b', 'c'))    # This call might actually get optimized out 
+proc(_myProc, @a, @b){
+	@a = array('a', 'b', 'c');    # This call might actually get optimized out 
 										# entirely since it's not used, but 
 										# anyway, it has no effect
 
-	assign(@b[0], 4)
-	assign(@b[1], 5)
-	assign(@b[2], 6)
-)
+	@b[0] = 4;
+	@b[1] = 5;
+	@b[2] = 6;
+}
 
-assign(@myA, array(1, 2, 3))
-assign(@myB, @myA)
+@myA = array(1, 2, 3);
+@myB = @myA;
 
-msg(array_implode(@myA, ', ')) # msg's 1, 2, 3
-msg(array_implode(@myB, ', ')) # msg's 1, 2, 3
-_myProc(@myA, @myB)
-msg(array_implode(@myA, ', ')) # msg's 4, 5, 6
-msg(array_implode(@myB, ', ')) # msg's 4, 5, 6
+msg(array_implode(@myA, ', ')); # msg's 1, 2, 3
+msg(array_implode(@myB, ', ')); # msg's 1, 2, 3
+_myProc(@myA, @myB);
+msg(array_implode(@myA, ', ')); # msg's 4, 5, 6
+msg(array_implode(@myB, ', ')); # msg's 4, 5, 6
 
 %%
 
@@ -112,46 +112,46 @@ If we seemingly "''inline''" (we actually aren't inlining it, see below)
 the procedure, we get different results though:
 
 %%CODE|
-assign(@myA, array(1, 2, 3))
-assign(@myB, @myA)
+@myA = array(1, 2, 3);
+@myB = @myA;
 
-msg(array_implode(@myA, ', ')) # msg's 1, 2, 3
-msg(array_implode(@myB, ', ')) # msg's 1, 2, 3
+msg(array_implode(@myA, ', ')); # msg's 1, 2, 3
+msg(array_implode(@myB, ', ')); # msg's 1, 2, 3
 # _myProc:
-assign(@myA, array('a', 'b', 'c'))
-assign(@myB[0], 4)
-assign(@myB[1], 5)
-assign(@myB[2], 6)
+@myA = array('a', 'b', 'c');
+@myB[0] = 4;
+@myB[1] = 5;
+@myB[2] = 6;
 
-msg(array_implode(@myA, ', ')) # msg's a, b, c <- Note the difference here
-msg(array_implode(@myB, ', ')) # msg's 4, 5, 6
+msg(array_implode(@myA, ', ')); # msg's a, b, c <- Note the difference here
+msg(array_implode(@myB, ', ')); # msg's 4, 5, 6
 
 %%
 
 This works differently, because we have forgotten that a procedure call introduces
-an extra "assignment" before it runs. To truly inline a procedure, we must do an
+an extra "assignment" before it runs. To truly "inline" a procedure, we must do an
 assignment beforehand, so something like this:
 
 %%CODE|
-assign(@myA, array(1, 2, 3))
-assign(@myB, @myA)
+@myA = array(1, 2, 3);
+@myB = @myA;
 
-msg(array_implode(@myA, ', ')) # msg's 1, 2, 3
-msg(array_implode(@myB, ', ')) # msg's 1, 2, 3
+msg(array_implode(@myA, ', ')); # msg's 1, 2, 3
+msg(array_implode(@myB, ', ')); # msg's 1, 2, 3
 
 # This bit duplicates the implied assignments done by the procedure
-assign(@a, @myA)
-assign(@b, @myB)
+@a = @myA;
+@b = @myB;
 
 #_myProc:
-assign(@a, array('a', 'b', 'c'))
-assign(@b[0], 4)
-assign(@b[1], 5)
-assign(@b[2], 6)
+@a = array('a', 'b', 'c');
+@b[0] = 4;
+@b[1] = 5;
+@b[2] = 6;
 
 
-msg(array_implode(@myA, ', ')) # msg's 4, 5, 6 <- Now it's back to what it was with an actual procedure
-msg(array_implode(@myB, ', ')) # msg's 4, 5, 6
+msg(array_implode(@myA, ', ')); # msg's 4, 5, 6 <- Now it's back to what it was with an actual procedure
+msg(array_implode(@myB, ', ')); # msg's 4, 5, 6
 
 %%
 
@@ -165,11 +165,11 @@ what you need.
 
 %%CODE|
 # Copy by reference
-@array1 = array(1, 2, 3)
-@array2 = @array1
-@array1[0] = 'a'
-msg(@array1) # msg's a, 2, 3
-msg(@array2) # msg's a, 2, 3
+@array1 = array(1, 2, 3);
+@array2 = @array1;
+@array1[0] = 'a';
+msg(@array1); # msg's a, 2, 3
+msg(@array2); # msg's a, 2, 3
 %%
 
 The above example copied by reference, as was explained in the earlier section. Changes
@@ -179,11 +179,11 @@ Contrast this to a cloned array, which copies the value over:
 
 %%CODE|
 #Copy by value
-@array1 = array(1, 2, 3)
-@array2 = @array1[] #Note the clone operation here
-@array1[0] = 'a'
-msg(@array1) # msg's a, 2, 3
-msg(@array2) # msg's 1, 2, 3
+@array1 = array(1, 2, 3);
+@array2 = @array1[]; #Note the clone operation here
+@array1[0] = 'a';
+msg(@array1); # msg's a, 2, 3
+msg(@array2); # msg's 1, 2, 3
 %%
 
 In this example, the value wasn't changed in array2. However, this comes at a cost.
