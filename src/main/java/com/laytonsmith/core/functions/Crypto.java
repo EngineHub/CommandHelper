@@ -45,9 +45,7 @@ public class Crypto {
 			byte[] hmac = mac.doFinal(args[1].val().getBytes());
 			String hash = StringUtils.toHex(hmac).toLowerCase();
 			return new CString(hash, t);
-		} catch (NoSuchAlgorithmException ex) {
-			throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
-		}  catch (InvalidKeyException ex) {
+		} catch (NoSuchAlgorithmException | InvalidKeyException ex) {
 			throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
 		}
 	}
