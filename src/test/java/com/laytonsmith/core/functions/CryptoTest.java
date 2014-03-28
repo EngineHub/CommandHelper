@@ -57,4 +57,9 @@ public class CryptoTest {
 		assertEquals("15272f929f45d7f15e2bbfd7237741538847de8a", SRun("hmac_sha1('secret_key', 'hello world')", null));
 	}
 
+	@Test(timeout=10000)
+	public void testHmacSha256() throws ConfigCompileException {
+		assertEquals("cf1a418afaafc798df48fd804a2abf6970283afd8c40b41f818ad9b6ca4f8ca8", SRun("hmac_sha256('secret_key', 'hello world')", null));
+	}
+
 }
