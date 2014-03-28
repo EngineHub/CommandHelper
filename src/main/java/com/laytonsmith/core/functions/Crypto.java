@@ -39,7 +39,7 @@ public class Crypto {
 
 	private static CString getHMAC(String algorithm, Target t, Construct[] args) {
 		try {
-			SecretKeySpec signingKey = new SecretKeySpec(args[0].val().getBytes(), "HmacMD5");
+			SecretKeySpec signingKey = new SecretKeySpec(args[0].val().getBytes(), algorithm);
 			Mac mac = Mac.getInstance(algorithm);
 			mac.init(signingKey);
 			byte[] hmac = mac.doFinal(args[1].val().getBytes());
