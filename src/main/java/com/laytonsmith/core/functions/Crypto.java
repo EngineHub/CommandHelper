@@ -558,7 +558,7 @@ public class Crypto {
 	}
 
 	@api
-	public static class hmac_md5 extends AbstractFunction {
+	public static class hmac_md5 extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -601,6 +601,14 @@ public class Crypto {
 		}
 
 		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "hmac_md5('secret_key', 'string')"),
@@ -609,7 +617,7 @@ public class Crypto {
 	}
 
 	@api
-	public static class hmac_sha1 extends AbstractFunction {
+	public static class hmac_sha1 extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -652,6 +660,14 @@ public class Crypto {
 		}
 
 		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "hmac_sha1('secret_key', 'string')"),
@@ -660,7 +676,7 @@ public class Crypto {
 	}
 
 	@api
-	public static class hmac_sha256 extends AbstractFunction {
+	public static class hmac_sha256 extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -700,6 +716,14 @@ public class Crypto {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return getHMAC("HmacSHA256", t, args);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 
 		@Override
