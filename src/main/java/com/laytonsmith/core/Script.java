@@ -422,8 +422,14 @@ public class Script {
 					String extensionData = "";
 					for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
 						for(Extension extension : tracker.getExtensions()){
-							extensionData += TermColors.CYAN + extension.getName() + TermColors.RED 
-									+ " (version " + TermColors.RESET + extension.getVersion() + TermColors.RED + ");\n";
+							try {
+								extensionData += TermColors.CYAN + extension.getName() + TermColors.RED 
+										+ " (version " + TermColors.RESET + extension.getVersion() + TermColors.RED + ");\n";
+							} catch(AbstractMethodError ex){
+								// This happens with an old style extensions. Just skip it.
+								extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED
+										+ " (unknown version);\n";
+							}
 						}
 					}
 					if(extensionData.equals("")){
