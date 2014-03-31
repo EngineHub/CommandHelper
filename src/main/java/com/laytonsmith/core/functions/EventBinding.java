@@ -14,6 +14,7 @@ import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
+import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -131,30 +132,34 @@ public class EventBinding {
 			if (prefilter instanceof CNull) {
 				prefilter = null;
 			}
+			Event event;
 			try {
 				BoundEvent be = new BoundEvent(name.val(), (CArray) options, (CArray) prefilter,
 						((IVariable) event_obj).getName(), newEnv, tree, t);
 				EventUtils.RegisterEvent(be);
 				id = new CString(be.getId(), t);
+				event = EventList.getEvent(be.getEventName());
 			} catch (EventException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.BindException, t);
 			}
 			
-			//Set up our bind counter
-			synchronized(bindCounter){
-				if(bindCounter.get() == 0){
-					env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
-					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+			//Set up our bind counter, but only if the event is supposed to be added to the counter
+			if(event.addCounter()){
+				synchronized(bindCounter){
+					if(bindCounter.get() == 0){
+						env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+						StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
-						@Override
-						public void run() {
-							synchronized(bindCounter){
-								bindCounter.set(0);
+							@Override
+							public void run() {
+								synchronized(bindCounter){
+									bindCounter.set(0);
+								}
 							}
-						}
-					});
+						});
+					}
+					bindCounter.incrementAndGet();
 				}
-				bindCounter.incrementAndGet();
 			}
 			return id;
 		}
@@ -294,11 +299,16 @@ public class EventBinding {
 				}
 				id = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getId();
 			}
+			BoundEvent be = EventUtils.GetEventById(id);
+			Event event = be.getEventDriver();
 			EventUtils.UnregisterEvent(id);
-			synchronized(bindCounter){
-				bindCounter.decrementAndGet();
-				if(bindCounter.get() == 0){
-					environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+			//Only remove the counter if it had been added in the first place.
+			if(event.addCounter()){
+				synchronized(bindCounter){
+					bindCounter.decrementAndGet();
+					if(bindCounter.get() == 0){
+						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+					}
 				}
 			}
 			return new CVoid(t);

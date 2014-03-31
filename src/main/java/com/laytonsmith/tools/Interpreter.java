@@ -55,6 +55,9 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
+import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.events.drivers.CmdlineEvents;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -125,7 +128,7 @@ public final class Interpreter {
 
 	public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File fromFile = new File(file).getCanonicalFile();
-		Interpreter interpreter = new Interpreter(args, fromFile.getPath(), true);
+		Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
 		try {
 			interpreter.execute(FileUtil.read(fromFile), args, fromFile);
 		} catch (ConfigCompileException ex) {
@@ -467,6 +470,12 @@ public final class Interpreter {
 		}
 	}
 
+	/**
+	 * This evaluates each line of text
+	 * @param line
+	 * @return
+	 * @throws IOException 
+	 */
 	private boolean textLine(String line) throws IOException {
 		switch (line) {
 			case "-":
@@ -505,11 +514,32 @@ public final class Interpreter {
 		return true;
 	}
 
+	/**
+	 * This executes a script
+	 * @param script
+	 * @param args
+	 * @throws ConfigCompileException
+	 * @throws IOException 
+	 */
 	public void execute(String script, List<String> args) throws ConfigCompileException, IOException {
 		execute(script, args, null);
 	}
 
+	/**
+	 * This executes an entire script. The cmdline_prompt_event is first triggered (if used) and
+	 * if the event is cancelled, nothing happens.
+	 * @param script
+	 * @param args
+	 * @param fromFile
+	 * @throws ConfigCompileException
+	 * @throws IOException 
+	 */
 	public void execute(String script, List<String> args, File fromFile) throws ConfigCompileException, IOException {
+		CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput input = new CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput(script);
+		EventUtils.TriggerListener(Driver.CMDLINE_PROMPT_INPUT, "cmdline_prompt_input", input);
+		if(input.isCancelled()){
+			return;
+		}
 		ctrlCcount = 0;
 		if("exit".equals(script)){
 			pl(YELLOW + "Use exit() if you wish to exit.");

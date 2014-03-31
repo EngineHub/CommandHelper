@@ -983,7 +983,7 @@ public class Cmdline {
 			return "void {command, [options]} Runs a shell command. <code>command</code> can either be a string or an array of string arguments,"
 					+ " which are run as an external process. Requires the allow-shell-commands option to be enabled in preferences, or run from command line, otherwise"
 					+ " an InsufficientPermissionException is thrown. ---- <code>options</code> is an associative array with zero or more"
-					+ " of the following options:"
+					+ " of the following options:\n\n"
 					+ "{| border=\"1\" class=\"wikitable\" cellspacing=\"1\" cellpadding=\"1\"\n"
 					+ "|-\n| workingDir || Sets the working directory for"
 					+ " the sub process. By default null, which represents the directory of this script."
@@ -1442,6 +1442,58 @@ public class Cmdline {
 			return CHVersion.V3_3_1;
 		}
 		
+	}
+	
+	@api
+	public static class get_terminal_width extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			requireCmdlineMode(environment, this, t);
+			try {
+				int i = new jline.console.ConsoleReader().getTerminal().getWidth();
+				return new CInt(i, t);
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "get_terminal_width";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "int {} Returns the current width of the terminal, measured in characters. This is"
+					+ " useful for determining proper layout for dynamic output. This only works in cmdline mode.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	
 	}
 	
 	/**

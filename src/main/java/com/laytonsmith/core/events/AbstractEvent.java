@@ -225,5 +225,15 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	public Class<? extends Documentation>[] seeAlso() {
 		return EMPTY_CLASS;
 	}
+
+	/**
+	 * Most events should return true for this, but passive events may override this
+	 * to return null.
+	 * @return 
+	 */
+	@Override
+	public boolean addCounter() {
+		return true;
+	}
     
 }

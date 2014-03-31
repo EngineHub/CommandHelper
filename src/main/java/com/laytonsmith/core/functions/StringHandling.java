@@ -399,15 +399,26 @@ public class StringHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			String[] sa = args[0].val().split(" ");
-			ArrayList<Construct> a = new ArrayList<Construct>();
-			for (String s : sa) {
-				if (!s.trim().isEmpty()) {
+			String string = args[0].val();
+			boolean useAdvanced = false;
+			if(args.length >= 2){
+				useAdvanced = Static.getBoolean(args[1]);
+			}
+			List<Construct> a = new ArrayList<>();
+			if(!useAdvanced){
+				String[] sa = string.split(" ");
+				for (String s : sa) {
+					if (!s.trim().isEmpty()) {
+						a.add(new CString(s.trim(), t));
+					}
+				}
+			} else {
+				for(String s : StringUtils.ArgParser(string)){
 					a.add(new CString(s.trim(), t));
 				}
 			}
@@ -420,9 +431,10 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "array {string} Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
+			return "array {string, [useAdvanced]} Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
 					+ " $ into a usable array of items with which to script against. Extra spaces are ignored, so you would never get an empty"
-					+ " string as an input.";
+					+ " string as an input. useAdvanced defaults to false, but if true, uses a basic argument parser that supports quotes for"
+					+ " allowing arguments with spaces.";
 		}
 
 		@Override

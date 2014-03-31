@@ -25,8 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author layton
+ * 
  */
 public final class EventUtils {
 
@@ -89,6 +88,23 @@ public final class EventUtils {
 			}
 		}
 	}
+	
+	/**
+	 * Returns the BoundEvent, by id.
+	 * @param id
+	 * @return 
+	 */
+	public static BoundEvent GetEventById(String id){
+		for(Driver type : event_handles.keySet()){
+			SortedSet<BoundEvent> set = event_handles.get(type);
+			for(BoundEvent b : set){
+				if(b.getId().equals(id)){
+					return b;
+				}
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Unregisters all event handlers. Runs in O(n)
@@ -127,7 +143,7 @@ public final class EventUtils {
 
 	public static void ManualTrigger(String eventName, CArray object, boolean serverWide) {
 		for (Driver type : event_handles.keySet()) {
-			SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
+			SortedSet<BoundEvent> toRun = new TreeSet<>();
 			SortedSet<BoundEvent> bounded = GetEvents(type);
 			Event driver = EventList.getEvent(type, eventName);
 			if (bounded != null) {
@@ -174,14 +190,14 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static SortedSet<BoundEvent> GetMatchingEvents(Driver type, String eventName, BindableEvent e, Event driver) {
-		SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
+		SortedSet<BoundEvent> toRun = new TreeSet<>();
         //This is the set of bounded events of this driver type. 
 		//We must now look through the bound events to see if they are
 		//the eventName, and if so, we will also run the prefilter.
 		SortedSet<BoundEvent> bounded = GetEvents(type);
 		if (bounded != null) {
 			//Wrap this in a new set, so we can safely iterate it with async threads
-			bounded = new TreeSet<BoundEvent>(bounded);
+			bounded = new TreeSet<>(bounded);
 			for (BoundEvent b : bounded) {
 				try {
 					boolean matches = false;
@@ -272,9 +288,9 @@ public final class EventUtils {
 		for (Method m : ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(event.class)) {
 			Class<?>[] params = m.getParameterTypes();
 			if (params.length != 1 || !BindableEvent.class.isAssignableFrom(params[0])) {
-				Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, "An event handler annotated with @"
-						+ event.class.getSimpleName() + " may only contain one parameter, which extends "
-						+ BindableEvent.class.getName());
+				Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, 
+						"An event handler annotated with @{0} may only contain one parameter, which extends {1}", 
+						new Object[]{event.class.getSimpleName(), BindableEvent.class.getName()});
 			} else {
 				try {
 					Object instance = null;
@@ -289,7 +305,7 @@ public final class EventUtils {
 						// TODO: We could preprocess, as we are for lifecycles, and emit errors.
 						try {
 							instance = m.getDeclaringClass().newInstance();
-						} catch (Exception e) {
+						} catch (InstantiationException | IllegalAccessException e) {
 							throw new RuntimeException("Could not instantiate the superclass " + m.getDeclaringClass().getName()
 									+ ". There is no no-arg constructor present. Ideally however, the method " + m.getName()
 									+ " would simply be static, which would decrease overhead in general. "

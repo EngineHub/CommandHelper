@@ -4,7 +4,6 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.environments.Environment;
@@ -17,7 +16,6 @@ import java.util.Map;
  * This interface should be implemented to allow the bind() function to bind to
  * a particular event type. To be recognized as an event type, it should also tag
  * itself with @api, and it will be included in the EventList.
- * @author layton
  */
 public interface Event extends Comparable<Event>, Documentation{
     /**
@@ -42,6 +40,12 @@ public interface Event extends Comparable<Event>, Documentation{
     /**
      * This function should return true if the event code should be run, based
      * on this prefilter and triggering event's parameters.
+	 * @param prefilter The prefilter map, provided by the script
+	 * @param e The bindable event itself
+	 * @return True, iff the event code should be run
+	 * @throws com.laytonsmith.core.exceptions.PrefilterNonMatchException Equivalent
+	 * to returning false, though throwing an exception is sometimes easier, given
+	 * that lower level code may be handling the prefilter match.
      */
     public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException;
     
@@ -58,8 +62,10 @@ public interface Event extends Comparable<Event>, Documentation{
      * back a Map, which will be converted into a CArray, and passed to the bound event,
      * as the event object. If an EventException is thrown, it is considered a fatal error,
      * and will throw an uncatchable CH exception.
-     * @param e
-     * @return 
+     * @param e The bindable event
+     * @return The map build from the event
+	 * @throws com.laytonsmith.core.exceptions.EventException If some exception occurs
+	 * during map building
      */
     public Map<String, Construct> evaluate(BindableEvent e) throws EventException;
     
@@ -75,6 +81,9 @@ public interface Event extends Comparable<Event>, Documentation{
      * event can also be cancelled. If the underlying event is not cancellable, this
      * should throw an EventException, which is caught in the triggering code, and
      * at this time ignored.
+	 * @param e The bindable event
+	 * @param state True, if the event should be cancelled, false if it should be uncancelled.
+	 * @throws com.laytonsmith.core.exceptions.EventException If the event isn't cancellable
      */
     public void cancel(BindableEvent e, boolean state) throws EventException;
     
@@ -85,6 +94,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * more strictly filter events based on other conditions, but all events must
      * have a single Type of event that drives the CH event. This is also the type of
      * the event that will be sent to the matches function.
+	 * @return The underlying driver for this event
      */
     public Driver driver();
     
@@ -112,6 +122,11 @@ public interface Event extends Comparable<Event>, Documentation{
      * preconfigured script, and the BoundEvent generating the action are passed to
      * the Event itself. AbstractEvent's default implementation is to simply run the
      * script, but an event can choose to override this functionality if needed.
+	 * @param s
+	 * @param b
+	 * @param env
+	 * @param activeEvent
+	 * @throws com.laytonsmith.core.exceptions.EventException
      */
     public void execute(ParseTree s, BoundEvent b, Environment env, ActiveEvent activeEvent) throws EventException;
     
@@ -135,6 +150,10 @@ public interface Event extends Comparable<Event>, Documentation{
      * Called when a script wishes to modify an event specific parameter, this function
      * takes a key, a construct, and the underlying event. It returns true if the underlying
      * event was successfully updated.
+	 * @param key
+	 * @param value
+	 * @param event
+	 * @return 
      */
     public boolean modifyEvent(String key, Construct value, BindableEvent event);
 
@@ -153,5 +172,13 @@ public interface Event extends Comparable<Event>, Documentation{
 	 * @return 
      */
     public boolean appearInDocumentation();
+	
+	/**
+	 * When bound, dictates if this event should be added to the bind counter. In most
+	 * cases this should be true, but it should be false if this is a "passive" event.
+	 * An event added to the counter won't allow the script to halt until it is unbound.
+	 * @return 
+	 */
+	public boolean addCounter();
     
 }

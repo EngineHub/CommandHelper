@@ -188,16 +188,27 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		return clone;
 	}
 
+	/**
+	 * Gets the current working directory. It is guaranteed that this will be
+	 * a folder, not a file, and that it will not be null.
+	 * @return 
+	 */
 	public File GetRootFolder() {
 		return root.getObject();
 	}
 	
 	/**
-	 * Sets the root working directory. It cannot be null.
+	 * Sets the root working directory. It cannot be null, or a file, it
+	 * must be a directory.
 	 * @param file 
+	 * @throws NullPointerException If file is null
+	 * @throws IllegalArgumentException If the file specified is not a directory.
 	 */
 	public void SetRootFolder(File file){
 		Static.AssertNonNull(file, "Root file cannot be null");
+		if(file.isFile()){
+			throw new IllegalArgumentException("File provided to SetRootFolder must be a folder, not a file. (" + file.toString() + " was found.)");
+		}
 		this.root.setObject(file);
 	}
 

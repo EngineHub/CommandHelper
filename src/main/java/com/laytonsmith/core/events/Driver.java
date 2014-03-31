@@ -98,6 +98,11 @@ public enum Driver {
 	VEHICLE_ENTER,
 	VEHICLE_LEAVE,
 	VEHICLE_MOVE,
+	
+	/**
+	 * Cmdline events
+	 */
+	CMDLINE_PROMPT_INPUT,
 
 	/**
 	 * Extension events, used by events fired from the extension system.

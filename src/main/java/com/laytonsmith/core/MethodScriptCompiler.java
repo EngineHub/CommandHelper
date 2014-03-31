@@ -1151,6 +1151,7 @@ public final class MethodScriptCompiler {
 				string.setData(new CString(t.value, t.target));
 				function.addChild(string);
 				tree.addChild(function);
+				constructCount.peek().incrementAndGet();
 				continue;
 			}
 
