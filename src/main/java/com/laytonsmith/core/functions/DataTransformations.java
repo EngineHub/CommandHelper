@@ -24,6 +24,7 @@ import javax.xml.xpath.XPathExpressionException;
 import org.xml.sax.SAXException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
  *
@@ -218,9 +219,15 @@ public class DataTransformations {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String data = args[0].val();
 			Yaml yaml = new Yaml();
-			Object ret = yaml.load(data);
+			Object ret = null;
+			Exception cause = null;
+			try {
+				ret = yaml.load(data);
+			} catch(ScannerException ex){
+				cause = ex;
+			}
 			if(!(ret instanceof Map)){
-				throw new Exceptions.FormatException("Improperly formatted YML", t);
+				throw new Exceptions.FormatException("Improperly formatted YML", t, cause);
 			}
 			Map<String, Object> map = (Map<String, Object>) ret;
 			return Construct.GetConstruct(map);

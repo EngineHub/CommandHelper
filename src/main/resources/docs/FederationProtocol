@@ -1,5 +1,5 @@
 The Federation Protocol is the way that the client and server speak with each
-other. It is a text based streaming protocol. There are several steps required
+other. It is an object based streaming protocol. There are several steps required
 to set up a connection, but once the connection is established, making requests
 to the server is fairly straightforward. The version of the protocol that this
 document describes is version 1.0.0.
@@ -16,7 +16,7 @@ When allowing a connection, servers must provide the master server private key,
 if they are intending on requiring secure master server requests. When making a
 connection to the host, the client should provide the public key for master
 server requests. If the master server provides the private key, the client
-is required to provide the public key.
+is required to provide the public key of the server.
 
 Connections to the slave servers are secured both ways. The client ensures it
 is connecting to the correct server (though this is admittedly slightly less
