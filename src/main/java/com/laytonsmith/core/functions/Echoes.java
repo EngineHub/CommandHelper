@@ -728,7 +728,7 @@ public class Echoes {
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_CONSTANT);
+			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
 		}
 		
 	}
