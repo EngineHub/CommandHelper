@@ -420,7 +420,7 @@ public class Web {
 
 		@Override
 		public String docs() {
-			Map<String, DocGenTemplates.Generator> templates = new HashMap<String, DocGenTemplates.Generator>();
+			Map<String, DocGenTemplates.Generator> templates = new HashMap<>();
 			templates.put("enum", new DocGenTemplates.Generator() {
 
 				@Override
@@ -432,6 +432,7 @@ public class Web {
 					}
 				}
 			});
+			templates.put("CODE", DocGenTemplates.CODE);
 			return super.getBundledDocs(templates);
 		}
 
@@ -447,13 +448,13 @@ public class Web {
 					+ "\tsuccess: closure(@response,\n"
 					+ "\t\tmsg(@response['headers']['Server'][0])\n"
 					+ "\t)\n"
-					+ "))\n", "gws"),
+					+ "));\n", "gws"),
 				new ExampleScript("Using a cookie jar", "@cookiejar = array()\n"
 					+ "http_request('http://www.google.com', array(\n"
 					+ "\tcookiejar: @cookiejar, success: closure(@resp,\n"
 					+ "\t\tmsg(@cookiejar)\n"
 					+ "\t)\n"
-					+ "))\n", "<cookie jar would now have cookies in it>")
+					+ "));\n", "<cookie jar would now have cookies in it>")
 			};
 		}
 		
