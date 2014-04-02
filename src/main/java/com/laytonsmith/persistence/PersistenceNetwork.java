@@ -29,7 +29,6 @@ import java.util.TreeMap;
 public class PersistenceNetwork {
 
 	private DataSourceFilter filter;
-	private Map<URI, DataSource> dsCache;
 	private ConnectionMixinFactory.ConnectionMixinOptions options;
 
 	/**
@@ -64,7 +63,6 @@ public class PersistenceNetwork {
 	 */
 	public PersistenceNetwork(String configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		filter = new DataSourceFilter(configuration, defaultURI);
-		dsCache = new TreeMap<URI, DataSource>();
 		this.options = options;
 		//Data sources are lazily loaded, so we don't need to do anything right now to load them.
 	}
@@ -81,17 +79,15 @@ public class PersistenceNetwork {
 	}
 
 	/**
-	 * Returns the data source object for this URI.
+	 * Returns the data source object for this URI. The returned DataSource is
+	 * threadsafe.
 	 *
 	 * @param uri
 	 * @return
 	 * @throws DataSourceException
 	 */
 	private DataSource getDataSource(URI uri) throws DataSourceException {
-		if (!dsCache.containsKey(uri)) {
-			dsCache.put(uri, DataSourceFactory.GetDataSource(uri, options));
-		}
-		return dsCache.get(uri);
+		return ThreadsafeDataSource.GetDataSource(uri, options);
 	}
 
 	/**

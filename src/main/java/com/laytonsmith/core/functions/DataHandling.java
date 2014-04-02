@@ -2532,6 +2532,7 @@ public class DataHandling {
 	}
 
 	@api
+	@seealso({_export.class})
 	public static class _import extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2555,7 +2556,7 @@ public class DataHandling {
 					+ " the specified ivar doesn't exist, the ivar will be assigned an empty"
 					+ " string, and if the specified string key doesn't exist, null is returned."
 					+ " See the documentation on [[CommandHelper/import-export|imports/exports]]"
-					+ " for more information.";
+					+ " for more information. import() is threadsafe.";
 		}
 
 		@Override
@@ -2624,6 +2625,7 @@ public class DataHandling {
 	}
 
 	@api
+	@seealso({_import.class})
 	public static class _export extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2646,7 +2648,7 @@ public class DataHandling {
 					+ " the value is already stored, it is overwritten. See {{function|import}} and"
 					+ " [[CommandHelper/import-export|importing/exporting]]. The reference to the value"
 					+ " is stored, not a copy of the value, so in the case of arrays, manipulating the"
-					+ " contents of the array will manipulate the stored value.";
+					+ " contents of the array will manipulate the stored value. export() is threadsafe.";
 		}
 
 		@Override

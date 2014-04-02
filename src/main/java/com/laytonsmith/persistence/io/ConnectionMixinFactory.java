@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -27,7 +28,31 @@ public class ConnectionMixinFactory {
 		 */
 		public void setWorkingDirectory(File workingDirectory){
 			this.workingDirectory = workingDirectory;
-		}		
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final ConnectionMixinOptions other = (ConnectionMixinOptions) obj;
+			if (!Objects.equals(this.workingDirectory, other.workingDirectory)) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 7;
+			hash = 41 * hash + Objects.hashCode(this.workingDirectory);
+			return hash;
+		}
+		
+		
 		
 	}
 	
