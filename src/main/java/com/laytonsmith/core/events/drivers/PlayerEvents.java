@@ -41,6 +41,7 @@ import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -1435,6 +1436,121 @@ public class PlayerEvents {
 		@Override
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if (event instanceof MCPlayerChatEvent) {
+                MCPlayerChatEvent e = (MCPlayerChatEvent)event;
+                if("message".equals(key)){
+                    e.setMessage(value.nval());
+                }
+                if("recipients".equals(key)){
+                    if(value instanceof CArray){
+                        List<MCPlayer> list = new ArrayList<MCPlayer>();
+                        for(String index : ((CArray)value).stringKeySet()){
+                            Construct v = ((CArray)value).get(index);
+                            try{
+                                list.add(Static.GetPlayer(v, Target.UNKNOWN));
+                            } catch(ConfigRuntimeException ex){
+                                //Ignored
+                            }
+                        }
+                        e.setRecipients(list);
+                    } else {
+                        throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
+                    }
+                }
+				if("format".equals(key)){
+					try{
+						e.setFormat(value.nval());
+					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
+						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
+					}
+				}
+                return true;
+            }
+            return false;
+        }
+    }
+
+    @api
+	@hide("Experimental until further notice")
+    public static class async_player_chat extends AbstractEvent {
+
+		@Override
+        public String getName() {
+            return "async_player_chat";
+        }
+
+		@Override
+        public String docs() {
+            return "{player: <macro>}"
+                    + "Fired when any player attempts to send a chat message. The event handler is run on the async thread, and not"
+					+ " the main server thread, which can lead to undefined results if your code accesses non-threadsafe methods, hence"
+					+ " why this feature is undocumented. If this event is cancelled, player_chat binds will not fire."
+                    + "{message: The message to be sent | recipients | format}"
+                    + "{message|recipients: An array of"
+                    + " players that will recieve the chat message. If a player doesn't exist"
+                    + " or is offline, and is in the array, it is simply ignored, no"
+                    + " exceptions will be thrown.|format: The \"printf\" format string, by "
+					+ " default: \"<%1$s> %2$s\". The first parameter is the player's display"
+					+ " name, and the second one is the message.}"
+                    + "{}";
+        }
+
+		@Override
+        public Driver driver() {
+            return Driver.PLAYER_CHAT;
+        }
+
+		@Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+		@Override
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            if (e instanceof MCPlayerChatEvent) {
+                //As a very special case, if this player is currently in interpreter mode, we do not want to
+                //intercept their chat event
+                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerChatEvent)e).getPlayer().getName())){
+                    throw new PrefilterNonMatchException();
+                }
+                Prefilters.match(prefilter, "player", ((MCPlayerChatEvent)e).getPlayer().getName(), PrefilterType.MACRO);
+                return true;
+            }
+            return false;
+        }
+
+		@Override
+        public BindableEvent convert(CArray manualObject) {
+            //Get the parameters from the manualObject
+            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
+            String message = manualObject.get("message").nval();
+
+            BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class,
+                player, message);
+            return e;
+        }
+
+		@Override
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if (e instanceof MCPlayerChatEvent) {
+                MCPlayerChatEvent event = (MCPlayerChatEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                //Fill in the event parameters
+                map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
+                CArray ca = new CArray(Target.UNKNOWN);
+                for(MCPlayer recipient : event.getRecipients()){
+                    ca.push(new CString(recipient.getName(), Target.UNKNOWN));
+                }
+				map.put("format", new CString(event.getFormat(), Target.UNKNOWN));
+                map.put("recipients", ca);
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCPlayerChatEvent");
+            }
+        }
+
+		@Override
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCPlayerChatEvent) {
                 MCPlayerChatEvent e = (MCPlayerChatEvent)event;
                 if("message".equals(key)){
                     e.setMessage(value.nval());

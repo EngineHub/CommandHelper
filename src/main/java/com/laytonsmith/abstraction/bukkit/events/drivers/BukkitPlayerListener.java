@@ -109,6 +109,17 @@ public class BukkitPlayerListener implements Listener {
             //They are in interpreter mode, so we want it to handle this, not everything else.
             return;
         }
+		
+		if(event.isAsynchronous()){
+			//The async event gets priority, and if cancelled, doesn't trigger a normal player_chat event.
+			BukkitPlayerEvents.BukkitMCPlayerChatEvent pce = new BukkitPlayerEvents.BukkitMCPlayerChatEvent(event);
+			EventUtils.TriggerListener(Driver.PLAYER_CHAT, "async_player_chat", pce);
+
+			if(event.isCancelled()){
+				return;
+			}
+		}
+		
 		if (EventUtils.GetEvents(Driver.PLAYER_CHAT) != null
 			&& !EventUtils.GetEvents(Driver.PLAYER_CHAT).isEmpty()) {
 			if (event.isAsynchronous()) {

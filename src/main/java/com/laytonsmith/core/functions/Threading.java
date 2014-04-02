@@ -8,6 +8,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -94,6 +95,52 @@ public class Threading {
 		@Override
 		public Version since() {
 			return CHVersion.V0_0_0;
+		}
+		
+	}
+	
+	@api
+	@hide("Experimental")
+	public static class x_get_current_thread extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CString(Thread.currentThread().getName(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "x_get_current_thread";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "string {} Returns the thread id (thread name) of the currently running thread.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 		
 	}

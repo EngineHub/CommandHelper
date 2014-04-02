@@ -454,7 +454,24 @@ public class Web {
 					+ "\tcookiejar: @cookiejar, success: closure(@resp,\n"
 					+ "\t\tmsg(@cookiejar)\n"
 					+ "\t)\n"
-					+ "));\n", "<cookie jar would now have cookies in it>")
+					+ "));\n", "<cookie jar would now have cookies in it>"),
+				new ExampleScript("Sending some json to the server", 
+						"http_request('http://example.com', array(\n"
+								+ "\tmethod: 'POST',\n"
+								+ "\theaders: array(\n"
+								+ "\t\t// The content type isn't set automatically if we send a string via params,\n"
+								+ "\t\t// so we have to set this manually to application/json here, since we're sending"
+								+ "\t\t// json data. Other data types may have different MIME types."
+								+ "\t\t'Content-Type': 'application/json'\n"
+								+ "\t),"
+								+ "\tparams: json_encode(array(\n"
+								+ "\t\t'arg1': 'value',\n"
+								+ "\t\t'arg2': 'value',\n"
+								+ "\t)),\n"
+								+ "\tsuccess: closure(@response){\n"
+								+ "\t\t// Handle the server's response\n"
+								+ "\t}}"
+								+ "));", "<A POST request with json data would be sent to the server>")
 			};
 		}
 		
