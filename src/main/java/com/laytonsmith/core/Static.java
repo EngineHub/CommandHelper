@@ -103,12 +103,36 @@ public final class Static {
 	 * @param expectedClassName The expected class type, for use in the error message if the construct is the wrong type.
 	 * @param clazz The type expected.
 	 * @return The properly cast object.
+	 * @deprecated Use {@link #getObject(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target, java.lang.Class)}
+	 * instead, as that gets the expected class name automatically.
 	 */
+	@Deprecated
 	public static <T extends Construct> T getObject(Construct construct, Target t, String expectedClassName, Class<T> clazz){
 		if(clazz.isAssignableFrom(construct.getClass())){
 			return (T)construct;
 		} else {
 			throw new ConfigRuntimeException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", ExceptionType.CastException, t);
+		}
+	}
+	
+	/**
+	 * Works like the other get* methods, but works in a more generic way for other types of Constructs. It also assumes that
+	 * the class specified is tagged with a typeof annotation, thereby preventing the need for the expectedClassName like the
+	 * deprecated version uses.
+	 * @param <T> The type expected.
+	 * @param construct The generic object
+	 * @param t Code target
+	 * @param clazz The type expected.
+	 * @return The properly cast object.
+	 */
+	public static <T extends Construct> T getObject(Construct construct, Target t, Class<T> clazz){
+		if(clazz.isAssignableFrom(construct.getClass())){
+			return (T)construct;
+		} else {
+			String expectedClassName = clazz.getAnnotation(typeof.class).value();
+			String actualClassName = construct.getClass().getAnnotation(typeof.class).value();
+			throw new ConfigRuntimeException("Expecting " + expectedClassName + " but receieved " + construct.val() 
+					+ " (" + actualClassName + ") instead.", ExceptionType.CastException, t);
 		}
 	}
 
