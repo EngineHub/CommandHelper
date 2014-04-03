@@ -77,7 +77,7 @@ public class SQL {
 			try {
 				Profiles.Profile profile;
 				if (args[0] instanceof CArray) {
-					Map<String, String> data = new HashMap<String, String>();
+					Map<String, String> data = new HashMap<>();
 					for (String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key).val());
 					}
@@ -91,12 +91,13 @@ public class SQL {
 				for (int i = 2; i < args.length; i++) {
 					int index = i - 2;
 					params[index] = args[i];
+					if(params[index] instanceof CNull){
+						params[index] = null;
+					}
 				}
 				//Parameters are now all parsed into java objects.
 				Connection conn = DriverManager.getConnection(profile.getConnectionString());
-				PreparedStatement ps = null;
-				try {
-					ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+				try (PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 					for (int i = 0; i < params.length; i++) {
 						int type = ps.getParameterMetaData().getParameterType(i + 1);
 						if (params[i] == null) {
@@ -141,7 +142,11 @@ public class SQL {
 							for (int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
-								if (columnType == Types.INTEGER 
+								if(rs.wasNull()){
+									// Since mscript can assign null to primitives, we
+									// can set it to null regardless of the data type.
+									value = new CNull(t);
+								} else if (columnType == Types.INTEGER 
 										|| columnType == Types.TINYINT
 										|| columnType == Types.SMALLINT
 										|| columnType == Types.BIGINT) {
@@ -193,16 +198,9 @@ public class SQL {
 						return new CNull(t);
 					}
 				} finally {
-					if (ps != null) {
-						ps.close();
-					}
-					if (conn != null) { 
-						conn.close();
-					}
+					conn.close();
 				}
-			} catch (Profiles.InvalidProfileException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
-			} catch (SQLException ex) {
+			} catch (Profiles.InvalidProfileException | SQLException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
 			}
 		}

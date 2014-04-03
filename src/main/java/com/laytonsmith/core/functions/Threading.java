@@ -6,7 +6,6 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
@@ -107,7 +106,7 @@ public class Threading {
 
 		@Override
 		public Version since() {
-			return CHVersion.V0_0_0;
+			return CHVersion.V3_3_1;
 		}
 
 		@Override
@@ -117,8 +116,8 @@ public class Threading {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "msg(" + get_current_thread + "());\n"
 						+ new_thread + "('myThread', closure(){\n"
-						+ "\tsleep(5); // Sleep here, to allow the main thread to get well past us, for demonstration purposes"
-						+ "\tmsg(" + get_current_thread + "());"
+						+ "\tsleep(5); // Sleep here, to allow the main thread to get well past us, for demonstration purposes\n"
+						+ "\tmsg(" + get_current_thread + "());\n"
 						+ "});\n"
 						+ "msg('End of main thread');", 
 						"MainThread\n"
