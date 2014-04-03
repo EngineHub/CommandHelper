@@ -14,7 +14,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import org.bukkit.event.Cancellable;
 
 /**
- * @author Layton
+ * 
  */
 public class Sandbox {
 
@@ -106,7 +106,7 @@ public class Sandbox {
 //                }
 //            }
 //
-//            return new CVoid(t);
+//            return CVoid.VOID;
 //        }
 //    }
         
@@ -165,7 +165,7 @@ public class Sandbox {
                 BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
             }
             environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
-            return new CVoid(t);
+            return CVoid.VOID;
         }
     }
 
@@ -246,7 +246,7 @@ public class Sandbox {
 
                 is.addUnsafeEnchantment(e, level);
             }
-            return new CVoid(t);
+            return CVoid.VOID;
         }
     }
 
@@ -303,7 +303,7 @@ public class Sandbox {
 
             other.setVanished(isVanished, me);
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override

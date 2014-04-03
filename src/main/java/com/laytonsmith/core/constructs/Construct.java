@@ -177,7 +177,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      */
     public static Construct json_decode(String s, Target t) throws MarshalException {
 		if(s == null){
-			return new CNull(t);
+			return CNull.NULL;
 		}
         if (s.startsWith("{")) {
             //Object
@@ -207,7 +207,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             JSONArray array = (JSONArray) JSONValue.parse(s);
 			if(array == null){
 				//It's a null value
-				return new CNull(t);
+				return CNull.NULL;
 			}
             Object o = array.get(0);
             return convertJSON(o, t);
@@ -227,16 +227,16 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
                 return new CDouble(n.doubleValue(), Target.UNKNOWN);
             }
         } else if (o instanceof Boolean) {
-            return new CBoolean(((Boolean) o).booleanValue(), Target.UNKNOWN);
+            return new CBoolean(((Boolean) o), Target.UNKNOWN);
         } else if (o instanceof java.util.List) {
             java.util.List l = (java.util.List) o;
             CArray ca = new CArray(t);
-            for (int i = 0; i < l.size(); i++) {
-                ca.push(convertJSON(l.get(i), t));
-            }
+			for (Object l1 : l) {
+				ca.push(convertJSON(l1, t));
+			}
             return ca;
         } else if (o == null) {
-            return new CNull();
+            return CNull.NULL;
         } else if(o instanceof java.util.Map){
             CArray ca = CArray.GetAssociativeArray(t);
             for(Object key : ((java.util.Map)o).keySet()){
@@ -273,7 +273,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      */
     public static Construct GetConstruct(Object o) throws ClassCastException{
         if(o == null){
-            return new CNull();
+            return CNull.NULL;
         } else if(o instanceof CharSequence){
             return new CString((CharSequence)o, Target.UNKNOWN);
         } else if(o instanceof Number){

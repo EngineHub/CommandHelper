@@ -16,8 +16,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class IncludeCache {
     private static final CHLog.Tags TAG = CHLog.Tags.INCLUDES;

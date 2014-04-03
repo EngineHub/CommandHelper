@@ -18,8 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class Exceptions {
 
@@ -401,12 +400,12 @@ public class Exceptions {
 				}
 			}
 
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -519,7 +518,7 @@ public class Exceptions {
 				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
 				if(old == null){
-					return new CNull();
+					return CNull.NULL;
 				} else {
 					return old;
 				}

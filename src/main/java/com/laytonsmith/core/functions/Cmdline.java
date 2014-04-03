@@ -45,8 +45,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author lsmith
+ * 
  */
 public class Cmdline {
 
@@ -83,7 +82,7 @@ public class Cmdline {
                 System.out.print(TermColors.reset());
             }
             System.out.println();
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override
@@ -147,7 +146,7 @@ public class Cmdline {
                 System.err.print(TermColors.reset());
             }
             System.err.println();
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override
@@ -278,7 +277,7 @@ public class Cmdline {
 					prop = System.getProperty(propName);
 				}
 				if(prop == null){
-					return new CNull();
+					return CNull.NULL;
 				}
                 return new CString(prop, t);
             } else {
@@ -708,7 +707,7 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			java.awt.Toolkit.getDefaultToolkit().beep();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -761,7 +760,7 @@ public class Cmdline {
 					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -965,7 +964,7 @@ public class Cmdline {
 			} else {
 				run.run();
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1309,7 +1308,7 @@ public class Cmdline {
 				throw new ConfigRuntimeException("No such file or directory: " + cd.getPath(), ExceptionType.IOException, t);
 			}
 			environment.getEnv(GlobalEnv.class).SetRootFolder(cd);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1417,7 +1416,7 @@ public class Cmdline {
 				throw new Exceptions.CastException("Expecting a closure for argument 1 of " + getName(), t);
 			}
 			environment.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

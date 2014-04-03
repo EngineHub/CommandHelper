@@ -27,8 +27,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.util.StringUtil;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class Environment {
 
@@ -246,7 +245,7 @@ public class Environment {
 			}
 			b.setTypeAndData(idata, imeta, physics);
 
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -344,7 +343,7 @@ public class Environment {
 				s.setLine(1, line2);
 				s.setLine(2, line3);
 				s.setLine(3, line4);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
 			}
@@ -508,7 +507,7 @@ public class Environment {
 			MCWorld w = (p != null ? p.getWorld() : null);
 			l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			l.breakBlock();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -578,7 +577,7 @@ public class Environment {
 				throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
 			}
 			w.setBiome(x, z, bt);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -814,7 +813,7 @@ public class Environment {
 			}
 
 			w.explosion(x, y, z, size, safe);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -905,7 +904,7 @@ public class Environment {
 				throw new Exceptions.CastException("Expected an array for note parameter, but " + args[noteOffset] + " found instead", t);
 			}
 			p.playNote(l, i, n);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -999,7 +998,7 @@ public class Environment {
 			} else {
 				loc.getWorld().playSound(loc, sound, volume, pitch);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1091,7 +1090,7 @@ public class Environment {
 			} else {
 				loc.getWorld().playSound(loc, path, volume, pitch);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1452,7 +1451,7 @@ public class Environment {
 			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setCommand(cmd);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new ConfigRuntimeException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);
@@ -1567,7 +1566,7 @@ public class Environment {
 			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setName(name);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new ConfigRuntimeException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);

@@ -71,7 +71,7 @@ public final class Globals {
         if(vars.containsKey(name)){
             return vars.get(name);
         } else {
-            return new CNull();
+            return CNull.NULL;
         }
     }
     

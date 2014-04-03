@@ -29,8 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class DataHandling {
 
@@ -316,7 +315,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -491,7 +490,7 @@ public class DataHandling {
 						e.setTimes(--num);
 						throw e;
 					}
-					return new CVoid(t);
+					return CVoid.VOID;
 				} catch (LoopContinueException e) {
 					_continue = e.getTimes() - 1;
 					parent.eval(expression, env);
@@ -502,7 +501,7 @@ public class DataHandling {
 			if (!hasRunOnce && !runAsFor && elseCode != null) {
 				parent.eval(elseCode, env);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -545,7 +544,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -621,12 +620,12 @@ public class DataHandling {
 							e.setTimes(--num);
 							throw e;
 						}
-						return new CVoid(t);
+						return CVoid.VOID;
 					} catch (LoopContinueException e) {
 						continues += e.getTimes();
 					}
 				}
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 					//It's not associative, so we have more complex handling. We will create an ArrayAccessIterator,
 				//and store that in the environment. As the array is iterated, underlying changes in the array
@@ -671,7 +670,7 @@ public class DataHandling {
 									e.setTimes(--num);
 									throw e;
 								}
-								return new CVoid(t);
+								return CVoid.VOID;
 							} catch (LoopContinueException e) {
 								continues += e.getTimes();
 								continue;
@@ -683,7 +682,7 @@ public class DataHandling {
 					arrayAccessList.remove(iterator);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -890,7 +889,7 @@ public class DataHandling {
 				return super.execs(t, env, parent, pass);
 			}
 
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -997,7 +996,7 @@ public class DataHandling {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1007,7 +1006,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull();
+			return CNull.NULL;
 		}
 
 		@Override
@@ -1064,7 +1063,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull();
+			return CNull.NULL;
 		}
 
 		@Override
@@ -1110,7 +1109,7 @@ public class DataHandling {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1965,7 +1964,7 @@ public class DataHandling {
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			Procedure myProc = getProcedure(t, env, parent, nodes);
 			env.getEnv(GlobalEnv.class).GetProcs().put(myProc.getName(), myProc);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		public static Procedure getProcedure(Target t, Environment env, Script parent, ParseTree... nodes) {
@@ -2035,7 +2034,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2156,7 +2155,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			Construct ret = (args.length == 1 ? args[0] : new CVoid(t));
+			Construct ret = (args.length == 1 ? args[0] : CVoid.VOID);
 			throw new FunctionReturnException(ret, t);
 		}
 	}
@@ -2201,7 +2200,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2212,7 +2211,7 @@ public class DataHandling {
 			File file = Static.GetFileFromArgument(location, env, t, null);
 			ParseTree include = IncludeCache.get(file, t);
 			parent.eval(include.getChildAt(0), env);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2590,7 +2589,7 @@ public class DataHandling {
 				//Mode 1     
 				IVariable var = (IVariable) args[0];
 				environment.getEnv(GlobalEnv.class).GetVarList().set(Globals.GetGlobalIVar(var));
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				//Mode 2
 				String key = GetNamespace(args, null, getName(), t);
@@ -2694,7 +2693,7 @@ public class DataHandling {
 				}
 				Globals.SetGlobal(key, c);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2791,7 +2790,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2917,7 +2916,7 @@ public class DataHandling {
 			} else {
 				throw new ConfigRuntimeException("Only a closure (created from the closure function) can be sent to execute()", ExceptionType.CastException, t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

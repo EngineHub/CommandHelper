@@ -147,7 +147,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null){
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, Target.UNKNOWN);
-			Construct ret = new CNull();
+			Construct ret = CNull.NULL;
 			try{
 				c.execute(new Construct[]{ex});
 			} catch(FunctionReturnException retException){

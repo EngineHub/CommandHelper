@@ -43,8 +43,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class Scheduling {
 
@@ -191,7 +190,7 @@ public class Scheduling {
 				Thread.sleep((int)(time * 1000));
 			} catch (InterruptedException ex) {
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -403,7 +402,7 @@ public class Scheduling {
 			} else {
 				throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -923,7 +922,7 @@ public class Scheduling {
 			if(!set_cron.stopJob(id)){
 				throw new Exceptions.RangeException("Task ID invalid", t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

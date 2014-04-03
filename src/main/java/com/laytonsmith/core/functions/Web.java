@@ -383,7 +383,7 @@ public class Web {
 					}
 				}
 			});
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 		
 		private void executeFinish(CClosure closure, Construct arg, Target t, Environment environment){
@@ -500,7 +500,7 @@ public class Web {
 			CArray array = Static.getArray(args[0], t);
 			CookieJar jar = getCookieJar(array, t);
 			jar.clearSessionCookies();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

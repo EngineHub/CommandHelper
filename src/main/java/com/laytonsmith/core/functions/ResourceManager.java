@@ -188,7 +188,7 @@ public class ResourceManager {
 				CResource<?> resource = (CResource<?>) args[0];
 				if(resources.containsKey(resource.getId())){
 					resources.remove(resource.getId());
-					return new CVoid(t);
+					return CVoid.VOID;
 				} else {
 					throw new ConfigRuntimeException("That resource is not a valid resource.", ExceptionType.NotFoundException, t);
 				}

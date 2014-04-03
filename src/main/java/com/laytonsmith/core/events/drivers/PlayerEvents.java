@@ -390,7 +390,7 @@ public class PlayerEvents {
 				if (event.getTo() != null) {
 					Prefilters.match(prefilter, "to", event.getTo(), PrefilterType.LOCATION_MATCH);
 				} else {
-					Prefilters.match(prefilter, "to", new CNull(Target.UNKNOWN), PrefilterType.MACRO);
+					Prefilters.match(prefilter, "to", CNull.NULL, PrefilterType.MACRO);
 				}
 				return true;
 
@@ -417,7 +417,7 @@ public class PlayerEvents {
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
 				if (event.getTo() == null) {
-					map.put("to", new CNull(Target.UNKNOWN));
+					map.put("to", CNull.NULL);
 				} else {
 					map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
 				}
@@ -1210,7 +1210,7 @@ public class PlayerEvents {
 				if(event.getKiller() instanceof MCPlayer){
 					map.put("killer", new CString(((MCPlayer)event.getKiller()).getName(), Target.UNKNOWN));
 				} else {
-					map.put("killer", new CNull());
+					map.put("killer", CNull.NULL);
 				}
                 return map;
             } else {
@@ -2084,7 +2084,7 @@ public class PlayerEvents {
 				ret.put("state", new CString(event.getState().name(), t));
 				ret.put("hook", new CInt(event.getHook().getEntityId(), t));
 				ret.put("xp", new CInt(event.getExpToDrop(), t));
-				Construct caught = new CNull(t);
+				Construct caught = CNull.NULL;
 				if (event.getCaught() instanceof MCEntity) {
 					caught = new CInt(event.getCaught().getEntityId(), t);
 				}
@@ -2394,12 +2394,12 @@ public class PlayerEvents {
 				if (oldBookMeta.hasTitle()) {
 					oldBookArray.set("title", new CString(oldBookMeta.getTitle(), Target.UNKNOWN), Target.UNKNOWN);
 				} else {
-					oldBookArray.set("title", new CNull(Target.UNKNOWN), Target.UNKNOWN);
+					oldBookArray.set("title", CNull.NULL, Target.UNKNOWN);
 				}
 				if (oldBookMeta.hasAuthor()) {
 					oldBookArray.set("author", new CString(oldBookMeta.getAuthor(), Target.UNKNOWN), Target.UNKNOWN);
 				} else {
-					oldBookArray.set("author", new CNull(Target.UNKNOWN), Target.UNKNOWN);
+					oldBookArray.set("author", CNull.NULL, Target.UNKNOWN);
 				}
 				if (oldBookMeta.hasPages()) {
 					CArray pages = new CArray(Target.UNKNOWN);
@@ -2416,12 +2416,12 @@ public class PlayerEvents {
 				if (newBookMeta.hasTitle()) {
 					newBookArray.set("title", new CString(newBookMeta.getTitle(), Target.UNKNOWN), Target.UNKNOWN);
 				} else {
-					newBookArray.set("title", new CNull(Target.UNKNOWN), Target.UNKNOWN);
+					newBookArray.set("title", CNull.NULL, Target.UNKNOWN);
 				}
 				if (newBookMeta.hasAuthor()) {
 					newBookArray.set("author", new CString(newBookMeta.getAuthor(), Target.UNKNOWN), Target.UNKNOWN);
 				} else {
-					newBookArray.set("author", new CNull(Target.UNKNOWN), Target.UNKNOWN);
+					newBookArray.set("author", CNull.NULL, Target.UNKNOWN);
 				}
 				if (newBookMeta.hasPages()) {
 					CArray pages = new CArray(Target.UNKNOWN);

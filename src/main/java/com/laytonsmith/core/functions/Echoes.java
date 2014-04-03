@@ -28,8 +28,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- *
- * @author layton
+ * 
  */
 public class Echoes {
     public static String docs(){
@@ -136,7 +135,7 @@ public class Echoes {
 				System.out.println(mes);
 				System.out.flush();
 			}
-            return new CVoid(t);
+            return CVoid.VOID;
         }
         
 		@Override
@@ -203,7 +202,7 @@ public class Echoes {
 //                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
 //                start += 100;
 //            }
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override
@@ -430,7 +429,7 @@ public class Echoes {
 			} else {
 				throw new ConfigRuntimeException("Console cannot chat. Use something like broadcast() instead.", ExceptionType.PlayerOfflineException, t);
 			}
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override
@@ -499,7 +498,7 @@ public class Echoes {
             final MCPlayer player = Static.GetPlayer(args[0], t);
             Static.AssertPlayerNonNull(player, t);
 			player.chat(args[1].val());
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 		@Override
         public Boolean runAsync(){
@@ -557,7 +556,7 @@ public class Echoes {
             } else {
             	server.broadcastMessage(args[0].val(), permission);
             }
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 		@Override
         public Boolean runAsync(){
@@ -615,7 +614,7 @@ public class Echoes {
                 mes += TermColors.reset();
             }
             System.out.println(mes);
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 		@Override
         public Boolean runAsync(){

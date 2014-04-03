@@ -40,8 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
- * @author layton
+ * 
  */
 public class Reflection {
 
@@ -245,7 +244,7 @@ public class Reflection {
 					throw new ConfigRuntimeException("Unknown function: " + element, ExceptionType.FormatException, t);
 				}
 			}
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		public String formatFunctionDoc(String docs, DocField field) {

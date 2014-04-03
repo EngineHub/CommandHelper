@@ -37,8 +37,7 @@ import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 
 /**
- *
- * @author lsmith
+ * 
  */
 public class FileHandling {
 
@@ -206,13 +205,13 @@ public class FileHandling {
 					}
 					final Construct cret;
 					if(returnString == null){
-						cret = new CNull(t);
+						cret = CNull.NULL;
 					} else {
 						cret = new CString(returnString, t);
 					}
 					final Construct cex;
 					if(exception == null){
-						cex = new CNull(t);
+						cex = CNull.NULL;
 					} else {
 						cex = ObjectGenerator.GetGenerator().exception(exception, t);
 					}
@@ -225,7 +224,7 @@ public class FileHandling {
 					});
 				}
 			});
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -467,7 +466,7 @@ public class FileHandling {
 			path = path.replaceAll("(/)(?=.*?/)", path);
 			if("/".equals(path) || path.matches("[a-zA-Z]:/")){
 				//This is the root path, return null.
-				return new CNull();
+				return CNull.NULL;
 			}
 			//If the path ends with /, take it off
 			if(path.endsWith("/")){

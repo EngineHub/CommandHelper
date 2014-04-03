@@ -244,7 +244,7 @@ public class Scoreboards {
 				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.setScoreboard(assignBoard(2, 1, t, args));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -329,7 +329,7 @@ public class Scoreboards {
 				CArray obj = CArray.GetAssociativeArray(t);
 				obj.set("name", new CString(o.getName(), t), t);
 				obj.set("displayname", new CString(o.getDisplayName(), t), t);
-				Construct slot = new CNull(t);
+				Construct slot = CNull.NULL;
 				if (o.getDisplaySlot() != null) {
 					slot = new CString(o.getDisplaySlot().name(), t);
 				}
@@ -419,7 +419,7 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			addBoard(args[0].val(), Static.getServer().getNewScoreboard(), t);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -468,7 +468,7 @@ public class Scoreboards {
 			} catch (IllegalArgumentException iae) {
 				throw new ScoreboardException("An objective by that name already exists.", t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -513,7 +513,7 @@ public class Scoreboards {
 			} catch (IllegalArgumentException iae) {
 				throw new ScoreboardException("A team by that name already exists.", t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -583,7 +583,7 @@ public class Scoreboards {
 				}
 				o.setDisplayName(dname);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -669,7 +669,7 @@ public class Scoreboards {
 				}
 				o.setSuffix(suffix);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -715,7 +715,7 @@ public class Scoreboards {
 				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
 			}
 			team.addPlayer(Static.getServer().getOfflinePlayer(args[1].val()));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -796,7 +796,7 @@ public class Scoreboards {
 				}
 			}
 			removeBoard(id, t);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -834,7 +834,7 @@ public class Scoreboards {
 			} catch (IllegalStateException ise) {
 				throw new ScoreboardException("The objective has already been unregistered.", t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -868,7 +868,7 @@ public class Scoreboards {
 			} catch (IllegalStateException ise) {
 				throw new ScoreboardException("The team has already been unregistered.", t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -940,7 +940,7 @@ public class Scoreboards {
 			}
 			MCOfflinePlayer ofp = Static.getServer().getOfflinePlayer(args[1].val());
 			o.getScore(ofp).setScore(Static.getInt32(args[2], t));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -968,7 +968,7 @@ public class Scoreboards {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			assignBoard(2, 1, t, args).resetScores(Static.getServer().getOfflinePlayer(args[0].val()));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1015,7 +1015,7 @@ public class Scoreboards {
 			} else {
 				throw new Exceptions.FormatException("Expected arg 2 to be an array.", t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

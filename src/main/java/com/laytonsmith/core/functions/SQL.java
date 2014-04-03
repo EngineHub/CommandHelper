@@ -145,7 +145,7 @@ public class SQL {
 								if(rs.wasNull()){
 									// Since mscript can assign null to primitives, we
 									// can set it to null regardless of the data type.
-									value = new CNull(t);
+									value = CNull.NULL;
 								} else if (columnType == Types.INTEGER 
 										|| columnType == Types.TINYINT
 										|| columnType == Types.SMALLINT
@@ -195,7 +195,7 @@ public class SQL {
 							return new CInt(rs.getInt(1), t);
 						}
 						//Update count. Just return null.
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				} finally {
 					conn.close();
@@ -327,8 +327,8 @@ public class SQL {
 
 				@Override
 				public void run() {
-					Construct returnValue = new CNull();
-					Construct exception = new CNull();
+					Construct returnValue = CNull.NULL;
+					Construct exception = CNull.NULL;
 					try{
 						returnValue = new query().exec(t, environment, newArgs);
 					} catch(ConfigRuntimeException ex){
@@ -345,7 +345,7 @@ public class SQL {
 					});
 				}
 			});
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

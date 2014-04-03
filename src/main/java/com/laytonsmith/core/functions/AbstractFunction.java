@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- * @author layton
+ * 
  */
 public abstract class AbstractFunction implements Function {
 
@@ -44,7 +43,7 @@ public abstract class AbstractFunction implements Function {
 	 */
 	@Override
 	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-		return new CVoid(t);
+		return CVoid.VOID;
 	}
 
 	/**
@@ -187,7 +186,7 @@ public abstract class AbstractFunction implements Function {
 	protected String getBundledDocs(Map<String, DocGenTemplates.Generator> map){
 		String template = StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/" + getName()));
 		if(map == null){
-			map = new HashMap<String, DocGenTemplates.Generator>();
+			map = new HashMap<>();
 		}
 		return DocGenTemplates.DoTemplateReplacement(template, map);
 	}

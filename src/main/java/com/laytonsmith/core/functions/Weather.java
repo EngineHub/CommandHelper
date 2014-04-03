@@ -14,8 +14,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class Weather {
 
@@ -132,7 +131,7 @@ public class Weather {
 			if (args.length == 3) {
 				w.setWeatherDuration(Static.getInt32(args[2], t));
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -199,7 +198,7 @@ public class Weather {
 			if (args.length == 3) {
 				w.setThunderDuration(Static.getInt32(args[2], t));
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

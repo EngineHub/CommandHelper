@@ -208,7 +208,7 @@ public class Procedure implements Cloneable {
 			e.addStackTraceTrail(new ConfigRuntimeException.StackTraceElement("proc " + name, e.getTarget()), t);
 			throw e;
 		}
-        return new CVoid(Target.UNKNOWN);
+        return CVoid.VOID;
     }
 	
 	public Target getTarget(){

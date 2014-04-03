@@ -208,7 +208,7 @@ public class ObjectGenerator {
      */
     public Construct item(MCItemStack is, Target t) {
         if (is == null || is.getAmount() == 0 || is.getTypeId() == 0) {
-            return new CNull(t);
+            return CNull.NULL;
         }
         int type = is.getTypeId();
         
@@ -365,14 +365,14 @@ public class ObjectGenerator {
 		Construct ret, display, lore, color, title, author, pages, owner, stored;
 		CArray enchants, effects;
 		if (!is.hasItemMeta()) {
-			ret = new CNull(t);
+			ret = CNull.NULL;
 		} else {
 			CArray ma = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
 			if (meta.hasDisplayName()) {
 				display = new CString(meta.getDisplayName(), t);
 			} else {
-				display = new CNull(t);
+				display = CNull.NULL;
 			}
 			if (meta.hasLore()) {
 				lore = new CArray(t);
@@ -380,7 +380,7 @@ public class ObjectGenerator {
 					((CArray) lore).push(new CString(l, t));
 				}
 			} else {
-				lore = new CNull(t);
+				lore = CNull.NULL;
 			}
 			enchants = enchants(meta.getEnchants(), t);
 			ma.set("display", display, t);
@@ -395,12 +395,12 @@ public class ObjectGenerator {
 				if (((MCBookMeta) meta).hasTitle()) {
 					title = new CString(((MCBookMeta) meta).getTitle(), t);
 				} else {
-					title = new CNull(t);
+					title = CNull.NULL;
 				}
 				if (((MCBookMeta) meta).hasAuthor()) {
 					author = new CString(((MCBookMeta) meta).getAuthor(), t);
 				} else {
-					author = new CNull(t);
+					author = CNull.NULL;
 				}
 				if (((MCBookMeta) meta).hasPages()) {
 					pages = new CArray(t);
@@ -408,7 +408,7 @@ public class ObjectGenerator {
 						((CArray) pages).push(new CString(p, t));
 					}
 				} else {
-					pages = new CNull(t);
+					pages = CNull.NULL;
 				}
 				ma.set("title", title, t);
 				ma.set("author", author, t);
@@ -418,7 +418,7 @@ public class ObjectGenerator {
 				if (((MCSkullMeta) meta).hasOwner()) {
 					owner = new CString(((MCSkullMeta) meta).getOwner(), t);
 				} else {
-					owner = new CNull(t);
+					owner = CNull.NULL;
 				}
 				ma.set("owner", owner, t);
 			}
@@ -426,7 +426,7 @@ public class ObjectGenerator {
 				if (((MCEnchantmentStorageMeta) meta).hasStoredEnchants()) {
 					stored = enchants(((MCEnchantmentStorageMeta) meta).getStoredEnchants(), t);
 				} else {
-					stored = new CNull(t);
+					stored = CNull.NULL;
 				}
 				ma.set("stored", stored, t);
 			}
@@ -766,7 +766,7 @@ public class ObjectGenerator {
 	
 	public Construct recipe(MCRecipe r, Target t) {
 		if (r == null) {
-			return new CNull(t);
+			return CNull.NULL;
 		}
 		CArray ret = CArray.GetAssociativeArray(t);
 		ret.set("type", new CString(r.getRecipeType().name(), t), t);

@@ -64,7 +64,6 @@ import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -411,7 +410,7 @@ public class EntityManagement {
 
 			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
 			e.setVelocity(ObjectGenerator.GetGenerator().velocity(args[1], t));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -446,13 +445,13 @@ public class EntityManagement {
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity((int) Static.getInt(args[0], t), t);
 			if (ent == null) {
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else if (ent instanceof MCHumanEntity) {
 				throw new ConfigRuntimeException("Cannot remove human entity (" + ent.getEntityId() + ")!",
 						ExceptionType.BadEntityException, t);
 			} else {
 				ent.remove();
-				return new CVoid(t);
+				return CVoid.VOID;
 			}
 		}
 
@@ -486,7 +485,7 @@ public class EntityManagement {
 			try {
 				ent = Static.getEntity(id, t);
 			} catch (ConfigRuntimeException cre) {
-				return new CNull(t);
+				return CNull.NULL;
 			}
 			return new CString(ent.getType().name(), t);
 		}
@@ -547,7 +546,7 @@ public class EntityManagement {
 				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
 			}
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -570,7 +569,7 @@ public class EntityManagement {
 			int id = Static.getInt32(args[0], t);
 			MCEntity ent = Static.getEntity(id, t);
 			if (ent == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else {
 				return new CInt(ent.getTicksLived(), t);
 			}
@@ -608,10 +607,10 @@ public class EntityManagement {
 
 			MCEntity ent = Static.getEntity(id, t);
 			if (ent == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else {
 				ent.setTicksLived(age);
-				return new CVoid(t);
+				return CVoid.VOID;
 			}
 		}
 
@@ -641,7 +640,7 @@ public class EntityManagement {
 			int id = Static.getInt32(args[0], t);
 			MCLivingEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				return new CInt(mob.getAge(), t);
@@ -682,12 +681,12 @@ public class EntityManagement {
 			}
 			MCLivingEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				mob.setAge(age);
 				mob.setAgeLock(lock);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new ConfigRuntimeException("The specified entity does not age", ExceptionType.UnageableMobException, t);
 			}
@@ -1080,7 +1079,7 @@ public class EntityManagement {
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			if (le.getTarget(t) == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else {
 				return new CInt(le.getTarget(t).getEntityId(), t);
 			}
@@ -1115,7 +1114,7 @@ public class EntityManagement {
 				target = Static.getLivingEntity(Static.getInt32(args[1], t), t);
 			}
 			le.setTarget(target, t);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1175,7 +1174,7 @@ public class EntityManagement {
 			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
 			if (args[1] instanceof CNull) {
 				ee.clearEquipment();
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else if (args[1] instanceof CArray) {
 				CArray ea = (CArray) args[1];
 				for (String key : ea.stringKeySet()) {
@@ -1189,7 +1188,7 @@ public class EntityManagement {
 				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
 			}
 			ee.setAllEquipment(eq);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1241,7 +1240,7 @@ public class EntityManagement {
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			le.setMaxHealth(Static.getDouble(args[1], t));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1297,7 +1296,7 @@ public class EntityManagement {
 				throw new Exceptions.FormatException("Seconds cannot be less than 0", t);
 			}
 			ent.setFireTicks(setTicks);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1328,7 +1327,7 @@ public class EntityManagement {
 				throw new Exceptions.FormatException("Unknown effect at arg 2.", t);
 			}
 			ent.playEffect(mee);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1378,7 +1377,7 @@ public class EntityManagement {
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			le.setCustomName(args[1].val());
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1538,7 +1537,7 @@ public class EntityManagement {
 			if (ent.getPassenger() instanceof MCEntity) {
 				return new CInt(ent.getPassenger().getEntityId(), t);
 			}
-			return new CNull();
+			return CNull.NULL;
 		}
 
 		@Override
@@ -1562,7 +1561,7 @@ public class EntityManagement {
 			if (ent.isInsideVehicle()) {
 				return new CInt(ent.getVehicle().getEntityId(), t);
 			}
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		@Override
@@ -1636,7 +1635,7 @@ public class EntityManagement {
 						ExceptionType.BadEntityTypeException, t);
 			}
 
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1706,7 +1705,7 @@ public class EntityManagement {
 				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
 			}
 			ee.setAllDropChances(eq);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1749,7 +1748,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setCustomNameVisible(Static.getBoolean(args[1]));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1790,7 +1789,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setCanPickupItems(Static.getBoolean(args[1]));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1829,7 +1828,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemoveWhenFarAway(!Static.getBoolean(args[1]));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1978,7 +1977,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			if (!le.isLeashed()) {
-				return new CNull(t);
+				return CNull.NULL;
 			}
 			return new CInt(le.getLeashHolder().getEntityId(), t);
 		}
@@ -2008,7 +2007,7 @@ public class EntityManagement {
 				holder = Static.getEntity(Static.getInt32(args[1], t), t);
 			}
 			le.setLeashHolder(holder);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2081,7 +2080,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemainingAir(Static.getInt32(args[1], t));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -2120,7 +2119,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getLivingEntity(Static.getInt32(args[0], t), t).setMaximumAir(Static.getInt32(args[1], t));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -2293,7 +2292,7 @@ public class EntityManagement {
 					if (carried != null) {
 						specArray.set("carried", new CString(carried.getMaterial().getName(), t), t);
 					} else {
-						specArray.set("carried", new CNull(t), t);
+						specArray.set("carried", CNull.NULL, t);
 					}
 					break;
 				case EXPERIENCE_ORB:
@@ -2337,7 +2336,7 @@ public class EntityManagement {
 					if (itemstack != null) {
 						specArray.set("item", ObjectGenerator.GetGenerator().item(frame.getItem(), t), t);
 					} else {
-						specArray.set("item", new CNull(t), t);
+						specArray.set("item", CNull.NULL, t);
 					}
 					specArray.set("rotation", new CString(frame.getRotation().name(), t), t);
 					break;
@@ -2382,7 +2381,7 @@ public class EntityManagement {
 					if (source != null) {
 						specArray.set("source", new CInt(source.getEntityId(), t), t);
 					} else {
-						specArray.set("source", new CNull(t), t);
+						specArray.set("source", CNull.NULL, t);
 					}
 					break;
 				case SHEEP:
@@ -2824,7 +2823,7 @@ public class EntityManagement {
 					}
 			}
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -2856,7 +2855,7 @@ public class EntityManagement {
 				} else if (shooter instanceof MCEntity) {
 					return new CInt(((MCEntity) shooter).getEntityId(), t);
 				} else {
-					return new CNull(t);
+					return CNull.NULL;
 				}
 			} else {
 				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
@@ -2899,7 +2898,7 @@ public class EntityManagement {
 				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -2953,7 +2952,7 @@ public class EntityManagement {
 				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}
 			
-			return new CVoid(t);
+			return CVoid.VOID;
  		}
 	}
 	
@@ -2981,7 +2980,7 @@ public class EntityManagement {
 			double damage = Static.getDouble(args[1], t);
 			living.damage(damage);
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

@@ -85,7 +85,7 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1616,7 +1616,7 @@ public class StringHandling {
 			for(int i = 1; i < args.length; i++){
 				buf.append(args[i].val());
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

@@ -52,8 +52,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class WorldEdit {
 
@@ -118,7 +117,7 @@ public class WorldEdit {
             }
             if (setter) {
                 sel.selectPrimary(BukkitUtil.toVector(( (BukkitMCLocation) l )._Location()));
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos1();
                 if (pt == null) {
@@ -190,7 +189,7 @@ public class WorldEdit {
 
             if (setter) {
                 sel.selectSecondary(BukkitUtil.toVector(( (BukkitMCLocation) l )._Location()));
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 Vector pt = ( (CuboidRegion) sel.getIncompleteRegion() ).getPos2();
                 if (pt == null) {
@@ -226,7 +225,7 @@ public class WorldEdit {
 //
 //        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 //            Static.checkPlugin("WorldEdit", t);
-//            return new CVoid(t);
+//            return CVoid.VOID;
 //        }
 //    }
 	@api
@@ -938,7 +937,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while creating protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -1076,7 +1075,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while redefining protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -1187,7 +1186,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while renaming protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -1264,7 +1263,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while removing protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -1443,7 +1442,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while adding owner(s) to protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -1548,7 +1547,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while deleting owner(s) from protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -1717,7 +1716,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while adding member(s) to protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -1822,7 +1821,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while deleting members(s) from protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -2009,7 +2008,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while defining flags", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		private <V> void setFlag(Target t, ProtectedRegion region,
@@ -2112,28 +2111,28 @@ public class WorldEdit {
 					if (value != null) {
 						return new CBoolean(value, t);
 					} else {
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				} else if (foundFlag instanceof DoubleFlag) {
 					Double value = ((DoubleFlag) foundFlag).unmarshal(getFlag);
 					if (value != null) {
 						return new CDouble(value, t);
 					} else {
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				} else if (foundFlag instanceof EnumFlag) {
 					String value = ((EnumFlag) foundFlag).unmarshal(getFlag).name();
 					if (value != null) {
 						return new CString(value, t);
 					} else {
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				} else if (foundFlag instanceof IntegerFlag) {
 					Integer value = ((IntegerFlag) foundFlag).unmarshal(getFlag);
 					if (value != null) {
 						return new CInt(value, t);
 					} else {
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				} else if (foundFlag instanceof LocationFlag) {
 					com.sk89q.worldedit.Location value = ((LocationFlag) foundFlag).unmarshal(getFlag);
@@ -2144,14 +2143,14 @@ public class WorldEdit {
 								new CDouble(value.getPosition().getZ(), t),
 								new CString(l.getWorld().getName(), t));
 					} else {
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				} else if (foundFlag instanceof RegionGroupFlag) {
 					String value = ((RegionGroupFlag) foundFlag).unmarshal(getFlag).name();
 					if (value != null) {
 						return new CString(value, t);
 					} else {
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				} else if (foundFlag instanceof SetFlag) {
 
@@ -2180,7 +2179,7 @@ public class WorldEdit {
 					if (value != null) {
 						return new CString(value, t);
 					} else {
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				}
 
@@ -2273,7 +2272,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while setting priority for protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -2359,7 +2358,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("Error while setting parent for protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
         @Override
@@ -2532,7 +2531,7 @@ public class WorldEdit {
 			} catch (DataException e) {
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.IOException, t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2580,7 +2579,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("The clipboard is empty, copy something to it first!",
 						ExceptionType.NotFoundException, t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2642,7 +2641,7 @@ public class WorldEdit {
 						ExceptionType.NotFoundException, t);
 			}
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

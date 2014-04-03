@@ -16,8 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class Enchantments {
 
@@ -254,7 +253,7 @@ public class Enchantments {
 					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " cannot be applied to this item", ExceptionType.EnchantmentException, t);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -329,7 +328,7 @@ public class Enchantments {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(enchantArray.get(key, t).val().toUpperCase());
 				is.removeEnchantment(e);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 

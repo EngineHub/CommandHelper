@@ -139,7 +139,7 @@ public class Federation {
 //
 //										@Override
 //										public void run() {
-//											local_callback.execute(new CNull(), new CBoolean(true, t), new CNull());
+//											local_callback.execute(CNull.NULL, new CBoolean(true, t), CNull.NULL);
 //										}
 //									});
 //								}
@@ -152,7 +152,7 @@ public class Federation {
 //
 //										@Override
 //										public void run() {
-//											local_callback.execute(new CNull(), new CBoolean(true, t), exception);
+//											local_callback.execute(CNull.NULL, new CBoolean(true, t), exception);
 //										}
 //									});
 //								}

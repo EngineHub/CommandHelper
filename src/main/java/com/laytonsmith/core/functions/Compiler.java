@@ -18,8 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
- * @author layton
+ * 
  */
 public class Compiler {
 
@@ -33,8 +32,6 @@ public class Compiler {
 	@noprofile
 	@hide("This is only used internally by the compiler.")
 	public static class p extends DummyFunction {
-
-		private static final CVoid VOID = new CVoid(Target.UNKNOWN);
 
 		@Override
 		public String getName() {
@@ -55,7 +52,7 @@ public class Compiler {
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			switch (nodes.length) {
 				case 0:
-					return VOID;
+					return CVoid.VOID;
 				case 1:
 					return parent.eval(nodes[0], env);
 				default: 
@@ -65,7 +62,7 @@ public class Compiler {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -501,7 +498,7 @@ public class Compiler {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
-				return new CVoid(t);
+				return CVoid.VOID;
 			}
 			return args[0];
 		}
@@ -526,7 +523,7 @@ public class Compiler {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree node;
 			if (children.isEmpty()) {
-				node = new ParseTree(new CVoid(t), fileOptions);
+				node = new ParseTree(CVoid.VOID, fileOptions);
 			} else if (children.size() == 1) {
 				node = children.get(0);
 			} else {
@@ -557,7 +554,7 @@ public class Compiler {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree node;
 			if (children.isEmpty()) {
-				node = new ParseTree(new CVoid(t), fileOptions);
+				node = new ParseTree(CVoid.VOID, fileOptions);
 			} else if (children.size() == 1) {
 				node = children.get(0);
 			} else {

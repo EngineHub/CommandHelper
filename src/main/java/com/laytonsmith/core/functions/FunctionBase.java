@@ -6,7 +6,6 @@ import com.laytonsmith.core.snapins.PackagePermission;
  * All functions that are implemented across all compilation platforms must implement
  * this interface at minimum. The annotation provides the platform(s) that the
  * function can be linked against.
- * @author layton
  */
 public interface FunctionBase {
     /**

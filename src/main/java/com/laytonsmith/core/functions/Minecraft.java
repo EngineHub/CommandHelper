@@ -33,8 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class Minecraft {
 
@@ -111,7 +110,7 @@ public class Minecraft {
 					}
 					return new CString(split[0] + ":" + split[1], t);
 				}
-				return new CNull(t);
+				return CNull.NULL;
 			}
 		}
 
@@ -218,7 +217,7 @@ public class Minecraft {
 				try {
 					return new CString(StaticLayer.LookupMaterialName(i), t);
 				} catch (NullPointerException e) {
-					return new CNull(t);
+					return CNull.NULL;
 				}
 			}
 		}
@@ -435,7 +434,7 @@ public class Minecraft {
 			int id = Static.getInt32(entityID, t);
 			MCLivingEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else if (e instanceof MCTameable) {
 				MCTameable mct = ((MCTameable) e);
 				if (player != null) {
@@ -443,7 +442,7 @@ public class Minecraft {
 				} else {
 					mct.setOwner(null);
 				}
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);
 			}
@@ -494,13 +493,13 @@ public class Minecraft {
 			int id = Static.getInt32(args[0], t);
 			MCLivingEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else if (e instanceof MCTameable) {
 				MCAnimalTamer at = ((MCTameable) e).getOwner();
 				if (null != at) {
 					return new CString(at.getName(), t);
 				} else {
-					return new CNull(t);
+					return CNull.NULL;
 				}
 			} else {
 				throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);
@@ -631,7 +630,7 @@ public class Minecraft {
 				radius = Static.getInt32(args[2], t);
 			}
 			l.getWorld().playEffect(l, e, data, radius);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -686,7 +685,7 @@ public class Minecraft {
 			} else {
 				e.setHealth(percent / 100.0 * e.getMaxHealth());
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1084,7 +1083,7 @@ public class Minecraft {
 			MCEntityType type = MCEntityType.valueOf(args[1].val().toUpperCase());
 			if(location.getBlock().getState() instanceof MCCreatureSpawner){
 				((MCCreatureSpawner)location.getBlock().getState()).setSpawnedType(type);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new Exceptions.FormatException("The block at " + location.toString() + " is not a spawner block", t);
 			}
@@ -1329,7 +1328,7 @@ public class Minecraft {
 				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.sendTexturePack(args[1].val());
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1435,7 +1434,7 @@ public class Minecraft {
 			} else {
 				s.unbanIP(ip);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1597,7 +1596,7 @@ public class Minecraft {
 			if (item != null) {
 				return new CInt(item.getEntityId(), t);
 			} else {
-				return new CNull(t);
+				return CNull.NULL;
 			}
         }
     }

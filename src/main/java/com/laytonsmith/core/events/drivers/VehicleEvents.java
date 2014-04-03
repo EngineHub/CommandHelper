@@ -103,7 +103,7 @@ public class VehicleEvents {
 				if (e.getEntity().getType() == MCEntityType.PLAYER) {
 					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
 				} else {
-					ret.put("player", new CNull(t));
+					ret.put("player", CNull.NULL);
 				}
 				return ret;
 			} else {
@@ -174,7 +174,7 @@ public class VehicleEvents {
 				if (e.getEntity().getType() == MCEntityType.PLAYER) {
 					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
 				} else {
-					ret.put("player", new CNull(t));
+					ret.put("player", CNull.NULL);
 				}
 				return ret;
 			} else {
@@ -261,8 +261,8 @@ public class VehicleEvents {
 				ret.put("type", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CInt(e.getVehicle().getEntityId(), t));
 				ret.put("collisiontype", new CString(e.getCollisionType().name(), t));
-				Construct block = new CNull(t);
-				Construct entity = new CNull(t);
+				Construct block = CNull.NULL;
+				Construct entity = CNull.NULL;
 				boolean collide = true;
 				boolean pickup = false;
 				switch (e.getCollisionType()) {
@@ -575,9 +575,9 @@ public class VehicleEvents {
 				MCEntity passenger = e.getVehicle().getPassenger();
 
 				if (passenger == null) {
-					ret.put("passenger", new CNull(t));
-					ret.put("passengertype", new CNull(t));
-					ret.put("player", new CNull(t));
+					ret.put("passenger", CNull.NULL);
+					ret.put("passengertype", CNull.NULL);
+					ret.put("player", CNull.NULL);
 				} else {
 
 					MCEntityType passengertype = e.getVehicle().getPassenger().getType();
@@ -588,7 +588,7 @@ public class VehicleEvents {
 					if (passengertype == MCEntityType.PLAYER) {
 						ret.put("player", new CString(((MCPlayer) e.getVehicle().getPassenger()).getName(), t));
 					} else {
-						ret.put("player", new CNull(t));
+						ret.put("player", CNull.NULL);
 					}
 				}
 

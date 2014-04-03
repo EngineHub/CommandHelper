@@ -25,7 +25,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
-import java.lang.Math;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.SortedMap;
@@ -37,8 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class World {
 
@@ -148,7 +146,7 @@ public class World {
 				throw new ConfigRuntimeException("Invalid world given.", ExceptionType.InvalidWorldException, t);
 			}
 			w.setSpawnLocation(x, y, z);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -247,7 +245,7 @@ public class World {
 				z = Static.getInt32(args[2], t);
 			}
 			world.refreshChunk(x, z);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 	
@@ -303,7 +301,7 @@ public class World {
  				z = Static.getInt32(args[2], t);
  			}
  			world.loadChunk(x, z);
- 			return new CVoid(t);
+ 			return CVoid.VOID;
  		}
  
  		@Override
@@ -380,7 +378,7 @@ public class World {
  				z = Static.getInt32(args[2], t);
  			}
  			world.unloadChunk(x, z);
- 			return new CVoid(t);
+ 			return CVoid.VOID;
  		}
  
  		@Override
@@ -761,7 +759,7 @@ public class World {
 			}
 			time = Long.parseLong(stime);
 			w.setTime(time);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -867,7 +865,7 @@ public class World {
 				creator.generator(args[4].val());
 			}
 			creator.createWorld();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1321,7 +1319,7 @@ public class World {
 				}
 				world.setDifficulty(difficulty);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1425,7 +1423,7 @@ public class World {
 				}
 				world.setPVP(Static.getBoolean(args[1]));
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1557,7 +1555,7 @@ public class World {
 				}
 				world.setGameRuleValue(gameRule, Static.getBoolean(args[2]));
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1676,11 +1674,11 @@ public class World {
 			double dY = subtract.getY();
 			double dZ = subtract.getZ();
 
-			double distanceXZ = Math.sqrt(dX * dX + dZ * dZ);
+			double distanceXZ = java.lang.Math.sqrt(dX * dX + dZ * dZ);
 
-			double yaw = Math.toDegrees(Math.acos(dX / distanceXZ));
+			double yaw = java.lang.Math.toDegrees(java.lang.Math.acos(dX / distanceXZ));
 			if (dZ < 0.0) {
-				yaw += Math.abs(180 - yaw) * 2;
+				yaw += java.lang.Math.abs(180 - yaw) * 2;
 			}
 
 			return new CDouble(yaw - 90, t);
@@ -1738,10 +1736,10 @@ public class World {
 			double dY = subtract.getY();
 			double dZ = subtract.getZ();
 
-			double distanceXZ = Math.sqrt(dX * dX + dZ * dZ);
-			double distanceY = Math.sqrt(distanceXZ * distanceXZ + dY * dY);
+			double distanceXZ = java.lang.Math.sqrt(dX * dX + dZ * dZ);
+			double distanceY = java.lang.Math.sqrt(distanceXZ * distanceXZ + dY * dY);
 
-			double pitch = Math.toDegrees(Math.acos(dY / distanceY)) - 90;
+			double pitch = java.lang.Math.toDegrees(java.lang.Math.acos(dY / distanceY)) - 90;
 
 			return new CDouble(pitch, t);
 		}

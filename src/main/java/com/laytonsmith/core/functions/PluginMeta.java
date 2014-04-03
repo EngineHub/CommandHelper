@@ -21,8 +21,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.Set;
 
 /**
- *
- * @author lsmith
+ * 
  */
 public class PluginMeta {
 	public static String docs(){
@@ -60,7 +59,7 @@ public class PluginMeta {
 			CByteArray ba = Static.getByteArray(args[1 + offset], t);
 			Static.AssertPlayerNonNull(p, t);
 			meta.fakeIncomingMessage(p, channel, ba.asByteArrayCopy());
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -118,7 +117,7 @@ public class PluginMeta {
 			CByteArray ba = Static.getByteArray(args[1 + offset], t);
 			Static.AssertPlayerNonNull(p, t);
 			p.sendPluginMessage(channel, ba.asByteArrayCopy());
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -174,7 +173,7 @@ public class PluginMeta {
 				throw new ConfigRuntimeException("The channel '" + channel + "' is already registered.", ExceptionType.PluginChannelException, t);
 			}
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -228,7 +227,7 @@ public class PluginMeta {
 				throw new ConfigRuntimeException("The channel '" + channel + "' is not registered.", ExceptionType.PluginChannelException, t);
 			}
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

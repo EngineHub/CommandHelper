@@ -150,7 +150,7 @@ public class XGUI {
 			}
 			Window w = windows.get(id);
 			w.setVisible(show);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -209,10 +209,10 @@ public class XGUI {
 					JPanel panel = (JPanel)w.findComponentAt(x, y);
 					panel.getGraphics().setColor(new Color(red, green, blue));
 					panel.getGraphics().draw3DRect(x, y, 1, 1, true);
-					return new CVoid(t);
+					return CVoid.VOID;
 				} catch(ClassCastException ex){
 					//?
-					return new CVoid(t);
+					return CVoid.VOID;
 				}
 			}
 		}

@@ -21,8 +21,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class Regex {
     
@@ -86,7 +85,7 @@ public class Regex {
                 ret.set(0, new CString(m.group(0), t), t);
                 for(int i = 1; i <= m.groupCount(); i++){
                     if(m.group(i) == null){
-                        ret.set(i, new CNull(t), t);
+                        ret.set(i, CNull.NULL, t);
                     } else {
                         ret.set(i, Static.resolveConstruct(m.group(i), t), t);
                     }

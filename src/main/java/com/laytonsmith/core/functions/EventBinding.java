@@ -27,8 +27,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class EventBinding {
 
@@ -85,7 +84,7 @@ public class EventBinding {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -314,7 +313,7 @@ public class EventBinding {
 					}
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -373,7 +372,7 @@ public class EventBinding {
 			if (original.getUnderlyingEvent() != null && original.isCancellable()) {
 				original.setCancelled(cancelled);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -488,7 +487,7 @@ public class EventBinding {
 				serverWide = Static.getBoolean(args[2]);
 			}
 			EventUtils.ManualTrigger(args[0].val(), obj, serverWide);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -636,7 +635,7 @@ public class EventBinding {
 			for (String param : params) {
 				e.lock(param);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -737,7 +736,7 @@ public class EventBinding {
 				throw new ConfigRuntimeException("consume may only be called from an event handler!", ExceptionType.BindException, t);
 			}
 			environment.getEnv(GlobalEnv.class).GetEvent().consume();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

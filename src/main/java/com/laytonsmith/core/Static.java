@@ -506,7 +506,7 @@ public final class Static {
             return new CString("", t);
         }
         if (val.equalsIgnoreCase("null")) {
-            return new CNull(t);
+            return CNull.NULL;
         } else if (val.equalsIgnoreCase("true")) {
             return new CBoolean(true, t);
         } else if (val.equalsIgnoreCase("false")) {
@@ -550,7 +550,7 @@ public final class Static {
 
     public static Construct resolveDollarVar(Construct variable, List<Variable> vars) {
         if(variable == null){
-            return new CNull();
+            return CNull.NULL;
         }
         if (variable.getCType() == Construct.ConstructType.VARIABLE) {
             for (Variable var : vars) {

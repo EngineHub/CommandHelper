@@ -13,8 +13,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.Map;
 
 /**
- *
- * @author layton
+ * 
  */
 public class InventoryManagement {
     public static String docs(){
@@ -171,7 +170,7 @@ public class InventoryManagement {
 			
 			p.closeInventory();
             
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override
@@ -226,7 +225,7 @@ public class InventoryManagement {
 			
 			p.openWorkbench(p.getLocation(), true);
             
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override
@@ -287,7 +286,7 @@ public class InventoryManagement {
 			
 			player.openInventory(other.getEnderChest());
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -343,7 +342,7 @@ public class InventoryManagement {
 			
 			p.openEnchanting(p.getLocation(), true);
             
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override
@@ -477,7 +476,7 @@ public class InventoryManagement {
                     ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_pinv(), but \"" + key + "\" was found. Ignoring.");
                 }
             }
-            return new CVoid(t);
+            return CVoid.VOID;
         }
     }
     
@@ -710,7 +709,7 @@ public class InventoryManagement {
 			if (m != null) {
 				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = p.getInventory().addItem(is);
@@ -879,7 +878,7 @@ public class InventoryManagement {
 			if (m != null) {
 				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = p.getEnderChest().addItem(is);
@@ -1081,7 +1080,7 @@ public class InventoryManagement {
 				}
 			}
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 	
@@ -1284,7 +1283,7 @@ public class InventoryManagement {
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
 			try{
 				inv.setItem(slot, is);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} catch(ArrayIndexOutOfBoundsException e){
 				throw new Exceptions.RangeException("Index out of bounds for the inventory type.", t);
 			}
@@ -1449,7 +1448,7 @@ public class InventoryManagement {
 			}
 			Static.AssertPlayerNonNull(p1, t);
 			p1.openInventory(p2.getInventory());
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1631,7 +1630,7 @@ public class InventoryManagement {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_inventory(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1691,7 +1690,7 @@ public class InventoryManagement {
 			if (m != null) {
 				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = inventory.addItem(is);
@@ -1830,7 +1829,7 @@ public class InventoryManagement {
 //                //If the stack size is maxed out, we're done.
 //            }
 //            
-//            return new CVoid(t);
+//            return CVoid.VOID;
 //        }
 //        
 //        public CHVersion since() {

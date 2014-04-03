@@ -59,7 +59,7 @@ public class Commands {
 						ExceptionType.NotFoundException, t);
 			}
 			customExec(t, environment, cmd, args[1]);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 		
 		/**
@@ -282,7 +282,7 @@ public class Commands {
 						ExceptionType.NotFoundException, t);
 			}
 			customExec(t, environment, cmd, args[1]);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 		
 		/**

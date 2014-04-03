@@ -31,7 +31,6 @@ import java.util.Set;
 
 /**
  *
- * @author Layton
  */
 public class ArrayHandling {
 
@@ -352,7 +351,7 @@ public class ArrayHandling {
 			} catch (IndexOutOfBoundsException e) {
 				throw new ConfigRuntimeException("The index " + index.asString().getQuote() + " is out of bounds", ExceptionType.IndexOverflowException, t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -363,7 +362,7 @@ public class ArrayHandling {
 				} catch (IndexOutOfBoundsException e) {
 					throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
 				}
-				return new CVoid(t);
+				return CVoid.VOID;
 			}
 			throw new ConfigRuntimeException("Argument 1 of array_set must be an array", ExceptionType.CastException, t);
 		}
@@ -434,7 +433,7 @@ public class ArrayHandling {
 						iterator.addToBlacklist(initialSize + i - 1);
 					}
 				}
-				return new CVoid(t);
+				return CVoid.VOID;
 			}
 			throw new ConfigRuntimeException("Argument 1 of array_push must be an array", ExceptionType.CastException, t);
 		}
@@ -523,7 +522,7 @@ public class ArrayHandling {
 			} catch(IndexOutOfBoundsException ex){
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IndexOverflowException, t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -808,7 +807,7 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray && args[1] instanceof CInt) {
 				CArray original = (CArray) args[0];
 				int size = (int) ((CInt) args[1]).getInt();
-				Construct fill = new CNull(t);
+				Construct fill = CNull.NULL;
 				if (args.length == 3) {
 					fill = args[2];
 				}
@@ -1470,7 +1469,7 @@ public class ArrayHandling {
 					callback.execute(new Construct[]{c});
 				}
 			});
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1531,7 +1530,7 @@ public class ArrayHandling {
 				}
 			}
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1645,7 +1644,7 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = (CArray)new array_indexes().exec(t, environment, args);
 			if(ca.isEmpty()){
-				return new CNull(t);
+				return CNull.NULL;
 			} else {
 				return ca.get(0);
 			}
@@ -1706,7 +1705,7 @@ public class ArrayHandling {
 			if(args[0] instanceof CArray){
 				((CArray)args[0]).reverse();
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

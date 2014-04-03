@@ -20,8 +20,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class ItemMeta {
 	public static String docs(){
@@ -166,7 +165,7 @@ public class ItemMeta {
 				throw new Exceptions.CastException("There is no item at slot " + slot, t);
 			}
 			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getTypeId(), t));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -335,7 +334,7 @@ public class ItemMeta {
 			} else {
 				throw new Exceptions.CastException("The item at slot " + slot + " is not leather armor", t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

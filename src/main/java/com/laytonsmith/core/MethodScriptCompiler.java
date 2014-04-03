@@ -1000,7 +1000,7 @@ public final class MethodScriptCompiler {
 		stream = tempStream;
 
 		ParseTree tree = new ParseTree(fileOptions);
-		tree.setData(new CNull(unknown));
+		tree.setData(CNull.NULL);
 		Stack<ParseTree> parents = new Stack<>();
 		/**
 		 * constructCount is used to determine if we need to use autoconcat

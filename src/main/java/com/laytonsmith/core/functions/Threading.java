@@ -82,7 +82,7 @@ public class Threading {
 					}
 				}
 			}, "(" + Implementation.GetServerType().getBranding() + ") " + id).start();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -216,7 +216,7 @@ public class Threading {
 					}
 				}
 			});
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -279,7 +279,7 @@ public class Threading {
 						} catch(ConfigRuntimeException | ProgramFlowManipulationException e){
 							return e;
 						}
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				});
 				

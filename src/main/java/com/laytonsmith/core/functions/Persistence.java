@@ -104,7 +104,7 @@ public class Persistence {
 			} catch (Exception ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -170,7 +170,7 @@ public class Persistence {
 					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 				}
 				if (obj == null) {
-					return new CNull(t);
+					return CNull.NULL;
 				}
 				o = Construct.json_decode(obj.toString(), t);
 			} catch (MarshalException ex) {
@@ -179,7 +179,7 @@ public class Persistence {
 			try {
 				return (Construct) o;
 			} catch (ClassCastException e) {
-				return new CNull(t);
+				return CNull.NULL;
 			}
 		}
 
@@ -393,7 +393,7 @@ public class Persistence {
 			} catch(IllegalArgumentException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

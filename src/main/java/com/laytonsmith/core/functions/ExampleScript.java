@@ -25,8 +25,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -40,7 +38,6 @@ import org.bukkit.plugin.PluginManager;
  * but there is no guarantee that functions will work. Since this is the case,
  * output can be mocked, by using the appropriate constructor. This will bypass actually
  * running the code, but will still output the information in the standard format.
- * @author lsmith
  */
 public class ExampleScript {
 	

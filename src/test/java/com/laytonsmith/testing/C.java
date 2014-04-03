@@ -36,13 +36,13 @@ public class C {
         return new CInt(val, Target.UNKNOWN);
     }
     public static CNull Null(){
-        return new CNull(Target.UNKNOWN);
+        return CNull.NULL;
     }
     public static CString String(String s){
         return new CString(s, Target.UNKNOWN);
     }
     public static CVoid Void(){
-        return new CVoid(Target.UNKNOWN);
+        return CVoid.VOID;
     }
     public static IVariable IVariable(String name, Construct val){
         return new IVariable(name, val, Target.UNKNOWN);

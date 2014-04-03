@@ -27,8 +27,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
- *
- * @author lsmith
+ * 
  */
 public class DataTransformations {
 

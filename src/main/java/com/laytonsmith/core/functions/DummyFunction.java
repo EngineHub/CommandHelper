@@ -7,7 +7,6 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 /**
  * Only should be used for test functions, or other typically unreleased or
  * temporary functions.
- * @author Layton
  */
 public abstract class DummyFunction extends AbstractFunction{
 

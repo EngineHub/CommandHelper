@@ -18,7 +18,7 @@ import org.perf4j.StopWatch;
 
 /**
  *
- * @author Layton
+
  */
 public class Performance {
     public static boolean PERFORMANCE_LOGGING = false;
@@ -82,7 +82,7 @@ public class Performance {
                 throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, t);
             }
             PERFORMANCE_LOGGING = Static.getBoolean(args[0]);
-            return new CVoid(t);
+            return CVoid.VOID;
         }
         
     }

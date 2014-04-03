@@ -65,7 +65,7 @@ public class BasicLogic {
 				return parent.seval(__if, env);
 			} else {
 				if (__else == null) {
-					return new CVoid(t);
+					return CVoid.VOID;
 				}
 				return parent.seval(__else, env);
 			}
@@ -73,7 +73,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -157,7 +157,7 @@ public class BasicLogic {
 //						if (!args.isEmpty()) {
 //							options = args.get(0).getFileOptions();
 //						}
-//						ParseTree node = new ParseTree(new CVoid(t), options);
+//						ParseTree node = new ParseTree(CVoid.VOID, options);
 //						node.setOptimized(true);
 //						return node;
 //					}
@@ -235,7 +235,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		@Override
@@ -295,7 +295,7 @@ public class BasicLogic {
 					throw ex;
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -654,7 +654,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		@Override
@@ -682,7 +682,7 @@ public class BasicLogic {
 					return ret;
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2036,7 +2036,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) {
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		@Override
@@ -2098,7 +2098,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) {
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		@Override
@@ -2687,7 +2687,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		@Override
@@ -2755,7 +2755,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		@Override

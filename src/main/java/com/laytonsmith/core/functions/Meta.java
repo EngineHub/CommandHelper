@@ -29,9 +29,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 /**
- * I'm So Meta, Even This Acronym
- *
- * @author Layton
+ * 
  */
 public class Meta {
 
@@ -101,7 +99,7 @@ public class Meta {
 				for (int i = 0; i < u.size(); i++) {
 					exec(t, env, new Construct[]{new CString(u.get(i, t).val(), t), args[1]});
 				}
-				return new CVoid(t);
+				return CVoid.VOID;
 			}
 			if (args[0].val().equals("~op")) {
 				//TODO: Remove this after next release (3.3.1)
@@ -141,7 +139,7 @@ public class Meta {
 							ExceptionType.PlayerOfflineException, t);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -229,7 +227,7 @@ public class Meta {
 					this.setOp(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), isOp);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -344,7 +342,7 @@ public class Meta {
 						+ " but in the plugin that provides the command.", 
 						ExceptionType.PluginInternalException, t, ex);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -394,7 +392,7 @@ public class Meta {
 			for (int i = 0; i < args.length; i++) {
 				args[i].val();
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -490,7 +488,7 @@ public class Meta {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 		//Doesn't matter, run out of state anyways
 
@@ -721,7 +719,7 @@ public class Meta {
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalPlayer);
 			environment.getEnv(GlobalEnv.class).SetLabel(originalLabel);
 			environment.getEnv(GlobalEnv.class).GetScript().setLabel(originalLabel);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -768,7 +766,7 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else {
 				return new CString(environment.getEnv(CommandHelperEnvironment.class).GetCommand(), t);
 			}
@@ -891,7 +889,7 @@ public class Meta {
 				MCLocation l = (cs.getBlock().getLocation());
 				return ObjectGenerator.GetGenerator().location(l);
 			}
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		@Override
@@ -947,7 +945,7 @@ public class Meta {
 				state = Static.getBoolean(args[1]);
 			}
 			player.setOp(state);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1006,7 +1004,7 @@ public class Meta {
 			} else {
 				run.exec(t, environment, s);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

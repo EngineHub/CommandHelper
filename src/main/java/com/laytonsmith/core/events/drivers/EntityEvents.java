@@ -192,8 +192,8 @@ public class EntityEvents {
 					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()));
 				}
 				ret.put("blocks", blocks);
-				Construct entity = new CNull(t);
-				Construct entitytype = new CNull(t);
+				Construct entity = CNull.NULL;
+				Construct entitytype = CNull.NULL;
 				if (e.getEntity() != null) {
 					entity = new CInt(e.getEntity().getEntityId(), t);
 					entitytype = new CString(e.getEntity().getType().name(), t);
@@ -305,7 +305,7 @@ public class EntityEvents {
 				} else if (shooter instanceof MCEntity) {
 					ret.put("shooter", new CInt(((MCEntity) shooter).getEntityId(), t));
 				} else {
-					ret.put("shooter", new CNull(t));
+					ret.put("shooter", CNull.NULL);
 				}
 				return ret;
 			} else {
@@ -421,17 +421,17 @@ public class EntityEvents {
 					if (es instanceof MCPlayer) {
 						mapEvent.put("player", new CString(((MCPlayer) es).getName(), Target.UNKNOWN));
   					} else {
-						mapEvent.put("player", new CNull(Target.UNKNOWN));
+						mapEvent.put("player", CNull.NULL);
 					}
 				} else if (shooter instanceof MCBlockProjectileSource) {
 					mapEvent.put("shooter", ObjectGenerator.GetGenerator().location(
 							((MCBlockProjectileSource) shooter).getBlock().getLocation()));
 					mapEvent.put("shootertype", new CString("BLOCK", Target.UNKNOWN));
-					mapEvent.put("player", new CNull(Target.UNKNOWN));
+					mapEvent.put("player", CNull.NULL);
 				} else {
-					mapEvent.put("shooter", new CNull(Target.UNKNOWN));
-					mapEvent.put("shootertype", new CNull(Target.UNKNOWN));
-					mapEvent.put("player", new CNull(Target.UNKNOWN));
+					mapEvent.put("shooter", CNull.NULL);
+					mapEvent.put("shootertype", CNull.NULL);
+					mapEvent.put("player", CNull.NULL);
 				}
 				mapEvent.put("location", ObjectGenerator.GetGenerator().location(projectile.getLocation()));
 				mapEvent.put("velocity", ObjectGenerator.GetGenerator().velocity(projectile.getVelocity(), Target.UNKNOWN));
@@ -1018,7 +1018,7 @@ public class EntityEvents {
                 map.put("id", new CInt(event.getDamager().getEntityId(), t));
 				map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 
-                Construct data = new CNull(t);
+                Construct data = CNull.NULL;
 				if(event.getDamager() instanceof MCPlayer) {
 					data = new CString(((MCPlayer)event.getDamager()).getName(), t);
 				} else if (event.getDamager() instanceof MCProjectile) {
@@ -1412,11 +1412,11 @@ public class EntityEvents {
 					if (remover instanceof MCPlayer) {
 						mapEvent.put("player", new CString(((MCPlayer) remover).getName(), Target.UNKNOWN));
 					} else {
-						mapEvent.put("player", new CNull(Target.UNKNOWN));
+						mapEvent.put("player", CNull.NULL);
 					}
 				} else {
-					mapEvent.put("remover", new CNull(Target.UNKNOWN));
-					mapEvent.put("player", new CNull(Target.UNKNOWN));
+					mapEvent.put("remover", CNull.NULL);
+					mapEvent.put("player", CNull.NULL);
 				}
 				return mapEvent;
 			} else {
