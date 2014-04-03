@@ -1448,7 +1448,7 @@ public class Cmdline {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.InsufficientPermissionException};
 		}
 
 		@Override
