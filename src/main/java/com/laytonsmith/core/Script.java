@@ -175,6 +175,9 @@ public class Script {
 
         try {
             for (ParseTree rootNode : cright) {
+				if(rootNode == null){
+					continue;
+				}
                 for (Construct tempNode : rootNode.getAllData()) {
                     if (tempNode instanceof Variable) {
                         if(left_vars == null){
