@@ -65,7 +65,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.File;
@@ -126,7 +126,7 @@ public final class Interpreter {
 	 */
 	private static final int MAX_COMMAND_HISTORY = 100;
 
-	public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
 		File fromFile = new File(file).getCanonicalFile();
 		Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
 		try {
@@ -159,11 +159,11 @@ public final class Interpreter {
 	 * @throws DataSourceException
 	 * @throws URISyntaxException
 	 */
-	public Interpreter(List<String> args, String cwd) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	public Interpreter(List<String> args, String cwd) throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
 		this(args, cwd, false);
 	}
 
-	private Interpreter(List<String> args, String cwd, boolean inTTYMode) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	private Interpreter(List<String> args, String cwd, boolean inTTYMode) throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
 		doStartup();
 		env.getEnv(GlobalEnv.class).SetRootFolder(new File(cwd));
 		if(inTTYMode){
@@ -412,7 +412,7 @@ public final class Interpreter {
 		return BLUE + ":" + TermColors.RESET;
 	}
 
-	private void doStartup() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	private void doStartup() throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
 
 		Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		Installer.InstallCmdlineInterpreter();

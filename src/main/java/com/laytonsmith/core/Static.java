@@ -38,7 +38,7 @@ import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
@@ -1146,7 +1146,7 @@ public final class Static {
 	 * @throws DataSourceException
 	 * @throws URISyntaxException 
 	 */
-	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException{
+	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException{
 		return GenerateStandaloneEnvironment(new PermissionsResolver.PermissiveResolver());
 	}
 	
@@ -1159,7 +1159,7 @@ public final class Static {
 	 * @throws DataSourceException
 	 * @throws URISyntaxException 
 	 */
-	public static Environment GenerateStandaloneEnvironment(PermissionsResolver permissionsResolver) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException{
+	public static Environment GenerateStandaloneEnvironment(PermissionsResolver permissionsResolver) throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException{
 		File jarLocation;
 		if(Static.class.getProtectionDomain().getCodeSource().getLocation() != null){
 			jarLocation = new File(Static.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
@@ -1174,7 +1174,7 @@ public final class Static {
 				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace("\\", "/")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"), 
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, permissionsResolver, platformFolder,
-				new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+				new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}

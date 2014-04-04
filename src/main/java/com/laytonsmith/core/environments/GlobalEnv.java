@@ -14,7 +14,7 @@ import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.File;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private String label = null;
 	private final DaemonManager daemonManager = new DaemonManager();
 	private boolean dynamicScriptingMode = false;
-	private final Profiles profiles;
+	private final SQLProfiles profiles;
 	private BoundEvent.ActiveEvent event = null;
 	private boolean interrupt = false;
 	private final List<ArrayAccess.ArrayAccessIterator> arrayAccessList = Collections.synchronizedList(new ArrayList<ArrayAccess.ArrayAccessIterator>());
@@ -67,10 +67,10 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param network The pre-configured PersistenecNetwork object to use
 	 * @param resolver The PermissionsResolver to use
 	 * @param root The root working directory to use
-	 * @param profiles The SQL Profiles object to use
+	 * @param profiles The SQL SQLProfiles object to use
 	 */
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network, PermissionsResolver resolver, 
-			File root, Profiles profiles) {
+			File root, SQLProfiles profiles) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
 		Static.AssertNonNull(profiler, "Profiler cannot be null");
 		Static.AssertNonNull(network, "PersistenceNetwork cannot be null");
@@ -288,7 +288,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		return this.dynamicScriptingMode;
 	}
 
-	public Profiles getSQLProfiles() {
+	public SQLProfiles getSQLProfiles() {
 		return this.profiles;
 	}
 	

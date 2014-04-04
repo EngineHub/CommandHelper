@@ -2185,7 +2185,7 @@ public class DataHandling {
 
 		@Override
 		public boolean isRestricted() {
-			return true;
+			return false;
 		}
 
 		@Override

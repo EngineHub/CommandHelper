@@ -19,7 +19,7 @@ public class ProfilesTest {
 	
 	@BeforeClass
 	public static void setUpClass() {
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Profiles.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(SQLProfiles.class));
 	}
 	
 	@AfterClass
@@ -51,7 +51,7 @@ public class ProfilesTest {
 				+ "		<password>password2</password>"
 				+ "	</profile>"
 				+ "</profiles>";
-		Profiles profiles = new Profiles(good);
+		SQLProfiles profiles = new SQLProfiles(good);
 		
 	}
 	

@@ -29,7 +29,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ParameterMetaData;
@@ -75,15 +75,15 @@ public class SQL {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				Profiles.Profile profile;
+				SQLProfiles.SQLProfile profile;
 				if (args[0] instanceof CArray) {
 					Map<String, String> data = new HashMap<>();
 					for (String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key).val());
 					}
-					profile = Profiles.getProfile(data);
+					profile = SQLProfiles.getProfile(data);
 				} else {
-					Profiles profiles = environment.getEnv(GlobalEnv.class).getSQLProfiles();
+					SQLProfiles profiles = environment.getEnv(GlobalEnv.class).getSQLProfiles();
 					profile = profiles.getProfileById(args[0].val());
 				}
 				String query = args[1].val();
@@ -200,7 +200,7 @@ public class SQL {
 				} finally {
 					conn.close();
 				}
-			} catch (Profiles.InvalidProfileException | SQLException ex) {
+			} catch (SQLProfiles.InvalidSQLProfileException | SQLException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
 			}
 		}
