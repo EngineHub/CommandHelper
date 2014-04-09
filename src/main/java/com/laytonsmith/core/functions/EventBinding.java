@@ -315,13 +315,10 @@ public class EventBinding {
 				id = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getId();
 			}
 			BoundEvent be = EventUtils.GetEventById(id);
-			Event event = null;
-			if(be != null){
-				event = be.getEventDriver();
-			}
+			Event event = be.getEventDriver();
 			EventUtils.UnregisterEvent(id);
 			//Only remove the counter if it had been added in the first place.
-			if(event != null && event.addCounter()){
+			if(event.addCounter()){
 				synchronized(bindCounter){
 					bindCounter.decrementAndGet();
 					if(bindCounter.get() == 0){
