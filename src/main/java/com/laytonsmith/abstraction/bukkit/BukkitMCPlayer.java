@@ -371,26 +371,45 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
             throw new IllegalStateException("Running server isn't CraftBukkit");
         }
 
-        Set opSet = null;
-		try{
-			//Probably 1.4.5
-			/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
-			/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
-			opSet = (Set) ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "ServerConfigurationManagerAbstract").loadClass(), obcServerConfigurationmanagerAbstract, "operators");
-		} catch(ReflectionUtils.ReflectionException e){
-			//Probably 1.4.6
+		try {
+			Set opSet = null;
+			try{
+				//Probably 1.4.5
+				/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
+				/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
+				opSet = (Set) ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "ServerConfigurationManagerAbstract").loadClass(), obcServerConfigurationmanagerAbstract, "operators");
+			} catch(ReflectionUtils.ReflectionException e){
+				//Probably 1.4.6
+				Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
+				/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
+				/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
+				opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
+			}
+
+			// since all Java objects pass by reference, we don't need to set field back to object
+			if (value) {
+				opSet.add(p.getName().toLowerCase());
+			} else {
+				opSet.remove(p.getName().toLowerCase());
+			}
+		} catch(ClassCastException ex){
+			// Probably 1.7.8
 			Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
 			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
 			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-			opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
+			/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
+			//opSet.getClass().getSuperclass() == n.m.s.JsonList
+			Map/*<String, n.m.s.OpListEntry>*/ d = (Map)ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
+			if(value){
+				/*n.m.s.OpListEntry*/ Class nmsOpListEntry = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "OpListEntry").loadClass();
+				/*net.minecraft.util.com.mojang.authlib.GameProfile*/ Class nmucmaGameProfile = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
+				Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
+				Object opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmucmaGameProfile, int.class}, new Object[]{gameProfile, 4});
+				d.put(p.getUniqueId().toString(), opListEntry);
+			} else {
+				d.remove(p.getUniqueId().toString());
+			}
 		}
-
-        // since all Java objects pass by reference, we don't need to set field back to object
-        if (value) {
-            opSet.add(p.getName().toLowerCase());
-        } else {
-            opSet.remove(p.getName().toLowerCase());
-        }
         p.recalculatePermissions();
     }
 
