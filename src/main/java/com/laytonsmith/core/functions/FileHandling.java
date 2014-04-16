@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -469,7 +470,7 @@ public class FileHandling {
 				return CNull.NULL;
 			}
 			//If the path ends with /, take it off
-			if(path.endsWith("/")){
+			while(path.endsWith("/")){
 				path = path.substring(0, path.length() - 2);
 			}
 			return new CString(path.substring(0, path.length() - path.lastIndexOf("/")), t);
@@ -502,12 +503,12 @@ public class FileHandling {
 		
 	}
 	
-	//@api
+	@api
 	public static class file_resolve extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.IOException};
 		}
 
 		@Override
@@ -522,7 +523,12 @@ public class FileHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			throw new UnsupportedOperationException("TODO: Not supported yet.");
+			File f = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+			try {
+				return new CString(f.getCanonicalPath(), t);
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+			}
 		}
 
 		@Override
@@ -537,7 +543,8 @@ public class FileHandling {
 
 		@Override
 		public String docs() {
-			return "";
+			return "string {file} Returns the canonical, absolute path of the given path. This provides a context independent"
+					+ " and unique path which always points to the specified path, and removes any duplicate . or .. parts.";
 		}
 
 		@Override
