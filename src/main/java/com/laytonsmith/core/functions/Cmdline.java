@@ -179,6 +179,114 @@ public class Cmdline {
 			};
 		}
     }
+	
+	@api
+	@noboilerplate
+	public static class print_out extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String msg = Static.MCToANSIColors(args[0].val());
+			System.out.print(msg);
+			System.out.flush();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "print_out";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {text} Writes the text to the system's std out, but does not automatically add a newline at the end."
+					+ " Unlike console(), this does not use anything else to format the output, though in many"
+                    + " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
+					+ " \"bleed\" through, so"
+                    + " print_out(color(RED) . 'This is red') will also cause the next line to also be red,"
+					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)).";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	@noboilerplate
+	public static class print_err extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String msg = Static.MCToANSIColors(args[0].val());
+			System.err.print(msg);
+			System.err.flush();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "print_err";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {text} Writes the text to the system's std err, but does not automatically add a newline at the end."
+					+ " Unlike console(), this does not use anything else to format the output, though in many"
+                    + " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
+					+ " \"bleed\" through, so"
+                    + " print_err(color(RED) . 'This is red') will also cause the next line to also be red,"
+					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)).";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 
     @api(environments={GlobalEnv.class})
     @noboilerplate
