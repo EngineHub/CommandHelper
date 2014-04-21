@@ -3,11 +3,10 @@ package com.laytonsmith.core.environments;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.events.BoundEvent;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cloneable {
 	  

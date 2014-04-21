@@ -4,7 +4,7 @@ import com.laytonsmith.abstraction.enums.MCInventoryType;
 
 /**
  *
- * @author Layton
+ * 
  */
 public interface MCInventoryView {
 

@@ -9,7 +9,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
- * @author layton
+ * 
  */
 @typeof("double")
 public class CDouble extends Construct implements Cloneable{

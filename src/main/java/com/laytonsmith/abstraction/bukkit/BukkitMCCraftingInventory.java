@@ -1,11 +1,10 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.inventory.CraftingInventory;
-import org.bukkit.inventory.ItemStack;
-
 import com.laytonsmith.abstraction.MCCraftingInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCRecipe;
+import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.ItemStack;
 
 public class BukkitMCCraftingInventory extends BukkitMCInventory implements MCCraftingInventory {
 

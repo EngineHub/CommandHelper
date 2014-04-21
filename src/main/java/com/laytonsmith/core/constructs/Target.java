@@ -6,7 +6,7 @@ import java.io.File;
  * A target allows code to be exactly identified in source. It contains the line
  * number, file, and column that this target represents.
  *
- * @author layton
+ * 
  */
 public class Target {
 

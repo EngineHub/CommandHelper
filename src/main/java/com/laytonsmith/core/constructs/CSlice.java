@@ -6,13 +6,12 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Exceptions;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 /**
  *
- * @author layton
+ * 
  */
 @typeof("slice")
 public class CSlice extends CArray {

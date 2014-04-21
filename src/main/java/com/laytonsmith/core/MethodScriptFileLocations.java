@@ -1,8 +1,8 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.FileLocations;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.FileLocations;
 import com.laytonsmith.abstraction.Implementation;
 import java.io.File;
 import java.io.UnsupportedEncodingException;

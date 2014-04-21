@@ -4,6 +4,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
@@ -16,9 +17,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Window;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +27,7 @@ import javax.swing.JPanel;
 /**
  *
  */
+@core
 public class XGUI {
 	public static String docs(){
 		return "This provides extremely limited gui control functions. This entire class is experimental, and will probably be removed at"

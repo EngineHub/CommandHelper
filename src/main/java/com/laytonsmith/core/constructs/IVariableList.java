@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class IVariableList {
     Map<String, IVariable> varList = new HashMap<String, IVariable>();

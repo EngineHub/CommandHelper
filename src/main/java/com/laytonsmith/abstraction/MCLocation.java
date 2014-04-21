@@ -1,12 +1,11 @@
 
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCLocation extends AbstractionObject{
     public double getX();

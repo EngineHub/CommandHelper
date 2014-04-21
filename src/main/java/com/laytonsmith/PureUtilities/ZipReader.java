@@ -1,10 +1,15 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.util.ArrayList;
@@ -24,7 +29,7 @@ import java.util.zip.ZipInputStream;
  * good to keep in mind this when using the reader, you'll have to balance
  * between memory usage (caching) or CPU use (re-reading as needed).
  *
- * @author Layton Smith
+ *  Smith
  */
 public class ZipReader {
 

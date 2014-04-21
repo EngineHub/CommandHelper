@@ -8,16 +8,22 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.*;
-import org.junit.*;
-import org.junit.runner.RunWith;
+import static com.laytonsmith.testing.StaticTest.GetFakeServer;
+import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
+import static com.laytonsmith.testing.StaticTest.InstallFakeServerFrontend;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import static org.mockito.Mockito.verify;
 //import org.powermock.core.classloader.annotations.PowerMockIgnore;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
 //import org.powermock.modules.junit4.PowerMockRunner;
 /**
  *
- * @author Layton
+ * 
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(Static.class)

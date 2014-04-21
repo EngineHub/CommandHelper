@@ -9,7 +9,7 @@ import net.milkbowl.vault.economy.Economy;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCServer extends AbstractionObject{
     public String getName();

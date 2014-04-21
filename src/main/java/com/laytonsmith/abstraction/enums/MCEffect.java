@@ -5,7 +5,7 @@ import com.laytonsmith.annotations.MEnum;
 
 /**
  *
- * @author layton
+ * 
  */
 @MEnum("Effect")
 public enum MCEffect {

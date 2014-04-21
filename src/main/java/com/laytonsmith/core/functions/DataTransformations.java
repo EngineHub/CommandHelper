@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -29,6 +30,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 /**
  * 
  */
+@core
 public class DataTransformations {
 
 	public static String docs() {

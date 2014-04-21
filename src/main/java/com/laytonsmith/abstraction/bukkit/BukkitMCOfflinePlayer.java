@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOfflinePlayer{
 

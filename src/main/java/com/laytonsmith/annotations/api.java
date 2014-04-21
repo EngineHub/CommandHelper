@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * Marks a function as an API function, which includes it in the list of functions.
- * @author Layton
+ * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

@@ -4,7 +4,7 @@ package com.laytonsmith.core;
  * A permissions resolver resolves whether a particular user (stored as a string) has
  * various permissions to do certain things, as well as polling for information
  * about the user.
- * @author lsmith
+ * 
  */
 public interface PermissionsResolver {
 	

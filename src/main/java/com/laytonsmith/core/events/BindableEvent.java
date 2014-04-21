@@ -2,7 +2,7 @@ package com.laytonsmith.core.events;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface BindableEvent {
     /**

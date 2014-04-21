@@ -17,7 +17,7 @@ import org.bukkit.inventory.meta.Repairable;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitMCItemMeta implements MCItemMeta {
 

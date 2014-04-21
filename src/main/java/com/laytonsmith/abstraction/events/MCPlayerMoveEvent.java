@@ -4,7 +4,7 @@ import com.laytonsmith.abstraction.MCLocation;
 
 /**
  *
- * @author Layton
+ * 
  */
 public interface MCPlayerMoveEvent extends MCPlayerEvent {
 	public MCLocation getFrom();

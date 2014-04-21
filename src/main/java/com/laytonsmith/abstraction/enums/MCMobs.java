@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.MEnum;
 /**
  * These don't directly map to entity types, because this is mostly used for
  * spawining mobs.
- * @author Layton
+ * 
  */
 @MEnum("Mobs")
 public enum MCMobs {

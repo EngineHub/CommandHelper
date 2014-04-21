@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  *
- * @author layton
+ * 
  */
 public final class EventList {
     

@@ -10,24 +10,19 @@ import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.tools.Interpreter;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 //import org.pushingpixels.substance.api.skin.SubstanceGraphiteGlassLookAndFeel;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class DocGenUI extends javax.swing.JFrame {
 

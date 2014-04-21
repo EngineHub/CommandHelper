@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * is guaranteed to be sequential with respect to other tasks in that
  * queue, but not necessarily with respect to other tasks on other queues.
  * Tasks will block the queue.
- * @author lsmith
+ * 
  */
 public class ExecutionQueue {
 	

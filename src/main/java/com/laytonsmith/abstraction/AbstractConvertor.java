@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public abstract class AbstractConvertor implements Convertor{
 	

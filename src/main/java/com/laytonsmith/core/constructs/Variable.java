@@ -2,7 +2,7 @@ package com.laytonsmith.core.constructs;
 
 /**
  *
- * @author layton
+ * 
  */
 public class Variable extends Construct {
 

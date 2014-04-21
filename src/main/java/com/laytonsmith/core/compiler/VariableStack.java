@@ -12,7 +12,7 @@ import java.util.Stack;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public final class VariableStack {
 	private Stack<Map<String, Construct>> vars;

@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.Velocity;
 
 /**
  *

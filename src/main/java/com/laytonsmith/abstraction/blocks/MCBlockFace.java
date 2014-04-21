@@ -4,7 +4,7 @@ import com.laytonsmith.annotations.MEnum;
 
 /**
  *
- * @author layton
+ * 
  */
 @MEnum("BlockFace")
 public enum MCBlockFace {

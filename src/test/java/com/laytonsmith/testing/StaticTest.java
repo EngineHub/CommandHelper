@@ -78,14 +78,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.junit.Assert.fail;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 //import static org.powermock.api.mockito.PowerMockito.mock;
 //import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * 
- * @author Layton
+ * 
  */
 //@RunWith(PowerMockRunner.class)
 

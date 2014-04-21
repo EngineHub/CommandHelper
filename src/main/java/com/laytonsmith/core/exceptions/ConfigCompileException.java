@@ -8,7 +8,7 @@ import java.io.File;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class ConfigCompileException extends Exception{
 

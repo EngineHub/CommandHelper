@@ -1,7 +1,21 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCCommandMap;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCHumanEntity;
+import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
+import com.laytonsmith.abstraction.MCItemFactory;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPluginManager;
+import com.laytonsmith.abstraction.MCRecipe;
+import com.laytonsmith.abstraction.MCScoreboard;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
@@ -17,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.milkbowl.vault.economy.Economy;
-import net.sf.cglib.proxy.Enhancer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -32,7 +45,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCServer implements MCServer {
     

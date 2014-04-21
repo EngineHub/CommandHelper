@@ -1,11 +1,5 @@
 package com.laytonsmith.core.functions.bash;
 
-import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.compiler.MethodScriptStaticCompiler;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import org.junit.*;
-import static org.junit.Assert.*;
-
 /**
  *
  * TODO: Re-add these tests once the feature is under development again.

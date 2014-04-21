@@ -1,8 +1,8 @@
 package com.laytonsmith.persistence;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.PropertiesManager;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.PropertiesManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 /**
  * Given a File, creates a data source filter, which can be
  *
- * @author layton
+ * 
  */
 public class DataSourceFilter {
 

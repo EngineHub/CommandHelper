@@ -3,7 +3,7 @@ package com.laytonsmith.core.profiler;
 
 /**
  *
- * @author Layton
+ * 
  */
 final class GarbageCollectionDetector {
 

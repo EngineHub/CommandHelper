@@ -8,7 +8,11 @@ import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -16,7 +20,7 @@ import org.json.simple.JSONValue;
 
 /**
  *
- * @author layton
+ * 
  */
 public abstract class Construct implements Cloneable, Comparable<Construct>, Mixed{
 	

@@ -5,7 +5,7 @@ import com.laytonsmith.annotations.MEnum;
 
 /**
  *
- * @author Layton
+ * 
  */
 @MEnum("DyeColor")
 public enum MCDyeColor {

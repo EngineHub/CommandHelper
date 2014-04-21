@@ -113,7 +113,6 @@ import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Minecart;
-import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Painting;
 import org.bukkit.entity.Pig;
@@ -129,6 +128,7 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
+import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
@@ -149,7 +149,7 @@ import org.bukkit.projectiles.ProjectileSource;
 
 /**
  *
- * @author layton
+ * 
  */
 @convert(type=Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {

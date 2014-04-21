@@ -2,22 +2,18 @@ package com.laytonsmith.core.events;
 
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.SRun;
-import org.junit.*;
-import org.junit.runner.RunWith;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 //import static org.powermock.api.mockito.PowerMockito.when;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
 //import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
- * @author layton
+ * 
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(Static.class)

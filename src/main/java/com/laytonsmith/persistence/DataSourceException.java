@@ -2,7 +2,7 @@ package com.laytonsmith.persistence;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class DataSourceException extends Exception {
 

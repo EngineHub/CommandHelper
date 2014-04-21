@@ -7,7 +7,7 @@ import com.laytonsmith.core.constructs.Target;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class FunctionReturnException extends ProgramFlowManipulationException{
     Construct ret;

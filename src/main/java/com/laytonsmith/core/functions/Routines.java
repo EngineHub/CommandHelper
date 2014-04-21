@@ -1,20 +1,12 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CLock;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Construct.ConstructType;
-import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.annotations.core;
 
 /**
  *
  */
+@core
 public class Routines {
 	public static String docs(){
 		return "This class of functions provides Routines capabilities. Currently all these functions"

@@ -24,7 +24,7 @@ package com.laytonsmith.core.packetjumper;
 //
 ///**
 // *
-// * @author Layton
+// * 
 // */
 public class PacketJumper {
 //	

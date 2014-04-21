@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -47,6 +48,7 @@ import java.util.logging.Logger;
 /**
  * 
  */
+@core
 public class Cmdline {
 
     public static String docs() {

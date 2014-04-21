@@ -9,9 +9,27 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.AliasCore;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -370,155 +388,6 @@ public class Meta {
 		public Boolean runAsync() {
 			return false;
 		}
-	}
-
-	@api
-	@noprofile
-	@hide("This will eventually be replaced by ; statements.")
-	public static class g extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "g";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			for (int i = 0; i < args.length; i++) {
-				args[i].val();
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String docs() {
-			return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
-		}
-
-		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-	}
-
-	@api
-	public static class eval extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "eval";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
-					+ "removal.";
-		}
-
-		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			boolean oldDynamicScriptMode = env.getEnv(GlobalEnv.class).GetDynamicScriptingMode();
-			ParseTree node = nodes[0];
-			try {
-				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
-				Construct script = parent.seval(node, env);
-				if(script instanceof CClosure){
-					throw new Exceptions.CastException("Closures cannot be eval'd directly. Use execute() instead.", t);
-				}
-				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
-				StringBuilder b = new StringBuilder();
-				int count = 0;
-				for (ParseTree child : root.getChildren()) {
-					Construct s = parent.seval(child, env);
-					if (!s.val().trim().isEmpty()) {
-						if (count > 0) {
-							b.append(" ");
-						}
-						b.append(s.val());
-					}
-					count++;
-				}
-				return new CString(b.toString(), t);
-			} catch (ConfigCompileException e) {
-				throw new ConfigRuntimeException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
-			} finally {
-				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(oldDynamicScriptMode);
-			}
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return CVoid.VOID;
-		}
-		//Doesn't matter, run out of state anyways
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() != 1){
-				throw new ConfigCompileException(getName() + " expects only one argument", t);
-			}
-			if(children.get(0).isConst()){
-				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
-						+ " hardcoded code in " + getName() + " is much less efficient.", t);
-			}
-			return null;
-		}
-		
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})

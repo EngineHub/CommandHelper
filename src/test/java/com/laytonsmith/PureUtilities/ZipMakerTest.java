@@ -9,7 +9,7 @@ import org.junit.Before;
 
 /**
  *
- * @author layton
+ * 
  */
 public class ZipMakerTest {
     File resourceDir;

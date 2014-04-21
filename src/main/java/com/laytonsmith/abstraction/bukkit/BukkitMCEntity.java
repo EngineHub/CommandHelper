@@ -2,7 +2,12 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
@@ -25,7 +30,7 @@ import org.bukkit.util.Vector;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 

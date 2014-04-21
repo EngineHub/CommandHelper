@@ -2,11 +2,25 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CBrace;
+import com.laytonsmith.core.constructs.CBracket;
+import com.laytonsmith.core.constructs.CEntry;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CSymbol;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -20,6 +34,7 @@ import java.util.Set;
 /**
  * 
  */
+@core
 public class Compiler {
 
 	public static String docs() {

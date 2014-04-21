@@ -3,13 +3,13 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.PermissionsResolver;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * This helper class implements a few of the common functions in event, and
  * most (all?) Events should extend this class.
- * @author layton
+ * 
  */
 public abstract class AbstractEvent implements Event, Comparable<Event> {
     
@@ -234,6 +234,18 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	@Override
 	public boolean addCounter() {
 		return true;
+	}
+	
+	@Override
+	public final boolean isCore() {
+		Class c = this.getClass();
+		do{
+			if(c.getAnnotation(core.class) != null){
+				return true;
+			}
+			c = c.getDeclaringClass();
+		} while(c != null);
+		return false;
 	}
     
 }

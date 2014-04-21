@@ -2,9 +2,9 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCChunk;
-import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import org.bukkit.Location;
@@ -12,7 +12,7 @@ import org.bukkit.util.Vector;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCLocation implements MCLocation {
     Location l;

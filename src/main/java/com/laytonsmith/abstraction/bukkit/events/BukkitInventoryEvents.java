@@ -36,7 +36,6 @@ import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

@@ -9,7 +9,7 @@ import org.bukkit.block.Sign;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCSign implements MCSign {
     

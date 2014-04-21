@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CByteArray;
@@ -20,6 +21,7 @@ import java.nio.BufferUnderflowException;
 /**
  * 
  */
+@core
 public class ByteArrays {
 	public static String docs(){
 		return "This class contains all the methods needed to manipulate a byte array primitive. Since"

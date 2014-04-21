@@ -1,15 +1,13 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapelessRecipe;
-
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapelessRecipe;
 
 /**
  * 

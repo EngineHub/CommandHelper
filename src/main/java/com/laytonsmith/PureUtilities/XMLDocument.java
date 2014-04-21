@@ -1,7 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,8 +9,6 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,7 +33,7 @@ import org.xml.sax.SAXException;
  * This class abstracts up and simplifies XML document parsing. You give it an XML
  * string, and it gives you the ability to manipulate and query the document. This works
  * via a DOM implementation.
- * @author lsmith
+ * 
  */
 public class XMLDocument {
 	

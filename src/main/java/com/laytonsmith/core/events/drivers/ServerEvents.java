@@ -27,7 +27,7 @@ import java.util.Map;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class ServerEvents {
 

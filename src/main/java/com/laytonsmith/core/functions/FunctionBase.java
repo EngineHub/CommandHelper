@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.snapins.PackagePermission;
 
 /**
@@ -39,6 +40,7 @@ public interface FunctionBase {
     /**
      * Some functions don't need to show up in documentation. Maybe they are experimental, or magic
      * functions. If they shouldn't show up in the normal API documentation, return false.
+	 * @return
      */
     public boolean appearInDocumentation();
 	
@@ -47,4 +49,11 @@ public interface FunctionBase {
 	 * @return 
 	 */
 	public PackagePermission getPermission();
+	
+	/**
+	 * Returns whether or not this function, or the function's containing class is
+	 * annotated with the {@link core} annotation.
+	 * @return 
+	 */
+	public boolean isCore();
 }

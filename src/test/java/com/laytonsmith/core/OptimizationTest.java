@@ -3,13 +3,14 @@ package com.laytonsmith.core;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
-import org.junit.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  * This class tests optimizations by looking at the tree after optimization occurs to see
  * if it matches expectation.
- * @author layton
+ * 
  */
 public class OptimizationTest {
 	

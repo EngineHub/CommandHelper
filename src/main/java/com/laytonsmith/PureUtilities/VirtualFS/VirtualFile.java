@@ -5,7 +5,7 @@ package com.laytonsmith.PureUtilities.VirtualFS;
  * in the virtual file system. Not many operations
  * can be done with this class, it is passed instead to
  * the VirtualFileSystem.
- * @author lsmith
+ * 
  */
 public class VirtualFile {
 	/**

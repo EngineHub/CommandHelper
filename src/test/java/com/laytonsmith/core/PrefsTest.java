@@ -12,7 +12,7 @@ import org.junit.Test;
 
 /**
  *
- * @author layton
+ * 
  */
 public class PrefsTest {
     

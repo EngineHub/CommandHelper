@@ -4,7 +4,7 @@ import java.awt.Window;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class UIUtils {
 	

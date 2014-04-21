@@ -1,10 +1,5 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-
 /**
  * This class is for testing concepts
  */

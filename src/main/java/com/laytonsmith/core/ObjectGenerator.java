@@ -6,7 +6,6 @@ import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
-import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFurnaceRecipe;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -43,7 +42,7 @@ import java.util.Map;
  * This file is responsible for converting CH objects into server objects, and
  * vice versa
  *
- * @author layton
+ * 
  */
 public class ObjectGenerator {
 

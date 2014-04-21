@@ -8,12 +8,16 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.testing.C;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
 import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *
- * @author layton
+ * 
  */
 public class PrefiltersTest {
 

@@ -5,7 +5,7 @@ import com.laytonsmith.core.SimpleDocumentation;
 
 /**
  * A Burst is a single transmission from client to server, or server to client.
- * @author lsmith
+ * 
  */
 public class Burst {
 	

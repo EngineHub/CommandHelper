@@ -9,7 +9,7 @@ import org.bukkit.enchantments.Enchantment;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCEnchantment implements MCEnchantment{
     Enchantment e;

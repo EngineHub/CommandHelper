@@ -7,7 +7,7 @@ import java.net.URI;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class ReadOnlyFileConnection extends ReadWriteFileConnection{
 	public ReadOnlyFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException{

@@ -15,7 +15,7 @@ import java.util.SortedMap;
 
 /**
  *
- * @author lsmith
+ * 
  */
 @typeof("byte_array")
 public class CByteArray extends Construct implements Sizable, ArrayAccess {

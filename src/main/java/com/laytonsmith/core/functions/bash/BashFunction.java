@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions.bash;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.functions.CompiledFunction;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -9,7 +10,7 @@ import java.net.URL;
 
 /**
  * This is a marker interface to make Bash functions separate.
- * @author layton
+ * 
  */
 public abstract class BashFunction implements FunctionBase, CompiledFunction, Documentation {
 
@@ -33,6 +34,18 @@ public abstract class BashFunction implements FunctionBase, CompiledFunction, Do
 	@Override
 	public Class<? extends Documentation>[] seeAlso() {
 		return EMPTY_CLASS;
+	}
+	
+	@Override
+	public final boolean isCore() {
+		Class c = this.getClass();
+		do{
+			if(c.getAnnotation(core.class) != null){
+				return true;
+			}
+			c = c.getDeclaringClass();
+		} while(c != null);
+		return false;
 	}
 	
 }

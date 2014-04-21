@@ -8,7 +8,7 @@ import org.bukkit.Note;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitMCNote implements AbstractionObject, MCNote {
 	Note n;

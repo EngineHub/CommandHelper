@@ -25,7 +25,7 @@ import java.util.Stack;
 
 /**
  *
- * @author Layton
+ * 
  */
 class CompilerObject {
 	TokenStream stream;

@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 /**
  *
- * @author layton
+ * 
  */
 public enum MCDamageCause {
     /**

@@ -6,7 +6,12 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.MethodScriptComplete;
+import com.laytonsmith.core.MethodScriptFileLocations;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -18,7 +23,12 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.database.SQLProfiles;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.event.EventHandler;
@@ -30,7 +40,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class CommandHelperInterpreterListener implements Listener {
 

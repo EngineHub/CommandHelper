@@ -4,7 +4,7 @@ package com.laytonsmith.core.exceptions;
 
 /**
  *
- * @author layton
+ * 
  */
 public class EventException extends Exception {
 

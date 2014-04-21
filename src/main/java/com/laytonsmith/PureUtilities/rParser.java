@@ -8,7 +8,7 @@ import java.util.Arrays;
  * This class provides a method for working around the not so pretty line breaks
  * that SMP does. The original class was written by Nossr50, with portions contributed
  * by Reil.
- * @author Layton
+ * 
  */
 public final class rParser {
     

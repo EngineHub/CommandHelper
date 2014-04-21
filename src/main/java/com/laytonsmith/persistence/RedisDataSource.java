@@ -1,7 +1,7 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Web.WebUtility;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
@@ -18,7 +18,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  *
- * @author lsmith
+ * 
  */
 @datasource("redis")
 public class RedisDataSource extends AbstractDataSource {

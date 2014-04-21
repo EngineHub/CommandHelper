@@ -8,7 +8,7 @@ import org.bukkit.plugin.Plugin;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCPlugin implements MCPlugin {
 

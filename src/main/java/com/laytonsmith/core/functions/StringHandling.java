@@ -5,12 +5,25 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CResource;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -30,9 +43,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
- * @author Layton
+ * 
  */
+@core
 public class StringHandling {
 
 	public static String docs() {
@@ -199,7 +212,7 @@ public class StringHandling {
 	@noprofile
 	public static class sconcat extends AbstractFunction implements Optimizable {
 
-		private static final String g = new Meta.g().getName();
+		private static final String g = new DataHandling.g().getName();
 		private static final String p = new Compiler.p().getName();
 		
 		@Override

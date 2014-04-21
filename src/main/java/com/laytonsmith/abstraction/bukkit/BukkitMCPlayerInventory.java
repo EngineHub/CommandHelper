@@ -10,7 +10,7 @@ import org.bukkit.inventory.PlayerInventory;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlayerInventory {
 

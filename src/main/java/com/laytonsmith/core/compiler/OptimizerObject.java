@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  *
- * @author lsmith
+ * 
  */
 class OptimizerObject {
 	private ParseTree root;

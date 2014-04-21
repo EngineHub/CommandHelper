@@ -12,7 +12,7 @@ import org.apache.commons.io.FileUtils;
 
 /**
  *
- * @author lsmith
+ * 
  */
 @FileSystemLayer.fslayer("file")
 public class RealFileSystemLayer extends FileSystemLayer {

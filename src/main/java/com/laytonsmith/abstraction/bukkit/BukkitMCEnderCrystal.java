@@ -6,7 +6,7 @@ import org.bukkit.entity.EnderCrystal;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitMCEnderCrystal extends BukkitMCEntity implements MCEnderCrystal{
 	

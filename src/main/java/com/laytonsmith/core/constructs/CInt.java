@@ -9,7 +9,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
- * @author layton
+ * 
  */
 @typeof("int")
 public class CInt extends Construct implements Cloneable{

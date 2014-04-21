@@ -5,6 +5,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
@@ -27,6 +28,7 @@ import org.mindrot.jbcrypt.BCrypt;
 /**
  * 
  */
+@core
 public class Crypto {
 
     public static String docs() {

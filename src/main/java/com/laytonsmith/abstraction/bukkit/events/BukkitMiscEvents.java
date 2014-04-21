@@ -4,27 +4,22 @@ import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
-import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCConsoleCommandEvent;
 import com.laytonsmith.abstraction.events.MCPluginIncomingMessageEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
-import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
-
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitMiscEvents {
 	public static class BukkitMCConsoleCommandEvent implements MCConsoleCommandEvent {

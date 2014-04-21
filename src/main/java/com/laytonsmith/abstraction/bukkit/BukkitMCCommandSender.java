@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCCommandSender implements MCCommandSender{
 

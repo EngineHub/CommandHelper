@@ -8,7 +8,7 @@ import org.bukkit.command.BlockCommandSender;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitMCBlockCommandSender extends BukkitMCCommandSender implements MCBlockCommandSender {
 

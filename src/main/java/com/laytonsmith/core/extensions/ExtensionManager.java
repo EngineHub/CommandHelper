@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class ExtensionManager {
 	private static final Map<URL, ExtensionTracker> extensions = new HashMap<>();

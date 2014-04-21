@@ -1,8 +1,8 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
-import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.constructs.Target;
 import java.io.File;
@@ -16,7 +16,7 @@ import java.util.List;
  * and the user configures each separately, allowing for more granular log control. Eventually, if other
  * clients are able to connect to the system, they may each specify logging granularity, but the default
  * is to use the preferences file and output to the debug log file.
- * @author layton
+ * 
  */
 public final class CHLog {
     

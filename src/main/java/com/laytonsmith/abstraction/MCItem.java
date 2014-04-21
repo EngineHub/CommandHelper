@@ -3,7 +3,7 @@ package com.laytonsmith.abstraction;
 
 /**
  *
- * @author Layton
+ * 
  */
 public interface MCItem extends MCEntity {
 	

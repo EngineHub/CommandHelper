@@ -1,15 +1,24 @@
 package com.laytonsmith.persistence;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
 import com.laytonsmith.PureUtilities.RunnableQueue;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,7 +28,7 @@ import java.util.logging.Logger;
  * In general, the most common methods used are getValue and setValue. Note that
  * getValue, setValue, save, and load are synchronized.
  *
- * @author layton
+ * 
  */
 @datasource("ser")
 public class SerializedPersistence extends AbstractDataSource {

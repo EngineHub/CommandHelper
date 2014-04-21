@@ -2,7 +2,7 @@ package com.laytonsmith.core.arguments;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class Signature {
 	private final ArgumentBuilder outer;

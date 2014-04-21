@@ -7,11 +7,10 @@ import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.CHLog.Tags;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Exceptions;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,7 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitMCInventory implements MCInventory {
 	private Inventory i;

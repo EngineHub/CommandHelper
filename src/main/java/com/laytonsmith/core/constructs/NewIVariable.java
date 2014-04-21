@@ -2,7 +2,7 @@ package com.laytonsmith.core.constructs;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class NewIVariable extends Construct{
 	private String name;

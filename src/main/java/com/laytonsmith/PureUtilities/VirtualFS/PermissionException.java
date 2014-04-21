@@ -2,7 +2,7 @@ package com.laytonsmith.PureUtilities.VirtualFS;
 
 /**
  * Thrown if a function failed due to a permissions issue
- * @author lsmith
+ * 
  */
 public class PermissionException extends SecurityException {
 

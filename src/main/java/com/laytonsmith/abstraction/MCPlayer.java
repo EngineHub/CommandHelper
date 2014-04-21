@@ -8,7 +8,7 @@ import java.net.InetSocketAddress;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCPlayer extends MCCommandSender, MCHumanEntity,
         MCOfflinePlayer {

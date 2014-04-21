@@ -7,7 +7,7 @@ import org.bukkit.command.ConsoleCommandSender;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCConsoleCommandSender extends BukkitMCCommandSender implements MCConsoleCommandSender{
 

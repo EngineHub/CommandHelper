@@ -27,7 +27,7 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCBlock implements MCBlock{
     Block b;

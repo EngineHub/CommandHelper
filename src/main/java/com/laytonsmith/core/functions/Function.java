@@ -2,7 +2,6 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.annotations.MustUseOverride;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;

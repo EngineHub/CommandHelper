@@ -2,7 +2,7 @@ package com.laytonsmith.core.environments;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class InvalidEnvironmentException extends RuntimeException {
 	

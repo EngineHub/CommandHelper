@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CArray;
@@ -180,5 +181,12 @@ public interface Event extends Comparable<Event>, Documentation{
 	 * @return 
 	 */
 	public boolean addCounter();
+	
+	/**
+	 * Returns whether or not this event, or the event's containing class is
+	 * annotated with the {@link core} annotation.
+	 * @return 
+	 */
+	public boolean isCore();
     
 }

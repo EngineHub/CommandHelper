@@ -12,6 +12,7 @@ import com.laytonsmith.PureUtilities.Web.WebUtility;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
@@ -57,6 +58,7 @@ import java.util.concurrent.ThreadFactory;
 /**
  *
  */
+@core
 public class Web {
 	public static String docs(){
 		return "Contains various methods to make HTTP requests.";

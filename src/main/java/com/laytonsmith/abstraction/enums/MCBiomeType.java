@@ -4,7 +4,7 @@ import com.laytonsmith.annotations.MEnum;
 
 /**
  *
- * @author layton
+ * 
  */
 @MEnum("BiomeType")
 public enum MCBiomeType {

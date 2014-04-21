@@ -2,11 +2,10 @@ package com.laytonsmith.core.snapins;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.CHVersion;
-import java.net.URL;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public enum CorePermissions implements PackagePermission {
 	FILE_READ("CORE.FILE.READ", ThreatLevel.CAUTIOUS, "This permission grants read access to the filesystem, via the VFS only,"

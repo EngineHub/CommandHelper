@@ -2,12 +2,29 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CIdentifier;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CSlice;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -25,9 +42,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- *
- * @author Layton
+ * 
  */
+@core
 public class BasicLogic {
 
 	public static String docs() {
@@ -698,7 +715,7 @@ public class BasicLogic {
 		}
 
 		private static final String and = new and().getName();
-		private static final String g = new Meta.g().getName();
+		private static final String g = new DataHandling.g().getName();
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {

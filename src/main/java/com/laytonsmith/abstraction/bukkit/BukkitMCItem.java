@@ -7,7 +7,7 @@ import org.bukkit.entity.Item;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitMCItem extends BukkitMCEntity implements MCItem{
 	

@@ -9,7 +9,7 @@ import org.bukkit.block.BlockState;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCBlockState implements MCBlockState {
     

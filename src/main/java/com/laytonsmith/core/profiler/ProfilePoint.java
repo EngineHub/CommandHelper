@@ -4,7 +4,7 @@ import com.laytonsmith.core.LogLevel;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class ProfilePoint implements Comparable<ProfilePoint> {
 	private String name;

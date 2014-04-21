@@ -88,7 +88,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author layton
+ * 
  */
 public class PlayerEvents {
     public static String docs(){

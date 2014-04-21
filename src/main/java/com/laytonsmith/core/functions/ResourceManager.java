@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CVoid;
@@ -21,6 +22,7 @@ import org.xml.sax.SAXException;
 /**
  *
  */
+@core
 public class ResourceManager {
 	public static String docs(){
 		return "This class contains functions for resource management. This entire class of functions WILL"

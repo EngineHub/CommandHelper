@@ -3,7 +3,7 @@ package com.laytonsmith.PureUtilities;
 
 /**
  * Provided various geometry convenience classes and methods.
- * @author Layton
+ * 
  */
 public class Geometry {
 	

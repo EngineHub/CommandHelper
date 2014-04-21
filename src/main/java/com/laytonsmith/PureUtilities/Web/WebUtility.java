@@ -31,7 +31,7 @@ import org.apache.commons.codec.binary.Base64;
 /**
  * Contains methods to simplify web connections.
  *
- * @author lsmith
+ * 
  */
 public final class WebUtility {
 	

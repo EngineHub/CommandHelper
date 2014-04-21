@@ -9,7 +9,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
- * @author layton
+ * 
  */
 @typeof("boolean")
 public class CBoolean extends Construct implements Cloneable{

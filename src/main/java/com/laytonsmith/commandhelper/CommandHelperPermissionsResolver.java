@@ -6,7 +6,7 @@ import com.sk89q.wepif.PermissionsResolverManager;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class CommandHelperPermissionsResolver implements PermissionsResolver {
 	

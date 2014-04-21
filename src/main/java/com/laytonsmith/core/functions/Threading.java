@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
@@ -29,6 +30,7 @@ import java.util.concurrent.Callable;
 /**
  *
  */
+@core
 public class Threading {
 	public static String docs(){
 		return "This experimental and private API is subject to removal, or incompatible changes, and should not"

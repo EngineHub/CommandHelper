@@ -17,7 +17,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 	private FireworkEffect.Builder builder;

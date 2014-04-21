@@ -1,17 +1,14 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * A persistence network is a group of data sources that can act transparently
@@ -24,7 +21,7 @@ import java.util.TreeMap;
  * match. All other aspects of how the data is stored and retrieved are
  * abstracted, so you needn't worry about any of those details.
  *
- * @author lsmith
+ * 
  */
 public class PersistenceNetwork {
 

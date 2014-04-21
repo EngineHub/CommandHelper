@@ -7,7 +7,7 @@ import com.laytonsmith.core.functions.FunctionList;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class SingleFunctionDialog extends javax.swing.JDialog {
 

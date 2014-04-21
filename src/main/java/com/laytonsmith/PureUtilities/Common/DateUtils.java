@@ -4,7 +4,7 @@ import java.util.Calendar;
 
 /**
  *
- * @author layton
+ * 
  */
 public final class DateUtils {
     

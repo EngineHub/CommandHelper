@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  *
- * @author Layton
+ * 
  */
 @typeof("string")
 public class CString extends Construct implements Cloneable, ArrayAccess{

@@ -41,7 +41,7 @@ import org.bukkit.event.player.PlayerToggleSprintEvent;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitPlayerListener implements Listener {
 

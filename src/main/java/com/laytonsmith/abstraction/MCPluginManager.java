@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCPluginManager extends AbstractionObject{
     public MCPlugin getPlugin(String name);
