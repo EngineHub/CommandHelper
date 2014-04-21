@@ -139,7 +139,7 @@ public class SQL {
 						CArray ret = new CArray(t);
 						ResultSetMetaData md = ps.getMetaData();
 						ResultSet rs = ps.getResultSet();
-						while (rs.next()) {
+						while (rs != null && rs.next()) {
 							CArray row = new CArray(t);
 							for (int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
