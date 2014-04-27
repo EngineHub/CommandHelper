@@ -17,7 +17,6 @@ import com.laytonsmith.annotations.shutdown;
 import com.laytonsmith.annotations.startup;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.LifeCycle;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
@@ -713,10 +712,6 @@ public class ExtensionManager {
 		}
 	}
 	
-	/**
-	 * Get all known events.
-	 * @return 
-	 */
 	public static Set<Event> GetEvents() {
 		Set<Event> retn = new HashSet<>();
 		
@@ -727,11 +722,6 @@ public class ExtensionManager {
 		return retn;
 	}
 	
-	/**
-	 * Get all events of a given Driver type.
-	 * @param type
-	 * @return 
-	 */
 	public static Set<Event> GetEvents(Driver type) {
 		Set<Event> retn = new HashSet<>();
 		
@@ -742,78 +732,32 @@ public class ExtensionManager {
 		return retn;
 	}
 	
-	/**
-	 * Get a specific event from a specific extension. If type is null,
-	 * all events are iterated to find a matching event name.
-	 * @param trk
-	 * @param type
-	 * @param name
-	 * @return 
-	 */
-	private static Event GetEvent(ExtensionTracker trk, Driver type, String name) {
-		Set<Event> events;
-			
-		if (type == null) {
-			events = trk.getEvents();
-		} else {
-			events = trk.getEvents(type);
-		}
-
-		for (Event event: events) {
-			if (event.getName().equalsIgnoreCase(name)) {
-				return event;
-			}
-		}
-
-		return null;
-	}
-	
-	/**
-	 * Get an event given a specific driver, by name. If type is null,
-	 * all events are iterated to find a matching event name.
-	 * @param type
-	 * @param name
-	 * @return 
-	 */
 	public static Event GetEvent(Driver type, String name) {
-		// Prioritize the core when looking for an event.
-		ExtensionTracker core = null;
-		// Tests break if this isn't checked!
-		if (LifeCycle.getInstance() != null) {
-			core = LifeCycle.getInstance().getExtensionTracker();
-		}
-		
-		Event possible;
-		
-		// Check core first.
-		if (core != null) {
-			possible = GetEvent(core, type, name);
-			
-			if (possible != null) {
-				return possible;
-			}
-		}
-		
-		// Not found yet, lets check extensions.
 		for (ExtensionTracker trk: extensions.values()) {
-			possible = GetEvent(trk, type, name);
+			Set<Event> events = trk.getEvents(type);
 			
-			if (possible != null) {
-				return possible;
+			for (Event event: events) {
+				if (event.getName().equalsIgnoreCase(name)) {
+					return event;
+				}
 			}
 		}
 		
 		return null;
 	}
 	
-	/**
-	 * Get an event, given it's name. This iterates all known events, without
-	 * driver-based optimizations.
-	 * @param name
-	 * @return 
-	 */
 	public static Event GetEvent(String name) {
-		return GetEvent(null, name);
+		for (ExtensionTracker trk: extensions.values()) {
+			Set<Event> events = trk.getEvents();
+			
+			for (Event event: events) {
+				if (event.getName().equalsIgnoreCase(name)) {
+					return event;
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -824,7 +768,7 @@ public class ExtensionManager {
 		for(Event event : GetEvents()){
 			try{
 				event.hook();
-			} catch (UnsupportedOperationException ex){}
+			} catch(UnsupportedOperationException ex){}
 		}
 	}
 	
@@ -835,31 +779,14 @@ public class ExtensionManager {
         }
 		
         if (c instanceof CFunction) {
-			// Prioritize the core when looking for a function.
-			ExtensionTracker core = null;
-			// Tests break if this isn't checked!
-			if (LifeCycle.getInstance() != null) {
-				core = LifeCycle.getInstance().getExtensionTracker();
-			}
-			
-			String funcName = c.val();
-			
-			// Check core first.
-			if (core != null && core.functions.get(platform).containsKey(funcName) 
-					&& core.supportedPlatforms.get(funcName).contains(platform)) {
-				return core.functions.get(platform).get(funcName);
-			}
-			
-			// Not found yet, lets check extensions.
 			for (ExtensionTracker trk: extensions.values()) {
-				if(trk.functions.get(platform).containsKey(funcName) 
-						&& trk.supportedPlatforms.get(funcName).contains(platform)) {
-					return trk.functions.get(platform).get(funcName);  
+				if(trk.functions.get(platform).containsKey(c.val()) 
+						&& trk.supportedPlatforms.get(c.val()).contains(platform)){
+					return trk.functions.get(platform).get(c.val());  
 				}
 			}
 			
-			// Not found. Lets notify people.
-			throw new ConfigCompileException("The function \"" + funcName + 
+			throw new ConfigCompileException("The function \"" + c.val() + 
 					"\" does not exist in the " + platform.platformName(),
 							c.getTarget());
         } else {
