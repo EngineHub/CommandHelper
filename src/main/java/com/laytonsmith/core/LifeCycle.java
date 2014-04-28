@@ -10,24 +10,8 @@ import com.laytonsmith.core.extensions.MSExtension;
  */
 @MSExtension("Core")
 public class LifeCycle extends AbstractExtension {
-	static LifeCycle instance;
-	
-	public static LifeCycle getInstance() {
-		return instance;
-	}
-	
 	@Override
 	public Version getVersion() {
 		return CHVersion.LATEST;
-	}
-
-	@Override
-	public void onStartup() {
-		instance = this;
-}
-
-	@Override
-	public void onShutdown() {
-		instance = null;
 	}
 }

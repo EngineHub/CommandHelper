@@ -71,8 +71,7 @@ public interface MCServer extends AbstractionObject{
 	
 	/**
 	 * Dispatches a command like {@link #dispatchCommand(com.laytonsmith.abstraction.MCCommandSender, java.lang.String) }, but
-	 * attempts to capture the output of the command, and returns that. This ends up being very custom and low level code
-	 * per server, so most of the implementation is left to the abstraction layer.
+	 * attempts to capture the output of the command, and returns that.
 	 * @param commandSender The command sender
 	 * @param cmd The command
 	 * @return The command's captured output, if possible, otherwise an empty string, never null.
