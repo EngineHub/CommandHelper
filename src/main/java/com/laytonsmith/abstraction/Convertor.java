@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
  * things. You can get an instance of the current Convertor by looking for the
  * <code>@convert</code> tag. StaticLayer wraps all the functionality for you
  * however.
+ * @author layton
  */
 public interface Convertor {
 

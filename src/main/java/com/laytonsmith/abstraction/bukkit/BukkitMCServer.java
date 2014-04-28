@@ -25,10 +25,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.ListIterator;
 import java.util.Set;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -36,6 +35,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -99,12 +99,6 @@ public class BukkitMCServer implements MCServer {
 		}
         return s.dispatchCommand(cs, command);
     }
-	
-	/**
-	 * Contains the generated subclasses used by capture_runas. Since they are loaded via a classloader, they
-	 * aren't ever regenerated.
-	 */
-	private final static Map<Class, Class> generatedSubclassesClasses = new HashMap<>();
 
 	private class CommandSenderInterceptor implements InvocationHandler {
 		private final StringBuilder buffer;
@@ -136,31 +130,11 @@ public class BukkitMCServer implements MCServer {
 		CommandSender sender = (CommandSender)commandSender.getHandle();
 		
 		// Create the interceptor
-		final CommandSenderInterceptor interceptor = new CommandSenderInterceptor(sender);
+		CommandSenderInterceptor interceptor = new CommandSenderInterceptor(sender);
 		
-		// Create a new proxy and abstraction layer wrapper around the proxy.
+		// Create a new proxy and abstraction layer wrapper around the proxy
 		CommandSender newCommandSender = (CommandSender)Proxy.newProxyInstance(BukkitMCServer.class.getClassLoader(), new Class[]{CommandSender.class}, interceptor);
-		
-		// TODO: I can't get this working right, it's throwing weird class not found exceptions. This is by 
-		// far a better solution (assuming I can get it working) so this is definitely preferred to using
-		// a java.reflect.Proxy, but for now, that will do. In the meantime, it may be ok even to see if more interfaces
-		// that extend CommandSender can be added to the newCommandSender, so at least plugins that don't use CraftBukkit will
-		// work properly. As it stands now, a call to sender instanceof Player will always return false, even if the underlying
-		// sender is in fact a Player.
-//		Enhancer enhancer = new Enhancer();
-//		enhancer.setSuperclass(sender.getClass());
-//		enhancer.setCallback(new net.sf.cglib.proxy.InvocationHandler() {
-//
-//			@Override
-//			public Object invoke(Object o, Method method, Object[] os) throws Throwable {
-//				return interceptor.invoke(o, method, os);
-//			}
-//		});
-//		
-//		CommandSender newCommandSender = (CommandSender)enhancer.create();
-		
 		BukkitMCCommandSender aCommandSender = new BukkitMCCommandSender(newCommandSender);
-		
 		
 		MCCommandSender oldSender = Static.UninjectPlayer(commandSender);
 		// Inject our new wrapped object
