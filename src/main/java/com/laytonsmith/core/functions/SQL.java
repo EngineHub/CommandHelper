@@ -222,9 +222,10 @@ public class SQL {
 							+ " which ensure that your parameters are properly escaped.", t);
 				}
 			} else if(queryData instanceof CString){
-				//It's a hard coded query, so we can double check parameter lengths
+				//It's a hard coded query, so we can double check parameter lengths and other things
+				String query = queryData.val();
 				int count = 0;
-				for(char c : queryData.val().toCharArray()){
+				for(char c : query.toCharArray()){
 					if(c == '?'){
 						count++;
 					}
@@ -237,6 +238,25 @@ public class SQL {
 									+ StringUtils.PluralTemplateHelper(children.size() - 2, "%d parameter was", "%d parameters were")
 									+ " provided to query().", t);
 				}
+				//TODO: Need to get the SQL Profile data from the environment before this can be done.
+				//Profile validation will simply ensure that the profile stated is listed in the profiles,
+				//and that a connection can in fact be made.
+				//Also need to figure out how to validate a prepared statement.
+//				if(children.get(0).isConst() && children.get(0).getData() instanceof CString){
+//					if(true){ //Prefs.verifyQueries()
+//						String profileName = children.get(0).getData().val();
+//						SQLProfiles.SQLProfile profile = null;
+//						Connection conn;
+//						try {
+//							conn = DriverManager.getConnection(profile.getConnectionString());
+//							try(PreparedStatement statement = conn.prepareStatement(query)){
+//								
+//							}
+//						} catch (SQLException ex) {
+//							// Do nothing, but we can't validate this query
+//						}
+//					}
+//				}
 			}
 			return null;
 		}
