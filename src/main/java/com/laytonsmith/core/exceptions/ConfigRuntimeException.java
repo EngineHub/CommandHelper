@@ -3,6 +3,7 @@
 
 package com.laytonsmith.core.exceptions;
 
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
@@ -40,12 +41,12 @@ public class ConfigRuntimeException extends RuntimeException {
 
 	/**
 	 * Sets the environment of the exception.
-	 * @param env 
+	 * @param env
 	 */
     public void setEnv(Environment env) {
         this.env = env;
     }
-    
+
     /**
      * This returns the environment that was set when the exception was thrown.
      * It may be null, though that's due to an incomplete swapover, and should be
@@ -58,7 +59,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	/**
 	 * Sets the file that the exception occurred in. If f is null, the
 	 * file is not set.
-	 * @param f 
+	 * @param f
 	 */
     public void setFile(File f) {
         if(file == null){
@@ -69,30 +70,30 @@ public class ConfigRuntimeException extends RuntimeException {
 	/**
 	 * Sets the line number that the exception occurred in. If line_num is -1,
 	 * nothing is set.
-	 * @param line_num 
+	 * @param line_num
 	 */
     public void setLineNum(int line_num) {
         if(this.line_num == -1){
             this.line_num = line_num;
         }
     }
-    
+
 	/**
 	 * Sets the column that the exception occurred in. If column is -1,
 	 * nothing is set.
-	 * @param column 
+	 * @param column
 	 */
     public void setColumn(int column){
         if(this.column == -1){
             this.column = column;
         }
     }
-    
+
 	/**
 	 * Appends a stack trace frame to this exception. Stack trace frames should
-	 * only be 
+	 * only be
 	 * @param t
-	 * @param nextTarget 
+	 * @param nextTarget
 	 */
     public void addStackTraceTrail(StackTraceElement t, Target nextTarget){
 		if(t == null){
@@ -102,7 +103,7 @@ public class ConfigRuntimeException extends RuntimeException {
 			target = nextTarget;
 		}
     }
-    
+
 	/**
 	 * A reaction is a pre-programmed response to the exception bubbling all the
 	 * way up. One of these reaction types must be set by user code (or defaults
@@ -128,14 +129,14 @@ public class ConfigRuntimeException extends RuntimeException {
          */
         FATAL
     }
-    
+
     /**
      * If a exception bubbles all the way up to the top, this should be called first,
      * to see what reaction the plugin should take. Generally speaking, you'll want to
 	 * use {@link #HandleUncaughtException} instead of this, though if you need to take custom action, you
 	 * can determine the user's preferred reaction with this method.
      * @param e
-     * @return 
+     * @return
      */
     public static Reaction GetReaction(ConfigRuntimeException e, Environment env){
         //If there is an exception handler, call it to see what it says.
@@ -165,33 +166,33 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
         return reaction;
     }
-	
+
 	/**
 	 * Compile errors are always handled with the default mechanism, but
 	 * to standardize error handling, this method must be used.
 	 * @param e
 	 * @param optionalMessage
-	 * @param player 
+	 * @param player
 	 */
 	public static void HandleUncaughtException(ConfigCompileException e, String optionalMessage, MCPlayer player){
 		DoReport(e, player);
 	}
-    
+
     /**
      * If there's nothing special you want to do with the exception, you can send it
      * here, and it will take the default action for an uncaught exception.
      * @param e
-     * @param r 
+     * @param r
      */
     public static void HandleUncaughtException(ConfigRuntimeException e, Environment env){
         HandleUncaughtException(e, GetReaction(e, env));
     }
-    
+
     /**
      * If there's nothing special you want to do with the exception, you can send it
      * here, and it will take the default action for an uncaught exception.
      * @param e
-     * @param r 
+     * @param r
      */
     private static void HandleUncaughtException(ConfigRuntimeException e, Reaction r){
 		//This is the top of the stack chain, so finalize the stack trace at this point
@@ -204,18 +205,17 @@ public class ConfigRuntimeException extends RuntimeException {
         } else if(r == ConfigRuntimeException.Reaction.FATAL){
             ConfigRuntimeException.DoReport(e);
             //Well, here goes nothing
-            ConfigRuntimeException.DoReport(e);
             throw e;
         }
     }
-    
+
     /**
      * If the Reaction returned by GetReaction is to report the exception,
 	 * this function should be used to standardize the report format. If the error message
      * wouldn't be very useful by itself, or if a hint is desired, an optional message
      * may be provided (null otherwise).
      * @param e
-     * @param optionalMessage 
+     * @param optionalMessage
      */
     private static void DoReport(String message, String exceptionType, List<StackTraceElement> stacktrace, MCPlayer currentPlayer){
         String type = exceptionType;
@@ -253,7 +253,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				filepath = file.getPath();
 				simplepath = file.getName();
 			}
-			
+
 			log.append("\t").append(proc).append(":").append(filepath).append(":")
 					.append(line)/*.append(".")
 					.append(column)*/.append("\n");
@@ -267,12 +267,12 @@ public class ConfigRuntimeException extends RuntimeException {
 					.append(MCChatColor.YELLOW).append(simplepath)
 					.append(MCChatColor.WHITE).append(":")
 					.append(MCChatColor.AQUA).append(line)/*.append(".").append(column)*/.append("\n");
-			
+
 		}
-		
+
 		//Log
 		//Don't log to screen though, since we're ALWAYS going to do that ourselves.
-		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType)?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, 
+		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType)?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME,
 				LogLevel.ERROR, log.toString(), top, false);
 		//Console
 		System.out.println(console.toString() + TermColors.reset());
@@ -281,43 +281,53 @@ public class ConfigRuntimeException extends RuntimeException {
 			currentPlayer.sendMessage(player.toString());
 		}
     }
-    
+
     private static void DoReport(ConfigRuntimeException e){
         MCPlayer p = null;
         if(e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
             p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
         }
         DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.stackTraceTrail, p);
-		if(e.getCause() != null && Prefs.DebugMode()){
-			//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
-			System.err.println("The previous MethodScript error had an attached cause:");
-			e.getCause().printStackTrace(System.err);
+		if(Prefs.DebugMode()){
+			if(e.getCause() != null){
+				//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
+				System.err.println("The previous MethodScript error had an attached cause:");
+				e.getCause().printStackTrace(System.err);
+			}
+			if(e.getTarget().equals(Target.UNKNOWN)){
+				//This should never happen, but there are still some hard to track
+				//down bugs that cause this. If it does happen, we want to print out
+				//a stacktrace from here, which *might* assist in fixing the error
+				//messages to provide a proper target.
+				System.err.println("Since the exception has an unknown code target, here is additional information that may help:");
+				System.err.println(StackTraceUtils.GetStacktrace(new Exception()));
+			}
 		}
     }
-    
+
     private static void DoReport(ConfigCompileException e, MCPlayer player){
 		List<StackTraceElement> st = new ArrayList<StackTraceElement>();
 		st.add(0, new StackTraceElement("", e.getTarget()));
         DoReport(e.getMessage(), "COMPILE ERROR", st, player);
     }
-        
-    
+
+
     /**
      * Shorthand for DoWarning(exception, null, true);
-     * @param e 
+     * @param e
      */
     public static void DoWarning(Exception e){
         DoWarning(e, null, true);
     }
-    
+
     /**
      * Shorthand for DoWarning(null, message, true);
-     * @param optionalMessage 
+     * @param optionalMessage
      */
     public static void DoWarning(String optionalMessage){
         DoWarning(null, optionalMessage, true);
     }
-    
+
     /**
      * To standardize the warning messages displayed, this function should
      * be used. It checks the preference setting for warnings to see if
@@ -326,7 +336,7 @@ public class ConfigRuntimeException extends RuntimeException {
      * is a ConfigRuntimeException, it is displayed specially (including line number
      * and file)
      * @param e
-     * @param optionalMessage 
+     * @param optionalMessage
      * @throws NullPointerException If both the exception and message are null (or empty)
      */
     public static void DoWarning(Exception e, String optionalMessage, boolean checkPrefs){
@@ -338,10 +348,10 @@ public class ConfigRuntimeException extends RuntimeException {
 			Target t = Target.UNKNOWN;
             if(e instanceof ConfigRuntimeException){
                 ConfigRuntimeException cre = (ConfigRuntimeException)e;
-                exceptionMessage = MCChatColor.YELLOW + cre.getMessage() 
-                + MCChatColor.WHITE + " :: " + MCChatColor.GREEN 
-                + cre.getExceptionType() + MCChatColor.WHITE + ":" 
-                + MCChatColor.YELLOW + cre.getFile() + MCChatColor.WHITE + ":" 
+                exceptionMessage = MCChatColor.YELLOW + cre.getMessage()
+                + MCChatColor.WHITE + " :: " + MCChatColor.GREEN
+                + cre.getExceptionType() + MCChatColor.WHITE + ":"
+                + MCChatColor.YELLOW + cre.getFile() + MCChatColor.WHITE + ":"
                 + MCChatColor.AQUA + cre.getLineNum();
 				t = cre.getTarget();
             } else if(e != null){
@@ -352,8 +362,8 @@ public class ConfigRuntimeException extends RuntimeException {
             //Warnings are not shown to players ever
         }
     }
-    
-    
+
+
     private ExceptionType ex;
     private int line_num = -1;
     private File file;
@@ -370,7 +380,7 @@ public class ConfigRuntimeException extends RuntimeException {
     public ConfigRuntimeException(String msg, ExceptionType ex, Target t){
         this(msg, ex, t, null);
     }
-    
+
     public ConfigRuntimeException(String msg, ExceptionType ex, Target t, Throwable cause){
         super(msg, cause);
 		if(ex == null){
@@ -378,7 +388,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
         createException(ex, t);
     }
-	
+
 	private void createException(ExceptionType ex, Target t){
         this.ex = ex;
         this.line_num = t.line();
@@ -386,15 +396,15 @@ public class ConfigRuntimeException extends RuntimeException {
         this.column = t.col();
         this.target = t;
 	}
-    
+
 //    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
 //        this(msg, ex, line_num, null);
 //    }
 //    public ConfigRuntimeException(String msg, int line_num){
 //        this(msg, null, line_num, null);
 //    }
-    
-	
+
+
 	/**
 	 * Creates an uncatchable exception. This should rarely be used. An uncatchable
 	 * exception is one where the user code is unable to catch the exception, and the
@@ -404,13 +414,13 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * there yet for catching such an error in the compiler, or for errors in MethodScript
 	 * itself.
 	 * @param msg
-	 * @param t 
+	 * @param t
 	 * @return Returns an uncatchable exception.
 	 */
 	public static ConfigRuntimeException CreateUncatchableException(String msg, Target t){
 		return new ConfigRuntimeException(msg, t, null);
 	}
-	
+
 	/**
 	 * Creates an uncatchable exception with a cause. This should rarely be used. An uncatchable
 	 * exception is one where the user code is unable to catch the exception, and the
@@ -420,63 +430,63 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * there yet for catching such an error in the compiler, or for errors in MethodScript
 	 * itself.
 	 * @param msg
-	 * @param t 
+	 * @param t
 	 * @param cause
 	 * @return Returns an uncatchable exception
 	 */
 	public static ConfigRuntimeException CreateUncatchableException(String msg, Target t, Throwable cause){
 		return new ConfigRuntimeException(msg, t, cause);
 	}
-    
+
     private ConfigRuntimeException(String msg, Target t, Throwable cause){
 		super(msg, cause);
         createException(null, t);
     }
-    
+
 	/**
 	 * Gets the exception type. This may be null in cases where an uncatchable
 	 * exception is created.
-	 * @return 
+	 * @return
 	 */
     public ExceptionType getExceptionType(){
         return this.ex;
     }
-    
+
 	/**
 	 * Gets the line number that this exception is triggered at.
-	 * @return 
+	 * @return
 	 */
     public int getLineNum(){
         return this.line_num;
     }
-    
+
 	/**
 	 * Gets the file this exception is triggered in.
-	 * @return 
+	 * @return
 	 */
     public File getFile(){
         return this.file;
     }
-    
+
 	/**
 	 * Gets the column that this exception is triggered at.
-	 * @return 
+	 * @return
 	 */
     public int getCol(){
         return this.column;
     }
-    
+
 	/**
 	 * Gets the code target for this exception.
-	 * @return 
+	 * @return
 	 */
     public Target getTarget(){
         return this.target;
     }
-    
+
 	/**
 	 * Gets the shorter name of the file, or null if no file has been set.
-	 * @return 
+	 * @return
 	 */
     public String getSimpleFile(){
         if(this.file != null){
@@ -485,7 +495,7 @@ public class ConfigRuntimeException extends RuntimeException {
             return null;
         }
     }
-	
+
 	/**
 	 * A stacktrace contains 1 or more stack trace elements. A new stacktrace
 	 * element is added each time an exception bubbles up past a procedure.
@@ -506,7 +516,7 @@ public class ConfigRuntimeException extends RuntimeException {
 
 		/**
 		 * Gets the name of the procedure.
-		 * @return 
+		 * @return
 		 */
 		public String getProcedureName() {
 			return procedureName;
@@ -514,7 +524,7 @@ public class ConfigRuntimeException extends RuntimeException {
 
 		/**
 		 * Gets the code target where the procedure is defined at.
-		 * @return 
+		 * @return
 		 */
 		public Target getDefinedAt() {
 			return definedAt;
@@ -524,7 +534,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		public String toString() {
 			return procedureName + " (Defined at " + definedAt + ")";
 		}
-		
-		
+
+
 	}
 }
