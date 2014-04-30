@@ -119,11 +119,11 @@ public class BukkitBlockEvents {
         }
 
 		@Override
-        public MCBlockState getBlockReplacedState() {            
+        public MCBlockState getBlockReplacedState() {
             return new BukkitMCBlockState(event.getBlockReplacedState());
         }
     }
-	
+
 	@abstraction(type = Implementation.Type.BUKKIT)
     public static class BukkitMCBlockBurnEvent implements MCBlockBurnEvent {
 
@@ -200,7 +200,7 @@ public class BukkitBlockEvents {
         public static BukkitMCSignChangeEvent _instantiate(MCBlock sign, MCPlayer player, CArray signtext) {
             String[] text = new String[4];
             for (int i = 0; i < signtext.size(); i++) {
-                text[i] = signtext.get(i).toString();
+                text[i] = signtext.get(i, Target.UNKNOWN).toString();
             }
             return new BukkitMCSignChangeEvent(new SignChangeEvent(( (BukkitMCBlock) sign ).__Block(), ( (BukkitMCPlayer) player )._Player(),
                     text));

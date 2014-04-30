@@ -71,9 +71,9 @@ public class Web {
 			CArray aCookie = null;
 			for(Construct ac : arrayJar.asList()){
 				aCookie = Static.getArray(ac, t);
-				if(cookie.getName().equals(aCookie.get("name").val())
-						&& cookie.getDomain().equals(aCookie.get("domain").val())
-						&& cookie.getPath().equals(aCookie.get("path").val())){
+				if(cookie.getName().equals(aCookie.get("name", t).val())
+						&& cookie.getDomain().equals(aCookie.get("domain", t).val())
+						&& cookie.getPath().equals(aCookie.get("path", t).val())){
 					//This is just an update, not a new cookie
 					update = true;
 					break;
@@ -97,11 +97,11 @@ public class Web {
 			}
 		}
 	}
-	
+
 	private static CookieJar getCookieJar(CArray cookieJar, Target t){
 		CookieJar ret = new CookieJar();
 		for(String key : cookieJar.stringKeySet()){
-			CArray cookie = Static.getArray(cookieJar.get(key), t);
+			CArray cookie = Static.getArray(cookieJar.get(key, t), t);
 			String name;
 			String value;
 			String domain;
@@ -111,29 +111,29 @@ public class Web {
 			boolean secureOnly = false;
 			if(cookie.containsKey("name") && cookie.containsKey("value")
 					&& cookie.containsKey("domain") && cookie.containsKey("path")){
-				name = cookie.get("name").val();
-				value = cookie.get("value").val();
-				domain = cookie.get("domain").val();
-				path = cookie.get("path").val();
+				name = cookie.get("name", t).val();
+				value = cookie.get("value", t).val();
+				domain = cookie.get("domain", t).val();
+				path = cookie.get("path", t).val();
 			} else {
 				throw new ConfigRuntimeException("The name, value, domain, and path keys are required"
 						+ " in all cookies.", ExceptionType.FormatException, t);
 			}
 			if(cookie.containsKey("expiration")){
-				expiration = Static.getInt(cookie.get("expiration"), t);
+				expiration = Static.getInt(cookie.get("expiration", t), t);
 			}
 			if(cookie.containsKey("httpOnly")){
-				httpOnly = Static.getBoolean(cookie.get("httpOnly"));
+				httpOnly = Static.getBoolean(cookie.get("httpOnly", t));
 			}
 			if(cookie.containsKey("secureOnly")){
-				secureOnly = Static.getBoolean(cookie.get("secureOnly"));
+				secureOnly = Static.getBoolean(cookie.get("secureOnly", t));
 			}
 			Cookie c = new Cookie(name, value, domain, path, expiration, httpOnly, secureOnly);
 			ret.addCookie(c);
 		}
 		return ret;
 	}
-	
+
 	@api
 	public static class http_request extends AbstractFunction {
 		/**
@@ -144,14 +144,14 @@ public class Web {
 		private static final int MAX_HTTP_THREADS = 3;
 		private static int threadCount = 0;
 		private static final ExecutorService threadPool = Executors.newFixedThreadPool(MAX_HTTP_THREADS, new ThreadFactory() {
-			
-			
+
+
 			@Override
 			public Thread newThread(Runnable r) {
 				return new Thread(r, Implementation.GetServerType().getBranding() + "-web-request-" + (threadCount++));
 			}
 		});
-		
+
 		private static final Map<String, String> DEFAULT_HEADERS = new HashMap<String, String>();
 		static{
 			DEFAULT_HEADERS.put("Accept", "text/*, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8");
@@ -196,24 +196,24 @@ public class Web {
 				CArray csettings = Static.getArray(args[1], t);
 				if(csettings.containsKey("method")){
 					try{
-						settings.setMethod(HTTPMethod.valueOf(csettings.get("method").val()));
+						settings.setMethod(HTTPMethod.valueOf(csettings.get("method", t).val()));
 					} catch(IllegalArgumentException e){
 						throw new Exceptions.FormatException(e.getMessage(), t);
 					}
 				}
 				boolean useDefaultHeaders = true;
 				if(csettings.containsKey("useDefaultHeaders")){
-					useDefaultHeaders = Static.getBoolean(csettings.get("useDefaultHeaders"));
+					useDefaultHeaders = Static.getBoolean(csettings.get("useDefaultHeaders", t));
 				}
-				if(csettings.containsKey("headers") && !(csettings.get("headers") instanceof CNull)){
-					CArray headers = Static.getArray(csettings.get("headers"), t);
+				if(csettings.containsKey("headers") && !(csettings.get("headers", t) instanceof CNull)){
+					CArray headers = Static.getArray(csettings.get("headers", t), t);
 					Map<String, List<String>> mheaders = new HashMap<String, List<String>>();
 					for(String key : headers.stringKeySet()){
 						List<String> h = new ArrayList<String>();
-						Construct c = headers.get(key);
+						Construct c = headers.get(key, t);
 						if(c instanceof CArray){
 							for(String kkey : ((CArray)c).stringKeySet()){
-								h.add(((CArray)c).get(kkey).val());
+								h.add(((CArray)c).get(kkey, t).val());
 							}
 						} else {
 							h.add(c.val());
@@ -236,16 +236,16 @@ public class Web {
 						settings.getHeaders().put(key, Arrays.asList(DEFAULT_HEADERS.get(key)));
 					}
 				}
-				if(csettings.containsKey("params") && !(csettings.get("params") instanceof CNull)){
-					if(csettings.get("params") instanceof CArray){
-						CArray params = Static.getArray(csettings.get("params"), t);
+				if(csettings.containsKey("params") && !(csettings.get("params", t) instanceof CNull)){
+					if(csettings.get("params", t) instanceof CArray){
+						CArray params = Static.getArray(csettings.get("params", t), t);
 						Map<String, List<String>> mparams = new HashMap<String, List<String>>();
 						for(String key : params.stringKeySet()){
-							Construct c = params.get(key);
+							Construct c = params.get(key, t);
 							List<String> l = new ArrayList<String>();
 							if(c instanceof CArray){
 								for(String kkey : ((CArray)c).stringKeySet()){
-									l.add(((CArray)c).get(kkey).val());
+									l.add(((CArray)c).get(kkey, t).val());
 								}
 							} else {
 								l.add(c.val());
@@ -254,25 +254,25 @@ public class Web {
 						}
 						settings.setComplexParameters(mparams);
 					} else {
-						settings.setRawParameter(csettings.get("params").val());
+						settings.setRawParameter(csettings.get("params", t).val());
 						if(settings.getMethod() != HTTPMethod.POST){
 							throw new Exceptions.FormatException("You must set the method to POST to use raw params.", t);
 						}
 					}
 				}
-				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar") instanceof CNull)){
-					arrayJar = Static.getArray(csettings.get("cookiejar"), t);
+				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar", t) instanceof CNull)){
+					arrayJar = Static.getArray(csettings.get("cookiejar", t), t);
 					settings.setCookieJar(getCookieJar(arrayJar, t));
 				} else {
 					arrayJar = null;
 				}
 				if(csettings.containsKey("followRedirects")){
-					settings.setFollowRedirects(Static.getBoolean(csettings.get("followRedirects")));
+					settings.setFollowRedirects(Static.getBoolean(csettings.get("followRedirects", t)));
 				}
 				//Only required parameter
 				if(csettings.containsKey("success")){
-					if(csettings.get("success") instanceof CClosure){
-						success = (CClosure) csettings.get("success");
+					if(csettings.get("success", t) instanceof CClosure){
+						success = (CClosure) csettings.get("success", t);
 					} else {
 						throw new Exceptions.CastException("Expecting the success parameter to be a closure.", t);
 					}
@@ -280,8 +280,8 @@ public class Web {
 					throw new ConfigRuntimeException("Missing the success parameter, which is required.", ExceptionType.CastException, t);
 				}
 				if(csettings.containsKey("error")){
-					if(csettings.get("error") instanceof CClosure){
-						error = (CClosure) csettings.get("error");
+					if(csettings.get("error", t) instanceof CClosure){
+						error = (CClosure) csettings.get("error", t);
 					} else {
 						throw new Exceptions.CastException("Expecting the error parameter to be a closure.", t);
 					}
@@ -289,18 +289,18 @@ public class Web {
 					error = null;
 				}
 				if(csettings.containsKey("timeout")){
-					settings.setTimeout(Static.getInt32(csettings.get("timeout"), t));
+					settings.setTimeout(Static.getInt32(csettings.get("timeout", t), t));
 				}
 				String username = null;
 				String password = null;
 				if(csettings.containsKey("username")){
-					username = csettings.get("username").val();
+					username = csettings.get("username", t).val();
 				}
 				if(csettings.containsKey("password")){
-					password = csettings.get("password").val(); 
+					password = csettings.get("password", t).val();
 				}
 				if(csettings.containsKey("proxy")){
-					CArray proxySettings = Static.getArray(csettings.get("proxy"), t);
+					CArray proxySettings = Static.getArray(csettings.get("proxy", t), t);
 					Proxy.Type type;
 					String proxyURL;
 					int port;
@@ -309,14 +309,14 @@ public class Web {
 					} catch(IllegalArgumentException e){
 						throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 					}
-					proxyURL = proxySettings.get("url").val();
-					port = Static.getInt32(proxySettings.get("port"), t);
+					proxyURL = proxySettings.get("url", t).val();
+					port = Static.getInt32(proxySettings.get("port", t), t);
 					SocketAddress addr = new InetSocketAddress(proxyURL, port);
 					Proxy proxy = new Proxy(type, addr);
 					settings.setProxy(proxy);
 				}
 				if(csettings.containsKey("download")){
-					Construct download = csettings.get("download");
+					Construct download = csettings.get("download", t);
 					if(download instanceof CNull){
 						settings.setDownloadTo(null);
 					} else {
@@ -365,7 +365,7 @@ public class Web {
 							}
 						});
 					} catch(IOException e){
-						final ConfigRuntimeException ex = new ConfigRuntimeException((e instanceof UnknownHostException?"Unknown host: ":"") 
+						final ConfigRuntimeException ex = new ConfigRuntimeException((e instanceof UnknownHostException?"Unknown host: ":"")
 								+ e.getMessage(), ExceptionType.IOException, t);
 						if(error != null){
 							StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
@@ -387,7 +387,7 @@ public class Web {
 			});
 			return CVoid.VOID;
 		}
-		
+
 		private void executeFinish(CClosure closure, Construct arg, Target t, Environment environment){
 			try{
 				closure.execute(new Construct[]{arg});
@@ -457,7 +457,7 @@ public class Web {
 					+ "\t\tmsg(@cookiejar)\n"
 					+ "\t)\n"
 					+ "));\n", "<cookie jar would now have cookies in it>"),
-				new ExampleScript("Sending some json to the server", 
+				new ExampleScript("Sending some json to the server",
 						"http_request('http://example.com', array(\n"
 								+ "\tmethod: 'POST',\n"
 								+ "\theaders: array(\n"
@@ -476,9 +476,9 @@ public class Web {
 								+ "));", "<A POST request with json data would be sent to the server>")
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	public static class http_clear_session_cookies extends AbstractFunction {
 
@@ -525,9 +525,9 @@ public class Web {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class url_encode extends AbstractFunction {
 
@@ -582,9 +582,9 @@ public class Web {
 				new ExampleScript("Basic usage", "url_encode('A string with special characters: !@#$%^&*()-+')")
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	public static class url_decode extends AbstractFunction {
 
@@ -638,7 +638,7 @@ public class Web {
 				new ExampleScript("Basic usage", "url_decode('A+string+with+special+characters%3A+%21%40%23%24%25%5E%26*%28%29-%2B')")
 			};
 		}
-		
+
 	}
 
 }

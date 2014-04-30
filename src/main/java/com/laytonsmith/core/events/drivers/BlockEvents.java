@@ -152,7 +152,7 @@ public class BlockEvents {
             blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
 
             map.put("block", blk);
-			
+
 			CArray location = ObjectGenerator.GetGenerator()
 					.location(StaticLayer.GetLocation(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
 			map.put("location", location);
@@ -165,7 +165,7 @@ public class BlockEvents {
                 drops.push(item);
             }
             map.put("drops", drops);
-			
+
 			map.put("xp", new CInt(event.getExpToDrop(), Target.UNKNOWN));
 
             return map;
@@ -185,29 +185,29 @@ public class BlockEvents {
                     CArray arr = (CArray) value;
 
                     for (int i = 0; i < arr.size(); i++) {
-                        CArray item = (CArray) arr.get(i);
+                        CArray item = (CArray) arr.get(i, Target.UNKNOWN);
                         MCItemStack stk = ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN);
-                        
+
                         blk.getWorld().dropItemNaturally(
                             StaticLayer.GetLocation(
-                                    blk.getWorld(), 
-                                    blk.getX(), 
-                                    blk.getY(), 
-                                    blk.getZ()), 
+                                    blk.getWorld(),
+                                    blk.getX(),
+                                    blk.getY(),
+                                    blk.getZ()),
                             stk);
                     }
 
                     return true;
                 }
             }
-			
+
 			if (key.equals("xp")) {
 				if (value instanceof CInt) {
-					
+
 					int xp = Integer.parseInt(value.val());
-					
+
 					event.setExpToDrop(xp);
-					
+
 					return true;
 				}
 			}
@@ -311,7 +311,7 @@ public class BlockEvents {
             map.put("Y", new CInt(blk.getY(), Target.UNKNOWN));
             map.put("Z", new CInt(blk.getZ(), Target.UNKNOWN));
             map.put("world", new CString(blk.getWorld().getName(), Target.UNKNOWN));
-			
+
 			CArray location = ObjectGenerator.GetGenerator()
 					.location(StaticLayer.GetLocation(blk.getWorld(), blk.getX(), blk.getY(), blk.getZ()));
 			map.put("location", location);
@@ -376,7 +376,7 @@ public class BlockEvents {
             return false;
         }
     }
-	
+
 	@api
     public static class block_burn extends AbstractEvent {
 
@@ -667,7 +667,7 @@ public class BlockEvents {
                     String[] lines = {"","","",""};
 
                     for (int i = 0; i < 4; i++) {
-                        lines[i] = val.get(i).toString();
+                        lines[i] = val.get(i, Target.UNKNOWN).toString();
                     }
 
                     sce.setLines(lines);
@@ -705,9 +705,9 @@ public class BlockEvents {
         public BindableEvent convert(CArray manual) {
             MCSignChangeEvent e = EventBuilder.instantiate(
                     MCSignChangeEvent.class,
-                    Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN),
-                    manual.get("1").val(), manual.get("2").val(),
-                    manual.get("3").val(), manual.get("4").val());
+                    Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
+                    manual.get("1", Target.UNKNOWN).val(), manual.get("2", Target.UNKNOWN).val(),
+                    manual.get("3", Target.UNKNOWN).val(), manual.get("4", Target.UNKNOWN).val());
             return e;
         }
     }

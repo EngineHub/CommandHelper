@@ -28,7 +28,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
- * 
+ *
  */
 @core
 public class DataTransformations {
@@ -256,7 +256,7 @@ public class DataTransformations {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class ini_encode extends AbstractFunction {
 
@@ -287,7 +287,7 @@ public class DataTransformations {
 				throw new Exceptions.CastException("Expecting an associative array", t);
 			}
 			for(String key : arr.stringKeySet()){
-				Construct c = arr.get(key);
+				Construct c = arr.get(key, t);
 				String val;
 				if(c instanceof CNull){
 					val = "";
@@ -333,9 +333,9 @@ public class DataTransformations {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ini_decode extends AbstractFunction {
 
@@ -399,9 +399,9 @@ public class DataTransformations {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class xml_read extends AbstractFunction {
 
@@ -455,9 +455,9 @@ public class DataTransformations {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	//@api
 	public static class xml_write extends AbstractFunction {
 
@@ -500,6 +500,6 @@ public class DataTransformations {
 		public Version since() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
-		
+
 	}
 }

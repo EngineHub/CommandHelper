@@ -88,7 +88,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * 
+ *
  */
 public class PlayerEvents {
     public static String docs(){
@@ -128,8 +128,8 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item"), Target.UNKNOWN);
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item", Target.UNKNOWN), Target.UNKNOWN);
 			return EventBuilder.instantiate(MCPlayerItemConsumeEvent.class, p, i);
 		}
 
@@ -169,7 +169,7 @@ public class PlayerEvents {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
     @api
@@ -304,9 +304,9 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), p.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), p.getWorld(), manualObject.getTarget());
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerTeleportEvent.class, p, from, to);
 		}
 
@@ -401,9 +401,9 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), p.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), p.getWorld(), manualObject.getTarget());
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerPortalEvent.class, p, from, to);
 		}
 
@@ -751,8 +751,8 @@ public class PlayerEvents {
 
 		@Override
         public BindableEvent convert(CArray manual){
-            MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN),
-                    manual.get("join_message").val());
+            MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
+                    manual.get("join_message", Target.UNKNOWN).val());
             return e;
         }
 
@@ -850,11 +850,11 @@ public class PlayerEvents {
 
 		@Override
         public BindableEvent convert(CArray manual){
-            MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
-            MCAction a = MCAction.valueOf(manual.get("action").val().toUpperCase());
-            MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item").val(), 1, Target.UNKNOWN);
-            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location"), null, Target.UNKNOWN).getBlock();
-            MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing").val().toUpperCase());
+            MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
+            MCAction a = MCAction.valueOf(manual.get("action", Target.UNKNOWN).val().toUpperCase());
+            MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item", Target.UNKNOWN).val(), 1, Target.UNKNOWN);
+            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null, Target.UNKNOWN).getBlock();
+            MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing", Target.UNKNOWN).val().toUpperCase());
             MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);
             return e;
         }
@@ -869,35 +869,35 @@ public class PlayerEvents {
         }
 
     }
-	
+
     public abstract static class player_bed_event extends AbstractEvent {
-		
+
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerBedEvent){
                 MCPlayerBedEvent be = (MCPlayerBedEvent)e;
-				
+
 				if(prefilter.containsKey("location")){
 					MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, Target.UNKNOWN);
-					
+
 					if(!be.getBed().getLocation().equals(loc)){
 						return false;
 					}
 				}
-				
+
 				return true;
 			}
-			
+
 			return false;
 		}
 
 		@Override
 		public BindableEvent convert(CArray manual) {
-			MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
-            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location"), null, Target.UNKNOWN).getBlock();
-            
+			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
+            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null, Target.UNKNOWN).getBlock();
+
 			MCPlayerBedEvent e = EventBuilder.instantiate(MCPlayerBedEvent.class, p, b);
-            
+
 			return e;
 		}
 
@@ -906,10 +906,10 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerBedEvent){
                 MCPlayerBedEvent bee = (MCPlayerBedEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-				
+
                 map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation(), false));
 				map.put("player", new CString(bee.getPlayer().getName(), Target.UNKNOWN));
-				
+
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to an appropriate PlayerBedEvent.");
@@ -931,10 +931,10 @@ public class PlayerEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class player_enter_bed extends player_bed_event {
-		
+
 		@Override
 		public String docs() {
 			return "{location: The location of the bed} "
@@ -950,10 +950,10 @@ public class PlayerEvents {
 			return "player_enter_bed";
 		}
 	}
-	
+
 	@api
 	public static class player_leave_bed extends player_bed_event {
-		
+
 		@Override
 		public String docs() {
 			return "{location: The location of the bed} "
@@ -969,7 +969,7 @@ public class PlayerEvents {
 			return "player_leave_bed";
 		}
 	}
-	
+
 	@api
     public static class pressure_plate_activated extends AbstractEvent {
 
@@ -1010,8 +1010,8 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manual) {
-			MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
-            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location"), null, Target.UNKNOWN).getBlock();
+			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
+            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null, Target.UNKNOWN).getBlock();
             MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, MCAction.PHYSICAL, null, b, MCBlockFace.UP);
             return e;
 		}
@@ -1044,7 +1044,7 @@ public class PlayerEvents {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
     @api
@@ -1113,8 +1113,8 @@ public class PlayerEvents {
         public BindableEvent convert(CArray manual) {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
-            MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
-            MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location"), p.getWorld(), Target.UNKNOWN);
+            MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
+            MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), p.getWorld(), Target.UNKNOWN);
             MCPlayerRespawnEvent e = EventBuilder.instantiate(MCPlayerRespawnEvent.class, p, l, false);
             return e;
         }
@@ -1222,12 +1222,12 @@ public class PlayerEvents {
         public BindableEvent convert(CArray manual) {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
-            String splayer = manual.get("player").val();
+            String splayer = manual.get("player", Target.UNKNOWN).val();
             List<MCItemStack> list = new ArrayList<MCItemStack>();
-            String deathMessage = manual.get("death_message").val();
-            CArray clist = (CArray)manual.get("drops");
+            String deathMessage = manual.get("death_message", Target.UNKNOWN).val();
+            CArray clist = (CArray)manual.get("drops", Target.UNKNOWN);
             for(String key : clist.stringKeySet()){
-                list.add(ObjectGenerator.GetGenerator().item(clist.get(key), clist.getTarget()));
+                list.add(ObjectGenerator.GetGenerator().item(clist.get(key, Target.UNKNOWN), clist.getTarget()));
             }
             MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer, Target.UNKNOWN), list,
                     0, deathMessage);
@@ -1303,8 +1303,8 @@ public class PlayerEvents {
 		@Override
         public BindableEvent convert(CArray manualObject) {
             //Get the parameters from the manualObject
-            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-            String message = manualObject.get("message").nval();
+            MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+            String message = manualObject.get("message", Target.UNKNOWN).nval();
 
             BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
                 player, message);
@@ -1405,9 +1405,9 @@ public class PlayerEvents {
 		@Override
         public BindableEvent convert(CArray manualObject) {
             //Get the parameters from the manualObject
-            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-            String message = manualObject.get("message").nval();
-			String format = manualObject.get("format").nval();
+            MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+            String message = manualObject.get("message", Target.UNKNOWN).nval();
+			String format = manualObject.get("format", Target.UNKNOWN).nval();
 
             BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class,
                 player, message, format);
@@ -1444,7 +1444,7 @@ public class PlayerEvents {
                     if(value instanceof CArray){
                         List<MCPlayer> list = new ArrayList<MCPlayer>();
                         for(String index : ((CArray)value).stringKeySet()){
-                            Construct v = ((CArray)value).get(index);
+                            Construct v = ((CArray)value).get(index, Target.UNKNOWN);
                             try{
                                 list.add(Static.GetPlayer(v, Target.UNKNOWN));
                             } catch(ConfigRuntimeException ex){
@@ -1521,8 +1521,8 @@ public class PlayerEvents {
 		@Override
         public BindableEvent convert(CArray manualObject) {
             //Get the parameters from the manualObject
-            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-            String message = manualObject.get("message").nval();
+            MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+            String message = manualObject.get("message", Target.UNKNOWN).nval();
 
             BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class,
                 player, message);
@@ -1559,7 +1559,7 @@ public class PlayerEvents {
                     if(value instanceof CArray){
                         List<MCPlayer> list = new ArrayList<MCPlayer>();
                         for(String index : ((CArray)value).stringKeySet()){
-                            Construct v = ((CArray)value).get(index);
+                            Construct v = ((CArray)value).get(index, Target.UNKNOWN);
                             try{
                                 list.add(Static.GetPlayer(v, Target.UNKNOWN));
                             } catch(ConfigRuntimeException ex){
@@ -1627,7 +1627,7 @@ public class PlayerEvents {
                     StringHandling.parse_args pa = new StringHandling.parse_args();
                     CArray ca = (CArray)pa.exec(Target.UNKNOWN, null, new CString(command, Target.UNKNOWN));
                     if(ca.size() > 0){
-                        if(!ca.get(0).val().equals(prefilter.get("prefix").val())){
+                        if(!ca.get(0, Target.UNKNOWN).val().equals(prefilter.get("prefix").val())){
                             return false;
                         }
                     } else {
@@ -1641,8 +1641,8 @@ public class PlayerEvents {
 
 		@Override
         public BindableEvent convert(CArray manualObject) {
-            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-            String command = manualObject.get("command").nval();
+            MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+            String command = manualObject.get("command", Target.UNKNOWN).nval();
 
             BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
                 player, command);
@@ -1659,7 +1659,7 @@ public class PlayerEvents {
 
                 StringHandling.parse_args pa = new StringHandling.parse_args();
                 CArray ca = (CArray)pa.exec(Target.UNKNOWN, null, new CString(event.getCommand(), Target.UNKNOWN));
-                map.put("prefix", new CString(ca.get(0).val(), Target.UNKNOWN));
+                map.put("prefix", new CString(ca.get(0, Target.UNKNOWN).val(), Target.UNKNOWN));
 
                 return map;
             } else {
@@ -1731,8 +1731,8 @@ public class PlayerEvents {
 
 		@Override
         public BindableEvent convert(CArray manualObject) {
-            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-            MCWorld from = Static.getServer().getWorld(manualObject.get("from").val());
+            MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+            MCWorld from = Static.getServer().getWorld(manualObject.get("from", Target.UNKNOWN).val());
 
             BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
                 player, from);
@@ -1996,9 +1996,9 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), p.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), p.getWorld(), manualObject.getTarget());
+			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerMoveEvent.class, p, from, to);
 		}
 
@@ -2038,12 +2038,12 @@ public class PlayerEvents {
 
 	@api
 	public static class player_fish extends AbstractEvent {
-	
+
 		@Override
 		public String getName() {
 			return "player_fish";
 		}
-	
+
 		@Override
 		public String docs() {
 			return "{state: <macro> Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
@@ -2054,7 +2054,7 @@ public class PlayerEvents {
 					+ " | xp: the exp the player will get from catching a fish}"
 					+ " {}";
 		}
-	
+
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
 				throws PrefilterNonMatchException {
@@ -2067,12 +2067,12 @@ public class PlayerEvents {
 			}
 			return false;
 		}
-	
+
 		@Override
 		public BindableEvent convert(CArray manualObject) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
-	
+
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
@@ -2095,7 +2095,7 @@ public class PlayerEvents {
 				throw new EventException("Could not convert to MCPlayerFishEvent");
 			}
 		}
-	
+
 		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
@@ -2116,18 +2116,18 @@ public class PlayerEvents {
 			}
 			return false;
 		}
-	
+
 		@Override
 		public Driver driver() {
 			return Driver.PLAYER_FISH;
 		}
-	
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class gamemode_change extends AbstractEvent {
 
@@ -2192,12 +2192,12 @@ public class PlayerEvents {
 
 	@api
 	public static class tab_complete_chat extends AbstractEvent {
-	
+
 		@Override
 		public String getName() {
 			return "tab_complete_chat";
 		}
-	
+
 		@Override
 		public String docs() {
 			return "{player: <macro>}"
@@ -2208,7 +2208,7 @@ public class PlayerEvents {
 					+ " {completions: the list of completions to send, default is player names containing the last text}"
 					+ " {}";
 		}
-	
+
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCChatTabCompleteEvent) {
@@ -2217,12 +2217,12 @@ public class PlayerEvents {
 			}
 			return false;
 		}
-	
+
 		@Override
 		public BindableEvent convert(CArray manualObject) {
 			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
-	
+
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCChatTabCompleteEvent) {
@@ -2241,7 +2241,7 @@ public class PlayerEvents {
 				throw new EventException("Could not convert to MCChatTabCompleteEvent.");
 			}
 		}
-	
+
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCChatTabCompleteEvent) {
@@ -2269,7 +2269,7 @@ public class PlayerEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class exp_change extends AbstractEvent {
 
@@ -2482,7 +2482,7 @@ public class PlayerEvents {
 			}
 		}
 	}
-	
+
 	@api
 	public static class player_toggle_flight extends AbstractEvent {
 		@Override

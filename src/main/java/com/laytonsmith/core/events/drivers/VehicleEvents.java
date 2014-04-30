@@ -51,7 +51,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 
+ *
  * @author jb_aero
  */
 public class VehicleEvents {
@@ -126,7 +126,7 @@ public class VehicleEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class vehicle_leave extends AbstractEvent {
 
@@ -197,7 +197,7 @@ public class VehicleEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class vehicle_collide extends AbstractEvent {
 
@@ -549,15 +549,15 @@ public class VehicleEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject) {
 
-			int id = Static.getInt32(manualObject.get("id"), Target.UNKNOWN);
+			int id = Static.getInt32(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			MCEntity e = Static.getEntity(id, Target.UNKNOWN);
 			if (!(e instanceof MCVehicle)) {
 				throw new ConfigRuntimeException("The id was not a vehicle",
 						ExceptionType.BadEntityException, Target.UNKNOWN);
 			}
 
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), e.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), e.getWorld(), manualObject.getTarget());
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCVehicleMoveEvent.class, e, from, to);
 		}
 

@@ -58,7 +58,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 
+ *
  */
 public class PlayerManagement {
 
@@ -495,7 +495,7 @@ public class PlayerManagement {
 					CArray ta = (CArray) args[0];
 					trans = new HashSet<Short>();
 					for (int i=0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i), t));
+						trans.add(Static.getInt16(ta.get(i, t), t));
 					}
 				} else {
 					p = Static.GetPlayer(args[0], t);
@@ -506,7 +506,7 @@ public class PlayerManagement {
 					CArray ta = (CArray) args[1];
 					trans = new HashSet<Short>();
 					for (int i=0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i), t));
+						trans.add(Static.getInt16(ta.get(i, t), t));
 					}
 				} else {
 					throw new Exceptions.FormatException("An array was expected for argument 2 but received " + args[1], t);
@@ -546,7 +546,7 @@ public class PlayerManagement {
 			};
 		}
 	}
-	
+
 	@api
 	public static class ptarget_space extends AbstractFunction {
 
@@ -595,12 +595,12 @@ public class PlayerManagement {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pkill extends AbstractFunction {
-		
+
 		@Override
 		public String getName() {
 			return "pkill";
@@ -674,7 +674,7 @@ public class PlayerManagement {
 					+ " all usages of kill() to pkill() ", t);
 			return null;
 		}
-		
+
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
@@ -998,7 +998,7 @@ public class PlayerManagement {
 			return new CString(m.getWorld().getName(), t);
 		}
 	}
-	
+
 	@api
 	@hide("Deprecated in favor of pkick")
 	@Deprecated
@@ -1020,7 +1020,7 @@ public class PlayerManagement {
 					+ " all usages of kick() to pkick() ", t);
 			return null;
 		}
-		
+
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -2018,7 +2018,7 @@ public class PlayerManagement {
 			//otherwise the client crashes, and requires deletion of
 			//player data to fix.
 			if (effect < 1 || effect > m.getMaxEffect()) {
-				throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(), 
+				throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(),
 						ExceptionType.RangeException, t);
 			}
 
@@ -2475,7 +2475,7 @@ public class PlayerManagement {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			double speed = 0;
-			
+
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2490,12 +2490,12 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("Speed must be between -1 and 1", ExceptionType.RangeException, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			
+
 			m.setWalkSpeed((float) speed);
 			return CVoid.VOID;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pwalkspeed extends AbstractFunction {
 
@@ -2538,21 +2538,21 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			
+
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
-			
+
 			if (args.length == 1) {
 				m = Static.GetPlayer(args[0], t);
 			}
-			
+
 			Static.AssertPlayerNonNull(m, t);
 
 			return new CDouble(((double) m.getWalkSpeed()), t);
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pflyspeed extends AbstractFunction {
 
@@ -2596,7 +2596,7 @@ public class PlayerManagement {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			double speed = 0;
-			
+
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2611,12 +2611,12 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("Speed must be between -1 and 1", ExceptionType.RangeException, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			
+
 			m.setFlySpeed((float) speed);
 			return CVoid.VOID;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pflyspeed extends AbstractFunction {
 
@@ -2659,21 +2659,21 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			
+
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
-			
+
 			if (args.length == 1) {
 				m = Static.GetPlayer(args[0], t);
 			}
-			
+
 			Static.AssertPlayerNonNull(m, t);
 
 			return new CDouble(((double) m.getFlySpeed()), t);
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pisop extends AbstractFunction {
 
@@ -4359,7 +4359,7 @@ public class PlayerManagement {
 			};
 		}
 	}
-	
+
 	@api
 	public static class get_player_from_entity_id extends AbstractFunction {
 

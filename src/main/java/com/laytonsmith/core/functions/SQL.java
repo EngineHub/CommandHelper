@@ -81,7 +81,7 @@ public class SQL {
 				if (args[0] instanceof CArray) {
 					Map<String, String> data = new HashMap<>();
 					for (String key : ((CArray) args[0]).stringKeySet()) {
-						data.put(key, ((CArray) args[0]).get(key).val());
+						data.put(key, ((CArray) args[0]).get(key, t).val());
 					}
 					profile = SQLProfiles.getProfile(data);
 				} else {
@@ -122,13 +122,13 @@ public class SQL {
 							} else if (params[i] instanceof CBoolean) {
 								ps.setBoolean(i + 1, Static.getBoolean(params[i]));
 							}else{
-								throw new ConfigRuntimeException("The type " + params[i].getClass().getSimpleName() 
+								throw new ConfigRuntimeException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported."
 										, ExceptionType.CastException, t);
 							}
 						} catch (ClassCastException ex) {
 							throw new ConfigRuntimeException("Could not cast parameter " + (i + 1) + " to "
-									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from " 
+									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from "
 									+ params[i].getClass().getSimpleName() + "."
 									, ExceptionType.CastException, t, ex);
 						}
@@ -148,7 +148,7 @@ public class SQL {
 									// Since mscript can assign null to primitives, we
 									// can set it to null regardless of the data type.
 									value = CNull.NULL;
-								} else if (columnType == Types.INTEGER 
+								} else if (columnType == Types.INTEGER
 										|| columnType == Types.TINYINT
 										|| columnType == Types.SMALLINT
 										|| columnType == Types.BIGINT) {
@@ -160,12 +160,12 @@ public class SQL {
 										|| columnType == Types.NUMERIC) {
 									value = new CDouble(rs.getDouble(i), t);
 								} else if (columnType == Types.VARCHAR
-										|| columnType == Types.CHAR 
+										|| columnType == Types.CHAR
 										|| columnType == Types.LONGVARCHAR) {
 									value = new CString(rs.getString(i), t);
-								} else if (columnType == Types.BLOB 
-										|| columnType == Types.BINARY 
-										|| columnType == Types.VARBINARY 
+								} else if (columnType == Types.BLOB
+										|| columnType == Types.BINARY
+										|| columnType == Types.VARBINARY
 										|| columnType == Types.LONGVARBINARY) {
 									value = CByteArray.wrap(rs.getBytes(i), t);
 								} else if (columnType == Types.DATE
@@ -180,8 +180,8 @@ public class SQL {
 										|| columnType == Types.BIT) {
 									value = new CBoolean(rs.getBoolean(i), t);
 								} else {
-									throw new ConfigRuntimeException("SQL returned a unhandled column type " 
-											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "." 
+									throw new ConfigRuntimeException("SQL returned a unhandled column type "
+											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "."
 											, ExceptionType.CastException, t);
 								}
 								row.set(md.getColumnName(i), value, t);
@@ -233,7 +233,7 @@ public class SQL {
 				//-2 accounts for the profile data and query
 				if(children.size() - 2 != count){
 					throw new ConfigCompileException(
-							StringUtils.PluralTemplateHelper(count, "%d parameter token was", "%d parameter tokens were") 
+							StringUtils.PluralTemplateHelper(count, "%d parameter token was", "%d parameter tokens were")
 									+ " found in the query, but "
 									+ StringUtils.PluralTemplateHelper(children.size() - 2, "%d parameter was", "%d parameters were")
 									+ " provided to query().", t);
@@ -250,7 +250,7 @@ public class SQL {
 //						try {
 //							conn = DriverManager.getConnection(profile.getConnectionString());
 //							try(PreparedStatement statement = conn.prepareStatement(query)){
-//								
+//
 //							}
 //						} catch (SQLException ex) {
 //							// Do nothing, but we can't validate this query
@@ -287,13 +287,13 @@ public class SQL {
 		}
 
 	}
-	
+
 	@api
 	public static class query_async extends AbstractFunction {
-		
+
 		RunnableQueue queue = null;
 		boolean started = false;
-		
+
 		private synchronized void startup(){
 			if(queue == null){
 				queue = new RunnableQueue("MethodScript-queryAsync");
@@ -396,6 +396,6 @@ public class SQL {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }

@@ -78,7 +78,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 
 /**
- * 
+ *
  */
 public class WorldEdit {
 
@@ -285,7 +285,7 @@ public class WorldEdit {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PluginInternalException, 
+			return new ExceptionType[]{ExceptionType.PluginInternalException,
 				ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
@@ -411,7 +411,7 @@ public class WorldEdit {
 				}
 
 				if (ret.size() == 1) {
-					return ret.get(0);
+					return ret.get(0, t);
 				}
 				return ret;
 
@@ -921,7 +921,7 @@ public class WorldEdit {
 				CArray arg = (CArray) args[args.length - 1];
 
 				for (int i = 0; i < arg.size(); i++) {
-					MCLocation point = ObjectGenerator.GetGenerator().location(arg.get(i), null, t);
+					MCLocation point = ObjectGenerator.GetGenerator().location(arg.get(i, t), null, t);
 
 					int x = point.getBlockX();
 					int y = point.getBlockY();
@@ -1051,7 +1051,7 @@ public class WorldEdit {
             CArray arg = (CArray) args[args.length - 1];
 
             for (int i = 0; i < arg.size(); i++) {
-                MCLocation point = ObjectGenerator.GetGenerator().location(arg.get(i), null, t);
+                MCLocation point = ObjectGenerator.GetGenerator().location(arg.get(i, t), null, t);
 
                 int x = point.getBlockX();
                 int y = point.getBlockY();
@@ -2392,7 +2392,7 @@ public class WorldEdit {
             return CHVersion.V3_3_1;
         }
     }
-	
+
 	@api(environments=CommandHelperEnvironment.class)
 	public static class sk_can_build extends SKFunction {
 
@@ -2415,7 +2415,7 @@ public class WorldEdit {
 				}
 				loc = ObjectGenerator.GetGenerator().location(args[0], p.getWorld(), t);
 			} else {
-				
+
 				p = Static.GetPlayer(args[0], t);
 				loc = ObjectGenerator.GetGenerator().location(args[1], p.getWorld(), t);
 			}
@@ -2438,7 +2438,7 @@ public class WorldEdit {
 			return "boolean {[player,] locationArray} Returns whether or not player can build at the location,"
 					+ " according to WorldGuard. If player is not given, the current player is used.";
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
@@ -2464,42 +2464,42 @@ public class WorldEdit {
     }
 
     /* **************************** Clipboard functions below this line ****************************** */
-    
+
 	// Class required for working with loggers
 	public static class CHCommandSender extends com.sk89q.worldedit.bukkit.BukkitCommandSender {
 
 		public CHCommandSender(com.sk89q.worldedit.bukkit.WorldEditPlugin wep) {
 			super(wep, wep.getServerInterface(), wep.getServer().getConsoleSender());
 		}
-		
+
 		public CHCommandSender(Target t) {
 			this(Static.getWorldEditPlugin(t));
 		}
-		
+
 		private LocalWorld world;
 
 		@Override
 		public LocalWorld getWorld() {
 			return world;
 		}
-		
+
 		public void setWorld(LocalWorld w) {
 			world = w;
 		}
 	}
-	
+
 	// CH's local player, based from console
 	private static CHCommandSender player;
 	// CH's console-based session
 	private static LocalSession session;
-	
+
 	public static CHCommandSender getLocalPlayer(Target t) {
 		if (player == null) {
 			player = new CHCommandSender(t);
 		}
 		return player;
 	}
-	
+
 	public static LocalSession getLocalSession(Target t) {
 		if (session == null) {
 			session = Static.getWorldEditPlugin(t).getWorldEdit().getSession(getLocalPlayer(t));
@@ -2515,7 +2515,7 @@ public class WorldEdit {
 		}
 		return null;
 	}
-	
+
 	// modified from com.sk89q.worldedit.LocalSession.createEditSession
 	public static EditSession createEditSession(CHCommandSender player, String world, boolean fastMode, Target t) {
 		LocalWorld w = getLocalWorld(world, t);
@@ -2526,7 +2526,7 @@ public class WorldEdit {
 
 		return editSession;
 	}
-	
+
 	@api
 	public static class skcb_load extends SKFunction {
 
@@ -2581,7 +2581,7 @@ public class WorldEdit {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class skcb_rotate extends SKFunction {
 
@@ -2622,13 +2622,13 @@ public class WorldEdit {
 		public String docs() {
 			return "void {int} Given a multiple of 90, rotates the clipboard by that number.";
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class skcb_paste extends SKFunction {
 
@@ -2656,7 +2656,7 @@ public class WorldEdit {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			Vector vec = new Vector(loc.getX(), loc.getY(), loc.getZ());
 			EditSession editor = createEditSession(getLocalPlayer(t), loc.getWorld().getName(), fastmode, t);
-			
+
 			try {
 				getLocalSession(t).getClipboard().paste(editor, vec, noAir, entities);
 			} catch (MaxChangedBlocksException e) {
@@ -2666,7 +2666,7 @@ public class WorldEdit {
 				throw new ConfigRuntimeException("The clipboard is empty, copy something to it first!",
 						ExceptionType.NotFoundException, t);
 			}
-			
+
 			return CVoid.VOID;
 		}
 
@@ -2689,7 +2689,7 @@ public class WorldEdit {
 					+ " If entities is true, any entities stored in the clipboard will be pasted as well."
 					+ " Both ignoreAir and entities default to false.";
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;

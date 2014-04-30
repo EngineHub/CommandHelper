@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
@@ -15,7 +16,7 @@ import java.util.List;
 
 /**
  *
- * 
+ *
  */
 public class OptimizationUtilities {
 
@@ -42,20 +43,20 @@ public class OptimizationUtilities {
 			}
 		}
 	}
-	
+
 	/**
 	 * This function takes a string script, and returns an equivalent, optimized script.
 	 * @param script
 	 * @return
-	 * @throws ConfigCompileException 
+	 * @throws ConfigCompileException
 	 */
 	public static String optimize(String script, File source) throws ConfigCompileException{
-        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, source, true));        
+        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, source, true));
         StringBuilder b = new StringBuilder();
         //The root always contains null.
         for(ParseTree child : tree.getChildren()){
             b.append(optimize0(child));
-        }        
+        }
         return b.toString();
     }
     private static String optimize0(ParseTree node){
@@ -94,7 +95,7 @@ public class OptimizationUtilities {
 					b.append(",");
 				}
 				first = false;
-				b.append(optimize0(new ParseTree(n.get(key), node.getFileOptions())));
+				b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN), node.getFileOptions())));
 			}
 			b.append(")");
 			return b.toString();

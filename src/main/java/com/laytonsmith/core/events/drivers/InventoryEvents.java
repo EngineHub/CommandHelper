@@ -108,7 +108,7 @@ public class InventoryEvents {
 					viewers.push(new CString(viewer.getName(), Target.UNKNOWN));
 				}
 				map.put("viewers", viewers);
-				
+
 				map.put("action", new CString(e.getAction().name(), Target.UNKNOWN));
 				map.put("clicktype", new CString(e.getClickType().name(), Target.UNKNOWN));
 
@@ -445,7 +445,7 @@ public class InventoryEvents {
 		}
 
 	}
-	
+
 	@api
 	public static class item_enchant extends AbstractEvent {
 
@@ -492,16 +492,16 @@ public class InventoryEvents {
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("levels", new CInt(e.getExpLevelCost(), Target.UNKNOWN));
 				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
-				
+
 				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
-					
+
 				loc.remove(new CString("yaw", Target.UNKNOWN));
 				loc.remove(new CString("pitch", Target.UNKNOWN));
 				loc.remove(new CString("4", Target.UNKNOWN));
 				loc.remove(new CString("5", Target.UNKNOWN));
 
 				map.put("location", loc);
-				
+
 				map.put("option", new CInt(e.whichButton(), Target.UNKNOWN));
 
 				return map;
@@ -524,12 +524,12 @@ public class InventoryEvents {
 					e.setExpLevelCost(Static.getInt32(value, Target.UNKNOWN));
 					return true;
 				}
-				
+
 				if (key.equalsIgnoreCase("item")) {
 					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
 					return true;
 				}
-				
+
 				if (key.equalsIgnoreCase("enchants")) {
 					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, Target.UNKNOWN)));
 					return true;
@@ -543,7 +543,7 @@ public class InventoryEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class item_pre_enchant extends AbstractEvent {
 
@@ -582,31 +582,31 @@ public class InventoryEvents {
 			if (event instanceof MCPrepareItemEnchantEvent) {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
-				
+
 				map.put("player", new CString(e.getEnchanter().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), Target.UNKNOWN));
-				
+
 				int[] expCosts = e.getExpLevelCostsOffered();
 				CArray expCostsCArray = new CArray(Target.UNKNOWN);
-				
+
 				for (int i = 0; i < expCosts.length; i++) {
 					int j = expCosts[i];
 					expCostsCArray.push(new CInt(j, Target.UNKNOWN), i);
 				}
-				
+
 				map.put("expcosts", expCostsCArray);
-				
+
 				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
-					
+
 				loc.remove(new CString("yaw", Target.UNKNOWN));
 				loc.remove(new CString("pitch", Target.UNKNOWN));
 				loc.remove(new CString("4", Target.UNKNOWN));
 				loc.remove(new CString("5", Target.UNKNOWN));
 
 				map.put("location", loc);
-				
+
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPrepareItemEnchantEvent");
@@ -622,21 +622,21 @@ public class InventoryEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCPrepareItemEnchantEvent) {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
-				
+
 				if (key.equalsIgnoreCase("item")) {
 					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
 					return true;
 				}
-				
+
 				if (key.equalsIgnoreCase("expcosts")) {
 					if (value instanceof CArray) {
 						CArray CexpCosts = (CArray) value;
 						if (!CexpCosts.inAssociativeMode()) {
 							int[] ExpCosts = e.getExpLevelCostsOffered();
-							
+
 							for (int i = 0; i <= 2; i++) {
-								if (CexpCosts.get(i) instanceof CInt) {
-									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i)).getInt();
+								if (CexpCosts.get(i, Target.UNKNOWN) instanceof CInt) {
+									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i, Target.UNKNOWN)).getInt();
 								} else {
 									throw new ConfigRuntimeException("Expected an intger at index " + i + "!", ExceptionType.FormatException, Target.UNKNOWN);
 								}
@@ -656,9 +656,9 @@ public class InventoryEvents {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class item_held extends AbstractEvent {
 
@@ -724,7 +724,7 @@ public class InventoryEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class item_pre_craft extends AbstractEvent {
 
@@ -821,7 +821,7 @@ public class InventoryEvents {
 			} */
 			return false;
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;

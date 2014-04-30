@@ -60,7 +60,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 
+ *
  */
 @core
 public class DataHandling {
@@ -828,7 +828,7 @@ public class DataHandling {
 				children.set(0, sconcat);
 			}
 			if (children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new StringHandling.sconcat().getName())) {
-				// We may be looking at a "@value in @array" or "@array as @value" type 
+				// We may be looking at a "@value in @array" or "@array as @value" type
 				// structure, so we need to re-arrange this into the standard format.
 				ParseTree array = null;
 				ParseTree key = null;
@@ -2132,7 +2132,7 @@ public class DataHandling {
 //            //if we are assigning a dynamic value as a default, but we have to check
 //            //that here. If we don't, we lose the information
 //            return ;
-//        }        
+//        }
 		@Override
 		public boolean allowBraces() {
 			return true;
@@ -2362,7 +2362,7 @@ public class DataHandling {
 			Construct[] args2 = new Construct[(int) ca.size() + 1];
 			args2[0] = args[0];
 			for (int i = 1; i < args2.length; i++) {
-				args2[i] = ca.get(i - 1);
+				args2[i] = ca.get(i - 1, t);
 			}
 			return super.exec(t, environment, args2);
 		}
@@ -2618,7 +2618,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof IVariable) {
-				//Mode 1     
+				//Mode 1
 				IVariable var = (IVariable) args[0];
 				environment.getEnv(GlobalEnv.class).GetVarList().set(Globals.GetGlobalIVar(var));
 				return CVoid.VOID;
@@ -2870,7 +2870,7 @@ public class DataHandling {
 			return true;
 		}
 	}
-	
+
 	@api
 	@hide("Until the Federation system is finished, this is hidden")
 	@unbreakable
@@ -2895,7 +2895,7 @@ public class DataHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
 	@api
@@ -3446,7 +3446,7 @@ public class DataHandling {
 		}
 
 	}
-	
+
 	@api
 	public static class eval extends AbstractFunction implements Optimizable {
 
@@ -3544,9 +3544,9 @@ public class DataHandling {
 			}
 			return null;
 		}
-		
+
 	}
-	
+
 	@api
 	@noprofile
 	@hide("This will eventually be replaced by ; statements.")
