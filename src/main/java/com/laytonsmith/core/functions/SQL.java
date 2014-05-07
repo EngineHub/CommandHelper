@@ -103,12 +103,16 @@ public class SQL {
 					for (int i = 0; i < params.length; i++) {
 						int type = ps.getParameterMetaData().getParameterType(i + 1);
 						if (params[i] == null) {
-							if (ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
-								throw new ConfigRuntimeException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
-							} else {
-								ps.setNull(i + 1, type);
-								continue;
+							try {
+								if (ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
+									throw new ConfigRuntimeException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
+								}
+							} catch(SQLException ex){
+								//Ignored. This appears to be able to happen in various cases, but in the case where it *does* work, we don't want
+								//to completely disable the feature.
 							}
+							ps.setNull(i + 1, type);
+							continue;
 						}
 						try {
 							if (params[i] instanceof CInt) {
