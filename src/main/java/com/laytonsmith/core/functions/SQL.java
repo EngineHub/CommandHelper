@@ -148,11 +148,7 @@ public class SQL {
 							for (int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
-								if(rs.wasNull()){
-									// Since mscript can assign null to primitives, we
-									// can set it to null regardless of the data type.
-									value = CNull.NULL;
-								} else if (columnType == Types.INTEGER
+								if (columnType == Types.INTEGER
 										|| columnType == Types.TINYINT
 										|| columnType == Types.SMALLINT
 										|| columnType == Types.BIGINT) {
@@ -187,6 +183,11 @@ public class SQL {
 									throw new ConfigRuntimeException("SQL returned a unhandled column type "
 											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "."
 											, ExceptionType.CastException, t);
+								}
+								if(rs.wasNull()){
+									// Since mscript can assign null to primitives, we
+									// can set it to null regardless of the data type.
+									value = CNull.NULL;
 								}
 								row.set(md.getColumnName(i), value, t);
 							}
