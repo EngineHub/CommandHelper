@@ -715,7 +715,7 @@ public class BasicLogic {
 		}
 
 		private static final String and = new and().getName();
-		private static final String g = new DataHandling.g().getName();
+		private static final String g = new Compiler.g().getName();
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {

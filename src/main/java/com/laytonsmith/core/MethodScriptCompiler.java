@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.CPreIdentifier;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
@@ -73,6 +74,9 @@ public final class MethodScriptCompiler {
 	 */
 	@SuppressWarnings("UnnecessaryContinue")
 	public static List<Token> lex(String script, File file, boolean inPureMScript) throws ConfigCompileException {
+		if(script.isEmpty()){
+			return new ArrayList<>();
+		}
 		if((int)script.charAt(0) == 65279){
 			// Remove the UTF-8 Byte Order Mark, if present.
 			script = script.substring(1);
@@ -1353,7 +1357,31 @@ public final class MethodScriptCompiler {
 			} else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
 				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
-				//right_vars.add(new Variable(t.val(), null, t.line_num));
+			} else if (t.type.equals(TType.SEMICOLON)) {
+				// We need to take the last unstatemented children in the tree so far and wrap it in __statement__(),
+				// then update counters and such.
+				int firstNodeInStatement = 0;
+				for(int k = tree.numberOfChildren() - 1; k >= 0; k--){
+					if(tree.getChildAt(k).getData() instanceof CFunction
+							&& "__statement__".equals(tree.getChildAt(k).getData().val())){
+						// This child (and prior) are all set, so we don't want to include them in this.
+						firstNodeInStatement = k + 1;
+						break;
+					}
+				}
+
+				ParseTree s = new ParseTree(new CFunction("__statement__", tree.getChildAt(firstNodeInStatement).getTarget()), fileOptions);
+				ParseTree innerAC = new ParseTree(new CFunction("__autoconcat__", s.getTarget()), fileOptions);
+				int originalTreeSize = tree.numberOfChildren();
+				for(int k = 0; k < (originalTreeSize - firstNodeInStatement); k++){
+					ParseTree lastChild = tree.getChildAt(firstNodeInStatement);
+					tree.removeChildAt(firstNodeInStatement);
+					innerAC.addChild(lastChild);
+					constructCount.peek().decrementAndGet();
+				}
+				s.addChild(innerAC);
+				tree.addChild(s);
+				constructCount.peek().incrementAndGet();
 			}
 
 		}
@@ -1791,6 +1819,9 @@ public final class MethodScriptCompiler {
 	 * @throws ConfigCompileException
 	 */
 	public static Construct execute(String script, File file, boolean inPureMScript, Environment env, MethodScriptComplete done, Script s, List<Variable> vars) throws ConfigCompileException{
+		if(script.isEmpty()){
+			return CVoid.VOID;
+		}
 		return execute(compile(lex(script, file, inPureMScript)), env, done, s, vars);
 	}
 

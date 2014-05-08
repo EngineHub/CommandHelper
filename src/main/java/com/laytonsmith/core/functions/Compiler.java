@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
@@ -32,7 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 
+ *
  */
 @core
 public class Compiler {
@@ -70,8 +71,20 @@ public class Compiler {
 					return CVoid.VOID;
 				case 1:
 					return parent.eval(nodes[0], env);
-				default: 
-					return new __autoconcat__().execs(t, env, parent, nodes);
+				default:
+					StringBuilder b = new StringBuilder();
+					boolean hasAppended = false;
+					for(ParseTree node : nodes){
+						Construct c = parent.eval(node, env);
+						if(!(c instanceof CVoid)){
+							if(hasAppended){
+								b.append(" ");
+								hasAppended = true;
+							}
+							b.append(c.val());
+						}
+					}
+					return new CString(b, t);
 			}
 		}
 
@@ -141,6 +154,18 @@ public class Compiler {
 			return optimizeSpecial(list, true);
 		}
 
+		private static final String __ac__ = new __autoconcat__().getName();
+		private static final String __assign__ = new DataHandling.assign().getName();
+		private static final String __statement__ = new __statement__().getName();
+		private static final String postinc = new Math.postinc().getName();
+		private static final String postdec = new Math.postdec().getName();
+		private static final String neg = new Math.neg().getName();
+		private static final String p = new p().getName();
+		private static final String g = new g().getName();
+		private static final String centry = new centry().getName();
+		private static final String concat = new StringHandling.concat().getName();
+		private static final String sconcat = new StringHandling.sconcat().getName();
+
 		/**
 		 * __autoconcat__ has special optimization techniques needed, since it's
 		 * really a part of the compiler itself, and not so much a function. It
@@ -178,7 +203,7 @@ public class Compiler {
 							ParseTree rhs;
 							if (i < list.size() - 3) {
 								//Need to autoconcat
-								ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), lhs.getFileOptions());
+								ParseTree ac = new ParseTree(new CFunction(getName(), Target.UNKNOWN), lhs.getFileOptions());
 								int index = i + 2;
 								ac.addChild(list.get(index));
 								list.remove(index);
@@ -208,11 +233,11 @@ public class Compiler {
 						}
 					}
 					//Simple assignment now
-					ParseTree assign = new ParseTree(new CFunction("assign", node.getTarget()), node.getFileOptions());
+					ParseTree assign = new ParseTree(new CFunction(__assign__, node.getTarget()), node.getFileOptions());
 					ParseTree rhs;
 					if (i < list.size() - 3) {
 						//Need to autoconcat
-						ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), lhs.getFileOptions());
+						ParseTree ac = new ParseTree(new CFunction(__ac__, Target.UNKNOWN), lhs.getFileOptions());
 						int index = i + 2;
 						//As an incredibly special case, because (@value = !@value) is supported, and
 						//! hasn't been reduced yet, we want to check for that case, and if present, grab
@@ -259,9 +284,9 @@ public class Compiler {
 						CSymbol sy = (CSymbol) node.getData();
 						ParseTree conversion;
 						if (sy.val().equals("++")) {
-							conversion = new ParseTree(new CFunction("postinc", node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(new CFunction(postinc, node.getTarget()), node.getFileOptions());
 						} else {
-							conversion = new ParseTree(new CFunction("postdec", node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(new CFunction(postdec, node.getTarget()), node.getFileOptions());
 						}
 						conversion.addChild(list.get(i - 1));
 						list.set(i - 1, conversion);
@@ -284,9 +309,9 @@ public class Compiler {
 										&& !(list.get(i + 1).getData() instanceof CSymbol)) {
 									if (node.getData().val().equals("-")) {
 										//We have to negate it
-										conversion = new ParseTree(new CFunction("neg", node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(new CFunction(neg, node.getTarget()), node.getFileOptions());
 									} else {
-										conversion = new ParseTree(new CFunction("p", node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(new CFunction(p, node.getTarget()), node.getFileOptions());
 									}
 								} else {
 									continue;
@@ -411,11 +436,11 @@ public class Compiler {
 			if (list.size() >= 1) {
 				ParseTree node = list.get(0);
 				if (node.getData() instanceof CLabel) {
-					ParseTree value = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), node.getFileOptions());
+					ParseTree value = new ParseTree(new CFunction(__ac__, node.getTarget()), node.getFileOptions());
 					for (int i = 1; i < list.size(); i++) {
 						value.addChild(list.get(i));
 					}
-					ParseTree ce = new ParseTree(new CFunction("centry", node.getTarget()), node.getFileOptions());
+					ParseTree ce = new ParseTree(new CFunction(centry, node.getTarget()), node.getFileOptions());
 					ce.addChild(node);
 					ce.addChild(value);
 					return ce;
@@ -437,7 +462,7 @@ public class Compiler {
 							list.remove(0);
 							ParseTree child = list.get(0);
 							if (list.size() > 1) {
-								child = new ParseTree(new CFunction("sconcat", Target.UNKNOWN), child.getFileOptions());
+								child = new ParseTree(new CFunction(sconcat, Target.UNKNOWN), child.getFileOptions());
 								child.setChildren(list);
 							}
 							try {
@@ -460,12 +485,27 @@ public class Compiler {
 					options = list.get(0).getFileOptions();
 				}
 				if (returnSConcat) {
-					tree = new ParseTree(new CFunction("sconcat", Target.UNKNOWN), options);
+					tree = new ParseTree(new CFunction(sconcat, Target.UNKNOWN), options);
 				} else {
-					tree = new ParseTree(new CFunction("concat", Target.UNKNOWN), options);
+					tree = new ParseTree(new CFunction(concat, Target.UNKNOWN), options);
 				}
 				tree.setChildren(list);
-				return tree;
+
+				ParseTree topTree = new ParseTree(new CFunction(p, Target.UNKNOWN), options);
+
+				for(int i = 0; i < tree.numberOfChildren(); i++){
+					// Now walk through and handle any statements, by replacing them with g()
+					Construct data = tree.getChildAt(i).getData();
+					if(data instanceof CFunction && __statement__.equals(data.val())){
+						ParseTree gTree = new ParseTree(new CFunction(g, Target.UNKNOWN), options);
+						gTree.setChildren(tree.getChildAt(i).getChildren());
+						topTree.addChild(gTree);
+					} else {
+						topTree.addChild(tree.getChildAt(i));
+					}
+				}
+
+				return topTree;
 			}
 		}
 	}
@@ -580,7 +620,7 @@ public class Compiler {
 			return new ParseTree(new CBrace(node), fileOptions);
 		}
 	}
-	
+
 	@api
 	@hide("This is more of a compiler feature, rather than a function, and so it is hidden from normal"
 			+ " documentation.")
@@ -638,7 +678,7 @@ public class Compiler {
 				throw new ConfigCompileException(getName() + " can only take one parameter", t);
 			}
 			String value = children.get(0).getData().val();
-			
+
 			StringBuilder b = new StringBuilder();
 			boolean inBrace = false;
 			boolean inSimpleVar = false;
@@ -686,7 +726,7 @@ public class Compiler {
 						root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
 					} else {
 						//Complex variable name, with arrays (or perhaps an error case)
-						
+
 					}
 					continue;
 				}
@@ -706,6 +746,33 @@ public class Compiler {
 			//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
 			return root;
 		}
-		
+
+	}
+
+	@api
+	@noprofile
+	@hide("This will eventually be replaced by ; statements.")
+	public static class g extends DummyFunction {
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			for (Construct arg : args) {
+				arg.val();
+			}
+			return CVoid.VOID;
+		}
+
+	}
+
+	@api
+	@noboilerplate
+	@hide("This is a language feature, not a usable function")
+	public static class __statement__ extends DummyFunction {
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CVoid.VOID;
+		}
+
 	}
 }

@@ -342,7 +342,7 @@ public class DataHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{4};
+			return new Integer[]{2, 4};
 		}
 
 		@Override
@@ -3545,55 +3545,6 @@ public class DataHandling {
 			return null;
 		}
 
-	}
-
-	@api
-	@noprofile
-	@hide("This will eventually be replaced by ; statements.")
-	public static class g extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "g";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			for (int i = 0; i < args.length; i++) {
-				args[i].val();
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String docs() {
-			return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
-		}
-
-		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
 	}
 
 }

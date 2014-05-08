@@ -212,7 +212,7 @@ public class StringHandling {
 	@noprofile
 	public static class sconcat extends AbstractFunction implements Optimizable {
 
-		private static final String g = new DataHandling.g().getName();
+		private static final String g = new Compiler.g().getName();
 		private static final String p = new Compiler.p().getName();
 
 		@Override
