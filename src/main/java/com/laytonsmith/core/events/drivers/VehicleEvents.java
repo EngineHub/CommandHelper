@@ -86,7 +86,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -157,7 +157,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -248,7 +248,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -547,7 +547,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 
 			int id = Static.getInt32(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			MCEntity e = Static.getEntity(id, Target.UNKNOWN);

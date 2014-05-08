@@ -42,7 +42,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 
+ *
  */
 @core
 public class EventBinding {
@@ -50,7 +50,7 @@ public class EventBinding {
 	public static String docs() {
 		return "This class of functions provide methods to hook deep into the server's event architecture";
 	}
-	
+
 	private static final AtomicInteger bindCounter = new AtomicInteger(0);
 
 	@api(environments=CommandHelperEnvironment.class)
@@ -157,7 +157,7 @@ public class EventBinding {
 			} catch (EventException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.BindException, t);
 			}
-			
+
 			//Set up our bind counter, but only if the event is supposed to be added to the counter
 			if(event.addCounter()){
 				synchronized(bindCounter){
@@ -214,7 +214,7 @@ public class EventBinding {
 			}
 			return null;
 		}
-		
+
 	}
 
 	@api
@@ -502,7 +502,7 @@ public class EventBinding {
 			if (args.length == 3) {
 				serverWide = Static.getBoolean(args[2]);
 			}
-			EventUtils.ManualTrigger(args[0].val(), obj, serverWide);
+			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide);
 			return CVoid.VOID;
 		}
 	}
@@ -812,10 +812,10 @@ public class EventBinding {
 	}
 
 //    @api public static class when_triggered extends AbstractFunction{
-//        
+//
 //    }
 //    @api public static class when_cancelled extends AbstractFunction{
-//        
+//
 //    }
 	@api(environments=CommandHelperEnvironment.class)
 	public static class event_meta extends AbstractFunction {
@@ -868,7 +868,7 @@ public class EventBinding {
 			return CHVersion.V3_3_0;
 		}
 	}
-	
+
 	@api public static class has_bind extends AbstractFunction {
 
 		@Override
@@ -923,6 +923,6 @@ public class EventBinding {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }

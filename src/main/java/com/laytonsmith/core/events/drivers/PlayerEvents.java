@@ -127,7 +127,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
 			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item", Target.UNKNOWN), Target.UNKNOWN);
 			return EventBuilder.instantiate(MCPlayerItemConsumeEvent.class, p, i);
@@ -208,7 +208,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             return null;
         }
 
@@ -303,7 +303,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
 			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
@@ -400,7 +400,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
 			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
@@ -508,7 +508,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -598,7 +598,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -750,7 +750,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manual){
+        public BindableEvent convert(CArray manual, Target t){
             MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
                     manual.get("join_message", Target.UNKNOWN).val());
             return e;
@@ -849,7 +849,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manual){
+        public BindableEvent convert(CArray manual, Target t){
             MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
             MCAction a = MCAction.valueOf(manual.get("action", Target.UNKNOWN).val().toUpperCase());
             MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item", Target.UNKNOWN).val(), 1, Target.UNKNOWN);
@@ -892,7 +892,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual) {
+		public BindableEvent convert(CArray manual, Target t) {
 			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
             MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null, Target.UNKNOWN).getBlock();
 
@@ -1009,7 +1009,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual) {
+		public BindableEvent convert(CArray manual, Target t) {
 			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
             MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null, Target.UNKNOWN).getBlock();
             MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, MCAction.PHYSICAL, null, b, MCBlockFace.UP);
@@ -1110,7 +1110,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manual) {
+        public BindableEvent convert(CArray manual, Target t) {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
             MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
@@ -1219,7 +1219,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manual) {
+        public BindableEvent convert(CArray manual, Target t) {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
             String splayer = manual.get("player", Target.UNKNOWN).val();
@@ -1301,7 +1301,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             //Get the parameters from the manualObject
             MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
             String message = manualObject.get("message", Target.UNKNOWN).nval();
@@ -1403,7 +1403,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             //Get the parameters from the manualObject
             MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
             String message = manualObject.get("message", Target.UNKNOWN).nval();
@@ -1519,7 +1519,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             //Get the parameters from the manualObject
             MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
             String message = manualObject.get("message", Target.UNKNOWN).nval();
@@ -1640,7 +1640,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
             String command = manualObject.get("command", Target.UNKNOWN).nval();
 
@@ -1730,7 +1730,7 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
             MCWorld from = Static.getServer().getWorld(manualObject.get("from", Target.UNKNOWN).val());
 
@@ -1995,7 +1995,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
 			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
@@ -2069,7 +2069,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -2158,7 +2158,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
 
@@ -2219,7 +2219,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
 
@@ -2298,7 +2298,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -2380,7 +2380,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -2525,7 +2525,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -2592,7 +2592,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -2659,7 +2659,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 

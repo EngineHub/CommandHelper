@@ -96,7 +96,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -186,7 +186,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -285,7 +285,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			int id = Static.getInt32(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			MCEntity p = Static.getEntity(id, Target.UNKNOWN);
 			if (!(p instanceof MCProjectile)) {
@@ -410,7 +410,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -496,7 +496,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -600,7 +600,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -688,7 +688,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -762,7 +762,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -826,7 +826,7 @@ public class EntityEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             return null;
         }
 
@@ -920,7 +920,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -1005,7 +1005,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -1174,7 +1174,7 @@ public class EntityEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manual){
+        public BindableEvent convert(CArray manual, Target t){
             MCEntityTargetEvent e = EventBuilder.instantiate(MCEntityTargetEvent.class, Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN));
             return e;
         }
@@ -1211,7 +1211,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -1283,7 +1283,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -1401,7 +1401,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 

@@ -125,7 +125,7 @@ public class BlockEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             return null;
         }
 
@@ -294,7 +294,7 @@ public class BlockEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             return null;
         }
 
@@ -447,7 +447,7 @@ public class BlockEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             return null;
         }
 
@@ -538,7 +538,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -702,7 +702,7 @@ public class BlockEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manual) {
+        public BindableEvent convert(CArray manual, Target t) {
             MCSignChangeEvent e = EventBuilder.instantiate(
                     MCSignChangeEvent.class,
                     Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
@@ -755,7 +755,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -843,7 +843,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
