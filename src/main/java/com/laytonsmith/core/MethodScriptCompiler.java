@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.CPreIdentifier;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
@@ -73,6 +74,9 @@ public final class MethodScriptCompiler {
 	 */
 	@SuppressWarnings("UnnecessaryContinue")
 	public static List<Token> lex(String script, File file, boolean inPureMScript) throws ConfigCompileException {
+		if(script.isEmpty()){
+			return new ArrayList<Token>();
+		}
 		if((int)script.charAt(0) == 65279){
 			// Remove the UTF-8 Byte Order Mark, if present.
 			script = script.substring(1);
@@ -1823,6 +1827,9 @@ public final class MethodScriptCompiler {
 	 * @return
 	 */
 	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
+		if(root == null){
+			return CVoid.VOID;
+		}
 		if (script == null) {
 			script = new Script(null, null);
 		}

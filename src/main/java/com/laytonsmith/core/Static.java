@@ -66,34 +66,30 @@ import java.util.logging.Logger;
  * in the event they aren't, each function will throw a NotInitializedYetException, which is a RuntimeException,
  * so you don't have to check for exceptions whenever you use them. The Exception is caught on a higher
  * level though, so it shouldn't bubble up too far.
- * 
+ *
  */
 public final class Static {
 
     private Static(){}
-    
+
     private static final Logger logger = Logger.getLogger("CommandHelper");
-    
+
     private static Map<String, String> hostCache = new HashMap<String, String>();
 
 	private static final String consoleName = "~console";
-	
+
 	private static final String blockPrefix = "#"; // Chosen over @ because that does special things when used by the block
-	
+
 	/**
 	 * Returns a CArray object from a given construct, throwing a common error message if not.
 	 * @param construct
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static CArray getArray(Construct construct, Target t) {
-		if(construct instanceof CArray){
-			return ((CArray)construct);
-		} else {
-			throw new ConfigRuntimeException("Expecting array, but received " + construct.val(), ExceptionType.CastException, t);
-		}
+		return ArgumentValidation.getArray(construct, t);
 	}
-	
+
 	/**
 	 * Works like the other get* methods, but works in a more generic way for other types of Constructs.
 	 * @param <T> The type expected.
@@ -107,13 +103,9 @@ public final class Static {
 	 */
 	@Deprecated
 	public static <T extends Construct> T getObject(Construct construct, Target t, String expectedClassName, Class<T> clazz){
-		if(clazz.isAssignableFrom(construct.getClass())){
-			return (T)construct;
-		} else {
-			throw new ConfigRuntimeException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", ExceptionType.CastException, t);
-		}
+		return ArgumentValidation.getObject(construct, t, expectedClassName, clazz);
 	}
-	
+
 	/**
 	 * Works like the other get* methods, but works in a more generic way for other types of Constructs. It also assumes that
 	 * the class specified is tagged with a typeof annotation, thereby preventing the need for the expectedClassName like the
@@ -125,14 +117,7 @@ public final class Static {
 	 * @return The properly cast object.
 	 */
 	public static <T extends Construct> T getObject(Construct construct, Target t, Class<T> clazz){
-		if(clazz.isAssignableFrom(construct.getClass())){
-			return (T)construct;
-		} else {
-			String expectedClassName = clazz.getAnnotation(typeof.class).value();
-			String actualClassName = construct.getClass().getAnnotation(typeof.class).value();
-			throw new ConfigRuntimeException("Expecting " + expectedClassName + " but receieved " + construct.val() 
-					+ " (" + actualClassName + ") instead.", ExceptionType.CastException, t);
-		}
+		return ArgumentValidation.getObject(construct, t, clazz);
 	}
 
     /**
@@ -140,91 +125,34 @@ public final class Static {
      * if it cannot be converted, for instance the string "s" cannot be cast to a number. The number returned
      * will always be a double.
      * @param c
-     * @return 
+     * @return
      */
     public static double getNumber(Construct c, Target t) {
-        double d;
-        if (c == null || c instanceof CNull) {
-            return 0.0;
-        }
-        if (c instanceof CInt) {
-            d = ((CInt) c).getInt();
-        } else if (c instanceof CDouble) {
-            d = ((CDouble) c).getDouble();
-        } else if (c instanceof CString) {
-            try {
-                d = Double.parseDouble(c.val());
-            } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
-                        ExceptionType.CastException, t);
-            }
-        } else if(c instanceof CBoolean){
-            if(((CBoolean)c).getBoolean()){
-                d = 1;
-            } else {
-                d = 0;
-            }
-        } else {
-            throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
-                    ExceptionType.CastException, t);
-        }
-        return d;
+        return ArgumentValidation.getNumber(c, t);
     }
 
     /**
      * Alias to getNumber
      * @param c
-     * @return 
+     * @return
      */
     public static double getDouble(Construct c, Target t) {
-        try {
-            return getNumber(c, t);
-        } catch (ConfigRuntimeException e) {
-            throw new ConfigRuntimeException("Expecting a double, but received " + c.val() + " instead",
-                    ExceptionType.CastException, t);
-        }
+        return ArgumentValidation.getDouble(c, t);
     }
-	
+
 	public static float getDouble32(Construct c, Target t){
-		// Use 6 places at most else the imprecisions of float makes this function throw the exception.
-		double delta = 0.0000001; 
-		double l = getDouble(c, t);
-		float f = (float)l;
-		if(Math.abs(f - l) > delta){
-			throw new Exceptions.RangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
-		}
-		return f;
+		return ArgumentValidation.getDouble32(c, t);
 	}
 
     /**
      * Returns an integer from any given construct.
      * @param c
-     * @return 
+     * @return
      */
     public static long getInt(Construct c, Target t) {
-        long i;
-        if (c == null || c instanceof CNull) {
-            return 0;
-        }
-        if (c instanceof CInt) {
-            i = ((CInt) c).getInt();
-        } else if(c instanceof CBoolean){
-            if(((CBoolean)c).getBoolean()){
-                i = 1;
-            } else {
-                i = 0;
-            }
-        } else {
-            try {
-                i = Long.parseLong(c.val());
-            } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Expecting an integer, but received \"" + c.val() + "\" instead",
-                        ExceptionType.CastException, t);
-            }
-        }
-        return i;
+        return ArgumentValidation.getInt(c, t);
     }
-	
+
 	/**
 	 * Returns a 32 bit int from the construct. Since the backing value is actually
 	 * a long, if the number contained in the construct is not the same after truncating,
@@ -232,17 +160,12 @@ public final class Static {
 	 * method is much preferred over silently truncating.
 	 * @param c
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static int getInt32(Construct c, Target t){
-		long l = getInt(c, t);
-		int i = (int)l;
-		if(i != l){
-			throw new Exceptions.RangeException("Expecting a 32 bit integer, but a larger value was found: " + l, t);
-		}
-		return i;
+		return ArgumentValidation.getInt32(c, t);
 	}
-	
+
 	/**
 	 * Returns a 16 bit int from the construct (a short). Since the backing value is actually
 	 * a long, if the number contained in the construct is not the same after truncating,
@@ -250,17 +173,12 @@ public final class Static {
 	 * method is much preferred over silently truncating.
 	 * @param c
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static short getInt16(Construct c, Target t){
-		long l = getInt(c, t);
-		short s = (short)l;
-		if(s != l){
-			throw new Exceptions.RangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
-		}
-		return s;
+		return ArgumentValidation.getInt16(c, t);
 	}
-	
+
 	/**
 	 * Returns an 8 bit int from the construct (a byte). Since the backing value is actually
 	 * a long, if the number contained in the construct is not the same after truncating,
@@ -268,90 +186,51 @@ public final class Static {
 	 * method is much preferred over silently truncating.
 	 * @param c
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static byte getInt8(Construct c, Target t){
-		long l = getInt(c, t);
-		byte b = (byte)l;
-		if(b != l){
-			throw new Exceptions.RangeException("Expecting an 8 bit integer, but a larger value was found: " + l, t);
-		}
-		return b;
+		return ArgumentValidation.getInt8(c, t);
 	}
-	
+
     /**
      * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows the following rules:
      * If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it is empty, it is false, otherwise it is true.
      * @param c
-     * @return 
+     * @return
      */
     public static boolean getBoolean(Construct c) {
-        boolean b = false;
-        if (c == null) {
-            return false;
-        }
-        if (c instanceof CBoolean) {
-            b = ((CBoolean) c).getBoolean();
-        } else if (c instanceof CString) {
-            b = (c.val().length() > 0);
-        } else if (c instanceof CInt || c instanceof CDouble) {
-            b = !(getNumber(c, Target.UNKNOWN) == 0);
-        } else if(c instanceof CArray){
-            b = !((CArray)c).isEmpty();
-        }
-        return b;
+        return ArgumentValidation.getBoolean(c, Target.UNKNOWN);
     }
-	
+
 	public static CByteArray getByteArray(Construct c, Target t){
-		if(c instanceof CByteArray){
-			return (CByteArray)c;
-		} else if(c instanceof CNull){
-			return new CByteArray(t, 0);
-		} else {
-			throw new Exceptions.CastException("Expecting byte array, but found " + c.getCType() + " instead.", t);
-		}
+		return ArgumentValidation.getByteArray(c, t);
 	}
 
     /**
      * Returns true if any of the constructs are a CDouble, false otherwise.
      * @param c
-     * @return 
+     * @return
      */
     public static boolean anyDoubles(Construct... c) {
-        for (int i = 0; i < c.length; i++) {
-            if (c[i] instanceof CDouble) {
-                return true;
-            }
-        }
-        return false;
+        return ArgumentValidation.anyDoubles(c);
     }
 
     /**
      * Return true if any of the constructs are CStrings, false otherwise.
      * @param c
-     * @return 
+     * @return
      */
     public static boolean anyStrings(Construct... c) {
-        for (int i = 0; i < c.length; i++) {
-            if (c[i] instanceof CString) {
-                return true;
-            }
-        }
-        return false;
+        return ArgumentValidation.anyStrings(c);
     }
 
     /**
      * Returns true if any of the constructs are CBooleans, false otherwise.
      * @param c
-     * @return 
+     * @return
      */
     public static boolean anyBooleans(Construct... c) {
-        for (int i = 0; i < c.length; i++) {
-            if (c[i] instanceof CBoolean) {
-                return true;
-            }
-        }
-        return false;
+        return ArgumentValidation.anyBooleans(c);
     }
 
     /**
@@ -365,7 +244,7 @@ public final class Static {
     /**
      * Returns the server for this plugin
      * @return
-     * @throws NotInitializedYetException 
+     * @throws NotInitializedYetException
      */
     public static MCServer getServer() throws NotInitializedYetException {
         MCServer s = com.laytonsmith.commandhelper.CommandHelperPlugin.myServer;
@@ -378,7 +257,7 @@ public final class Static {
     /**
      * Gets the reference to the AliasCore for this plugin
      * @return
-     * @throws NotInitializedYetException 
+     * @throws NotInitializedYetException
      */
     public static AliasCore getAliasCore() throws NotInitializedYetException {
         AliasCore ac = com.laytonsmith.commandhelper.CommandHelperPlugin.getCore();
@@ -391,7 +270,7 @@ public final class Static {
     /**
      * Gets the current version of the plugin
      * @return
-     * @throws NotInitializedYetException 
+     * @throws NotInitializedYetException
      */
     public static SimpleVersion getVersion() throws NotInitializedYetException {
         SimpleVersion v = com.laytonsmith.commandhelper.CommandHelperPlugin.version;
@@ -407,7 +286,7 @@ public final class Static {
     /**
      * Returns a file that is most likely ready to write to. The timestamp variables have already been replaced, and parent directories
      * are all created.
-     * @return 
+     * @return
      */
     public static FileWriter debugLogFile(File root) throws IOException {
         String currentFileName = root.getPath() + "/" + DateUtils.ParseCalendarNotation(Prefs.DebugLogFile());
@@ -458,7 +337,7 @@ public final class Static {
         return profilingLogFileHandle;
     }
 
-    
+
 
     public static WorldEditPlugin getWorldEditPlugin(Target t) {
         if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
@@ -496,7 +375,7 @@ public final class Static {
      * type. This takes into account that null, true, and false are keywords.
      * @param val
 	 * @param t
-     * @return 
+     * @return
 	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid
 	 * characters in it.
      */
@@ -512,7 +391,7 @@ public final class Static {
             return new CBoolean(false, t);
         } else {
 			if(val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")){
-				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.", 
+				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.",
 						ExceptionType.FormatException, t);
 			}
 			if(val.matches("0x[a-fA-F0-9]+")){
@@ -520,7 +399,7 @@ public final class Static {
 				return new CInt(Long.parseLong(val.substring(2), 16), t);
 			}
 			if(val.matches("0b[0-1]*[^0-1]+[0-1]*")){
-				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.", 
+				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.",
 						ExceptionType.FormatException, t);
 			}
 			if(val.matches("0b[0-1]+")){
@@ -593,7 +472,7 @@ public final class Static {
 	 * Works like {@link #SendMessage(com.laytonsmith.abstraction.MCCommandSender, java.lang.String, com.laytonsmith.core.constructs.Target)}
 	 * except it doesn't require a target, and ignores the message if the command sender is offline.
 	 * @param m
-	 * @param msg 
+	 * @param msg
 	 */
 	public static void SendMessage(final MCCommandSender m, String msg) {
 		try{
@@ -636,7 +515,7 @@ public final class Static {
      * @param line_num
      * @param f
      * @throws ConfigRuntimeException FormatException if the notation is invalid.
-     * @return 
+     * @return
      */
     public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
         int type = 0;
@@ -665,7 +544,7 @@ public final class Static {
     /**
      * Works in reverse from the other ParseItemNotation
      * @param is
-     * @return 
+     * @return
      */
     public static String ParseItemNotation(MCItemStack is) {
         if (is == null) {
@@ -693,9 +572,9 @@ public final class Static {
 	 * @param player
 	 * @param t
 	 * @return
-	 * @throws ConfigRuntimeException 
+	 * @throws ConfigRuntimeException
 	 */
-    public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {  
+    public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
         MCCommandSender m = GetCommandSender(player, t);
 		if(m == null){
             throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
@@ -709,14 +588,14 @@ public final class Static {
 		}
 		return p;
     }
-	
+
 	/**
 	 * Returns the specified command sender. Players are suppored, as is the special ~console user. The special
 	 * ~console user will always return a user.
 	 * @param player
 	 * @param t
 	 * @return
-	 * @throws ConfigRuntimeException 
+	 * @throws ConfigRuntimeException
 	 */
 	public static MCCommandSender GetCommandSender(String player, Target t) throws ConfigRuntimeException {
         MCCommandSender m = null;
@@ -856,7 +735,7 @@ public final class Static {
 
 	/**
 	 * Returns the system based line seperator character
-	 * @return 
+	 * @return
 	 */
     public static String LF() {
         return System.getProperty("line.separator");
@@ -865,14 +744,14 @@ public final class Static {
     public static void LogDebug(File root, String message) throws IOException {
 		LogDebug(root, message, LogLevel.OFF);
 	}
-	
+
 	/**
 	 * Equivalent to LogDebug(root, message, level, true);
 	 */
     public static synchronized void LogDebug(File root, String message, LogLevel level) throws IOException {
 		LogDebug(root, message, level, true);
 	}
-	
+
 	/**
 	 * Logs an error message, depending on the log level of the message and the user's
 	 * preferences.
@@ -881,7 +760,7 @@ public final class Static {
 	 * @param level
 	 * @param printScreen If true, the message (if otherwise shown) will be printed to the screen. If
 	 * false, it never will be, though it will still be logged to the log file.
-	 * @throws IOException 
+	 * @throws IOException
 	 */
     public static synchronized void LogDebug(File root, String message, LogLevel level, boolean printScreen) throws IOException {
 		//If debug mode is on in the prefs, we want to log this to the screen too
@@ -1010,7 +889,7 @@ public final class Static {
         }
         return perm;
     }
-    
+
     public static String Logo(){
         String logo = Installer.parseISToString(Static.class.getResourceAsStream("/mainlogo"));
         logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
@@ -1019,7 +898,7 @@ public final class Static {
         String s = logo + TermColors.reset();
         return s;
     }
-    
+
     public static String DataManagerLogo(){
         String logo = Installer.parseISToString(Static.class.getResourceAsStream("/datamanagerlogo"));
         logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
@@ -1028,11 +907,11 @@ public final class Static {
         String s = logo + TermColors.reset();
         return s;
     }
-    
+
     public static String GetStringResource(String name){
         return GetStringResource(Static.class, name);
     }
-    
+
     public static String GetStringResource(Class path, String name){
         return Installer.parseISToString(path.getResourceAsStream(name));
     }
@@ -1041,7 +920,7 @@ public final class Static {
      * Pulls out the MCChatColors from the string, and replaces them
      * with the nearest match ANSI terminal color.
      * @param mes If null, simply returns null
-     * @return 
+     * @return
      */
     public static String MCToANSIColors(String mes) {
         //Pull out the MC colors
@@ -1074,8 +953,8 @@ public final class Static {
                 .replaceAll("§n", TermColors.RESET + TermColors.UNDERLINE)
                 .replaceAll("§o", TermColors.RESET + TermColors.ITALIC)
                 .replaceAll("§r", TermColors.reset());
-                
-                
+
+
     }
 
     public static void InjectPlayer(MCCommandSender player) {
@@ -1085,12 +964,12 @@ public final class Static {
 		}
         injectedPlayers.put(name, player);
     }
-    
+
 	/**
 	 * Removes a player into the global player proxy system. Returns the player
 	 * removed (or null if none were injected).
 	 * @param player
-	 * @return 
+	 * @return
 	 */
     public static MCCommandSender UninjectPlayer(MCCommandSender player){
 		String name = player.getName();
@@ -1106,49 +985,49 @@ public final class Static {
            public void run(){
                CommandHelperPlugin.hostnameLookupCache.put(p.getName(),
                        p.getAddress().getHostName());
-           } 
+           }
         });
     }
-    
+
     public static void SetPlayerHost(MCPlayer p, String host){
         hostCache.put(p.getName(), host);
     }
     public static String GetHost(MCPlayer p){
         return hostCache.get(p.getName());
     }
-    
+
     public static void AssertPlayerNonNull(MCPlayer p, Target t){
         if(p == null){
             throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
         }
     }
-	
+
 	public static long msToTicks(long ms){
 		return ms / 50;
 	}
-	
+
 	public static long ticksToMs(long ticks){
 		return ticks * 50;
 	}
-	
+
 	public static void AssertNonNull(Object var, String message){
 		if(var == null){
 			throw new NullPointerException(message);
 		}
 	}
-	
+
 	/**
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that
 	 * folder is the root.
 	 * @return
 	 * @throws IOException
 	 * @throws DataSourceException
-	 * @throws URISyntaxException 
+	 * @throws URISyntaxException
 	 */
 	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException{
 		return GenerateStandaloneEnvironment(new PermissionsResolver.PermissiveResolver());
 	}
-	
+
 	/**
 	 * Generates a new environment, using the permissions resolver given. It is assumed that the jar has a folder
 	 * next to it with the name of the platform, and that folder is the root.
@@ -1156,7 +1035,7 @@ public final class Static {
 	 * @return
 	 * @throws IOException
 	 * @throws DataSourceException
-	 * @throws URISyntaxException 
+	 * @throws URISyntaxException
 	 */
 	public static Environment GenerateStandaloneEnvironment(PermissionsResolver permissionsResolver) throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException{
 		File jarLocation;
@@ -1169,20 +1048,20 @@ public final class Static {
 		Installer.Install(platformFolder);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(platformFolder);
-		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(), 
+		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace("\\", "/")), options);
-		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"), 
+		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, permissionsResolver, platformFolder,
 				new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}
-	
+
 	/**
 	 * Asserts that all the args are not CNulls. If so, throws a ConfigRuntimeNullPointerException
 	 * @param t
 	 * @param args
-	 * @throws ConfigRuntimeException 
+	 * @throws ConfigRuntimeException
 	 */
 	public static void AssertNonCNull(Target t, Construct ... args) throws ConfigRuntimeException {
 		for(Construct arg : args){
@@ -1191,14 +1070,14 @@ public final class Static {
 			}
 		}
 	}
-	
+
 	public static String GetStacktraceString(Throwable t){
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		t.printStackTrace(pw);
 		return sw.toString();
 	}
-	
+
 	/**
 	 * Returns the actual file location, given the script's partial (or absolute)
 	 * file path, and depending on the context, the correct File object. Security
@@ -1208,10 +1087,10 @@ public final class Static {
 	 * set as the default. Except in cases where both arg and def are null, this
 	 * function will never return null. If the arg starts with ~, it is replaced
 	 * with the user's home directory, as defined by the system property user.home.
-	 * 
+	 *
 	 * This generally condenses a 5 or 6 line operation into 1 line.
 	 * @param arg
-	 * @return 
+	 * @return
 	 */
 	public static File GetFileFromArgument(String arg, Environment env, Target t, File def){
 		if(arg == null){
@@ -1232,17 +1111,17 @@ public final class Static {
 			return new File(t.file().getParent(), arg);
 		}
 	}
-	
+
 	/**
 	 * Returns true if currently running in cmdline mode.
 	 * @param environment
-	 * @return 
+	 * @return
 	 */
 	public static boolean InCmdLine(Environment environment){
-		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
+		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean
 					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
 	}
-	
+
 	/**
 	 * This verifies that the type required is actually present, and returns the value,
 	 * cast to the appropriate type, or, if not the correct type, a CRE.
@@ -1274,5 +1153,5 @@ public final class Static {
 			return (T) value;
 		}
 	}
-    
+
 }

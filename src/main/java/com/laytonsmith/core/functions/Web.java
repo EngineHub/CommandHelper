@@ -13,13 +13,17 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -35,13 +39,18 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -51,9 +60,27 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.Authenticator;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -636,6 +663,343 @@ public class Web {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "url_decode('A+string+with+special+characters%3A+%21%40%23%24%25%5E%26*%28%29-%2B')")
+			};
+		}
+
+	}
+
+	@api
+	@noboilerplate
+	public static class email extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PluginInternalException, ExceptionType.IOException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			// Argument processing
+			CArray options = ArgumentValidation.getArray(args[0], t);
+
+			// Transport options
+			String host = ArgumentValidation.getItemFromArray(options, "host", t, new CString("localhost", t)).val();
+			final String mailUser = ArgumentValidation.getItemFromArray(options, "user", t, new CString("", t)).val();
+			final String mailPassword = ArgumentValidation.getItemFromArray(options, "password", t, new CString("", t)).val();
+			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t)), t);
+			boolean useSSL = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_ssl", t, new CBoolean(false, t)), t);
+			boolean useStartTLS = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, new CBoolean(false, t)), t);
+			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t)), t);
+
+			//Standard email options
+			String from = ArgumentValidation.getItemFromArray(options, "from", t, null).val();
+			String subject = ArgumentValidation.getItemFromArray(options, "subject", t, new CString("<No Subject>", t)).val();
+			String body = ArgumentValidation.getItemFromArray(options, "body", t, new CString("", t)).val();
+			Construct cto = ArgumentValidation.getItemFromArray(options, "to", t, null);
+			CArray to;
+			if(cto instanceof CString){
+				to = new CArray(t);
+				to.push(cto);
+			} else {
+				to = (CArray)cto;
+			}
+			CArray attachments = ArgumentValidation.getArray(ArgumentValidation.getItemFromArray(options, "attachments", t, new CArray(t)), t);
+
+			// Setup and execution
+			Properties properties = System.getProperties();
+			properties.setProperty("mail.smtp.host", host);
+			properties.setProperty("mail.smtp.port", Integer.toString(mailPort));
+			properties.setProperty("mail.smtp.starttls.enable", Boolean.toString(useStartTLS));
+			properties.setProperty("mail.smtp.ssl.enable", Boolean.toString(useSSL));
+			if(timeout > 0){
+				properties.setProperty("mail.smtp.connectiontimeout", Integer.toString(timeout));
+				properties.setProperty("mail.smtp.timeout", Integer.toString(timeout));
+			}
+
+
+			properties.setProperty("mail.debug", Boolean.toString(Prefs.DebugMode()));
+
+			if(!"".equals(mailUser)){
+				properties.setProperty("mail.smtp.user", mailUser);
+				properties.setProperty("mail.smtp.auth", "true");
+			}
+			if(!"".equals(mailPassword)){
+				properties.setProperty("mail.smtp.password", mailPassword);
+				properties.setProperty("mail.smtp.auth", "true");
+			}
+
+			Session session = Session.getInstance(properties, new Authenticator() {
+
+				@Override
+				protected PasswordAuthentication getPasswordAuthentication() {
+					return new PasswordAuthentication(mailUser, mailPassword);
+				}
+
+			});
+
+			try{
+				MimeMessage message = new MimeMessage(session);
+
+				message.setFrom(new InternetAddress(from));
+
+				message.setSubject(subject);
+
+				if(!"".equals(body)){
+					CArray bodyAttachment = new CArray(t);
+					bodyAttachment.set("type", "text/plain");
+					bodyAttachment.set("content", body);
+					attachments.push(bodyAttachment, 0);
+				}
+
+				for(Construct c : to.asList()){
+					Message.RecipientType type = Message.RecipientType.TO;
+					String address;
+					if(c instanceof CArray){
+						CArray ca = (CArray)c;
+						String stype = ArgumentValidation.getItemFromArray(ca, "type", t, new CString("TO", t)).val();
+						switch(stype){
+							case "TO":
+								type = Message.RecipientType.TO;
+								break;
+							case "CC":
+								type = Message.RecipientType.CC;
+								break;
+							case "BCC":
+								type = Message.RecipientType.BCC;
+								break;
+							default:
+								throw new ConfigRuntimeException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", ExceptionType.FormatException, t);
+						}
+						address = ArgumentValidation.getItemFromArray(ca, "address", t, null).val();
+					} else {
+						address = c.val();
+					}
+					message.addRecipient(type, new InternetAddress(address));
+				}
+
+				if(attachments.size() == 1){
+					CArray pattachment = ArgumentValidation.getArray(attachments.get(0, t), t);
+					String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null).val();
+					String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
+					String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
+					String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t)).val().trim();
+					Construct content = ArgumentValidation.getItemFromArray(pattachment, "content", t, null);
+					if(!"".equals(fileName)){
+						message.setFileName(fileName);
+					}
+					if(!"".equals(description)){
+						message.setDescription(description);
+					}
+					if(!"".equals(disposition)){
+						message.setDisposition(disposition);
+					}
+					message.setContent(getContent(content, t), type);
+				} else {
+					Multipart mp = new MimeMultipart("alternative");
+					for(Construct attachment : attachments.asList()){
+						CArray pattachment = ArgumentValidation.getArray(attachment, t);
+						final String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null).val();
+						final String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
+						String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
+						String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t)).val().trim();
+						final Object content = getContent(ArgumentValidation.getItemFromArray(pattachment, "content", t, null), t);
+						BodyPart bp = new MimeBodyPart();
+						if(!"".equals(fileName)){
+							bp.setFileName(fileName);
+							bp.setHeader("Content-ID", "<" + fileName + ">");
+						}
+						if(!"".equals(description)){
+							bp.setDescription(description);
+						}
+						if(!"".equals(disposition)){
+							bp.setDisposition(disposition);
+						}
+
+						DataSource ds = new DataSource() {
+
+							@Override
+							public InputStream getInputStream() throws IOException {
+								if(content instanceof String){
+									return new ByteArrayInputStream(((String)content).getBytes("UTF-8"));
+								} else {
+									return new ByteArrayInputStream((byte[])content);
+								}
+							}
+
+							@Override
+							public OutputStream getOutputStream() throws IOException {
+								throw new Error("Content is immutable, this should never be called.");
+							}
+
+							@Override
+							public String getContentType() {
+								return type;
+							}
+
+							@Override
+							public String getName() {
+								if("".equals(fileName)){
+									return "Untitled";
+								} else {
+									return fileName;
+								}
+							}
+						};
+						bp.setDataHandler(new DataHandler(ds));
+						mp.addBodyPart(bp);
+					}
+					message.setContent(mp);
+				}
+
+				Transport tr = session.getTransport(useSSL?"smtps":"smtp");
+				try {
+					tr.connect(host, mailPort, mailUser, mailPassword);
+					message.saveChanges();
+					tr.sendMessage(message, message.getAllRecipients());
+				} finally {
+					tr.close();
+				}
+
+			} catch(MessagingException ex){
+				if(ex.getCause() instanceof SocketTimeoutException){
+					throw new ConfigRuntimeException(ex.getCause().getMessage(), ExceptionType.IOException, t, ex);
+				}
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.PluginInternalException, t, ex);
+			}
+			return CVoid.VOID;
+		}
+
+		private boolean isContentBase64(Construct c){
+			return c instanceof CByteArray;
+		}
+
+		/**
+		 * Parses the content from the construct.
+		 * @param c
+		 * @param t
+		 * @return
+		 */
+		private Object getContent(Construct c, Target t){
+			if(c instanceof CString){
+				return c.val();
+			} else if(c instanceof CByteArray){
+				CByteArray cb = (CByteArray)c;
+				return cb.asByteArrayCopy();
+			} else {
+				throw new ConfigRuntimeException("Only strings and byte_arrays may be added as attachments' content.", ExceptionType.FormatException, t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "email";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return getBundledDocs();
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Sending a plain text email using default transport and email settings", "email(array(\n"
+						+ "\tfrom: 'from@example.com',\n"
+						+ "\tto: 'to@example.com',\n"
+						+ "\tbody: 'Email body',\n"
+						+ "));", "<Would send a basic email>"),
+				new ExampleScript("Sending a plain text email using gmail", "email(array(\n"
+						+ "\thost: 'smtp.gmail.com',\n"
+						+ "\tport: 465,\n"
+						+ "\tuse_start_tls: true,\n"
+						+ "\tuse_ssl: true,\n"
+						+ "\tuser: 'username@gmail.com',\n"
+						+ "\tpassword: 'myPassword',\n"
+						+ "\n"
+						+ "\tfrom: 'from@gmail.com',\n"
+						+ "\tto: 'to@example.com',\n"
+						+ "\tsubject: 'Subject',\n"
+						+ "\tbody: 'Body'\n"
+						+ "));", "<Would send a basic email through gmail's smtp server>"),
+				new ExampleScript("Sending a html email, with text fallback", "email(array(\n"
+						+ "\tfrom: 'from@example.com',\n"
+						+ "\tto: 'to@example.com',\n"
+						+ "\tsubject: 'Test Email',\n"
+						+ "\tbody: 'This is the plain text body, which would show up in some email clients, such a mobile devices',\n"
+						+ "\tattachments: array(\n"
+						+ "\t\tarray(\n"
+						+ "\t\t\ttype: 'text/html',"
+						+ "\t\t\tcontent: '<h1>This is the html body, which would show up in most email clients. The <span style=\"color:red;\">plain text body</span> will not show if this does.</h1>'\n"
+						+ "\t\t)\n"
+						+ "\t)\n"
+						+ "));", "<Would send a basic html email, but would have fallback plain text>"),
+				new ExampleScript("Sending an email, with multiple recipients", "email(array(\n"
+						+ "\tfrom: 'from@example.com',\n"
+						+ "\tto: array('to@example.com', array(type: 'BCC', address: 'bcc@example.com')),\n"
+						+ "\tbody: 'Two recipients'\n"
+						+ "));", "<Would send a basic email to multiple recipients>"),
+				new ExampleScript("Sending an email, with a text attachment", "email(array(\n"
+						+ "\tfrom: 'from@example.com',\n"
+						+ "\tto: 'to@example.com',\n"
+						+ "\tattachments: array(\n"
+						+ "\t\tarray(\n"
+						+ "\t\t\ttype: 'text/plain',\n"
+						+ "\t\t\tfilename: 'test.txt',\n"
+						+ "\t\t\tcontent: read('test.txt'), // This text may come from anywhere, not just the file system\n"
+						+ "\t\t\tdisposition: 'attachment', // This is what tells the email client to make it downloadable\n"
+						+ "\t\t\tdescription: 'A description of the file, which may or may not be shown by the email client'\n"
+						+ "\t\t)\n"
+						+ "\t)"
+						+ "));", "<Would send a basic email, and the attached file would be downloadable>"),
+				new ExampleScript("Sending an email, with a binary attachment", "email(array(\n"
+						+ "\tfrom: 'from@example.com',\n"
+						+ "\tto: 'to@example.com',\n"
+						+ "\tattachments: array(\n"
+						+ "\t\tarray(\n"
+						+ "\t\t\ttype: 'application/pdf', // This will vary depending on the file type, and cannot be automatically determined\n"
+						+ "\t\t\tfilename: 'test.pdf',\n"
+						+ "\t\t\tcontent: read_binary('test.pdf'),\n"
+						+ "\t\t\tdisposition: 'attachment', // This is what tells the email client to make it downloadable\n"
+						+ "\t\t)\n"
+						+ "\t)"
+						+ "));", "<Would send a basic email, and the attached pdf would be downloadable>"),
+				new ExampleScript("Sending an html email with an inline image", "email(array(\n"
+						+ "\tfrom: 'from@example.com',\n"
+						+ "\tto: 'to@example.com',\n"
+						+ "\tsubject: 'Test Email',\n"
+						+ "\tbody: 'This is the plain text body, which would show up in some email clients, such a mobile devices',\n"
+						+ "\tattachments: array(\n"
+						+ "\t\tarray(\n"
+						+ "\t\t\ttype: 'text/html',"
+						+ "\t\t\tcontent: '<h1>This is an inline image: <img src=\"cid:image.png\" /></h1>'\n"
+						+ "\t\t), array(\n"
+						+ "\t\t\ttype: 'image/png',\n"
+						+ "\t\t\tfilename: 'image.png', // This needs to be unique across all attachments, and is referenced by \"cid:image.png\" in the html\n"
+						+ "\t\t\tcontent: read_binary('image.png'),\n"
+						+ "\t\t\tdisposition: 'inline', // Technically we could leave this off, because it defaults to inline\n"
+						+ "\t\t\tdescription: 'An image',\n"
+						+ "\t)\n"
+						+ "));", "<Would send an html email, and the attached image would show up>"),
 			};
 		}
 
