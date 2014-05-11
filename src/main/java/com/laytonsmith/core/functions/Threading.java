@@ -11,8 +11,8 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -83,7 +83,7 @@ public class Threading {
 						ConfigRuntimeException.HandleUncaughtException(ex, environment);
 					} catch(CancelCommandException ex){
 						if(ex.getMessage() != null){
-							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), new CBoolean(false, t));
+							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), CFalse.FALSE);
 						}
 					} finally {
 						dm.deactivateThread(Thread.currentThread());

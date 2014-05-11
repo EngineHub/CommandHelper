@@ -37,7 +37,7 @@ public class C {
         return new CArray(Target.UNKNOWN, elems);
     }
     public static CBoolean Boolean(boolean b){
-        return new CBoolean(b, Target.UNKNOWN);
+        return CBoolean.get(b);
     }
     public static CDouble Double(double d){
         return new CDouble(d, Target.UNKNOWN);

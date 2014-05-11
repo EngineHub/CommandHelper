@@ -397,7 +397,7 @@ public class ItemMeta {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemMeta im = p.getItemAt(slot).getItemMeta();
-			return new CBoolean(im instanceof MCLeatherArmorMeta, t);
+			return CBoolean.get(im instanceof MCLeatherArmorMeta);
 		}
 
 		@Override

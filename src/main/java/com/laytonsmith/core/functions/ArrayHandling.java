@@ -17,10 +17,12 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -591,15 +593,14 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			equals e = new equals();
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				for (int i = 0; i < ca.size(); i++) {
-					if (((CBoolean) e.exec(t, env, ca.get(i, t), args[1])).getBoolean()) {
-						return new CBoolean(true, t);
+					if (new equals().exec(t, env, ca.get(i, t), args[1]).getBoolean()) {
+						return CTrue.TRUE;
 					}
 				}
-				return new CBoolean(false, t);
+				return CFalse.FALSE;
 			} else {
 				throw new ConfigRuntimeException("Argument 1 of array_contains must be an array", ExceptionType.CastException, t);
 			}
@@ -681,15 +682,14 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			equals_ic e = new equals_ic();
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				for (int i = 0; i < ca.size(); i++) {
-					if (((CBoolean) e.exec(t, environment, ca.get(i, t), args[1])).getBoolean()) {
-						return new CBoolean(true, t);
+					if (new equals_ic().exec(t, environment, ca.get(i, t), args[1]).getBoolean()) {
+						return CTrue.TRUE;
 					}
 				}
-				return new CBoolean(false, t);
+				return CFalse.FALSE;
 			} else {
 				throw new ConfigRuntimeException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, t);
 			}
@@ -750,14 +750,14 @@ public class ArrayHandling {
 					try {
 						int index = Static.getInt32(args[1], t);
 						CArray ca = (CArray) args[0];
-						return new CBoolean(index <= ca.size() - 1, t);
+						return CBoolean.get(index <= ca.size() - 1);
 					} catch (ConfigRuntimeException e) {
 						//They sent a key that is a string. Obviously it doesn't exist.
-						return new CBoolean(false, t);
+						return CFalse.FALSE;
 					}
 				} else {
 					CArray ca = (CArray) args[0];
-					return new CBoolean(ca.containsKey(args[1].val()), t);
+					return CBoolean.get(ca.containsKey(args[1].val()));
 				}
 			} else {
 				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
@@ -1968,7 +1968,7 @@ public class ArrayHandling {
 						ret = ex.getReturn();
 					}
 					if(ret == null){
-						ret = CBoolean.FALSE;
+						ret = CFalse.FALSE;
 					}
 					boolean bret = Static.getBoolean(ret);
 					if(bret){
@@ -1987,7 +1987,7 @@ public class ArrayHandling {
 						ret = ex.getReturn();
 					}
 					if(ret == null){
-						ret = CBoolean.FALSE;
+						ret = CFalse.FALSE;
 					}
 					boolean bret = Static.getBoolean(ret);
 					if(bret){

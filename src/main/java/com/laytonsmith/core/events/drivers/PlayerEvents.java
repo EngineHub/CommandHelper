@@ -52,6 +52,7 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -725,7 +726,7 @@ public class PlayerEvents {
                 //map.put("player", new CString(ple.getPlayer().getName(), Target.UNKNOWN));
 				map.put("world", new CString(ple.getPlayer().getWorld().getName(), Target.UNKNOWN));
                 map.put("join_message", new CString(ple.getJoinMessage(), Target.UNKNOWN));
-                map.put("first_login", new CBoolean(ple.getPlayer().isNewPlayer(), Target.UNKNOWN));
+                map.put("first_login", CBoolean.get(ple.getPlayer().isNewPlayer()));
                 return map;
             } else{
                 throw new EventException("Cannot convert e to PlayerLoginEvent");
@@ -1023,7 +1024,7 @@ public class PlayerEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(), false));
 				//TODO: Once activation is supported, set that appropriately here.
-				map.put("activated", new CBoolean(true, Target.UNKNOWN));
+				map.put("activated", CTrue.TRUE);
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to PlayerInteractEvent");
@@ -1102,7 +1103,7 @@ public class PlayerEvents {
                 //the helper puts the player in for us
                 CArray location = ObjectGenerator.GetGenerator().location(event.getRespawnLocation());
                 map.put("location", location);
-				map.put("bed_spawn", new CBoolean(event.isBedSpawn(), Target.UNKNOWN));
+				map.put("bed_spawn", CBoolean.get(event.isBedSpawn()));
                 return map;
             } else {
                 throw new EventException("Cannot convert e to PlayerRespawnEvent");
@@ -1205,7 +1206,7 @@ public class PlayerEvents {
 				Map<String, Construct> map = super.evaluate(e);
 				map.putAll(evaluate_helper(e));
 				map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
-				map.put("keep_level", new CBoolean(event.getKeepLevel(), Target.UNKNOWN));
+				map.put("keep_level", CBoolean.get(event.getKeepLevel()));
 				map.put("new_level", new CInt(event.getNewLevel(), Target.UNKNOWN));
 				if(event.getKiller() instanceof MCPlayer){
 					map.put("killer", new CString(((MCPlayer)event.getKiller()).getName(), Target.UNKNOWN));
@@ -2434,7 +2435,7 @@ public class PlayerEvents {
 				}
 				mapEvent.put("newbook", newBookArray);
 				mapEvent.put("slot", new CInt(playerEditBookEvent.getSlot(), Target.UNKNOWN));
-				mapEvent.put("signing", new CBoolean(playerEditBookEvent.isSigning(), Target.UNKNOWN));
+				mapEvent.put("signing", CBoolean.get(playerEditBookEvent.isSigning()));
 				return mapEvent;
 			} else {
 				throw new EventException("Cannot convert event to PlayerEditBookEvent");
@@ -2461,7 +2462,7 @@ public class PlayerEvents {
 					if (pageArray.inAssociativeMode()) {
 						throw new ConfigRuntimeException("The page array must not be associative.", ExceptionType.CastException, pageArray.getTarget());
 					} else {
-						List<String> pages = new ArrayList<String>();
+						List<String> pages = new ArrayList<>();
 						for (Construct page : pageArray.asList()) {
 							pages.add(page.val());
 						}
@@ -2537,7 +2538,7 @@ public class PlayerEvents {
 				MCPlayer player = ptfe.getPlayer();
 				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
 				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
-				mapEvent.put("flying", new CBoolean(ptfe.isFlying(), Target.UNKNOWN));
+				mapEvent.put("flying", CBoolean.get(ptfe.isFlying()));
 				return mapEvent;
 			} else {
 				throw new EventException("Cannot convert event to PlayerToggleFlightEvent");
@@ -2604,7 +2605,7 @@ public class PlayerEvents {
 				MCPlayer player = ptse.getPlayer();
 				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
 				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
-				mapEvent.put("sneaking", new CBoolean(ptse.isSneaking(), Target.UNKNOWN));
+				mapEvent.put("sneaking", CBoolean.get(ptse.isSneaking()));
 				return mapEvent;
 			} else {
 				throw new EventException("Cannot convert event to PlayerToggleSneakEvent");
@@ -2671,7 +2672,7 @@ public class PlayerEvents {
 				MCPlayer player = ptse.getPlayer();
 				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
 				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
-				mapEvent.put("sprinting", new CBoolean(ptse.isSprinting(), Target.UNKNOWN));
+				mapEvent.put("sprinting", CBoolean.get(ptse.isSprinting()));
 				return mapEvent;
 			} else {
 				throw new EventException("Cannot convert event to PlayerToggleSprintEvent");

@@ -261,7 +261,7 @@ public class Weather {
 				}
 			}
 			if (w != null) {
-				return new CBoolean(w.isStorming(), t);
+				return CBoolean.get(w.isStorming());
 			} else {
 				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
 			}
@@ -319,7 +319,7 @@ public class Weather {
 				}
 			}
 			if (w != null) {
-				return new CBoolean(w.isThundering(), t);
+				return CBoolean.get(w.isThundering());
 			} else {
 				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
 			}

@@ -136,7 +136,7 @@ public class Commands {
 				throw new ConfigRuntimeException("Command not found did you forget to register it?",
 						ExceptionType.NotFoundException, t);
 			}
-			return new CBoolean(map.unregister(cmd), t);
+			return CBoolean.get(map.unregister(cmd));
 		}
 
 		@Override
@@ -204,7 +204,7 @@ public class Commands {
 				if (ops.containsKey("aliases")) {
 					if (ops.get("aliases", t) instanceof CArray) {
 						List<Construct> ca = ((CArray) ops.get("aliases", t)).asList();
-						List<String> aliases = new ArrayList<String>();
+						List<String> aliases = new ArrayList<>();
 						for (Construct c : ca) {
 							aliases.add(c.val());
 						}
@@ -221,7 +221,7 @@ public class Commands {
 				if (isnew) {
 					success = map.register(Implementation.GetServerType().getBranding(), cmd);
 				}
-				return new CBoolean(success, t);
+				return CBoolean.get(success);
 			} else {
 				throw new ConfigRuntimeException("Arg 2 was expected to be an array.", ExceptionType.FormatException, t);
 			}

@@ -7,26 +7,22 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
-import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UserManager;
-import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -34,16 +30,12 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistence.DataSourceException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -71,7 +63,7 @@ public class Meta {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(CommandHelperPlugin.isFirstLoad(), t);
+			return CBoolean.get(CommandHelperPlugin.isFirstLoad());
 		}
 
 		public String getName() {
@@ -415,7 +407,7 @@ public class Meta {
 
 			for (Script s : ac.getScripts()) {
 				if (s.match(args[0].val())) {
-					return new CBoolean(true, t);
+					return CTrue.TRUE;
 				}
 			}
 
@@ -425,7 +417,7 @@ public class Meta {
 					// p might be null
 					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistenceNetwork())) {
 						if (s.match(args[0].val())) {
-							return new CBoolean(true, t);
+							return CTrue.TRUE;
 						}
 					}
 				} catch (DataSourceException ex) {
@@ -433,7 +425,7 @@ public class Meta {
 				}
 			}
 
-			return new CBoolean(false, t);
+			return CFalse.FALSE;
 		}
 
 		@Override
@@ -515,7 +507,7 @@ public class Meta {
 			if (doRemoval) {
 				Static.getAliasCore().addPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			}
-			return new CBoolean(ret, t);
+			return CBoolean.get(ret);
 		}
 	}
 

@@ -9,7 +9,9 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -59,10 +61,10 @@ public class ExtensionMeta {
 			try {
 				FunctionList.getFunction(args[0].val().toLowerCase());
 			} catch (ConfigCompileException ex) {
-				return new CBoolean(false, t);
+				return CFalse.FALSE;
 			}
 
-			return new CBoolean(true, t);
+			return CTrue.TRUE;
 		}
 
 		@Override
@@ -142,9 +144,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			boolean found = EventList.getEvent(args[0].val().toLowerCase()) != null;
-
-			return new CBoolean(found, t);
+			return CBoolean.get(EventList.getEvent(args[0].val().toLowerCase()) != null);
 		}
 
 		@Override

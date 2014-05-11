@@ -703,7 +703,7 @@ public class ObjectGenerator {
 	}
 
 	public Map<MCEnchantment,Integer> enchants(CArray enchantArray, Target t) {
-		Map<MCEnchantment,Integer> ret = new HashMap<MCEnchantment,Integer>();
+		Map<MCEnchantment,Integer> ret = new HashMap<>();
 		for (String key : enchantArray.stringKeySet()) {
 			try {
 				CArray ea = (CArray) enchantArray.get(key, t);
@@ -728,14 +728,14 @@ public class ObjectGenerator {
 			effect.set("id", new CInt(eff.getPotionID(), t), t);
 			effect.set("strength", new CInt(eff.getStrength(), t), t);
 			effect.set("seconds", new CInt(eff.getSecondsRemaining(), t), t);
-			effect.set("ambient", new CBoolean(eff.isAmbient(), t), t);
+			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
 			ea.push(effect);
 		}
 		return ea;
 	}
 
 	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t) {
-		List<MCLivingEntity.MCEffect> ret = new ArrayList<MCLivingEntity.MCEffect>();
+		List<MCLivingEntity.MCEffect> ret = new ArrayList<>();
 		for (String key : ea.stringKeySet()) {
 			if (ea.get(key, t) instanceof CArray) {
 				CArray effect = (CArray) ea.get(key, t);

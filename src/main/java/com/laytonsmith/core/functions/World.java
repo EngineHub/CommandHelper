@@ -557,7 +557,7 @@ public class World {
 				world = Static.getServer().getWorld(args[2].val());
 			}
 
-			return new CBoolean(world.regenerateChunk(x, z), t);
+			return CBoolean.get(world.regenerateChunk(x, z));
 		}
 	}
 
@@ -646,7 +646,7 @@ public class World {
 				+ z * z * 0x4307a7L
 				+ z * 0x5f24f
 				^ 0x3ad8025f);
-			return new CBoolean(rnd.nextInt(10) == 0, t);
+			return CBoolean.get(rnd.nextInt(10) == 0);
 		}
 	}
 
@@ -660,7 +660,7 @@ public class World {
 				Enumeration e = p.propertyNames();
 				while (e.hasMoreElements()) {
 					String name = e.nextElement().toString();
-					TimeLookup.put(name, new CString(p.getProperty(name).toString(), Target.UNKNOWN));
+					TimeLookup.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
 				}
 			} catch (IOException ex) {
 				Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
@@ -1193,7 +1193,7 @@ public class World {
 			if (world == null) {
 				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 			}
-			return new CBoolean(Static.getServer().unloadWorld(world, save), t);
+			return CBoolean.get(Static.getServer().unloadWorld(world, save));
 		}
 
 		@Override
@@ -1377,7 +1377,7 @@ public class World {
 			if (world == null) {
 				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 			}
-			return new CBoolean(world.getPVP(), t);
+			return CBoolean.get(world.getPVP());
 		}
 	}
 
@@ -1486,7 +1486,7 @@ public class World {
 			if (args.length == 1) {
 				CArray gameRules = new CArray(t);
 				for (MCGameRule gameRule : MCGameRule.values()) {
-					gameRules.set(new CString(gameRule.getGameRule(), t), new CBoolean(world.getGameRuleValue(gameRule), t), t);
+					gameRules.set(new CString(gameRule.getGameRule(), t), CBoolean.get(world.getGameRuleValue(gameRule)), t);
 				}
 				return gameRules;
 			} else {
@@ -1496,7 +1496,7 @@ public class World {
 				} catch (IllegalArgumentException exception) {
 					throw new ConfigRuntimeException("The gamerule \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
 				}
-				return new CBoolean(world.getGameRuleValue(gameRule), t);
+				return CBoolean.get(world.getGameRuleValue(gameRule));
 			}
 		}
 	}

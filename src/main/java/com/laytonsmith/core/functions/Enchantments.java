@@ -9,9 +9,11 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -455,7 +457,7 @@ public class Enchantments {
 				String name = Enchantments.ConvertName(args[0].val().toUpperCase());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
-				return new CBoolean(e.canEnchantItem(is), t);
+				return CBoolean.get(e.canEnchantItem(is));
 			} catch (NullPointerException e) {
 				throw new ConfigRuntimeException(args[0].val() + " is not a known enchantment type.", ExceptionType.EnchantmentException, t);
 			}
@@ -512,7 +514,7 @@ public class Enchantments {
 	@api
 	public static class get_enchants extends AbstractFunction {
 
-		private static Map<String, CArray> cache = new HashMap<String, CArray>();
+		private static Map<String, CArray> cache = new HashMap<>();
 
 		@Override
 		public String getName() {
@@ -614,9 +616,9 @@ public class Enchantments {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
-				return new CBoolean(true, t);
+				return CTrue.TRUE;
 			} catch (NullPointerException e) {
-				return new CBoolean(false, t);
+				return CFalse.FALSE;
 			}
 		}
 	}

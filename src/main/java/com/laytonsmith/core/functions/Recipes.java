@@ -55,10 +55,7 @@ public class Recipes {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			
-			MCRecipe recipe = ObjectGenerator.GetGenerator().recipe(args[0], t);
-			
-			return new CBoolean(Static.getServer().addRecipe(recipe), t);
+			return CBoolean.get(Static.getServer().addRecipe(ObjectGenerator.GetGenerator().recipe(args[0], t)));
 		}
 
 		@Override

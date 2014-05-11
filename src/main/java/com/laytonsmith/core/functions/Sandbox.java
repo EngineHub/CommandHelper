@@ -368,7 +368,7 @@ public class Sandbox {
                 me = Static.GetPlayer(args[0], t);
                 other = Static.GetPlayer(args[1], t);
             }
-            return new CBoolean(me.canSee(other), t);
+            return CBoolean.get(me.canSee(other));
         }
 
 		@Override

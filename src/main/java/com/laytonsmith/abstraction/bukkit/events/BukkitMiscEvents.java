@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
+import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
@@ -24,7 +25,7 @@ import org.bukkit.event.server.ServerListPingEvent;
 public class BukkitMiscEvents {
 	public static class BukkitMCConsoleCommandEvent implements MCConsoleCommandEvent {
 		ServerCommandEvent sce;
-		
+
 		public BukkitMCConsoleCommandEvent(ServerCommandEvent sce){
 			this.sce = sce;
 		}
@@ -43,8 +44,13 @@ public class BukkitMiscEvents {
 		public void setCommand(String command) {
 			sce.setCommand(command);
 		}
+
+		@Override
+		public boolean isRemote() {
+			return sce instanceof RemoteServerCommandEvent;
+		}
 	}
-	
+
 	/*
 	 * Not an actual event, but making it one.
 	 */
@@ -133,7 +139,7 @@ public class BukkitMiscEvents {
 		String alias;
 		String[] args;
 		public BukkitMCCommandTabCompleteEvent(MCCommandSender sender, Command cmd, String alias, String[] args) {
-			this.comp = new ArrayList<String>();
+			this.comp = new ArrayList<>();
 			this.sender = sender;
 			this.cmd = cmd;
 			this.alias = alias;

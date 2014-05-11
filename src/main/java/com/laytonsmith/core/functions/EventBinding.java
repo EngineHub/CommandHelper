@@ -14,8 +14,10 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
@@ -125,7 +127,7 @@ public class EventBinding {
 			Environment newEnv = env;
 			try {
 				newEnv = env.clone();
-			} catch (Exception e) {
+			} catch (CloneNotSupportedException e) {
 			}
 			newEnv.getEnv(GlobalEnv.class).SetVarList(custom_params);
 			ParseTree tree = nodes[nodes.length - 1];
@@ -441,7 +443,7 @@ public class EventBinding {
 			if (original.getUnderlyingEvent() != null && original.isCancellable()) {
 				result = original.isCancelled();
 			}
-			return new CBoolean(result, t);
+			return CBoolean.get(result);
 		}
 	}
 
@@ -587,7 +589,7 @@ public class EventBinding {
 			if (throwOnFailure && !success) {
 				throw new ConfigRuntimeException("Event parameter is already locked!", ExceptionType.BindException, t);
 			}
-			return new CBoolean(success, t);
+			return CBoolean.get(success);
 		}
 	}
 
@@ -701,8 +703,7 @@ public class EventBinding {
 			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("is_locked may only be called from inside an event handler", ExceptionType.BindException, t);
 			}
-			boolean locked = environment.getEnv(GlobalEnv.class).GetEvent().isLocked(args[0].val());
-			return new CBoolean(locked, t);
+			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetEvent().isLocked(args[0].val()));
 		}
 
 		@Override
@@ -802,7 +803,7 @@ public class EventBinding {
 			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new ConfigRuntimeException("is_consumed must be called from within an event handler", ExceptionType.BindException, t);
 			}
-			return new CBoolean(environment.getEnv(GlobalEnv.class).GetEvent().isConsumed(), t);
+			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetEvent().isConsumed());
 		}
 
 		@Override
@@ -894,12 +895,12 @@ public class EventBinding {
 				if (events != null) {
 					for(BoundEvent b : events){
 						if(b.getId().equals(id)){
-							return new CBoolean(true, t);
+							return CTrue.TRUE;
 						}
 					}
 				}
 			}
-			return new CBoolean(false, t);
+			return CFalse.FALSE;
 		}
 
 		@Override

@@ -69,9 +69,11 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -242,9 +244,9 @@ public class EntityManagement {
 			try {
 				e = Static.getEntity(Static.getInt32(args[0], t), t);
 			} catch (ConfigRuntimeException cre) {
-				return new CBoolean(false, t);
+				return CFalse.FALSE;
 			}
-			return new CBoolean(true, t);
+			return CTrue.TRUE;
 		}
 
 		@Override
@@ -269,10 +271,10 @@ public class EntityManagement {
 			try {
 				e = Static.getEntity(Static.getInt32(args[0], t), t);
 			} catch (ConfigRuntimeException cre) {
-				return new CBoolean(false, t);
+				return CFalse.FALSE;
 			}
 
-			return new CBoolean(e instanceof MCLivingEntity, t);
+			return CBoolean.get(e instanceof MCLivingEntity);
 		}
 
 		@Override
@@ -337,7 +339,7 @@ public class EntityManagement {
 			} else {
 				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
 			}
-			return new CBoolean(e.teleport(l), t);
+			return CBoolean.get(e.teleport(l));
 		}
 
 		@Override
@@ -512,7 +514,7 @@ public class EntityManagement {
 			MCEntity ent = Static.getEntity(id, t);
 
 			if (ent instanceof MCAgeable){
-				return new CBoolean(((MCAgeable)ent).getCanBreed(), t);
+				return CBoolean.get(((MCAgeable)ent).getCanBreed());
 			} else {
 				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
 			}
@@ -788,10 +790,10 @@ public class EntityManagement {
 			}
 
 			if (seconds == 0) {
-				return new CBoolean(mob.removeEffect(effect), t);
+				return CBoolean.get(mob.removeEffect(effect));
 			} else {
 				mob.addEffect(effect, strength, seconds, ambient, t);
-				return new CBoolean(true, t);
+				return CTrue.TRUE;
 			}
 		}
 	}
@@ -1509,7 +1511,7 @@ public class EntityManagement {
 			} else {
 				success = horse.setPassenger(rider);
 			}
-			return new CBoolean(success, t);
+			return CBoolean.get(success);
 		}
 
 		@Override
@@ -1726,7 +1728,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).isCustomNameVisible(), t);
+			return CBoolean.get(Static.getLivingEntity(Static.getInt32(args[0], t), t).isCustomNameVisible());
 		}
 
 		@Override
@@ -1769,7 +1771,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).getCanPickupItems(), t);
+			return CBoolean.get(Static.getLivingEntity(Static.getInt32(args[0], t), t).getCanPickupItems());
 		}
 
 		@Override
@@ -1808,7 +1810,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(!Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway(), t);
+			return CBoolean.get(!Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway());
 		}
 
 		@Override
@@ -1944,7 +1946,7 @@ public class EntityManagement {
 			if(!worked){
 				p.remove();
 			}
-			return new CBoolean(worked, t);
+			return CBoolean.get(worked);
 		}
 
 		@Override
@@ -2031,7 +2033,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
 
-			return new CBoolean(e.isOnGround(), t);
+			return CBoolean.get(e.isOnGround());
 		}
 
 		@Override
@@ -2201,7 +2203,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).hasLineOfSight(Static.getEntity(Static.getInt32(args[1], t), t)), t);
+			return CBoolean.get(Static.getLivingEntity(Static.getInt32(args[0], t), t).hasLineOfSight(Static.getEntity(Static.getInt32(args[1], t), t)));
 		}
 	}
 
@@ -2279,7 +2281,7 @@ public class EntityManagement {
 			switch (entity.getType()) {
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
-					specArray.set("powered", new CBoolean(creeper.isPowered(), t), t);
+					specArray.set("powered", CBoolean.get(creeper.isPowered()), t);
 					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
@@ -2302,7 +2304,7 @@ public class EntityManagement {
 				case FALLING_BLOCK:
 					MCFallingBlock block = (MCFallingBlock) entity;
 					specArray.set("block", new CInt(block.getMaterial().getName(), t), t);
-					specArray.set("dropitem", new CBoolean(block.getDropItem(), t), t);
+					specArray.set("dropitem", CBoolean.get(block.getDropItem()), t);
 					break;
 				case FIREBALL:
 				case SMALL_FIREBALL:
@@ -2319,7 +2321,7 @@ public class EntityManagement {
 					specArray.set("color", new CString(horse.getColor().name(), t), t);
 					specArray.set("style", new CString(horse.getPattern().name(), t), t);
 					specArray.set("variant", new CString(horse.getVariant().name(), t), t);
-					specArray.set("chest", new CBoolean(horse.hasChest(), t), t);
+					specArray.set("chest", CBoolean.get(horse.hasChest()), t);
 					specArray.set("jump", new CDouble(horse.getJumpStrength(), t), t);
 					specArray.set("domestication", new CInt(horse.getDomestication(), t), t);
 					specArray.set("maxdomestication", new CInt(horse.getMaxDomestication(), t), t);
@@ -2328,7 +2330,7 @@ public class EntityManagement {
 					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
-					specArray.set("playercreated", new CBoolean(golem.isPlayerCreated(), t), t);
+					specArray.set("playercreated", CBoolean.get(golem.isPlayerCreated()), t);
 					break;
 				case ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
@@ -2342,7 +2344,7 @@ public class EntityManagement {
 					break;
 				case LIGHTNING:
 					MCLightningStrike lightning = (MCLightningStrike) entity;
-					specArray.set("effect", new CBoolean(lightning.isEffect(), t), t);
+					specArray.set("effect", CBoolean.get(lightning.isEffect()), t);
 					break;
 				case MAGMA_CUBE:
 				case SLIME:
@@ -2357,7 +2359,7 @@ public class EntityManagement {
 				case OCELOT:
 					MCOcelot ocelot = (MCOcelot) entity;
 					specArray.set("type", new CString(ocelot.getCatType().name(), t), t);
-					specArray.set("sitting", new CBoolean(ocelot.isSitting(), t), t);
+					specArray.set("sitting", CBoolean.get(ocelot.isSitting()), t);
 					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
@@ -2365,14 +2367,14 @@ public class EntityManagement {
 					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
-					specArray.set("saddled", new CBoolean(pig.isSaddled(), t), t);
+					specArray.set("saddled", CBoolean.get(pig.isSaddled()), t);
 					break;
 				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
-					specArray.set("angry", new CBoolean(pigZombie.isAngry(), t), t);
+					specArray.set("angry", CBoolean.get(pigZombie.isAngry()), t);
 					specArray.set("anger", new CInt(pigZombie.getAnger(), t), t);
-					specArray.set("baby", new CBoolean(pigZombie.isBaby(), t), t);
-					specArray.set("villager", new CBoolean(pigZombie.isVillager(), t), t);
+					specArray.set("baby", CBoolean.get(pigZombie.isBaby()), t);
+					specArray.set("villager", CBoolean.get(pigZombie.isVillager()), t);
 					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
@@ -2387,7 +2389,7 @@ public class EntityManagement {
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
 					specArray.set("color", new CString(sheep.getColor().name(), t), t);
-					specArray.set("sheared", new CBoolean(sheep.isSheared(), t), t);
+					specArray.set("sheared", CBoolean.get(sheep.isSheared()), t);
 					break;
 				case SKELETON:
 					MCSkeleton skeleton = (MCSkeleton) entity;
@@ -2403,14 +2405,14 @@ public class EntityManagement {
 					break;
 				case WOLF:
 					MCWolf wolf = (MCWolf) entity;
-					specArray.set("angry", new CBoolean(wolf.isAngry(), t), t);
+					specArray.set("angry", CBoolean.get(wolf.isAngry()), t);
 					specArray.set("color", new CString(wolf.getCollarColor().name(), t), t);
-					specArray.set("sitting", new CBoolean(wolf.isSitting(), t), t);
+					specArray.set("sitting", CBoolean.get(wolf.isSitting()), t);
 					break;
 				case ZOMBIE:
 					MCZombie zombie = (MCZombie) entity;
-					specArray.set("baby", new CBoolean(zombie.isBaby(), t), t);
-					specArray.set("villager", new CBoolean(zombie.isVillager(), t), t);
+					specArray.set("baby", CBoolean.get(zombie.isBaby()), t);
+					specArray.set("villager", CBoolean.get(zombie.isVillager()), t);
 					break;
 			}
 			return specArray;
@@ -2921,7 +2923,7 @@ public class EntityManagement {
 			MCEntity entity = Static.getEntity(id, t);
 
 			if (entity instanceof MCProjectile) {
-				return new CBoolean(((MCProjectile) entity).doesBounce(), t);
+				return CBoolean.get(((MCProjectile) entity).doesBounce());
 			} else {
 				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}

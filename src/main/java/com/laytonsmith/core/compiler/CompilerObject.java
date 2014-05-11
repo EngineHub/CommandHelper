@@ -1,9 +1,8 @@
-
 package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -11,6 +10,7 @@ import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
+import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.NewIVariable;
 import com.laytonsmith.core.constructs.Target;
@@ -203,9 +203,9 @@ class CompilerObject {
 				return new NewIVariable(t.val(), t.getTarget());
 			case BARE_STRING:
 				if (t.val().equals("true")) {
-					return new CBoolean(true, t.getTarget());
+					return CTrue.GenerateCTrue(t.getTarget());
 				} else if (t.val().equals("false")) {
-					return new CBoolean(false, t.getTarget());
+					return CFalse.GenerateCFalse(t.getTarget());
 				} else if (t.val().equals("null")) {
 					return CNull.GenerateCNull(t.getTarget());
 				} else if (keywords.contains(t.val())) {
