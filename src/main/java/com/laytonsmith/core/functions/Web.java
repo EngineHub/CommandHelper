@@ -25,7 +25,6 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClosure;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -41,6 +40,7 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,6 +64,8 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Authenticator;
@@ -78,6 +80,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -694,8 +697,8 @@ public class Web {
 			final String mailUser = ArgumentValidation.getItemFromArray(options, "user", t, new CString("", t)).val();
 			final String mailPassword = ArgumentValidation.getItemFromArray(options, "password", t, new CString("", t)).val();
 			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t)), t);
-			boolean useSSL = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CFalse.FALSE), t);
-			boolean useStartTLS = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CFalse.FALSE), t);
+			boolean useSSL = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t);
+			boolean useStartTLS = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t);
 			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t)), t);
 
 			//Standard email options

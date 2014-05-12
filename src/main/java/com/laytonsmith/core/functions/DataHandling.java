@@ -27,7 +27,6 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CLabel;
@@ -1918,7 +1917,7 @@ public class DataHandling {
 			try {
 				d = Static.getDouble(args[0], t);
 			} catch (ConfigRuntimeException e) {
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
 			return CBoolean.get((long) d == d);
 		}

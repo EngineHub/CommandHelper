@@ -52,7 +52,6 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -1024,7 +1023,7 @@ public class PlayerEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(), false));
 				//TODO: Once activation is supported, set that appropriately here.
-				map.put("activated", CTrue.TRUE);
+				map.put("activated", CBoolean.TRUE);
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to PlayerInteractEvent");
@@ -2462,7 +2461,7 @@ public class PlayerEvents {
 					if (pageArray.inAssociativeMode()) {
 						throw new ConfigRuntimeException("The page array must not be associative.", ExceptionType.CastException, pageArray.getTarget());
 					} else {
-						List<String> pages = new ArrayList<>();
+						List<String> pages = new ArrayList<String>();
 						for (Construct page : pageArray.asList()) {
 							pages.add(page.val());
 						}

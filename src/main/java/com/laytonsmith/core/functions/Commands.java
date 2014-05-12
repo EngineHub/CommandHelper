@@ -204,7 +204,7 @@ public class Commands {
 				if (ops.containsKey("aliases")) {
 					if (ops.get("aliases", t) instanceof CArray) {
 						List<Construct> ca = ((CArray) ops.get("aliases", t)).asList();
-						List<String> aliases = new ArrayList<>();
+						List<String> aliases = new ArrayList<String>();
 						for (Construct c : ca) {
 							aliases.add(c.val());
 						}

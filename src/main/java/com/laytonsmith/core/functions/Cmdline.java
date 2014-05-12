@@ -521,7 +521,7 @@ public class Cmdline {
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             //TODO: Make this more robust by having a local cache of the environment which we modify, and get_env returns from.
-            Map<String, String> newenv = new HashMap<>(System.getenv());
+            Map<String, String> newenv = new HashMap<String, String>(System.getenv());
             newenv.put(args[0].val(), args[1].val());
             boolean ret;
             try {

@@ -19,10 +19,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -407,7 +405,7 @@ public class Meta {
 
 			for (Script s : ac.getScripts()) {
 				if (s.match(args[0].val())) {
-					return CTrue.TRUE;
+					return CBoolean.TRUE;
 				}
 			}
 
@@ -417,7 +415,7 @@ public class Meta {
 					// p might be null
 					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistenceNetwork())) {
 						if (s.match(args[0].val())) {
-							return CTrue.TRUE;
+							return CBoolean.TRUE;
 						}
 					}
 				} catch (DataSourceException ex) {
@@ -425,7 +423,7 @@ public class Meta {
 				}
 			}
 
-			return CFalse.FALSE;
+			return CBoolean.FALSE;
 		}
 
 		@Override

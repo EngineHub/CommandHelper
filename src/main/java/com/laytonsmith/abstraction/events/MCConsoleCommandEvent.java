@@ -1,3 +1,7 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.core.events.BindableEvent;
@@ -8,7 +12,7 @@ import com.laytonsmith.core.events.BindableEvent;
  */
 public interface MCConsoleCommandEvent extends BindableEvent {
 	
-	public String getCommand();
-	public void setCommand(String command);
-	public boolean isRemote();
+	String getCommand();
+	void setCommand(String command);
+	
 }

@@ -16,11 +16,9 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -480,11 +478,11 @@ public class WorldEdit {
 
             try {
                 if (!region.getIntersectingRegions(checkRegions).isEmpty()) {
-                    return CTrue.TRUE;
+                    return CBoolean.TRUE;
                 }
             } catch (Exception e) {
             }
-            return CFalse.FALSE;
+            return CBoolean.FALSE;
         }
     }
 
@@ -1357,10 +1355,10 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists != null) {
-                return CTrue.TRUE;
+                return CBoolean.TRUE;
             }
 
-            return CFalse.FALSE;
+            return CBoolean.FALSE;
         }
 
         @Override

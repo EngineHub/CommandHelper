@@ -5,7 +5,6 @@ import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
@@ -17,14 +16,12 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -916,7 +913,7 @@ public class BasicLogic {
 				}
 			}
 			if (referenceMatch) {
-				return CTrue.TRUE;
+				return CBoolean.TRUE;
 			}
 			if (Static.anyBooleans(args)) {
 				boolean equals = true;
@@ -940,7 +937,7 @@ public class BasicLogic {
 					}
 				}
 				if (equals) {
-					return CTrue.TRUE;
+					return CBoolean.TRUE;
 				}
 			}
 			try {
@@ -955,7 +952,7 @@ public class BasicLogic {
 				}
 				return CBoolean.get(equals);
 			} catch (ConfigRuntimeException e) {
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
 		}
 
@@ -1051,7 +1048,7 @@ public class BasicLogic {
 			if (args[1].getClass().equals(args[0].getClass())) {
 				return new equals().exec(t, environment, args);
 			} else {
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
 		}
 
@@ -1073,6 +1070,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({sequals.class})
 	public static class snequals extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1177,7 +1175,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new equals().exec(t, env, args).not();
 		}
 
@@ -1266,7 +1264,7 @@ public class BasicLogic {
 					}
 				}
 				if (equals) {
-					return CTrue.TRUE;
+					return CBoolean.TRUE;
 				}
 			}
 			try {
@@ -1281,7 +1279,7 @@ public class BasicLogic {
 				}
 				return CBoolean.get(equals);
 			} catch (ConfigRuntimeException e) {
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
 		}
 
@@ -1302,6 +1300,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({equals_ic.class})
 	public static class nequals_ic extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1341,7 +1340,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new equals_ic().exec(t, environment, args).not();
 		}
 
@@ -1380,7 +1379,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray && args[1] instanceof CArray) {
 				return CBoolean.get(args[0] == args[1]);
 			} else {
@@ -1700,15 +1699,15 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public CBoolean exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for (Construct c : args) {
 				if (!Static.getBoolean(c)) {
-					return CFalse.FALSE;
+					return CBoolean.FALSE;
 				}
 			}
-			return CTrue.TRUE;
+			return CBoolean.TRUE;
 		}
 
 		@Override
@@ -1717,10 +1716,10 @@ public class BasicLogic {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				boolean b = Static.getBoolean(c);
 				if (b == false) {
-					return CFalse.FALSE;
+					return CBoolean.FALSE;
 				}
 			}
-			return CTrue.TRUE;
+			return CBoolean.TRUE;
 		}
 
 		@Override
@@ -1768,7 +1767,7 @@ public class BasicLogic {
 			}
 			if (children.isEmpty()) {
 				//We've removed all the children, so return true, because they were all true.
-				return new ParseTree(CTrue.TRUE, null);
+				return new ParseTree(CBoolean.TRUE, null);
 			}
 			return null;
 		}
@@ -1803,15 +1802,15 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public CBoolean exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for (Construct c : args) {
 				if (Static.getBoolean(c)) {
-					return CTrue.TRUE;
+					return CBoolean.TRUE;
 				}
 			}
-			return CFalse.FALSE;
+			return CBoolean.FALSE;
 		}
 
 		@Override
@@ -1819,10 +1818,10 @@ public class BasicLogic {
 			for (ParseTree tree : nodes) {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				if (Static.getBoolean(c)) {
-					return CTrue.TRUE;
+					return CBoolean.TRUE;
 				}
 			}
-			return CFalse.FALSE;
+			return CBoolean.FALSE;
 		}
 
 		@Override
@@ -1869,7 +1868,7 @@ public class BasicLogic {
 			}
 			if (children.isEmpty()) {
 				//We've removed all the children, so return false, because they were all false.
-				return new ParseTree(CFalse.FALSE, null);
+				return new ParseTree(CBoolean.FALSE, null);
 			}
 			return null;
 		}
@@ -1904,7 +1903,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return CBoolean.get(!ArgumentValidation.getBoolean(args[0], t));
+			return CBoolean.get(!Static.getBoolean(args[0]));
 		}
 
 		@Override
@@ -2012,6 +2011,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({and.class})
 	public static class nand extends AbstractFunction {
 
 		@Override
@@ -2055,7 +2055,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return new and().execs(t, env, parent, nodes).not();
 		}
 
@@ -2072,6 +2072,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({or.class})
 	public static class nor extends AbstractFunction {
 
 		@Override
@@ -2115,7 +2116,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
+		public CBoolean execs(Target t, Environment environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
 			return new or().execs(t, environment, parent, args).not();
 		}
 
@@ -2132,6 +2133,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({xor.class})
 	public static class xnor extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2170,7 +2172,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new xor().exec(t, environment, args).not();
 		}
 

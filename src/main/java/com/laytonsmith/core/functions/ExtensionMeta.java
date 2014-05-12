@@ -9,9 +9,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -61,10 +59,10 @@ public class ExtensionMeta {
 			try {
 				FunctionList.getFunction(args[0].val().toLowerCase());
 			} catch (ConfigCompileException ex) {
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
 
-			return CTrue.TRUE;
+			return CBoolean.TRUE;
 		}
 
 		@Override

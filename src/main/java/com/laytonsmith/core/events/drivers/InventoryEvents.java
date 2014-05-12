@@ -678,7 +678,10 @@ public class InventoryEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			return event instanceof MCItemHeldEvent;
+			if (event instanceof MCItemHeldEvent) {
+				return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -743,7 +746,10 @@ public class InventoryEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			return event instanceof MCPrepareItemCraftEvent;
+			if (event instanceof MCPrepareItemCraftEvent) {
+				return true;
+			}
+			return false;
 		}
 
 		@Override

@@ -158,13 +158,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         } else if (c instanceof CArray) {
             CArray ca = (CArray) c;
             if (!ca.inAssociativeMode()) {
-                List<Object> list = new ArrayList<>();
+                List<Object> list = new ArrayList<Object>();
                 for(int i = 0; i < ca.size(); i++){
                     list.add(json_encode0(ca.get(i, t), t));
                 }
                 return list;
             } else {
-                Map<String, Object> map = new HashMap<>();
+                Map<String, Object> map = new HashMap<String, Object>();
                 for(String key : ca.stringKeySet()){
                     map.put(key, json_encode0(ca.get(key, t), t));
                 }
@@ -201,9 +201,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             //It's an array
             JSONArray array = (JSONArray) JSONValue.parse(s);
             CArray carray = new CArray(t);
-			for (Object o : array) {
-				carray.push(convertJSON(o, t));
-			}
+            for (int i = 0; i < array.size(); i++) {
+                carray.push(convertJSON(array.get(i), t));
+            }
             return carray;
         } else {
             //It's a single value, but we're gonna wrap it in an array, then deconstruct it
@@ -333,23 +333,23 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         } else if(c instanceof CString){
             return c.val();
         } else if(c instanceof CBoolean){
-            return ((CBoolean) c).getBoolean();
+            return Boolean.valueOf(((CBoolean)c).getBoolean());
         } else if(c instanceof CInt){
-            return ((CInt) c).getInt();
+            return Long.valueOf(((CInt)c).getInt());
         } else if(c instanceof CDouble){
-            return ((CDouble) c).getDouble();
+            return Double.valueOf(((CDouble)c).getDouble());
         } else if(c instanceof CArray){
             CArray ca = (CArray)c;
             if(ca.inAssociativeMode()){
                 //HashMap
-                HashMap<String, Object> map = new HashMap<>((int)ca.size());
+                HashMap<String, Object> map = new HashMap<String, Object>((int)ca.size());
                 for(String key : ca.stringKeySet()){
                     map.put(key, GetPOJO(ca.get(key, Target.UNKNOWN)));
                 }
                 return map;
             } else {
                 //ArrayList
-                ArrayList<Object> list = new ArrayList<>((int)ca.size());
+                ArrayList<Object> list = new ArrayList<Object>((int)ca.size());
                 for(int i = 0; i < ca.size(); i++){
                     list.add(GetPOJO(ca.get(i, Target.UNKNOWN)));
                 }

@@ -9,11 +9,9 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -514,7 +512,7 @@ public class Enchantments {
 	@api
 	public static class get_enchants extends AbstractFunction {
 
-		private static Map<String, CArray> cache = new HashMap<>();
+		private static Map<String, CArray> cache = new HashMap<String, CArray>();
 
 		@Override
 		public String getName() {
@@ -616,9 +614,9 @@ public class Enchantments {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
-				return CTrue.TRUE;
+				return CBoolean.TRUE;
 			} catch (NullPointerException e) {
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
 		}
 	}

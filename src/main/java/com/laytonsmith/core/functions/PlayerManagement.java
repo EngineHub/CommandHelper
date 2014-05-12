@@ -29,11 +29,9 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -2038,7 +2036,7 @@ public class PlayerManagement {
 				return CBoolean.get(m.removeEffect(effect));
 			} else {
 				m.addEffect(effect, strength, seconds, ambient, t);
-				return CTrue.TRUE;
+				return CBoolean.TRUE;
 			}
 		}
 
@@ -2229,7 +2227,7 @@ public class PlayerManagement {
 			} else if (p != null) {
 				return CBoolean.get(p.isOnline());
 			} else {
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
 		}
 	}
@@ -3575,10 +3573,10 @@ public class PlayerManagement {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
 						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
 						+ " (It was " + v.magnitude + ")", t);
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
 			p.setVelocity(v);
-			return CTrue.TRUE;
+			return CBoolean.TRUE;
 		}
 
 		@Override

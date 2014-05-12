@@ -16,7 +16,6 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -112,7 +111,7 @@ public class Persistence {
 				env.getEnv(GlobalEnv.class).GetPersistenceNetwork().set(env.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + key).split("\\."), value);
 			} catch(IllegalArgumentException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
-			} catch (InvalidEnvironmentException | DataSourceException | ReadOnlyException | IOException ex) {
+			} catch (Exception ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			}
 			return CVoid.VOID;
@@ -256,7 +255,7 @@ public class Persistence {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			PersistenceNetwork p = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
-			List<String> keyChain = new ArrayList<>();
+			List<String> keyChain = new ArrayList<String>();
 			keyChain.add("storage");
 			String namespace = GetNamespace(args, null, getName(), t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Getting all values from " + namespace, t);
@@ -395,7 +394,11 @@ public class Persistence {
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
 				environment.getEnv(GlobalEnv.class).GetPersistenceNetwork().clearKey(environment.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + namespace).split("\\."));
-			} catch (DataSourceException | ReadOnlyException | IOException ex) {
+			} catch (DataSourceException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+			} catch (ReadOnlyException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+			} catch (IOException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch(IllegalArgumentException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);

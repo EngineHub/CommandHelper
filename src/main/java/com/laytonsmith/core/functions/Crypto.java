@@ -396,8 +396,7 @@ public class Crypto {
 
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            boolean match = BCrypt.checkpw(args[0].val(), args[1].val());
-            return CBoolean.get(match);
+            return CBoolean.get(BCrypt.checkpw(args[0].val(), args[1].val()));
         }
 
 		@Override

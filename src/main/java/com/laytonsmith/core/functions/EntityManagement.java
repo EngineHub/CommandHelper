@@ -69,11 +69,9 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -244,9 +242,9 @@ public class EntityManagement {
 			try {
 				e = Static.getEntity(Static.getInt32(args[0], t), t);
 			} catch (ConfigRuntimeException cre) {
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
-			return CTrue.TRUE;
+			return CBoolean.TRUE;
 		}
 
 		@Override
@@ -271,7 +269,7 @@ public class EntityManagement {
 			try {
 				e = Static.getEntity(Static.getInt32(args[0], t), t);
 			} catch (ConfigRuntimeException cre) {
-				return CFalse.FALSE;
+				return CBoolean.FALSE;
 			}
 
 			return CBoolean.get(e instanceof MCLivingEntity);
@@ -793,7 +791,7 @@ public class EntityManagement {
 				return CBoolean.get(mob.removeEffect(effect));
 			} else {
 				mob.addEffect(effect, strength, seconds, ambient, t);
-				return CTrue.TRUE;
+				return CBoolean.TRUE;
 			}
 		}
 	}
@@ -2031,9 +2029,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
-
-			return CBoolean.get(e.isOnGround());
+			return CBoolean.get(Static.getEntity(Static.getInt32(args[0], t), t).isOnGround());
 		}
 
 		@Override

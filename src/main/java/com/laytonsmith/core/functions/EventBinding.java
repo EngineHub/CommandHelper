@@ -14,10 +14,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
@@ -127,7 +125,7 @@ public class EventBinding {
 			Environment newEnv = env;
 			try {
 				newEnv = env.clone();
-			} catch (CloneNotSupportedException e) {
+			} catch (Exception e) {
 			}
 			newEnv.getEnv(GlobalEnv.class).SetVarList(custom_params);
 			ParseTree tree = nodes[nodes.length - 1];
@@ -895,12 +893,12 @@ public class EventBinding {
 				if (events != null) {
 					for(BoundEvent b : events){
 						if(b.getId().equals(id)){
-							return CTrue.TRUE;
+							return CBoolean.TRUE;
 						}
 					}
 				}
 			}
-			return CFalse.FALSE;
+			return CBoolean.FALSE;
 		}
 
 		@Override

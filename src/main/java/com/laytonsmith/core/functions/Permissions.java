@@ -9,7 +9,6 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -79,7 +78,7 @@ public class Permissions {
 				final MCCommandSender mcc = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if (mcc instanceof MCConsoleCommandSender || mcc instanceof MCBlockCommandSender) {
 					// Console and CommandBlocks always have permission
-					return CTrue.TRUE;
+					return CBoolean.TRUE;
 				}
 
 				MCPlayer mcp = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -102,7 +101,7 @@ public class Permissions {
 
 			if (Static.getConsoleName().equals(player.toLowerCase()) || player.startsWith(Static.getBlockPrefix())) {
 				// Console and CommandBlocks always have permission
-				return CTrue.TRUE;
+				return CBoolean.TRUE;
 			}
 
 			PermissionsResolver perms = environment.getEnv(GlobalEnv.class).GetPermissionsResolver();

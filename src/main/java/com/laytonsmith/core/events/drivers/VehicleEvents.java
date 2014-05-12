@@ -437,7 +437,7 @@ public class VehicleEvents {
 									} else {
 										//If there is no location here, just put the current location in there.
 										if (!thresholds.containsKey(i)) {
-											Map<Integer, MCLocation> map = new HashMap<>();
+											Map<Integer, MCLocation> map = new HashMap<Integer, MCLocation>();
 											thresholds.put(i, map);
 										}
 										thresholds.get(i).put(v.getEntityId(), v.asyncGetLocation());
@@ -567,8 +567,8 @@ public class VehicleEvents {
 				MCVehicleMoveEvent e = (MCVehicleMoveEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(e);
-				ret.put("from", ObjectGenerator.GetGenerator().location(e.getFrom()));
-				ret.put("to", ObjectGenerator.GetGenerator().location(e.getTo()));
+				ret.put("from", ObjectGenerator.GetGenerator().location(((MCVehicleMoveEvent) e).getFrom()));
+				ret.put("to", ObjectGenerator.GetGenerator().location(((MCVehicleMoveEvent) e).getTo()));
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CInt(e.getVehicle().getEntityId(), t));
 

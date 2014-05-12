@@ -23,11 +23,9 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CFalse;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CTrue;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
@@ -35,7 +33,6 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.profiler.Profiler;
@@ -388,9 +385,9 @@ public final class Static {
         if (val.equalsIgnoreCase("null")) {
             return CNull.NULL;
         } else if (val.equalsIgnoreCase("true")) {
-            return CTrue.TRUE;
+            return CBoolean.TRUE;
         } else if (val.equalsIgnoreCase("false")) {
-            return CFalse.FALSE;
+            return CBoolean.FALSE;
         } else {
 			if(val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")){
 				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.",

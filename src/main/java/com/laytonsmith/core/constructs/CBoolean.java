@@ -1,13 +1,42 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typeof;
+
 /**
  * Represents a MethodScript boolean.
  */
-public abstract class CBoolean extends Construct implements Cloneable {
+@typeof("boolean")
+public final class CBoolean extends Construct implements Cloneable{
 
-	protected CBoolean(String value, Target t) {
-		super(value, ConstructType.BOOLEAN, t);
-	}
+	public static final long serialVersionUID = 1L;
+
+	/**
+	 * True values do not normally need to be duplicated, since they are
+	 * immutable, and for values that have an unknown code target, are
+	 * always equal. In cases where a true is generated from inside Java,
+	 * this value should be returned, instead of generating a new one.
+	 */
+	public static final CBoolean TRUE = new CBoolean(true, Target.UNKNOWN);
+
+	/**
+	 * False values do not normally need to be duplicated, since they are
+	 * immutable, and for values that have an unknown code target, are
+	 * always equal. In cases where a false is generated from inside Java,
+	 * this value should be returned, instead of generating a new one.
+	 */
+	public static final CBoolean FALSE = new CBoolean(false, Target.UNKNOWN);
+
+	private final boolean val;
+
+	/**
+	 * Private constructor to force usage of {@link #GenerateCBoolean(boolean, com.laytonsmith.core.constructs.Target)}, which can
+	 * return existing objects.
+	 * @param t 
+	 */
+	private CBoolean(boolean value, Target t) {
+		super(Boolean.toString(value), ConstructType.BOOLEAN, t);
+		val = value;
+    }
 
 	/**
 	 * return b ? CTrue.TRUE : CFalse.FALSE;
@@ -15,7 +44,7 @@ public abstract class CBoolean extends Construct implements Cloneable {
 	 * @return 
 	 */
 	public static CBoolean get(boolean b) {
-		return b ? CTrue.TRUE : CFalse.FALSE;
+		return b ? CBoolean.TRUE : CBoolean.FALSE;
 	}
 
 	public static CBoolean get(String value) {
@@ -31,7 +60,7 @@ public abstract class CBoolean extends Construct implements Cloneable {
 	}
 
 	/**
-	 * Constructs a new CBoolean object. Generally speaking, this should
+	 * Constructs a CBoolean.get object. Generally speaking, this should
 	 * only be used when creating booleans that are literally created
 	 * by user code, all internal code should simply use {@link #get(boolean)}.
 	 * This method DOES check the target however, and if the target is
@@ -41,24 +70,24 @@ public abstract class CBoolean extends Construct implements Cloneable {
 	 * @return 
 	 */
 	public static CBoolean GenerateCBoolean(boolean b, Target t) {
-		if (t == Target.UNKNOWN) {
-			return get(b);
-		} else {
-			return b ? CTrue.GenerateCTrue(t) : CFalse.GenerateCFalse(t);
-		}
+		return (t == Target.UNKNOWN) ? get(b) : new CBoolean(b, t);
 	}
 
 	/**
 	 * Returns the primitive boolean value of this CBoolean.
 	 * @return 
 	 */
-	public abstract boolean getBoolean();
+	public boolean getBoolean() {
+		return val;
+	}
 
 	/**
 	 * Negates this CBoolean.
 	 * @return 
 	 */
-	public abstract CBoolean not();
+	public CBoolean not() {
+		return GenerateCBoolean(!val, getTarget());
+	}
 
 	@Override
 	@SuppressWarnings("CloneDoesntCallSuperClone")
