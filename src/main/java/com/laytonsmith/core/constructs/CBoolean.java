@@ -39,7 +39,7 @@ public final class CBoolean extends Construct implements Cloneable{
     }
 
 	/**
-	 * return b ? CTrue.TRUE : CFalse.FALSE;
+	 * return b ? CBoolean.TRUE : CBoolean.FALSE;
 	 * @param b The boolean value
 	 * @return 
 	 */
@@ -60,7 +60,7 @@ public final class CBoolean extends Construct implements Cloneable{
 	}
 
 	/**
-	 * Constructs a CBoolean.get object. Generally speaking, this should
+	 * Constructs a new CBoolean object. Generally speaking, this should
 	 * only be used when creating booleans that are literally created
 	 * by user code, all internal code should simply use {@link #get(boolean)}.
 	 * This method DOES check the target however, and if the target is
