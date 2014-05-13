@@ -25,7 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 
+ *
  */
 public final class EventUtils {
 
@@ -88,17 +88,18 @@ public final class EventUtils {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the BoundEvent, by id.
+	 *
 	 * @param id
-	 * @return 
+	 * @return
 	 */
-	public static BoundEvent GetEventById(String id){
-		for(Driver type : event_handles.keySet()){
+	public static BoundEvent GetEventById(String id) {
+		for (Driver type : event_handles.keySet()) {
 			SortedSet<BoundEvent> set = event_handles.get(type);
-			for(BoundEvent b : set){
-				if(b.getId().equals(id)){
+			for (BoundEvent b : set) {
+				if (b.getId().equals(id)) {
 					return b;
 				}
 			}
@@ -141,7 +142,7 @@ public final class EventUtils {
 		return event_handles.get(type);
 	}
 
-	public static void ManualTrigger(String eventName, CArray object, boolean serverWide) {
+	public static void ManualTrigger(String eventName, CArray object, Target t, boolean serverWide) {
 		for (Driver type : event_handles.keySet()) {
 			SortedSet<BoundEvent> toRun = new TreeSet<>();
 			SortedSet<BoundEvent> bounded = GetEvents(type);
@@ -150,14 +151,15 @@ public final class EventUtils {
 				for (BoundEvent b : bounded) {
 					if (b.getEventName().equalsIgnoreCase(eventName)) {
 						try {
-							BindableEvent convertedEvent;
+							BindableEvent convertedEvent = null;
 							try {
-								convertedEvent = driver.convert(object);
-							} catch (ConfigRuntimeException e) {
-								ConfigRuntimeException.HandleUncaughtException(e, b.getEnvironment());
-								continue;
+								convertedEvent = driver.convert(object, t);
+							} catch (UnsupportedOperationException ex) {
+								// The event will stay null, and be caught below
 							}
-							if (driver.matches(b.getPrefilter(), convertedEvent)) {
+							if(convertedEvent == null){
+								throw new ConfigRuntimeException(eventName + " doesn't support the use of trigger() yet.", Exceptions.ExceptionType.BindException, t);
+							} else if (driver.matches(b.getPrefilter(), convertedEvent)) {
 								toRun.add(b);
 							}
 						} catch (PrefilterNonMatchException ex) {
@@ -169,10 +171,10 @@ public final class EventUtils {
 			//If it's not a serverwide event, or this event doesn't support external events.
 			if (!toRun.isEmpty()) {
 				if (!serverWide || !driver.supportsExternal()) {
-					FireListeners(toRun, driver, driver.convert(object));
+					FireListeners(toRun, driver, driver.convert(object, t));
 				} else {
 					//It's serverwide, so we can just trigger it normally with the driver, and it should trickle back down to us
-					driver.manualTrigger(driver.convert(object));
+					driver.manualTrigger(driver.convert(object, t));
 				}
 			} else {
 				//They have fired a non existant event
@@ -191,7 +193,7 @@ public final class EventUtils {
 	 */
 	public static SortedSet<BoundEvent> GetMatchingEvents(Driver type, String eventName, BindableEvent e, Event driver) {
 		SortedSet<BoundEvent> toRun = new TreeSet<>();
-        //This is the set of bounded events of this driver type. 
+		//This is the set of bounded events of this driver type.
 		//We must now look through the bound events to see if they are
 		//the eventName, and if so, we will also run the prefilter.
 		SortedSet<BoundEvent> bounded = GetEvents(type);
@@ -282,19 +284,19 @@ public final class EventUtils {
 		}
 		return ca;
 	}
-	
+
 	@Deprecated // Use TriggerListener instead!
 	public static void TriggerExternal(BindableEvent mce) {
 		for (Method m : ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(event.class)) {
 			Class<?>[] params = m.getParameterTypes();
 			if (params.length != 1 || !BindableEvent.class.isAssignableFrom(params[0])) {
-				Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, 
-						"An event handler annotated with @{0} may only contain one parameter, which extends {1}", 
+				Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE,
+						"An event handler annotated with @{0} may only contain one parameter, which extends {1}",
 						new Object[]{event.class.getSimpleName(), BindableEvent.class.getName()});
 			} else {
 				try {
 					Object instance = null;
-					
+
 					if ((m.getModifiers() & Modifier.STATIC) == 0) {
 						//It's not static, so we need an instance. Ideally we could skip
 						//this step, but it's harder to enforce that across jars.
@@ -315,36 +317,37 @@ public final class EventUtils {
 									+ " author.", e);
 						}
 					}
-					
+
 					m.invoke(instance, mce);
 				} catch (IllegalAccessException ex) {
-					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, 
+					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE,
 							"Illegal Access Exception while triggering"
-									+ " an external event:", ex.getCause());
+							+ " an external event:", ex.getCause());
 				} catch (IllegalArgumentException ex) {
 					// If we do this, console gets spammed for hooks that don't apply for
 					// the event being fired. Need to check if mce is instance of params[0].
-					
+
 					//Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (InvocationTargetException ex) {
-					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, 
+					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE,
 							"Invocation Target Exception while triggering"
-									+ " an external event:", ex.getCause());
+							+ " an external event:", ex.getCause());
 				}
 			}
 
 		}
 	}
-	
+
 	/**
 	 * Verifies that the event name given is a valid event name. If not, an
 	 * IllegalArgumentException is thrown.
+	 *
 	 * @param name The name of the event to validate
 	 * @throws IllegalArgumentException if the event name is invalid
 	 */
 	public static void verifyEventName(String name) throws IllegalArgumentException {
-		for(Event e : EventList.GetEvents()){
-			if(e.getName().equals(name)){
+		for (Event e : EventList.GetEvents()) {
+			if (e.getName().equals(name)) {
 				return;
 			}
 		}

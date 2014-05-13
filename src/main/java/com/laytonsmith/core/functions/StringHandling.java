@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 
+ *
  */
 @core
 public class StringHandling {
@@ -214,7 +214,7 @@ public class StringHandling {
 
 		private static final String g = new DataHandling.g().getName();
 		private static final String p = new Compiler.p().getName();
-		
+
 		@Override
 		public String getName() {
 			return "sconcat";
@@ -268,7 +268,7 @@ public class StringHandling {
 //                        if (i > 1) {
 //                            c.append(" ");
 //                        }
-//                        c.append(d.val());                        
+//                        c.append(d.val());
 //                    }
 //                    value = new CString(c.toString(), t);
 //                } else {
@@ -311,9 +311,9 @@ public class StringHandling {
 			Iterator<ParseTree> it = children.iterator();
 			while(it.hasNext()){
 				ParseTree n = it.next();
-				if(n.getData() instanceof CFunction && 
+				if(n.getData() instanceof CFunction &&
 						(g.equals(n.getData().val())
-							|| p.equals(n.getData().val())) 
+							|| p.equals(n.getData().val()))
 						&& !n.hasChildren()){
 					it.remove();
 				}
@@ -1119,7 +1119,7 @@ public class StringHandling {
 					throw new ConfigRuntimeException("If the second argument to " + getName() + " is an array, it may not be associative.", ExceptionType.CastException, t);
 				} else {
 					for (int i = 0; i < ((CArray) args[1]).size(); i++) {
-						flattenedArgs.add(((CArray) args[1]).get(i));
+						flattenedArgs.add(((CArray) args[1]).get(i, t));
 					}
 				}
 			} else {
@@ -1387,11 +1387,11 @@ public class StringHandling {
 					throw new RuntimeException("Unknown type: " + ref.getClass());
 				}
 			}
-			
+
 			public int getArgIndex(){
 				return ((Integer)ReflectionUtils.get(FormatSpecifier, ref, "index"));
 			}
-			
+
 			public boolean isFixed(){
 				return getExpectedType() == '%' || getExpectedType() == 'n';
 			}
@@ -1420,7 +1420,7 @@ public class StringHandling {
 			}
 			return list;
 		}
-		
+
 		private int requiredArgs(List<FormatString> list){
 			Set<Integer> knownIndexes = new HashSet<Integer>();
 			int count = 0;
@@ -1490,9 +1490,9 @@ public class StringHandling {
 				new ExampleScript("Other formatting: hash code", "sprintf('%h', 'will be hashed')"),
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	public static class string_get_bytes extends AbstractFunction {
 
@@ -1546,9 +1546,9 @@ public class StringHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class string_from_bytes extends AbstractFunction {
 
@@ -1601,9 +1601,9 @@ public class StringHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class string_append extends AbstractFunction {
 
@@ -1666,7 +1666,7 @@ public class StringHandling {
 					+ "res_free_resource(@res) #This line is super important!\n"
 					+ "msg(@string)"
 					+ ""),
-				new ExampleScript("Basic usage, showing performance benefits", 
+				new ExampleScript("Basic usage, showing performance benefits",
 					"@to = 100000\n"
 					+ "@t1 = time()\n"
 					+ "@res = res_create_resource('STRING_BUILDER')\n"
@@ -1687,9 +1687,9 @@ public class StringHandling {
 					+ "Task 2 took 28305ms under 100000 iterations\n")
 			};
 		}
-		
+
 	}
-	
+
 	@api public static class char_from_unicode extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1752,9 +1752,9 @@ public class StringHandling {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
 		}
-		
+
 	}
-	
+
 	@api public static class unicode_from_char extends AbstractFunction {
 
 		@Override
@@ -1801,16 +1801,16 @@ public class StringHandling {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "to_radix(unicode_from_char('\\u2665'), 16)")
 			};
 		}
-		
+
 	}
-	
+
 	@api public static class levenshtein extends AbstractFunction {
 
 		@Override
@@ -1863,6 +1863,6 @@ public class StringHandling {
 				new ExampleScript("", "levenshtein('133', '123')")
 			};
 		}
-		
+
 	}
 }

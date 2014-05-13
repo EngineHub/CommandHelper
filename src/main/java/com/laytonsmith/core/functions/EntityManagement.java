@@ -257,7 +257,7 @@ public class EntityManagement {
 			return "boolean {entityID} Returns true if entity exists, otherwise false.";
 		}
 	}
-	
+
 	@api
 	public static class is_entity_living extends EntityGetterFunction {
 
@@ -265,13 +265,13 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity e;
-			
+
 			try {
 				e = Static.getEntity(Static.getInt32(args[0], t), t);
 			} catch (ConfigRuntimeException cre) {
 				return new CBoolean(false, t);
 			}
-			
+
 			return new CBoolean(e instanceof MCLivingEntity, t);
 		}
 
@@ -501,7 +501,7 @@ public class EntityManagement {
 					+ " Returns null if the entity does not exist.";
 		}
 	}
-	
+
 	@api
 	public static class get_entity_breedable extends EntityGetterFunction {
 
@@ -510,7 +510,7 @@ public class EntityManagement {
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			MCEntity ent = Static.getEntity(id, t);
-			
+
 			if (ent instanceof MCAgeable){
 				return new CBoolean(((MCAgeable)ent).getCanBreed(), t);
 			} else {
@@ -528,7 +528,7 @@ public class EntityManagement {
 			return "boolean {entityID} Returns if an entity is set to be breedable.";
 		}
 	}
-	
+
 	@api
 	public static class set_entity_breedable extends EntitySetterFunction {
 
@@ -537,15 +537,15 @@ public class EntityManagement {
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			boolean breed = Static.getBoolean(args[1]);
-			
+
 			MCEntity ent = Static.getEntity(id, t);
-			
+
 			if (ent instanceof MCAgeable){
 				((MCAgeable)ent).setCanBreed(breed);
 			} else {
 				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
 			}
-			
+
 			return CVoid.VOID;
 		}
 
@@ -1347,7 +1347,7 @@ public class EntityManagement {
 		}
 
 	}
-	
+
 	@api
 	public static class get_mob_name extends EntityGetterFunction {
 
@@ -1368,7 +1368,7 @@ public class EntityManagement {
 			return "string {entityID} Returns the name of the given mob.";
 		}
 	}
-	
+
 	@api
 	public static class set_mob_name extends EntitySetterFunction {
 
@@ -1391,7 +1391,7 @@ public class EntityManagement {
 					+ " automatically truncates if it is more than 64 characters.";
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class spawn_entity extends EntityFunction {
 
@@ -1476,8 +1476,8 @@ public class EntityManagement {
 			return "array {entityType, [qty], [location]} Spawns the specified number of entities of the given type"
 					+ " at the given location. Returns an array of entityIDs of what is spawned. Qty defaults to 1"
 					+ " and location defaults to the location of the commandsender, if it is a block or player."
-					+ " If the commandsender is console, location must be supplied. ---- Entitytype can be one of " 
-					+ StringUtils.Join(spawnable, ", ", " or ", ", or ") 
+					+ " If the commandsender is console, location must be supplied. ---- Entitytype can be one of "
+					+ StringUtils.Join(spawnable, ", ", " or ", ", or ")
 					+ ". Falling_blocks will be sand by default, and dropped_items will be stone,"
 					+ " as these entities already have their own functions for spawning.";
 		}
@@ -1485,7 +1485,7 @@ public class EntityManagement {
 
 	@api
 	public static class set_entity_rider extends EntitySetterFunction {
-	
+
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity horse, rider;
@@ -1511,12 +1511,12 @@ public class EntityManagement {
 			}
 			return new CBoolean(success, t);
 		}
-	
+
 		@Override
 		public String getName() {
 			return "set_entity_rider";
 		}
-	
+
 		@Override
 		public String docs() {
 			return "boolean {horse, rider} Sets the way two entities are stacked. Horse and rider are entity ids."
@@ -1526,7 +1526,7 @@ public class EntityManagement {
 					+ " If horse and rider are both null, or otherwise the same, a FormatException is thrown.";
 		}
 	}
-	
+
 	@api
 	public static class get_entity_rider extends EntityGetterFunction {
 
@@ -1550,7 +1550,7 @@ public class EntityManagement {
 			return "mixed {entityID} Returns the ID of the given entity's rider, or null if it doesn't have one.";
 		}
 	}
-	
+
 	@api
 	public static class get_entity_vehicle extends EntityGetterFunction {
 
@@ -1649,7 +1649,7 @@ public class EntityManagement {
 					+ " or minecart.";
 		}
 	}
-	
+
 	@api
 	public static class get_equipment_droprates extends EntityGetterFunction {
 
@@ -1677,7 +1677,7 @@ public class EntityManagement {
 					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
 		}
 	}
-	
+
 	@api
 	public static class set_equipment_droprates extends EntitySetterFunction {
 
@@ -1720,7 +1720,7 @@ public class EntityManagement {
 					+ " set all rates to 0, which will cause nothing to drop. A rate of 1 will guarantee a drop.";
 		}
 	}
-	
+
 	@api
 	public static class get_name_visible extends EntityGetterFunction {
 
@@ -1741,7 +1741,7 @@ public class EntityManagement {
 					+ " visible when near the mob.";
 		}
 	}
-	
+
 	@api
 	public static class set_name_visible extends EntitySetterFunction {
 
@@ -1763,7 +1763,7 @@ public class EntityManagement {
 					+ " False means it will only be visible when near the mob.";
 		}
 	}
-	
+
 	@api
 	public static class can_pickup_items extends EntityGetterFunction {
 
@@ -1782,7 +1782,7 @@ public class EntityManagement {
 			return "boolean {entityID} Returns whether the specified living entity can pick up items.";
 		}
 	}
-	
+
 	@api
 	public static class set_can_pickup_items extends EntitySetterFunction {
 
@@ -1802,7 +1802,7 @@ public class EntityManagement {
 			return "void {entityID, boolean} Sets a living entity's ability to pick up items.";
 		}
 	}
-	
+
 	@api
 	public static class get_entity_persistence extends EntityGetterFunction {
 
@@ -1821,7 +1821,7 @@ public class EntityManagement {
 			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will not.";
 		}
 	}
-	
+
 	@api
 	public static class set_entity_persistence extends EntitySetterFunction {
 
@@ -1841,7 +1841,7 @@ public class EntityManagement {
 			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will not.";
 		}
 	}
-	
+
 	@api public static class get_art_at extends AbstractFunction {
 
 		@Override
@@ -1895,9 +1895,9 @@ public class EntityManagement {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api public static class set_art_at extends AbstractFunction {
 
 		@Override
@@ -1929,7 +1929,7 @@ public class EntityManagement {
 				throw new ConfigRuntimeException("Invalid type: " + args[1].val(), ExceptionType.FormatException, t);
 			}
 			//If there's already a painting there, just use that one. Otherwise, spawn a new one.
-			
+
 			MCPainting p = null;
 			for(MCEntity e : StaticLayer.GetConvertor().GetEntitiesAt(loc, 1)){
 				if(e instanceof MCPainting){
@@ -1969,7 +1969,7 @@ public class EntityManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class get_leashholder extends EntityGetterFunction {
 
@@ -1993,7 +1993,7 @@ public class EntityManagement {
 					+ " or null if it isn't being held.";
 		}
 	}
-	
+
 	@api
 	public static class set_leashholder extends EntitySetterFunction {
 
@@ -2023,14 +2023,14 @@ public class EntityManagement {
 					+ " Bats, enderdragons, players, and withers can not be held by leashes due to minecraft limitations.";
 		}
 	}
-	
+
 	@api
 	public static class entity_grounded extends EntityGetterFunction {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
-			
+
 			return new CBoolean(e.isOnGround(), t);
 		}
 
@@ -2245,7 +2245,7 @@ public class EntityManagement {
 			return "string {entityID} returns the persistent unique id of the entity";
 		}
 	}
-	
+
 	@api
 	@seealso(set_entity_spec.class)
 	public static class entity_spec extends EntityGetterFunction {
@@ -2275,7 +2275,7 @@ public class EntityManagement {
 			int id = Static.getInt32(args[0], t);
 			MCEntity entity = Static.getEntity(id, t);
 			CArray specArray = new CArray(t);
-			
+
 			switch (entity.getType()) {
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
@@ -2442,13 +2442,13 @@ public class EntityManagement {
 			int id = Static.getInt32(args[0], t);
 			MCEntity entity = Static.getEntity(id, t);
 			CArray specArray = Static.getArray(args[1], t);
-			
+
 			switch (entity.getType()) {
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("powered")) {
-							creeper.setPowered(Static.getBoolean(specArray.get(index)));
+							creeper.setPowered(Static.getBoolean(specArray.get(index, t)));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2459,10 +2459,10 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "itemstack":
-								item.setItemStack(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+								item.setItemStack(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
 							case "pickupdelay":
-								item.setPickupDelay(Static.getInt32(specArray.get(index), t));
+								item.setPickupDelay(Static.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2473,7 +2473,7 @@ public class EntityManagement {
 					MCEnderman enderman = (MCEnderman) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("carried")) {
-							enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index), t).getData());
+							enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2483,7 +2483,7 @@ public class EntityManagement {
 					MCExperienceOrb orb = (MCExperienceOrb) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("amount")) {
-							orb.setExperience(Static.getInt32(specArray.get(index), t));
+							orb.setExperience(Static.getInt32(specArray.get(index, t), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2493,7 +2493,7 @@ public class EntityManagement {
 					MCFallingBlock block = (MCFallingBlock) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("dropitem")) {
-							block.setDropItem(Static.getBoolean(specArray.get(index)));
+							block.setDropItem(Static.getBoolean(specArray.get(index, t)));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2505,7 +2505,7 @@ public class EntityManagement {
 					MCFireball ball = (MCFireball) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("direction")) {
-							ball.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index), t));
+							ball.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index, t), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2516,7 +2516,7 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("chance")) {
 							try {
-								hook.setBiteChance(Static.getDouble(specArray.get(index), t));
+								hook.setBiteChance(Static.getDouble(specArray.get(index, t), t));
 							} catch (IllegalArgumentException exception) {
 								throw new ConfigRuntimeException("The chance must be between 0.0 and 1.0", ExceptionType.RangeException, t);
 							}
@@ -2531,50 +2531,50 @@ public class EntityManagement {
 						switch (index) {
 							case "color":
 								try {
-									horse.setColor(MCHorseColor.valueOf(specArray.get(index).val().toUpperCase()));
+									horse.setColor(MCHorseColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse color: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+									throw new ConfigRuntimeException("Invalid horse color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case "style":
 								try {
-									horse.setPattern(MCHorsePattern.valueOf(specArray.get(index).val().toUpperCase()));
+									horse.setPattern(MCHorsePattern.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse style: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+									throw new ConfigRuntimeException("Invalid horse style: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case "variant":
 								try {
-									horse.setVariant(MCHorseVariant.valueOf(specArray.get(index).val().toUpperCase()));
+									horse.setVariant(MCHorseVariant.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse variant: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+									throw new ConfigRuntimeException("Invalid horse variant: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case "chest":
-								horse.setHasChest(Static.getBoolean(specArray.get(index)));
+								horse.setHasChest(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case "jump":
 								try {
-									horse.setJumpStrength(Static.getDouble(specArray.get(index), t));
+									horse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("The jump strength must be between 0.0 and 2.0", ExceptionType.RangeException, t);
 								}
 								break;
 							case "domestication":
 								try {
-									horse.setDomestication(Static.getInt32(specArray.get(index), t));
+									horse.setDomestication(Static.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("The domestication level can not be higher than the max domestication level.", ExceptionType.RangeException, t);
 								}
 								break;
 							case "maxdomestication":
-								horse.setMaxDomestication(Static.getInt32(specArray.get(index), t));
+								horse.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
 								break;
 							case "saddle":
-								horse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+								horse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
 							case "armor":
-								horse.setArmor(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+								horse.setArmor(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
 							default:
 								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2585,7 +2585,7 @@ public class EntityManagement {
 					MCIronGolem golem = (MCIronGolem) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("playercreated")) {
-							golem.setPlayerCreated(Static.getBoolean(specArray.get(index)));
+							golem.setPlayerCreated(Static.getBoolean(specArray.get(index, t)));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2596,18 +2596,18 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "item":
-								frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
-								if (specArray.get(index) instanceof CNull) {
+								frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								if (specArray.get(index, t) instanceof CNull) {
 									frame.setItem(null);
 								} else {
-									frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+									frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								}
 								break;
 							case "rotation":
 								try {
-									frame.setRotation(MCRotation.valueOf(specArray.get(index).val().toUpperCase()));
+									frame.setRotation(MCRotation.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid rotation type: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+									throw new ConfigRuntimeException("Invalid rotation type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							default:
@@ -2620,7 +2620,7 @@ public class EntityManagement {
 					MCSlime cube = (MCSlime) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("size")) {
-							cube.setSize(Static.getInt32(specArray.get(index), t));
+							cube.setSize(Static.getInt32(specArray.get(index, t), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2631,17 +2631,17 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "customname":
-								if(specArray.get(index) instanceof CNull) {
+								if(specArray.get(index, t) instanceof CNull) {
 									commandminecart.setName(null);
 								} else {
-									commandminecart.setName(specArray.get(index).val());
+									commandminecart.setName(specArray.get(index, t).val());
 								}
 								break;
 							case "command":
-								if(specArray.get(index) instanceof CNull) {
+								if(specArray.get(index, t) instanceof CNull) {
 									commandminecart.setCommand(null);
 								} else {
-									commandminecart.setCommand(specArray.get(index).val());
+									commandminecart.setCommand(specArray.get(index, t).val());
 								}
 								break;
 							default:
@@ -2655,13 +2655,13 @@ public class EntityManagement {
 						switch (index) {
 							case "type":
 								try {
-									ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index).val().toUpperCase()));
+									ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid ocelot type: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+									throw new ConfigRuntimeException("Invalid ocelot type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case "sitting":
-								ocelot.setSitting(Static.getBoolean(specArray.get(index)));
+								ocelot.setSitting(Static.getBoolean(specArray.get(index, t)));
 								break;
 							default:
 								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2673,9 +2673,9 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("art")) {
 							try {
-								painting.setArt(MCArt.valueOf(specArray.get(index).val().toUpperCase()));
+								painting.setArt(MCArt.valueOf(specArray.get(index, t).val().toUpperCase()));
 							} catch (IllegalArgumentException exception) {
-								throw new ConfigRuntimeException("Invalid art type: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								throw new ConfigRuntimeException("Invalid art type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 							}
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2686,7 +2686,7 @@ public class EntityManagement {
 					MCPig pig = (MCPig) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("saddled")) {
-							pig.setSaddled(Static.getBoolean(specArray.get(index)));
+							pig.setSaddled(Static.getBoolean(specArray.get(index, t)));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2697,16 +2697,16 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "baby":
-								pigZombie.setBaby(Static.getBoolean(specArray.get(index)));
+								pigZombie.setBaby(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case "villager":
-								pigZombie.setVillager(Static.getBoolean(specArray.get(index)));
+								pigZombie.setVillager(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case "angry":
-								pigZombie.setAngry(Static.getBoolean(specArray.get(index)));
+								pigZombie.setAngry(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case "anger":
-								pigZombie.setAnger(Static.getInt32(specArray.get(index), t));
+								pigZombie.setAnger(Static.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2717,7 +2717,7 @@ public class EntityManagement {
 					MCTNT tnt = (MCTNT) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("fuseticks")) {
-							tnt.setFuseTicks(Static.getInt32(specArray.get(index), t));
+							tnt.setFuseTicks(Static.getInt32(specArray.get(index, t), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2729,13 +2729,13 @@ public class EntityManagement {
 						switch (index) {
 							case "color":
 								try {
-									sheep.setColor(MCDyeColor.valueOf(specArray.get(index).val().toUpperCase()));
+									sheep.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid sheep color: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+									throw new ConfigRuntimeException("Invalid sheep color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case "sheared":
-								sheep.setSheared(Static.getBoolean(specArray.get(index)));
+								sheep.setSheared(Static.getBoolean(specArray.get(index, t)));
 								break;
 							default:
 								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2747,9 +2747,9 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("type")) {
 							try {
-								skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index).val().toUpperCase()));
+								skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index, t).val().toUpperCase()));
 							} catch (IllegalArgumentException exception) {
-								throw new ConfigRuntimeException("Invalid skeleton type: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								throw new ConfigRuntimeException("Invalid skeleton type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 							}
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2760,7 +2760,7 @@ public class EntityManagement {
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("item")) {
-							potion.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index), t));
+							potion.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 						}
@@ -2771,9 +2771,9 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						if (index.equals("profession")) {
 							try {
-								villager.setProfession(MCProfession.valueOf(specArray.get(index).val().toUpperCase()));
+								villager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
 							} catch (IllegalArgumentException exception) {
-								throw new ConfigRuntimeException("Invalid profession: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+								throw new ConfigRuntimeException("Invalid profession: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 							}
 						} else {
 							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2785,17 +2785,17 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "angry":
-								wolf.setAngry(Static.getBoolean(specArray.get(index)));
+								wolf.setAngry(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case "color":
 								try {
-									wolf.setCollarColor(MCDyeColor.valueOf(specArray.get(index).val().toUpperCase()));
+									wolf.setCollarColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid collar color: " + specArray.get(index).val(), ExceptionType.FormatException, t);
+									throw new ConfigRuntimeException("Invalid collar color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case "sitting":
-								wolf.setSitting(Static.getBoolean(specArray.get(index)));
+								wolf.setSitting(Static.getBoolean(specArray.get(index, t)));
 								break;
 							default:
 								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2807,10 +2807,10 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						switch (index) {
 							case "baby":
-								zombie.setBaby(Static.getBoolean(specArray.get(index)));
+								zombie.setBaby(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case "villager":
-								zombie.setVillager(Static.getBoolean(specArray.get(index)));
+								zombie.setVillager(Static.getBoolean(specArray.get(index, t)));
 								break;
 							default:
 								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
@@ -2822,7 +2822,7 @@ public class EntityManagement {
 						throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 					}
 			}
-			
+
 			return CVoid.VOID;
 		}
 	}
@@ -2846,10 +2846,10 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			MCEntity entity = Static.getEntity(id, t);
-			
+
 			if (entity instanceof MCProjectile) {
 				MCProjectileSource shooter = ((MCProjectile) entity).getShooter();
-				
+
 				if (shooter instanceof MCBlockProjectileSource) {
 					return ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation());
 				} else if (shooter instanceof MCEntity) {
@@ -2880,7 +2880,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			MCEntity entity = Static.getEntity(id, t);
-			
+
 			if (entity instanceof MCProjectile) {
 				if (args[1] instanceof CNull) {
 					((MCProjectile) entity).setShooter(null);
@@ -2897,7 +2897,7 @@ public class EntityManagement {
 			} else {
 				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}
-			
+
 			return CVoid.VOID;
 		}
 	}
@@ -2919,7 +2919,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			MCEntity entity = Static.getEntity(id, t);
-			
+
 			if (entity instanceof MCProjectile) {
 				return new CBoolean(((MCProjectile) entity).doesBounce(), t);
 			} else {
@@ -2945,23 +2945,23 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			MCEntity entity = Static.getEntity(id, t);
-			
+
 			if (entity instanceof MCProjectile) {
 				((MCProjectile) entity).setBounce(Static.getBoolean(args[1]));
 			} else {
 				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}
-			
+
 			return CVoid.VOID;
  		}
 	}
-	
+
 	@api
 	public static class damage_entity extends EntityFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, 
+			return new ExceptionType[]{ExceptionType.CastException,
 				ExceptionType.BadEntityTypeException, ExceptionType.BadEntityException};
 		}
 
@@ -2969,14 +2969,14 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			MCEntity entity = Static.getEntity(id, t);
-			
+
 			if (!(entity instanceof MCLivingEntity)) {
 				throw new ConfigRuntimeException("The entity id provided doesn't"
 					+ " belong to a living entity", ExceptionType.BadEntityTypeException, t);
 			}
-			
+
 			MCLivingEntity living = (MCLivingEntity)entity;
-			
+
 			double damage = Static.getDouble(args[1], t);
 			if (args.length == 3) {
 				int sourceid = Static.getInt32(args[2], t);
@@ -2985,7 +2985,7 @@ public class EntityManagement {
 			} else {
 				living.damage(damage);
 			}
-			
+
 			return CVoid.VOID;
 		}
 
@@ -3004,6 +3004,6 @@ public class EntityManagement {
 			return "void {entityId, amount, [sourceEntityId]} Damage an entity. If given,"
 					+ " the source entity will be attributed as the damager.";
 		}
-	
+
 	}
 }

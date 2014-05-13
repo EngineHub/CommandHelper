@@ -30,7 +30,7 @@
 			<id>sk89q</id>
 			<name>sk89q</name>
 			<url>http://www.sk89q.com</url>
-			<roles>                
+			<roles>
 				<role>infrastructure maintainer</role>
 			</roles>
 			<timezone>-8</timezone>
@@ -106,7 +106,7 @@
 		<license>
 			<name>The MIT License</name>
 			<url>LICENSE.txt</url>
-			<distribution>repo</distribution>            
+			<distribution>repo</distribution>
 		</license>
 	</licenses>
 	<scm>
@@ -124,7 +124,7 @@
 			<id>sk89q-mvn2</id>
 			<url>http://mvn2.sk89q.com/repo</url>
 		</repository>
-    
+
 		<!-- Repository for Bukkit -->
 		<repository>
 			<id>bukkit-repo</id>
@@ -137,7 +137,7 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-    
+
 		<!-- Other repositories -->
 		<repository>
 			<id>maven-central</id>
@@ -152,6 +152,12 @@
 		<repository>
 			<id>Plugin Metrics</id>
 			<url>http://repo.mcstats.org/content/repositories/public</url>
+		</repository>
+
+		<!-- Java Mail -->
+		<repository>
+			<id>Java.Net</id>
+			<url>http://download.java.net/maven/2/</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -172,28 +178,28 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-    
+
 		<!-- Bukkit -->
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
 			<version>1.7.8-R0.1-SNAPSHOT</version>
 		</dependency>
-        
+
 		<!-- CraftBukkit Dependency for experimental features
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>craftbukkit</artifactId>
 			<version>1.4.5-R0.3-SNAPSHOT</version>
-		</dependency>-->        
-        
+		</dependency>-->
+
 		<!-- WorldGuard for some of the sk functions -->
 		<dependency>
 			<groupId>com.sk89q</groupId>
 			<artifactId>worldguard</artifactId>
 			<version>5.8.1-SNAPSHOT</version>
 		</dependency>
-    
+
 		<!-- Used for economy stuff -->
 		<dependency>
 			<groupId>net.milkbowl</groupId>
@@ -201,21 +207,21 @@
 			<version>1.2.12</version>
 			<type>jar</type>
 		</dependency>
-        
+
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-        
+
 		<!-- BCrypt -->
 		<dependency>
 			<groupId>org.mindrot</groupId>
 			<artifactId>jBCrypt</artifactId>
 			<version>1.0</version>
 		</dependency>
-        
+
 		<!-- Used for potion effects
 		<dependency>
 		 <groupId>org.bukkit</groupId>
@@ -223,7 +229,7 @@
 		 <version>1.8.1</version>
 		 <type>jar</type>
 		</dependency> -->
-        
+
 		<!-- Used for IRC hooks -->
 		<!--<dependency> NOT READY YET
 		 <groupId>org.jibble</groupId>
@@ -231,7 +237,7 @@
 		 <version>1.5.0</version>
 		 <scope>compile</scope>
 		</dependency>-->
-        
+
 		<!-- Profiling library -->
 		<dependency>
 			<groupId>org.perf4j</groupId>
@@ -246,7 +252,7 @@
 			<version>1.2.17</version>
 			<scope>compile</scope>
 		</dependency>
-        
+
 		<!-- Database -->
 		<!-- SQLite -->
 		<dependency>
@@ -255,7 +261,7 @@
 			<version>3.7.15-M1</version>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<!-- Redis -->
 		<dependency>
 			<groupId>redis.clients</groupId>
@@ -264,7 +270,7 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<!-- MySQL -->
 		<dependency>
 			<groupId>mysql</groupId>
@@ -273,7 +279,7 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-        
+
 		<!-- Yaml parsing -->
 		<dependency>
 			<groupId>org.yaml</groupId>
@@ -287,7 +293,7 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
 		</dependency>
-        
+
 		<!-- Evil-y things (currently not used) -->
 		<!--<dependency>
 		 <groupId>cglib</groupId>
@@ -301,7 +307,7 @@
 		 <artifactId>javassist</artifactId>
 		 <version>3.15.0-GA</version>
 		 <type>jar</type>
-		</dependency>-->			
+		</dependency>-->
 		<!-- Embedded SSH Client -->
 		<dependency>
 			<groupId>com.jcraft</groupId>
@@ -315,7 +321,7 @@
 			<artifactId>jchardet</artifactId>
 			<version>1.0</version>
 		</dependency>
-        
+
 		<!-- Test libraries -->
 		<!-- Hamcrest must come before powermock -->
 		<dependency>
@@ -333,8 +339,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>  
-			<version>1.9.5</version> 
+			<artifactId>mockito-core</artifactId>
+			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -343,7 +349,7 @@
 			<version>2.8.1</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- This is neat and all, but too much trouble. 
+		<!-- This is neat and all, but too much trouble.
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-junit4</artifactId>
@@ -389,6 +395,17 @@
 			<artifactId>jline</artifactId>
 			<version>2.11</version>
 		</dependency>
+		<!-- Java Mail -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.3</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<site>
@@ -406,7 +423,7 @@
 	</distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-    
+
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -497,7 +514,7 @@
 					<goals>assembly:assembly</goals>
 				</configuration>
 			</plugin>
-            
+
 			<!-- Shade plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -518,7 +535,7 @@
 								1. Add a reference to the artifact set
 								2. Add a relocation tag (usually recommended, though not always)
 								3. Add it to the filter list
-								
+
 								You can copy existing structures over, and change the parameters on them.
 							-->
 							<artifactSet>
@@ -541,6 +558,8 @@
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
 									<include>asm:asm-all:jar:*</include>
 									<include>jline:jline:jar:*</include>
+									<include>javax.mail:mail:jar:*</include>
+									<include>javax.activation:activation:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -619,6 +638,23 @@
 									<pattern>org.fusesource</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.fusesource</shadedPattern>
 								</relocation>-->
+								<relocation>
+									<pattern>jaxax.mail</pattern>
+									<shadedPattern>com.laytonsmith.libs.javax.mail</shadedPattern>
+								</relocation>
+								<!-- Cannot relocate this due to a Class.forName in the JavaMail API.
+								<relocation>
+									<pattern>com.sun.mail</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.sun.mail</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>jaxax.activation</pattern>
+									<shadedPattern>com.laytonsmith.libs.javax.activation</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.sun.activation</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.sun.activation</shadedPattern>
+								</relocation>-->
 							</relocations>
 							<filters>
 								<filter>
@@ -639,8 +675,8 @@
 									<artifact>com.sk89q:worldedit:jar:*</artifact>
 									<includes>
 										<!-- Permissions Items -->
-										<include>com/sk89q/bukkit/migration/**</include> 
-										<include>com/sk89q/wepif/**</include> 
+										<include>com/sk89q/bukkit/migration/**</include>
+										<include>com/sk89q/wepif/**</include>
 										<include>com/sk89q/util/**</include>
 										<include>com/sk89q/worldedit/Vector.*</include>
 										<!-- Expression Parser -->
@@ -688,13 +724,13 @@
 									<includes>
 										<include>**</include>
 									</includes>
-								</filter>                                                        
+								</filter>
 								<filter>
 									<artifact>org.mcstats:metrics:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
-								</filter>                                           
+								</filter>
 								<filter>
 									<artifact>net.sourceforge.jchardet:jchardet:jar:*</artifact>
 									<includes>
@@ -733,6 +769,18 @@
 								</filter>
 								<filter>
 									<artifact>jline:jline:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>javax.mail:mail:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>javax.activation:activation:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
@@ -785,7 +833,7 @@
 					</processors>
 				</configuration>
 			</plugin>
-            
+
 			<!-- Getting rid of maven warnings by providing versions for the following plugins -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -812,7 +860,7 @@
 						<include>**/*Test.java</include>
 						<include>**/Test*.java</include>
 						<include>**/*TestCase.java</include>
-                        
+
 						<!-- Include custom, none specific classes -->
 						<include>**/RandomTests.java</include>
 					</includes>
@@ -823,7 +871,7 @@
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>2.4</version>
 			</plugin>
-      
+
 			<!-- Site / report generation -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

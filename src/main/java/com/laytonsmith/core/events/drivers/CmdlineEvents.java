@@ -31,12 +31,12 @@ public class CmdlineEvents {
 	public static String docs(){
 		return "Contains events related to cmdline events.";
 	}
-	
-	
+
+
 	@api
 	@hide("Test event, not meant for normal use")
 	public static class cmdline_test_event extends AbstractEvent {
-		
+
 		private static Thread testThread = null;
 
 		@Override
@@ -76,7 +76,7 @@ public class CmdlineEvents {
 			}
 		}
 
-		
+
 
 		@Override
 		public String getName() {
@@ -94,13 +94,19 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
-			throw new UnsupportedOperationException("TODO: Not supported yet.");
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return new BindableEvent() {
+
+				@Override
+				public Object _GetObject() {
+					return new Object();
+				}
+			};
 		}
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			Map<String, Construct> map = new HashMap<String, Construct>();
+			Map<String, Construct> map = new HashMap<>();
 			map.put("time", new CInt(System.currentTimeMillis(), Target.UNKNOWN));
 			return map;
 		}
@@ -112,16 +118,16 @@ public class CmdlineEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			throw new UnsupportedOperationException("TODO: Not supported yet.");
+			return false;
 		}
 
 		@Override
 		public Version since() {
 			return CHVersion.V0_0_0;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class cmdline_prompt_input extends AbstractEvent {
 
@@ -147,8 +153,9 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
-			throw new UnsupportedOperationException("TODO: Not supported yet.");
+		public BindableEvent convert(CArray manualObject, Target t) {
+			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val());
+			return cpi;
 		}
 
 		@Override
@@ -178,9 +185,9 @@ public class CmdlineEvents {
 		public boolean addCounter() {
 			return false;
 		}
-		
+
 		public static class CmdlinePromptInput implements BindableEvent, CancellableEvent {
-			
+
 			private boolean isCancelled = false;
 			private final String command;
 			public CmdlinePromptInput(String command){
@@ -191,7 +198,7 @@ public class CmdlineEvents {
 			public Object _GetObject() {
 				throw new UnsupportedOperationException("TODO: Not supported yet.");
 			}
-			
+
 			public String getCommand(){
 				return command;
 			}
@@ -200,14 +207,14 @@ public class CmdlineEvents {
 			public void cancel(boolean state) {
 				isCancelled = state;
 			}
-			
+
 			public boolean isCancelled(){
 				return isCancelled;
 			}
-			
-			
-			
+
+
+
 		}
-		
+
 	}
 }

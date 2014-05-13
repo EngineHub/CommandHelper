@@ -42,7 +42,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * 
+ *
  */
 @core
 public class BasicLogic {
@@ -277,7 +277,7 @@ public class BasicLogic {
 						}
 					} else if (evalStatement instanceof CArray) {
 						for (String index : ((CArray) evalStatement).stringKeySet()) {
-							Construct inner = ((CArray) evalStatement).get(index);
+							Construct inner = ((CArray) evalStatement).get(index, t);
 							if (inner instanceof CSlice) {
 								long rangeLeft = ((CSlice) inner).getStart();
 								long rangeRight = ((CSlice) inner).getFinish();
@@ -341,7 +341,7 @@ public class BasicLogic {
 				+ "\t\tmsg('Success')\n"
 				+ "}"),
 				new ExampleScript("With braces/case/default. Note the lack of fallthrough, even without a break(),"
-						+ " except where two cases are directly back to back.", 
+						+ " except where two cases are directly back to back.",
 						"@a = 5\nswitch(@a){\n"
 								+ "\tcase 1:\n"
 								+ "\tcase 2:\n"
@@ -833,7 +833,7 @@ public class BasicLogic {
 //                    break;
 //                }
 //            }
-//            
+//
 //            if(!inNewMode){
 //                return null;//TODO: We can optimize this, even with some parameters dynamic, but
 //                we need the tree.
@@ -2260,7 +2260,7 @@ public class BasicLogic {
 				new ExampleScript("Usage in masking applications. Note that 5 in binary is 101 and 4 is 100. (See bit_or for a more complete example.)",
 				"assign(@var, 5)\nif(bit_and(@var, 4),\n\tmsg('Third bit set')\n)"),};
 		}
-		
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() < 2){
@@ -2335,7 +2335,7 @@ public class BasicLogic {
 				+ "if(bit_and(@flags, @flag1),\n\tmsg('Contains flag 1')\n)\n"
 				+ "if(!bit_and(@flags, @flag2),\n\tmsg('Does not contain flag 2')\n)"),};
 		}
-		
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() < 2){
@@ -2406,7 +2406,7 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "bit_xor(1, 2, 4)"),};
 		}
-		
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() < 2){

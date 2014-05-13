@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ *
  * @author jb_aero
  */
 public class Commands {
@@ -32,10 +32,10 @@ public class Commands {
 	public static String docs() {
 		return "A series of functions for creating and managing custom commands.";
 	}
-	
+
 	public static Map<String, CClosure> onCommand = new HashMap<String, CClosure>();
 	public static Map<String, CClosure> onTabComplete = new HashMap<String, CClosure>();
-	
+
 	@api
 	public static class set_tabcompleter extends AbstractFunction {
 
@@ -65,7 +65,7 @@ public class Commands {
 			customExec(t, environment, cmd, args[1]);
 			return CVoid.VOID;
 		}
-		
+
 		/**
 		 * For setting the completion code of a command that exists but might not be registered yet
 		 * @param t
@@ -109,7 +109,7 @@ public class Commands {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class unregister_command extends AbstractFunction {
 
@@ -159,7 +159,7 @@ public class Commands {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class register_command extends AbstractFunction {
 
@@ -190,20 +190,20 @@ public class Commands {
 			if (args[1] instanceof CArray) {
 				CArray ops = (CArray) args[1];
 				if (ops.containsKey("permission")) {
-					cmd.setPermission(ops.get("permission").val());
+					cmd.setPermission(ops.get("permission", t).val());
 				}
 				if (ops.containsKey("description")) {
-					cmd.setDescription(ops.get("description").val());
+					cmd.setDescription(ops.get("description", t).val());
 				}
 				if (ops.containsKey("usage")) {
-					cmd.setUsage(ops.get("usage").val());
+					cmd.setUsage(ops.get("usage", t).val());
 				}
 				if (ops.containsKey("noPermMsg")) {
-					cmd.setPermissionMessage(ops.get("noPermMsg").val());
+					cmd.setPermissionMessage(ops.get("noPermMsg", t).val());
 				}
 				if (ops.containsKey("aliases")) {
-					if (ops.get("aliases") instanceof CArray) {
-						List<Construct> ca = ((CArray) ops.get("aliases")).asList();
+					if (ops.get("aliases", t) instanceof CArray) {
+						List<Construct> ca = ((CArray) ops.get("aliases", t)).asList();
 						List<String> aliases = new ArrayList<String>();
 						for (Construct c : ca) {
 							aliases.add(c.val());
@@ -212,10 +212,10 @@ public class Commands {
 					}
 				}
 				if (ops.containsKey("executor")) {
-					set_executor.customExec(t, environment, cmd, ops.get("executor"));
+					set_executor.customExec(t, environment, cmd, ops.get("executor", t));
 				}
 				if (ops.containsKey("tabcompleter")) {
-					set_tabcompleter.customExec(t, environment, cmd, ops.get("tabcompleter"));
+					set_tabcompleter.customExec(t, environment, cmd, ops.get("tabcompleter", t));
 				}
 				boolean success = true;
 				if (isnew) {
@@ -259,7 +259,7 @@ public class Commands {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class set_executor extends AbstractFunction {
 
@@ -288,7 +288,7 @@ public class Commands {
 			customExec(t, environment, cmd, args[1]);
 			return CVoid.VOID;
 		}
-		
+
 		/**
 		 * For setting the execution code of a command that exists but might not be registered yet
 		 * @param t

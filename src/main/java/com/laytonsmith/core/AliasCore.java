@@ -22,6 +22,7 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
+import com.laytonsmith.core.packetjumper.PacketJumper;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.database.SQLProfiles;
@@ -374,6 +375,8 @@ public class AliasCore {
 			//Clear out the data source cache
 			DataSourceFactory.DisconnectAll();
 			
+			PacketJumper.startup();
+			
 			if (reloadExtensions) {
 				ExtensionManager.Startup();
 			}
@@ -383,7 +386,6 @@ public class AliasCore {
 			}
 			if (parent.persistenceNetwork == null || reloadPersistenceConfig) {
 				MemoryDataSource.ClearDatabases();
-				//PacketJumper.startup();
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
 				parent.persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),

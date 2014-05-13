@@ -11,6 +11,7 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -19,6 +20,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -36,7 +38,7 @@ public class Threading {
 		return "This experimental and private API is subject to removal, or incompatible changes, and should not"
 				+ " be yet heavily relied on in normal development.";
 	}
-	
+
 	@api
 	@noboilerplate
 	@seealso({x_run_on_main_thread_later.class, x_run_on_main_thread_now.class})
@@ -79,6 +81,10 @@ public class Threading {
 								+ " operation was triggered inside the closure.", t), environment);
 					} catch(ConfigRuntimeException ex){
 						ConfigRuntimeException.HandleUncaughtException(ex, environment);
+					} catch(CancelCommandException ex){
+						if(ex.getMessage() != null){
+							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), new CBoolean(false, t));
+						}
 					} finally {
 						dm.deactivateThread(Thread.currentThread());
 					}
@@ -121,15 +127,15 @@ public class Threading {
 						+ "\tsleep(5); // Sleep here, to allow the main thread to get well past us, for demonstration purposes\n"
 						+ "\tmsg(" + get_current_thread + "());\n"
 						+ "});\n"
-						+ "msg('End of main thread');", 
+						+ "msg('End of main thread');",
 						"MainThread\n"
 						+ "End of main thread\n"
 						+ "myThread")
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	public static class x_get_current_thread extends AbstractFunction {
 
@@ -179,9 +185,9 @@ public class Threading {
 				new ExampleScript("Basic usage", this.getName() + "()", "MainThread")
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	@seealso({x_run_on_main_thread_now.class})
@@ -242,9 +248,9 @@ public class Threading {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	@seealso({x_run_on_main_thread_later.class})
@@ -271,7 +277,7 @@ public class Threading {
 			Object ret;
 			try {
 				ret = StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-					
+
 					@Override
 					public Object call() throws Exception {
 						try {
@@ -284,8 +290,8 @@ public class Threading {
 						return CNull.NULL;
 					}
 				});
-				
-				
+
+
 			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
@@ -319,7 +325,7 @@ public class Threading {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
 }

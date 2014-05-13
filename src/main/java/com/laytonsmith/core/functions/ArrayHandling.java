@@ -102,10 +102,10 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5))"),				
+				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5))"),
 			};
 		}
-				
+
 	}
 
 	@api(environments={GlobalEnv.class})
@@ -155,7 +155,7 @@ public class ArrayHandling {
 					long start = ((CSlice) index).getStart();
 					long finish = ((CSlice) index).getFinish();
 					try {
-						//Convert negative indexes 
+						//Convert negative indexes
 						if (start < 0) {
 							start = ca.size() + start;
 						}
@@ -217,7 +217,7 @@ public class ArrayHandling {
 					long start = ((CSlice) index).getStart();
 					long finish = ((CSlice) index).getFinish();
 					try {
-						//Convert negative indexes 
+						//Convert negative indexes
 						if (start < 0) {
 							start = aa.val().length() + start;
 						}
@@ -311,7 +311,7 @@ public class ArrayHandling {
 			}
 
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -321,14 +321,14 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates bracket notation", "array(0, 1, 2)[2]"),
 			};
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 				OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
-	
+
 	}
 
 	@api
@@ -406,7 +406,7 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -479,19 +479,19 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates usage", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0)\nmsg(@array)"),
 				new ExampleScript("Demonstrates pushing multiple values", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0, 1, 2)\nmsg(@array)"),
 				new ExampleScript("Operator syntax. Note the difference between this and the array clone"
-						+ " operator is that this occurs on the Left Hand Side (LHS) of the assignment.", 
+						+ " operator is that this occurs on the Left Hand Side (LHS) of the assignment.",
 						"@array = array();\n@array[] = 'new value';"),
 			};
 		}
 	}
-	
+
 	@api
 	public static class array_insert extends AbstractFunction{
 
@@ -572,8 +572,8 @@ public class ArrayHandling {
 					+ "array_insert(@array, 4, array_size(@array))\n"
 					+ "msg(@array)")
 			};
-		}		
-		
+		}
+
 	}
 
 	@api
@@ -629,7 +629,7 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -694,7 +694,7 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, t);
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -763,7 +763,7 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -833,7 +833,7 @@ public class ArrayHandling {
 			}
 			return (CArray)args[0];
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -918,8 +918,8 @@ public class ArrayHandling {
 				new ExampleScript("In reverse", "range(10, 0, -1)"),
 			};
 		}
-		
-		
+
+
 	}
 
 	@api
@@ -974,7 +974,7 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -1036,7 +1036,7 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -1114,13 +1114,13 @@ public class ArrayHandling {
 			}
 			return newArray;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "array_merge(array(1), array(2), array(3))"),				
-				new ExampleScript("With associative arrays", "array_merge(array(one: 1), array(two: 2), array(three: 3))"),				
-				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))"),				
+				new ExampleScript("Basic usage", "array_merge(array(1), array(2), array(3))"),
+				new ExampleScript("With associative arrays", "array_merge(array(one: 1), array(two: 2), array(three: 3))"),
+				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))"),
 			};
 		}
 	}
@@ -1183,7 +1183,7 @@ public class ArrayHandling {
 				return removed;
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -1257,7 +1257,7 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -1312,14 +1312,14 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array(1, 2, 3)[cslice(0, 1)]"),
 			};
 		}
-		
+
 	}
 
 	@api
@@ -1393,7 +1393,7 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -1414,24 +1414,24 @@ public class ArrayHandling {
 			}
 			return null;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Regular sort", "assign(@array, array('a', 2, 4, 'string'))\narray_sort(@array, 'REGULAR')\nmsg(@array)"),				
-				new ExampleScript("Numeric sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'NUMERIC')\nmsg(@array)"),				
-				new ExampleScript("String sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'STRING')\nmsg(@array)"),				
-				new ExampleScript("String sort (with words)", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING')\nmsg(@array)"),				
-				new ExampleScript("Ignore case sort", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING_IC')\nmsg(@array)"),				
+				new ExampleScript("Regular sort", "assign(@array, array('a', 2, 4, 'string'))\narray_sort(@array, 'REGULAR')\nmsg(@array)"),
+				new ExampleScript("Numeric sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'NUMERIC')\nmsg(@array)"),
+				new ExampleScript("String sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'STRING')\nmsg(@array)"),
+				new ExampleScript("String sort (with words)", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING')\nmsg(@array)"),
+				new ExampleScript("Ignore case sort", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING_IC')\nmsg(@array)"),
 			};
 		}
 	}
-	
+
 	@api public static class array_sort_async extends AbstractFunction{
-		
+
 		RunnableQueue queue = new RunnableQueue("MethodScript-arraySortAsync");
 		boolean started = false;
-		
+
 		private void startup(){
 			if(!started){
 				queue.invokeLater(null, new Runnable() {
@@ -1452,7 +1452,7 @@ public class ArrayHandling {
 				started = true;
 			}
 		}
-		
+
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -1508,9 +1508,9 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api public static class array_remove_values extends AbstractFunction{
 
 		@Override
@@ -1532,18 +1532,18 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			//This needs to be in terms of array_remove, to ensure that the iteration
-			//logic is followed. We will iterate backwards, however, to make the 
+			//logic is followed. We will iterate backwards, however, to make the
 			//process more efficient, unless this is an associative array.
 			if(array.isAssociative()){
 				array.removeValues(args[1]);
 			} else {
 				for(long i = array.size() - 1; i >= 0; i--){
-					if(BasicLogic.equals.doEquals(array.get(i), args[1])){
+					if(BasicLogic.equals.doEquals(array.get(i, t), args[1])){
 						new array_remove().exec(t, environment, array, new CInt(i, t));
 					}
 				}
 			}
-			
+
 			return CVoid.VOID;
 		}
 
@@ -1569,16 +1569,16 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(@array)\narray_remove_values(@array, 2)\nmsg(@array)"),				
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(@array)\narray_remove_values(@array, 2)\nmsg(@array)"),
 			};
 		}
-		
+
 	}
-	
+
 	@api public static class array_indexes extends AbstractFunction{
 
 		@Override
@@ -1626,17 +1626,17 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 2))"),				
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))"),				
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 2))"),
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))"),
 			};
 		}
-		
+
 	}
-	
+
 	@api public static class array_index extends AbstractFunction{
 
 		@Override
@@ -1660,7 +1660,7 @@ public class ArrayHandling {
 			if(ca.isEmpty()){
 				return CNull.NULL;
 			} else {
-				return ca.get(0);
+				return ca.get(0, t);
 			}
 		}
 
@@ -1685,17 +1685,17 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 2))"),				
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 5))"),				
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 2))"),
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 5))"),
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	public static class array_reverse extends AbstractFunction{
 
@@ -1749,10 +1749,10 @@ public class ArrayHandling {
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)\narray_reverse(@array)\nmsg(@array)"),
 				new ExampleScript("Failure", "assign(@array, array(one: 1, two: 2))\narray_reverse(@array)")
 			};
-		}				
-		
+		}
+
 	}
-	
+
 	@api public static class array_rand extends AbstractFunction{
 
 		@Override
@@ -1792,7 +1792,7 @@ public class ArrayHandling {
 			if(args.length > 2){
 				getKeys = Static.getBoolean(args[2]);
 			}
-			
+
 			LinkedHashSet<Integer> randoms = new LinkedHashSet<Integer>();
 			while(randoms.size() < number){
 				randoms.add(java.lang.Math.abs(r.nextInt() % (int)array.size()));
@@ -1836,14 +1836,14 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Usage with a normal array", "assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array))", "{1}"),
-				new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results", 
+				new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results",
 					"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))", "{b, c}"),
-				new ExampleScript("Usage with an associative array", 
+				new ExampleScript("Usage with an associative array",
 					"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))", "two"),
 			};
 		}
 	}
-	
+
 	@api
 	public static class array_unique extends AbstractFunction{
 
@@ -1922,10 +1922,10 @@ public class ArrayHandling {
 				new ExampleScript("No removal of different datatypes", "array_unique(array(1, '1'))"),
 				new ExampleScript("Removal of different datatypes, by setting compareTypes to false", "array_unique(array(1, '1'), false)"),
 			};
-		}				
-		
+		}
+
 	}
-	
+
 	@api
 	public static class array_filter extends AbstractFunction {
 
@@ -2030,7 +2030,7 @@ public class ArrayHandling {
 						+ "\treturn(@value % 2 == 1);\n"
 						+ "});\n"
 						+ "msg(@newArray);\n"),
-				new ExampleScript("Pulls out only the odd numbers in an associative array", 
+				new ExampleScript("Pulls out only the odd numbers in an associative array",
 						"@array = array('one': 1, 'two': 2, 'three': 3, 'four': 4);\n"
 						+ "@newArray = array_filter(@array, closure(@key, @value){\n"
 						+ "\treturn(@value % 2 == 1);\n"
@@ -2038,9 +2038,9 @@ public class ArrayHandling {
 						+ "msg(@newArray);\n")
 			};
 		}
-		
+
 	}
-	
+
 //	@api
 //	public static class array_deep_clone extends AbstractFunction {
 //
@@ -2091,6 +2091,6 @@ public class ArrayHandling {
 //				new ExampleScript("", "")
 //			};
 //		}
-//		
+//
 //	}
 }

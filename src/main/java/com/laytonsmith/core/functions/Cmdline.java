@@ -46,7 +46,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 
+ *
  */
 @core
 public class Cmdline {
@@ -116,8 +116,8 @@ public class Cmdline {
 				new ExampleScript("Basic usage", "#Note, this is guaranteed to print to standard out\nsys_out('Hello World!')", ":Hello World!")
 			};
 		}
-		
-		
+
+
     }
 
     @api
@@ -173,7 +173,7 @@ public class Cmdline {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -181,7 +181,7 @@ public class Cmdline {
 			};
 		}
     }
-	
+
 	@api
 	@noboilerplate
 	public static class print_out extends AbstractFunction {
@@ -233,9 +233,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class print_err extends AbstractFunction {
@@ -287,7 +287,7 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
     @api(environments={GlobalEnv.class})
@@ -347,8 +347,8 @@ public class Cmdline {
 			return EnumSet.of(
 						OptimizationOption.TERMINAL
 			);
-		}			
-		
+		}
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -403,7 +403,7 @@ public class Cmdline {
             }
 
         }
-		
+
 		private Map<String, String> getMethodScriptProperties(){
 			Map<String, String> map = new HashMap<>();
 			for(Prefs.PNames name : Prefs.PNames.values()){
@@ -435,7 +435,7 @@ public class Cmdline {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -591,7 +591,7 @@ public class Cmdline {
             return CHVersion.V3_3_1;
         }
     }
-	
+
 	@api
 	@noboilerplate
 	public static class prompt_pass extends AbstractFunction {
@@ -620,7 +620,7 @@ public class Cmdline {
 			if(args.length > 1){
 				mask = Static.getBoolean(args[1]);
 			}
-			
+
 			String prompt = args[0].val();
 			Character cha = new Character((char)0);
 			if(mask){
@@ -638,7 +638,7 @@ public class Cmdline {
 					reader.shutdown();
 				}
 			}
-			
+
 		}
 
 		@Override
@@ -662,9 +662,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class prompt_char extends AbstractFunction {
@@ -687,7 +687,7 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
-			
+
 			String prompt = args[0].val();
 			System.out.print(Static.MCToANSIColors(prompt));
 			System.out.flush();
@@ -705,7 +705,7 @@ public class Cmdline {
 					reader.shutdown();
 				}
 			}
-			
+
 		}
 
 		@Override
@@ -728,9 +728,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class prompt_line extends AbstractFunction {
@@ -755,7 +755,7 @@ public class Cmdline {
 			if(!Static.InCmdLine(environment)){
 				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
 			}
-			
+
 			String prompt = args[0].val();
 			jline.console.ConsoleReader reader = null;
 			try {
@@ -770,7 +770,7 @@ public class Cmdline {
 					reader.shutdown();
 				}
 			}
-			
+
 		}
 
 		@Override
@@ -793,9 +793,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class sys_beep extends AbstractFunction {
 
@@ -839,9 +839,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class clear_screen extends AbstractFunction {
@@ -892,9 +892,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class shell_adv extends AbstractFunction {
@@ -934,30 +934,30 @@ public class Cmdline {
 				CArray array = (CArray) args[0];
 				command = new String[(int)array.size()];
 				for(int i = 0; i < array.size(); i++){
-					command[i] = array.get(i).val();
+					command[i] = array.get(i, t).val();
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
 			}
 			if(args.length > 1){
 				CArray options = Static.getArray(args[1], t);
-				if(options.containsKey("workingDir") && !(options.get("workingDir") instanceof CNull)){
-					workingDir = new File(options.get("workingDir").val());
+				if(options.containsKey("workingDir") && !(options.get("workingDir", t) instanceof CNull)){
+					workingDir = new File(options.get("workingDir", t).val());
 					if(!workingDir.isAbsolute()){
 						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
 					}
 				}
-				if(options.containsKey("stdout") && !(options.get("stdout") instanceof CNull)){
-					stdout = Static.getObject(options.get("stdout"), t, "closure", CClosure.class);
+				if(options.containsKey("stdout") && !(options.get("stdout", t) instanceof CNull)){
+					stdout = Static.getObject(options.get("stdout", t), t, "closure", CClosure.class);
 				}
-				if(options.containsKey("stderr") && !(options.get("stderr") instanceof CNull)){
-					stderr = Static.getObject(options.get("stderr"), t, "closure", CClosure.class);
+				if(options.containsKey("stderr") && !(options.get("stderr", t) instanceof CNull)){
+					stderr = Static.getObject(options.get("stderr", t), t, "closure", CClosure.class);
 				}
-				if(options.containsKey("exit") && !(options.get("exit") instanceof CNull)){
-					exit = Static.getObject(options.get("exit"), t, "closure", CClosure.class);
+				if(options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)){
+					exit = Static.getObject(options.get("exit", t), t, "closure", CClosure.class);
 				}
 				if(options.containsKey("subshell")){
-					subshell = Static.getBoolean(options.get("subshell"));
+					subshell = Static.getBoolean(options.get("subshell", t));
 				}
 			}
 			final CommandExecutor cmd = new CommandExecutor(command);
@@ -977,7 +977,7 @@ public class Cmdline {
 					if(c == '\n' || b == -1){
 						try {
 							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-								
+
 								@Override
 								public Object call() throws Exception {
 									_stdout.execute(new CString(sbout.getObject(), t));
@@ -1003,7 +1003,7 @@ public class Cmdline {
 					if(c == '\n' || b == -1){
 						try {
 							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-								
+
 								@Override
 								public Object call() throws Exception {
 									_stderr.execute(new CString(sberr.getObject(), t));
@@ -1024,7 +1024,7 @@ public class Cmdline {
 			} catch (IOException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
 			}
-			
+
 			Runnable run = new Runnable() {
 
 				@Override
@@ -1111,9 +1111,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class shell extends AbstractFunction {
@@ -1150,7 +1150,7 @@ public class Cmdline {
 				CArray array = (CArray) args[0];
 				command = new String[(int)array.size()];
 				for(int i = 0; i < array.size(); i++){
-					command[i] = array.get(i).val();
+					command[i] = array.get(i, t).val();
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
@@ -1158,10 +1158,10 @@ public class Cmdline {
 			if(args.length > 1){
 				CArray options = Static.getArray(args[1], t);
 				if(options.containsKey("expectedExitCode")){
-					expectedExitCode = Static.getInt32(options.get("expectedExitCode"), t);
+					expectedExitCode = Static.getInt32(options.get("expectedExitCode", t), t);
 				}
-				if(options.containsKey("workingDir") && !(options.get("workingDir") instanceof CNull)){
-					workingDir = new File(options.get("workingDir").val());
+				if(options.containsKey("workingDir") && !(options.get("workingDir", t) instanceof CNull)){
+					workingDir = new File(options.get("workingDir", t).val());
 					if(!workingDir.isAbsolute()){
 						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
 					}
@@ -1245,9 +1245,9 @@ public class Cmdline {
 				new com.laytonsmith.core.functions.ExampleScript("Changing the working directory", "shell('grep -r \"search content\" *', array(workingDir: '/'))", "<output of command>"),
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	public static class read_pipe_input extends AbstractFunction {
 
@@ -1329,9 +1329,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class pwd extends AbstractFunction {
 
@@ -1389,9 +1389,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class cd extends AbstractFunction {
 
@@ -1441,9 +1441,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ls extends AbstractFunction {
 
@@ -1472,7 +1472,7 @@ public class Cmdline {
 					ca.push(new CString(f.getName(), t));
 				}
 			} else {
-				throw new ConfigRuntimeException("No such file or directory: " + cwd.getPath(), 
+				throw new ConfigRuntimeException("No such file or directory: " + cwd.getPath(),
 						ExceptionType.IOException, t);
 			}
 			return ca;
@@ -1498,9 +1498,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class set_cmdline_prompt extends AbstractFunction {
 
@@ -1550,9 +1550,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class get_terminal_width extends AbstractFunction {
 
@@ -1602,9 +1602,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-	
+
 	}
-	
+
 	/**
 	 * Requires cmdline mode. If not currently in cmdline mode, a proper CRE is thrown.
 	 * @param environment
@@ -1614,7 +1614,7 @@ public class Cmdline {
 	 */
 	public static void requireCmdlineMode(Environment environment, Function f, Target t) throws ConfigRuntimeException {
 		if(!Static.InCmdLine(environment)){
-			throw new ConfigRuntimeException(f.getName() + " cannot be used outside of cmdline mode.", 
+			throw new ConfigRuntimeException(f.getName() + " cannot be used outside of cmdline mode.",
 					ExceptionType.InsufficientPermissionException, t);
 		}
 	}

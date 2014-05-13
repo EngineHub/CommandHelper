@@ -48,16 +48,16 @@ public class PluginEvents {
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent)e;
-				
+
 				Prefilters.match(prefilter, "channel", event.getChannel(), Prefilters.PrefilterType.STRING_MATCH);
-				
+
 				return true;
 			}
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -66,17 +66,17 @@ public class PluginEvents {
 			if (e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent) e;
 				Map<String, Construct> ret = evaluate_helper(e);
-				
+
 				ret.put("channel", new CString(event.getChannel(), Target.UNKNOWN));
 				ret.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 
 				// Insert bytes into a CByteArray
 				CByteArray a = CByteArray.wrap(event.getBytes().clone(), Target.UNKNOWN);
-				
+
 				a.rewind();
-				
+
 				ret.put("bytes", a);
-				
+
 				return ret;
 			} else {
 				throw new EventException("Cannot convert to MCPluginIncomingMessageEvent");
