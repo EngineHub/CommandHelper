@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -16,6 +17,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.List;
@@ -27,7 +29,7 @@ import java.util.List;
 public class BukkitMetadata {
 
 	public static String docs() {
-		return "Allow to manipulate the Bukkit metadata.";
+		return "This class allows manipulation of entity metadata.";
 	}
 
 	public static abstract class MetadataFunction extends AbstractFunction {
@@ -79,6 +81,20 @@ public class BukkitMetadata {
 					+ " to exchange these informations between them without requiring one to be dependant on each other."
 					+ " The metadata are persistent across server reloads, but not across server restarts. The metadata attached"
 					+ " to a player are also persistent between logins.";
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Returns the value of the metadata attached to the player running the function by any plugins at the 'rank' key.",
+						"set_metadata('rank', 'admin') msg(get_metadata('rank'))"),
+				new ExampleScript("Returns the value of the metadata attached to the block at the given location by any plugins, at the 'owner' key.",
+						"set_metadata(array('x': 100, 'y': 63, 'z': 0), 'owner', player()) msg(get_metadata(array('x': 100, 'y': 63, 'z': 0), 'owner'))"),
+				new ExampleScript("Returns the value of the metadata attached to the entity 1001 by the myPlugin plugin at the 'myKey' key.",
+						"set_metadata(1001, 'myKey', myPlugin, true) msg(get_metadata(1001, 'myKey', 'myPlugin'))"),
+				new ExampleScript("Returns the value of the metadata attached to the world named nether by " + Implementation.GetServerType().getBranding() + " at the 'myKey' key.",
+						"set_metadata('nether', 'myKey', '" + Implementation.GetServerType().getBranding() + "', array(1, 50, 3)) msg(get_metadata('nether', 'myKey', '" + Implementation.GetServerType().getBranding() + "'))")
+			};
 		}
 
 		@Override
@@ -170,10 +186,10 @@ public class BukkitMetadata {
 
 		@Override
 		public String docs() {
-			return "void {[mixed], key, value | mixed, key, value, [plugin]} Registers a metadata value in the given object with the"
+			return "void {[object], key, value | object, key, value, [plugin]} Registers a metadata value in the given object with the"
 					+ " given key. object can be a location array (it will designate a block), an entityID (it will designate an entity)"
 					+ " or a string (it will designate a world). If only the key and the value are given, the object is the current player."
-					+ " You can specify the plugin that will own the metadata, 'CommandHelper' by default. See get_metadata() for more"
+					+ " You can specify the plugin that will own the metadata, '" + Implementation.GetServerType().getBranding() + "' by default. See get_metadata() for more"
 					+ " informations about Bukkit metadata.";
 		}
 
@@ -187,12 +203,12 @@ public class BukkitMetadata {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 				value = args[1];
-				plugin = Static.getServer().getPluginManager().getPlugin("CommandHelper");
+				plugin = Static.getPlugin(Implementation.GetServerType().getBranding(), t);
 			} else {
 				metadatable = Static.getMetadatable(args[0], t);
 				key = args[1].val();
 				value = args[2];
-				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : Static.getServer().getPluginManager().getPlugin("CommandHelper");
+				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : Static.getPlugin(Implementation.GetServerType().getBranding(), t);;
 			}
 			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin));
 			return new CVoid(t);
@@ -210,7 +226,7 @@ public class BukkitMetadata {
 
 		@Override
 		public String docs() {
-			return "void {[mixed], key | mixed, key, [plugin]} Remove the metadata in the given object at the given key."
+			return "void {[object], key | object, key, [plugin]} Remove the metadata in the given object at the given key."
 					+ " object can be a location array (it will designate a block), an entityID (it will designate an entity)"
 					+ " or a string (it will designate a world). If only the key is given, the object is the current player."
 					+ " If no plugin is given, the function removes all metadata at the given key, otherwise only the value"

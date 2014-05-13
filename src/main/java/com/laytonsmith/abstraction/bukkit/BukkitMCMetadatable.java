@@ -10,15 +10,15 @@ import org.bukkit.metadata.Metadatable;
 
 public class BukkitMCMetadatable implements MCMetadatable {
 
-	private final Metadatable m_metadatable;
+	private final Metadatable _metadatable;
 
 	public BukkitMCMetadatable(Metadatable metadatable) {
-		m_metadatable = metadatable;
+		_metadatable = metadatable;
 	}
 
 	@Override
 	public List<MCMetadataValue> getMetadata(String metadataKey) {
-		List<MetadataValue> lst = m_metadatable.getMetadata(metadataKey);
+		List<MetadataValue> lst = _metadatable.getMetadata(metadataKey);
 		List<MCMetadataValue> retn = new ArrayList<>();
 		
 		for(MetadataValue val : lst) {
@@ -30,36 +30,36 @@ public class BukkitMCMetadatable implements MCMetadatable {
 
 	@Override
 	public boolean hasMetadata(String metadataKey) {
-		return m_metadatable.hasMetadata(metadataKey);
+		return _metadatable.hasMetadata(metadataKey);
 	}
 
 	@Override
 	public void removeMetadata(String metadataKey, MCPlugin owningPlugin) {
-		m_metadatable.removeMetadata(metadataKey, ((BukkitMCPlugin)owningPlugin).getHandle());
+		_metadatable.removeMetadata(metadataKey, ((BukkitMCPlugin)owningPlugin).getHandle());
 	}
 
 	@Override
 	public void setMetadata(String metadataKey, MCMetadataValue newMetadataValue) {
-		m_metadatable.setMetadata(metadataKey, ((BukkitMCMetadataValue)newMetadataValue).getHandle());
+		_metadatable.setMetadata(metadataKey, ((BukkitMCMetadataValue)newMetadataValue).getHandle());
 	}
 
 	@Override
 	public Metadatable getHandle() {
-		return m_metadatable;
+		return _metadatable;
 	}
 
 	@Override
 	public String toString() {
-		return m_metadatable.toString();
+		return _metadatable.toString();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCMetadatable?m_metadatable.equals(((BukkitMCMetadatable)obj).m_metadatable):false);
+		return (obj instanceof BukkitMCMetadatable?_metadatable.equals(((BukkitMCMetadatable)obj)._metadatable):false);
 	}
 
 	@Override
 	public int hashCode() {
-		return m_metadatable.hashCode();
+		return _metadatable.hashCode();
 	}
 }

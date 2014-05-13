@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
