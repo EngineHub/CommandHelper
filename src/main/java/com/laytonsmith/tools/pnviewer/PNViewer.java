@@ -144,7 +144,7 @@ public class PNViewer extends javax.swing.JFrame {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(config.getParentFile().getParentFile());
 				try {
-					PersistenceNetwork pn = new PersistenceNetwork(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db")), options);
+					PersistenceNetwork pn = new PersistenceNetwork(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace("\\", "/")), options);
 					Map<String[], String> data = pn.getNamespace(new String[0]);
 					Map<String, String> dataSources = new HashMap<>();
 					for(String[] key : data.keySet()){
