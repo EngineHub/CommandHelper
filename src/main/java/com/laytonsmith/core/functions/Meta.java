@@ -7,24 +7,18 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
-import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UserManager;
-import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -34,16 +28,12 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistence.DataSourceException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -652,7 +642,7 @@ public class Meta {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
 		@Override

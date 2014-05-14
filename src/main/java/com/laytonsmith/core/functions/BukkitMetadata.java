@@ -112,7 +112,7 @@ public class BukkitMetadata {
 						return Static.getMSObject(value.value(), t);
 					}
 				}
-				return new CNull(t);
+				return CNull.NULL;
 			} else {
 				CArray values = new CArray(t);
 				for (MCMetadataValue value : metadata) {
@@ -208,10 +208,10 @@ public class BukkitMetadata {
 				metadatable = Static.getMetadatable(args[0], t);
 				key = args[1].val();
 				value = args[2];
-				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : Static.getPlugin(Implementation.GetServerType().getBranding(), t);;
+				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : Static.getPlugin(Implementation.GetServerType().getBranding(), t);
 			}
 			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -251,7 +251,7 @@ public class BukkitMetadata {
 					metadatable.removeMetadata(key, value.getOwningPlugin());
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 }
