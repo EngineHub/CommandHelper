@@ -5,7 +5,7 @@ import com.laytonsmith.annotations.MEnum;
 
 /**
  *
- * @author layton
+ * 
  */
 @MEnum("GameMode")
 public enum MCGameMode {

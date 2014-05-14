@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.InventoryType;
 
 /**
  *
- * @author Layton
+ * 
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

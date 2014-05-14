@@ -2,9 +2,18 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -24,9 +33,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author Layton
+ * 
  */
+@core
 public class Persistence {
 
 	public static String docs() {
@@ -34,7 +43,8 @@ public class Persistence {
 				+ " In all the functions, you may send multiple arguments for the key, which will automatically"
 				+ " be concatenated with a period (the namespace separator). No magic happens here, you can"
 				+ " put periods yourself, or combine manually namespaced values or automatically namespaced values"
-				+ " with no side effects.";
+				+ " with no side effects. All the functions in the Persistence API are threadsafe (though not necessarily"
+				+ " process safe).";
 	}
 
 	@api(environments={GlobalEnv.class})
@@ -104,7 +114,7 @@ public class Persistence {
 			} catch (Exception ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -170,7 +180,7 @@ public class Persistence {
 					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 				}
 				if (obj == null) {
-					return new CNull(t);
+					return CNull.NULL;
 				}
 				o = Construct.json_decode(obj.toString(), t);
 			} catch (MarshalException ex) {
@@ -179,7 +189,7 @@ public class Persistence {
 			try {
 				return (Construct) o;
 			} catch (ClassCastException e) {
-				return new CNull(t);
+				return CNull.NULL;
 			}
 		}
 
@@ -393,7 +403,7 @@ public class Persistence {
 			} catch(IllegalArgumentException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

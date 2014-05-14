@@ -17,7 +17,7 @@ import java.util.Map;
  * directly, this is generally discouraged, since the reusability is lower this way. Instead, subclass it,
  * add direct accessors for various properties, and construct that instead. The static methods
  * provided allow for creation of an instance, given a CArray.
- * 
+ *
  * Subclasses should note that a typical implementation will look like this:
  * <pre>
  * public Integer x;
@@ -27,26 +27,26 @@ import java.util.Map;
  * }
  * ...
  * </pre>
- * 
+ *
  * Additionally, the alias function can be overriden to provide for aliased
  * values, which will be accepted as non-dynamic parameters that point to
  * the real fields. They will not be included during serialization, however,
  * reads and writes to these fields will work correctly.
- * 
+ *
  * If an object contains fields that should not be handled as instance fields,
  * they must be set to private, and they will be
  * ignored. All other fields should be public. If a field MUST be public, but
  * not accessible, you may annotate it with the {@link nofield} annotation, though
  * this is highly discouraged, since it breaks future compatibility.
- * 
+ *
  * Note that in the example, an Integer is used. This is appropriate, though Construct
  * types may be used as well. The supported POJO types are only the following,
  * and conversions are automatic: All 8 primitives' object wrappers, String, MList,
  * MObject (and subclasses) and MMap.
- * @author lsmith
+ *
  */
 public class MObject {
-	
+
 	public static <T extends MObject> T Construct(Class<T> type, CArray data){
 		T instance;
 		try {
@@ -58,19 +58,19 @@ public class MObject {
 		}
 		return null; //TODO
 	}
-	
+
 	/**
 	 * Constructs a fully dynamic MObject based on the given array. This is discouraged
 	 * from direct use.
 	 * @param data
-	 * @return 
+	 * @return
 	 */
 	public static MObject Construct(CArray data){
 		return Construct(MObject.class, data);
 	}
-	
+
 	private Map<String, Construct> fields = new HashMap<String, Construct>();
-	
+
 	/**
 	 * If a field can have an alias, this should return the proper
 	 * name given this alias. If this is not an alias, return null, and
@@ -79,19 +79,19 @@ public class MObject {
 	 * alias are set, the actual value takes priority, should the two values
 	 * be different.
 	 * @param field
-	 * @return 
+	 * @return
 	 */
 	protected String alias(String field){
 		return null;
 	}
-	
+
 	/**
 	 * Sets the field to the given parameter. If the field is a non-dynamic
-	 * property, it is actually set in the object (and converted properly), 
+	 * property, it is actually set in the object (and converted properly),
 	 * otherwise it is simply added to the dynamic field list.
 	 * @param field
 	 * @param value
-	 * @param t 
+	 * @param t
 	 */
 	public final void set(String field, Construct value, Target t){
 		String alias = alias(field);
@@ -135,18 +135,18 @@ public class MObject {
 						CArray ca = Static.getArray(value, t);
 						MMap m = new MMap();
 						for(String key : ca.stringKeySet()){
-							m.put(key, ca.get(key));
+							m.put(key, ca.get(key, t));
 						}
 						val = m;
 					} else if(fType == MList.class){
 						CArray ca = Static.getArray(value, t);
 						MList m = new MList();
 						if(ca.inAssociativeMode()){
-							throw new ConfigRuntimeException("Expected non-associative array, but an associative array was found instead.", 
+							throw new ConfigRuntimeException("Expected non-associative array, but an associative array was found instead.",
 									Exceptions.ExceptionType.CastException, t);
 						}
 						for(int i = 0; i < ca.size(); i++){
-							m.add(ca.get(i));
+							m.add(ca.get(i, t));
 						}
 						val = m;
 					} else if(Construct.class.isAssignableFrom(fType)){
@@ -156,7 +156,7 @@ public class MObject {
 						val = MObject.Construct(fType, ca);
 					} else {
 						//Programming error.
-						throw new Error(this.getClass().getName() + " contained the public field " 
+						throw new Error(this.getClass().getName() + " contained the public field "
 								+ f.getName() + " of type " + fType.getName() + ", which is an unsupported field type.");
 					}
 				}
@@ -174,11 +174,11 @@ public class MObject {
 		//Always put the dynamic parameter, regardless
 		fields.put(field, value);
 	}
-	
+
 	/**
-	 * Retrieves a Construct from the 
+	 * Retrieves a Construct from the
 	 * @param field
-	 * @return 
+	 * @return
 	 */
 	public Construct get(String field){
 		return null; //TODO

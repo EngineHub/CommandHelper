@@ -4,7 +4,7 @@ import java.io.File;
 
 /**
  *
- * @author layton
+ * 
  */
 public final class Security {
     

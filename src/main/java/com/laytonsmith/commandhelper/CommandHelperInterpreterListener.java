@@ -6,7 +6,12 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.MethodScriptComplete;
+import com.laytonsmith.core.MethodScriptFileLocations;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -15,10 +20,15 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.event.EventHandler;
@@ -30,7 +40,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class CommandHelperInterpreterListener implements Listener {
 
@@ -132,11 +142,11 @@ public class CommandHelperInterpreterListener implements Listener {
 			gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler,
 					plugin.persistenceNetwork, plugin.permissionsResolver,
 					CommandHelperFileLocations.getDefault().getConfigDirectory(),
-					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+					new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		} catch (IOException ex) {
 			CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 			return;
-		} catch (Profiles.InvalidProfileException ex) {
+		} catch (SQLProfiles.InvalidSQLProfileException ex) {
 			CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 			return;
 		}

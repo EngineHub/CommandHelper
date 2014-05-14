@@ -9,7 +9,7 @@ import org.bukkit.FireworkEffect;
 
 /**
  *
- * @author Layton
+ * 
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

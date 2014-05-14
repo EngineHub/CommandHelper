@@ -1,17 +1,28 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.Range;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -37,15 +48,13 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  *
- * @author Layton
  */
+@core
 public class Scheduling {
 
 	public static void ClearScheduledRunners() {
@@ -191,7 +200,7 @@ public class Scheduling {
 				Thread.sleep((int)(time * 1000));
 			} catch (InterruptedException ex) {
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -281,6 +290,20 @@ public class Scheduling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "set_interval(1000, closure(){\n"
+						+ "\tmsg('Hello World!');\n"
+						+ "});", "<Would message the user \"Hello World!\" every second>"),
+				new ExampleScript("Usage with initial delay", "set_interval(1000, 5000, closure(){\n"
+						+ "\tmsg('Hello World!');\n"
+						+ "});", "<Would message the user \"Hello World!\" every second, however there would be an initial delay of 5 seconds>")
+			};
+		}
+
+
 	}
 
 	@api(environments={GlobalEnv.class})
@@ -354,6 +377,17 @@ public class Scheduling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "set_timeout(10000, closure(){\n"
+						+ "\tmsg('Hello World!');\n"
+						+ "});", "<Would wait 5 seconds, then message the user \"Hello World!\">")
+			};
+		}
+
+
 	}
 
 	@api(environments={GlobalEnv.class})
@@ -403,13 +437,30 @@ public class Scheduling {
 			} else {
 				throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Use from within an interval", "set_interval(1000, closure(){\n"
+						+ "\tif(rand(0, 10) == 9){\n"
+						+ "\t\tclear_task();\n"
+						+ "\t}\n"
+						+ "\tmsg('Hello World!');\n"
+						+ "});", "<Messages the user until the random number generator produces a 9, at which point the interval is stopped>"),
+				new ExampleScript("Using the id returned from set_timeout", "@id = set_timeout(5000, closure(){\n"
+						+ "\tmsg('Hello World!');\n"
+						+ "});\n"
+						+ "clear_task(@id);", "<Nothing happens, as the timeout is cancelled before it runs>")
+			};
+		}
+
 	}
 
 	@api
@@ -438,7 +489,7 @@ public class Scheduling {
 					} catch(NullPointerException e){
 						//This is due to a JDK bug. As you can see, the code above
 						//should never NPE due to our mistake, so it would only occur
-						//during an internal error. The solution that worked for me is here: 
+						//during an internal error. The solution that worked for me is here:
 						//https://bugs.launchpad.net/ubuntu/+source/tzdata/+bug/1053160
 						//however, this appears to be an issue in Open JDK, so performance on
 						//other systems may vary. We will handle this error by reporting that
@@ -511,16 +562,16 @@ public class Scheduling {
 			};
 		}
 	}
-	
+
 	@api
 	public static class set_cron extends AbstractFunction implements Optimizable {
-		
+
 		private static Thread cronThread = null;
 		private static final Object cronThreadLock = new Object();
 		private static final Map<Integer, CronFormat> cronJobs = new HashMap<Integer, CronFormat>();
 		private static boolean stopCron = false;
 		private static final AtomicInteger jobIDs = new AtomicInteger(1);
-		
+
 		/**
 		 * Stops a job from running again, and returns true if the value was
 		 * actually removed. False is returned otherwise.
@@ -642,14 +693,14 @@ public class Scheduling {
 			}
 			return new CInt(jobID, t);
 		}
-		
+
 		private static final Map<String, Integer> MONTHS = new HashMap<String, Integer>();
 		private static final Map<String, Integer> DAYS = new HashMap<String, Integer>();
 		private static final Map<String, Integer> HOURS = new HashMap<String, Integer>();
 		private static final Pattern RANGE = Pattern.compile("(\\d+)-(\\d+)");
 		private static final Pattern EVERY = Pattern.compile("\\*/(\\d+)");
 		private static final List<Range> RANGES = Arrays.asList(new Range(0, 59), new Range(0, 23), new Range(1, 31), new Range(1, 12), new Range(0, 6));
-		
+
 		static {
 			MONTHS.put("jan", 1);
 			MONTHS.put("feb", 2);
@@ -676,7 +727,7 @@ public class Scheduling {
 			MONTHS.put("october", 10);
 			MONTHS.put("november", 11);
 			MONTHS.put("december", 12);
-			
+
 			DAYS.put("sun", 0);
 			DAYS.put("mon", 1);
 			DAYS.put("tue", 2);
@@ -691,11 +742,11 @@ public class Scheduling {
 			DAYS.put("thursday", 4);
 			DAYS.put("friday", 5);
 			DAYS.put("saturday", 6);
-			
+
 			HOURS.put("midnight", 0);
 			HOURS.put("noon", 12);
 		}
-		
+
 		private CronFormat validateFormat(String format, Target t){
 			//Now we need to look at the format of the cron task, and convert it to a standardized format.
 			//Our goal here is to remove all ranges, predefined names, including @hourly and January.
@@ -735,7 +786,7 @@ public class Scheduling {
 			String day = sformat[2];
 			String month = sformat[3];
 			String dayOfWeek = sformat[4];
-			
+
 			//Now replace the special shortcut names
 			for(String key : MONTHS.keySet()){
 				month = month.replace(key, Integer.toString(MONTHS.get(key)));
@@ -752,7 +803,7 @@ public class Scheduling {
 			List<String> dayList = new ArrayList<String>(Arrays.asList(day.split(",")));
 			List<String> monthList = new ArrayList<String>(Arrays.asList(month.split(",")));
 			List<String> dayOfWeekList = new ArrayList<String>(Arrays.asList(dayOfWeek.split(",")));
-			
+
 			List<List<String>> segments = Arrays.asList(minList, hourList, dayList, monthList, dayOfWeekList);
 			//Now go through each and pull out any ranges. At this point, everything
 			//is numbers or *
@@ -839,21 +890,21 @@ public class Scheduling {
 			}
 			return f;
 		}
-		
+
 		private static class CronFormat {
 			public Set<Integer> min = new HashSet<Integer>();
 			public Set<Integer> hour = new HashSet<Integer>();
 			public Set<Integer> day = new HashSet<Integer>();
 			public Set<Integer> month = new HashSet<Integer>();
 			public Set<Integer> dayOfWeek = new HashSet<Integer>();
-			
+
 			public CClosure job;
 
 			@Override
 			public String toString() {
 				return min + "\n" + hour + "\n" + day + "\n" + month + "\n" + dayOfWeek;
 			}
-			
+
 		}
 
 		@Override
@@ -890,9 +941,9 @@ public class Scheduling {
 			}
 			return null;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class clear_cron extends AbstractFunction {
 
@@ -923,7 +974,7 @@ public class Scheduling {
 			if(!set_cron.stopJob(id)){
 				throw new Exceptions.RangeException("Task ID invalid", t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -948,7 +999,7 @@ public class Scheduling {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 }

@@ -29,7 +29,7 @@ import org.bukkit.util.BlockIterator;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource implements MCLivingEntity {
 

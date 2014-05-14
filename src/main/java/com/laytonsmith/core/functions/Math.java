@@ -1,9 +1,9 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
@@ -11,14 +11,19 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.core.functions.Math;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
@@ -32,8 +37,8 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Layton
  */
+@core
 public class Math {
 
 	public static String docs() {
@@ -265,7 +270,7 @@ public class Math {
 						new ExampleScript("Functional usage", "multiply(8, 8)"),
 						new ExampleScript("Operator syntax", "8 * 8"),};
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -342,7 +347,7 @@ public class Math {
 						new ExampleScript("Operator syntax", "2 / 4"),
 						new ExampleScript("Demonstrates divide by zero error", "@zero = 0;\nmsg(1 / @zero);"),};
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -403,7 +408,7 @@ public class Math {
 						new ExampleScript("Functional usage", "mod(2, 2)"),
 						new ExampleScript("Operator syntax", "2 % 2"),};
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -464,7 +469,7 @@ public class Math {
 						new ExampleScript("Functional usage", "pow(2, 4)"),
 						new ExampleScript("Operator syntax", "2 ** 4"),};
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -473,15 +478,15 @@ public class Math {
 			);
 		}
 	}
-	
+
 	/**
 	 * If we have the case {@code @array[0]++}, we have to increment it as
 	 * though it were a variable, so we have to do that with execs. This method
 	 * consolidates the code to do so.
-	 * @return 
+	 * @return
 	 */
-	private static Construct doIncrementDecrement(ParseTree[] nodes, 
-			Script parent, Environment env, Target t, 
+	private static Construct doIncrementDecrement(ParseTree[] nodes,
+			Script parent, Environment env, Target t,
 			Function func, boolean pre, boolean inc){
 		if(nodes[0].getData() instanceof CFunction){
 				Function f = ((CFunction)nodes[0].getData()).getFunction();
@@ -517,7 +522,7 @@ public class Math {
 						if(value instanceof CInt || value instanceof CDouble){
 							temp = Static.getInt(value, t);
 							//Alright, now let's actually perform the increment, and store that in the array.
-							
+
 							if(inc){
 								newVal = temp + delta;
 							} else {
@@ -562,12 +567,12 @@ public class Math {
 		public boolean useSpecialExec() {
 			return true;
 		}
-		
+
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, true);
 		}
-		
+
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
@@ -649,8 +654,8 @@ public class Math {
 			} else {
 				return exec(t, null, args);
 			}
-		}				
-		
+		}
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -759,8 +764,8 @@ public class Math {
 			} else {
 				return exec(t, null, args);
 			}
-		}				
-		
+		}
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -782,7 +787,7 @@ public class Math {
 						+ "msg(@a);"),
 			};
 		}
-		
+
 	}
 
 	@api
@@ -798,12 +803,12 @@ public class Math {
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
-		
+
 		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
-		
+
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, true, false);
@@ -879,15 +884,15 @@ public class Math {
 			} else {
 				return exec(t, null, args);
 			}
-		}				
-		
+		}
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 						OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -897,7 +902,7 @@ public class Math {
 								+ "(--@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
 								+ "msg(@x);"),};
 		}
-		
+
 	}
 
 	@api
@@ -913,12 +918,12 @@ public class Math {
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
-		
+
 		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
-		
+
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return doIncrementDecrement(nodes, parent, env, t, this, false, false);
@@ -1000,8 +1005,8 @@ public class Math {
 			} else {
 				return exec(t, null, args);
 			}
-		}				
-		
+		}
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -1105,7 +1110,7 @@ public class Math {
 				new ExampleScript("Usage with no parameters", "rand()", ":0.720543709668052")
 			};
 		}
-				
+
 	}
 
 	@api
@@ -1162,7 +1167,7 @@ public class Math {
 						new ExampleScript("Demonstrates a negative number", "abs(-5)")
 					};
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -2044,7 +2049,7 @@ public class Math {
 				new ExampleScript("Higher precision round", "round(2.229, 2)"),
 			};
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -2052,7 +2057,7 @@ public class Math {
 						OptimizationOption.CACHE_RETURN
 			);
 		}
-		
+
 	}
 
 	@api
@@ -2080,7 +2085,7 @@ public class Math {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.PluginInternalException};
 		}
 
 		@Override
@@ -2100,7 +2105,10 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String expr = args[0].val();
+			String expr = args[0].val().trim();
+			if("".equals(expr)){
+				throw new Exceptions.FormatException("Expression may not be empty", t);
+			}
 			CArray vars = null;
 			if (args.length == 2 && args[1] instanceof CArray) {
 				vars = (CArray) args[1];
@@ -2197,7 +2205,7 @@ public class Math {
 			);
 		}
 	}
-	
+
 	@api
 	public static class logarithm extends AbstractFunction implements Optimizable {
 
@@ -2271,7 +2279,7 @@ public class Math {
 				new ExampleScript("Error condition", "logarithm(0)"),
 				new ExampleScript("Error condition", "logarithm(-1)"),
 			};
-		}		
-		
+		}
+
 	}
 }

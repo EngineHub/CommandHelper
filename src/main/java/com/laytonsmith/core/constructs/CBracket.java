@@ -4,7 +4,7 @@ import com.laytonsmith.core.ParseTree;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class CBracket extends Construct{
 	ParseTree code;

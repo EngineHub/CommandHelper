@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -46,8 +47,8 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author lsmith
  */
+@core
 public class Cmdline {
 
     public static String docs() {
@@ -83,7 +84,7 @@ public class Cmdline {
                 System.out.print(TermColors.reset());
             }
             System.out.println();
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override
@@ -115,8 +116,8 @@ public class Cmdline {
 				new ExampleScript("Basic usage", "#Note, this is guaranteed to print to standard out\nsys_out('Hello World!')", ":Hello World!")
 			};
 		}
-		
-		
+
+
     }
 
     @api
@@ -147,7 +148,7 @@ public class Cmdline {
                 System.err.print(TermColors.reset());
             }
             System.err.println();
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override
@@ -172,7 +173,7 @@ public class Cmdline {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -180,6 +181,114 @@ public class Cmdline {
 			};
 		}
     }
+
+	@api
+	@noboilerplate
+	public static class print_out extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String msg = Static.MCToANSIColors(args[0].val());
+			System.out.print(msg);
+			System.out.flush();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "print_out";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {text} Writes the text to the system's std out, but does not automatically add a newline at the end."
+					+ " Unlike console(), this does not use anything else to format the output, though in many"
+                    + " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
+					+ " \"bleed\" through, so"
+                    + " print_out(color(RED) . 'This is red') will also cause the next line to also be red,"
+					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)).";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	@noboilerplate
+	public static class print_err extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String msg = Static.MCToANSIColors(args[0].val());
+			System.err.print(msg);
+			System.err.flush();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "print_err";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {text} Writes the text to the system's std err, but does not automatically add a newline at the end."
+					+ " Unlike console(), this does not use anything else to format the output, though in many"
+                    + " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
+					+ " \"bleed\" through, so"
+                    + " print_err(color(RED) . 'This is red') will also cause the next line to also be red,"
+					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)).";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
 
     @api(environments={GlobalEnv.class})
     @noboilerplate
@@ -238,8 +347,8 @@ public class Cmdline {
 			return EnumSet.of(
 						OptimizationOption.TERMINAL
 			);
-		}			
-		
+		}
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -278,7 +387,7 @@ public class Cmdline {
 					prop = System.getProperty(propName);
 				}
 				if(prop == null){
-					return new CNull();
+					return CNull.NULL;
 				}
                 return new CString(prop, t);
             } else {
@@ -294,7 +403,7 @@ public class Cmdline {
             }
 
         }
-		
+
 		private Map<String, String> getMethodScriptProperties(){
 			Map<String, String> map = new HashMap<>();
 			for(Prefs.PNames name : Prefs.PNames.values()){
@@ -326,7 +435,7 @@ public class Cmdline {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -482,7 +591,7 @@ public class Cmdline {
             return CHVersion.V3_3_1;
         }
     }
-	
+
 	@api
 	@noboilerplate
 	public static class prompt_pass extends AbstractFunction {
@@ -511,7 +620,7 @@ public class Cmdline {
 			if(args.length > 1){
 				mask = Static.getBoolean(args[1]);
 			}
-			
+
 			String prompt = args[0].val();
 			Character cha = new Character((char)0);
 			if(mask){
@@ -529,7 +638,7 @@ public class Cmdline {
 					reader.shutdown();
 				}
 			}
-			
+
 		}
 
 		@Override
@@ -553,9 +662,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class prompt_char extends AbstractFunction {
@@ -578,7 +687,7 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
-			
+
 			String prompt = args[0].val();
 			System.out.print(Static.MCToANSIColors(prompt));
 			System.out.flush();
@@ -596,7 +705,7 @@ public class Cmdline {
 					reader.shutdown();
 				}
 			}
-			
+
 		}
 
 		@Override
@@ -619,9 +728,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class prompt_line extends AbstractFunction {
@@ -646,7 +755,7 @@ public class Cmdline {
 			if(!Static.InCmdLine(environment)){
 				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
 			}
-			
+
 			String prompt = args[0].val();
 			jline.console.ConsoleReader reader = null;
 			try {
@@ -661,7 +770,7 @@ public class Cmdline {
 					reader.shutdown();
 				}
 			}
-			
+
 		}
 
 		@Override
@@ -684,9 +793,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class sys_beep extends AbstractFunction {
 
@@ -708,7 +817,7 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			java.awt.Toolkit.getDefaultToolkit().beep();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -730,9 +839,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class clear_screen extends AbstractFunction {
@@ -761,7 +870,7 @@ public class Cmdline {
 					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -783,9 +892,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class shell_adv extends AbstractFunction {
@@ -825,30 +934,30 @@ public class Cmdline {
 				CArray array = (CArray) args[0];
 				command = new String[(int)array.size()];
 				for(int i = 0; i < array.size(); i++){
-					command[i] = array.get(i).val();
+					command[i] = array.get(i, t).val();
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
 			}
 			if(args.length > 1){
 				CArray options = Static.getArray(args[1], t);
-				if(options.containsKey("workingDir") && !(options.get("workingDir") instanceof CNull)){
-					workingDir = new File(options.get("workingDir").val());
+				if(options.containsKey("workingDir") && !(options.get("workingDir", t) instanceof CNull)){
+					workingDir = new File(options.get("workingDir", t).val());
 					if(!workingDir.isAbsolute()){
 						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
 					}
 				}
-				if(options.containsKey("stdout") && !(options.get("stdout") instanceof CNull)){
-					stdout = Static.getObject(options.get("stdout"), t, "closure", CClosure.class);
+				if(options.containsKey("stdout") && !(options.get("stdout", t) instanceof CNull)){
+					stdout = Static.getObject(options.get("stdout", t), t, "closure", CClosure.class);
 				}
-				if(options.containsKey("stderr") && !(options.get("stderr") instanceof CNull)){
-					stderr = Static.getObject(options.get("stderr"), t, "closure", CClosure.class);
+				if(options.containsKey("stderr") && !(options.get("stderr", t) instanceof CNull)){
+					stderr = Static.getObject(options.get("stderr", t), t, "closure", CClosure.class);
 				}
-				if(options.containsKey("exit") && !(options.get("exit") instanceof CNull)){
-					exit = Static.getObject(options.get("exit"), t, "closure", CClosure.class);
+				if(options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)){
+					exit = Static.getObject(options.get("exit", t), t, "closure", CClosure.class);
 				}
 				if(options.containsKey("subshell")){
-					subshell = Static.getBoolean(options.get("subshell"));
+					subshell = Static.getBoolean(options.get("subshell", t));
 				}
 			}
 			final CommandExecutor cmd = new CommandExecutor(command);
@@ -868,7 +977,7 @@ public class Cmdline {
 					if(c == '\n' || b == -1){
 						try {
 							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-								
+
 								@Override
 								public Object call() throws Exception {
 									_stdout.execute(new CString(sbout.getObject(), t));
@@ -894,7 +1003,7 @@ public class Cmdline {
 					if(c == '\n' || b == -1){
 						try {
 							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-								
+
 								@Override
 								public Object call() throws Exception {
 									_stderr.execute(new CString(sberr.getObject(), t));
@@ -915,7 +1024,7 @@ public class Cmdline {
 			} catch (IOException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
 			}
-			
+
 			Runnable run = new Runnable() {
 
 				@Override
@@ -965,7 +1074,7 @@ public class Cmdline {
 			} else {
 				run.run();
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -983,7 +1092,7 @@ public class Cmdline {
 			return "void {command, [options]} Runs a shell command. <code>command</code> can either be a string or an array of string arguments,"
 					+ " which are run as an external process. Requires the allow-shell-commands option to be enabled in preferences, or run from command line, otherwise"
 					+ " an InsufficientPermissionException is thrown. ---- <code>options</code> is an associative array with zero or more"
-					+ " of the following options:"
+					+ " of the following options:\n\n"
 					+ "{| border=\"1\" class=\"wikitable\" cellspacing=\"1\" cellpadding=\"1\"\n"
 					+ "|-\n| workingDir || Sets the working directory for"
 					+ " the sub process. By default null, which represents the directory of this script."
@@ -1002,9 +1111,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class shell extends AbstractFunction {
@@ -1041,7 +1150,7 @@ public class Cmdline {
 				CArray array = (CArray) args[0];
 				command = new String[(int)array.size()];
 				for(int i = 0; i < array.size(); i++){
-					command[i] = array.get(i).val();
+					command[i] = array.get(i, t).val();
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
@@ -1049,10 +1158,10 @@ public class Cmdline {
 			if(args.length > 1){
 				CArray options = Static.getArray(args[1], t);
 				if(options.containsKey("expectedExitCode")){
-					expectedExitCode = Static.getInt32(options.get("expectedExitCode"), t);
+					expectedExitCode = Static.getInt32(options.get("expectedExitCode", t), t);
 				}
-				if(options.containsKey("workingDir") && !(options.get("workingDir") instanceof CNull)){
-					workingDir = new File(options.get("workingDir").val());
+				if(options.containsKey("workingDir") && !(options.get("workingDir", t) instanceof CNull)){
+					workingDir = new File(options.get("workingDir", t).val());
 					if(!workingDir.isAbsolute()){
 						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
 					}
@@ -1136,9 +1245,9 @@ public class Cmdline {
 				new com.laytonsmith.core.functions.ExampleScript("Changing the working directory", "shell('grep -r \"search content\" *', array(workingDir: '/'))", "<output of command>"),
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	public static class read_pipe_input extends AbstractFunction {
 
@@ -1220,9 +1329,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class pwd extends AbstractFunction {
 
@@ -1280,9 +1389,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class cd extends AbstractFunction {
 
@@ -1309,7 +1418,7 @@ public class Cmdline {
 				throw new ConfigRuntimeException("No such file or directory: " + cd.getPath(), ExceptionType.IOException, t);
 			}
 			environment.getEnv(GlobalEnv.class).SetRootFolder(cd);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1332,9 +1441,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ls extends AbstractFunction {
 
@@ -1363,7 +1472,7 @@ public class Cmdline {
 					ca.push(new CString(f.getName(), t));
 				}
 			} else {
-				throw new ConfigRuntimeException("No such file or directory: " + cwd.getPath(), 
+				throw new ConfigRuntimeException("No such file or directory: " + cwd.getPath(),
 						ExceptionType.IOException, t);
 			}
 			return ca;
@@ -1389,9 +1498,9 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class set_cmdline_prompt extends AbstractFunction {
 
@@ -1417,7 +1526,7 @@ public class Cmdline {
 				throw new Exceptions.CastException("Expecting a closure for argument 1 of " + getName(), t);
 			}
 			environment.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1441,9 +1550,61 @@ public class Cmdline {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
+	@api
+	public static class get_terminal_width extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InsufficientPermissionException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			requireCmdlineMode(environment, this, t);
+			try {
+				int i = new jline.console.ConsoleReader().getTerminal().getWidth();
+				return new CInt(i, t);
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "get_terminal_width";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "int {} Returns the current width of the terminal, measured in characters. This is"
+					+ " useful for determining proper layout for dynamic output. This only works in cmdline mode.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
+
 	/**
 	 * Requires cmdline mode. If not currently in cmdline mode, a proper CRE is thrown.
 	 * @param environment
@@ -1453,7 +1614,7 @@ public class Cmdline {
 	 */
 	public static void requireCmdlineMode(Environment environment, Function f, Target t) throws ConfigRuntimeException {
 		if(!Static.InCmdLine(environment)){
-			throw new ConfigRuntimeException(f.getName() + " cannot be used outside of cmdline mode.", 
+			throw new ConfigRuntimeException(f.getName() + " cannot be used outside of cmdline mode.",
 					ExceptionType.InsufficientPermissionException, t);
 		}
 	}

@@ -1,8 +1,8 @@
 package com.laytonsmith.core.profiler;
 
 import com.laytonsmith.PureUtilities.Common.DateUtils;
-import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.core.LogLevel;
@@ -24,7 +24,7 @@ import java.util.TreeMap;
  */
 /**
  *
- * @author lsmith
+ * 
  */
 public final class Profiler {
 	

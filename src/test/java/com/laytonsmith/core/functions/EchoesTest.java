@@ -13,16 +13,23 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Echoes.color;
 import com.laytonsmith.testing.C;
-import static com.laytonsmith.testing.StaticTest.*;
+import static com.laytonsmith.testing.StaticTest.GetFakeServer;
+import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.TestClassDocs;
 import java.lang.reflect.InvocationTargetException;
-import org.junit.*;
-import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class EchoesTest {
 

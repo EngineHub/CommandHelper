@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
 import com.laytonsmith.abstraction.MCPotionMeta;
-import com.laytonsmith.abstraction.bukkit.BukkitMCItemMeta;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;

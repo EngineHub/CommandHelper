@@ -28,7 +28,7 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 

@@ -2,14 +2,16 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.MCAnimalTamer;
+import com.laytonsmith.abstraction.MCTameable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable{
 

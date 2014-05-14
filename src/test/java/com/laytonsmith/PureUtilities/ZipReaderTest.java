@@ -3,13 +3,15 @@ package com.laytonsmith.PureUtilities;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
- * @author layton
+ * 
  */
 public class ZipReaderTest {
     

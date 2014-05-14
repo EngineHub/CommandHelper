@@ -10,7 +10,7 @@ import java.util.Collection;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCBlock extends MCMetadatable {
 

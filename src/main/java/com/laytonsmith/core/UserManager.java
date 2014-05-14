@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * This class manages user aliases, and repeat commands.
- * @author layton
+ * 
  */
 public class UserManager {
     

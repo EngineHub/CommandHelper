@@ -7,7 +7,7 @@ package com.laytonsmith.abstraction;
  * a new concrete class for each type. Further, since supertypes can implement the getHandle method, only
  * subclasses that need to implement the false constructor have to. A template implementation is given in the
  * source below.
- * @author layton
+ * 
  */
 public interface AbstractionObject {
     /**

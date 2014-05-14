@@ -3,7 +3,7 @@ package com.laytonsmith.abstraction;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCTameable extends MCAgeable {
     public boolean isTamed();

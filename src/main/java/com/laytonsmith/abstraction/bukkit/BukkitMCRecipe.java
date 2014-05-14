@@ -1,10 +1,9 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.inventory.Recipe;
-
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
+import org.bukkit.inventory.Recipe;
 
 public abstract class BukkitMCRecipe implements MCRecipe {
 

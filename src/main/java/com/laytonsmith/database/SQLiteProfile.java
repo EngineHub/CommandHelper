@@ -8,15 +8,15 @@ import java.util.Map;
 /**
  * 
  */
-@Profiles.ProfileType(type = "sqlite")
-public class SQLiteProfile extends Profiles.Profile {
+@SQLProfiles.SQLProfileType(type = "sqlite")
+public class SQLiteProfile extends SQLProfiles.SQLProfile {
 	
 	private String file;
 	
-	public SQLiteProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
+	public SQLiteProfile(String id, Map<String, String> elements) throws SQLProfiles.InvalidSQLProfileException {
 		super(id);
 		if(!elements.containsKey("file")){
-			throw new Profiles.InvalidProfileException("\"file\" parameter is required for profile \"" + id + "\"");
+			throw new SQLProfiles.InvalidSQLProfileException("\"file\" parameter is required for profile \"" + id + "\"");
 		}
 		file = elements.get("file");
 	}

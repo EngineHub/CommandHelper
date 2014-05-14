@@ -5,14 +5,16 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class Economy {
     
@@ -234,7 +236,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).set(Static.getNumber(args[1], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to set the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
             }
@@ -282,7 +284,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).add(Static.getNumber(args[1], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to add to the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
             }
@@ -330,7 +332,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).subtract(Static.getNumber(args[1], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to subtract from the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
             }
@@ -378,7 +380,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).multiply(Static.getNumber(args[1], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to multiply the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
             }
@@ -426,7 +428,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).divide(Static.getNumber(args[1], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to divide the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
             }
@@ -478,7 +480,7 @@ public class Economy {
                     + " this operation being unsupported in Vault. If you want to see this feature supported, "
                     + " contact the authors of Vault!", ExceptionType.PluginInternalException, t);
 //            if(GetAccount(this.getName(), t, args).remove()){
-//                return new CVoid(t);
+//                return CVoid.VOID;
 //            } else {
 //                throw new ConfigRuntimeException("An error occured when trying to set the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
 //            }
@@ -570,7 +572,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).set(Static.getNumber(args[2], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to set the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
             }
@@ -618,7 +620,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).add(Static.getNumber(args[2], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to add to the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
             }
@@ -666,7 +668,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).subtract(Static.getNumber(args[2], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to subtract from the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
             }
@@ -714,7 +716,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).multiply(Static.getNumber(args[2], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to multiply the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
             }
@@ -762,7 +764,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).divide(Static.getNumber(args[2], t))){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to divide the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
             }
@@ -810,7 +812,7 @@ public class Economy {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).remove()){
-                return new CVoid(t);
+                return CVoid.VOID;
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to remove the bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
             }

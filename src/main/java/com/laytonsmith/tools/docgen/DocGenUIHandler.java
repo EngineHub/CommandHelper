@@ -10,7 +10,6 @@ import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Crypto;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -37,7 +36,7 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class DocGenUIHandler {
 	

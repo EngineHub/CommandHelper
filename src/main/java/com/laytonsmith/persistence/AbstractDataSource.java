@@ -1,14 +1,13 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.persistence.io.ConnectionMixin;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;

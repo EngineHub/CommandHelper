@@ -4,7 +4,6 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.annotations.abstractionenum;
-
 import org.bukkit.event.inventory.InventoryAction;
 
 /**

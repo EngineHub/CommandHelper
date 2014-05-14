@@ -8,8 +8,8 @@ import java.util.Map;
 /**
  *
  */
-@Profiles.ProfileType(type = "mysql")
-public class MySQLProfile extends Profiles.Profile {
+@SQLProfiles.SQLProfileType(type = "mysql")
+public class MySQLProfile extends SQLProfiles.SQLProfile {
 
 	private final String host;
 	private final int port;
@@ -17,10 +17,10 @@ public class MySQLProfile extends Profiles.Profile {
 	private final String username;
 	private final String password;
 
-	public MySQLProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
+	public MySQLProfile(String id, Map<String, String> elements) throws SQLProfiles.InvalidSQLProfileException {
 		super(id);
 		if (!elements.containsKey("database")) {
-			throw new Profiles.InvalidProfileException("Required \"database\" tag is missing for profile \"" + id + "\"");
+			throw new SQLProfiles.InvalidSQLProfileException("Required \"database\" tag is missing for profile \"" + id + "\"");
 		}
 		database = elements.get("database");
 		if (elements.containsKey("username")) {
@@ -42,7 +42,7 @@ public class MySQLProfile extends Profiles.Profile {
 			try {
 				port = Integer.parseInt(elements.get("port"));
 			} catch (NumberFormatException ex) {
-				throw new Profiles.InvalidProfileException(ex.getMessage());
+				throw new SQLProfiles.InvalidSQLProfileException(ex.getMessage());
 			}
 		} else {
 			port = 3306;

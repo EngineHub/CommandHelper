@@ -1,12 +1,5 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
-import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
-import org.bukkit.event.vehicle.VehicleCollisionEvent;
-import org.bukkit.event.vehicle.VehicleEnterEvent;
-import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
-import org.bukkit.event.vehicle.VehicleEvent;
-import org.bukkit.event.vehicle.VehicleExitEvent;
-
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
@@ -25,6 +18,12 @@ import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.Location;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
+import org.bukkit.event.vehicle.VehicleCollisionEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
+import org.bukkit.event.vehicle.VehicleEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 
 /**
  * 

@@ -1,47 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
-import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClosure;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.persistence.DataSourceException;
-import com.laytonsmith.persistence.PersistenceNetwork;
-import com.laytonsmith.persistence.ReadOnlyException;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.ConnectException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  *
  */
@@ -139,7 +97,7 @@ public class Federation {
 //
 //										@Override
 //										public void run() {
-//											local_callback.execute(new CNull(), new CBoolean(true, t), new CNull());
+//											local_callback.execute(CNull.NULL, new CBoolean(true, t), CNull.NULL);
 //										}
 //									});
 //								}
@@ -152,7 +110,7 @@ public class Federation {
 //
 //										@Override
 //										public void run() {
-//											local_callback.execute(new CNull(), new CBoolean(true, t), exception);
+//											local_callback.execute(CNull.NULL, new CBoolean(true, t), exception);
 //										}
 //									});
 //								}

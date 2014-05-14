@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class FileOptions {
 

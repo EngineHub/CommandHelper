@@ -1,17 +1,14 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * A persistence network is a group of data sources that can act transparently
@@ -24,12 +21,11 @@ import java.util.TreeMap;
  * match. All other aspects of how the data is stored and retrieved are
  * abstracted, so you needn't worry about any of those details.
  *
- * @author lsmith
+ * 
  */
 public class PersistenceNetwork {
 
 	private DataSourceFilter filter;
-	private Map<URI, DataSource> dsCache;
 	private ConnectionMixinFactory.ConnectionMixinOptions options;
 
 	/**
@@ -64,7 +60,6 @@ public class PersistenceNetwork {
 	 */
 	public PersistenceNetwork(String configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		filter = new DataSourceFilter(configuration, defaultURI);
-		dsCache = new TreeMap<URI, DataSource>();
 		this.options = options;
 		//Data sources are lazily loaded, so we don't need to do anything right now to load them.
 	}
@@ -81,17 +76,15 @@ public class PersistenceNetwork {
 	}
 
 	/**
-	 * Returns the data source object for this URI.
+	 * Returns the data source object for this URI. The returned DataSource is
+	 * threadsafe.
 	 *
 	 * @param uri
 	 * @return
 	 * @throws DataSourceException
 	 */
 	private DataSource getDataSource(URI uri) throws DataSourceException {
-		if (!dsCache.containsKey(uri)) {
-			dsCache.put(uri, DataSourceFactory.GetDataSource(uri, options));
-		}
-		return dsCache.get(uri);
+		return ThreadsafeDataSource.GetDataSource(uri, options);
 	}
 
 	/**

@@ -1,16 +1,14 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
-
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
+import java.util.HashMap;
+import java.util.Map;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 
 public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedRecipe {
 

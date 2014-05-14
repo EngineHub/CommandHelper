@@ -17,7 +17,7 @@ package com.laytonsmith.PureUtilities.Common;
  * not match /home/user/files/resources/frame.html, because the last match does
  * not span segments. However, "/home/user/files/**.htm?" would match.
  *
- * @author lsmith
+ * 
  */
 public class Wildcard {
 	

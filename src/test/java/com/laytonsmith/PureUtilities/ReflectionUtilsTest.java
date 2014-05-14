@@ -1,15 +1,15 @@
 package com.laytonsmith.PureUtilities;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.testing.StaticTest;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class ReflectionUtilsTest {
 	

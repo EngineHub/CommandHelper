@@ -1,9 +1,7 @@
 
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.PureUtilities.FileLocations;
 import com.laytonsmith.core.MethodScriptFileLocations;
-import static com.laytonsmith.core.MethodScriptFileLocations.setDefault;
 import java.io.File;
 
 /**

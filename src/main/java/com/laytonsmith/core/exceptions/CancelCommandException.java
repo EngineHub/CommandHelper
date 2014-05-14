@@ -7,7 +7,7 @@ import com.laytonsmith.core.constructs.Target;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class CancelCommandException extends ProgramFlowManipulationException{
     String message;

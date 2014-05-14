@@ -2,11 +2,25 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CBrace;
+import com.laytonsmith.core.constructs.CBracket;
+import com.laytonsmith.core.constructs.CEntry;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CSymbol;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -18,9 +32,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
- * @author layton
+ * 
  */
+@core
 public class Compiler {
 
 	public static String docs() {
@@ -33,8 +47,6 @@ public class Compiler {
 	@noprofile
 	@hide("This is only used internally by the compiler.")
 	public static class p extends DummyFunction {
-
-		private static final CVoid VOID = new CVoid(Target.UNKNOWN);
 
 		@Override
 		public String getName() {
@@ -55,7 +67,7 @@ public class Compiler {
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			switch (nodes.length) {
 				case 0:
-					return VOID;
+					return CVoid.VOID;
 				case 1:
 					return parent.eval(nodes[0], env);
 				default: 
@@ -65,7 +77,7 @@ public class Compiler {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -501,7 +513,7 @@ public class Compiler {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
-				return new CVoid(t);
+				return CVoid.VOID;
 			}
 			return args[0];
 		}
@@ -526,7 +538,7 @@ public class Compiler {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree node;
 			if (children.isEmpty()) {
-				node = new ParseTree(new CVoid(t), fileOptions);
+				node = new ParseTree(CVoid.VOID, fileOptions);
 			} else if (children.size() == 1) {
 				node = children.get(0);
 			} else {
@@ -557,7 +569,7 @@ public class Compiler {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree node;
 			if (children.isEmpty()) {
-				node = new ParseTree(new CVoid(t), fileOptions);
+				node = new ParseTree(CVoid.VOID, fileOptions);
 			} else if (children.size() == 1) {
 				node = children.get(0);
 			} else {

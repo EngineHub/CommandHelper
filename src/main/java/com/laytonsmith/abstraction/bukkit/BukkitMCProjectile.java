@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockProjectileSource;

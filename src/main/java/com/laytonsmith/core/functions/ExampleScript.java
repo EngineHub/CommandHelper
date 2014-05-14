@@ -15,7 +15,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
@@ -25,8 +25,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -40,7 +38,6 @@ import org.bukkit.plugin.PluginManager;
  * but there is no guarantee that functions will work. Since this is the case,
  * output can be mocked, by using the appropriate constructor. This will bypass actually
  * running the code, but will still output the information in the standard format.
- * @author lsmith
  */
 public class ExampleScript {
 	
@@ -219,7 +216,7 @@ public class ExampleScript {
 		Environment env;
 		try {
 			env = Static.GenerateStandaloneEnvironment();
-		} catch (Profiles.InvalidProfileException ex) {
+		} catch (SQLProfiles.InvalidSQLProfileException ex) {
 			throw new RuntimeException(ex);
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);

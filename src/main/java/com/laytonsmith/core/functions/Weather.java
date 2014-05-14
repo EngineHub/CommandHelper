@@ -5,8 +5,15 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -14,8 +21,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class Weather {
 
@@ -132,7 +138,7 @@ public class Weather {
 			if (args.length == 3) {
 				w.setWeatherDuration(Static.getInt32(args[2], t));
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -199,7 +205,7 @@ public class Weather {
 			if (args.length == 3) {
 				w.setThunderDuration(Static.getInt32(args[2], t));
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

@@ -3,24 +3,36 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.SimpleDocumentation;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- *
- * @author Layton
+ * 
  */
+@core
 public class Exceptions {
 
 	public static String docs() {
@@ -401,12 +413,12 @@ public class Exceptions {
 				}
 			}
 
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -519,7 +531,7 @@ public class Exceptions {
 				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
 				if(old == null){
-					return new CNull();
+					return CNull.NULL;
 				} else {
 					return old;
 				}

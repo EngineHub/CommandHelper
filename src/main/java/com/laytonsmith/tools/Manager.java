@@ -1,10 +1,24 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.TermColors;
-import static com.laytonsmith.PureUtilities.TermColors.*;
+import static com.laytonsmith.PureUtilities.TermColors.BG_RED;
+import static com.laytonsmith.PureUtilities.TermColors.BLINKOFF;
+import static com.laytonsmith.PureUtilities.TermColors.BLINKON;
+import static com.laytonsmith.PureUtilities.TermColors.BLUE;
+import static com.laytonsmith.PureUtilities.TermColors.BOLD;
+import static com.laytonsmith.PureUtilities.TermColors.BRIGHT_WHITE;
+import static com.laytonsmith.PureUtilities.TermColors.CYAN;
+import static com.laytonsmith.PureUtilities.TermColors.GREEN;
+import static com.laytonsmith.PureUtilities.TermColors.MAGENTA;
+import static com.laytonsmith.PureUtilities.TermColors.RED;
+import static com.laytonsmith.PureUtilities.TermColors.WHITE;
+import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
+import static com.laytonsmith.PureUtilities.TermColors.cls;
+import static com.laytonsmith.PureUtilities.TermColors.p;
+import static com.laytonsmith.PureUtilities.TermColors.prompt;
+import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.CHLog;
@@ -21,28 +35,24 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.DataSource;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.DataSourceFilter;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
-import com.laytonsmith.persistence.SerializedPersistence;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
-import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -61,7 +71,7 @@ public class Manager {
 	};
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
-	public static void start() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	public static void start() throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
 		Implementation.useAbstractEnumThread(false);
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
@@ -72,7 +82,7 @@ public class Manager {
 		CHLog.initialize(chDirectory);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork, 
-				new PermissionsResolver.PermissiveResolver(), chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+				new PermissionsResolver.PermissiveResolver(), chDirectory, new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 

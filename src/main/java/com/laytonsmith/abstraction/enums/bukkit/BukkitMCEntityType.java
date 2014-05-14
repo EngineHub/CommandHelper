@@ -9,7 +9,7 @@ import org.bukkit.entity.EntityType;
 
 /**
  *
- * @author Layton
+ * 
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

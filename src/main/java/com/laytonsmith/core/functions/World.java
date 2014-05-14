@@ -4,32 +4,41 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
-import java.lang.Math;
 import java.util.Enumeration;
 import java.util.Properties;
-import java.util.SortedMap;
 import java.util.Random;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +47,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author Layton
  */
 public class World {
 
@@ -148,7 +156,7 @@ public class World {
 				throw new ConfigRuntimeException("Invalid world given.", ExceptionType.InvalidWorldException, t);
 			}
 			w.setSpawnLocation(x, y, z);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -220,7 +228,7 @@ public class World {
 			int x;
 			int z;
 			if (args.length == 1) {
-				//Location array provided                
+				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 				world = l.getWorld();
 				x = l.getBlockX();
@@ -247,28 +255,28 @@ public class World {
 				z = Static.getInt32(args[2], t);
 			}
 			world.refreshChunk(x, z);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
-	
+
 	@api
 	public static class load_chunk extends AbstractFunction {
- 
+
  		@Override
  		public ExceptionType[] thrown() {
  			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
  		}
- 
+
  		@Override
  		public boolean isRestricted() {
  			return true;
  		}
- 
+
  		@Override
  		public Boolean runAsync() {
  			return false;
  		}
- 
+
  		@Override
  		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
  			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -276,7 +284,7 @@ public class World {
  			int x;
  			int z;
  			if (args.length == 1) {
- 				//Location array provided                
+ 				//Location array provided
  				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
  				world = l.getWorld();
  				x = l.getBlockX();
@@ -303,49 +311,49 @@ public class World {
  				z = Static.getInt32(args[2], t);
  			}
  			world.loadChunk(x, z);
- 			return new CVoid(t);
+ 			return CVoid.VOID;
  		}
- 
+
  		@Override
  		public String getName() {
  			return "load_chunk";
  		}
- 
+
  		@Override
  		public Integer[] numArgs() {
  			return new Integer[]{1, 2, 3};
  		}
- 		
+
  		@Override
  		public String docs() {
  			return "void {[world], x, z | [world], locationArray} Loads the chunk, using the specified world, or the current"
  					+ " players world if not provided.";
  		}
- 
+
  		@Override
  		public Version since() {
  			return CHVersion.V3_3_1;
  		}
  	}
- 	
+
  	@api(environments=CommandHelperEnvironment.class)
  	public static class unload_chunk extends AbstractFunction {
- 
+
  		@Override
  		public ExceptionType[] thrown() {
  			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
  		}
- 
+
  		@Override
  		public boolean isRestricted() {
  			return true;
  		}
- 
+
  		@Override
  		public Boolean runAsync() {
  			return false;
  		}
- 
+
  		@Override
  		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
  			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -353,7 +361,7 @@ public class World {
  			int x;
  			int z;
  			if (args.length == 1) {
- 				//Location array provided                
+ 				//Location array provided
  				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
  				world = l.getWorld();
  				x = l.getBlockX();
@@ -380,31 +388,31 @@ public class World {
  				z = Static.getInt32(args[2], t);
  			}
  			world.unloadChunk(x, z);
- 			return new CVoid(t);
+ 			return CVoid.VOID;
  		}
- 
+
  		@Override
  		public String getName() {
  			return "unload_chunk";
  		}
- 
+
  		@Override
  		public Integer[] numArgs() {
  			return new Integer[]{1, 2, 3};
  		}
- 		
+
  		@Override
  		public String docs() {
  			return "void {[world], x, z | [world], locationArray} Unloads the chunk, using the specified world, or the current"
  					+ " players world if not provided.";
  		}
- 
+
  		@Override
  		public Version since() {
  			return CHVersion.V3_3_1;
  		}
  	}
-	
+
 	@api
 	public static class get_loaded_chunks extends AbstractFunction {
 
@@ -428,7 +436,7 @@ public class World {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
  			MCWorld world;
  			if (args.length == 1) {
- 				// World Provided           
+ 				// World Provided
  				world = Static.getServer().getWorld(args[0].val());
  			} else {
 				if (m == null) {
@@ -445,7 +453,7 @@ public class World {
 				chunk.set("world", chunks[i].getWorld().getName(), t);
 				ret.set(i, chunk, t);
 			}
-			
+
  			return ret;
 		}
 
@@ -469,9 +477,9 @@ public class World {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments=CommandHelperEnvironment.class)
 	public static class regen_chunk extends AbstractFunction {
 
@@ -519,7 +527,7 @@ public class World {
 			int z;
 
 			if (args.length == 1) {
-				//Location array provided                
+				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 
 				world = l.getWorld();
@@ -552,7 +560,7 @@ public class World {
 			return new CBoolean(world.regenerateChunk(x, z), t);
 		}
 	}
-	
+
 	@api(environments=CommandHelperEnvironment.class)
 	public static class is_slime_chunk extends AbstractFunction {
 
@@ -593,7 +601,7 @@ public class World {
 		}
 
 		Random rnd = new Random();
-		
+
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -602,7 +610,7 @@ public class World {
 			int z;
 			long seed;
 			if (args.length == 1) {
-				//Location array provided                
+				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 				world = l.getWorld();
 				seed = world.getSeed();
@@ -761,7 +769,7 @@ public class World {
 			}
 			time = Long.parseLong(stime);
 			w.setTime(time);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -867,7 +875,7 @@ public class World {
 				creator.generator(args[4].val());
 			}
 			creator.createWorld();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -884,7 +892,7 @@ public class World {
 		public String docs() {
 			return "void {name, [type, environment, [seed, [generator]]]} Creates a new world with the specified options."
 					+ " If the world already exists, it will be loaded from disk, and the last 3 arguments may be"
-					+ " ignored. name is the name of the world, type is one of " 
+					+ " ignored. name is the name of the world, type is one of "
 					+ StringUtils.Join(MCWorldType.values(), ", ") + " and environment is one of "
 					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ". The seed can be an integer, a string (will be the hashcode), or null (will be random int)."
 					+ " Generator is the name of a world generator loaded on the server.";
@@ -1052,7 +1060,7 @@ public class World {
 			if (args.length == 3) {
 				if (args[2] instanceof CArray) {
 					vect = (CArray)args[2];
-					
+
 					if (vect.size() < 3) {
 						throw new ConfigRuntimeException("Argument 3 of spawn_falling_block must have 3 items", ExceptionType.FormatException, t);
 					}
@@ -1064,9 +1072,9 @@ public class World {
 			MCFallingBlock block = loc.getWorld().spawnFallingBlock(loc, item.getType().getType(), (byte)item.getData().getData());
 
 			if (args.length == 3 && vect != null) {
-				double x = Double.valueOf(vect.get(0).val());
-				double y = Double.valueOf(vect.get(1).val());
-				double z = Double.valueOf(vect.get(2).val());
+				double x = Double.valueOf(vect.get(0, t).val());
+				double y = Double.valueOf(vect.get(1, t).val());
+				double z = Double.valueOf(vect.get(2, t).val());
 
 				Velocity v = new Velocity(x, y, z);
 
@@ -1321,7 +1329,7 @@ public class World {
 				}
 				world.setDifficulty(difficulty);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1425,7 +1433,7 @@ public class World {
 				}
 				world.setPVP(Static.getBoolean(args[1]));
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1557,7 +1565,7 @@ public class World {
 				}
 				world.setGameRuleValue(gameRule, Static.getBoolean(args[2]));
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1676,11 +1684,11 @@ public class World {
 			double dY = subtract.getY();
 			double dZ = subtract.getZ();
 
-			double distanceXZ = Math.sqrt(dX * dX + dZ * dZ);
+			double distanceXZ = java.lang.Math.sqrt(dX * dX + dZ * dZ);
 
-			double yaw = Math.toDegrees(Math.acos(dX / distanceXZ));
+			double yaw = java.lang.Math.toDegrees(java.lang.Math.acos(dX / distanceXZ));
 			if (dZ < 0.0) {
-				yaw += Math.abs(180 - yaw) * 2;
+				yaw += java.lang.Math.abs(180 - yaw) * 2;
 			}
 
 			return new CDouble(yaw - 90, t);
@@ -1738,10 +1746,10 @@ public class World {
 			double dY = subtract.getY();
 			double dZ = subtract.getZ();
 
-			double distanceXZ = Math.sqrt(dX * dX + dZ * dZ);
-			double distanceY = Math.sqrt(distanceXZ * distanceXZ + dY * dY);
+			double distanceXZ = java.lang.Math.sqrt(dX * dX + dZ * dZ);
+			double distanceY = java.lang.Math.sqrt(distanceXZ * distanceXZ + dY * dY);
 
-			double pitch = Math.toDegrees(Math.acos(dY / distanceY)) - 90;
+			double pitch = java.lang.Math.toDegrees(java.lang.Math.acos(dY / distanceY)) - 90;
 
 			return new CDouble(pitch, t);
 		}

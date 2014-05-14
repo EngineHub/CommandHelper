@@ -6,7 +6,7 @@ import com.laytonsmith.core.constructs.Target;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class ProcedureUsage extends Construct{
 	ProcedureDefinition definition;

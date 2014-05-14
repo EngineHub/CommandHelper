@@ -13,7 +13,7 @@ import java.util.TreeSet;
 
 /**
  *
- * @author Layton
+ * 
  */
 class LexerObject {
 	StringBuilder buffer;

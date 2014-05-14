@@ -1,27 +1,11 @@
 package com.laytonsmith.core.federation;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.persistence.DataSourceException;
-import com.laytonsmith.persistence.PersistenceNetwork;
-import com.laytonsmith.persistence.ReadOnlyException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class contains the POJO functionality for the Federation system.

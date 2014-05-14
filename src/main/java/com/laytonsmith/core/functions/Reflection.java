@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -40,9 +41,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
- * @author layton
+ * 
  */
+@core
 public class Reflection {
 
 	public static String docs() {
@@ -245,7 +246,7 @@ public class Reflection {
 					throw new ConfigRuntimeException("Unknown function: " + element, ExceptionType.FormatException, t);
 				}
 			}
-			return new CNull(t);
+			return CNull.NULL;
 		}
 
 		public String formatFunctionDoc(String docs, DocField field) {

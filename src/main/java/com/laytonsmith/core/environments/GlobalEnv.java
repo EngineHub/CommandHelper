@@ -14,7 +14,7 @@ import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.File;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import java.util.Map;
  * A global environment is always available, and contains the objects that the
  * core functionality uses.
  *
- * @author lsmith
+ * 
  */
 public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
@@ -55,7 +55,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private String label = null;
 	private final DaemonManager daemonManager = new DaemonManager();
 	private boolean dynamicScriptingMode = false;
-	private final Profiles profiles;
+	private final SQLProfiles profiles;
 	private BoundEvent.ActiveEvent event = null;
 	private boolean interrupt = false;
 	private final List<ArrayAccess.ArrayAccessIterator> arrayAccessList = Collections.synchronizedList(new ArrayList<ArrayAccess.ArrayAccessIterator>());
@@ -67,10 +67,10 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param network The pre-configured PersistenecNetwork object to use
 	 * @param resolver The PermissionsResolver to use
 	 * @param root The root working directory to use
-	 * @param profiles The SQL Profiles object to use
+	 * @param profiles The SQL SQLProfiles object to use
 	 */
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network, PermissionsResolver resolver, 
-			File root, Profiles profiles) {
+			File root, SQLProfiles profiles) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
 		Static.AssertNonNull(profiler, "Profiler cannot be null");
 		Static.AssertNonNull(network, "PersistenceNetwork cannot be null");
@@ -188,16 +188,27 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		return clone;
 	}
 
+	/**
+	 * Gets the current working directory. It is guaranteed that this will be
+	 * a folder, not a file, and that it will not be null.
+	 * @return 
+	 */
 	public File GetRootFolder() {
 		return root.getObject();
 	}
 	
 	/**
-	 * Sets the root working directory. It cannot be null.
+	 * Sets the root working directory. It cannot be null, or a file, it
+	 * must be a directory.
 	 * @param file 
+	 * @throws NullPointerException If file is null
+	 * @throws IllegalArgumentException If the file specified is not a directory.
 	 */
 	public void SetRootFolder(File file){
 		Static.AssertNonNull(file, "Root file cannot be null");
+		if(file.isFile()){
+			throw new IllegalArgumentException("File provided to SetRootFolder must be a folder, not a file. (" + file.toString() + " was found.)");
+		}
 		this.root.setObject(file);
 	}
 
@@ -277,7 +288,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		return this.dynamicScriptingMode;
 	}
 
-	public Profiles getSQLProfiles() {
+	public SQLProfiles getSQLProfiles() {
 		return this.profiles;
 	}
 	

@@ -9,7 +9,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 /**
  *
- * @author Layton
+ * 
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

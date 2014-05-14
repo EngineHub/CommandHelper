@@ -13,7 +13,7 @@ package com.laytonsmith.PureUtilities.VirtualFS;
  * The essential operations of a glob simply ask if a particular VirtualFile actually match
  * this glob or not.
  * 
- * @author lsmith
+ * 
  */
 public class VirtualGlob implements Comparable<VirtualGlob> {
 	

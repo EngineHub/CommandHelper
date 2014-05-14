@@ -12,7 +12,12 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -20,8 +25,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class ItemMeta {
 	public static String docs(){
@@ -166,7 +170,7 @@ public class ItemMeta {
 				throw new Exceptions.CastException("There is no item at slot " + slot, t);
 			}
 			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getTypeId(), t));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -335,7 +339,7 @@ public class ItemMeta {
 			} else {
 				throw new Exceptions.CastException("The item at slot " + slot + " is not leather armor", t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

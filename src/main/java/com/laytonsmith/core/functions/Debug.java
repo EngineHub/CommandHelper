@@ -5,7 +5,11 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.HeapDumper;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MethodScriptFileLocations;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -22,7 +26,6 @@ import java.util.Set;
 
 /**
  * 
- * @author Layton
  */
 public class Debug {
 
@@ -235,7 +238,7 @@ public class Debug {
                     throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
                 }
             }
-            return new CVoid(t);
+            return CVoid.VOID;
         }
     }
 	
@@ -265,7 +268,7 @@ public class Debug {
 					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getName(), t);
 					System.out.println(ivar.getName() + ": " + val.val());
 				}
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new Exceptions.CastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
 			}
@@ -355,7 +358,7 @@ public class Debug {
 //            if(args.length >= 3){
 //                Debug.LOG_TO_SCREEN = Static.getBoolean(args[2]);
 //            }
-//            return new CVoid(t);
+//            return CVoid.VOID;
 //        }
 //    }
 
@@ -430,7 +433,7 @@ public class Debug {
 //                    EVENT_LOGGING_FILTER.add(t);
 //                }
 //            }
-//            return new CVoid(t);
+//            return CVoid.VOID;
 //        }
 //    }
 
@@ -486,7 +489,7 @@ public class Debug {
 //            } else {
 //                throw new ConfigRuntimeException(this.getName() + " expects the argument to be a single string, or an array of strings.", ExceptionType.CastException, t);
 //            }
-//            return new CVoid(t);
+//            return CVoid.VOID;
 //        }
 //    }
 	
@@ -568,7 +571,7 @@ public class Debug {
 			} catch(Throwable tt){
 				throw new ConfigRuntimeException("Could not create a heap dump: " + tt.getMessage(), ExceptionType.PluginInternalException, t, tt);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

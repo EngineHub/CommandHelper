@@ -20,7 +20,7 @@ import java.util.WeakHashMap;
 /**
  * A parse tree wraps a generic tree node, but provides functions that are commonly used to discover
  * things about a particular section of code.
- * @author Layton
+ * 
  */
 public class ParseTree implements Cloneable{
 	

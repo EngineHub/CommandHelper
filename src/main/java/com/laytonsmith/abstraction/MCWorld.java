@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCWorld extends MCMetadatable {
 	public List<MCPlayer> getPlayers();

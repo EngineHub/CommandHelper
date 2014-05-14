@@ -13,7 +13,7 @@ import org.bukkit.event.server.ServerListPingEvent;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitServerListener implements Listener{
     

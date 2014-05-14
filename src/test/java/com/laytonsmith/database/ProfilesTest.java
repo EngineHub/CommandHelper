@@ -6,11 +6,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class ProfilesTest {
 	
@@ -19,7 +18,7 @@ public class ProfilesTest {
 	
 	@BeforeClass
 	public static void setUpClass() {
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Profiles.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(SQLProfiles.class));
 	}
 	
 	@AfterClass
@@ -51,7 +50,7 @@ public class ProfilesTest {
 				+ "		<password>password2</password>"
 				+ "	</profile>"
 				+ "</profiles>";
-		Profiles profiles = new Profiles(good);
+		SQLProfiles profiles = new SQLProfiles(good);
 		
 	}
 	

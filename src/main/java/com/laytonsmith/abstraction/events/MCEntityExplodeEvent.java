@@ -1,11 +1,10 @@
 package com.laytonsmith.abstraction.events;
 
-import java.util.List;
-
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.core.events.BindableEvent;
+import java.util.List;
 
 public interface MCEntityExplodeEvent extends BindableEvent {
 

@@ -1,7 +1,7 @@
 package com.laytonsmith.core.events.drivers;
 
-import com.laytonsmith.PureUtilities.Geometry.Point3D;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Geometry.Point3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
@@ -51,7 +51,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 
+ *
  * @author jb_aero
  */
 public class VehicleEvents {
@@ -86,7 +86,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -103,7 +103,7 @@ public class VehicleEvents {
 				if (e.getEntity().getType() == MCEntityType.PLAYER) {
 					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
 				} else {
-					ret.put("player", new CNull(t));
+					ret.put("player", CNull.NULL);
 				}
 				return ret;
 			} else {
@@ -126,7 +126,7 @@ public class VehicleEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class vehicle_leave extends AbstractEvent {
 
@@ -157,7 +157,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -174,7 +174,7 @@ public class VehicleEvents {
 				if (e.getEntity().getType() == MCEntityType.PLAYER) {
 					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
 				} else {
-					ret.put("player", new CNull(t));
+					ret.put("player", CNull.NULL);
 				}
 				return ret;
 			} else {
@@ -197,7 +197,7 @@ public class VehicleEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class vehicle_collide extends AbstractEvent {
 
@@ -248,7 +248,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -261,8 +261,8 @@ public class VehicleEvents {
 				ret.put("type", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CInt(e.getVehicle().getEntityId(), t));
 				ret.put("collisiontype", new CString(e.getCollisionType().name(), t));
-				Construct block = new CNull(t);
-				Construct entity = new CNull(t);
+				Construct block = CNull.NULL;
+				Construct entity = CNull.NULL;
 				boolean collide = true;
 				boolean pickup = false;
 				switch (e.getCollisionType()) {
@@ -547,17 +547,17 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 
-			int id = Static.getInt32(manualObject.get("id"), Target.UNKNOWN);
+			int id = Static.getInt32(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			MCEntity e = Static.getEntity(id, Target.UNKNOWN);
 			if (!(e instanceof MCVehicle)) {
 				throw new ConfigRuntimeException("The id was not a vehicle",
 						ExceptionType.BadEntityException, Target.UNKNOWN);
 			}
 
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), e.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), e.getWorld(), manualObject.getTarget());
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCVehicleMoveEvent.class, e, from, to);
 		}
 
@@ -575,9 +575,9 @@ public class VehicleEvents {
 				MCEntity passenger = e.getVehicle().getPassenger();
 
 				if (passenger == null) {
-					ret.put("passenger", new CNull(t));
-					ret.put("passengertype", new CNull(t));
-					ret.put("player", new CNull(t));
+					ret.put("passenger", CNull.NULL);
+					ret.put("passengertype", CNull.NULL);
+					ret.put("player", CNull.NULL);
 				} else {
 
 					MCEntityType passengertype = e.getVehicle().getPassenger().getType();
@@ -588,7 +588,7 @@ public class VehicleEvents {
 					if (passengertype == MCEntityType.PLAYER) {
 						ret.put("player", new CString(((MCPlayer) e.getVehicle().getPassenger()).getName(), t));
 					} else {
-						ret.put("player", new CNull(t));
+						ret.put("player", CNull.NULL);
 					}
 				}
 

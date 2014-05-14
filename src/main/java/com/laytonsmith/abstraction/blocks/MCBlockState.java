@@ -7,7 +7,7 @@ import com.laytonsmith.abstraction.MCMetadatable;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCBlockState extends MCMetadatable {
 

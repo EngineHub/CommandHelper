@@ -1,9 +1,8 @@
 package com.laytonsmith.abstraction.events;
 
-import java.util.Collection;
-
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.events.BindableEvent;
+import java.util.Collection;
 
 public interface MCChatTabCompleteEvent extends BindableEvent {
 	public MCPlayer getPlayer();

@@ -2,20 +2,28 @@
 
 package com.laytonsmith.abstraction.bukkit.events;
 
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
+import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
+import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
+import com.laytonsmith.abstraction.events.MCBlockEvent;
+import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
+import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
+import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
+import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
@@ -23,8 +31,8 @@ import com.laytonsmith.core.constructs.Target;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
@@ -111,11 +119,11 @@ public class BukkitBlockEvents {
         }
 
 		@Override
-        public MCBlockState getBlockReplacedState() {            
+        public MCBlockState getBlockReplacedState() {
             return new BukkitMCBlockState(event.getBlockReplacedState());
         }
     }
-	
+
 	@abstraction(type = Implementation.Type.BUKKIT)
     public static class BukkitMCBlockBurnEvent implements MCBlockBurnEvent {
 
@@ -192,7 +200,7 @@ public class BukkitBlockEvents {
         public static BukkitMCSignChangeEvent _instantiate(MCBlock sign, MCPlayer player, CArray signtext) {
             String[] text = new String[4];
             for (int i = 0; i < signtext.size(); i++) {
-                text[i] = signtext.get(i).toString();
+                text[i] = signtext.get(i, Target.UNKNOWN).toString();
             }
             return new BukkitMCSignChangeEvent(new SignChangeEvent(( (BukkitMCBlock) sign ).__Block(), ( (BukkitMCPlayer) player )._Player(),
                     text));

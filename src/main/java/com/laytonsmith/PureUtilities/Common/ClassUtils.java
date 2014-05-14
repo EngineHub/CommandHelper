@@ -1,7 +1,6 @@
 
 package com.laytonsmith.PureUtilities.Common;
 
-import com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

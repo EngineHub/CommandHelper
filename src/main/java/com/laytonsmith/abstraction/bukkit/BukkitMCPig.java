@@ -1,8 +1,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.entity.Pig;
-
 import com.laytonsmith.abstraction.entities.MCPig;
+import org.bukkit.entity.Pig;
 
 /**
  * 

@@ -1,12 +1,12 @@
 package com.laytonsmith.PureUtilities;
 
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 /**
  * This class wraps the JSch library, to make atomic operations easier to do.
  *
- * @author lsmith
+ * 
  */
 public class SSHWrapper {
 

@@ -2,13 +2,10 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
@@ -19,12 +16,18 @@ import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
 import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
+import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
@@ -34,7 +37,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-
 import java.util.Map;
 
 /**
@@ -90,7 +92,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
 
@@ -106,7 +108,7 @@ public class InventoryEvents {
 					viewers.push(new CString(viewer.getName(), Target.UNKNOWN));
 				}
 				map.put("viewers", viewers);
-				
+
 				map.put("action", new CString(e.getAction().name(), Target.UNKNOWN));
 				map.put("clicktype", new CString(e.getClickType().name(), Target.UNKNOWN));
 
@@ -209,7 +211,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -320,7 +322,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -395,7 +397,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -443,7 +445,7 @@ public class InventoryEvents {
 		}
 
 	}
-	
+
 	@api
 	public static class item_enchant extends AbstractEvent {
 
@@ -475,7 +477,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -490,16 +492,16 @@ public class InventoryEvents {
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("levels", new CInt(e.getExpLevelCost(), Target.UNKNOWN));
 				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
-				
+
 				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
-					
+
 				loc.remove(new CString("yaw", Target.UNKNOWN));
 				loc.remove(new CString("pitch", Target.UNKNOWN));
 				loc.remove(new CString("4", Target.UNKNOWN));
 				loc.remove(new CString("5", Target.UNKNOWN));
 
 				map.put("location", loc);
-				
+
 				map.put("option", new CInt(e.whichButton(), Target.UNKNOWN));
 
 				return map;
@@ -522,12 +524,12 @@ public class InventoryEvents {
 					e.setExpLevelCost(Static.getInt32(value, Target.UNKNOWN));
 					return true;
 				}
-				
+
 				if (key.equalsIgnoreCase("item")) {
 					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
 					return true;
 				}
-				
+
 				if (key.equalsIgnoreCase("enchants")) {
 					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, Target.UNKNOWN)));
 					return true;
@@ -541,7 +543,7 @@ public class InventoryEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class item_pre_enchant extends AbstractEvent {
 
@@ -571,7 +573,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -580,31 +582,31 @@ public class InventoryEvents {
 			if (event instanceof MCPrepareItemEnchantEvent) {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
-				
+
 				map.put("player", new CString(e.getEnchanter().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), Target.UNKNOWN));
-				
+
 				int[] expCosts = e.getExpLevelCostsOffered();
 				CArray expCostsCArray = new CArray(Target.UNKNOWN);
-				
+
 				for (int i = 0; i < expCosts.length; i++) {
 					int j = expCosts[i];
 					expCostsCArray.push(new CInt(j, Target.UNKNOWN), i);
 				}
-				
+
 				map.put("expcosts", expCostsCArray);
-				
+
 				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
-					
+
 				loc.remove(new CString("yaw", Target.UNKNOWN));
 				loc.remove(new CString("pitch", Target.UNKNOWN));
 				loc.remove(new CString("4", Target.UNKNOWN));
 				loc.remove(new CString("5", Target.UNKNOWN));
 
 				map.put("location", loc);
-				
+
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPrepareItemEnchantEvent");
@@ -620,21 +622,21 @@ public class InventoryEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCPrepareItemEnchantEvent) {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
-				
+
 				if (key.equalsIgnoreCase("item")) {
 					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
 					return true;
 				}
-				
+
 				if (key.equalsIgnoreCase("expcosts")) {
 					if (value instanceof CArray) {
 						CArray CexpCosts = (CArray) value;
 						if (!CexpCosts.inAssociativeMode()) {
 							int[] ExpCosts = e.getExpLevelCostsOffered();
-							
+
 							for (int i = 0; i <= 2; i++) {
-								if (CexpCosts.get(i) instanceof CInt) {
-									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i)).getInt();
+								if (CexpCosts.get(i, Target.UNKNOWN) instanceof CInt) {
+									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i, Target.UNKNOWN)).getInt();
 								} else {
 									throw new ConfigRuntimeException("Expected an intger at index " + i + "!", ExceptionType.FormatException, Target.UNKNOWN);
 								}
@@ -654,9 +656,9 @@ public class InventoryEvents {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class item_held extends AbstractEvent {
 
@@ -683,7 +685,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
 		}
 
@@ -722,7 +724,7 @@ public class InventoryEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class item_pre_craft extends AbstractEvent {
 
@@ -751,7 +753,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
 		}
 
@@ -819,7 +821,7 @@ public class InventoryEvents {
 			} */
 			return false;
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;

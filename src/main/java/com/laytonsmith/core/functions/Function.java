@@ -2,7 +2,6 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.annotations.MustUseOverride;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
@@ -18,8 +17,7 @@ import java.util.List;
 
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation
- * to it.
- * @author layton
+ * to it. 
  */
 //This will be re-added at some point, so get ready!
 //@MustUseOverride

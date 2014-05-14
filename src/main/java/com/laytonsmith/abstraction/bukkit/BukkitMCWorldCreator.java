@@ -13,7 +13,7 @@ import org.bukkit.WorldType;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitMCWorldCreator implements MCWorldCreator {
 	

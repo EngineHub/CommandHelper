@@ -9,10 +9,19 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
- * @author layton
+ * 
  */
 @typeof("boolean")
 public class CBoolean extends Construct implements Cloneable{
+	
+	/**
+	 * A constant true, with unknown code target.
+	 */
+	public static final CBoolean TRUE = new CBoolean(true, Target.UNKNOWN);
+	/**
+	 * A constant false, with unknown code target.
+	 */
+	public static final CBoolean FALSE = new CBoolean(false, Target.UNKNOWN);
     
     public static final long serialVersionUID = 1L;
     private final boolean val;

@@ -9,7 +9,7 @@ import org.bukkit.DyeColor;
 
 /**
  *
- * @author Layton
+ * 
  */
 @abstractionenum(
 		implementation=Implementation.Type.BUKKIT,

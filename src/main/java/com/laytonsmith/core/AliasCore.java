@@ -22,9 +22,10 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
+import com.laytonsmith.core.packetjumper.PacketJumper;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.MemoryDataSource;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -59,7 +60,7 @@ import java.util.zip.ZipFile;
  * Objects, so that if the Minecraft API Hook changes, porting the code will
  * only require changing the API specific portions, not this core file.
  *
- * @author Layton
+ * 
  */
 public class AliasCore {
 
@@ -116,11 +117,11 @@ public class AliasCore {
 			gEnv = new GlobalEnv(parent.executionQueue, parent.profiler,
 					parent.persistenceNetwork, parent.permissionsResolver,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+					new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		} catch (IOException ex) {
 			Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
-		} catch (Profiles.InvalidProfileException ex) {
+		} catch (SQLProfiles.InvalidSQLProfileException ex) {
 			throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), Target.UNKNOWN);
 		}
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
@@ -374,6 +375,8 @@ public class AliasCore {
 			//Clear out the data source cache
 			DataSourceFactory.DisconnectAll();
 			
+			PacketJumper.startup();
+			
 			if (reloadExtensions) {
 				ExtensionManager.Startup();
 			}
@@ -383,7 +386,6 @@ public class AliasCore {
 			}
 			if (parent.persistenceNetwork == null || reloadPersistenceConfig) {
 				MemoryDataSource.ClearDatabases();
-				//PacketJumper.startup();
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
 				parent.persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
@@ -394,8 +396,8 @@ public class AliasCore {
 			try {
 				gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork, parent.permissionsResolver,
 						MethodScriptFileLocations.getDefault().getConfigDirectory(),
-						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
-			} catch (Profiles.InvalidProfileException ex) {
+						new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+			} catch (SQLProfiles.InvalidSQLProfileException ex) {
 				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;
 			}

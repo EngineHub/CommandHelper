@@ -3,7 +3,9 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -18,7 +20,7 @@ import org.perf4j.StopWatch;
 
 /**
  *
- * @author Layton
+
  */
 public class Performance {
     public static boolean PERFORMANCE_LOGGING = false;
@@ -82,7 +84,7 @@ public class Performance {
                 throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, t);
             }
             PERFORMANCE_LOGGING = Static.getBoolean(args[0]);
-            return new CVoid(t);
+            return CVoid.VOID;
         }
         
     }

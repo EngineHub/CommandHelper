@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 
 /**
  *
- * @author Layton
+ * 
  */
 public interface MCCreatureSpawner extends MCBlockState {
 	

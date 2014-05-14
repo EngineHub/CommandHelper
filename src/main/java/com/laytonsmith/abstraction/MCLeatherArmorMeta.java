@@ -7,7 +7,7 @@ package com.laytonsmith.abstraction;
 
 /**
  *
- * @author Layton
+ * 
  */
 public interface MCLeatherArmorMeta extends MCItemMeta {
 	    /**

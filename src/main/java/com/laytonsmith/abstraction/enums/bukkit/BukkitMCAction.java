@@ -9,7 +9,7 @@ import org.bukkit.event.block.Action;
 
 /**
  *
- * @author Layton
+ * 
  */
 @abstractionenum(
 		implementation= Implementation.Type.BUKKIT,

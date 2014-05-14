@@ -2,7 +2,22 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCAnimalTamer;
+import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCCreatureSpawner;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCFireworkBuilder;
+import com.laytonsmith.abstraction.MCItem;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCTameable;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
@@ -18,23 +33,40 @@ import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  *
- * @author Layton
  */
 public class Minecraft {
 
@@ -111,7 +143,7 @@ public class Minecraft {
 					}
 					return new CString(split[0] + ":" + split[1], t);
 				}
-				return new CNull(t);
+				return CNull.NULL;
 			}
 		}
 
@@ -218,7 +250,7 @@ public class Minecraft {
 				try {
 					return new CString(StaticLayer.LookupMaterialName(i), t);
 				} catch (NullPointerException e) {
-					return new CNull(t);
+					return CNull.NULL;
 				}
 			}
 		}
@@ -308,17 +340,17 @@ public class Minecraft {
 					+ " to the location of the player. An array of the entity IDs spawned is returned."
 					+ " ---- mobType can be one of: " + StringUtils.Join(MCMobs.values(), ", ", ", or ", " or ") + "."
 					+ " Spelling matters, but capitalization doesn't. At this time, the function is limited to spawning a maximum of 50 at a time."
-					+ " Further, subtypes can be applied by specifying MOBTYPE:SUBTYPE, for example the sheep subtype can be any of the dye colors: " 
+					+ " Further, subtypes can be applied by specifying MOBTYPE:SUBTYPE, for example the sheep subtype can be any of the dye colors: "
 					+ StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or ") + ". COLOR defaults to white if not specified. For mobs with multiple"
 					+ " subtypes, separate each type with a \"-\", currently only zombies which, using ZOMBIE:TYPE1-TYPE2 can be any non-conflicting two of: "
-					+ StringUtils.Join(MCZombieType.values(), ", ", ", or ", " or ") + ", but default to normal zombies. Ocelots may be one of: " 
+					+ StringUtils.Join(MCZombieType.values(), ", ", ", or ", " or ") + ", but default to normal zombies. Ocelots may be one of: "
 					+ StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or ") + ", defaulting to the wild variety. Villagers can have a profession as a subtype: "
 					+ StringUtils.Join(MCProfession.values(), ", ", ", or ", " or ") + ", defaulting to farmer if not specified. Skeletons can be "
 					+ StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or ") + ". PigZombies' subtype represents their anger,"
 					+ " and accepts an integer, where 0 is neutral and 400 is the normal response to being attacked. Defaults to 0. Similarly, Slime"
 					+ " and MagmaCube size can be set by integer, otherwise will be a random natural size. If a material is specified as the subtype"
-					+ " for Endermen, they will hold that material, otherwise they will hold nothing. Creepers can be set to " 
-					+ StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + ", wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ") 
+					+ " for Endermen, they will hold that material, otherwise they will hold nothing. Creepers can be set to "
+					+ StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + ", wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ")
 					+ ", and pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + "."
 					+ " Horses can have three different subTypes, the variant: " + StringUtils.Join(MCHorse.MCHorseVariant.values(), ", ", ", or ", " or ") + ","
 					+ " the color: " + StringUtils.Join(MCHorse.MCHorseColor.values(), ", ", ", or ", " or ") + ","
@@ -435,7 +467,7 @@ public class Minecraft {
 			int id = Static.getInt32(entityID, t);
 			MCLivingEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else if (e instanceof MCTameable) {
 				MCTameable mct = ((MCTameable) e);
 				if (player != null) {
@@ -443,7 +475,7 @@ public class Minecraft {
 				} else {
 					mct.setOwner(null);
 				}
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);
 			}
@@ -494,13 +526,13 @@ public class Minecraft {
 			int id = Static.getInt32(args[0], t);
 			MCLivingEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else if (e instanceof MCTameable) {
 				MCAnimalTamer at = ((MCTameable) e).getOwner();
 				if (null != at) {
 					return new CString(at.getName(), t);
 				} else {
-					return new CNull(t);
+					return CNull.NULL;
 				}
 			} else {
 				throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);
@@ -631,7 +663,7 @@ public class Minecraft {
 				radius = Static.getInt32(args[2], t);
 			}
 			l.getWorld().playEffect(l, e, data, radius);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -686,7 +718,7 @@ public class Minecraft {
 			} else {
 				e.setHealth(percent / 100.0 * e.getMaxHealth());
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -854,16 +886,16 @@ public class Minecraft {
 				//Array of plugins
 				CArray co = new CArray(t);
 				List<MCPlugin> plugs = server.getPluginManager().getPlugins();
-				
+
 				for (MCPlugin p : plugs) {
 					if (p == null) {
 						continue;
 					}
-					
+
 					CString name = new CString(p.getName(), t);
 					co.push(name);
 				}
-				
+
 				retVals.add(co);
 			}
 			if (index == 10 || index == -1) {
@@ -996,7 +1028,7 @@ public class Minecraft {
 			return co;
 		}
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_spawner_type extends AbstractFunction{
 
@@ -1023,7 +1055,7 @@ public class Minecraft {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			
+
 			if(location.getBlock().getState() instanceof MCCreatureSpawner){
 				String type = ((MCCreatureSpawner)location.getBlock().getState()).getSpawnedType().name();
 				return new CString(type, t);
@@ -1052,9 +1084,9 @@ public class Minecraft {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_spawner_type extends AbstractFunction{
 
@@ -1084,7 +1116,7 @@ public class Minecraft {
 			MCEntityType type = MCEntityType.valueOf(args[1].val().toUpperCase());
 			if(location.getBlock().getState() instanceof MCCreatureSpawner){
 				((MCCreatureSpawner)location.getBlock().getState()).setSpawnedType(type);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new Exceptions.FormatException("The block at " + location.toString() + " is not a spawner block", t);
 			}
@@ -1103,7 +1135,7 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
-					+ " or if the type is invalid, a FormatException is thrown. The type may be one of either " 
+					+ " or if the type is invalid, a FormatException is thrown. The type may be one of either "
 					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ");
 		}
 
@@ -1111,9 +1143,9 @@ public class Minecraft {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class launch_firework extends AbstractFunction {
 
@@ -1151,33 +1183,33 @@ public class Minecraft {
 			colors.add(MCColor.WHITE);
 			Set<MCColor> fade = new HashSet<MCColor>();
 			MCFireworkType type = MCFireworkType.BALL;
-			
+
 			if(options.containsKey("strength")){
-				strength = Static.getInt32(options.get("strength"), t);
+				strength = Static.getInt32(options.get("strength", t), t);
 				if (strength < 0 || strength > 128) {
 					throw new ConfigRuntimeException("Strength must be between 0 and 128", ExceptionType.RangeException, t);
 				}
 			}
 			if(options.containsKey("flicker")){
-				flicker = Static.getBoolean(options.get("flicker"));
+				flicker = Static.getBoolean(options.get("flicker", t));
 			}
 			if(options.containsKey("trail")){
-				trail = Static.getBoolean(options.get("trail"));
+				trail = Static.getBoolean(options.get("trail", t));
 			}
 			if(options.containsKey("colors")){
-				colors = parseColors(options.get("colors"), t);
+				colors = parseColors(options.get("colors", t), t);
 			}
 			if(options.containsKey("fade")){
-				fade = parseColors(options.get("fade"), t);
+				fade = parseColors(options.get("fade", t), t);
 			}
 			if(options.containsKey("type")){
 				try{
-					type = MCFireworkType.valueOf(options.get("type").val().toUpperCase());
+					type = MCFireworkType.valueOf(options.get("type", t).val().toUpperCase());
 				} catch(IllegalArgumentException e){
-					throw new Exceptions.FormatException("Invalid type: " + options.get("type").val(), t);
+					throw new Exceptions.FormatException("Invalid type: " + options.get("type", t).val(), t);
 				}
 			}
-			
+
 			MCFireworkBuilder fw = StaticLayer.GetConvertor().GetFireworkBuilder();
 			fw.setStrength(strength);
 			fw.setFlicker(flicker);
@@ -1186,28 +1218,28 @@ public class Minecraft {
 			for(MCColor color : colors){
 				fw.addColor(color);
 			}
-			
+
 			for(MCColor color : fade){
 				fw.addFadeColor(color);
 			}
-			
+
 			return new CInt(fw.launch(loc), t);
 		}
-		
+
 		private Set<MCColor> parseColors(Construct c, Target t){
 			Set<MCColor> colors = new HashSet<MCColor>();
 			if(c instanceof CArray){
 				CArray ca = ((CArray)c);
 				if(ca.size() == 3
-						&& ca.get(0) instanceof CInt
-						&& ca.get(1) instanceof CInt
-						&& ca.get(2) instanceof CInt
+						&& ca.get(0, t) instanceof CInt
+						&& ca.get(1, t) instanceof CInt
+						&& ca.get(2, t) instanceof CInt
 						){
 					//It's a single custom color
 					colors.add(parseColor(ca, t));
 				} else {
 					for(String key : ca.stringKeySet()){
-						Construct val = ca.get(key);
+						Construct val = ca.get(key, t);
 						if(val instanceof CArray){
 							colors.add(parseColor(((CArray)val), t));
 						} else if(val instanceof CString){
@@ -1220,15 +1252,15 @@ public class Minecraft {
 			}
 			return colors;
 		}
-		
+
 		private MCColor parseColor(CArray ca, Target t){
 			return StaticLayer.GetConvertor().GetColor(
-							Static.getInt32(ca.get(0), t), 
-							Static.getInt32(ca.get(1), t), 
-							Static.getInt32(ca.get(2), t)
+							Static.getInt32(ca.get(0, t), t),
+							Static.getInt32(ca.get(1, t), t),
+							Static.getInt32(ca.get(2, t), t)
 						);
 		}
-		
+
 		private List<MCColor> parseColor(CString cs, Target t){
 			String split[] = cs.val().split("\\|");
 			List<MCColor> colors = new ArrayList<MCColor>();
@@ -1303,9 +1335,9 @@ public class Minecraft {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class send_texturepack extends AbstractFunction {
 
@@ -1329,7 +1361,7 @@ public class Minecraft {
 				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.sendTexturePack(args[1].val());
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1354,9 +1386,9 @@ public class Minecraft {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
-		}	
+		}
 	}
-	
+
 	@api
 	public static class get_ip_bans extends AbstractFunction {
 
@@ -1406,7 +1438,7 @@ public class Minecraft {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class set_ip_banned extends AbstractFunction {
 
@@ -1435,7 +1467,7 @@ public class Minecraft {
 			} else {
 				s.unbanIP(ip);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1459,7 +1491,7 @@ public class Minecraft {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class material_info extends AbstractFunction {
 
@@ -1516,7 +1548,7 @@ public class Minecraft {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
     public static class drop_item extends AbstractFunction {
 
@@ -1597,7 +1629,7 @@ public class Minecraft {
 			if (item != null) {
 				return new CInt(item.getEntityId(), t);
 			} else {
-				return new CNull(t);
+				return CNull.NULL;
 			}
         }
     }

@@ -1,10 +1,10 @@
 package com.laytonsmith.PureUtilities;
 
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentParserResults;
 import com.laytonsmith.PureUtilities.ArgumentParser.ResultUseException;
 import com.laytonsmith.PureUtilities.ArgumentParser.ValidationException;
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.Map;
  * be used to parse the remaining arguments. This allows for finer control over
  * mutually exclusive parameters in both the documentation and the validation, as
  * well as wider support for traditional use cases.
- * @author lsmith
+ * 
  */
 public class ArgumentSuite {
 	

@@ -15,13 +15,19 @@ import static com.laytonsmith.testing.StaticTest.RunCommand;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.io.File;
 import java.io.IOException;
-import org.junit.*;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  *
- * @author layton
+ * 
  */
 public class DataHandlingTest {
 

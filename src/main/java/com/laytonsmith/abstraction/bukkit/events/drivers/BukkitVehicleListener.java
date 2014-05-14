@@ -2,6 +2,12 @@
 
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleBlockCollideEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleEnterEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleEntityCollideEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleExitEvent;
+import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.entity.Animals;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,16 +17,9 @@ import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 
-import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleBlockCollideEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleEnterEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleEntityCollideEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleExitEvent;
-import com.laytonsmith.core.events.Driver;
-import com.laytonsmith.core.events.EventUtils;
-
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitVehicleListener implements Listener{
     

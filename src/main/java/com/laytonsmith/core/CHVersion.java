@@ -5,7 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 
 /**
  *
- * @author layton
+ * 
  */
 public enum CHVersion implements Version {
     V0_0_0("0.0.0"), //Unreleased version

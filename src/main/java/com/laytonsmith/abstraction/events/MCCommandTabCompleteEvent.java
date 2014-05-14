@@ -1,10 +1,9 @@
 package com.laytonsmith.abstraction.events;
 
-import java.util.List;
-
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.core.events.BindableEvent;
+import java.util.List;
 
 public interface MCCommandTabCompleteEvent extends BindableEvent {
 

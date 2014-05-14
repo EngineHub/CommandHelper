@@ -8,12 +8,16 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import static com.laytonsmith.testing.CustomMatchers.regexMatch;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
-import org.junit.*;
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
-import static com.laytonsmith.testing.CustomMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertThat;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *

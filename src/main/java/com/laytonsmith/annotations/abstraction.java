@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * This tag is to denote that a class is a implementation of a specific abstraction interface.
  * This isn't always needed however, only when a reverse lookup may need to be done should
  * this be needed.
- * @author layton
+ * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

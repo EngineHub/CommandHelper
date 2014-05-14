@@ -10,7 +10,7 @@ import org.bukkit.block.BlockState;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCBlockState extends BukkitMCMetadatable implements MCBlockState {
     

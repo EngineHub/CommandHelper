@@ -8,6 +8,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -37,9 +38,9 @@ import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 
 /**
- *
- * @author lsmith
+ * 
  */
+@core
 public class FileHandling {
 
 	public static String docs(){
@@ -206,13 +207,13 @@ public class FileHandling {
 					}
 					final Construct cret;
 					if(returnString == null){
-						cret = new CNull(t);
+						cret = CNull.NULL;
 					} else {
 						cret = new CString(returnString, t);
 					}
 					final Construct cex;
 					if(exception == null){
-						cex = new CNull(t);
+						cex = CNull.NULL;
 					} else {
 						cex = ObjectGenerator.GetGenerator().exception(exception, t);
 					}
@@ -225,7 +226,7 @@ public class FileHandling {
 					});
 				}
 			});
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -467,10 +468,10 @@ public class FileHandling {
 			path = path.replaceAll("(/)(?=.*?/)", path);
 			if("/".equals(path) || path.matches("[a-zA-Z]:/")){
 				//This is the root path, return null.
-				return new CNull();
+				return CNull.NULL;
 			}
 			//If the path ends with /, take it off
-			if(path.endsWith("/")){
+			while(path.endsWith("/")){
 				path = path.substring(0, path.length() - 2);
 			}
 			return new CString(path.substring(0, path.length() - path.lastIndexOf("/")), t);
@@ -503,12 +504,12 @@ public class FileHandling {
 		
 	}
 	
-	//@api
+	@api
 	public static class file_resolve extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.IOException};
 		}
 
 		@Override
@@ -523,7 +524,12 @@ public class FileHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			throw new UnsupportedOperationException("TODO: Not supported yet.");
+			File f = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+			try {
+				return new CString(f.getCanonicalPath(), t);
+			} catch (IOException ex) {
+				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+			}
 		}
 
 		@Override
@@ -538,7 +544,8 @@ public class FileHandling {
 
 		@Override
 		public String docs() {
-			return "";
+			return "string {file} Returns the canonical, absolute path of the given path. This provides a context independent"
+					+ " and unique path which always points to the specified path, and removes any duplicate . or .. parts.";
 		}
 
 		@Override

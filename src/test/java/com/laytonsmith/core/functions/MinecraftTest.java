@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -13,7 +14,7 @@ import org.junit.Test;
 
 /**
  *
- * @author layton
+ * 
  */
 
 public class MinecraftTest {

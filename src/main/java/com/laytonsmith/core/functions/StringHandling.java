@@ -5,12 +5,25 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CResource;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -31,8 +44,8 @@ import java.util.Set;
 
 /**
  *
- * @author Layton
  */
+@core
 public class StringHandling {
 
 	public static String docs() {
@@ -85,7 +98,7 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -199,9 +212,9 @@ public class StringHandling {
 	@noprofile
 	public static class sconcat extends AbstractFunction implements Optimizable {
 
-		private static final String g = new Meta.g().getName();
+		private static final String g = new DataHandling.g().getName();
 		private static final String p = new Compiler.p().getName();
-		
+
 		@Override
 		public String getName() {
 			return "sconcat";
@@ -255,7 +268,7 @@ public class StringHandling {
 //                        if (i > 1) {
 //                            c.append(" ");
 //                        }
-//                        c.append(d.val());                        
+//                        c.append(d.val());
 //                    }
 //                    value = new CString(c.toString(), t);
 //                } else {
@@ -298,9 +311,9 @@ public class StringHandling {
 			Iterator<ParseTree> it = children.iterator();
 			while(it.hasNext()){
 				ParseTree n = it.next();
-				if(n.getData() instanceof CFunction && 
+				if(n.getData() instanceof CFunction &&
 						(g.equals(n.getData().val())
-							|| p.equals(n.getData().val())) 
+							|| p.equals(n.getData().val()))
 						&& !n.hasChildren()){
 					it.remove();
 				}
@@ -399,15 +412,26 @@ public class StringHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			String[] sa = args[0].val().split(" ");
-			ArrayList<Construct> a = new ArrayList<Construct>();
-			for (String s : sa) {
-				if (!s.trim().isEmpty()) {
+			String string = args[0].val();
+			boolean useAdvanced = false;
+			if(args.length >= 2){
+				useAdvanced = Static.getBoolean(args[1]);
+			}
+			List<Construct> a = new ArrayList<>();
+			if(!useAdvanced){
+				String[] sa = string.split(" ");
+				for (String s : sa) {
+					if (!s.trim().isEmpty()) {
+						a.add(new CString(s.trim(), t));
+					}
+				}
+			} else {
+				for(String s : StringUtils.ArgParser(string)){
 					a.add(new CString(s.trim(), t));
 				}
 			}
@@ -420,9 +444,10 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "array {string} Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
+			return "array {string, [useAdvanced]} Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
 					+ " $ into a usable array of items with which to script against. Extra spaces are ignored, so you would never get an empty"
-					+ " string as an input.";
+					+ " string as an input. useAdvanced defaults to false, but if true, uses a basic argument parser that supports quotes for"
+					+ " allowing arguments with spaces.";
 		}
 
 		@Override
@@ -1094,7 +1119,7 @@ public class StringHandling {
 					throw new ConfigRuntimeException("If the second argument to " + getName() + " is an array, it may not be associative.", ExceptionType.CastException, t);
 				} else {
 					for (int i = 0; i < ((CArray) args[1]).size(); i++) {
-						flattenedArgs.add(((CArray) args[1]).get(i));
+						flattenedArgs.add(((CArray) args[1]).get(i, t));
 					}
 				}
 			} else {
@@ -1362,11 +1387,11 @@ public class StringHandling {
 					throw new RuntimeException("Unknown type: " + ref.getClass());
 				}
 			}
-			
+
 			public int getArgIndex(){
 				return ((Integer)ReflectionUtils.get(FormatSpecifier, ref, "index"));
 			}
-			
+
 			public boolean isFixed(){
 				return getExpectedType() == '%' || getExpectedType() == 'n';
 			}
@@ -1395,7 +1420,7 @@ public class StringHandling {
 			}
 			return list;
 		}
-		
+
 		private int requiredArgs(List<FormatString> list){
 			Set<Integer> knownIndexes = new HashSet<Integer>();
 			int count = 0;
@@ -1465,9 +1490,9 @@ public class StringHandling {
 				new ExampleScript("Other formatting: hash code", "sprintf('%h', 'will be hashed')"),
 			};
 		}
-		
+
 	}
-	
+
 	@api
 	public static class string_get_bytes extends AbstractFunction {
 
@@ -1521,9 +1546,9 @@ public class StringHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class string_from_bytes extends AbstractFunction {
 
@@ -1576,9 +1601,9 @@ public class StringHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class string_append extends AbstractFunction {
 
@@ -1604,7 +1629,7 @@ public class StringHandling {
 			for(int i = 1; i < args.length; i++){
 				buf.append(args[i].val());
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1641,7 +1666,7 @@ public class StringHandling {
 					+ "res_free_resource(@res) #This line is super important!\n"
 					+ "msg(@string)"
 					+ ""),
-				new ExampleScript("Basic usage, showing performance benefits", 
+				new ExampleScript("Basic usage, showing performance benefits",
 					"@to = 100000\n"
 					+ "@t1 = time()\n"
 					+ "@res = res_create_resource('STRING_BUILDER')\n"
@@ -1662,9 +1687,9 @@ public class StringHandling {
 					+ "Task 2 took 28305ms under 100000 iterations\n")
 			};
 		}
-		
+
 	}
-	
+
 	@api public static class char_from_unicode extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1727,9 +1752,9 @@ public class StringHandling {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
 		}
-		
+
 	}
-	
+
 	@api public static class unicode_from_char extends AbstractFunction {
 
 		@Override
@@ -1776,16 +1801,16 @@ public class StringHandling {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "to_radix(unicode_from_char('\\u2665'), 16)")
 			};
 		}
-		
+
 	}
-	
+
 	@api public static class levenshtein extends AbstractFunction {
 
 		@Override
@@ -1838,6 +1863,6 @@ public class StringHandling {
 				new ExampleScript("", "levenshtein('133', '123')")
 			};
 		}
-		
+
 	}
 }

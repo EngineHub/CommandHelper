@@ -7,7 +7,7 @@ import com.laytonsmith.core.constructs.Construct;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BashPlatformResolver implements PlatformResolver{
 

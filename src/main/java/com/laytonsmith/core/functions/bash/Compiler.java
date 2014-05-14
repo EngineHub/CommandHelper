@@ -6,7 +6,7 @@ import com.laytonsmith.core.constructs.Target;
 
 /**
  *
- * @author layton
+ * 
  */
 public class Compiler {
     

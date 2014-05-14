@@ -1,11 +1,27 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerInventory;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -14,13 +30,12 @@ import java.util.Map;
 
 /**
  *
- * @author layton
  */
 public class InventoryManagement {
     public static String docs(){
         return "Provides methods for managing inventory related tasks.";
     }
-    
+
     @api(environments={CommandHelperEnvironment.class})
     public static class pinv extends AbstractFunction {
 
@@ -140,7 +155,7 @@ public class InventoryManagement {
             return ObjectGenerator.GetGenerator().item(is, t);
         }
     }
-	
+
     @api(environments = {CommandHelperEnvironment.class})
     public static class close_pinv extends AbstractFunction {
 
@@ -162,16 +177,16 @@ public class InventoryManagement {
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p;
-			
+
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
-			
+
 			p.closeInventory();
-            
-            return new CVoid(t);
+
+            return CVoid.VOID;
         }
 
 		@Override
@@ -195,7 +210,7 @@ public class InventoryManagement {
             return CHVersion.V3_3_1;
         }
     }
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
     public static class pworkbench extends AbstractFunction {
 
@@ -217,16 +232,16 @@ public class InventoryManagement {
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p;
-			
+
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
-			
+
 			p.openWorkbench(p.getLocation(), true);
-            
-            return new CVoid(t);
+
+            return CVoid.VOID;
         }
 
 		@Override
@@ -250,7 +265,7 @@ public class InventoryManagement {
             return CHVersion.V3_3_1;
         }
     }
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class show_enderchest extends AbstractFunction {
 
@@ -273,7 +288,7 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			MCPlayer other;
-			
+
 			if (args.length == 1) {
 				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				other = Static.GetPlayer(args[0], t);
@@ -284,10 +299,10 @@ public class InventoryManagement {
 				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				other = player;
 			}
-			
+
 			player.openInventory(other.getEnderChest());
-			
-			return new CVoid(t);
+
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -312,7 +327,7 @@ public class InventoryManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
     public static class penchanting extends AbstractFunction {
 
@@ -334,16 +349,16 @@ public class InventoryManagement {
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p;
-			
+
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
-			
+
 			p.openEnchanting(p.getLocation(), true);
-            
-            return new CVoid(t);
+
+            return CVoid.VOID;
         }
 
 		@Override
@@ -455,10 +470,10 @@ public class InventoryManagement {
                         }
                     }
                     if(index == -1){
-                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(""), t);
+                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get("", t), t);
                         m.setItemInHand(is);
                     } else {
-                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), t);
+                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
                         if(index >= 0 && index <= 35){
                             m.getInventory().setItem(index, is);
                         } else if(index == 100){
@@ -477,10 +492,10 @@ public class InventoryManagement {
                     ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_pinv(), but \"" + key + "\" was found. Ignoring.");
                 }
             }
-            return new CVoid(t);
+            return CVoid.VOID;
         }
     }
-    
+
     @api(environments={CommandHelperEnvironment.class})
 	public static class phas_item extends AbstractFunction{
 
@@ -544,7 +559,7 @@ public class InventoryManagement {
             total += total(is, inv.getHelmet());
             return new CInt(total, t);
         }
-        
+
         private int total(MCItemStack is, MCItemStack iis){
             if(iis.getTypeId() == is.getTypeId() && iis.getData().getData() == is.getData().getData()){
                 int i = iis.getAmount();
@@ -553,7 +568,7 @@ public class InventoryManagement {
                     i = iis.maxStackSize();
                 }
                 return i;
-            }         
+            }
             return 0;
         }
 
@@ -561,9 +576,9 @@ public class InventoryManagement {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
     }
-    
+
     @api(environments={CommandHelperEnvironment.class})
 	public static class pitem_slot extends AbstractFunction{
 
@@ -631,7 +646,7 @@ public class InventoryManagement {
             }
             return ca;
         }
-        
+
         private boolean match(MCItemStack is, MCItemStack iis){
             return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
         }
@@ -640,9 +655,9 @@ public class InventoryManagement {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
     }
-    
+
     @api(environments={CommandHelperEnvironment.class})
 	public static class pgive_item extends AbstractFunction{
 
@@ -688,7 +703,7 @@ public class InventoryManagement {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
 			Construct m = null;
-			
+
             if(args.length == 2){
                 is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
             } else if(args.length == 3) {
@@ -705,12 +720,12 @@ public class InventoryManagement {
 				m = args[3];
 			}
 			Static.AssertPlayerNonNull(p, t);
-			
+
 			MCItemMeta meta;
 			if (m != null) {
 				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = p.getInventory().addItem(is);
@@ -723,14 +738,14 @@ public class InventoryManagement {
 				return new CInt(h.get(0).getAmount(), t);
 			}
 		}
-        
+
 		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
     }
-    
+
     @api(environments={CommandHelperEnvironment.class})
 	public static class ptake_item extends AbstractFunction{
 
@@ -798,9 +813,9 @@ public class InventoryManagement {
                 }
             }
             return new CInt(total - remaining, t);
-            
+
         }
-        
+
         private boolean match(MCItemStack is, MCItemStack iis){
             return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
         }
@@ -879,7 +894,7 @@ public class InventoryManagement {
 			if (m != null) {
 				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = p.getEnderChest().addItem(is);
@@ -977,7 +992,7 @@ public class InventoryManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_penderchest extends AbstractFunction {
 
@@ -1031,34 +1046,34 @@ public class InventoryManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			
+
 			MCPlayer m = null;
-			
+
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
-			
+
 			Construct arg;
-			
+
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
 				arg = args[1];
 			} else {
 				arg = args[0];
 			}
-			
+
 			if (!(arg instanceof CArray)) {
 				throw new ConfigRuntimeException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), Exceptions.ExceptionType.CastException, t);
 			}
-			
+
 			CArray array = (CArray) arg;
-			
+
 			Static.AssertPlayerNonNull(m, t);
-			
+
 			for (String key : array.stringKeySet()) {
 				try {
 					int index = -2;
-					
+
 					try {
 						index = Integer.parseInt(key);
 					} catch (NumberFormatException e) {
@@ -1068,9 +1083,9 @@ public class InventoryManagement {
 							throw e;
 						}
 					}
-					
-					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), t);
-					
+
+					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
+
 					if (index >= 0 && index <= 26) {
 						m.getEnderChest().setItem(index, is);
 					} else {
@@ -1080,11 +1095,11 @@ public class InventoryManagement {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_penderchest(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
-			
-			return new CVoid(t);
+
+			return CVoid.VOID;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class penderchest extends AbstractFunction {
 
@@ -1190,7 +1205,7 @@ public class InventoryManagement {
 			return ObjectGenerator.GetGenerator().item(is, t);
 		}
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_inventory_item extends AbstractFunction{
 
@@ -1216,8 +1231,8 @@ public class InventoryManagement {
 			if(p != null){
 				w = p.getWorld();
 			}
-			
-			MCInventory inv = GetInventory(args[0], w, t);			
+
+			MCInventory inv = GetInventory(args[0], w, t);
 			int slot = Static.getInt32(args[1], t);
 			try{
 				MCItemStack is = inv.getItem(slot);
@@ -1250,9 +1265,9 @@ public class InventoryManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_inventory_item extends AbstractFunction{
 
@@ -1278,13 +1293,13 @@ public class InventoryManagement {
 			if(p != null){
 				w = p.getWorld();
 			}
-			
-			MCInventory inv = GetInventory(args[0], w, t);			
+
+			MCInventory inv = GetInventory(args[0], w, t);
 			int slot = Static.getInt32(args[1], t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
 			try{
 				inv.setItem(slot, is);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} catch(ArrayIndexOutOfBoundsException e){
 				throw new Exceptions.RangeException("Index out of bounds for the inventory type.", t);
 			}
@@ -1310,9 +1325,9 @@ public class InventoryManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_inventory_type extends AbstractFunction{
 
@@ -1338,7 +1353,7 @@ public class InventoryManagement {
 			if(p != null){
 				w = p.getWorld();
 			}
-			
+
 			MCInventory inv = GetInventory(args[0], w, t);
 			return new CString(inv.getType().name(), t);
 		}
@@ -1365,9 +1380,9 @@ public class InventoryManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_inventory_size extends AbstractFunction{
 
@@ -1416,9 +1431,9 @@ public class InventoryManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class pinv_open extends AbstractFunction{
 
@@ -1449,7 +1464,7 @@ public class InventoryManagement {
 			}
 			Static.AssertPlayerNonNull(p1, t);
 			p1.openInventory(p2.getInventory());
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1471,7 +1486,7 @@ public class InventoryManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
     @api(environments = {CommandHelperEnvironment.class})
@@ -1624,14 +1639,14 @@ public class InventoryManagement {
 					if (index < 0 || index >= size) {
 						ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_inventory(), so ignoring.");
 					} else {
-						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), t);
+						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
 						inventory.setItem(index, is);
 					}
 				} catch (NumberFormatException e) {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_inventory(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1691,7 +1706,7 @@ public class InventoryManagement {
 			if (m != null) {
 				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getTypeId(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = inventory.addItem(is);
@@ -1784,15 +1799,15 @@ public class InventoryManagement {
 	}
 //    @api
 //    public static class pinv_consolidate extends AbstractFunction {
-//        
+//
 //        public String getName() {
 //            return "pinv_consolidate";
 //        }
-//        
+//
 //        public Integer[] numArgs() {
 //            return new Integer[]{0, 1};
 //        }
-//        
+//
 //        public String docs() {
 //            return "void {[player]} Consolidates a player's inventory as much as possible."
 //                    + " There is no guarantee anything will happen after this function"
@@ -1803,23 +1818,23 @@ public class InventoryManagement {
 //                    + " will be moved closer to the bottom of the main inventory. No empty slots"
 //                    + " will be filled in the hotbar.";
 //        }
-//        
+//
 //        public ExceptionType[] thrown() {
 //            return new ExceptionType[]{};
 //        }
-//        
+//
 //        public boolean isRestricted() {
 //            return true;
 //        }
-//        
+//
 //        public boolean preResolveVariables() {
 //            return true;
 //        }
-//        
+//
 //        public Boolean runAsync() {
 //            return false;
 //        }
-//        
+//
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            MCPlayer p = environment.GetPlayer();
 //            if(args.length == 1){
@@ -1829,10 +1844,10 @@ public class InventoryManagement {
 //            for(int i = 0; i < 10; i++){
 //                //If the stack size is maxed out, we're done.
 //            }
-//            
-//            return new CVoid(t);
+//
+//            return CVoid.VOID;
 //        }
-//        
+//
 //        public CHVersion since() {
 //            return CHVersion.V3_3_1;
 //        }

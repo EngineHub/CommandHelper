@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -29,7 +30,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ParameterMetaData;
@@ -48,6 +49,7 @@ import java.util.Set;
 /**
  *
  */
+@core
 public class SQL {
 
 	public static String docs() {
@@ -75,15 +77,15 @@ public class SQL {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				Profiles.Profile profile;
+				SQLProfiles.SQLProfile profile;
 				if (args[0] instanceof CArray) {
-					Map<String, String> data = new HashMap<String, String>();
+					Map<String, String> data = new HashMap<>();
 					for (String key : ((CArray) args[0]).stringKeySet()) {
-						data.put(key, ((CArray) args[0]).get(key).val());
+						data.put(key, ((CArray) args[0]).get(key, t).val());
 					}
-					profile = Profiles.getProfile(data);
+					profile = SQLProfiles.getProfile(data);
 				} else {
-					Profiles profiles = environment.getEnv(GlobalEnv.class).getSQLProfiles();
+					SQLProfiles profiles = environment.getEnv(GlobalEnv.class).getSQLProfiles();
 					profile = profiles.getProfileById(args[0].val());
 				}
 				String query = args[1].val();
@@ -91,21 +93,26 @@ public class SQL {
 				for (int i = 2; i < args.length; i++) {
 					int index = i - 2;
 					params[index] = args[i];
+					if(params[index] instanceof CNull){
+						params[index] = null;
+					}
 				}
 				//Parameters are now all parsed into java objects.
 				Connection conn = DriverManager.getConnection(profile.getConnectionString());
-				PreparedStatement ps = null;
-				try {
-					ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+				try (PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 					for (int i = 0; i < params.length; i++) {
 						int type = ps.getParameterMetaData().getParameterType(i + 1);
 						if (params[i] == null) {
-							if (ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
-								throw new ConfigRuntimeException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
-							} else {
-								ps.setNull(i + 1, type);
-								continue;
+							try {
+								if (ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
+									throw new ConfigRuntimeException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
+								}
+							} catch(SQLException ex){
+								//Ignored. This appears to be able to happen in various cases, but in the case where it *does* work, we don't want
+								//to completely disable the feature.
 							}
+							ps.setNull(i + 1, type);
+							continue;
 						}
 						try {
 							if (params[i] instanceof CInt) {
@@ -119,13 +126,13 @@ public class SQL {
 							} else if (params[i] instanceof CBoolean) {
 								ps.setBoolean(i + 1, Static.getBoolean(params[i]));
 							}else{
-								throw new ConfigRuntimeException("The type " + params[i].getClass().getSimpleName() 
+								throw new ConfigRuntimeException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported."
 										, ExceptionType.CastException, t);
 							}
 						} catch (ClassCastException ex) {
 							throw new ConfigRuntimeException("Could not cast parameter " + (i + 1) + " to "
-									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from " 
+									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from "
 									+ params[i].getClass().getSimpleName() + "."
 									, ExceptionType.CastException, t, ex);
 						}
@@ -136,12 +143,12 @@ public class SQL {
 						CArray ret = new CArray(t);
 						ResultSetMetaData md = ps.getMetaData();
 						ResultSet rs = ps.getResultSet();
-						while (rs.next()) {
+						while (rs != null && rs.next()) {
 							CArray row = new CArray(t);
 							for (int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
-								if (columnType == Types.INTEGER 
+								if (columnType == Types.INTEGER
 										|| columnType == Types.TINYINT
 										|| columnType == Types.SMALLINT
 										|| columnType == Types.BIGINT) {
@@ -153,12 +160,12 @@ public class SQL {
 										|| columnType == Types.NUMERIC) {
 									value = new CDouble(rs.getDouble(i), t);
 								} else if (columnType == Types.VARCHAR
-										|| columnType == Types.CHAR 
+										|| columnType == Types.CHAR
 										|| columnType == Types.LONGVARCHAR) {
 									value = new CString(rs.getString(i), t);
-								} else if (columnType == Types.BLOB 
-										|| columnType == Types.BINARY 
-										|| columnType == Types.VARBINARY 
+								} else if (columnType == Types.BLOB
+										|| columnType == Types.BINARY
+										|| columnType == Types.VARBINARY
 										|| columnType == Types.LONGVARBINARY) {
 									value = CByteArray.wrap(rs.getBytes(i), t);
 								} else if (columnType == Types.DATE
@@ -173,9 +180,14 @@ public class SQL {
 										|| columnType == Types.BIT) {
 									value = new CBoolean(rs.getBoolean(i), t);
 								} else {
-									throw new ConfigRuntimeException("SQL returned a unhandled column type " 
-											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "." 
+									throw new ConfigRuntimeException("SQL returned a unhandled column type "
+											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "."
 											, ExceptionType.CastException, t);
+								}
+								if(rs.wasNull()){
+									// Since mscript can assign null to primitives, we
+									// can set it to null regardless of the data type.
+									value = CNull.NULL;
 								}
 								row.set(md.getColumnName(i), value, t);
 							}
@@ -190,25 +202,21 @@ public class SQL {
 							return new CInt(rs.getInt(1), t);
 						}
 						//Update count. Just return null.
-						return new CNull(t);
+						return CNull.NULL;
 					}
 				} finally {
-					if (ps != null) {
-						ps.close();
-					}
-					if (conn != null) { 
-						conn.close();
-					}
+					conn.close();
 				}
-			} catch (Profiles.InvalidProfileException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
-			} catch (SQLException ex) {
+			} catch (SQLProfiles.InvalidSQLProfileException | SQLException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
 			}
 		}
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 2){
+				throw new ConfigCompileException(getName() + " expects at least 2 arguments", t);
+			}
 			//We can check 2 things here, one, that the statement isn't dynamic, and if not, then
 			//2, that the parameter count matches the ? count. No checks can be done for typing,
 			//without making a connection to the db though, so we won't do that here.
@@ -222,9 +230,10 @@ public class SQL {
 							+ " which ensure that your parameters are properly escaped.", t);
 				}
 			} else if(queryData instanceof CString){
-				//It's a hard coded query, so we can double check parameter lengths
+				//It's a hard coded query, so we can double check parameter lengths and other things
+				String query = queryData.val();
 				int count = 0;
-				for(char c : queryData.val().toCharArray()){
+				for(char c : query.toCharArray()){
 					if(c == '?'){
 						count++;
 					}
@@ -232,11 +241,30 @@ public class SQL {
 				//-2 accounts for the profile data and query
 				if(children.size() - 2 != count){
 					throw new ConfigCompileException(
-							StringUtils.PluralTemplateHelper(count, "%d parameter token was", "%d parameter tokens were") 
+							StringUtils.PluralTemplateHelper(count, "%d parameter token was", "%d parameter tokens were")
 									+ " found in the query, but "
 									+ StringUtils.PluralTemplateHelper(children.size() - 2, "%d parameter was", "%d parameters were")
 									+ " provided to query().", t);
 				}
+				//TODO: Need to get the SQL Profile data from the environment before this can be done.
+				//Profile validation will simply ensure that the profile stated is listed in the profiles,
+				//and that a connection can in fact be made.
+				//Also need to figure out how to validate a prepared statement.
+//				if(children.get(0).isConst() && children.get(0).getData() instanceof CString){
+//					if(true){ //Prefs.verifyQueries()
+//						String profileName = children.get(0).getData().val();
+//						SQLProfiles.SQLProfile profile = null;
+//						Connection conn;
+//						try {
+//							conn = DriverManager.getConnection(profile.getConnectionString());
+//							try(PreparedStatement statement = conn.prepareStatement(query)){
+//
+//							}
+//						} catch (SQLException ex) {
+//							// Do nothing, but we can't validate this query
+//						}
+//					}
+//				}
 			}
 			return null;
 		}
@@ -267,13 +295,13 @@ public class SQL {
 		}
 
 	}
-	
+
 	@api
 	public static class query_async extends AbstractFunction {
-		
+
 		RunnableQueue queue = null;
 		boolean started = false;
-		
+
 		private synchronized void startup(){
 			if(queue == null){
 				queue = new RunnableQueue("MethodScript-queryAsync");
@@ -329,8 +357,8 @@ public class SQL {
 
 				@Override
 				public void run() {
-					Construct returnValue = new CNull();
-					Construct exception = new CNull();
+					Construct returnValue = CNull.NULL;
+					Construct exception = CNull.NULL;
 					try{
 						returnValue = new query().exec(t, environment, newArgs);
 					} catch(ConfigRuntimeException ex){
@@ -347,7 +375,7 @@ public class SQL {
 					});
 				}
 			});
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -376,6 +404,6 @@ public class SQL {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }

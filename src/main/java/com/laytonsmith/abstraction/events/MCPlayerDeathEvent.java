@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCPlayerDeathEvent extends MCEntityDeathEvent {
 

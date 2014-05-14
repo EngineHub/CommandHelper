@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -24,11 +25,12 @@ import javax.xml.xpath.XPathExpressionException;
 import org.xml.sax.SAXException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
  *
- * @author lsmith
  */
+@core
 public class DataTransformations {
 
 	public static String docs() {
@@ -218,9 +220,15 @@ public class DataTransformations {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String data = args[0].val();
 			Yaml yaml = new Yaml();
-			Object ret = yaml.load(data);
+			Object ret = null;
+			Exception cause = null;
+			try {
+				ret = yaml.load(data);
+			} catch(ScannerException ex){
+				cause = ex;
+			}
 			if(!(ret instanceof Map)){
-				throw new Exceptions.FormatException("Improperly formatted YML", t);
+				throw new Exceptions.FormatException("Improperly formatted YML", t, cause);
 			}
 			Map<String, Object> map = (Map<String, Object>) ret;
 			return Construct.GetConstruct(map);
@@ -248,7 +256,7 @@ public class DataTransformations {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class ini_encode extends AbstractFunction {
 
@@ -279,7 +287,7 @@ public class DataTransformations {
 				throw new Exceptions.CastException("Expecting an associative array", t);
 			}
 			for(String key : arr.stringKeySet()){
-				Construct c = arr.get(key);
+				Construct c = arr.get(key, t);
 				String val;
 				if(c instanceof CNull){
 					val = "";
@@ -325,9 +333,9 @@ public class DataTransformations {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ini_decode extends AbstractFunction {
 
@@ -391,9 +399,9 @@ public class DataTransformations {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class xml_read extends AbstractFunction {
 
@@ -447,9 +455,9 @@ public class DataTransformations {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	//@api
 	public static class xml_write extends AbstractFunction {
 
@@ -492,6 +500,6 @@ public class DataTransformations {
 		public Version since() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
-		
+
 	}
 }

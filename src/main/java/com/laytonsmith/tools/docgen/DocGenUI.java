@@ -10,24 +10,19 @@ import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.tools.Interpreter;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import org.pushingpixels.substance.api.skin.SubstanceGraphiteGlassLookAndFeel;
+//import org.pushingpixels.substance.api.skin.SubstanceGraphiteGlassLookAndFeel;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class DocGenUI extends javax.swing.JFrame {
 
@@ -314,30 +309,30 @@ public class DocGenUI extends javax.swing.JFrame {
 			Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		
-		try {
-			SwingUtilities.invokeAndWait(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						UIManager.setLookAndFeel(new SubstanceGraphiteGlassLookAndFeel());
-						JFrame.setDefaultLookAndFeelDecorated(true);
-						JDialog.setDefaultLookAndFeelDecorated(true);
-					} catch (UnsupportedLookAndFeelException ex) {
-						Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
-					} 
-				}
-			});
-		} catch (Exception ex) {
-			Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
-		} catch(NoClassDefFoundError e){
-			//This shouldn't be an error, they just won't have the awesome
-			//theme
-			System.err.println("NoClassDefFoundError occured while trying to install LaF. Do you have Substance installed?");
-			if(Prefs.DebugMode()){
-				e.printStackTrace(System.err);
-			}
-		}
+//		try {
+//			SwingUtilities.invokeAndWait(new Runnable() {
+//
+//				@Override
+//				public void run() {
+//					try {
+//						UIManager.setLookAndFeel(new SubstanceGraphiteGlassLookAndFeel());
+//						JFrame.setDefaultLookAndFeelDecorated(true);
+//						JDialog.setDefaultLookAndFeelDecorated(true);
+//					} catch (UnsupportedLookAndFeelException ex) {
+//						Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
+//					} 
+//				}
+//			});
+//		} catch (Exception ex) {
+//			Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
+//		} catch(NoClassDefFoundError e){
+//			//This shouldn't be an error, they just won't have the awesome
+//			//theme
+//			System.err.println("NoClassDefFoundError occured while trying to install LaF. Do you have Substance installed?");
+//			if(Prefs.DebugMode()){
+//				e.printStackTrace(System.err);
+//			}
+//		}
 		
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenUI.class));
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());

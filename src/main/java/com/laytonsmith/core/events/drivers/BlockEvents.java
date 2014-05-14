@@ -5,14 +5,30 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
+import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
+import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
+import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
+import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
+import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
+import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
-import com.laytonsmith.core.events.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventBuilder;
+import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -109,7 +125,7 @@ public class BlockEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             return null;
         }
 
@@ -136,7 +152,7 @@ public class BlockEvents {
             blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
 
             map.put("block", blk);
-			
+
 			CArray location = ObjectGenerator.GetGenerator()
 					.location(StaticLayer.GetLocation(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
 			map.put("location", location);
@@ -149,7 +165,7 @@ public class BlockEvents {
                 drops.push(item);
             }
             map.put("drops", drops);
-			
+
 			map.put("xp", new CInt(event.getExpToDrop(), Target.UNKNOWN));
 
             return map;
@@ -169,29 +185,29 @@ public class BlockEvents {
                     CArray arr = (CArray) value;
 
                     for (int i = 0; i < arr.size(); i++) {
-                        CArray item = (CArray) arr.get(i);
+                        CArray item = (CArray) arr.get(i, Target.UNKNOWN);
                         MCItemStack stk = ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN);
-                        
+
                         blk.getWorld().dropItemNaturally(
                             StaticLayer.GetLocation(
-                                    blk.getWorld(), 
-                                    blk.getX(), 
-                                    blk.getY(), 
-                                    blk.getZ()), 
+                                    blk.getWorld(),
+                                    blk.getX(),
+                                    blk.getY(),
+                                    blk.getZ()),
                             stk);
                     }
 
                     return true;
                 }
             }
-			
+
 			if (key.equals("xp")) {
 				if (value instanceof CInt) {
-					
+
 					int xp = Integer.parseInt(value.val());
-					
+
 					event.setExpToDrop(xp);
-					
+
 					return true;
 				}
 			}
@@ -278,7 +294,7 @@ public class BlockEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             return null;
         }
 
@@ -295,7 +311,7 @@ public class BlockEvents {
             map.put("Y", new CInt(blk.getY(), Target.UNKNOWN));
             map.put("Z", new CInt(blk.getZ(), Target.UNKNOWN));
             map.put("world", new CString(blk.getWorld().getName(), Target.UNKNOWN));
-			
+
 			CArray location = ObjectGenerator.GetGenerator()
 					.location(StaticLayer.GetLocation(blk.getWorld(), blk.getX(), blk.getY(), blk.getZ()));
 			map.put("location", location);
@@ -360,7 +376,7 @@ public class BlockEvents {
             return false;
         }
     }
-	
+
 	@api
     public static class block_burn extends AbstractEvent {
 
@@ -431,7 +447,7 @@ public class BlockEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             return null;
         }
 
@@ -522,7 +538,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -651,7 +667,7 @@ public class BlockEvents {
                     String[] lines = {"","","",""};
 
                     for (int i = 0; i < 4; i++) {
-                        lines[i] = val.get(i).toString();
+                        lines[i] = val.get(i, Target.UNKNOWN).toString();
                     }
 
                     sce.setLines(lines);
@@ -686,12 +702,12 @@ public class BlockEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manual) {
+        public BindableEvent convert(CArray manual, Target t) {
             MCSignChangeEvent e = EventBuilder.instantiate(
                     MCSignChangeEvent.class,
-                    Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN),
-                    manual.get("1").val(), manual.get("2").val(),
-                    manual.get("3").val(), manual.get("4").val());
+                    Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
+                    manual.get("1", Target.UNKNOWN).val(), manual.get("2", Target.UNKNOWN).val(),
+                    manual.get("3", Target.UNKNOWN).val(), manual.get("4", Target.UNKNOWN).val());
             return e;
         }
     }
@@ -739,7 +755,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
@@ -827,7 +843,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 

@@ -1,8 +1,5 @@
 package com.laytonsmith.core.federation;
 
-import static com.laytonsmith.core.federation.Federation.DEAD_SERVER_TIMEOUT;
-import static com.laytonsmith.core.federation.Federation.DYNAMIC_PORT_MAXIMUM;
-import static com.laytonsmith.core.federation.Federation.DYNAMIC_PORT_MINIMUM;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.BufferedInputStream;
@@ -11,7 +8,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

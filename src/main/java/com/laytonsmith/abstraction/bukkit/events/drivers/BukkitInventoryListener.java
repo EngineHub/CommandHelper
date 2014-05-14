@@ -25,7 +25,7 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitInventoryListener implements Listener{
     

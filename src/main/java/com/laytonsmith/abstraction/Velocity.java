@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction;
 
 /**
  *
- * @author layton
+ * 
  */
 public class Velocity {
 	public double magnitude;

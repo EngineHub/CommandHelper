@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.annotations.breakable;
+import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -13,6 +14,7 @@ import com.laytonsmith.core.constructs.CPreIdentifier;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
@@ -26,9 +28,10 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
-import com.laytonsmith.database.Profiles;
+import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * provides helper methods for execution of the compiled trees.
  */
 public final class MethodScriptCompiler {
-	
+
 	private final static EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
 
 	private final static FileOptions fileOptions = new FileOptions(new HashMap<String, String>());
@@ -71,6 +74,13 @@ public final class MethodScriptCompiler {
 	 */
 	@SuppressWarnings("UnnecessaryContinue")
 	public static List<Token> lex(String script, File file, boolean inPureMScript) throws ConfigCompileException {
+		if(script.isEmpty()){
+			return new ArrayList<Token>();
+		}
+		if((int)script.charAt(0) == 65279){
+			// Remove the UTF-8 Byte Order Mark, if present.
+			script = script.substring(1);
+		}
 		script = script.replaceAll("\r\n", "\n");
 		script = script + "\n";
 		List<Token> token_list = new ArrayList<>();
@@ -203,7 +213,7 @@ public final class MethodScriptCompiler {
 				}
 				token_list.add(new Token(TType.CONCAT_ASSIGNMENT, "/=", target));
 				i++;
-				continue;				
+				continue;
 			}
 			//This has to come before subtraction and greater than
 			if (c == '-' && c2 == '>' && !state_in_quote) {
@@ -434,7 +444,7 @@ public final class MethodScriptCompiler {
 //                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 //                    buf = new StringBuilder();
 //                }
-//                token_list.add(new Token(TType.BIT_AND, "&", target));  
+//                token_list.add(new Token(TType.BIT_AND, "&", target));
 //                continue;
 //            }
 //            if(c == '|' && !state_in_quote){
@@ -442,7 +452,7 @@ public final class MethodScriptCompiler {
 //                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 //                    buf = new StringBuilder();
 //                }
-//                token_list.add(new Token(TType.BIT_OR, "|", target));  
+//                token_list.add(new Token(TType.BIT_OR, "|", target));
 //                continue;
 //            }
 //            if(c == '^' && !state_in_quote){
@@ -450,7 +460,7 @@ public final class MethodScriptCompiler {
 //                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 //                    buf = new StringBuilder();
 //                }
-//                token_list.add(new Token(TType.BIT_XOR, "^", target));  
+//                token_list.add(new Token(TType.BIT_XOR, "^", target));
 //                continue;
 //            }
 
@@ -582,7 +592,7 @@ public final class MethodScriptCompiler {
 			}
 			if (Character.isWhitespace(c) && !state_in_quote && c != '\n') {
 				//keep the whitespace, but end the previous token, unless the last character
-				//was also whitespace. All whitespace is added as a single space.                
+				//was also whitespace. All whitespace is added as a single space.
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
@@ -817,7 +827,7 @@ public final class MethodScriptCompiler {
 				tokens1_1.add(thisToken);
 			}
 		}
-		
+
 		assert thisToken != null;
 
 		if (inside_multiline) {
@@ -988,7 +998,7 @@ public final class MethodScriptCompiler {
 			}
 
 			//Nothing. Add it to the tempStream. Also, clear irrelevantNewlines,
-			//because they may not be irrelevant at this point.            
+			//because they may not be irrelevant at this point.
 			tempStream.add(t[1]);
 			irrelevantWhitespace.clear();
 		}
@@ -998,7 +1008,7 @@ public final class MethodScriptCompiler {
 		stream = tempStream;
 
 		ParseTree tree = new ParseTree(fileOptions);
-		tree.setData(new CNull(unknown));
+		tree.setData(CNull.NULL);
 		Stack<ParseTree> parents = new Stack<>();
 		/**
 		 * constructCount is used to determine if we need to use autoconcat
@@ -1125,7 +1135,7 @@ public final class MethodScriptCompiler {
 				ParseTree myIndex;
 				if (!emptyArray) {
 					myIndex = new ParseTree(new CFunction("__autoconcat__", myArray.getTarget()), fileOptions);
-					
+
 					for (int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
 					}
@@ -1149,6 +1159,7 @@ public final class MethodScriptCompiler {
 				string.setData(new CString(t.value, t.target));
 				function.addChild(string);
 				tree.addChild(function);
+				constructCount.peek().incrementAndGet();
 				continue;
 			}
 
@@ -1348,11 +1359,11 @@ public final class MethodScriptCompiler {
 				constructCount.peek().incrementAndGet();
 				//right_vars.add(new Variable(t.val(), null, t.line_num));
 			}
-			
+
 		}
-		
+
 		assert t != null;
-		
+
 		if (arrayStack.size() != 1) {
 			throw new ConfigCompileException("Mismatched square brackets", t.target);
 		}
@@ -1370,17 +1381,17 @@ public final class MethodScriptCompiler {
 		tree = parents.pop();
 		return tree;
 	}
-	
+
 	/**
 	 * Recurses down the tree and ensures that breaks don't bubble up past
 	 * procedures or the root code tree.
 	 * @param tree
-	 * @throws ConfigCompileException 
+	 * @throws ConfigCompileException
 	 */
 	private static void checkBreaks(ParseTree tree) throws ConfigCompileException {
 		checkBreaks0(tree, 0, null);
 	}
-	
+
 	private static void checkBreaks0(ParseTree tree, long currentLoops, String lastUnbreakable) throws ConfigCompileException {
 		if(!(tree.getData() instanceof CFunction)){
 			//Don't care about these
@@ -1394,7 +1405,11 @@ public final class MethodScriptCompiler {
 			return;
 		}
 		Function func = ((CFunction)tree.getData()).getFunction();
-		// We have special handling for procs and closures, and of course break and the loops. 
+		if(func.getClass().getAnnotation(nolinking.class) != null){
+			// Don't link here
+			return;
+		}
+		// We have special handling for procs and closures, and of course break and the loops.
 		// If any of these are here, we kick into special handling mode. Otherwise, we recurse.
 		if(func instanceof DataHandling._break){
 				// First grab the counter in the break function. If the break function doesn't
@@ -1417,8 +1432,8 @@ public final class MethodScriptCompiler {
 					}
 				}
 				return;
-		} 
-		if(func.getClass().getAnnotation(unbreakable.class) != null){		
+		}
+		if(func.getClass().getAnnotation(unbreakable.class) != null){
 				// Parse the children like normal, but reset the counter to 0.
 				for(ParseTree child : tree.getChildren()){
 					checkBreaks0(child, 0, func.getName());
@@ -1433,15 +1448,15 @@ public final class MethodScriptCompiler {
 			checkBreaks0(child, currentLoops, lastUnbreakable);
 		}
 	}
-	
+
 	/**
 	 * Recurses down the tree and ensures that there are no dynamic labels. This has
-	 * to finish completely after optimization, because the optimizer has no 
+	 * to finish completely after optimization, because the optimizer has no
 	 * good hook to know when optimization for a unit is fully completed, until
 	 * ALL units are fully complete, so this happens separately after optimization,
 	 * but as apart of the normal compile process.
 	 * @param tree
-	 * @throws ConfigCompileException 
+	 * @throws ConfigCompileException
 	 */
 	private static void checkLabels(ParseTree tree) throws ConfigCompileException {
 //		for(ParseTree t : tree.getChildren()){
@@ -1453,32 +1468,47 @@ public final class MethodScriptCompiler {
 //			checkLabels(t);
 //		}
 	}
-	
+
 	/**
 	 * Recurses down the tree and
 	 * <ul><li>Links functions</li>
 	 * <li>Checks function arguments</li></ul>
 	 * This is a separate process from optimization, because optimization
 	 * ignores any missing functions.
-	 * @param tree 
+	 * @param tree
 	 */
 	private static void link(ParseTree tree) throws ConfigCompileException{
+		FunctionBase treeFunction = null;
+		try {
+			treeFunction = FunctionList.getFunction(tree.getData());
+			if(treeFunction.getClass().getAnnotation(nolinking.class) != null){
+				//Don't link children of a nolinking function.
+				return;
+			}
+		} catch(ConfigCompileException ex){
+			//This can happen if the treeFunction isn't a function, is a proc, etc,
+			//but we don't care, we just want to continue.
+		}
+		if(treeFunction != null){
+			Integer[] numArgs = treeFunction.numArgs();
+			if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) &&
+					!Arrays.asList(numArgs).contains(tree.getChildren().size())) {
+				throw new ConfigCompileException("Incorrect number of arguments passed to "
+						+ tree.getData().val(), tree.getData().getTarget());
+			}
+		}
+
 		for(ParseTree child : tree.getChildren()){
 			if(child.getData() instanceof CFunction){
+				FunctionBase f = null;
 				if (!child.getData().val().matches("^_[^_].*")) {
-					FunctionList.getFunction(child.getData());
-					Integer[] numArgs = FunctionList.getFunction(child.getData()).numArgs();
-					if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && 
-							!Arrays.asList(numArgs).contains(child.getChildren().size())) {
-						throw new ConfigCompileException("Incorrect number of arguments passed to " 
-								+ child.getData().val(), child.getData().getTarget());
-					}
+					f = FunctionList.getFunction(child.getData());
 				}
 				link(child);
 			}
 		}
 	}
-	
+
 	private static final String __autoconcat__ = new Compiler.__autoconcat__().getName();
 
 	/**
@@ -1526,6 +1556,12 @@ public final class MethodScriptCompiler {
 		} catch (ConfigCompileException e) {
 			func = null;
 		}
+		if(func != null){
+			if(func.getClass().getAnnotation(nolinking.class) != null){
+				//It's an unlinking function, so we need to stop at this point
+				return;
+			}
+		}
 		if(cFunction instanceof CIdentifier){
 			//Add the child to the identifier
 			ParseTree c = ((CIdentifier)cFunction).contained();
@@ -1569,9 +1605,9 @@ public final class MethodScriptCompiler {
 		//For the time being, we will simply say that if a function uses execs, it
 		//is a branch (branches always use execs, though using execs doesn't strictly
 		//mean you are a branch type function).
-		
+
 		for(int i = 0; i < children.size(); i++){
-			ParseTree t = children.get(i);			
+			ParseTree t = children.get(i);
 			if(t.getData() instanceof CFunction){
 				if(t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())){
 					continue;
@@ -1587,7 +1623,7 @@ public final class MethodScriptCompiler {
 						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
 						//Now, truncate the children
 						for(int j = children.size() - 1; j > i; j--){
-							children.remove(j);							
+							children.remove(j);
 						}
 						break;
 					}
@@ -1611,7 +1647,7 @@ public final class MethodScriptCompiler {
 		//In all cases, at this point, we are either unable to optimize, or we will
 		//optimize, so set our optimized variable at this point.
 		tree.setOptimized(true);
-		
+
 		if(func == null) {
 			//It's a proc call. Let's see if we can optimize it
 			Procedure p = null;
@@ -1639,7 +1675,7 @@ public final class MethodScriptCompiler {
 					//Cool. Caught a runtime error at compile time :D
 					throw new ConfigCompileException(ex);
 				}
-			} 
+			}
 			//else this procedure isn't listed yet. Maybe a compiler error, maybe not, depends,
 			//so we can't for sure say, but we do know we can't optimize this
 			return;
@@ -1656,7 +1692,7 @@ public final class MethodScriptCompiler {
 				Environment env = null;
 				try{
 					env = Static.GenerateStandaloneEnvironment();
-				} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e){
+				} catch(IOException | DataSourceException | URISyntaxException | SQLProfiles.InvalidSQLProfileException e){
 					//
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
@@ -1717,7 +1753,7 @@ public final class MethodScriptCompiler {
 		}
 		//It could have optimized by changing the name, in that case, we
 		//don't want to run this now
-		if (tree.getData().getValue().equals(oldFunctionName) && 
+		if (tree.getData().getValue().equals(oldFunctionName) &&
 				(options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
 			Construct[] constructs = new Construct[tree.getChildren().size()];
 			for (int i = 0; i < tree.getChildren().size(); i++) {
@@ -1745,7 +1781,7 @@ public final class MethodScriptCompiler {
 
 		//It doesn't know how to optimize. Oh well.
 	}
-	
+
 	/**
 	 * Shorthand for lexing, compiling, and executing a script.
 	 * @param script The textual script to execute
@@ -1756,7 +1792,7 @@ public final class MethodScriptCompiler {
 	 * @param s A script object (may be null)
 	 * @param vars Any $vars (may be null)
 	 * @return
-	 * @throws ConfigCompileException 
+	 * @throws ConfigCompileException
 	 */
 	public static Construct execute(String script, File file, boolean inPureMScript, Environment env, MethodScriptComplete done, Script s, List<Variable> vars) throws ConfigCompileException{
 		return execute(compile(lex(script, file, inPureMScript)), env, done, s, vars);
@@ -1772,7 +1808,7 @@ public final class MethodScriptCompiler {
 	 * @param env
 	 * @param done
 	 * @param script
-	 * @return 
+	 * @return
 	 */
 	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script) {
 		return execute(root, env, done, script, null);
@@ -1791,6 +1827,9 @@ public final class MethodScriptCompiler {
 	 * @return
 	 */
 	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
+		if(root == null){
+			return CVoid.VOID;
+		}
 		if (script == null) {
 			script = new Script(null, null);
 		}

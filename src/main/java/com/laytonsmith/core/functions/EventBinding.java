@@ -3,9 +3,24 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.*;
+import com.laytonsmith.annotations.core;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.IVariableList;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -14,6 +29,7 @@ import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
+import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -27,14 +43,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
- * @author Layton
  */
+@core
 public class EventBinding {
 
 	public static String docs() {
 		return "This class of functions provide methods to hook deep into the server's event architecture";
 	}
-	
+
 	private static final AtomicInteger bindCounter = new AtomicInteger(0);
 
 	@api(environments=CommandHelperEnvironment.class)
@@ -84,7 +100,7 @@ public class EventBinding {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -131,30 +147,34 @@ public class EventBinding {
 			if (prefilter instanceof CNull) {
 				prefilter = null;
 			}
+			Event event;
 			try {
 				BoundEvent be = new BoundEvent(name.val(), (CArray) options, (CArray) prefilter,
 						((IVariable) event_obj).getName(), newEnv, tree, t);
 				EventUtils.RegisterEvent(be);
 				id = new CString(be.getId(), t);
+				event = EventList.getEvent(be.getEventName());
 			} catch (EventException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.BindException, t);
 			}
-			
-			//Set up our bind counter
-			synchronized(bindCounter){
-				if(bindCounter.get() == 0){
-					env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
-					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
-						@Override
-						public void run() {
-							synchronized(bindCounter){
-								bindCounter.set(0);
+			//Set up our bind counter, but only if the event is supposed to be added to the counter
+			if(event.addCounter()){
+				synchronized(bindCounter){
+					if(bindCounter.get() == 0){
+						env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+						StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+
+							@Override
+							public void run() {
+								synchronized(bindCounter){
+									bindCounter.set(0);
+								}
 							}
-						}
-					});
+						});
+					}
+					bindCounter.incrementAndGet();
 				}
-				bindCounter.incrementAndGet();
 			}
 			return id;
 		}
@@ -194,7 +214,7 @@ public class EventBinding {
 			}
 			return null;
 		}
-		
+
 	}
 
 	@api
@@ -294,14 +314,22 @@ public class EventBinding {
 				}
 				id = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getId();
 			}
+			BoundEvent be = EventUtils.GetEventById(id);
+			Event event = null;
+			if(be != null){
+				event = be.getEventDriver();
+			}
 			EventUtils.UnregisterEvent(id);
-			synchronized(bindCounter){
-				bindCounter.decrementAndGet();
-				if(bindCounter.get() == 0){
-					environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+			//Only remove the counter if it had been added in the first place.
+			if(event != null && event.addCounter()){
+				synchronized(bindCounter){
+					bindCounter.decrementAndGet();
+					if(bindCounter.get() == 0){
+						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+					}
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -360,7 +388,7 @@ public class EventBinding {
 			if (original.getUnderlyingEvent() != null && original.isCancellable()) {
 				original.setCancelled(cancelled);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -474,8 +502,8 @@ public class EventBinding {
 			if (args.length == 3) {
 				serverWide = Static.getBoolean(args[2]);
 			}
-			EventUtils.ManualTrigger(args[0].val(), obj, serverWide);
-			return new CVoid(t);
+			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide);
+			return CVoid.VOID;
 		}
 	}
 
@@ -623,7 +651,7 @@ public class EventBinding {
 			for (String param : params) {
 				e.lock(param);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -724,7 +752,7 @@ public class EventBinding {
 				throw new ConfigRuntimeException("consume may only be called from an event handler!", ExceptionType.BindException, t);
 			}
 			environment.getEnv(GlobalEnv.class).GetEvent().consume();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -784,10 +812,10 @@ public class EventBinding {
 	}
 
 //    @api public static class when_triggered extends AbstractFunction{
-//        
+//
 //    }
 //    @api public static class when_cancelled extends AbstractFunction{
-//        
+//
 //    }
 	@api(environments=CommandHelperEnvironment.class)
 	public static class event_meta extends AbstractFunction {
@@ -840,7 +868,7 @@ public class EventBinding {
 			return CHVersion.V3_3_0;
 		}
 	}
-	
+
 	@api public static class has_bind extends AbstractFunction {
 
 		@Override
@@ -895,6 +923,6 @@ public class EventBinding {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }

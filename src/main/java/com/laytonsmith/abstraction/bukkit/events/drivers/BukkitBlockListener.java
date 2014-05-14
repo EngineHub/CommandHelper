@@ -19,7 +19,7 @@ import org.bukkit.event.block.SignChangeEvent;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitBlockListener implements Listener{
 	@EventHandler(priority=EventPriority.LOWEST)

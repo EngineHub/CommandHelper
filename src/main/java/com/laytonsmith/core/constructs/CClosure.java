@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 /**
  * A closure is just an anonymous procedure.
  *
- * @author Layton
+ * 
  */
 @typeof("closure")
 public class CClosure extends Construct {
@@ -101,11 +101,22 @@ public class CClosure extends Construct {
      * Executes the closure, giving it the supplied arguments. {@code values}
      * may be null, which means that no arguments are being sent.
 	 * 
-	 * LoopManipulationExceptions will never bubble up past this point, but
-	 * other ProgramFlowManipulationExceptions will. ConfigRuntimeExceptions will
+	 * LoopManipulationExceptions will never bubble up past this point, because they are
+	 * never allowed, so they are handled automatically, but
+	 * other ProgramFlowManipulationExceptions will, . ConfigRuntimeExceptions will
 	 * also bubble up past this, since an execution mechanism may need to do custom
 	 * handling.
-     *
+	 * 
+	 * A typical execution will include the following code:
+	 * <pre>
+	 * try {
+	 *	closure.execute();
+	 * } catch(ConfigRuntimeException e){
+	 *	ConfigRuntimeException.HandleUncaughtException(e);
+	 * } catch(ProgramFlowManipulationException e){
+	 *	// Ignored
+	 * }
+     * </pre>
      * @param values The values to be passed to the closure
 	 * @throws ConfigRuntimeException If any call inside the closure causes a CRE
 	 * @throws ProgramFlowManipulationException If any ProgramFlowManipulationException is thrown

@@ -27,7 +27,7 @@ import java.util.TreeMap;
 
 /**
  * A class that represents a dynamic array.
- * 
+ *
  * For subclasses, the ArrayAccess methods are the most commonly
  * overridden methods. There are several overloaded methods in this
  * class, you need only to override the non-final ones for the
@@ -44,36 +44,36 @@ public class CArray extends Construct implements ArrayAccess{
     CArray parent = null;
 	private boolean valueDirty = true;
 	private boolean loadedExterns = false;
-    
-    
+
+
     public CArray(Target t){
         this(t, (Construct[])null);
     }
-	
+
 	public CArray(Target t, Collection<Construct> items){
 		this(t, getArray(items));
 	}
-	
+
 	/**
 	 * Returns if this array is in associative mode or not.
-	 * @return 
+	 * @return
 	 */
 	public boolean isAssociative(){
 		return associative_mode;
 	}
-	
+
 	/**
 	 * Returns the backing array.
-	 * @return 
+	 * @return
 	 */
 	protected List<Construct> getArray(){
 		return array;
 	}
-	
+
 	/**
 	 * Returns a List based on the array. This is only applicable if this
 	 * is a normal array.
-	 * @return 
+	 * @return
 	 */
 	public List<Construct> asList(){
 		if(inAssociativeMode()){
@@ -82,15 +82,15 @@ public class CArray extends Construct implements ArrayAccess{
 			return new ArrayList<Construct>(array);
 		}
 	}
-	
+
 	/**
 	 * Returns the backing associative array.
-	 * @return 
+	 * @return
 	 */
 	protected SortedMap<String, Construct> getAssociativeArray(){
 		return associative_array;
 	}
-	
+
 	private static Construct [] getArray(Collection<Construct> items){
 		Construct c [] = new Construct[items.size()];
 		int count = 0;
@@ -119,7 +119,7 @@ public class CArray extends Construct implements ArrayAccess{
                     if(item instanceof CEntry){
                         associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).construct);
                     } else {
-                        int max = Integer.MIN_VALUE;            
+                        int max = Integer.MIN_VALUE;
                         for (String key : associative_array.keySet()) {
                             try{
                                 int i = Integer.parseInt(key);
@@ -156,20 +156,20 @@ public class CArray extends Construct implements ArrayAccess{
     public boolean inAssociativeMode() {
         return associative_mode;
     }
-	
+
 	/**
 	 * Returns a new empty CArray that is in associative mode.
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static CArray GetAssociativeArray(Target t){
 		return new CArray(t).forceAssociativeMode();
 	}
-	
+
 	public static CArray GetAssociativeArray(Target t, Construct[] args){
 		return new CArray(t, args).forceAssociativeMode();
 	}
-    
+
     /**
      * This should only be used when copying an array that is already known to be associative, so integer keys will
      * remain associative.
@@ -197,7 +197,7 @@ public class CArray extends Construct implements ArrayAccess{
 			parent.regenValue(arrays);
 		}
     }
-	
+
 	/**
 	 * Reverses the array in place, if it is a normal array, otherwise, if associative, it throws
 	 * an exception.
@@ -213,7 +213,7 @@ public class CArray extends Construct implements ArrayAccess{
 
 	/**
 	 * Pushes a new Construct onto the end of the array.
-	 * @param c 
+	 * @param c
 	 */
 	public void push(Construct c){
 		push(c, null);
@@ -241,7 +241,7 @@ public class CArray extends Construct implements ArrayAccess{
 			if(index != null){
 				throw new IllegalArgumentException("Cannot insert into an associative array");
 			}
-            int max = 0;            
+            int max = 0;
             for (String key : associative_array.keySet()) {
                 try{
                     int i = Integer.parseInt(key);
@@ -259,17 +259,17 @@ public class CArray extends Construct implements ArrayAccess{
         }
         regenValue(new HashSet<CArray>());
     }
-    
+
     /**
      * Returns the key set for this array. If it's an associative array, it simply returns
      * the key set of the map, otherwise it generates a set of CInts from 0 to size-1, and
      * returns that.
-     * @return 
+     * @return
      */
 	@Override
     public Set<Construct> keySet(){
         Set<Construct> set = !associative_mode?new LinkedHashSet<Construct>(array.size()):new LinkedHashSet<Construct>(associative_array.size());
-        if(!associative_mode){            
+        if(!associative_mode){
             for(int i = 0; i < array.size(); i++){
                 set.add(new CInt(i, Target.UNKNOWN));
             }
@@ -280,16 +280,16 @@ public class CArray extends Construct implements ArrayAccess{
         }
         return set;
     }
-	
+
 	/**
 	 * Returns the string based key set for this array. If it's an associative array, it
 	 * simply returns the key set of the map, otherwise it generates a set from 0 to size-1,
 	 * toStrings the integers, and returns that.
-	 * @return 
+	 * @return
 	 */
 	public Set<String> stringKeySet(){
 		Set<String> set = !associative_mode?new LinkedHashSet<String>(array.size()):new HashSet<String>(associative_array.size());
-        if(!associative_mode){            
+        if(!associative_mode){
             for(int i = 0; i < array.size(); i++){
                 set.add(Integer.toString(i));
             }
@@ -300,9 +300,9 @@ public class CArray extends Construct implements ArrayAccess{
 	}
 
     /**
-     * 
+     *
      * @param index
-     * @param c 
+     * @param c
      */
     public void set(Construct index, Construct c, Target t) {
         if (!associative_mode) {
@@ -333,24 +333,25 @@ public class CArray extends Construct implements ArrayAccess{
         }
         regenValue(new HashSet<CArray>());
     }
-    
+
     public final void set(int index, Construct c, Target t){
         this.set(new CInt(index, Target.UNKNOWN), c, t);
     }
     /* Shortcuts */
-    
+
     public final void set(String index, Construct c, Target t){
         set(new CString(index, c.getTarget()), c, t);
     }
-    
+
     public final void set(String index, String value, Target t){
         set(index, new CString(value, t), t);
     }
-    
+
     public final void set(String index, String value){
         set(index, value, Target.UNKNOWN);
     }
 
+	@Override
     public Construct get(Construct index, Target t) {
         if(!associative_mode){
             try {
@@ -373,29 +374,21 @@ public class CArray extends Construct implements ArrayAccess{
             }
         }
     }
-    
+
     public final Construct get(long index, Target t){
         return this.get(new CInt(index, t), t);
     }
-	
+
 	@Override
     public final Construct get(int index, Target t){
         return this.get(new CInt(index, t), t);
     }
-    
+
 	@Override
     public final Construct get(String index, Target t){
         return this.get(new CString(index, t), t);
     }
-    
-    public final Construct get(String index){
-        return this.get(index, Target.UNKNOWN);
-    }
-    
-    public final Construct get(long index){
-        return this.get(index, Target.UNKNOWN);
-    }
-    
+
     public boolean containsKey(String c){
         Integer i;
         try{
@@ -413,11 +406,11 @@ public class CArray extends Construct implements ArrayAccess{
             }
         }
     }
-    
+
     public final boolean containsKey(int i){
         return this.containsKey(Integer.toString(i));
     }
-    
+
     public boolean contains(Construct c){
         if(associative_mode){
             return associative_array.containsValue(c);
@@ -425,20 +418,20 @@ public class CArray extends Construct implements ArrayAccess{
             return array.contains(c);
         }
     }
-    
+
     public final boolean contains(String c){
         return contains(new CString(c, Target.UNKNOWN));
     }
-    
+
     public final boolean contains(int i){
         return contains(new CString(Integer.toString(i), Target.UNKNOWN));
     }
-	
+
 	/**
 	 * Returns an array of the keys of all the values that are
 	 * equal to the value specified
 	 * @param value
-	 * @return 
+	 * @return
 	 */
 	public CArray indexesOf(Construct value){
 		CArray ret = new CArray(Target.UNKNOWN);
@@ -456,7 +449,7 @@ public class CArray extends Construct implements ArrayAccess{
 			}
 		}
 		return ret;
-	}		
+	}
 
     @Override
     public String val() {
@@ -471,21 +464,21 @@ public class CArray extends Construct implements ArrayAccess{
     public String toString() {
         return val();
     }
-	
+
 	/**
 	 * Returns a string version of this array. The arrays
 	 * that have been accounted for so far are stored in arrays,
 	 * to prevent recursion. Subclasses may override this method
 	 * if a more efficient or concise string can be generated.
 	 * @param arrays The values accounted for so far
-	 * @return 
+	 * @return
 	 */
 	protected String getString(Set<CArray> arrays){
 		StringBuilder b = new StringBuilder();
 		b.append("{");
 		if (!inAssociativeMode()) {
 			for (int i = 0; i < this.size(); i++) {
-				Mixed value = this.get(i);
+				Mixed value = this.get(i, Target.UNKNOWN);
 				String v;
 				if(value instanceof CArray){
 					if(arrays.contains((CArray)value)){
@@ -511,10 +504,10 @@ public class CArray extends Construct implements ArrayAccess{
 				}
 				first = false;
 				String v;
-				if(this.get(key) == null){
+				if(this.get(key, Target.UNKNOWN) == null){
 					v = "null";
 				} else {
-					Mixed value = this.get(key);
+					Mixed value = this.get(key, Target.UNKNOWN);
 					if(value instanceof CArray){
 						if(arrays.contains(((CArray)value))){
 							v = "*recursion*";
@@ -564,7 +557,7 @@ public class CArray extends Construct implements ArrayAccess{
         clone.regenValue(new HashSet<CArray>());
         return clone;
     }
-    
+
     private String normalizeConstruct(Construct c){
         if(c instanceof CArray){
             throw new ConfigRuntimeException("Arrays cannot be used as the key in an associative array", ExceptionType.CastException, c.getTarget());
@@ -592,7 +585,7 @@ public class CArray extends Construct implements ArrayAccess{
             try{
                 ret = array.remove(Integer.parseInt(c));
 				next_index--;
-            } catch(NumberFormatException e){ 
+            } catch(NumberFormatException e){
                 throw new ConfigRuntimeException("Expecting an integer, but received \"" + c + "\" (were you expecting an associative array? This array is a normal array.)", ExceptionType.CastException, construct.getTarget());
             } catch(IndexOutOfBoundsException e){
                 throw new ConfigRuntimeException("Cannot remove the value at '" + c + "', as no such index exists in the array", ExceptionType.RangeException, construct.getTarget());
@@ -603,13 +596,13 @@ public class CArray extends Construct implements ArrayAccess{
         regenValue(new HashSet<CArray>());
         return ret;
     }
-	
+
 	/**
 	 * Removes all values that are equal to the specified construct
 	 * from this array
-	 * @param construct 
+	 * @param construct
 	 */
-	public void removeValues(Construct construct){	
+	public void removeValues(Construct construct){
 		if(associative_mode){
 			Iterator<Construct> it;
 			it = associative_array.values().iterator();
@@ -629,7 +622,7 @@ public class CArray extends Construct implements ArrayAccess{
 		}
 		regenValue(new HashSet<CArray>());
 	}
-    
+
     private Comparator<String> comparator = new Comparator<String>(){
 
 		@Override
@@ -642,8 +635,8 @@ public class CArray extends Construct implements ArrayAccess{
 			} else if (o1 != null && o2 == null) {
 				return 1;
 			}
-			
-            //Due to a dumb behavior in Double.parseDouble, 
+
+            //Due to a dumb behavior in Double.parseDouble,
             //we need to check to see if there are non-digit characters in
             //the keys, and if so, do a string comparison.
             if(o1.matches(".*[^0-9\\.]+.*") || o2.matches(".*[^0-9\\.]+.*")){
@@ -655,7 +648,7 @@ public class CArray extends Construct implements ArrayAccess{
                 //They're both integers, do an integer comparison
                 return new Integer(i1).compareTo(new Integer(i2));
             } catch(NumberFormatException e){
-                try{                    
+                try{
                     double d1 = Double.parseDouble(o1);
                     double d2 = Double.parseDouble(o2);
                     //They're both doubles, do a double comparison
@@ -666,7 +659,7 @@ public class CArray extends Construct implements ArrayAccess{
                 }
             }
         }
-        
+
     };
 
     @Override
@@ -690,22 +683,22 @@ public class CArray extends Construct implements ArrayAccess{
     public Construct slice(int begin, int end, Target t) {
         return new ArrayHandling.array_get().exec(t, null, new CSlice(begin, end, t));
     }
-    
+
     public enum SortType{
         /**
          * Sorts the elements without converting types first. If a non-numeric
          * string is compared to a numeric string, it is compared as a string,
          * otherwise, it's compared as a natural ordering.
          */
-        REGULAR, 
+        REGULAR,
         /**
          * All strings are considered numeric, that is, 001 comes before 2.
          */
-        NUMERIC, 
+        NUMERIC,
         /**
          * All values are considered strings.
          */
-        STRING, 
+        STRING,
         /**
          * All values are considered strings, but the comparison is case-insensitive.
          */
@@ -736,7 +729,7 @@ public class CArray extends Construct implements ArrayAccess{
                     if(c instanceof CArray){
                         throw new ConfigRuntimeException("Cannot sort an array of arrays.", ExceptionType.CastException, CArray.this.getTarget());
                     }
-                    if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt || 
+                    if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt ||
                             c instanceof CDouble || c instanceof CNull)){
                         throw new ConfigRuntimeException("Unsupported type being sorted: " + c.getCType(), ExceptionType.FormatException, CArray.this.getTarget());
                     }
@@ -764,11 +757,11 @@ public class CArray extends Construct implements ArrayAccess{
                     case REGULAR:
                         return compareRegular(o1, o2);
                     case NUMERIC:
-                        return compareNumeric(o1, o2);                        
+                        return compareNumeric(o1, o2);
                     case STRING:
-                        return compareString(o1.val(), o2.val());                        
+                        return compareString(o1.val(), o2.val());
                     case STRING_IC:
-                        return compareString(o1.val().toLowerCase(), o2.val().toLowerCase());  
+                        return compareString(o1.val().toLowerCase(), o2.val().toLowerCase());
                 }
                 throw ConfigRuntimeException.CreateUncatchableException("Missing implementation for " + sort.name(), Target.UNKNOWN);
             }
@@ -796,10 +789,10 @@ public class CArray extends Construct implements ArrayAccess{
                 return o1.compareTo(o2);
             }
         });
-        this.array = list;  
+        this.array = list;
         this.regenValue(new HashSet<CArray>());
     }
-	
+
 	public boolean isEmpty(){
 		return size() == 0;
 	}

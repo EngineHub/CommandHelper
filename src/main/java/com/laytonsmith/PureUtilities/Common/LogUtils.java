@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author layton
+ * 
  */
 public final class LogUtils {
     

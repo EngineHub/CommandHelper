@@ -3,11 +3,21 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Variable;
 
 /**
  * This class provides methods for more easily creating different Constructs for testing purposes.
- * @author Layton
+ * 
  */
 public class C {
     
@@ -36,13 +46,13 @@ public class C {
         return new CInt(val, Target.UNKNOWN);
     }
     public static CNull Null(){
-        return new CNull(Target.UNKNOWN);
+        return CNull.NULL;
     }
     public static CString String(String s){
         return new CString(s, Target.UNKNOWN);
     }
     public static CVoid Void(){
-        return new CVoid(Target.UNKNOWN);
+        return CVoid.VOID;
     }
     public static IVariable IVariable(String name, Construct val){
         return new IVariable(name, val, Target.UNKNOWN);

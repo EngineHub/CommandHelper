@@ -14,15 +14,25 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.*;
-import org.junit.*;
+import static com.laytonsmith.testing.StaticTest.GetFakeServer;
+import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.TestClassDocs;
+import static com.laytonsmith.testing.StaticTest.assertCFalse;
+import static com.laytonsmith.testing.StaticTest.assertCTrue;
+import org.junit.After;
+import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BasicLogicTest {
 

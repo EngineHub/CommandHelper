@@ -27,18 +27,18 @@ import java.util.Map;
 
 /**
  *
- * @author Layton
+ *
  */
 public class ServerEvents {
 
 	@api
 	public static class server_ping extends AbstractEvent {
-	
+
 		@Override
 		public String getName() {
 			return "server_ping";
 		}
-	
+
 		@Override
 		public String docs() {
 			return "{players: <math match> | maxplayers: <math match>}"
@@ -48,7 +48,7 @@ public class ServerEvents {
 					+ " {motd: The message a player is shown on the serverlist | maxplayers}"
 					+ " {}";
 		}
-	
+
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
 				throws PrefilterNonMatchException {
@@ -60,12 +60,12 @@ public class ServerEvents {
 			}
 			return false;
 		}
-	
+
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
-	
+
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
@@ -88,7 +88,7 @@ public class ServerEvents {
 				throw new EventException("Could not convert to MCPingEvent");
 			}
 		}
-	
+
 		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
@@ -105,18 +105,18 @@ public class ServerEvents {
 			}
 			return false;
 		}
-	
+
 		@Override
 		public Driver driver() {
 			return Driver.SERVER_PING;
 		}
-	
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class tab_complete_command extends AbstractEvent {
 
@@ -143,7 +143,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject) {
+		public BindableEvent convert(CArray manualObject, Target t) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 

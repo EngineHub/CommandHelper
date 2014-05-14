@@ -25,7 +25,7 @@ import java.util.Stack;
 
 /**
  *
- * @author Layton
+ * 
  */
 class CompilerObject {
 	TokenStream stream;
@@ -207,7 +207,7 @@ class CompilerObject {
 				} else if (t.val().equals("false")) {
 					return new CBoolean(false, t.getTarget());
 				} else if (t.val().equals("null")) {
-					return new CNull(t.getTarget());
+					return CNull.GenerateCNull(t.getTarget());
 				} else if (keywords.contains(t.val())) {
 					return new CKeyword(t.val(), t.getTarget());
 				} else {

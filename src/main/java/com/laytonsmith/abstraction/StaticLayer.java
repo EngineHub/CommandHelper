@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * Unfortunately some methods just can't be overridden.
- * @author layton
+ * 
  */
 public final class StaticLayer {
     

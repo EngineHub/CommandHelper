@@ -9,7 +9,7 @@ import org.bukkit.WorldType;
 
 /**
  *
- * @author Layton
+ * 
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,

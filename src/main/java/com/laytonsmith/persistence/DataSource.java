@@ -5,7 +5,6 @@ import com.laytonsmith.annotations.MustUseOverride;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.SimpleDocumentation;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,7 +13,7 @@ import java.util.Set;
  * data about a data source, gather data from the data source, and (possibly)
  * write to the data source.
  *
- * @author lsmith
+ * 
  */
 @MustUseOverride
 public interface DataSource extends SimpleDocumentation {

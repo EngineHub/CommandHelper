@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 
 /**

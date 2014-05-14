@@ -1,11 +1,10 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.Material;
-import org.bukkit.inventory.FurnaceRecipe;
-
 import com.laytonsmith.abstraction.MCFurnaceRecipe;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
+import org.bukkit.Material;
+import org.bukkit.inventory.FurnaceRecipe;
 
 /**
  * 

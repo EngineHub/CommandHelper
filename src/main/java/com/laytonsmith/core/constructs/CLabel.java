@@ -6,7 +6,7 @@ import com.laytonsmith.core.constructs.Construct.ConstructType;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class CLabel extends Construct{
     Construct label;

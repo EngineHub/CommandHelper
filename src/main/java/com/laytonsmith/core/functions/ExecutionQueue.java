@@ -16,8 +16,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
- *
- * @author Layton
+ * 
  */
 public class ExecutionQueue {
 	public static String docs(){
@@ -78,7 +77,7 @@ public class ExecutionQueue {
 				}
 			});
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -151,7 +150,7 @@ public class ExecutionQueue {
 				}
 			});
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -201,7 +200,7 @@ public class ExecutionQueue {
 				queue = args[0].nval();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().remove(queue);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -251,7 +250,7 @@ public class ExecutionQueue {
 				queue = args[0].nval();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().removeFront(queue);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -302,7 +301,7 @@ public class ExecutionQueue {
 				queue = args[0].nval();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().clear(queue);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -413,7 +412,7 @@ public class ExecutionQueue {
 					}
 				}
 			});
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -475,7 +474,7 @@ public class ExecutionQueue {
 					}
 				}
 			});
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

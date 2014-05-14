@@ -18,8 +18,17 @@ import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -28,7 +37,6 @@ import com.sk89q.util.StringUtil;
 
 /**
  *
- * @author Layton
  */
 public class Environment {
 
@@ -246,7 +254,7 @@ public class Environment {
 			}
 			b.setTypeAndData(idata, imeta, physics);
 
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -344,7 +352,7 @@ public class Environment {
 				s.setLine(1, line2);
 				s.setLine(2, line3);
 				s.setLine(3, line4);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
 			}
@@ -508,7 +516,7 @@ public class Environment {
 			MCWorld w = (p != null ? p.getWorld() : null);
 			l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			l.breakBlock();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -578,7 +586,7 @@ public class Environment {
 				throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
 			}
 			w.setBiome(x, z, bt);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -814,7 +822,7 @@ public class Environment {
 			}
 
 			w.explosion(x, y, z, size, safe);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -881,11 +889,11 @@ public class Environment {
 			}
 			MCTone tone = null;
 			if (args[noteOffset] instanceof CArray) {
-				int octave = Static.getInt32(((CArray) args[noteOffset]).get("octave"), t);
+				int octave = Static.getInt32(((CArray) args[noteOffset]).get("octave", t), t);
 				if (octave < 0 || octave > 2) {
 					throw new Exceptions.RangeException("The octave must be 0, 1, or 2, but was " + octave, t);
 				}
-				String ttone = ((CArray) args[noteOffset]).get("tone").val().toUpperCase().trim();
+				String ttone = ((CArray) args[noteOffset]).get("tone", t).val().toUpperCase().trim();
 				try {
 					tone = MCTone.valueOf(ttone.trim().replaceAll("#", ""));
 				} catch (IllegalArgumentException e) {
@@ -905,7 +913,7 @@ public class Environment {
 				throw new Exceptions.CastException("Expected an array for note parameter, but " + args[noteOffset] + " found instead", t);
 			}
 			p.playNote(l, i, n);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -933,7 +941,7 @@ public class Environment {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class play_sound extends AbstractFunction {
 
@@ -958,16 +966,16 @@ public class Environment {
 		public Construct exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			
+
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound = MCSound.BREATH;
 			float volume = 1, pitch = 1;
-			
+
 			if (!(args[1] instanceof CArray))
 				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
-	
+
 			CArray sa = (CArray) args[1];
-			
+
 			if (sa.containsKey("sound")) {
 				try {
 					sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
@@ -977,13 +985,13 @@ public class Environment {
 			} else {
 				throw new Exceptions.FormatException("Sound field was missing.", t);
 			}
-			
+
 			if (sa.containsKey("volume"))
 				volume = Static.getDouble32(sa.get("volume", t), t);
-		
+
 			if (sa.containsKey("pitch"))
-				pitch = Static.getDouble32(sa.get("pitch", t), t); 
-		
+				pitch = Static.getDouble32(sa.get("pitch", t), t);
+
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
 				if (args[2] instanceof CArray) {
@@ -992,14 +1000,14 @@ public class Environment {
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
 				}
-				
+
 				for (MCPlayer p : players)
 					p.playSound(loc, sound, volume, pitch);
 
 			} else {
 				loc.getWorld().playSound(loc, sound, volume, pitch);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1020,7 +1028,7 @@ public class Environment {
 					+ " are optional and default to 1. Players can be a single"
 					+ " player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ----"
-					+ " Possible sounds: " 
+					+ " Possible sounds: "
 					+ StringUtils.Join(MCSound.values(), ", ", ", or ", " or ");
 		}
 
@@ -1028,9 +1036,9 @@ public class Environment {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class play_named_sound extends AbstractFunction {
 
@@ -1055,27 +1063,27 @@ public class Environment {
 		public Construct exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			
+
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			String path;
 			float volume = 1, pitch = 1;
-			
+
 			if (!(args[1] instanceof CArray))
 				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
-	
+
 			CArray sa = (CArray) args[1];
-			
+
 			if (!sa.containsKey("sound"))
 				throw new Exceptions.FormatException("Sound field was missing.", t);
-			
+
 			path = sa.get("sound", t).val();
-			
+
 			if (sa.containsKey("volume"))
 				volume = Static.getDouble32(sa.get("volume", t), t);
-		
+
 			if (sa.containsKey("pitch"))
-				pitch = Static.getDouble32(sa.get("pitch", t), t); 
-		
+				pitch = Static.getDouble32(sa.get("pitch", t), t);
+
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
 				if (args[2] instanceof CArray) {
@@ -1084,14 +1092,14 @@ public class Environment {
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
 				}
-				
+
 				for (MCPlayer p : players) {
 					p.playSound(loc, path, volume, pitch);
 				}
 			} else {
 				loc.getWorld().playSound(loc, path, volume, pitch);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1119,9 +1127,9 @@ public class Environment {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_block_info extends AbstractFunction {
 
@@ -1181,7 +1189,7 @@ public class Environment {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_light_at extends AbstractFunction {
 
@@ -1233,7 +1241,7 @@ public class Environment {
 			return new CInt(loc.getBlock().getLightLevel(), t);
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_block_powered extends AbstractFunction {
 
@@ -1344,7 +1352,7 @@ public class Environment {
 			return new CBoolean(location.getWorld().generateTree(location, treeType), t);
 		}
 	}
-	
+
 	@api
 	public static class get_block_command extends AbstractFunction {
 
@@ -1396,7 +1404,7 @@ public class Environment {
 			}
 		}
 	}
-	
+
 	@api
 	public static class set_block_command extends AbstractFunction {
 
@@ -1447,19 +1455,19 @@ public class Environment {
 				}
 				cmd = args[1].val();
 			}
-			
+
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setCommand(cmd);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new ConfigRuntimeException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);
 			}
 		}
 	}
-	
+
 	@api
 	public static class get_command_block_name extends AbstractFunction {
 
@@ -1511,7 +1519,7 @@ public class Environment {
 			}
 		}
 	}
-	
+
 	@api
 	public static class set_command_block_name extends AbstractFunction {
 
@@ -1562,12 +1570,12 @@ public class Environment {
 				}
 				name = args[1].val();
 			}
-			
+
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setName(name);
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				throw new ConfigRuntimeException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);

@@ -8,7 +8,7 @@ import java.util.Map;
  * actions by a remote. The remote is free to update
  * this list at any time, and capabilities can have
  * various states.
- * @author lsmith
+ * 
  */
 public class CapabilityList {
 	

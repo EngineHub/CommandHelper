@@ -4,12 +4,16 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.SRun;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class CryptoTest {
 

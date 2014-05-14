@@ -1,7 +1,11 @@
 package com.laytonsmith.tools;
 
 
-import static com.laytonsmith.PureUtilities.TermColors.*;
+import static com.laytonsmith.PureUtilities.TermColors.GREEN;
+import static com.laytonsmith.PureUtilities.TermColors.RED;
+import static com.laytonsmith.PureUtilities.TermColors.pl;
+import static com.laytonsmith.PureUtilities.TermColors.prompt;
+import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.PureUtilities.ZipMaker;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -14,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 /**
  *
- * @author layton
+ * 
  */
 public class MSLPMaker {
     

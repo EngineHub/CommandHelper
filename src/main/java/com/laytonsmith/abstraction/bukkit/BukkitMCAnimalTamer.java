@@ -12,7 +12,7 @@ import org.bukkit.entity.HumanEntity;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCAnimalTamer implements MCAnimalTamer{
     AnimalTamer at;

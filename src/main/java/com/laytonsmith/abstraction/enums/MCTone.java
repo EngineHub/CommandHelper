@@ -5,7 +5,7 @@ import com.laytonsmith.annotations.MEnum;
 
 /**
  *
- * @author Layton
+ * 
  */
 @MEnum("Tone")
 public enum MCTone {

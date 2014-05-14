@@ -34,6 +34,17 @@ public interface ArrayAccess extends Mixed, Sizable {
 	public Construct get(int index, Target t) throws ConfigRuntimeException;
 	
 	/**
+	 * Returns the mixed at this location. This should throw an exception if
+	 * the index does not exist. This method may be called whether or not
+	 * it isAssociative returns true.
+	 * @param index
+	 * @param t
+	 * @return
+	 * @throws ConfigRuntimeException 
+	 */
+	public Construct get(Construct index, Target t) throws ConfigRuntimeException;
+	
+	/**
 	 * If {@link #isAssociative()} returns true, this should return a set of all
 	 * keys. If {@link #isAssociative()} returns false, this method will not be
 	 * called.

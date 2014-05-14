@@ -3,25 +3,17 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.SRun;
 import java.io.File;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 //import static org.powermock.api.mockito.PowerMockito.*;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
 //import org.powermock.modules.junit4.PowerMockRunner;
@@ -30,7 +22,7 @@ import static org.mockito.Mockito.verify;
 //This should be re-implemented once permissions aren't static anymore.
 /**
  *
- * @author layton
+ * 
  */
 
 //@RunWith(PowerMockRunner.class)

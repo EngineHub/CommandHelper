@@ -163,7 +163,7 @@ public class Recipes {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getServer().clearRecipes();
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -195,7 +195,7 @@ public class Recipes {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getServer().resetRecipes();
 			
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

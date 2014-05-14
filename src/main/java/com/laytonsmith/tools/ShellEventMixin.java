@@ -4,6 +4,7 @@ package com.laytonsmith.tools;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.CancellableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.EventException;
 import java.util.HashMap;
@@ -22,13 +23,14 @@ public class ShellEventMixin implements EventMixinInterface {
 
 	@Override
 	public void cancel(BindableEvent e, boolean state) {
-		//TODO: This needs to be done better
+		if(e instanceof CancellableEvent){
+			((CancellableEvent)e).cancel(state);
+		}
 	}
 
 	@Override
 	public boolean isCancellable(BindableEvent o) {
-		//TODO: This needs to be done better
-		return false;
+		return o instanceof CancellableEvent;
 	}
 
 	@Override

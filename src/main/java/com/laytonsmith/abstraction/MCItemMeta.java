@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  *
- * @author Layton
+ * 
  */
 public interface MCItemMeta extends AbstractionObject {
 	    /**

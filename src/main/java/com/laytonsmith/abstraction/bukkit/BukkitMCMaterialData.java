@@ -10,7 +10,7 @@ import org.bukkit.material.MaterialData;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitMCMaterialData implements MCMaterialData{
     MaterialData md;

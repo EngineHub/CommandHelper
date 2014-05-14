@@ -5,6 +5,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
@@ -17,7 +18,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.EnumSet;
@@ -26,8 +26,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.mindrot.jbcrypt.BCrypt;
 
 /**
- * @author Layton
+ * 
  */
+@core
 public class Crypto {
 
     public static String docs() {

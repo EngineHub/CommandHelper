@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  *
- * @author lsmith
+ * 
  */
 public class NewScript {
 	ParseTree executable;

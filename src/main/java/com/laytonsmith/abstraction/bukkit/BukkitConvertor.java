@@ -76,6 +76,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -116,7 +117,6 @@ import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Minecart;
-import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Painting;
 import org.bukkit.entity.Pig;
@@ -133,6 +133,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
+import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
@@ -154,11 +155,11 @@ import org.bukkit.projectiles.ProjectileSource;
 
 /**
  *
- * @author layton
+ *
  */
 @convert(type=Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {
-	
+
 	private static BukkitMCPluginMeta pluginMeta = null;
 
 	@Override
@@ -243,7 +244,7 @@ public class BukkitConvertor extends AbstractConvertor {
         chp.registerEvent((Listener)ServerListener);
         chp.registerEvent((Listener)VehicleListener);
         chp.registerEvent((Listener)WeatherListener);
-        chp.registerEvent((Listener)WorldListener);        
+        chp.registerEvent((Listener)WorldListener);
     }
 
 	@Override
@@ -259,7 +260,7 @@ public class BukkitConvertor extends AbstractConvertor {
     public String LookupMaterialName(int id) {
         return Material.getMaterial(id).toString();
     }
-    
+
     /**
      * We don't want to allow scripts to clear other plugin's tasks
      * on accident, so only ids registered through our interface
@@ -273,12 +274,12 @@ public class BukkitConvertor extends AbstractConvertor {
         validIDs.add(id);
         return id;
     }
-    
+
 	@Override
     public synchronized int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
         int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
         validIDs.add(id);
-        return id;        
+        return id;
     }
 
 	@Override
@@ -304,109 +305,109 @@ public class BukkitConvertor extends AbstractConvertor {
             validIDs.remove(id);
         }
     }
-    
+
     public static MCEntity BukkitGetCorrectEntity(Entity be){
     	if (be == null) {
     		return null;
     	}
-		
+
     	//TODO: Change this to a reflection mechanism, this is getting tiresome to do.
-    	
+
 		// Steve!
         if(be instanceof Player){
 			// Must come before HumanEntity
             return new BukkitMCPlayer((Player)be);
         }
-		
+
 		// Mobs - Passive / Tamable
 		if(be instanceof Villager){
             return new BukkitMCVillager((Villager)be);
         }
-		
+
 		if(be instanceof Wolf){
             return new BukkitMCWolf(be);
         }
-		
+
 		if(be instanceof Ocelot){
             return new BukkitMCOcelot(be);
         }
-		
+
 		if (be instanceof Sheep) {
 			return new BukkitMCSheep((Sheep) be);
 		}
-		
+
 		if (be instanceof Horse) {
 			// Must come before Vehicle
 			return new BukkitMCHorse((Horse) be);
 		}
-		
+
 		if (be instanceof Pig) {
 			// Must come before Vehicle
 			return new BukkitMCPig((Pig) be);
 		}
-		
+
 		// Mobs - Enemies
 		if (be instanceof EnderDragon) {
 			// Must come before ComplexLivingEntity
 			return new BukkitMCEnderDragon((EnderDragon) be);
 		}
-		
+
 		if (be instanceof Enderman) {
 			return new BukkitMCEnderman((Enderman) be);
 		}
-		
+
 		if (be instanceof Creeper) {
     		return new BukkitMCCreeper((Creeper) be);
     	}
-		
+
 		if (be instanceof IronGolem) {
     		return new BukkitMCIronGolem((IronGolem) be);
     	}
-		
+
 		if (be instanceof Skeleton) {
     		return new BukkitMCSkeleton((Skeleton) be);
     	}
-		
+
 		if (be instanceof MagmaCube) {
 			// Must come before Slime
     		return new BukkitMCMagmaCube((MagmaCube) be);
     	}
-		
+
 		if (be instanceof Slime) {
     		return new BukkitMCSlime((Slime) be);
     	}
-		
+
 		if (be instanceof PigZombie) {
 			// Must come before Zombie
 			return new BukkitMCPigZombie((PigZombie) be);
 		}
-		
+
 		if (be instanceof Zombie) {
 			return new BukkitMCZombie((Zombie) be);
 		}
-		
+
 		// Block entities
 		if(be instanceof FallingBlock){
 			return new BukkitMCFallingBlock((FallingBlock) be);
 		}
-		
+
 		if(be instanceof TNTPrimed){
 			return new BukkitMCTNT((TNTPrimed)be);
 		}
-		
+
 		if(be instanceof EnderCrystal){
 			return new BukkitMCEnderCrystal((EnderCrystal)be);
 		}
-		
+
 		// Pickups
 		if(be instanceof Item){
 			return new BukkitMCItem((Item)be);
 		}
-		
+
 		if(be instanceof ExperienceOrb){
 			return new BukkitMCExperienceOrb((ExperienceOrb)be);
 		}
-		
+
 		// Projectiles
 		if (be instanceof Arrow) {
 			return new BukkitMCArrow((Arrow)be);
@@ -415,7 +416,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		if (be instanceof ThrownPotion) {
 			return new BukkitMCThrownPotion((ThrownPotion)be);
 		}
-		
+
 		if (be instanceof Fish) {
 			return new BukkitMCFishHook((Fish) be);
 		}
@@ -424,97 +425,97 @@ public class BukkitConvertor extends AbstractConvertor {
 			//Must be before Fireball
 			return new BukkitMCWitherSkull((WitherSkull)be);
 		}
-		
+
 		if (be instanceof Fireball) {
 			return new BukkitMCFireball((Fireball) be);
 		}
-		
-		if (be instanceof Firework) { 
+
+		if (be instanceof Firework) {
 			// Not really a projectile, but it fits here.
 			return new BukkitMCFirework((Firework) be);
 		}
-    	
+
 		// Static / Hanging
 		if (be instanceof EnderSignal) {
     		return new BukkitMCEnderSignal((EnderSignal) be);
     	}
-		
+
 		if (be instanceof ItemFrame) {
 			// Must come before Hanging
     		return new BukkitMCItemFrame((ItemFrame) be);
     	}
-		
+
 		if(be instanceof Painting){
 			// Must come before Hanging
 			return new BukkitMCPainting((Painting)be);
 		}
-		
+
     	if(be instanceof Hanging){
     		return new BukkitMCHanging(be);
     	}
-		
+
 		// Vehicles
 		if(be instanceof CommandMinecart) {
 			return new BukkitMCCommandMinecart((CommandMinecart)be);
 		}
-		
+
     	if(be instanceof Minecart) {
 			// Must come before Vehicle
     		return new BukkitMCMinecart((Minecart)be);
     	}
-		
+
 		if(be instanceof Boat) {
 			// Must come before Vehicle
 			return new BukkitMCBoat((Boat)be);
     	}
-        
+
 		// Weather
 		if(be instanceof LightningStrike){
 			return new BukkitMCLightningStrike((LightningStrike)be);
 		}
-		
+
 		// Misc
 		if (be instanceof EnderDragonPart) {
 			// Must come before ComplexLivingEntity
 			return new BukkitMCEnderDragonPart((EnderDragonPart) be);
 		}
-        
+
 		// Abstractions
 		if(be instanceof Projectile){
             return new BukkitMCProjectile((Projectile)be);
         }
-		
+
     	if(be instanceof Ageable){
 			// Must come before LivingEntity
     		return new BukkitMCAgeable(be);
     	}
-		
+
         if(be instanceof HumanEntity){
 			// Must come before LivingEntity
             return new BukkitMCHumanEntity((HumanEntity)be);
         }
-		
+
 		if(be instanceof ComplexEntityPart) {
 			return new BukkitMCComplexEntityPart((ComplexEntityPart)be);
 		}
-		
+
 		if(be instanceof ComplexLivingEntity) {
 			// Must come before LivingEntity
 			return new BukkitMCComplexLivingEntity((ComplexLivingEntity)be);
 		}
-        
+
         if(be instanceof LivingEntity){
             return new BukkitMCLivingEntity(((LivingEntity)be));
         }
-		
+
 		if (be instanceof ProjectileSource) {
 			return new BukkitMCEntityProjectileSource(be);
 		}
-		
+
     	if(be instanceof Vehicle){
     		return new BukkitMCVehicle(be);
     	}
-		
+
 		throw new IllegalArgumentException("While trying to find the correct entity type for " + be.getClass().getName()
 				+ ", was unable to find the appropriate implementation. If the named entity is not provided by mods,"
 				+ " please alert the developers of this stack trace. This is not necessarily an error,"
@@ -565,7 +566,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCEnchantmentStorageMeta((EnchantmentStorageMeta) im);
 		}
 		if (im instanceof FireworkEffectMeta) {
-			
+
 		}
 		if (im instanceof FireworkMeta) {
 			return new BukkitMCFireworkMeta((FireworkMeta) im);
@@ -581,7 +582,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		return new BukkitMCItemMeta(im);
 	}
-    
+
 	@Override
 	public MCInventory GetEntityInventory(int entityID) {
 		Entity entity = null;
@@ -635,8 +636,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public <T> T runOnMainThreadAndWait(Callable<T> callable) {
-		return (T)Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable);
+	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws InterruptedException, ExecutionException {
+		return Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable).get();
 	}
 
 	@Override
@@ -648,11 +649,11 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 		return new BukkitMCNote(octave, tone, sharp);
 	}
-	
+
 	private static int maxBlockID = -1;
 	private static int maxItemID = -1;
 	private static int maxRecordID = -1;
-	
+
 	@Override
 	public synchronized int getMaxBlockID() {
 		if (maxBlockID == -1) {
@@ -660,7 +661,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		return maxBlockID;
 	}
-	
+
 	@Override
 	public synchronized int getMaxItemID() {
 		if (maxItemID == -1) {
@@ -668,7 +669,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		return maxItemID;
 	}
-	
+
 	@Override
 	public synchronized int getMaxRecordID() {
 		if (maxRecordID == -1) {
@@ -676,7 +677,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		return maxRecordID;
 	}
-	
+
 	private void calculateIDs() {
 		maxBlockID = 0;
 		maxItemID = 256;
@@ -748,12 +749,12 @@ public class BukkitConvertor extends AbstractConvertor {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public MCCommand getNewCommand(String name) {
 		return BukkitMCCommand.newCommand(name);
 	}
-	
+
 	@Override
 	public MCCommandSender GetCorrectSender(MCCommandSender unspecific) {
 		if (unspecific == null) {
@@ -761,7 +762,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		return BukkitGetCorrectSender(((BukkitMCCommandSender) unspecific)._CommandSender());
 	}
-	
+
 	public static MCCommandSender BukkitGetCorrectSender(CommandSender sender) {
 		if (sender instanceof Player) {
 			return new BukkitMCPlayer((Player) sender);

@@ -11,8 +11,7 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import java.util.Set;
 
 /**
- *
- * @author layton
+ * 
  */
 public class FunctionList {
     public static FunctionBase getFunction(String s) throws ConfigCompileException{

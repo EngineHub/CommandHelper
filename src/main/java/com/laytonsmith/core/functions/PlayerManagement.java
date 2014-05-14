@@ -59,7 +59,6 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author Layton
  */
 public class PlayerManagement {
 
@@ -92,7 +91,7 @@ public class PlayerManagement {
 			// for player entities in CraftBukkit, this is the player's name, and
 			// for the console it's "CONSOLE". For CommandBlocks it's "@" unless it has been renamed.
 			if (p == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else {
 				String name = p.getName();
 				if (p instanceof MCConsoleCommandSender || "CONSOLE".equals(name)) {
@@ -496,7 +495,7 @@ public class PlayerManagement {
 					CArray ta = (CArray) args[0];
 					trans = new HashSet<Short>();
 					for (int i=0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i), t));
+						trans.add(Static.getInt16(ta.get(i, t), t));
 					}
 				} else {
 					p = Static.GetPlayer(args[0], t);
@@ -507,7 +506,7 @@ public class PlayerManagement {
 					CArray ta = (CArray) args[1];
 					trans = new HashSet<Short>();
 					for (int i=0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i), t));
+						trans.add(Static.getInt16(ta.get(i, t), t));
 					}
 				} else {
 					throw new Exceptions.FormatException("An array was expected for argument 2 but received " + args[1], t);
@@ -547,7 +546,7 @@ public class PlayerManagement {
 			};
 		}
 	}
-	
+
 	@api
 	public static class ptarget_space extends AbstractFunction {
 
@@ -596,12 +595,12 @@ public class PlayerManagement {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pkill extends AbstractFunction {
-		
+
 		@Override
 		public String getName() {
 			return "pkill";
@@ -625,7 +624,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.kill();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -675,7 +674,7 @@ public class PlayerManagement {
 					+ " all usages of kill() to pkill() ", t);
 			return null;
 		}
-		
+
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
@@ -836,7 +835,7 @@ public class PlayerManagement {
 					b = null;
 				}
 				if (b == null) {
-					retVals.add(new CNull(t));
+					retVals.add(CNull.NULL);
 				} else {
 					retVals.add(new CArray(t, new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
 				}
@@ -999,7 +998,7 @@ public class PlayerManagement {
 			return new CString(m.getWorld().getName(), t);
 		}
 	}
-	
+
 	@api
 	@hide("Deprecated in favor of pkick")
 	@Deprecated
@@ -1021,7 +1020,7 @@ public class PlayerManagement {
 					+ " all usages of kick() to pkick() ", t);
 			return null;
 		}
-		
+
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -1082,7 +1081,7 @@ public class PlayerManagement {
 			MCPlayer ptok = m;
 			Static.AssertPlayerNonNull(ptok, t);
 			ptok.kickPlayer(message);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1142,7 +1141,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(MCPlayer, t);
 			MCPlayer.setDisplayName(name);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1198,7 +1197,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(MCPlayer, t);
 			MCPlayer.setDisplayName(MCPlayer.getName());
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1332,7 +1331,7 @@ public class PlayerManagement {
 			l.setPitch(pitch);
 			l.setYaw(yaw);
 			toSet.teleport(l);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1452,7 +1451,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setGameMode(gm);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1564,7 +1563,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setExp(((float) xp) / 100.0F);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1623,7 +1622,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			m.giveExp(xp);
 
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1734,7 +1733,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setLevel(level);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1849,7 +1848,7 @@ public class PlayerManagement {
 //            m.setExp(0);
 //            m.setTotalExperience(0);
 //            m.giveExp(xp);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -1960,7 +1959,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setFoodLevel(level);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -2019,7 +2018,7 @@ public class PlayerManagement {
 			//otherwise the client crashes, and requires deletion of
 			//player data to fix.
 			if (effect < 1 || effect > m.getMaxEffect()) {
-				throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(), 
+				throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(),
 						ExceptionType.RangeException, t);
 			}
 
@@ -2163,7 +2162,7 @@ public class PlayerManagement {
 						+ m.getMaxHealth() + " for " + m.getName() + ").", ExceptionType.RangeException, t);
 			}
 			m.setHealth(health);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -2329,7 +2328,7 @@ public class PlayerManagement {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			boolean whitelist = Static.getBoolean(args[1]);
 			pl.setWhitelisted(whitelist);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -2429,7 +2428,7 @@ public class PlayerManagement {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			boolean ban = Static.getBoolean(args[1]);
 			pl.setBanned(ban);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -2476,7 +2475,7 @@ public class PlayerManagement {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			double speed = 0;
-			
+
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2491,12 +2490,12 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("Speed must be between -1 and 1", ExceptionType.RangeException, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			
+
 			m.setWalkSpeed((float) speed);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pwalkspeed extends AbstractFunction {
 
@@ -2539,21 +2538,21 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			
+
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
-			
+
 			if (args.length == 1) {
 				m = Static.GetPlayer(args[0], t);
 			}
-			
+
 			Static.AssertPlayerNonNull(m, t);
 
 			return new CDouble(((double) m.getWalkSpeed()), t);
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pflyspeed extends AbstractFunction {
 
@@ -2597,7 +2596,7 @@ public class PlayerManagement {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			double speed = 0;
-			
+
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2612,12 +2611,12 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("Speed must be between -1 and 1", ExceptionType.RangeException, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			
+
 			m.setFlySpeed((float) speed);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pflyspeed extends AbstractFunction {
 
@@ -2660,21 +2659,21 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			
+
 			if (p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
-			
+
 			if (args.length == 1) {
 				m = Static.GetPlayer(args[0], t);
 			}
-			
+
 			Static.AssertPlayerNonNull(m, t);
 
 			return new CDouble(((double) m.getFlySpeed()), t);
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pisop extends AbstractFunction {
 
@@ -2944,7 +2943,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setRemainingFireTicks(tick);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -3074,7 +3073,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setAllowFlight(flight);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -3233,7 +3232,7 @@ public class PlayerManagement {
 			}
 			time = Long.parseLong(stime);
 			p.setPlayerTime(time, relative);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -3339,7 +3338,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.resetPlayerTime();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -3378,7 +3377,7 @@ public class PlayerManagement {
 
 			Static.AssertPlayerNonNull(m, t);
 			m.setPlayerListName(listName);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -3635,7 +3634,7 @@ public class PlayerManagement {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0 + offset], p.getWorld(), t);
 			MCItemStack item = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t);
 			p.sendBlockChange(loc, item.getType().getType(), (byte) item.getData().getData());
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -3736,7 +3735,7 @@ public class PlayerManagement {
 			}
 			hunger = Static.getInt32(args[hungerIndex], t);
 			p.setHunger(hunger);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -3838,7 +3837,7 @@ public class PlayerManagement {
 			}
 			saturation = (float) Static.getDouble(args[saturationIndex], t);
 			p.setSaturation(saturation);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -3884,7 +3883,7 @@ public class PlayerManagement {
 			}
 			MCLocation loc = player.getBedSpawnLocation();
 			if (loc == null) {
-				return new CNull(t);
+				return CNull.NULL;
 			} else {
 				return ObjectGenerator.GetGenerator().location(loc, false);
 			}
@@ -4015,7 +4014,7 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
 			};
 			m.setBedSpawnLocation(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch()));
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 	}
 
@@ -4066,7 +4065,7 @@ public class PlayerManagement {
 
 			Static.AssertPlayerNonNull(p, t);
 			if (p.isInsideVehicle() == false) {
-				return new CNull(t);
+				return CNull.NULL;
 			}
 
 			return new CInt(p.getVehicle().getEntityId(), t);
@@ -4360,7 +4359,7 @@ public class PlayerManagement {
 			};
 		}
 	}
-	
+
 	@api
 	public static class get_player_from_entity_id extends AbstractFunction {
 
@@ -4385,7 +4384,7 @@ public class PlayerManagement {
 			try {
 				return new CString(((MCPlayer) Static.getLivingEntity(id, t)).getName(), t);
 			} catch (Exception exception) {
-				return new CNull(t);
+				return CNull.NULL;
 			}
 		}
 

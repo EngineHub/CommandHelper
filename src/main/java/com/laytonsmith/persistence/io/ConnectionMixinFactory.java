@@ -6,13 +6,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * A ConnectionMixin class dictates how a data source connects to its data.
  * This can vary depending on the URI, and so this class grabs the appropriate
  * mixin based on the original URI.
- * @author lsmith
+ * 
  */
 public class ConnectionMixinFactory {
 	private ConnectionMixinFactory(){}
@@ -27,7 +28,31 @@ public class ConnectionMixinFactory {
 		 */
 		public void setWorkingDirectory(File workingDirectory){
 			this.workingDirectory = workingDirectory;
-		}		
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final ConnectionMixinOptions other = (ConnectionMixinOptions) obj;
+			if (!Objects.equals(this.workingDirectory, other.workingDirectory)) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 7;
+			hash = 41 * hash + Objects.hashCode(this.workingDirectory);
+			return hash;
+		}
+		
+		
 		
 	}
 	

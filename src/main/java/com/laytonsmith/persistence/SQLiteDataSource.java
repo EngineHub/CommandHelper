@@ -2,7 +2,6 @@ package com.laytonsmith.persistence;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistence.io.ConnectionMixin;
@@ -23,7 +22,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author lsmith
+ * 
  */
 @datasource("sqlite")
 public class SQLiteDataSource extends SQLDataSource {

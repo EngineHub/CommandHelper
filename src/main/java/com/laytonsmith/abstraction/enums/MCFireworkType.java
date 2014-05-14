@@ -8,7 +8,7 @@ import com.laytonsmith.annotations.MEnum;
 
 /**
  *
- * @author Layton
+ * 
  */
 @MEnum("FireworkType")
 public enum MCFireworkType {

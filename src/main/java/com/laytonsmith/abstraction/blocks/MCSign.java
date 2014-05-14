@@ -4,7 +4,7 @@ package com.laytonsmith.abstraction.blocks;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCSign extends MCBlockState{       
 

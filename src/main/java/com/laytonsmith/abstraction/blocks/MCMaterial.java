@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.MCMaterialData;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCMaterial {
     short getMaxDurability();

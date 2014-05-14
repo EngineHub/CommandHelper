@@ -12,13 +12,18 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import java.io.File;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  *
- * @author layton
+ * 
  */
 public class ExceptionsTest {
 

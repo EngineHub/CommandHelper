@@ -4,7 +4,7 @@ package com.laytonsmith.core.constructs;
 
 /**
  *
- * @author layton
+ * 
  */
 public class Command extends Construct implements Cloneable {
     

@@ -8,7 +8,11 @@ import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -16,13 +20,13 @@ import org.json.simple.JSONValue;
 
 /**
  *
- * @author layton
+ *
  */
 public abstract class Construct implements Cloneable, Comparable<Construct>, Mixed{
-	
+
     public enum ConstructType {
 
-        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 
+        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT,
         DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
         SYMBOL, IDENTIFIER, BRACE, BRACKET, BYTE_ARRAY, RESOURCE, LOCK;
     }
@@ -35,15 +39,15 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     public ConstructType getCType() {
         return ctype;
     }
-    
+
     /**
      * This method should only be used by Script when setting the children's target, if it's an ivariable.
-     * @param target 
+     * @param target
      */
     void setTarget(Target target) {
         this.target = target;
     }
-    
+
     public final String getValue() {
         return val();
     }
@@ -55,11 +59,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     public File getFile() {
         return target.file();
     }
-    
+
     public int getColumn(){
         return target.col();
     }
-    
+
     public Target getTarget(){
         return target;
     }
@@ -70,7 +74,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         this.ctype = ctype;
         this.target = new Target(line_num, file, column);
     }
-    
+
     public Construct(String value, ConstructType ctype, Target t){
         this.value = value;
 		Static.AssertNonNull(value, "The string value may not be null.");
@@ -81,32 +85,32 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     /**
      * Returns the standard string representation of this Construct.
 	 * This will never return null.
-     * @return 
+     * @return
      */
 	@Override
     public String val() {
         return value;
     }
-	
+
 	public void setWasIdentifier(boolean b) {
 		wasIdentifier = b;
 	}
-	
+
 	public boolean wasIdentifier(){
 		return wasIdentifier;
 	}
-    
-    
+
+
     /**
      * Returns the standard string representation of this Construct, except
      * in the case that the construct is a CNull, in which case it returns
      * java null.
-     * @return 
+     * @return
      */
     public String nval(){
         return val();
     }
-    
+
 
     @Override
     public String toString() {
@@ -120,7 +124,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
     /**
      * This function takes a Construct, and turns it into a JSON value. If the construct is
-     * not one of the following, a MarshalException is thrown: CArray, CBoolean, CDouble, CInt, CNull, 
+     * not one of the following, a MarshalException is thrown: CArray, CBoolean, CDouble, CInt, CNull,
      * CString, CVoid, Command. Currently unsupported, but will be in the future are: CClosure/CFunction
      * The following map is applied when encoding and decoding:
      * <table border='1'>
@@ -132,12 +136,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * <tr><td>array/object</td><td>CArray</td></tr>
      * </table>
      * @param c
-     * @return 
+     * @return
      */
     public static String json_encode(Construct c, Target t) throws MarshalException{
         return JSONValue.toJSONString(json_encode0(c, t));
     }
-    
+
     private static Object json_encode0(Construct c, Target t) throws MarshalException{
         if (c instanceof CString || c instanceof Command) {
             return c.val();
@@ -173,11 +177,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     /**
      * Takes a string and converts it into a Construct
      * @param s
-     * @return 
+     * @return
      */
     public static Construct json_decode(String s, Target t) throws MarshalException {
 		if(s == null){
-			return new CNull(t);
+			return CNull.NULL;
 		}
         if (s.startsWith("{")) {
             //Object
@@ -189,7 +193,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 				throw new MarshalException();
 			}
             for(Object key : obj.keySet()){
-                ca.set(convertJSON(key, t), 
+                ca.set(convertJSON(key, t),
                         convertJSON(obj.get(key), t), t);
             }
             return ca;
@@ -207,7 +211,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             JSONArray array = (JSONArray) JSONValue.parse(s);
 			if(array == null){
 				//It's a null value
-				return new CNull(t);
+				return CNull.NULL;
 			}
             Object o = array.get(0);
             return convertJSON(o, t);
@@ -227,20 +231,20 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
                 return new CDouble(n.doubleValue(), Target.UNKNOWN);
             }
         } else if (o instanceof Boolean) {
-            return new CBoolean(((Boolean) o).booleanValue(), Target.UNKNOWN);
+            return new CBoolean(((Boolean) o), Target.UNKNOWN);
         } else if (o instanceof java.util.List) {
             java.util.List l = (java.util.List) o;
             CArray ca = new CArray(t);
-            for (int i = 0; i < l.size(); i++) {
-                ca.push(convertJSON(l.get(i), t));
-            }
+			for (Object l1 : l) {
+				ca.push(convertJSON(l1, t));
+			}
             return ca;
         } else if (o == null) {
-            return new CNull();
+            return CNull.NULL;
         } else if(o instanceof java.util.Map){
             CArray ca = CArray.GetAssociativeArray(t);
             for(Object key : ((java.util.Map)o).keySet()){
-                ca.set(convertJSON(key, t), 
+                ca.set(convertJSON(key, t),
                         convertJSON(((java.util.Map)o).get(key), t), t);
             }
             return ca;
@@ -251,7 +255,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	@Override
     public int compareTo(Construct c) {
-        if(this.value.contains(" ") || this.value.contains("\t") 
+        if(this.value.contains(" ") || this.value.contains("\t")
                 || c.value.contains(" ") || c.value.contains("\t")){
             return this.value.compareTo(c.value);
         }
@@ -263,17 +267,17 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             return this.value.compareTo(c.value);
         }
     }
-    
+
     /**
      * Converts a POJO to a Construct, if the type is convertable. This accepts many types of
      * objects, and should be expanded if a type does fit into the overall type scheme.
      * @param o
      * @return
-     * @throws ClassCastException 
+     * @throws ClassCastException
      */
     public static Construct GetConstruct(Object o) throws ClassCastException{
         if(o == null){
-            return new CNull();
+            return CNull.NULL;
         } else if(o instanceof CharSequence){
             return new CString((CharSequence)o, Target.UNKNOWN);
         } else if(o instanceof Number){
@@ -284,12 +288,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             } else {
                 //floating point
                 return new CDouble(((Number)o).doubleValue(), Target.UNKNOWN);
-            }            
+            }
         } else if(o instanceof Boolean){
             return new CBoolean(((Boolean)o).booleanValue(), Target.UNKNOWN);
         } else if(o instanceof Map){
             //associative array
-            CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);           
+            CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);
             Map m = (Map)o;
             for(Object key : m.keySet()){
                 a.set(key.toString(), GetConstruct(m.get(key)), Target.UNKNOWN);
@@ -307,7 +311,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             throw new ClassCastException(o.getClass().getName() + " cannot be cast to a Construct type");
         }
     }
-    
+
     /**
      * Converts a Construct to a POJO, if the type is convertable. The types returned from
      * this method are set, unlike GetConstruct which is more flexible. The mapping is precisely
@@ -321,7 +325,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * null -> null
      * @param c
      * @return
-     * @throws ClassCastException 
+     * @throws ClassCastException
      */
     public static Object GetPOJO(Construct c) throws ClassCastException{
         if(c instanceof CNull){
@@ -340,33 +344,33 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
                 //HashMap
                 HashMap<String, Object> map = new HashMap<String, Object>((int)ca.size());
                 for(String key : ca.stringKeySet()){
-                    map.put(key, GetPOJO(ca.get(key)));
+                    map.put(key, GetPOJO(ca.get(key, Target.UNKNOWN)));
                 }
                 return map;
             } else {
                 //ArrayList
                 ArrayList<Object> list = new ArrayList<Object>((int)ca.size());
                 for(int i = 0; i < ca.size(); i++){
-                    list.add(GetPOJO(ca.get(i)));
+                    list.add(GetPOJO(ca.get(i, Target.UNKNOWN)));
                 }
                 return list;
-            }            
+            }
         } else {
             throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
         }
     }
-	
+
 	public CString asString(){
 		return new CString(val(), target);
 	}
-    
+
     /**
      * If this type of construct is dynamic, that is to say, if it isn't a constant.
      * Things like 9, and 's' are constant. Things like {@code @value} are dynamic.
-     * @return 
+     * @return
      */
     public abstract boolean isDynamic();
-	
+
 	/**
 	 * Returns the underlying value, as a value that can be directly
 	 * inserted into code. So, if the value were
@@ -375,18 +379,18 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * the outer quotes as well. Numbers and other primitives may be able to override
 	 * this to return a valid value as well. By default, this assumes a string, and
 	 * returns appropriately.
-	 * @return 
+	 * @return
 	 */
 	protected String getQuote(){
 		return "'" + val().replace("\\", "\\\\").replace("'", "\\'") + "'";
 	}
-	
+
 	/**
-	 * Returns the typeof this Construct, as a string. Not all constructs are annotated with 
+	 * Returns the typeof this Construct, as a string. Not all constructs are annotated with
 	 * the @typeof annotation, in which case this is considered a "private" object, which
 	 * can't be directly accessed via MethodScript. In this case, an IllegalArgumentException
 	 * is thrown.
-	 * @return 
+	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	public final String typeof(){

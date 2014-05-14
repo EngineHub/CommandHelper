@@ -6,7 +6,7 @@ import com.laytonsmith.core.constructs.Construct;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class MarshalException extends Exception {
 

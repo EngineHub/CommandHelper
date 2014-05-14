@@ -4,10 +4,20 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -21,9 +31,9 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- *
- * @author Layton
+ * 
  */
+@core
 public class Regex {
     
     public static String docs(){
@@ -86,7 +96,7 @@ public class Regex {
                 ret.set(0, new CString(m.group(0), t), t);
                 for(int i = 1; i <= m.groupCount(); i++){
                     if(m.group(i) == null){
-                        ret.set(i, new CNull(t), t);
+                        ret.set(i, CNull.NULL, t);
                     } else {
                         ret.set(i, Static.resolveConstruct(m.group(i), t), t);
                     }

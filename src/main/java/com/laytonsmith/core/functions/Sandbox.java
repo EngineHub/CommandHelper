@@ -1,10 +1,21 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
-import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.BukkitDirtyRegisteredListener;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -14,7 +25,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import org.bukkit.event.Cancellable;
 
 /**
- * @author Layton
+ * 
  */
 public class Sandbox {
 
@@ -106,7 +117,7 @@ public class Sandbox {
 //                }
 //            }
 //
-//            return new CVoid(t);
+//            return CVoid.VOID;
 //        }
 //    }
         
@@ -165,7 +176,7 @@ public class Sandbox {
                 BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
             }
             environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
-            return new CVoid(t);
+            return CVoid.VOID;
         }
     }
 
@@ -246,7 +257,7 @@ public class Sandbox {
 
                 is.addUnsafeEnchantment(e, level);
             }
-            return new CVoid(t);
+            return CVoid.VOID;
         }
     }
 
@@ -303,7 +314,7 @@ public class Sandbox {
 
             other.setVanished(isVanished, me);
 
-            return new CVoid(t);
+            return CVoid.VOID;
         }
 
 		@Override

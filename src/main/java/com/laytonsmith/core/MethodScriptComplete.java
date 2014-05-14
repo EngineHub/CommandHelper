@@ -4,7 +4,7 @@ package com.laytonsmith.core;
 
 /**
  *
- * @author Layton
+ * 
  */
 public interface MethodScriptComplete {
     /**

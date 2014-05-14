@@ -19,8 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author lsmith
+ * 
  */
 public class Marquee {
 	public static String docs(){
@@ -103,7 +102,7 @@ public class Marquee {
 			if(marqueeName != null){
 				marqeeMap.put(marqueeName, m);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -158,7 +157,7 @@ public class Marquee {
 			if(marqeeMap.containsKey(marqueeName)){
 				marqeeMap.get(marqueeName).stop();
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

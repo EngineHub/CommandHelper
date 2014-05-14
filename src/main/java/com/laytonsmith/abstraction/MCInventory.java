@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  *
- * @author Layton
+ * 
  */
 public interface MCInventory extends AbstractionObject {
 	public Map<Integer, MCItemStack> addItem(MCItemStack stack);

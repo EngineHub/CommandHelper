@@ -3,16 +3,49 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
+import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.nolinking;
+import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Globals;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.PermissionsResolver;
+import com.laytonsmith.core.Procedure;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CSlice;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.exceptions.*;
+import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.LoopBreakException;
+import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.io.File;
@@ -28,8 +61,8 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Layton
  */
+@core
 public class DataHandling {
 
 	private static final String array_get = new ArrayHandling.array_get().getName();
@@ -314,7 +347,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -489,7 +522,7 @@ public class DataHandling {
 						e.setTimes(--num);
 						throw e;
 					}
-					return new CVoid(t);
+					return CVoid.VOID;
 				} catch (LoopContinueException e) {
 					_continue = e.getTimes() - 1;
 					parent.eval(expression, env);
@@ -500,7 +533,7 @@ public class DataHandling {
 			if (!hasRunOnce && !runAsFor && elseCode != null) {
 				parent.eval(elseCode, env);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -543,7 +576,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -619,12 +652,12 @@ public class DataHandling {
 							e.setTimes(--num);
 							throw e;
 						}
-						return new CVoid(t);
+						return CVoid.VOID;
 					} catch (LoopContinueException e) {
 						continues += e.getTimes();
 					}
 				}
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 					//It's not associative, so we have more complex handling. We will create an ArrayAccessIterator,
 				//and store that in the environment. As the array is iterated, underlying changes in the array
@@ -669,7 +702,7 @@ public class DataHandling {
 									e.setTimes(--num);
 									throw e;
 								}
-								return new CVoid(t);
+								return CVoid.VOID;
 							} catch (LoopContinueException e) {
 								continues += e.getTimes();
 								continue;
@@ -681,7 +714,7 @@ public class DataHandling {
 					arrayAccessList.remove(iterator);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -795,7 +828,7 @@ public class DataHandling {
 				children.set(0, sconcat);
 			}
 			if (children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new StringHandling.sconcat().getName())) {
-				// We may be looking at a "@value in @array" or "@array as @value" type 
+				// We may be looking at a "@value in @array" or "@array as @value" type
 				// structure, so we need to re-arrange this into the standard format.
 				ParseTree array = null;
 				ParseTree key = null;
@@ -888,7 +921,7 @@ public class DataHandling {
 				return super.execs(t, env, parent, pass);
 			}
 
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -995,7 +1028,7 @@ public class DataHandling {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1005,7 +1038,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull();
+			return CNull.NULL;
 		}
 
 		@Override
@@ -1062,7 +1095,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull();
+			return CNull.NULL;
 		}
 
 		@Override
@@ -1108,7 +1141,7 @@ public class DataHandling {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -1941,7 +1974,7 @@ public class DataHandling {
 
 		@Override
 		public boolean isRestricted() {
-			return true;
+			return false;
 		}
 
 		@Override
@@ -1963,7 +1996,7 @@ public class DataHandling {
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			Procedure myProc = getProcedure(t, env, parent, nodes);
 			env.getEnv(GlobalEnv.class).GetProcs().put(myProc.getName(), myProc);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		public static Procedure getProcedure(Target t, Environment env, Script parent, ParseTree... nodes) {
@@ -2033,7 +2066,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2099,7 +2132,7 @@ public class DataHandling {
 //            //if we are assigning a dynamic value as a default, but we have to check
 //            //that here. If we don't, we lose the information
 //            return ;
-//        }        
+//        }
 		@Override
 		public boolean allowBraces() {
 			return true;
@@ -2154,7 +2187,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			Construct ret = (args.length == 1 ? args[0] : new CVoid(t));
+			Construct ret = (args.length == 1 ? args[0] : CVoid.VOID);
 			throw new FunctionReturnException(ret, t);
 		}
 	}
@@ -2184,7 +2217,7 @@ public class DataHandling {
 
 		@Override
 		public boolean isRestricted() {
-			return true;
+			return false;
 		}
 
 		@Override
@@ -2199,7 +2232,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2210,7 +2243,7 @@ public class DataHandling {
 			File file = Static.GetFileFromArgument(location, env, t, null);
 			ParseTree include = IncludeCache.get(file, t);
 			parent.eval(include.getChildAt(0), env);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2329,7 +2362,7 @@ public class DataHandling {
 			Construct[] args2 = new Construct[(int) ca.size() + 1];
 			args2[0] = args[0];
 			for (int i = 1; i < args2.length; i++) {
-				args2[i] = ca.get(i - 1);
+				args2[i] = ca.get(i - 1, t);
 			}
 			return super.exec(t, environment, args2);
 		}
@@ -2530,6 +2563,7 @@ public class DataHandling {
 	}
 
 	@api
+	@seealso({_export.class})
 	public static class _import extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2553,7 +2587,7 @@ public class DataHandling {
 					+ " the specified ivar doesn't exist, the ivar will be assigned an empty"
 					+ " string, and if the specified string key doesn't exist, null is returned."
 					+ " See the documentation on [[CommandHelper/import-export|imports/exports]]"
-					+ " for more information.";
+					+ " for more information. import() is threadsafe.";
 		}
 
 		@Override
@@ -2584,10 +2618,10 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof IVariable) {
-				//Mode 1     
+				//Mode 1
 				IVariable var = (IVariable) args[0];
 				environment.getEnv(GlobalEnv.class).GetVarList().set(Globals.GetGlobalIVar(var));
-				return new CVoid(t);
+				return CVoid.VOID;
 			} else {
 				//Mode 2
 				String key = GetNamespace(args, null, getName(), t);
@@ -2622,6 +2656,7 @@ public class DataHandling {
 	}
 
 	@api
+	@seealso({_import.class})
 	public static class _export extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2644,7 +2679,7 @@ public class DataHandling {
 					+ " the value is already stored, it is overwritten. See {{function|import}} and"
 					+ " [[CommandHelper/import-export|importing/exporting]]. The reference to the value"
 					+ " is stored, not a copy of the value, so in the case of arrays, manipulating the"
-					+ " contents of the array will manipulate the stored value.";
+					+ " contents of the array will manipulate the stored value. export() is threadsafe.";
 		}
 
 		@Override
@@ -2690,7 +2725,7 @@ public class DataHandling {
 				}
 				Globals.SetGlobal(key, c);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2787,7 +2822,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -2801,13 +2836,13 @@ public class DataHandling {
 			for (int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
 				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
-				List<ParseTree> children = new ArrayList<ParseTree>();
+				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, env.getEnv(GlobalEnv.class).GetLabel());
 				Construct ret = MethodScriptCompiler.execute(newNode, env, null, fakeScript);
 				if (!(ret instanceof IVariable)) {
-					throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, t);
+					throw new ConfigRuntimeException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
 				}
 				names[i] = ((IVariable) ret).getName();
 				try {
@@ -2834,6 +2869,33 @@ public class DataHandling {
 		public boolean allowBraces() {
 			return true;
 		}
+	}
+
+	@api
+	@hide("Until the Federation system is finished, this is hidden")
+	@unbreakable
+	@nolinking
+	public static class rclosure extends closure {
+
+		@Override
+		public String getName() {
+			return "rclosure";
+		}
+
+		@Override
+		public String docs() {
+			return "closure {[varNames...], code} Returns a non-linking closure on the provided code. The same rules apply"
+					+ " for closures, except the top level internal code does not check for proper linking at compile time,"
+					+ " and instead links at runtime. Lexer errors and some other compile time checks ARE done however, but"
+					+ " functions are not optimized or linked. This is used for remote code execution, since the remote platform"
+					+ " may have some functionality unavailable on this current platform.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
 	}
 
 	@api
@@ -2886,7 +2948,7 @@ public class DataHandling {
 			} else {
 				throw new ConfigRuntimeException("Only a closure (created from the closure function) can be sent to execute()", ExceptionType.CastException, t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -3383,6 +3445,155 @@ public class DataHandling {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
 		}
 
+	}
+
+	@api
+	public static class eval extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "eval";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
+					+ "removal.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_1_0;
+		}
+
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			boolean oldDynamicScriptMode = env.getEnv(GlobalEnv.class).GetDynamicScriptingMode();
+			ParseTree node = nodes[0];
+			try {
+				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
+				Construct script = parent.seval(node, env);
+				if(script instanceof CClosure){
+					throw new Exceptions.CastException("Closures cannot be eval'd directly. Use execute() instead.", t);
+				}
+				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
+				StringBuilder b = new StringBuilder();
+				int count = 0;
+				for (ParseTree child : root.getChildren()) {
+					Construct s = parent.seval(child, env);
+					if (!s.val().trim().isEmpty()) {
+						if (count > 0) {
+							b.append(" ");
+						}
+						b.append(s.val());
+					}
+					count++;
+				}
+				return new CString(b.toString(), t);
+			} catch (ConfigCompileException e) {
+				throw new ConfigRuntimeException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
+			} finally {
+				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(oldDynamicScriptMode);
+			}
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			return CVoid.VOID;
+		}
+		//Doesn't matter, run out of state anyways
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1){
+				throw new ConfigCompileException(getName() + " expects only one argument", t);
+			}
+			if(children.get(0).isConst()){
+				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
+						+ " hardcoded code in " + getName() + " is much less efficient.", t);
+			}
+			return null;
+		}
+
+	}
+
+	@api
+	@noprofile
+	@hide("This will eventually be replaced by ; statements.")
+	public static class g extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "g";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			for (int i = 0; i < args.length; i++) {
+				args[i].val();
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String docs() {
+			return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_0_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
 	}
 
 }

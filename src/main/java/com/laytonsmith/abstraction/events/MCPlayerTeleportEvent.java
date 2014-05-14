@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.enums.MCTeleportCause;
 
 /**
  *
- * @author layton
+ * 
  */
 public interface MCPlayerTeleportEvent extends MCPlayerMoveEvent {
 	public MCTeleportCause getCause();

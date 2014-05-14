@@ -9,7 +9,7 @@ import org.junit.BeforeClass;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class ScriptTest {
     

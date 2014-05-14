@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CByteArray;
@@ -19,8 +20,8 @@ import java.nio.BufferUnderflowException;
 
 /**
  * 
- * @author lsmith
  */
+@core
 public class ByteArrays {
 	public static String docs(){
 		return "This class contains all the methods needed to manipulate a byte array primitive. Since"
@@ -91,7 +92,7 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			ba.rewind();
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -350,7 +351,7 @@ public class ByteArrays {
 			byte b = Static.getInt8(args[1], t);
 			Integer pos = set_getPos(args, t);
 			ba.putByte(b, pos);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -374,7 +375,7 @@ public class ByteArrays {
 			}
 			Integer pos = set_getPos(args, t);
 			ba.putChar(c, pos);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -394,7 +395,7 @@ public class ByteArrays {
 			short b = Static.getInt16(args[1], t);
 			Integer pos = set_getPos(args, t);
 			ba.putShort(b, pos);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -414,7 +415,7 @@ public class ByteArrays {
 			int b = Static.getInt32(args[1], t);
 			Integer pos = set_getPos(args, t);
 			ba.putInt(b, pos);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -434,7 +435,7 @@ public class ByteArrays {
 			long b = Static.getInt(args[1], t);
 			Integer pos = set_getPos(args, t);
 			ba.putLong(b, pos);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -454,7 +455,7 @@ public class ByteArrays {
 			float b = Static.getDouble32(args[1], t);
 			Integer pos = set_getPos(args, t);
 			ba.putFloat(b, pos);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -474,7 +475,7 @@ public class ByteArrays {
 			double b = Static.getDouble(args[1], t);
 			Integer pos = set_getPos(args, t);
 			ba.putDouble(b, pos);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -494,7 +495,7 @@ public class ByteArrays {
 			CByteArray src = Static.getByteArray(args[1], t);
 			Integer pos = set_getPos(args, t);
 			dest.putBytes(src, pos);
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -524,7 +525,7 @@ public class ByteArrays {
 			} catch(UnsupportedEncodingException e){
 				throw new Exceptions.FormatException(e.getMessage(), t);
 			}
-			return new CVoid(t);
+			return CVoid.VOID;
 		}
 
 		@Override

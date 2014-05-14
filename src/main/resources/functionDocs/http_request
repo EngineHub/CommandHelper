@@ -140,11 +140,11 @@ If this setting is set from non-cdmline mode, it is silently ignored.
 The most basic usage is to get the html of the google homepage, not worrying about cookies
 or anything complicated. That code is very straightforward:
 
-<pre>
-http_request('http://www.google.com', closure(@response,
-	msg(@response['body'])
-))
-</pre>
+%%CODE|
+http_request('http://www.google.com', closure(@response){
+	msg(@response['body']);
+});
+%%
 
 The settings can adjust the more complicated options needed to do more complex tasks, but for
 most basic needs, the usage is very straightforward. One thing you may more commonly find yourself needing

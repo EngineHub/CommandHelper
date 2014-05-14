@@ -4,7 +4,11 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,7 +21,7 @@ import org.bukkit.plugin.RegisteredListener;
 
 /**
  *
- * @author Layton
+ * 
  */
 public class BukkitDirtyRegisteredListener extends RegisteredListener {
 

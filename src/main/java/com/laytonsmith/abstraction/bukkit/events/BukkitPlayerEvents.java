@@ -99,7 +99,7 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  *
- * @author layton
+ * 
  */
 public class BukkitPlayerEvents {
 	@abstraction(type=Implementation.Type.BUKKIT)
