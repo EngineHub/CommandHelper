@@ -29,6 +29,7 @@ import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
+import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -44,7 +45,7 @@ import org.yaml.snakeyaml.Yaml;
 
 /**
  *
- * 
+ *
  */
 public class Main {
 
@@ -70,6 +71,7 @@ public class Main {
 	private static final ArgumentParser docExportMode;
 	private static final ArgumentParser profilerSummaryMode;
 	private static final ArgumentParser rsaKeyGenMode;
+	private static final ArgumentParser pnViewerMode;
 
 	static {
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -169,6 +171,9 @@ public class Main {
 						+ " The public key will have the same name, with \".pub\" appended.", "output-file", true)
 				.addArgument('l', "label", ArgumentParser.Type.STRING, "Label for the public key. For instance, \"user@localhost\"", "label", true);
 		suite.addMode("key-gen", rsaKeyGenMode);
+		pnViewerMode = ArgumentParser.GetParser()
+				.addDescription("Launches the Persistence Network viewer. This is a GUI tool that can help you visualize your databases.");
+		suite.addMode("pn-viewer", pnViewerMode);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -177,35 +182,35 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		try {
 			Implementation.setServerType(Implementation.Type.SHELL);
-			
+
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
-			
+
 			Prefs.SetColors();
 			if(Prefs.UseColors()){
 				//Use jansi to enable output to color properly, even on windows.
 				org.fusesource.jansi.AnsiConsole.systemInstall();
 			}
-			
+
 			ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
-			ClassDiscoveryCache cdcCache 
+			ClassDiscoveryCache cdcCache
 					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
 			cd.setClassDiscoveryCache(cdcCache);
 			cd.addAllJarsInFolder(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
-			
+
 			ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
 			ExtensionManager.Initialize(cd);
 			ExtensionManager.Startup();
-			
+
 			if (args.length == 0) {
 				args = new String[]{"--help"};
 			}
 
 			ArgumentParser mode;
 			ArgumentParser.ArgumentParserResults parsedArgs;
-			
+
 			try {
 				ArgumentSuite.ArgumentSuiteResults results = ARGUMENT_SUITE.match(args, "help");
 				mode = results.getMode();
@@ -215,7 +220,7 @@ public class Main {
 				mode = helpMode;
 				parsedArgs = null;
 			}
-			
+
 			if (mode == helpMode) {
 				String modeForHelp = null;
 				if (parsedArgs != null) {
@@ -233,7 +238,7 @@ public class Main {
 					return;
 				}
 			}
-			
+
 			//Gets rid of warnings below. We now know parsedArgs will never be null,
 			//if it were, the help command would have run.
 			assert parsedArgs != null;
@@ -332,7 +337,7 @@ public class Main {
 //                        }
 //                    }
 //                    String file = (i + 1 <= l.size() - 1 ? l.get(i + 1).toString().toLowerCase() : null);
-//                    
+//
 //                    return;
 			} else if (mode == apiMode) {
 				String function = parsedArgs.getStringArgument();
@@ -420,7 +425,7 @@ public class Main {
 						}
 					}
 				} else {
-					System.err.println("Extension directory specificed doesn't exist: " 
+					System.err.println("Extension directory specificed doesn't exist: "
 							+ extensionDirS + ". Continuing anyways.");
 				}
 				new DocGenExportTool(cd, outputFile).export();
@@ -453,6 +458,8 @@ public class Main {
 				FileUtil.write(enc.getPrivateKey(), privOutputFile);
 				FileUtil.write(enc.getPublicKey(), pubOutputFile);
 				System.exit(0);
+			} else if(mode == pnViewerMode){
+				PNViewer.main(parsedArgs.getStringListArgument().toArray(new String[0]));
 			} else {
 				throw new Error("Should not have gotten here");
 			}

@@ -91,6 +91,6 @@ case it is added to the email as is, or a byte_array, in which case it is base64
 
 Setting the body is actually shorthand for adding an attachment with type text/plain, inline disposition, and the plain
 string content. In order to send an html email, you'll need to use attachments.
+|}
 
 For full information about emails, see [http://tools.ietf.org/html/rfc2822 RFC 2822].
-|}

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JDialogFormInfo">
+  <NonVisualComponents>
+    <Component class="javax.swing.ButtonGroup" name="localOrRemoteGroup">
+    </Component>
+  </NonVisualComponents>
+  <Properties>
+    <Property name="defaultCloseOperation" type="int" value="2"/>
+  </Properties>
+  <SyntheticProperties>
+    <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
+  </SyntheticProperties>
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jSeparator1" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="localFileField" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="browseLocalFileButton" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="hostLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="usernameLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="36" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="hostField" max="32767" attributes="0"/>
+                          <Component id="usernameField" max="32767" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="passwordLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="privateKeyLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="knownHostsLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="remoteFileLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="passwordField" max="32767" attributes="0"/>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="privateKeyField" max="32767" attributes="0"/>
+                                  <Component id="knownHostsField" max="32767" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="browsePrivateKeyButton" min="-2" max="-2" attributes="0"/>
+                                  <Component id="browseKnownHostsFileButton" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <Group type="102" attributes="0">
+                              <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="54" max="32767" attributes="0"/>
+                          </Group>
+                          <Component id="remoteFileField" max="32767" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="localRadioButton" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                          <Component id="remoteRadioButton" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="loadButton" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Component id="localRadioButton" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="localFileField" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="browseLocalFileButton" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Component id="remoteRadioButton" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="hostLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="hostField" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="usernameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="usernameField" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="passwordLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="passwordField" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="privateKeyLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="privateKeyField" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="browsePrivateKeyButton" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="knownHostsLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="knownHostsField" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="browseKnownHostsFileButton" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="remoteFileLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="remoteFileField" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="loadButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="cancelButton" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Load Configuration from:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="localRadioButton">
+      <Properties>
+        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+          <ComponentRef name="localOrRemoteGroup"/>
+        </Property>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="Local"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="localFileField">
+    </Component>
+    <Component class="javax.swing.JButton" name="browseLocalFileButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Browse..."/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="remoteRadioButton">
+      <Properties>
+        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+          <ComponentRef name="localOrRemoteGroup"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Remote"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="hostLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Host:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="hostField">
+    </Component>
+    <Component class="javax.swing.JLabel" name="usernameLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Username:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="usernameField">
+    </Component>
+    <Component class="javax.swing.JLabel" name="passwordLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Password:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JPasswordField" name="passwordField">
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel5">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="If private key is specified, this is the passcode"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="privateKeyLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Private Key:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="privateKeyField">
+    </Component>
+    <Component class="javax.swing.JLabel" name="knownHostsLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Known Hosts:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="knownHostsField">
+    </Component>
+    <Component class="javax.swing.JButton" name="browsePrivateKeyButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Browse..."/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="browseKnownHostsFileButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Browse..."/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="remoteFileLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Remote File:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="remoteFileField">
+    </Component>
+    <Component class="javax.swing.JSeparator" name="jSeparator1">
+    </Component>
+    <Component class="javax.swing.JButton" name="loadButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Load"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="cancelButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Cancel"/>
+      </Properties>
+    </Component>
+  </SubComponents>
+</Form>
