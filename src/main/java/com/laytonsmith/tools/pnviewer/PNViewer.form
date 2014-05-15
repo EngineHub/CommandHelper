@@ -55,7 +55,8 @@
                       <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="configurationFromLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                      <Component id="reloadButton" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="statusLabel" min="-2" max="-2" attributes="0"/>
@@ -74,6 +75,7 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="configurationFromLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="reloadButton" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jSplitPane1" max="32767" attributes="0"/>
@@ -189,7 +191,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" pref="240" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" pref="232" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -280,6 +282,12 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JProgressBar" name="statusProgressBar">
+    </Component>
+    <Component class="javax.swing.JButton" name="reloadButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Reload"/>
+        <Property name="toolTipText" type="java.lang.String" value="Reloads the data from the configuration"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

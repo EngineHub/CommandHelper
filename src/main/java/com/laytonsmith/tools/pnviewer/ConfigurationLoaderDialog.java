@@ -9,7 +9,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.text.JTextComponent;
 
 /**
  *
@@ -50,12 +50,14 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 				if(validateFields()){
 					ConfigurationLoaderDialog.this.setVisible(false);
 					if(finishAction != null){
-						finishAction.data(localOrRemoteGroup.isSelected(localRadioButton.getModel()),
-								localFileField.getText(), hostField.getText(),
-								Integer.parseInt(portField.getText()),
-								new String(passwordField.getPassword()), remoteFileField.getText());
+						if(localOrRemoteGroup.isSelected(localRadioButton.getModel())){
+							finishAction.data(true, localFileField.getText(), "", 1, "", "");
+						} else {
+							finishAction.data(false, "", hostField.getText(),
+									Integer.parseInt(portField.getText()),
+									new String(passwordField.getPassword()), remoteFileField.getText());
+						}
 					}
-					ConfigurationLoaderDialog.this.dispose();
 				} else {
 					JOptionPane.showMessageDialog(ConfigurationLoaderDialog.this, getValidationError(), "Error", JOptionPane.ERROR_MESSAGE);
 				}
@@ -67,10 +69,11 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				ConfigurationLoaderDialog.this.setVisible(false);
-				ConfigurationLoaderDialog.this.dispose();
 			}
 		});
 		registerShowFileLoader(localFileField, browseLocalFileButton);
+		registerEnterHandler(loadButton, localFileField);
+		registerEnterHandler(loadButton, hostField, portField, passwordField, remoteFileField);
 	}
 
 	/**
@@ -91,6 +94,24 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 				}
 			}
 		});
+	}
+
+	/**
+	 * Registers a button to be clicked when the user presses enter in one of the given
+	 * fields.
+	 * @param button
+	 * @param fields
+	 */
+	private void registerEnterHandler(final JButton button, JTextField ... fields){
+		for(JTextField field : fields){
+			field.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					button.doClick();
+				}
+			});
+		}
 	}
 
 	private boolean validateFields(){
