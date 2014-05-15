@@ -1,10 +1,10 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
@@ -86,14 +86,16 @@ public class BukkitMetadata {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Returns the value of the metadata attached to the player running the function by any plugins at the 'rank' key.",
-						"set_metadata('rank', 'admin') msg(get_metadata('rank'))"),
-				new ExampleScript("Returns the value of the metadata attached to the block at the given location by any plugins, at the 'owner' key.",
-						"set_metadata(array('x': 100, 'y': 63, 'z': 0), 'owner', player()) msg(get_metadata(array('x': 100, 'y': 63, 'z': 0), 'owner'))"),
-				new ExampleScript("Returns the value of the metadata attached to the entity 1001 by the myPlugin plugin at the 'myKey' key.",
-						"set_metadata(1001, 'myKey', myPlugin, true) msg(get_metadata(1001, 'myKey', 'myPlugin'))"),
-				new ExampleScript("Returns the value of the metadata attached to the world named nether by " + Implementation.GetServerType().getBranding() + " at the 'myKey' key.",
-						"set_metadata('nether', 'myKey', '" + Implementation.GetServerType().getBranding() + "', array(1, 50, 3)) msg(get_metadata('nether', 'myKey', '" + Implementation.GetServerType().getBranding() + "'))")
+				new ExampleScript("Attaches the string 'example' at the key 'key' to the player running the function, and outputs all values attached at the same key.",
+						"set_metadata('key', 'example')\nmsg(get_metadata('rank'))"),
+				new ExampleScript("Attaches the name of the player running the function at the key 'aKey' to the block at the given location, and outputs all values attached to the same block and at the same key.",
+						"assign(@block, array('x': 100, 'y': 63, 'z': 0))\nset_metadata(@block, 'aKey', player())\nmsg(get_metadata(@block, 'aKey'))"),
+				new ExampleScript("Attaches the boolean value true at the key 'my.key' to the entity whose the id is 1001, and outputs the value attached to the same entity and at the same key by" + StaticLayer.GetCommandHelperName() + ".",
+						"assign(@entity, 1001)\nset_metadata(@entity, 'my.key', true)\nmsg(get_metadata(@entity, 'my.key', '" + StaticLayer.GetCommandHelperName() + "'))"),
+				new ExampleScript("Attaches an array at the key 'anotherKey' to the world named 'world', and outputs all values attached to the same world and at the same key.",
+						"set_metadata('world', 'anotherKey', array(1, 50, 3))\nmsg(get_metadata('world', 'anotherKey'))"),
+				new ExampleScript("Attaches null at the key 'key' to the player named 'player', and outputs the value attached to the same player and at the same key by" + StaticLayer.GetCommandHelperName() + ".",
+						"assign(@peid, pinfo()[13])\nset_metadata(@peid, 'key', null)\nmsg(get_metadata(@peid, 'key', '" + StaticLayer.GetCommandHelperName() + "'))")
 			};
 		}
 
@@ -189,7 +191,7 @@ public class BukkitMetadata {
 			return "void {[object], key, value | object, key, value, [plugin]} Registers a metadata value in the given object with the"
 					+ " given key. object can be a location array (it will designate a block), an entityID (it will designate an entity)"
 					+ " or a string (it will designate a world). If only the key and the value are given, the object is the current player."
-					+ " You can specify the plugin that will own the metadata, '" + Implementation.GetServerType().getBranding() + "' by default. See get_metadata() for more"
+					+ " You can specify the plugin that will own the metadata, '" + StaticLayer.GetCommandHelperName() + "' by default. See get_metadata() for more"
 					+ " informations about Bukkit metadata.";
 		}
 
@@ -203,12 +205,12 @@ public class BukkitMetadata {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 				value = args[1];
-				plugin = Static.getPlugin(Implementation.GetServerType().getBranding(), t);
+				plugin = StaticLayer.GetCommandHelper();
 			} else {
 				metadatable = Static.getMetadatable(args[0], t);
 				key = args[1].val();
 				value = args[2];
-				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : Static.getPlugin(Implementation.GetServerType().getBranding(), t);
+				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : StaticLayer.GetCommandHelper();
 			}
 			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin));
 			return CVoid.VOID;

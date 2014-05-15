@@ -800,8 +800,18 @@ public class StaticTest {
 		public MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
-    }
-    
+
+		@Override
+		public String GetCommandHelperName() {
+			return new BukkitConvertor().GetCommandHelperName();
+		}
+
+		@Override
+		public MCPlugin GetCommandHelper() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+	}
+
     public static class FakeServerMixin implements EventMixinInterface{
         
         public static MCPlayer fakePlayer;

@@ -37,7 +37,6 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.profiler.Profiler;
@@ -58,7 +57,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -788,7 +786,7 @@ public final class Static {
 		} else if (construct instanceof CString) {
 			return Static.getWorld(construct, t);
 		} else {
-			throw new ConfigRuntimeException("Expect an array, an int or a string.", ExceptionType.CastException, t);
+			throw new ConfigRuntimeException("An array, an int or a string was expected, but " + construct.val() + " was found.", ExceptionType.CastException, t);
 		}
 	}
 

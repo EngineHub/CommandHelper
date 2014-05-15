@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
@@ -148,6 +146,14 @@ public final class StaticLayer {
 	
 	public static MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
 		return convertor.GetNewRecipe(type, result);
+	}
+
+	public static String GetCommandHelperName() {
+		return convertor.GetCommandHelperName();
+	}
+
+	public static MCPlugin GetCommandHelper() {
+		return convertor.GetCommandHelper();
 	}
 	
 	public static synchronized Convertor GetConvertor(){

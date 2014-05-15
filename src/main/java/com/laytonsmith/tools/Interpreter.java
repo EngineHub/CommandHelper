@@ -926,6 +926,16 @@ public final class Interpreter {
 		public MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
+
+		@Override
+		public String GetCommandHelperName() {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCPlugin GetCommandHelper() {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
 	}
 
 }

@@ -209,4 +209,16 @@ public interface Convertor {
 	 * @return a properly typed MCCommandSender
 	 */
 	public MCCommandSender GetCorrectSender(MCCommandSender unspecific);
+
+	/**
+	 * Returns the name of CommandHelper by parsing the plugin.yml file.
+	 * @return 
+	 */
+	public String GetCommandHelperName();
+
+	/**
+	 * Returns a MCPlugin instance of CommandHelper.
+	 * @return 
+	 */
+	public MCPlugin GetCommandHelper();
 }

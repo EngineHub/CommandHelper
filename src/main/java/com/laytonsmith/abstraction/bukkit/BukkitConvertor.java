@@ -73,6 +73,7 @@ import com.laytonsmith.core.constructs.Target;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -152,6 +153,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.projectiles.ProjectileSource;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  *
@@ -778,5 +780,15 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCMaterial GetMaterial(String name) {
 		return new BukkitMCMaterial(Material.valueOf(name));
+	}
+
+	@Override
+	public String GetCommandHelperName() {
+		return (String) new Yaml().loadAs(getClass().getResourceAsStream("/plugin.yml"), Map.class).get("name");
+	}
+
+	@Override
+	public MCPlugin GetCommandHelper() {
+		return new BukkitMCPlugin(CommandHelperPlugin.self);
 	}
 }
