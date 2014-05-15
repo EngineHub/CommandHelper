@@ -14,6 +14,11 @@
                 <Property name="text" type="java.lang.String" value="Load from Configuration..."/>
               </Properties>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="closeRemoteConnectionMenu">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Close Remote Connection"/>
+              </Properties>
+            </MenuItem>
           </SubComponents>
         </Menu>
       </SubComponents>

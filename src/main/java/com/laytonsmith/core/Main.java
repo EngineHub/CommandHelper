@@ -13,8 +13,10 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.extensions.ExtensionManager;
+import com.laytonsmith.core.functions.Cmdline;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -30,6 +32,7 @@ import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
 import com.laytonsmith.tools.pnviewer.PNViewer;
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import jline.console.ConsoleReader;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -172,7 +176,11 @@ public class Main {
 				.addArgument('l', "label", ArgumentParser.Type.STRING, "Label for the public key. For instance, \"user@localhost\"", "label", true);
 		suite.addMode("key-gen", rsaKeyGenMode);
 		pnViewerMode = ArgumentParser.GetParser()
-				.addDescription("Launches the Persistence Network viewer. This is a GUI tool that can help you visualize your databases.");
+				.addDescription("Launches the Persistence Network viewer. This is a GUI tool that can help you visualize your databases.")
+				.addFlag("server", "Sets up a server running on this machine, that can be accessed by remote Persistence Network Viewers."
+						+ " If this is set, you must also provide the --port and --password options.")
+				.addArgument("port", ArgumentParser.Type.NUMBER, "The port for the server to listen on.", "port", false)
+				.addArgument("password", ArgumentParser.Type.STRING, "The password that remote clients will need to provide to connect. Leave the field blank to be prompted for a password.", "password", false);
 		suite.addMode("pn-viewer", pnViewerMode);
 
 		ARGUMENT_SUITE = suite;
@@ -459,7 +467,48 @@ public class Main {
 				FileUtil.write(enc.getPublicKey(), pubOutputFile);
 				System.exit(0);
 			} else if(mode == pnViewerMode){
-				PNViewer.main(parsedArgs.getStringListArgument().toArray(new String[0]));
+				if(parsedArgs.isFlagSet("server")){
+					if(parsedArgs.getNumberArgument("port") == null){
+						System.err.println("When running as a server, port is required.");
+						System.exit(1);
+					}
+					int port = parsedArgs.getNumberArgument("port").intValue();
+					if(port > 65535 || port < 1){
+						System.err.println("Port must be between 1 and 65535.");
+						System.exit(1);
+					}
+					String password = parsedArgs.getStringArgument("password");
+					if("".equals(password)){
+						ConsoleReader reader = null;
+						try {
+							reader = new ConsoleReader();
+							reader.setExpandEvents(false);
+							Character cha = new Character((char)0);
+							password = reader.readLine("Enter password: ", cha);
+						} finally {
+							if(reader != null){
+								reader.shutdown();
+							}
+						}
+					}
+					if(password == null){
+						System.err.println("Warning! Running server with no password, anyone will be able to connect!");
+						password = "";
+					}
+					try {
+						PNViewer.startServer(port, password);
+					} catch(IOException ex){
+						System.err.println(ex.getMessage());
+						System.exit(1);
+					}
+				} else {
+					try {
+						PNViewer.main(parsedArgs.getStringListArgument().toArray(new String[0]));
+					} catch(HeadlessException ex){
+						System.err.println("The Persistence Network Viewer may not be run from a headless environment.");
+						System.exit(1);
+					}
+				}
 			} else {
 				throw new Error("Should not have gotten here");
 			}

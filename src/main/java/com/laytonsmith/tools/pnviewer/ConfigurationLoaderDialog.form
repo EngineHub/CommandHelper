@@ -30,7 +30,6 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jSeparator1" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="localFileField" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -39,42 +38,31 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="hostLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="usernameLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="portLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" pref="36" max="-2" attributes="0"/>
+                      <EmptySpace min="54" pref="54" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="portField" max="32767" attributes="0"/>
                           <Component id="hostField" max="32767" attributes="0"/>
-                          <Component id="usernameField" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="passwordLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="privateKeyLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="knownHostsLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="remoteFileLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="passwordField" max="32767" attributes="0"/>
-                          <Group type="102" alignment="1" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="privateKeyField" max="32767" attributes="0"/>
-                                  <Component id="knownHostsField" max="32767" attributes="0"/>
-                              </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="browsePrivateKeyButton" min="-2" max="-2" attributes="0"/>
-                                  <Component id="browseKnownHostsFileButton" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                          </Group>
                           <Group type="102" attributes="0">
-                              <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="0" pref="54" max="32767" attributes="0"/>
+                              <Component id="passwordLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
                           </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="remoteFileLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="remoteFileField" max="32767" attributes="0"/>
+                          <Component id="passwordField" max="32767" attributes="0"/>
                       </Group>
                   </Group>
+                  <Component id="jSeparator1" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="localRadioButton" min="-2" max="-2" attributes="0"/>
@@ -86,7 +74,7 @@
                               <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="236" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -114,32 +102,18 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="usernameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="usernameField" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="portLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="portField" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="passwordLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="passwordField" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="privateKeyLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="privateKeyField" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="browsePrivateKeyButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="passwordLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="knownHostsLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="knownHostsField" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="browseKnownHostsFileButton" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="remoteFileLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="remoteFileField" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="remoteFileLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
@@ -190,55 +164,12 @@
     </Component>
     <Component class="javax.swing.JTextField" name="hostField">
     </Component>
-    <Component class="javax.swing.JLabel" name="usernameLabel">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Username:"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="usernameField">
-    </Component>
     <Component class="javax.swing.JLabel" name="passwordLabel">
       <Properties>
         <Property name="text" type="java.lang.String" value="Password:"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JPasswordField" name="passwordField">
-    </Component>
-    <Component class="javax.swing.JLabel" name="jLabel5">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="If private key is specified, this is the passcode"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="privateKeyLabel">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Private Key:"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="privateKeyField">
-    </Component>
-    <Component class="javax.swing.JLabel" name="knownHostsLabel">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Known Hosts:"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="knownHostsField">
-    </Component>
-    <Component class="javax.swing.JButton" name="browsePrivateKeyButton">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Browse..."/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JButton" name="browseKnownHostsFileButton">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Browse..."/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="remoteFileLabel">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Remote File:"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="remoteFileField">
     </Component>
     <Component class="javax.swing.JSeparator" name="jSeparator1">
     </Component>
@@ -251,6 +182,20 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Cancel"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="portLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Port:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="portField">
+    </Component>
+    <Component class="javax.swing.JLabel" name="remoteFileLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Remote File:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="remoteFileField">
     </Component>
   </SubComponents>
 </Form>

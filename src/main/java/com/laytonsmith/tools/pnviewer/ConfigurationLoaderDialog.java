@@ -3,6 +3,8 @@ package com.laytonsmith.tools.pnviewer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -49,9 +51,9 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 					ConfigurationLoaderDialog.this.setVisible(false);
 					if(finishAction != null){
 						finishAction.data(localOrRemoteGroup.isSelected(localRadioButton.getModel()),
-								localFileField.getText(), usernameField.getText(),
-								new String(passwordField.getPassword()), privateKeyField.getText(),
-								knownHostsField.getText(), remoteFileField.getText());
+								localFileField.getText(), hostField.getText(),
+								Integer.parseInt(portField.getText()),
+								new String(passwordField.getPassword()), remoteFileField.getText());
 					}
 					ConfigurationLoaderDialog.this.dispose();
 				} else {
@@ -69,8 +71,6 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 			}
 		});
 		registerShowFileLoader(localFileField, browseLocalFileButton);
-		registerShowFileLoader(knownHostsField, browseKnownHostsFileButton);
-		registerShowFileLoader(privateKeyField, browsePrivateKeyButton);
 	}
 
 	/**
@@ -97,8 +97,35 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 		return getValidationError() == null;
 	}
 
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	private String getValidationError(){
-		//TODO
+		if(localOrRemoteGroup.isSelected(localRadioButton.getModel())){
+			String localFile = localFileField.getText();
+			if(!new File(localFile).exists()){
+				return "File specified doesn't exist.";
+			}
+		} else {
+			String host = hostField.getText();
+			String sport = portField.getText();
+			String remote = remoteFileField.getText().trim();
+			try {
+				new URI(host);
+			} catch(URISyntaxException ex){
+				return ex.getMessage();
+			}
+			int port;
+			try {
+				port = Integer.parseInt(sport);
+			} catch(NumberFormatException ex){
+				return "Port must be a number.";
+			}
+			if(port < 1 || port > 65535){
+				return "Port must be between 1 and 65535";
+			}
+			if("".equals(remote)){
+				return "No remote file specified.";
+			}
+		}
 		return null;
 	}
 
@@ -110,16 +137,10 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 	private void setRemoteEnabled(boolean state){
 		hostLabel.setEnabled(state);
 		hostField.setEnabled(state);
-		usernameLabel.setEnabled(state);
-		usernameField.setEnabled(state);
 		passwordLabel.setEnabled(state);
 		passwordField.setEnabled(state);
-		privateKeyLabel.setEnabled(state);
-		privateKeyField.setEnabled(state);
-		browsePrivateKeyButton.setEnabled(state);
-		knownHostsLabel.setEnabled(state);
-		knownHostsField.setEnabled(state);
-		browseKnownHostsFileButton.setEnabled(state);
+		portLabel.setEnabled(state);
+		portField.setEnabled(state);
 		remoteFileLabel.setEnabled(state);
 		remoteFileField.setEnabled(state);
 	}
@@ -145,22 +166,15 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
         remoteRadioButton = new javax.swing.JRadioButton();
         hostLabel = new javax.swing.JLabel();
         hostField = new javax.swing.JTextField();
-        usernameLabel = new javax.swing.JLabel();
-        usernameField = new javax.swing.JTextField();
         passwordLabel = new javax.swing.JLabel();
         passwordField = new javax.swing.JPasswordField();
-        jLabel5 = new javax.swing.JLabel();
-        privateKeyLabel = new javax.swing.JLabel();
-        privateKeyField = new javax.swing.JTextField();
-        knownHostsLabel = new javax.swing.JLabel();
-        knownHostsField = new javax.swing.JTextField();
-        browsePrivateKeyButton = new javax.swing.JButton();
-        browseKnownHostsFileButton = new javax.swing.JButton();
-        remoteFileLabel = new javax.swing.JLabel();
-        remoteFileField = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
         loadButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
+        portLabel = new javax.swing.JLabel();
+        portField = new javax.swing.JTextField();
+        remoteFileLabel = new javax.swing.JLabel();
+        remoteFileField = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -177,25 +191,15 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 
         hostLabel.setText("Host:");
 
-        usernameLabel.setText("Username:");
-
         passwordLabel.setText("Password:");
-
-        jLabel5.setText("If private key is specified, this is the passcode");
-
-        privateKeyLabel.setText("Private Key:");
-
-        knownHostsLabel.setText("Known Hosts:");
-
-        browsePrivateKeyButton.setText("Browse...");
-
-        browseKnownHostsFileButton.setText("Browse...");
-
-        remoteFileLabel.setText("Remote File:");
 
         loadButton.setText("Load");
 
         cancelButton.setText("Cancel");
+
+        portLabel.setText("Port:");
+
+        remoteFileLabel.setText("Remote File:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -204,7 +208,6 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(localFileField)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -212,32 +215,23 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(hostLabel)
-                            .addComponent(usernameLabel))
-                        .addGap(36, 36, 36)
+                            .addComponent(portLabel))
+                        .addGap(54, 54, 54)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(hostField)
-                            .addComponent(usernameField)))
+                            .addComponent(portField)
+                            .addComponent(hostField)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(passwordLabel)
-                            .addComponent(privateKeyLabel)
-                            .addComponent(knownHostsLabel)
-                            .addComponent(remoteFileLabel))
-                        .addGap(21, 21, 21)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(passwordField)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(privateKeyField)
-                                    .addComponent(knownHostsField))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(browsePrivateKeyButton)
-                                    .addComponent(browseKnownHostsFileButton)))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addGap(0, 54, Short.MAX_VALUE))
-                            .addComponent(remoteFileField)))
+                                .addComponent(passwordLabel)
+                                .addGap(30, 30, 30))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(remoteFileLabel)
+                                .addGap(18, 18, 18)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(remoteFileField)
+                            .addComponent(passwordField)))
+                    .addComponent(jSeparator1)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(localRadioButton)
@@ -247,7 +241,7 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
                                 .addComponent(loadButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cancelButton)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 236, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -269,28 +263,16 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
                     .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(usernameLabel)
-                    .addComponent(usernameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(portLabel)
+                    .addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(passwordLabel)
-                    .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel5)
+                    .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(passwordLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(privateKeyLabel)
-                    .addComponent(privateKeyField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(browsePrivateKeyButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(knownHostsLabel)
-                    .addComponent(knownHostsField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(browseKnownHostsFileButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(remoteFileLabel)
-                    .addComponent(remoteFileField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(remoteFileField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(remoteFileLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -351,39 +333,31 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 		 * @param isLocal If the selection is local. If true, username, password, privateKey, knownHosts, and remoteFile
 		 * can be ignored. If false, localPath can be ignored.
 		 * @param localPath The local path to the configuration file, if isLocal is true
-		 * @param username The username for the ssh connection if isLocal is false
-		 * @param password The password for the ssh connection, or passcode for the local private key, if isLocal is false
-		 * @param privateKey The path to the local private key, if isLocal is false
-		 * @param knownHosts The path to the known hosts file, if isLocal is false
+		 * @param host The remote host to connect to
+		 * @param port The remote port to connect to
+		 * @param password The password for the remote connection
 		 * @param remoteFile The path to the configuration file on the remote, if isLocal is false
 		 */
-		void data(boolean isLocal, String localPath, String username, String password, String privateKey, String knownHosts, String remoteFile);
+		void data(boolean isLocal, String localPath, String host, int port, String password, String remoteFile);
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton browseKnownHostsFileButton;
     private javax.swing.JButton browseLocalFileButton;
-    private javax.swing.JButton browsePrivateKeyButton;
     private javax.swing.JButton cancelButton;
     private javax.swing.JTextField hostField;
     private javax.swing.JLabel hostLabel;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTextField knownHostsField;
-    private javax.swing.JLabel knownHostsLabel;
     private javax.swing.JButton loadButton;
     private javax.swing.JTextField localFileField;
     private javax.swing.ButtonGroup localOrRemoteGroup;
     private javax.swing.JRadioButton localRadioButton;
     private javax.swing.JPasswordField passwordField;
     private javax.swing.JLabel passwordLabel;
-    private javax.swing.JTextField privateKeyField;
-    private javax.swing.JLabel privateKeyLabel;
+    private javax.swing.JTextField portField;
+    private javax.swing.JLabel portLabel;
     private javax.swing.JTextField remoteFileField;
     private javax.swing.JLabel remoteFileLabel;
     private javax.swing.JRadioButton remoteRadioButton;
-    private javax.swing.JTextField usernameField;
-    private javax.swing.JLabel usernameLabel;
     // End of variables declaration//GEN-END:variables
 }

@@ -15,6 +15,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -38,6 +44,8 @@ public class PNViewer extends javax.swing.JFrame {
 
 	private Map<String, String> data;
 	private Map<String, String> dataSources;
+	private VirtualPersistenceNetwork network;
+	private Thread remoteSocketThread;
 
 	/**
 	 * Creates new form PNViewer
@@ -60,15 +68,27 @@ public class PNViewer extends javax.swing.JFrame {
 				cld.setLoaderDialogFinish(new ConfigurationLoaderDialog.LoaderDialogFinish() {
 
 					@Override
-					public void data(boolean isLocal, String localPath, String username, String password, String privateKey, String knownHosts, String remoteFile) {
+					public void data(boolean isLocal, String localPath, String host, int port, String password, String remoteFile) {
 						if(isLocal){
 							loadFromLocal(localPath);
 						} else {
-							loadFromRemote(username, password, privateKey, knownHosts, remoteFile);
+							loadFromRemote(host, port, password, remoteFile);
 						}
 					}
 				});
 				cld.setVisible(true);
+			}
+		});
+		closeRemoteConnectionMenu.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(remoteSocketThread == null){
+					showError("No remote connection is established.");
+				} else {
+					setStatus("Closing remote connection...", false);
+					remoteSocketThread.interrupt();
+				}
 			}
 		});
 		keyTree.addTreeSelectionListener(new TreeSelectionListener() {
@@ -144,13 +164,20 @@ public class PNViewer extends javax.swing.JFrame {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(config.getParentFile().getParentFile());
 				try {
-					PersistenceNetwork pn = new PersistenceNetwork(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace("\\", "/")), options);
-					Map<String[], String> data = pn.getNamespace(new String[0]);
-					Map<String, String> dataSources = new HashMap<>();
-					for(String[] key : data.keySet()){
-						dataSources.put(join(key), pn.getKeySource(key).toString());
-					}
-					displayData(data, dataSources);
+					final PersistenceNetwork pn = new PersistenceNetwork(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace("\\", "/")), options);
+					VirtualPersistenceNetwork vpn = new VirtualPersistenceNetwork() {
+
+						@Override
+						public Map<String[], String> getAllData() throws DataSourceException {
+							return pn.getNamespace(new String[0]);
+						}
+
+						@Override
+						public URI getKeySource(String[] key) {
+							return pn.getKeySource(key);
+						}
+					};
+					displayData(vpn);
 				} catch (URISyntaxException | IOException | DataSourceException ex) {
 					Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 					showError(ex.getMessage());
@@ -159,16 +186,50 @@ public class PNViewer extends javax.swing.JFrame {
 		}).start();
 	}
 
-	private void loadFromRemote(String username, String password, String privateKey, String knownHosts, String remoteFile){
-		JOptionPane.showMessageDialog(this, "Loading from remote is not yet implemented.", "Not yet implemented", JOptionPane.INFORMATION_MESSAGE);
+	private void loadFromRemote(final String host, final int port, final String password, final String remoteFile){
+		remoteSocketThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					Socket s = new Socket();
+					try {
+						s.connect(new InetSocketAddress(host, port), 30000);
+						setStatus("Connected to remote server", true);
+						ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
+						ObjectInputStream is = new ObjectInputStream(s.getInputStream());
+						while(!Thread.currentThread().isInterrupted()){
+							
+						}
+					} catch(SocketTimeoutException ex){
+						showError("Connection timed out, check your settings and try again.");
+					} finally {
+						s.close();
+					}
+				} catch (IOException ex) {
+					showError(ex.getMessage());
+					Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				remoteSocketThread = null;
+			}
+		});
+		remoteSocketThread.start();
 	}
+	
+	
 
 	/**
 	 * Once the data is loaded, however that may take place, the data should be sent here, which will
 	 * load the data into the viewer.
 	 * @param data
 	 */
-	private void displayData(final Map<String[], String> data, final Map<String, String> dataSources){
+	private void displayData(VirtualPersistenceNetwork pn) throws DataSourceException{
+		this.network = pn;
+		final Map<String[], String> data = pn.getAllData();
+		final Map<String, String> dataSources = new HashMap<>();
+		for(String[] key : data.keySet()){
+			dataSources.put(join(key), pn.getKeySource(key).toString());
+		}
 		SwingUtilities.invokeLater(new Runnable() {
 
 			@Override
@@ -227,6 +288,34 @@ public class PNViewer extends javax.swing.JFrame {
 	private void showError(String message){
 		JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
 	}
+	
+	public static void startServer(int port, String password) throws IOException{
+		ServerSocket socket = new ServerSocket(port);
+		System.out.println("Server started on port " + port + ". Type Ctrl+C to kill the server.");
+		System.out.println("Persistence Network Viewers may now connect to this server.");
+		while(true){
+			Socket s = socket.accept();
+			System.out.println("A client has connected.");
+			ObjectInputStream is = new ObjectInputStream(s.getInputStream());
+			ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
+			connected: while(s.isConnected()){
+				String command = is.readUTF();
+				switch(command){
+					case "DISCONNECT":
+						break connected;
+					
+				}
+			}
+		}
+	}
+	
+	private static interface VirtualPersistenceNetwork {
+		
+		Map<String[], String> getAllData() throws DataSourceException;
+		
+		URI getKeySource(String[] key);
+		
+	}
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
@@ -259,6 +348,7 @@ public class PNViewer extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         loadFromConfigurationMenu = new javax.swing.JMenuItem();
+        closeRemoteConnectionMenu = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -365,6 +455,9 @@ public class PNViewer extends javax.swing.JFrame {
         loadFromConfigurationMenu.setText("Load from Configuration...");
         fileMenu.add(loadFromConfigurationMenu);
 
+        closeRemoteConnectionMenu.setText("Close Remote Connection");
+        fileMenu.add(closeRemoteConnectionMenu);
+
         jMenuBar1.add(fileMenu);
 
         setJMenuBar(jMenuBar1);
@@ -442,6 +535,7 @@ public class PNViewer extends javax.swing.JFrame {
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem closeRemoteConnectionMenu;
     private javax.swing.JLabel configurationFromLabel;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JLabel jLabel1;
