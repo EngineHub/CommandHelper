@@ -90,12 +90,12 @@ public class BukkitMetadata {
 						"set_metadata('key', 'example')\nmsg(get_metadata('rank'))"),
 				new ExampleScript("Attaches the name of the player running the function at the key 'aKey' to the block at the given location, and outputs all values attached to the same block and at the same key.",
 						"assign(@block, array('x': 100, 'y': 63, 'z': 0))\nset_metadata(@block, 'aKey', player())\nmsg(get_metadata(@block, 'aKey'))"),
-				new ExampleScript("Attaches the boolean value true at the key 'my.key' to the entity whose the id is 1001, and outputs the value attached to the same entity and at the same key by" + StaticLayer.GetCommandHelperName() + ".",
-						"assign(@entity, 1001)\nset_metadata(@entity, 'my.key', true)\nmsg(get_metadata(@entity, 'my.key', '" + StaticLayer.GetCommandHelperName() + "'))"),
+				new ExampleScript("Attaches the boolean value true at the key 'my.key' to the entity whose the id is 1001, and outputs the value attached to the same entity and at the same key by" + StaticLayer.GetPluginName() + ".",
+						"assign(@entity, 1001)\nset_metadata(@entity, 'my.key', true)\nmsg(get_metadata(@entity, 'my.key', '" + StaticLayer.GetPluginName() + "'))"),
 				new ExampleScript("Attaches an array at the key 'anotherKey' to the world named 'world', and outputs all values attached to the same world and at the same key.",
 						"set_metadata('world', 'anotherKey', array(1, 50, 3))\nmsg(get_metadata('world', 'anotherKey'))"),
-				new ExampleScript("Attaches null at the key 'key' to the player named 'player', and outputs the value attached to the same player and at the same key by" + StaticLayer.GetCommandHelperName() + ".",
-						"assign(@peid, pinfo()[13])\nset_metadata(@peid, 'key', null)\nmsg(get_metadata(@peid, 'key', '" + StaticLayer.GetCommandHelperName() + "'))")
+				new ExampleScript("Attaches null at the key 'key' to the player named 'player', and outputs the value attached to the same player and at the same key by" + StaticLayer.GetPluginName() + ".",
+						"assign(@peid, pinfo()[13])\nset_metadata(@peid, 'key', null)\nmsg(get_metadata(@peid, 'key', '" + StaticLayer.GetPluginName() + "'))")
 			};
 		}
 
@@ -191,7 +191,7 @@ public class BukkitMetadata {
 			return "void {[object], key, value | object, key, value, [plugin]} Registers a metadata value in the given object with the"
 					+ " given key. object can be a location array (it will designate a block), an entityID (it will designate an entity)"
 					+ " or a string (it will designate a world). If only the key and the value are given, the object is the current player."
-					+ " You can specify the plugin that will own the metadata, '" + StaticLayer.GetCommandHelperName() + "' by default. See get_metadata() for more"
+					+ " You can specify the plugin that will own the metadata, '" + StaticLayer.GetPluginName() + "' by default. See get_metadata() for more"
 					+ " informations about Bukkit metadata.";
 		}
 
@@ -205,12 +205,12 @@ public class BukkitMetadata {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 				value = args[1];
-				plugin = StaticLayer.GetCommandHelper();
+				plugin = StaticLayer.GetPlugin();
 			} else {
 				metadatable = Static.getMetadatable(args[0], t);
 				key = args[1].val();
 				value = args[2];
-				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : StaticLayer.GetCommandHelper();
+				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : StaticLayer.GetPlugin();
 			}
 			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin));
 			return CVoid.VOID;

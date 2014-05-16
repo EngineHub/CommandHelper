@@ -783,12 +783,12 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public String GetCommandHelperName() {
+	public String GetPluginName() {
 		return (String) new Yaml().loadAs(getClass().getResourceAsStream("/plugin.yml"), Map.class).get("name");
 	}
 
 	@Override
-	public MCPlugin GetCommandHelper() {
+	public MCPlugin GetPlugin() {
 		return new BukkitMCPlugin(CommandHelperPlugin.self);
 	}
 }

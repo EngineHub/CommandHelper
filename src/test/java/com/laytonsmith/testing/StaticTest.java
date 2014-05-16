@@ -802,12 +802,12 @@ public class StaticTest {
 		}
 
 		@Override
-		public String GetCommandHelperName() {
-			return new BukkitConvertor().GetCommandHelperName();
+		public String GetPluginName() {
+			return new BukkitConvertor().GetPluginName();
 		}
 
 		@Override
-		public MCPlugin GetCommandHelper() {
+		public MCPlugin GetPlugin() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 	}

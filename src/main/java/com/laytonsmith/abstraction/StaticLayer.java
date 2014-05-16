@@ -148,12 +148,12 @@ public final class StaticLayer {
 		return convertor.GetNewRecipe(type, result);
 	}
 
-	public static String GetCommandHelperName() {
-		return convertor.GetCommandHelperName();
+	public static String GetPluginName() {
+		return convertor.GetPluginName();
 	}
 
-	public static MCPlugin GetCommandHelper() {
-		return convertor.GetCommandHelper();
+	public static MCPlugin GetPlugin() {
+		return convertor.GetPlugin();
 	}
 	
 	public static synchronized Convertor GetConvertor(){

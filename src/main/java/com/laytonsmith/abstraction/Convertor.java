@@ -214,11 +214,11 @@ public interface Convertor {
 	 * Returns the name of CommandHelper by parsing the plugin.yml file.
 	 * @return 
 	 */
-	public String GetCommandHelperName();
+	public String GetPluginName();
 
 	/**
 	 * Returns a MCPlugin instance of CommandHelper.
 	 * @return 
 	 */
-	public MCPlugin GetCommandHelper();
+	public MCPlugin GetPlugin();
 }

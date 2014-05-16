@@ -928,12 +928,12 @@ public final class Interpreter {
 		}
 
 		@Override
-		public String GetCommandHelperName() {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		public String GetPluginName() {
+			return "MethodScript";
 		}
 
 		@Override
-		public MCPlugin GetCommandHelper() {
+		public MCPlugin GetPlugin() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 	}
