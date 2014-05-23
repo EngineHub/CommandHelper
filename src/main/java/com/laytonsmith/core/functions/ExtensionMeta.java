@@ -60,10 +60,10 @@ public class ExtensionMeta {
 			try {
 				FunctionList.getFunction(args[0].val().toLowerCase());
 			} catch (ConfigCompileException ex) {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 
-			return new CBoolean(true, t);
+			return CBoolean.TRUE;
 		}
 
 		@Override
@@ -148,9 +148,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			boolean found = EventList.getEvent(args[0].val().toLowerCase()) != null;
-
-			return new CBoolean(found, t);
+			return CBoolean.get(EventList.getEvent(args[0].val().toLowerCase()) != null);
 		}
 
 		@Override
@@ -220,10 +218,10 @@ public class ExtensionMeta {
 			for (ExtensionTracker tracker : trackers.values()) {
 				String identifier = tracker.getIdentifier();
 				if ((identifier != null) && identifier.equalsIgnoreCase(args[0].val())) {
-					return new CBoolean(true, t);
+					return CBoolean.TRUE;
 				}
 			}
-			return new CBoolean(false, t);
+			return CBoolean.FALSE;
 		}
 
 		@Override
@@ -252,7 +250,7 @@ public class ExtensionMeta {
 		public Set<OptimizationOption> optimizationOptions() {
 			 return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
-		
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() != 1) {

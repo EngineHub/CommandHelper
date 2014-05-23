@@ -390,9 +390,9 @@ public final class Static {
         if (val.equalsIgnoreCase("null")) {
             return CNull.NULL;
         } else if (val.equalsIgnoreCase("true")) {
-            return new CBoolean(true, t);
+            return CBoolean.TRUE;
         } else if (val.equalsIgnoreCase("false")) {
-            return new CBoolean(false, t);
+            return CBoolean.FALSE;
         } else {
 			if(val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")){
 				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.",
@@ -632,7 +632,7 @@ public final class Static {
 	 * If the sender is a player, it is returned, otherwise a ConfigRuntimeException is thrown.
 	 * @param environment
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static MCPlayer getPlayer(Environment environment, Target t) {
 		MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -737,7 +737,7 @@ public final class Static {
 	 * Returns the world with the specified name. If it does not exists, a ConfigRuntimeException is thrown.
 	 * @param name
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static MCWorld getWorld(String name, Target t) {
 		MCWorld world = getServer().getWorld(name);
@@ -756,7 +756,7 @@ public final class Static {
 	 * Returns the plugin with the specified name. If it does not exist, a ConfigRuntimeException is thrown.
 	 * @param name
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static MCPlugin getPlugin(String name, Target t) {
 		MCPlugin plugin = getServer().getPluginManager().getPlugin(name);
@@ -776,7 +776,7 @@ public final class Static {
 	 * If the construct is invalid or if the object does not exist, a ConfigRuntimeException is thrown.
 	 * @param construct
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static MCMetadatable getMetadatable(Construct construct, Target t) {
 		if (construct instanceof CInt) {
@@ -1238,13 +1238,13 @@ public final class Static {
 	 * Given a java object, returns a MethodScript object.
 	 * @param object
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static Construct getMSObject(Object object, Target t) {
 		if (object == null) {
 			return CNull.NULL;
 		} else if (object instanceof Boolean) {
-			return new CBoolean((boolean) object, t);
+			return CBoolean.get((boolean) object);
 		} else if ((object instanceof Byte) || (object instanceof Short) || (object instanceof Integer) || (object instanceof Long)) {
 			return new CInt((long) object, t);
 		} else if ((object instanceof Float) || (object instanceof Double)) {
@@ -1268,7 +1268,7 @@ public final class Static {
 			boolean[] array = (boolean[]) object;
 			CArray r = new CArray(t);
 			for (boolean b : array) {
-				r.push(new CBoolean(b, t));
+				r.push(CBoolean.get(b));
 			}
 			return r;
 		} else if (object instanceof byte[]) {
@@ -1339,7 +1339,7 @@ public final class Static {
 	/**
 	 * Given a MethodScript object, returns a java object.
 	 * @param construct
-	 * @return 
+	 * @return
 	 */
 	public static Object getJavaObject(Construct construct) {
 		if ((construct == null) || (construct instanceof CNull)) {

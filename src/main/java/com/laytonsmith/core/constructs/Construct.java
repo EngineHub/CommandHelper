@@ -231,7 +231,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
                 return new CDouble(n.doubleValue(), Target.UNKNOWN);
             }
         } else if (o instanceof Boolean) {
-            return new CBoolean(((Boolean) o), Target.UNKNOWN);
+            return CBoolean.get((Boolean) o);
         } else if (o instanceof java.util.List) {
             java.util.List l = (java.util.List) o;
             CArray ca = new CArray(t);
@@ -290,7 +290,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
                 return new CDouble(((Number)o).doubleValue(), Target.UNKNOWN);
             }
         } else if(o instanceof Boolean){
-            return new CBoolean(((Boolean)o).booleanValue(), Target.UNKNOWN);
+            return CBoolean.get((Boolean) o);
         } else if(o instanceof Map){
             //associative array
             CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);

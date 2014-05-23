@@ -203,9 +203,9 @@ class CompilerObject {
 				return new NewIVariable(t.val(), t.getTarget());
 			case BARE_STRING:
 				if (t.val().equals("true")) {
-					return new CBoolean(true, t.getTarget());
+					return CBoolean.GenerateCBoolean(true, t.getTarget());
 				} else if (t.val().equals("false")) {
-					return new CBoolean(false, t.getTarget());
+					return CBoolean.GenerateCBoolean(false, t.getTarget());
 				} else if (t.val().equals("null")) {
 					return CNull.GenerateCNull(t.getTarget());
 				} else if (keywords.contains(t.val())) {

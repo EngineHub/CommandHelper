@@ -83,7 +83,7 @@ public class Threading {
 						ConfigRuntimeException.HandleUncaughtException(ex, environment);
 					} catch(CancelCommandException ex){
 						if(ex.getMessage() != null){
-							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), new CBoolean(false, t));
+							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
 					} finally {
 						dm.deactivateThread(Thread.currentThread());

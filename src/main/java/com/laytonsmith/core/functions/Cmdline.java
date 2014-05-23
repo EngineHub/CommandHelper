@@ -565,7 +565,7 @@ public class Cmdline {
                     CHLog.GetLogger().e(CHLog.Tags.GENERAL, e1, t);
                 }
             }
-            return new CBoolean(ret, t);
+            return CBoolean.get(ret);
         }
 
 		@Override

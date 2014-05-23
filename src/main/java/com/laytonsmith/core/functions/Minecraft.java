@@ -590,7 +590,7 @@ public class Minecraft {
 			} else {
 				ret = false;
 			}
-			return new CBoolean(ret, t);
+			return CBoolean.get(ret);
 		}
 	}
 
@@ -851,15 +851,15 @@ public class Minecraft {
 			}
 			if (index == 3 || index == -1) {
 				//Allow flight
-				retVals.add(new CBoolean(server.getAllowFlight(), t));
+				retVals.add(CBoolean.get(server.getAllowFlight()));
 			}
 			if (index == 4 || index == -1) {
 				//Allow nether
-				retVals.add(new CBoolean(server.getAllowNether(), t));
+				retVals.add(CBoolean.get(server.getAllowNether()));
 			}
 			if (index == 5 || index == -1) {
 				//Allow end
-				retVals.add(new CBoolean(server.getAllowEnd(), t));
+				retVals.add(CBoolean.get(server.getAllowEnd()));
 			}
 			if (index == 6 || index == -1) {
 				//World container
@@ -900,7 +900,7 @@ public class Minecraft {
 			}
 			if (index == 10 || index == -1) {
 				//Online Mode
-				retVals.add(new CBoolean(server.getOnlineMode(), t));
+				retVals.add(CBoolean.get(server.getOnlineMode()));
 			}
 			if (index == 11 || index == -1) {
 				//Server port
@@ -1506,15 +1506,15 @@ public class Minecraft {
 			CArray ret = new CArray(t);
 			ret.set("maxStacksize", new CInt(i.getMaxStackSize(), t), t);
 			ret.set("maxDurability", new CInt(i.getMaxDurability(), t), t);
-			ret.set("hasGravity", new CBoolean(i.hasGravity(), t), t);
-			ret.set("isBlock", new CBoolean(i.isBlock(), t), t);
-			ret.set("isBurnable", new CBoolean(i.isBurnable(), t), t);
-			ret.set("isEdible", new CBoolean(i.isEdible(), t), t);
-			ret.set("isFlammable", new CBoolean(i.isFlammable(), t), t);
-			ret.set("isOccluding", new CBoolean(i.isOccluding(), t), t);
-			ret.set("isRecord", new CBoolean(i.isRecord(), t), t);
-			ret.set("isSolid", new CBoolean(i.isSolid(), t), t);
-			ret.set("isTransparent", new CBoolean(i.isTransparent(), t), t);
+			ret.set("hasGravity", CBoolean.get(i.hasGravity()), t);
+			ret.set("isBlock", CBoolean.get(i.isBlock()), t);
+			ret.set("isBurnable", CBoolean.get(i.isBurnable()), t);
+			ret.set("isEdible", CBoolean.get(i.isEdible()), t);
+			ret.set("isFlammable", CBoolean.get(i.isFlammable()), t);
+			ret.set("isOccluding", CBoolean.get(i.isOccluding()), t);
+			ret.set("isRecord", CBoolean.get(i.isRecord()), t);
+			ret.set("isSolid", CBoolean.get(i.isSolid()), t);
+			ret.set("isTransparent", CBoolean.get(i.isTransparent()), t);
 			return ret;
 		}
 

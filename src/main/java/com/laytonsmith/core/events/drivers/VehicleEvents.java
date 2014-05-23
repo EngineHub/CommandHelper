@@ -283,8 +283,8 @@ public class VehicleEvents {
 				}
 				ret.put("block", block);
 				ret.put("entity", entity);
-				ret.put("pickup", new CBoolean(pickup, t));
-				ret.put("collide", new CBoolean(collide, t));
+				ret.put("pickup", CBoolean.get(pickup));
+				ret.put("collide", CBoolean.get(collide));
 				return ret;
 			} else {
 				throw new EventException("The event could not be converted to MCVehicleCollideEvent.");

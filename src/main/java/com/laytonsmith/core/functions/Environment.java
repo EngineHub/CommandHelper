@@ -465,7 +465,7 @@ public class Environment {
 				w = ((MCPlayer) sender).getWorld();
 			}
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			return new CBoolean(l.getBlock().isSign(), t);
+			return CBoolean.get(l.getBlock().isSign());
 		}
 	}
 
@@ -1154,13 +1154,13 @@ public class Environment {
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
 			MCBlock b = l.getBlock();
 			CArray array = new CArray(t);
-			array.set("solid", new CBoolean(b.isSolid(), t), t);
-			array.set("flammable", new CBoolean(b.isFlammable(), t), t);
-			array.set("transparent", new CBoolean(b.isTransparent(), t), t);
-			array.set("occluding", new CBoolean(b.isOccluding(), t), t);
-			array.set("burnable", new CBoolean(b.isBurnable(), t), t);
+			array.set("solid", CBoolean.get(b.isSolid()), t);
+			array.set("flammable", CBoolean.get(b.isFlammable()), t);
+			array.set("transparent", CBoolean.get(b.isTransparent()), t);
+			array.set("occluding", CBoolean.get(b.isOccluding()), t);
+			array.set("burnable", CBoolean.get(b.isBurnable()), t);
 			return array;
-			//return new CBoolean(l.getBlock().isSolid(), t);
+			//return CBoolean.get(l.getBlock().isSolid());
 		}
 
 		@Override
@@ -1292,7 +1292,7 @@ public class Environment {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			return new CBoolean(loc.getBlock().isBlockPowered(), t);
+			return CBoolean.get(loc.getBlock().isBlockPowered());
 		}
 	}
 
@@ -1349,7 +1349,7 @@ public class Environment {
 			}
 			MCPlayer psender = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], (psender != null ? psender.getWorld() : null), t);
-			return new CBoolean(location.getWorld().generateTree(location, treeType), t);
+			return CBoolean.get(location.getWorld().generateTree(location, treeType));
 		}
 	}
 

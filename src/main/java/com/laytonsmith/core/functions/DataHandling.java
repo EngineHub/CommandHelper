@@ -1362,7 +1362,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(!(args[0] instanceof CArray), t);
+			return CBoolean.get(!(args[0] instanceof CArray));
 		}
 
 		@Override
@@ -1423,7 +1423,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean((args[0] instanceof CString), t);
+			return CBoolean.get(args[0] instanceof CString);
 		}
 
 		@Override
@@ -1482,7 +1482,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean((args[0] instanceof CByteArray), t);
+			return CBoolean.get(args[0] instanceof CByteArray);
 		}
 
 		@Override
@@ -1542,7 +1542,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(args[0] instanceof CArray, t);
+			return CBoolean.get(args[0] instanceof CArray);
 		}
 
 		@Override
@@ -1604,7 +1604,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(args[0] instanceof CDouble, t);
+			return CBoolean.get(args[0] instanceof CDouble);
 		}
 
 		@Override
@@ -1665,7 +1665,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(args[0] instanceof CInt, t);
+			return CBoolean.get(args[0] instanceof CInt);
 		}
 
 		@Override
@@ -1725,7 +1725,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(args[0] instanceof CBoolean, t);
+			return CBoolean.get(args[0] instanceof CBoolean);
 		}
 
 		@Override
@@ -1784,7 +1784,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(args[0] instanceof CNull, t);
+			return CBoolean.get(args[0] instanceof CNull);
 		}
 
 		@Override
@@ -1845,7 +1845,7 @@ public class DataHandling {
 			} catch (ConfigRuntimeException e) {
 				b = false;
 			}
-			return new CBoolean(b, t);
+			return CBoolean.get(b);
 		}
 
 		@Override
@@ -1917,9 +1917,9 @@ public class DataHandling {
 			try {
 				d = Static.getDouble(args[0], t);
 			} catch (ConfigRuntimeException e) {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
-			return new CBoolean((long) d == d, t);
+			return CBoolean.get((long) d == d);
 		}
 
 		@Override
@@ -2443,7 +2443,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) {
-			return new CBoolean(env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val()) == null ? false : true, t);
+			return CBoolean.get(env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val()) != null);
 		}
 	}
 
@@ -2488,7 +2488,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
-				return new CBoolean(((CArray) args[0]).inAssociativeMode(), t);
+				return CBoolean.get(((CArray) args[0]).inAssociativeMode());
 			} else {
 				throw new ConfigRuntimeException(this.getName() + " expects argument 1 to be an array", ExceptionType.CastException, t);
 			}
@@ -2546,7 +2546,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(args[0] instanceof CClosure, t);
+			return CBoolean.get(args[0] instanceof CClosure);
 		}
 
 		@Override
@@ -2994,7 +2994,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(Static.getBoolean(args[0]), t);
+			return CBoolean.get(Static.getBoolean(args[0]));
 		}
 
 		@Override

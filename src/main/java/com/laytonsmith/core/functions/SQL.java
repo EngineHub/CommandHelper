@@ -178,7 +178,7 @@ public class SQL {
 									}
 								} else if (columnType == Types.BOOLEAN
 										|| columnType == Types.BIT) {
-									value = new CBoolean(rs.getBoolean(i), t);
+									value = CBoolean.get(rs.getBoolean(i));
 								} else {
 									throw new ConfigRuntimeException("SQL returned a unhandled column type "
 											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "."

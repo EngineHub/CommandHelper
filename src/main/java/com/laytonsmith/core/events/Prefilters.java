@@ -87,7 +87,7 @@ public final class Prefilters {
     
 	public static void match(Map<String, Construct> map, String key,
 			boolean actualValue, PrefilterType type) throws PrefilterNonMatchException {
-		match(map, key, new CBoolean(actualValue, Target.UNKNOWN), type);
+		match(map, key, CBoolean.get(actualValue), type);
 	}
     
 	public static void match(Map<String, Construct> map, String key,

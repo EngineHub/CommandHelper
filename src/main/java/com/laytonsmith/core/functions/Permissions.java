@@ -78,7 +78,7 @@ public class Permissions {
 				final MCCommandSender mcc = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if (mcc instanceof MCConsoleCommandSender || mcc instanceof MCBlockCommandSender) {
 					// Console and CommandBlocks always have permission
-					return new CBoolean(true, t);
+					return CBoolean.TRUE;
 				}
 
 				MCPlayer mcp = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -101,11 +101,11 @@ public class Permissions {
 
 			if (Static.getConsoleName().equals(player.toLowerCase()) || player.startsWith(Static.getBlockPrefix())) {
 				// Console and CommandBlocks always have permission
-				return new CBoolean(true, t);
+				return CBoolean.TRUE;
 			}
 
 			PermissionsResolver perms = environment.getEnv(GlobalEnv.class).GetPermissionsResolver();
-			return new CBoolean(perms.hasPermission(player, permission), t);
+			return CBoolean.get(perms.hasPermission(player, permission));
 		}
 	}
 }

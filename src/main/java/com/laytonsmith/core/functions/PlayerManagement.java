@@ -444,7 +444,7 @@ public class PlayerManagement {
 			if (!l.getWorld().exists()) {
 				throw new ConfigRuntimeException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
 			}
-			return new CBoolean(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), t);
+			return CBoolean.get(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())));
 		}
 	}
 
@@ -881,7 +881,7 @@ public class PlayerManagement {
 			}
 			if (index == 8 || index == -1) {
 				//Is op
-				retVals.add(new CBoolean(p.isOp(), t));
+				retVals.add(CBoolean.get(p.isOp()));
 			}
 			if (index == 9 || index == -1) {
 				//MCPlayer groups
@@ -908,7 +908,7 @@ public class PlayerManagement {
 				retVals.add(new CString(hostname, t));
 			}
 			if (index == 11 || index == -1) {
-				retVals.add(new CBoolean(p.isSneaking(), t));
+				retVals.add(CBoolean.get(p.isSneaking()));
 			}
 			if (index == 12 || index == -1) {
 				retVals.add(new CString(p.getHost(), t));
@@ -917,22 +917,22 @@ public class PlayerManagement {
 				retVals.add(new CInt(p.getEntityId(), t));
 			}
 			if (index == 14 || index == -1) {
-				retVals.add(new CBoolean(p.isInsideVehicle(), t));
+				retVals.add(CBoolean.get(p.isInsideVehicle()));
 			}
 			if (index == 15 || index == -1) {
 				retVals.add(new CInt(p.getInventory().getHeldItemSlot(), t));
 			}
 			if (index == 16 || index == -1) {
-				retVals.add(new CBoolean(p.isSleeping(), t));
+				retVals.add(CBoolean.get(p.isSleeping()));
 			}
 			if (index == 17 || index == -1) {
-				retVals.add(new CBoolean(p.isBlocking(), t));
+				retVals.add(CBoolean.get(p.isBlocking()));
 			}
 			if (index == 18 || index == -1) {
-				retVals.add(new CBoolean(p.isFlying(), t));
+				retVals.add(CBoolean.get(p.isFlying()));
 			}
 			if (index == 19 || index == -1) {
-				retVals.add(new CBoolean(p.isSprinting(), t));
+				retVals.add(CBoolean.get(p.isSprinting()));
 			}
 			if(index == 20 || index == -1){
 				retVals.add(new CString(p.getUniqueId().toString(), t));
@@ -2037,10 +2037,10 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if (seconds == 0) {
-				return new CBoolean(m.removeEffect(effect), t);
+				return CBoolean.get(m.removeEffect(effect));
 			} else {
 				m.addEffect(effect, strength, seconds, ambient, t);
-				return new CBoolean(true, t);
+				return CBoolean.TRUE;
 			}
 		}
 
@@ -2227,11 +2227,11 @@ public class PlayerManagement {
 			//from the server directly
 			if (p != null && !p.getName().equals(args[0].val())) {
 				MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());
-				return new CBoolean(player.isOnline(), t);
+				return CBoolean.get(player.isOnline());
 			} else if (p != null) {
-				return new CBoolean(p.isOnline(), t);
+				return CBoolean.get(p.isOnline());
 			} else {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 		}
 	}
@@ -2284,7 +2284,7 @@ public class PlayerManagement {
 			} else {
 				ret = pl.isWhitelisted();
 			}
-			return new CBoolean(ret, t);
+			return CBoolean.get(ret);
 		}
 	}
 
@@ -2381,7 +2381,7 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
-			return new CBoolean(pl.isBanned(), t);
+			return CBoolean.get(pl.isBanned());
 		}
 	}
 
@@ -2724,7 +2724,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return new CBoolean(m.isOp(), t);
+			return CBoolean.get(m.isOp());
 		}
 	}
 
@@ -2991,7 +2991,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
-			return new CBoolean(p.getAllowFlight(), t);
+			return CBoolean.get(p.getAllowFlight());
 		}
 
 		@Override
@@ -3577,10 +3577,10 @@ public class PlayerManagement {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
 						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
 						+ " (It was " + v.magnitude + ")", t);
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 			p.setVelocity(v);
-			return new CBoolean(true, t);
+			return CBoolean.TRUE;
 		}
 
 		@Override
@@ -4122,7 +4122,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 
-			return new CBoolean(p.leaveVehicle(), t);
+			return CBoolean.get(p.leaveVehicle());
 		}
 	}
 
@@ -4207,7 +4207,7 @@ public class PlayerManagement {
 				Construct... args) throws ConfigRuntimeException {
 			MCServer s = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
 			MCOfflinePlayer offp = s.getOfflinePlayer(args[0].val());
-			return new CBoolean(offp.hasPlayedBefore(), t);
+			return CBoolean.get(offp.hasPlayedBefore());
 		}
 
 		@Override
