@@ -335,7 +335,7 @@ public class Persistence {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			try {
-				return new CBoolean(env.getEnv(GlobalEnv.class).GetPersistenceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")), t);
+				return CBoolean.get(env.getEnv(GlobalEnv.class).GetPersistenceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")));
 			} catch (DataSourceException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			} catch(IllegalArgumentException e){

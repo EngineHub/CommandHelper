@@ -591,15 +591,14 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			equals e = new equals();
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				for (int i = 0; i < ca.size(); i++) {
-					if (((CBoolean) e.exec(t, env, ca.get(i, t), args[1])).getBoolean()) {
-						return new CBoolean(true, t);
+					if (new equals().exec(t, env, ca.get(i, t), args[1]).getBoolean()) {
+						return CBoolean.TRUE;
 					}
 				}
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			} else {
 				throw new ConfigRuntimeException("Argument 1 of array_contains must be an array", ExceptionType.CastException, t);
 			}
@@ -681,15 +680,14 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			equals_ic e = new equals_ic();
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				for (int i = 0; i < ca.size(); i++) {
-					if (((CBoolean) e.exec(t, environment, ca.get(i, t), args[1])).getBoolean()) {
-						return new CBoolean(true, t);
+					if (new equals_ic().exec(t, environment, ca.get(i, t), args[1]).getBoolean()) {
+						return CBoolean.TRUE;
 					}
 				}
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			} else {
 				throw new ConfigRuntimeException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, t);
 			}
@@ -750,14 +748,14 @@ public class ArrayHandling {
 					try {
 						int index = Static.getInt32(args[1], t);
 						CArray ca = (CArray) args[0];
-						return new CBoolean(index <= ca.size() - 1, t);
+						return CBoolean.get(index <= ca.size() - 1);
 					} catch (ConfigRuntimeException e) {
 						//They sent a key that is a string. Obviously it doesn't exist.
-						return new CBoolean(false, t);
+						return CBoolean.FALSE;
 					}
 				} else {
 					CArray ca = (CArray) args[0];
-					return new CBoolean(ca.containsKey(args[1].val()), t);
+					return CBoolean.get(ca.containsKey(args[1].val()));
 				}
 			} else {
 				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);

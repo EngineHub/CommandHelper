@@ -60,10 +60,10 @@ public class ExtensionMeta {
 			try {
 				FunctionList.getFunction(args[0].val().toLowerCase());
 			} catch (ConfigCompileException ex) {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 
-			return new CBoolean(true, t);
+			return CBoolean.TRUE;
 		}
 
 		@Override
@@ -148,9 +148,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			boolean found = EventList.getEvent(args[0].val().toLowerCase()) != null;
-
-			return new CBoolean(found, t);
+			return CBoolean.get(EventList.getEvent(args[0].val().toLowerCase()) != null);
 		}
 
 		@Override

@@ -728,7 +728,7 @@ public class ObjectGenerator {
 			effect.set("id", new CInt(eff.getPotionID(), t), t);
 			effect.set("strength", new CInt(eff.getStrength(), t), t);
 			effect.set("seconds", new CInt(eff.getSecondsRemaining(), t), t);
-			effect.set("ambient", new CBoolean(eff.isAmbient(), t), t);
+			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
 			ea.push(effect);
 		}
 		return ea;

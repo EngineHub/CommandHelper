@@ -117,8 +117,8 @@ public class Web {
 			c.set("domain", cookie.getDomain());
 			c.set("path", cookie.getPath());
 			c.set("expiration", new CInt(cookie.getExpiration(), t), t);
-			c.set("httpOnly", new CBoolean(cookie.isHttpOnly(), t), t);
-			c.set("secureOnly", new CBoolean(cookie.isSecureOnly(), t), t);
+			c.set("httpOnly", CBoolean.get(cookie.isHttpOnly()), t);
+			c.set("secureOnly", CBoolean.get(cookie.isSecureOnly()), t);
 			if(!update){
 				ret.push(c);
 			}
@@ -380,7 +380,7 @@ public class Web {
 						array.set("responseCode", new CInt(resp.getResponseCode(), t), t);
 						array.set("responseText", resp.getResponseText());
 						array.set("httpVersion", resp.getHttpVersion());
-						array.set("error", new CBoolean(resp.getResponseCode() >= 400 && resp.getResponseCode() < 600, t), t);
+						array.set("error", CBoolean.get(resp.getResponseCode() >= 400 && resp.getResponseCode() < 600), t);
 						if(arrayJar != null){
 							getCookieJar(arrayJar, settings.getCookieJar(), t);
 						}
@@ -697,8 +697,8 @@ public class Web {
 			final String mailUser = ArgumentValidation.getItemFromArray(options, "user", t, new CString("", t)).val();
 			final String mailPassword = ArgumentValidation.getItemFromArray(options, "password", t, new CString("", t)).val();
 			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t)), t);
-			boolean useSSL = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_ssl", t, new CBoolean(false, t)), t);
-			boolean useStartTLS = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, new CBoolean(false, t)), t);
+			boolean useSSL = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t);
+			boolean useStartTLS = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t);
 			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t)), t);
 
 			//Standard email options

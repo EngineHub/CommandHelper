@@ -455,7 +455,7 @@ public class Enchantments {
 				String name = Enchantments.ConvertName(args[0].val().toUpperCase());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
-				return new CBoolean(e.canEnchantItem(is), t);
+				return CBoolean.get(e.canEnchantItem(is));
 			} catch (NullPointerException e) {
 				throw new ConfigRuntimeException(args[0].val() + " is not a known enchantment type.", ExceptionType.EnchantmentException, t);
 			}
@@ -614,9 +614,9 @@ public class Enchantments {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
-				return new CBoolean(true, t);
+				return CBoolean.TRUE;
 			} catch (NullPointerException e) {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 		}
 	}

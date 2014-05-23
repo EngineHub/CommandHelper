@@ -341,7 +341,7 @@ public class Scoreboards {
 					slot = new CString(o.getDisplaySlot().name(), t);
 				}
 				obj.set("slot", slot, t);
-				obj.set("modifiable", new CBoolean(o.isModifiable(), t), t);
+				obj.set("modifiable", CBoolean.get(o.isModifiable()), t);
 				obj.set("criteria", new CString(o.getCriteria(), t), t);
 				ret.push(obj);
 			}
@@ -388,8 +388,8 @@ public class Scoreboards {
 				to.set("suffix", new CString(team.getSuffix(), t), t);
 				to.set("size", new CInt(team.getSize(), t), t);
 				CArray ops = new CArray(t);
-				ops.set("friendlyfire", new CBoolean(team.allowFriendlyFire(), t), t);
-				ops.set("friendlyinvisibles", new CBoolean(team.canSeeFriendlyInvisibles(), t), t);
+				ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
+				ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
 				to.set("options", ops, t);
 				CArray pl = new CArray(t);
 				for (MCOfflinePlayer ofp : team.getPlayers()) {
@@ -755,8 +755,7 @@ public class Scoreboards {
 			if (team == null) {
 				throw new ScoreboardException("No team by that name exists.", t);
 			}
-			return new CBoolean(team.removePlayer(
-					Static.getServer().getOfflinePlayer(args[1].val())), t);
+			return CBoolean.get(team.removePlayer(Static.getServer().getOfflinePlayer(args[1].val())));
 		}
 
 		@Override

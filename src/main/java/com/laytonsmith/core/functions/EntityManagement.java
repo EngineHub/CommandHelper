@@ -245,9 +245,9 @@ public class EntityManagement {
 			try {
 				e = Static.getEntity(Static.getInt32(args[0], t), t);
 			} catch (ConfigRuntimeException cre) {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
-			return new CBoolean(true, t);
+			return CBoolean.TRUE;
 		}
 
 		@Override
@@ -272,10 +272,10 @@ public class EntityManagement {
 			try {
 				e = Static.getEntity(Static.getInt32(args[0], t), t);
 			} catch (ConfigRuntimeException cre) {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 
-			return new CBoolean(e instanceof MCLivingEntity, t);
+			return CBoolean.get(e instanceof MCLivingEntity);
 		}
 
 		@Override
@@ -340,7 +340,7 @@ public class EntityManagement {
 			} else {
 				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
 			}
-			return new CBoolean(e.teleport(l), t);
+			return CBoolean.get(e.teleport(l));
 		}
 
 		@Override
@@ -515,7 +515,7 @@ public class EntityManagement {
 			MCEntity ent = Static.getEntity(id, t);
 
 			if (ent instanceof MCAgeable){
-				return new CBoolean(((MCAgeable)ent).getCanBreed(), t);
+				return CBoolean.get(((MCAgeable)ent).getCanBreed());
 			} else {
 				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
 			}
@@ -791,10 +791,10 @@ public class EntityManagement {
 			}
 
 			if (seconds == 0) {
-				return new CBoolean(mob.removeEffect(effect), t);
+				return CBoolean.get(mob.removeEffect(effect));
 			} else {
 				mob.addEffect(effect, strength, seconds, ambient, t);
-				return new CBoolean(true, t);
+				return CBoolean.TRUE;
 			}
 		}
 	}
@@ -1512,7 +1512,7 @@ public class EntityManagement {
 			} else {
 				success = horse.setPassenger(rider);
 			}
-			return new CBoolean(success, t);
+			return CBoolean.get(success);
 		}
 
 		@Override
@@ -1729,7 +1729,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).isCustomNameVisible(), t);
+			return CBoolean.get(Static.getLivingEntity(Static.getInt32(args[0], t), t).isCustomNameVisible());
 		}
 
 		@Override
@@ -1772,7 +1772,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).getCanPickupItems(), t);
+			return CBoolean.get(Static.getLivingEntity(Static.getInt32(args[0], t), t).getCanPickupItems());
 		}
 
 		@Override
@@ -1811,7 +1811,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(!Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway(), t);
+			return CBoolean.get(!Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway());
 		}
 
 		@Override
@@ -1947,7 +1947,7 @@ public class EntityManagement {
 			if(!worked){
 				p.remove();
 			}
-			return new CBoolean(worked, t);
+			return CBoolean.get(worked);
 		}
 
 		@Override
@@ -2032,9 +2032,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
-
-			return new CBoolean(e.isOnGround(), t);
+			return CBoolean.get(Static.getEntity(Static.getInt32(args[0], t), t).isOnGround());
 		}
 
 		@Override
@@ -2204,7 +2202,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(Static.getLivingEntity(Static.getInt32(args[0], t), t).hasLineOfSight(Static.getEntity(Static.getInt32(args[1], t), t)), t);
+			return CBoolean.get(Static.getLivingEntity(Static.getInt32(args[0], t), t).hasLineOfSight(Static.getEntity(Static.getInt32(args[1], t), t)));
 		}
 	}
 
@@ -3057,7 +3055,7 @@ public class EntityManagement {
 			MCEntity entity = Static.getEntity(id, t);
 
 			if (entity instanceof MCProjectile) {
-				return new CBoolean(((MCProjectile) entity).doesBounce(), t);
+				return CBoolean.get(((MCProjectile) entity).doesBounce());
 			} else {
 				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}

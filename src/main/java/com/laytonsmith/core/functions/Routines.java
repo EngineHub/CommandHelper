@@ -77,7 +77,7 @@ public class Routines {
 //
 //		@Override
 //		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			return new CBoolean(args[0] instanceof CLock, t);
+//			return CBoolean.get(args[0] instanceof CLock);
 //		}
 //
 //		@Override

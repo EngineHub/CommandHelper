@@ -61,7 +61,7 @@ public class Meta {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(CommandHelperPlugin.isFirstLoad(), t);
+			return CBoolean.get(CommandHelperPlugin.isFirstLoad());
 		}
 
 		public String getName() {
@@ -405,7 +405,7 @@ public class Meta {
 
 			for (Script s : ac.getScripts()) {
 				if (s.match(args[0].val())) {
-					return new CBoolean(true, t);
+					return CBoolean.TRUE;
 				}
 			}
 
@@ -415,7 +415,7 @@ public class Meta {
 					// p might be null
 					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistenceNetwork())) {
 						if (s.match(args[0].val())) {
-							return new CBoolean(true, t);
+							return CBoolean.TRUE;
 						}
 					}
 				} catch (DataSourceException ex) {
@@ -423,7 +423,7 @@ public class Meta {
 				}
 			}
 
-			return new CBoolean(false, t);
+			return CBoolean.FALSE;
 		}
 
 		@Override
@@ -505,7 +505,7 @@ public class Meta {
 			if (doRemoval) {
 				Static.getAliasCore().addPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			}
-			return new CBoolean(ret, t);
+			return CBoolean.get(ret);
 		}
 	}
 

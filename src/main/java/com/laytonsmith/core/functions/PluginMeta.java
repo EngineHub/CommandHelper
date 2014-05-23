@@ -271,9 +271,7 @@ public class PluginMeta {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			boolean bool = Static.getServer().getMessenger().isIncomingChannelRegistered(args[0].toString());
-			
-			return new CBoolean(bool, t);
+			return CBoolean.get(Static.getServer().getMessenger().isIncomingChannelRegistered(args[0].toString()));
 		}
 
 		@Override

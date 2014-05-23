@@ -390,9 +390,9 @@ public final class Static {
         if (val.equalsIgnoreCase("null")) {
             return CNull.NULL;
         } else if (val.equalsIgnoreCase("true")) {
-            return new CBoolean(true, t);
+            return CBoolean.TRUE;
         } else if (val.equalsIgnoreCase("false")) {
-            return new CBoolean(false, t);
+            return CBoolean.FALSE;
         } else {
 			if(val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")){
 				throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.",

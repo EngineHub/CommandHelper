@@ -351,7 +351,7 @@ public class ExecutionQueue {
 			if(args.length == 1){
 				queue = args[0].nval();
 			}
-			return new CBoolean(environment.getEnv(GlobalEnv.class).GetExecutionQueue().isRunning(queue), t);
+			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetExecutionQueue().isRunning(queue));
 		}
 
 		@Override

@@ -290,13 +290,13 @@ public class BasicLogic {
 									}
 								}
 							} else {
-								if (((CBoolean) equals.exec(t, env, value, inner)).getBoolean()) {
+								if (equals.exec(t, env, value, inner).getBoolean()) {
 									return parent.seval(code, env);
 								}
 							}
 						}
 					} else {
-						if (((CBoolean) equals.exec(t, env, value, evalStatement)).getBoolean()) {
+						if (equals.exec(t, env, value, evalStatement).getBoolean()) {
 							return parent.seval(code, env);
 						}
 					}
@@ -886,7 +886,7 @@ public class BasicLogic {
 		 * @return
 		 */
 		public static boolean doEquals(Construct one, Construct two) {
-			CBoolean ret = (CBoolean) self.exec(Target.UNKNOWN, null, one, two);
+			CBoolean ret = self.exec(Target.UNKNOWN, null, one, two);
 			return ret.getBoolean();
 		}
 
@@ -913,7 +913,7 @@ public class BasicLogic {
 				}
 			}
 			if (referenceMatch) {
-				return new CBoolean(true, t);
+				return CBoolean.TRUE;
 			}
 			if (Static.anyBooleans(args)) {
 				boolean equals = true;
@@ -925,7 +925,7 @@ public class BasicLogic {
 						break;
 					}
 				}
-				return new CBoolean(equals, t);
+				return CBoolean.get(equals);
 			}
 
 			{
@@ -937,7 +937,7 @@ public class BasicLogic {
 					}
 				}
 				if (equals) {
-					return new CBoolean(true, t);
+					return CBoolean.TRUE;
 				}
 			}
 			try {
@@ -950,9 +950,9 @@ public class BasicLogic {
 						break;
 					}
 				}
-				return new CBoolean(equals, t);
+				return CBoolean.get(equals);
 			} catch (ConfigRuntimeException e) {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 		}
 
@@ -1044,13 +1044,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			equals equals = new equals();
-			if (args[1].getClass().equals(args[0].getClass())
-					&& ((CBoolean) equals.exec(t, environment, args)).getBoolean()) {
-				return new CBoolean(true, t);
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if (args[1].getClass().equals(args[0].getClass())) {
+				return new equals().exec(t, environment, args);
 			} else {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 		}
 
@@ -1072,6 +1070,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({sequals.class})
 	public static class snequals extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1107,7 +1106,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(!((CBoolean) new sequals().exec(t, environment, args)).getBoolean(), t);
+			return new sequals().exec(t, environment, args).not();
 		}
 
 		@Override
@@ -1176,10 +1175,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			equals e = new equals();
-			CBoolean b = (CBoolean) e.exec(t, env, args);
-			return new CBoolean(!b.getBoolean(), t);
+		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			return new equals().exec(t, env, args).not();
 		}
 
 		@Override
@@ -1241,7 +1238,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length <= 1) {
 				throw new ConfigRuntimeException("At least two arguments must be passed to equals_ic", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -1255,7 +1252,7 @@ public class BasicLogic {
 						break;
 					}
 				}
-				return new CBoolean(equals, t);
+				return CBoolean.get(equals);
 			}
 
 			{
@@ -1267,7 +1264,7 @@ public class BasicLogic {
 					}
 				}
 				if (equals) {
-					return new CBoolean(true, t);
+					return CBoolean.TRUE;
 				}
 			}
 			try {
@@ -1280,9 +1277,9 @@ public class BasicLogic {
 						break;
 					}
 				}
-				return new CBoolean(equals, t);
+				return CBoolean.get(equals);
 			} catch (ConfigRuntimeException e) {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 		}
 
@@ -1303,6 +1300,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({equals_ic.class})
 	public static class nequals_ic extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1342,9 +1340,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			equals_ic e = new equals_ic();
-			return new CBoolean(!((CBoolean) e.exec(t, environment, args)).getBoolean(), t);
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new equals_ic().exec(t, environment, args).not();
 		}
 
 		@Override
@@ -1382,9 +1379,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray && args[1] instanceof CArray) {
-				return new CBoolean(args[0] == args[1], t);
+				return CBoolean.get(args[0] == args[1]);
 			} else {
 				return new equals().exec(t, environment, args);
 			}
@@ -1448,7 +1445,7 @@ public class BasicLogic {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
-			return new CBoolean(arg1 < arg2, t);
+			return CBoolean.get(arg1 < arg2);
 		}
 
 		@Override
@@ -1512,7 +1509,7 @@ public class BasicLogic {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
-			return new CBoolean(arg1 > arg2, t);
+			return CBoolean.get(arg1 > arg2);
 		}
 
 		@Override
@@ -1576,7 +1573,7 @@ public class BasicLogic {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
-			return new CBoolean(arg1 <= arg2, t);
+			return CBoolean.get(arg1 <= arg2);
 		}
 
 		@Override
@@ -1641,7 +1638,7 @@ public class BasicLogic {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
-			return new CBoolean(arg1 >= arg2, t);
+			return CBoolean.get(arg1 >= arg2);
 		}
 
 		@Override
@@ -1702,27 +1699,27 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public CBoolean exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for (Construct c : args) {
 				if (!Static.getBoolean(c)) {
-					return new CBoolean(false, t);
+					return CBoolean.FALSE;
 				}
 			}
-			return new CBoolean(true, t);
+			return CBoolean.TRUE;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				boolean b = Static.getBoolean(c);
 				if (b == false) {
-					return new CBoolean(false, t);
+					return CBoolean.FALSE;
 				}
 			}
-			return new CBoolean(true, t);
+			return CBoolean.TRUE;
 		}
 
 		@Override
@@ -1770,7 +1767,7 @@ public class BasicLogic {
 			}
 			if (children.isEmpty()) {
 				//We've removed all the children, so return true, because they were all true.
-				return new ParseTree(new CBoolean(true, t), null);
+				return new ParseTree(CBoolean.TRUE, null);
 			}
 			return null;
 		}
@@ -1805,26 +1802,26 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public CBoolean exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for (Construct c : args) {
 				if (Static.getBoolean(c)) {
-					return new CBoolean(true, t);
+					return CBoolean.TRUE;
 				}
 			}
-			return new CBoolean(false, t);
+			return CBoolean.FALSE;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				if (Static.getBoolean(c)) {
-					return new CBoolean(true, t);
+					return CBoolean.TRUE;
 				}
 			}
-			return new CBoolean(false, t);
+			return CBoolean.FALSE;
 		}
 
 		@Override
@@ -1871,7 +1868,7 @@ public class BasicLogic {
 			}
 			if (children.isEmpty()) {
 				//We've removed all the children, so return false, because they were all false.
-				return new ParseTree(new CBoolean(false, t), null);
+				return new ParseTree(CBoolean.FALSE, null);
 			}
 			return null;
 		}
@@ -1906,7 +1903,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CBoolean(!Static.getBoolean(args[0]), t);
+			return CBoolean.get(!Static.getBoolean(args[0]));
 		}
 
 		@Override
@@ -1992,10 +1989,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean val1 = Static.getBoolean(args[0]);
 			boolean val2 = Static.getBoolean(args[1]);
-			return new CBoolean(val1 ^ val2, t);
+			return CBoolean.get(val1 ^ val2);
 		}
 
 		@Override
@@ -2014,6 +2011,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({and.class})
 	public static class nand extends AbstractFunction {
 
 		@Override
@@ -2057,10 +2055,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			and and = new and();
-			boolean val = ((CBoolean) and.execs(t, env, parent, nodes)).getBoolean();
-			return new CBoolean(!val, t);
+		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			return new and().execs(t, env, parent, nodes).not();
 		}
 
 		@Override
@@ -2076,6 +2072,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({or.class})
 	public static class nor extends AbstractFunction {
 
 		@Override
@@ -2119,10 +2116,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
-			or or = new or();
-			boolean val = ((CBoolean) or.execs(t, environment, parent, args)).getBoolean();
-			return new CBoolean(!val, t);
+		public CBoolean execs(Target t, Environment environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
+			return new or().execs(t, environment, parent, args).not();
 		}
 
 		@Override
@@ -2138,6 +2133,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@seealso({xor.class})
 	public static class xnor extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -2176,10 +2172,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			xor xor = new xor();
-			boolean val = ((CBoolean) xor.exec(t, environment, args)).getBoolean();
-			return new CBoolean(!val, t);
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new xor().exec(t, environment, args).not();
 		}
 
 		@Override

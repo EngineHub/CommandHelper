@@ -478,11 +478,11 @@ public class WorldEdit {
 
             try {
                 if (!region.getIntersectingRegions(checkRegions).isEmpty()) {
-                    return new CBoolean(true, t);
+                    return CBoolean.TRUE;
                 }
             } catch (Exception e) {
             }
-            return new CBoolean(false, t);
+            return CBoolean.FALSE;
         }
     }
 
@@ -1355,10 +1355,10 @@ public class WorldEdit {
             ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists != null) {
-                return new CBoolean(true, t);
+                return CBoolean.TRUE;
             }
 
-            return new CBoolean(false, t);
+            return CBoolean.FALSE;
         }
 
         @Override
@@ -2119,9 +2119,9 @@ public class WorldEdit {
 
 			if (foundFlag instanceof StateFlag) {
 				if (p == null) {
-					return new CBoolean(set.allows((StateFlag) foundFlag), t);
+					return CBoolean.get(set.allows((StateFlag) foundFlag));
 				} else {
-					return new CBoolean(set.allows((StateFlag) foundFlag, Static.getWorldGuardPlugin(t).wrapPlayer(((BukkitMCPlayer) p)._Player())), t);
+					return CBoolean.get(set.allows((StateFlag) foundFlag, Static.getWorldGuardPlugin(t).wrapPlayer(((BukkitMCPlayer) p)._Player())));
 				}
 			} else {
 				Object getFlag;
@@ -2135,7 +2135,7 @@ public class WorldEdit {
 				if (foundFlag instanceof BooleanFlag) {
 					Boolean value = ((BooleanFlag) foundFlag).unmarshal(getFlag);
 					if (value != null) {
-						return new CBoolean(value, t);
+						return CBoolean.get(value);
 					} else {
 						return CNull.NULL;
 					}
@@ -2419,8 +2419,8 @@ public class WorldEdit {
 				p = Static.GetPlayer(args[0], t);
 				loc = ObjectGenerator.GetGenerator().location(args[1], p.getWorld(), t);
 			}
-			return new CBoolean(Static.getWorldGuardPlugin(t).canBuild(((BukkitMCPlayer) p)._Player(),
-					((BukkitMCLocation) loc)._Location()), t);
+			return CBoolean.get(Static.getWorldGuardPlugin(t).canBuild(((BukkitMCPlayer) p)._Player(),
+					((BukkitMCLocation) loc)._Location()));
 		}
 
 		@Override

@@ -112,11 +112,11 @@ public class InventoryEvents {
 				map.put("action", new CString(e.getAction().name(), Target.UNKNOWN));
 				map.put("clicktype", new CString(e.getClickType().name(), Target.UNKNOWN));
 
-				map.put("leftclick", new CBoolean(e.isLeftClick(), Target.UNKNOWN));
-				map.put("rightclick", new CBoolean(e.isRightClick(), Target.UNKNOWN));
-				map.put("shiftclick", new CBoolean(e.isShiftClick(), Target.UNKNOWN));
-				map.put("creativeclick", new CBoolean(e.isCreativeClick(), Target.UNKNOWN));
-				map.put("keyboardclick", new CBoolean(e.isKeyboardClick(), Target.UNKNOWN));
+				map.put("leftclick", CBoolean.get(e.isLeftClick()));
+				map.put("rightclick", CBoolean.get(e.isRightClick()));
+				map.put("shiftclick", CBoolean.get(e.isShiftClick()));
+				map.put("creativeclick", CBoolean.get(e.isCreativeClick()));
+				map.put("keyboardclick", CBoolean.get(e.isKeyboardClick()));
 				map.put("cursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN));
 
 				map.put("slot", new CInt(e.getSlot(), Target.UNKNOWN));
@@ -769,7 +769,7 @@ public class InventoryEvents {
 				}
 				ret.put("viewers", viewers);
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));
-				ret.put("isRepair", new CBoolean(e.isRepair(), t));
+				ret.put("isRepair", CBoolean.get(e.isRepair()));
 				CArray matrix = CArray.GetAssociativeArray(t);
 				MCItemStack[] mi = e.getInventory().getMatrix();
 				for (int i=0; i<mi.length; i++) {
