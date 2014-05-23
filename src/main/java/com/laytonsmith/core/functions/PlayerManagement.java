@@ -769,6 +769,7 @@ public class PlayerManagement {
 					+ " <li>13 - Player's current entity id</li><li>14 - Is player in a vehicle? Returns true or false.</li>"
 					+ " <li>15 - The slot number of the player's current hand.</li>"
 					+ " <li>16 - Is sleeping?</li><li>17 - Is blocking?</li><li>18 - Is flying?</li><li>19 - Is sprinting?</li>"
+					+ " <li>20 - Player UUID"
 					+ " </ul>";
 		}
 
@@ -932,6 +933,9 @@ public class PlayerManagement {
 			}
 			if (index == 19 || index == -1) {
 				retVals.add(new CBoolean(p.isSprinting(), t));
+			}
+			if(index == 20 || index == -1){
+				retVals.add(new CString(p.getUniqueId().toString(), t));
 			}
 			if (retVals.size() == 1) {
 				return retVals.get(0);

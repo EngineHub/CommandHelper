@@ -15,6 +15,8 @@ import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
@@ -49,6 +51,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 /**
  *
@@ -156,6 +159,31 @@ public class PNViewer extends javax.swing.JFrame {
 				} catch (NullPointerException ex) {
 					// Ignore
 				}
+			}
+		});
+
+		keyTree.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				int selRow = keyTree.getRowForLocation(e.getX(), e.getY());
+				TreePath selPath = keyTree.getPathForLocation(e.getX(), e.getY());
+				if (selRow != -1) {
+					if (SwingUtilities.isRightMouseButton(e)) {
+						System.out.println("Right click on " + selPath);
+					}
+				}
+			}
+
+		});
+
+		manageBookmarksMenu.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ManageBookmarksDialog bd = new ManageBookmarksDialog(PNViewer.this, true);
+				UIUtils.centerWindowOnWindow(bd, PNViewer.this);
+				bd.setVisible(true);
 			}
 		});
 
@@ -514,7 +542,7 @@ public class PNViewer extends javax.swing.JFrame {
 						// They have now authed correctly, so we can up the idle time.
 						longTimeout.set(true);
 
-				// Now we need to create instance variables for the remainder of
+						// Now we need to create instance variables for the remainder of
 						// the connection, that is, the meat of the connection.
 						String remoteFile = null;
 						PersistenceNetwork pn = null;
@@ -584,7 +612,7 @@ public class PNViewer extends javax.swing.JFrame {
 									break connected;
 							}
 						}
-					} catch(IOException ex){
+					} catch (IOException ex) {
 						// Disconnected
 					} finally {
 						try {
@@ -763,6 +791,9 @@ public class PNViewer extends javax.swing.JFrame {
         fileMenu = new javax.swing.JMenu();
         loadFromConfigurationMenu = new javax.swing.JMenuItem();
         closeRemoteConnectionMenu = new javax.swing.JMenuItem();
+        bookmarksMenu = new javax.swing.JMenu();
+        manageBookmarksMenu = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -877,6 +908,14 @@ public class PNViewer extends javax.swing.JFrame {
 
         jMenuBar1.add(fileMenu);
 
+        bookmarksMenu.setText("Bookmarks");
+
+        manageBookmarksMenu.setText("Manage Bookmarks...");
+        bookmarksMenu.add(manageBookmarksMenu);
+        bookmarksMenu.add(jSeparator1);
+
+        jMenuBar1.add(bookmarksMenu);
+
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -952,6 +991,7 @@ public class PNViewer extends javax.swing.JFrame {
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu bookmarksMenu;
     private javax.swing.JMenuItem closeRemoteConnectionMenu;
     private javax.swing.JLabel configurationFromLabel;
     private javax.swing.JMenu fileMenu;
@@ -965,10 +1005,12 @@ public class PNViewer extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JLabel keyLabel;
     private javax.swing.JTree keyTree;
     private javax.swing.JMenuItem loadFromConfigurationMenu;
+    private javax.swing.JMenuItem manageBookmarksMenu;
     private javax.swing.JLabel namespaceLabel;
     private javax.swing.JButton reloadButton;
     private javax.swing.JLabel sourceLabel;

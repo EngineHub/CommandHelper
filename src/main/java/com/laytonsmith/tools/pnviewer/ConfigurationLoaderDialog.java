@@ -9,7 +9,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
+import javax.swing.WindowConstants;
 
 /**
  *
@@ -26,6 +26,7 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 	public ConfigurationLoaderDialog(java.awt.Frame parent, boolean modal) {
 		super(parent, modal);
 		initComponents();
+		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		setTitle("Load configuration...");
 		setRemoteEnabled(false);
 		ActionListener radioButtonChangedActionListener = new ActionListener() {

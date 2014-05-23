@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Common;
 
+import java.awt.Component;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.MouseInfo;
@@ -50,5 +51,16 @@ public class UIUtils {
 	 */
 	public static void centerWindowOnWindow(Window windowToCenter, Window windowUponWhichToCenterOn){
 		windowToCenter.setLocationRelativeTo(windowUponWhichToCenterOn);
+	}
+
+	/**
+	 * Provides an easy way to setEnabled on multiple components at once.
+	 * @param enabled
+	 * @param components
+	 */
+	public static void setEnabled(boolean enabled, Component ... components){
+		for(Component component : components){
+			component.setEnabled(enabled);
+		}
 	}
 }
