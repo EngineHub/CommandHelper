@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction.blocks;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCWorld;
 import java.util.Collection;
 
@@ -11,7 +12,7 @@ import java.util.Collection;
  *
  * 
  */
-public interface MCBlock {
+public interface MCBlock extends MCMetadatable {
 
     public int getTypeId();
 

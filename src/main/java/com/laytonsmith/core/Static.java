@@ -3,12 +3,14 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCServer;
@@ -25,7 +27,9 @@ import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
@@ -33,7 +37,6 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.profiler.Profiler;
@@ -48,6 +51,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -346,7 +350,7 @@ public final class Static {
         if (CommandHelperPlugin.wep == null) {
             MCPlugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
             if (pwep != null && pwep.isEnabled() && pwep.isInstanceOf(WorldEditPlugin.class) && pwep instanceof BukkitMCPlugin) {
-                CommandHelperPlugin.wep = (WorldEditPlugin) ((BukkitMCPlugin)pwep).getPlugin();
+                CommandHelperPlugin.wep = (WorldEditPlugin) ((BukkitMCPlugin)pwep).getHandle();
             }
         }
         return CommandHelperPlugin.wep;
@@ -358,7 +362,7 @@ public final class Static {
         }
         MCPlugin pwgp = getServer().getPluginManager().getPlugin("WorldGuard");
         if (pwgp != null && pwgp.isEnabled() && pwgp.isInstanceOf(WorldGuardPlugin.class) && pwgp instanceof BukkitMCPlugin) {
-            return (WorldGuardPlugin) ((BukkitMCPlugin)pwgp).getPlugin();
+            return (WorldGuardPlugin) ((BukkitMCPlugin)pwgp).getHandle();
         }
         return null;
     }
@@ -624,6 +628,21 @@ public final class Static {
         return GetPlayer(player.val(), t);
     }
 
+	/**
+	 * If the sender is a player, it is returned, otherwise a ConfigRuntimeException is thrown.
+	 * @param environment
+	 * @param t
+	 * @return 
+	 */
+	public static MCPlayer getPlayer(Environment environment, Target t) {
+		MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		if (player != null) {
+			return player;
+		} else {
+			throw new ConfigRuntimeException("The passed arguments induce that the function must be run by a player.", ExceptionType.PlayerOfflineException, t);
+		}
+	}
+
     public static boolean isNull(Construct construct) {
         return construct instanceof CNull;
     }
@@ -647,6 +666,10 @@ public final class Static {
 			}
 		}
 		throw new ConfigRuntimeException("That entity (ID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
+	}
+
+	public static MCEntity getEntity(Construct id, Target t) {
+		return getEntity(Static.getInt32(id, t), t);
 	}
 
 	/**
@@ -708,6 +731,63 @@ public final class Static {
 			}
 		}
 		return vehicles;
+	}
+
+	/**
+	 * Returns the world with the specified name. If it does not exists, a ConfigRuntimeException is thrown.
+	 * @param name
+	 * @param t
+	 * @return 
+	 */
+	public static MCWorld getWorld(String name, Target t) {
+		MCWorld world = getServer().getWorld(name);
+		if (world != null) {
+			return world;
+		} else {
+			throw new ConfigRuntimeException("Unknown world:" + name + ".", ExceptionType.InvalidWorldException, t);
+		}
+	}
+
+	public static MCWorld getWorld(Construct name, Target t) {
+		return getWorld(name.val(), t);
+	}
+
+	/**
+	 * Returns the plugin with the specified name. If it does not exist, a ConfigRuntimeException is thrown.
+	 * @param name
+	 * @param t
+	 * @return 
+	 */
+	public static MCPlugin getPlugin(String name, Target t) {
+		MCPlugin plugin = getServer().getPluginManager().getPlugin(name);
+		if (plugin != null) {
+			return plugin;
+		} else {
+			throw new ConfigRuntimeException("Unknown plugin:" + name + ".", ExceptionType.InvalidPluginException, t);
+		}
+	}
+
+	public static MCPlugin getPlugin(Construct name, Target t) {
+		return getPlugin(name.val(), t);
+	}
+
+	/**
+	 * Returns the metadatable object designated by the given construct.
+	 * If the construct is invalid or if the object does not exist, a ConfigRuntimeException is thrown.
+	 * @param construct
+	 * @param t
+	 * @return 
+	 */
+	public static MCMetadatable getMetadatable(Construct construct, Target t) {
+		if (construct instanceof CInt) {
+			return Static.getEntity(construct, t);
+		} else if (construct instanceof CArray) {
+			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
+		} else if (construct instanceof CString) {
+			return Static.getWorld(construct, t);
+		} else {
+			throw new ConfigRuntimeException("An array, an int or a string was expected, but " + construct.val() + " was found.", ExceptionType.CastException, t);
+		}
 	}
 
     public static String strJoin(Collection c, String inner) {
@@ -1154,4 +1234,194 @@ public final class Static {
 		}
 	}
 
+	/**
+	 * Given a java object, returns a MethodScript object.
+	 * @param object
+	 * @param t
+	 * @return 
+	 */
+	public static Construct getMSObject(Object object, Target t) {
+		if (object == null) {
+			return CNull.NULL;
+		} else if (object instanceof Boolean) {
+			return new CBoolean((boolean) object, t);
+		} else if ((object instanceof Byte) || (object instanceof Short) || (object instanceof Integer) || (object instanceof Long)) {
+			return new CInt((long) object, t);
+		} else if ((object instanceof Float) || (object instanceof Double)) {
+			return new CDouble((double) object, t);
+		} else if (object instanceof Character) {
+			return new CString((char) object, t);
+		} else if (object instanceof String) {
+			return new CString((String) object, t);
+		} else if (object instanceof StringBuffer) {
+			return new CResource<>((StringBuffer) object,  new CResource.ResourceToString() {
+				@Override
+				public String getString(CResource res) {
+					return res.getResource().toString();
+				}
+			}, t);
+		} else if (object instanceof XMLDocument) {
+			return new CResource<>((XMLDocument) object, t);
+		} else if (object instanceof Construct) {
+			return (Construct) object;
+		} else if (object instanceof boolean[]) {
+			boolean[] array = (boolean[]) object;
+			CArray r = new CArray(t);
+			for (boolean b : array) {
+				r.push(new CBoolean(b, t));
+			}
+			return r;
+		} else if (object instanceof byte[]) {
+			return CByteArray.wrap((byte[]) object, t);
+		} else if (object instanceof char[]) {
+			char[] array = (char[]) object;
+			CArray r = new CArray(t);
+			for (char c : array) {
+				r.push(new CString(c, t));
+			}
+			return r;
+		} else if (object instanceof short[]) {
+			short[] array = (short[]) object;
+			CArray r = new CArray(t);
+			for (short s : array) {
+				r.push(new CInt(s, t));
+			}
+			return r;
+		} else if (object instanceof int[]) {
+			int[] array = (int[]) object;
+			CArray r = new CArray(t);
+			for (int i : array) {
+				r.push(new CInt(i, t));
+			}
+			return r;
+		} else if (object instanceof long[]) {
+			long[] array = (long[]) object;
+			CArray r = new CArray(t);
+			for (long l : array) {
+				r.push(new CInt(l, t));
+			}
+			return r;
+		} else if (object instanceof float[]) {
+			float[] array = (float[]) object;
+			CArray r = new CArray(t);
+			for (float f : array) {
+				r.push(new CDouble(f, t));
+			}
+			return r;
+		} else if (object instanceof double[]) {
+			double[] array = (double[]) object;
+			CArray r = new CArray(t);
+			for (double d : array) {
+				r.push(new CDouble(d, t));
+			}
+			return r;
+		} else if (object instanceof Object[]) {
+			CArray r = new CArray(t);
+			for (Object o : (Object[]) object) {
+				r.push((o == object) ? r : getMSObject(o, t));
+			}
+			return r;
+		} else if (object instanceof Collection) {
+			return getMSObject(((Collection) object).toArray(), t);
+		} else if (object instanceof Map) {
+			Map map = ((Map) object);
+			CArray r = new CArray(t);
+			for (Object key : map.keySet()) {
+				Object o = map.get(key);
+				r.set(key.toString(), (o == object) ? r : getMSObject(o, t), t);
+			}
+			return r;
+		} else {
+			return new CString(object.toString(), t);
+		}
+	}
+
+	/**
+	 * Given a MethodScript object, returns a java object.
+	 * @param construct
+	 * @return 
+	 */
+	public static Object getJavaObject(Construct construct) {
+		if ((construct == null) || (construct instanceof CNull)) {
+			return null;
+		} else if (construct instanceof CVoid) {
+			return "";
+		} else if (construct instanceof CBoolean) {
+			return ((CBoolean) construct).getBoolean();
+		} else if (construct instanceof CInt) {
+			return ((CInt) construct).getInt();
+		} else if (construct instanceof CDouble) {
+			return ((CDouble) construct).getDouble();
+		} else if (construct instanceof CString) {
+			return construct.val();
+		} else if (construct instanceof CByteArray) {
+			return ((CByteArray) construct).asByteArrayCopy();
+		} else if (construct instanceof CResource) {
+			return ((CResource) construct).getResource();
+		} else if (construct instanceof CArray) {
+			CArray array = (CArray) construct;
+			if (array.isAssociative()) {
+				HashMap<String, Object> map = new HashMap<>();
+				for (Construct key : array.keySet()) {
+					Construct c = array.get(key.val(), Target.UNKNOWN);
+					map.put(key.val(), (c == array) ? map : getJavaObject(c));
+				}
+				return map;
+			} else {
+				Object[] a = new Object[(int) array.size()];
+				boolean nullable = false;
+				Class<?> clazz = null;
+				for (int i = 0 ; i < array.size() ; i++) {
+					Construct c = array.get(i, Target.UNKNOWN);
+					if (c == array) {
+						a[i] = a;
+					} else {
+						a[i] = getJavaObject(array.get(i, Target.UNKNOWN));
+					}
+					if (a[i] != null) {
+						if (clazz == null) {
+							clazz = a[i].getClass();
+						} else if (!clazz.equals(Object.class)) {
+							//to test if it is possible to return something more specific than Object[]
+							Class<?> cl = a[i].getClass();
+							while (!clazz.isAssignableFrom(cl)) {
+								clazz = clazz.getSuperclass();
+							}
+						}
+					} else {
+						nullable = true;
+					}
+				}
+				if ((clazz != null) && (!clazz.equals(Object.class))) {
+					if (clazz.equals(Boolean.class) && !nullable) {
+						boolean[] r = new boolean[a.length];
+						for (int i = 0 ; i < a.length ; i++) {
+							r[i] = (boolean) a[i];
+						}
+						return r;
+					} if (clazz.equals(Long.class) && !nullable) {
+						long[] r = new long[a.length];
+						for (int i = 0 ; i < a.length ; i++) {
+							r[i] = (long) a[i];
+						}
+						return r;
+					} else if (clazz.equals(Double.class) && !nullable) {
+						double[] r = new double[a.length];
+						for (int i = 0 ; i < a.length ; i++) {
+							r[i] = (double) a[i];
+						}
+						return r;
+					} else {
+						Object[] r = (Object[]) Array.newInstance(clazz, a.length);
+						System.arraycopy(a, 0, r, 0, a.length);
+						return r;
+					}
+				} else {
+					return a;
+				}
+			}
+		} else {
+			return construct;
+		}
+	}
 }

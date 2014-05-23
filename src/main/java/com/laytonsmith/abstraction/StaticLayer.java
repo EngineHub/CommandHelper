@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
@@ -89,7 +87,11 @@ public final class StaticLayer {
     public static void Startup(CommandHelperPlugin chp) {
         convertor.Startup(chp);
     }
-    
+
+	public static MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin) {
+		return convertor.GetMetadataValue(value, plugin);
+	}
+
     /**
      * Returns the data value of the specified material name, or -1 if none was found.
      * @param materialName
@@ -144,6 +146,14 @@ public final class StaticLayer {
 	
 	public static MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
 		return convertor.GetNewRecipe(type, result);
+	}
+
+	public static String GetPluginName() {
+		return convertor.GetPluginName();
+	}
+
+	public static MCPlugin GetPlugin() {
+		return convertor.GetPlugin();
 	}
 	
 	public static synchronized Convertor GetConvertor(){

@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -15,7 +13,9 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCNote;
+import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCArrow;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCBoat;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
@@ -48,6 +49,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSkeleton;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSlime;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCVillager;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCWitherSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCWolf;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCZombie;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
@@ -71,6 +73,7 @@ import com.laytonsmith.core.constructs.Target;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -89,6 +92,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
@@ -127,6 +131,7 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.WitherSkull;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.entity.minecart.CommandMinecart;
@@ -146,7 +151,9 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.projectiles.ProjectileSource;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  *
@@ -215,6 +222,11 @@ public class BukkitConvertor extends AbstractConvertor {
     public MCItemStack GetItemStack(int type, int data, int qty) {
         return new BukkitMCItemStack(new ItemStack(type, qty, (short)0, (byte)data));
     }
+
+	@Override
+	public MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin) {
+		return new BukkitMCMetadataValue(new FixedMetadataValue(((BukkitMCPlugin) plugin).getHandle(), value));
+	}
 
     public static final BukkitBlockListener BlockListener = new BukkitBlockListener();
     public static final BukkitEntityListener EntityListener = new BukkitEntityListener();
@@ -399,12 +411,21 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 
 		// Projectiles
+		if (be instanceof Arrow) {
+			return new BukkitMCArrow((Arrow)be);
+		}
+
 		if (be instanceof ThrownPotion) {
 			return new BukkitMCThrownPotion((ThrownPotion)be);
 		}
 
 		if (be instanceof Fish) {
 			return new BukkitMCFishHook((Fish) be);
+		}
+
+		if (be instanceof WitherSkull) {
+			//Must be before Fireball
+			return new BukkitMCWitherSkull((WitherSkull)be);
 		}
 
 		if (be instanceof Fireball) {
@@ -506,7 +527,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCEntity GetCorrectEntity(MCEntity e) {
 
-		Entity be = ((BukkitMCEntity)e).asEntity();
+		Entity be = ((BukkitMCEntity)e).getHandle();
 		try {
 			return BukkitConvertor.BukkitGetCorrectEntity(be);
 		} catch (IllegalArgumentException iae) {
@@ -529,7 +550,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(radius <= 0){
 			radius = 1;
 		}
-		Entity tempEntity = ((BukkitMCEntity)location.getWorld().spawn(location, MCEntityType.ARROW)).asEntity();
+		Entity tempEntity = ((BukkitMCEntity)location.getWorld().spawn(location, MCEntityType.ARROW)).getHandle();
 		List<Entity> near = tempEntity.getNearbyEntities(radius, radius, radius);
 		tempEntity.remove();
 		List<MCEntity> entities = new ArrayList<MCEntity>();
@@ -759,5 +780,15 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCMaterial GetMaterial(String name) {
 		return new BukkitMCMaterial(Material.valueOf(name));
+	}
+
+	@Override
+	public String GetPluginName() {
+		return (String) new Yaml().loadAs(getClass().getResourceAsStream("/plugin.yml"), Map.class).get("name");
+	}
+
+	@Override
+	public MCPlugin GetPlugin() {
+		return new BukkitMCPlugin(CommandHelperPlugin.self);
 	}
 }

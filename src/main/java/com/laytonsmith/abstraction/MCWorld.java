@@ -22,7 +22,7 @@ import java.util.List;
  *
  * 
  */
-public interface MCWorld extends AbstractionObject{
+public interface MCWorld extends MCMetadatable {
 	public List<MCPlayer> getPlayers();
 	public List<MCEntity> getEntities();
     public List<MCLivingEntity> getLivingEntities();

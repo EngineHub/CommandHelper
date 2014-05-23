@@ -4,128 +4,139 @@ array {entityID} Returns an associative array containing all the data of the giv
 |-
 ! scope="col" width="10%" | Entity type
 ! scope="col" width="70%" | Data
+| ARROW
+| 
+* %KEY_ARROW_CRITICAL%: If this arrow is critical.
+* %KEY_ARROW_KNOCKBACK%: The knockback strength.
+|-
 |-
 | CREEPER
 | 
-* powered: If the creeper is powered or not.
+* %KEY_CREEPER_POWERED%: If the creeper is powered or not.
 |-
 | DROPPED_ITEM
 | 
-* itemstack: An array representing the item.
-* pickupdelay: The delay before the item is available to be picked up.
+* %KEY_DROPPED_ITEM_ITEMSTACK%: An array representing the item.
+* %KEY_DROPPED_ITEM_PICKUPDELAY%: The delay before the item is available to be picked up.
 |-
 | ENDERMAN
 | 
-* carried: Tthe block that the Enderman is carring.
+* %KEY_ENDERMAN_CARRIED%: The block that the Enderman is carring.
 |-
 | EXPERIENCE_ORB
 | 
-* amount: How much experience is contained within the orb.
+* %KEY_EXPERIENCE_ORB_AMOUNT%: How much experience is contained within the orb.
 |-
 | FALLING_BLOCK
 | 
-* block: The falling block.
-* dropitem: If the falling block will break into an item if it cannot be placed. Not editable.
+* %KEY_FALLING_BLOCK_BLOCK%: The falling block. Not editable.
+* %KEY_FALLING_BLOCK_DROPITEM%: If the falling block will break into an item if it cannot be placed.
 |-
 | FIREBALL
 | 
-* direction: The direction the fireball is heading toward.
+* %KEY_FIREBALL_DIRECTION%: The direction the fireball is heading toward.
 |-
 | FISHING_HOOK
 | 
-* chance: The chance of a fish biting (between 0.0 and 1.0, 0.0: no chance, 1.0: instant catch).
+* %KEY_FISHING_HOOK_CHANCE%: The chance of a fish biting (between 0.0 and 1.0, 0.0: no chance, 1.0: instant catch).
 |-
 | HORSE
 | 
-* color: The horse's color (can be %HORSE_COLOR%).
-* chest: Whether the horse has a chest equipped.
-* domestication: The domestication level of the horse (can't be higher than the maximum domestication level).
-* jump: The jump strength (between 1.0 and 2.0).
-* maxdomestication: The maximum domestication level of the horse.
-* style: The horse's style (can be %HORSE_STYLE%).
-* variant: The horse's variant (can be %HORSE_VARIANT%).
-* armor: An item pertaining to the armor a horse has put on.
-* saddle: An item pertaining to the saddle a horse has put on. Can be anything.
+* %KEY_HORSE_ARMOR%: An item pertaining to the armor a horse has put on.
+* %KEY_HORSE_CHEST%: Whether the horse has a chest equipped.
+* %KEY_HORSE_COLOR%: The horse's color (can be %HORSE_COLOR%).
+* %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
+* %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
+* %KEY_HORSE_MAXDOMESTICATION%: The maximum domestication level of the horse.
+* %KEY_HORSE_SADDLE%: An item pertaining to the saddle a horse has put on. Can be anything.
+* %KEY_HORSE_STYLE%: The horse's style (can be %HORSE_STYLE%).
+* %KEY_HORSE_VARIANT%: The horse's variant (can be %HORSE_VARIANT%).
 |-
 | IRON_GOLEM
 | 
-* playercreated: Whether the iron golem was built by a player or not.
+* %KEY_IRON_GOLEM_PLAYERCREATED%: Whether the iron golem was built by a player or not.
 |-
 | ITEM_FRAME
 | 
-* item: The item in the frame.
-* rotation: The rotation of the frame's item (can be %ROTATION%).
+* %KEY_ITEM_FRAME_ITEM%: The item in the frame.
+* %KEY_ITEM_FRAME_ROTATION%: The rotation of the frame's item (can be %ROTATION%).
 |-
 | LIGHTNING
 | 
-* effect: Whether the strike is an effect that does no damage. Not editable.
+* %KEY_LIGHTNING_EFFECT%: Whether the strike is an effect that does no damage. Not editable.
 |-
 | MAGMA_CUBE
 | 
-* size: The size of the magma cube.
+* %KEY_SLIME_SIZE%: The size of the magma cube.
+|-
+| MINECART_COMMAND
+| 
+* %KEY_MINECART_COMMAND_COMMAND%: The command that the command minecart will run when activated.
+* %KEY_MINECART_COMMAND_CUSTOMNAME%: The name of the command minecart.
 |- 
 | OCELOT
 | 
-* sitting: If the ocelot is sitting.
-* type: The type of the ocelot (can be %OCELOT_TYPE%).
+* %KEY_OCELOT_SITTING%: If the ocelot is sitting.
+* %KEY_OCELOT_TYPE%: The type of the ocelot (can be %OCELOT_TYPE%).
 |- 
 | PAINTING
 | 
-* type: The art on the painting (can be %ART%).
+* %KEY_PAINTING_ART%: The art on the painting (can be %ART%).
 |- 
 | PIG
 | 
-* saddled: If the pig has a saddle.
+* %KEY_PIG_SADDLED%: If the pig has a saddle.
 |- 
 | PIG_ZOMBIE
 | 
-* anger: The pig zombie's anger level.
-* angry: Whether the zombie is angry.
-* baby: Whether the pig zombie is a baby.
-* villager: Whether the pig zombie is a villager.
+* %KEY_PIG_ZOMBIE_ANGER%: The pig zombie's anger level.
+* %KEY_PIG_ZOMBIE_ANGRY%: Whether the zombie is angry.
+* %KEY_ZOMBIE_BABY%: Whether the pig zombie is a baby.
+* %KEY_ZOMBIE_VILLAGER%: Whether the pig zombie is a villager.
 |- 
 | PRIMED_TNT
 | 
-* fuseticks: The number of ticks until the explosion.
-* source: The source of the primed TNT. Not editable.
+* %KEY_PRIMED_TNT_FUSETICKS%: The number of ticks until the explosion.
+* %KEY_PRIMED_TNT_SOURCE%: The source of the primed TNT. Not editable.
 |- 
 | SHEEP
 | 
-* color: The color of the sheep (can be %DYE_COLOR%).
-* sheared: Whether the sheep is sheared.
+* %KEY_SHEEP_COLOR%: The color of the sheep (can be %DYE_COLOR%).
+* %KEY_SHEEP_SHEARED%: Whether the sheep is sheared.
 |-
 | SKELETON
 | 
-* direction: The type of the skeleton (can be %SKELETON_TYPE%).
+* %KEY_SKELETON_TYPE%: The type of the skeleton (can be %SKELETON_TYPE%).
 |-
 | SLIME
 | 
-* size: The size of the slime.
+* %KEY_SLIME_SIZE%: The size of the slime.
 |-
 | SMALL_FIREBALL
 | 
-* direction: The direction the small fireball is heading toward.
+* %KEY_FIREBALL_DIRECTION%: The direction the small fireball is heading toward.
 |-
 | SPLASH_POTION
 | 
-* item: The item for the thrown potion.
+* %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
 |-
 | VILLAGER
 | 
-* profession: The profession of the villager (can be %PROFESSION%).
+* %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
 |-
 | WITHER_SKULL
 | 
-* direction: The direction the wither skull is heading toward.
+* %KEY_WITHER_SKULL_CHARGED%: Whether or not the wither skull is charged.
+* %KEY_FIREBALL_DIRECTION%: The direction the wither skull is heading toward.
 |- 
 | WOLF
 | 
-* angry: If the wolf is angry.
-* color: The collar color of the wolf (can be %DYE_COLOR%).
-* sitting: If the wolf is sitting.
+* %KEY_WOLF_ANGRY%: If the wolf is angry.
+* %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
+* %KEY_WOLF_SITTING%: If the wolf is sitting.
 |- 
 | ZOMBIE
 | 
-* baby: Whether the zombie is a baby.
-* villager: Whether the zombie is a villager.
+* %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
+* %KEY_ZOMBIE_VILLAGER%: Whether the zombie is a villager.
 |}

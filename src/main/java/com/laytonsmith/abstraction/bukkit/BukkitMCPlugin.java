@@ -27,7 +27,7 @@ public class BukkitMCPlugin implements MCPlugin {
     }
     
 	@Override
-    public Object getHandle(){
+    public Plugin getHandle(){
         return p;
     }
 
@@ -43,10 +43,6 @@ public class BukkitMCPlugin implements MCPlugin {
         }
         
         return false;
-    }
-    
-    public Plugin getPlugin() {
-        return p;
     }
 	
 	@Override

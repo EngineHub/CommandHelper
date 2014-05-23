@@ -29,6 +29,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
+import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
@@ -49,6 +50,7 @@ import com.laytonsmith.abstraction.entities.MCSkeleton;
 import com.laytonsmith.abstraction.entities.MCSlime;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCVillager;
+import com.laytonsmith.abstraction.entities.MCWitherSkull;
 import com.laytonsmith.abstraction.entities.MCWolf;
 import com.laytonsmith.abstraction.entities.MCZombie;
 import com.laytonsmith.abstraction.enums.MCArt;
@@ -80,6 +82,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -2267,6 +2270,16 @@ public class EntityManagement {
 			docs = docs.replace("%DYE_COLOR%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%SKELETON_TYPE%", StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PROFESSION%", StringUtils.Join(MCProfession.values(), ", ", ", or ", " or "));
+			for (Field field : entity_spec.class.getDeclaredFields()) {
+				try {
+					String name = field.getName();
+					if (name.startsWith("KEY_")) {
+						docs = docs.replace("%" + name + "%", (String) field.get(null));
+					}
+				} catch (IllegalArgumentException | IllegalAccessException ex) {
+					ex.printStackTrace();
+				}
+			}
 			return docs;
 		}
 
@@ -2277,144 +2290,201 @@ public class EntityManagement {
 			CArray specArray = new CArray(t);
 
 			switch (entity.getType()) {
+				case ARROW:
+					MCArrow arrow = (MCArrow) entity;
+					specArray.set(entity_spec.KEY_ARROW_CRITICAL, new CBoolean(arrow.isCritical(), t), t);
+					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
+					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
-					specArray.set("powered", new CBoolean(creeper.isPowered(), t), t);
+					specArray.set(entity_spec.KEY_CREEPER_POWERED, new CBoolean(creeper.isPowered(), t), t);
 					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
-					specArray.set("itemstack", ObjectGenerator.GetGenerator().item(item.getItemStack(), t), t);
-					specArray.set("pickupdelay", new CInt(item.getPickupDelay(), t), t);
+					specArray.set(entity_spec.KEY_DROPPED_ITEM_ITEMSTACK, ObjectGenerator.GetGenerator().item(item.getItemStack(), t), t);
+					specArray.set(entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY, new CInt(item.getPickupDelay(), t), t);
 					break;
 				case ENDERMAN:
 					MCEnderman enderman = (MCEnderman) entity;
 					MCMaterialData carried = enderman.getCarriedMaterial();
 					if (carried != null) {
-						specArray.set("carried", new CString(carried.getMaterial().getName(), t), t);
+						specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, new CString(carried.getMaterial().getName(), t), t);
 					} else {
-						specArray.set("carried", CNull.NULL, t);
+						specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, CNull.NULL, t);
 					}
 					break;
 				case EXPERIENCE_ORB:
 					MCExperienceOrb orb = (MCExperienceOrb) entity;
-					specArray.set("amount", new CInt(orb.getExperience(), t), t);
+					specArray.set(entity_spec.KEY_EXPERIENCE_ORB_AMOUNT, new CInt(orb.getExperience(), t), t);
 					break;
 				case FALLING_BLOCK:
 					MCFallingBlock block = (MCFallingBlock) entity;
-					specArray.set("block", new CInt(block.getMaterial().getName(), t), t);
-					specArray.set("dropitem", new CBoolean(block.getDropItem(), t), t);
+					specArray.set(entity_spec.KEY_FALLING_BLOCK_BLOCK, new CInt(block.getMaterial().getName(), t), t);
+					specArray.set(entity_spec.KEY_FALLING_BLOCK_DROPITEM, new CBoolean(block.getDropItem(), t), t);
 					break;
 				case FIREBALL:
 				case SMALL_FIREBALL:
-				case WITHER_SKULL:
 					MCFireball ball = (MCFireball) entity;
-					specArray.set("direction", ObjectGenerator.GetGenerator().velocity(ball.getDirection(), t), t);
+					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().velocity(ball.getDirection(), t), t);
 					break;
 				case FISHING_HOOK:
 					MCFishHook hook = (MCFishHook) entity;
-					specArray.set("chance", new CDouble(hook.getBiteChance(), t), t);
+					specArray.set(entity_spec.KEY_FISHING_HOOK_CHANCE, new CDouble(hook.getBiteChance(), t), t);
 					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
-					specArray.set("color", new CString(horse.getColor().name(), t), t);
-					specArray.set("style", new CString(horse.getPattern().name(), t), t);
-					specArray.set("variant", new CString(horse.getVariant().name(), t), t);
-					specArray.set("chest", new CBoolean(horse.hasChest(), t), t);
-					specArray.set("jump", new CDouble(horse.getJumpStrength(), t), t);
-					specArray.set("domestication", new CInt(horse.getDomestication(), t), t);
-					specArray.set("maxdomestication", new CInt(horse.getMaxDomestication(), t), t);
-					specArray.set("armor", ObjectGenerator.GetGenerator().item(horse.getArmor(), t), t);
-					specArray.set("saddle", ObjectGenerator.GetGenerator().item(horse.getSaddle(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(horse.getColor().name(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_STYLE, new CString(horse.getPattern().name(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_VARIANT, new CString(horse.getVariant().name(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_CHEST, new CBoolean(horse.hasChest(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(horse.getJumpStrength(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(horse.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(horse.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_ARMOR, ObjectGenerator.GetGenerator().item(horse.getArmor(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(horse.getSaddle(), t), t);
 					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
-					specArray.set("playercreated", new CBoolean(golem.isPlayerCreated(), t), t);
+					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, new CBoolean(golem.isPlayerCreated(), t), t);
 					break;
 				case ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
 					MCItemStack itemstack = frame.getItem();
 					if (itemstack != null) {
-						specArray.set("item", ObjectGenerator.GetGenerator().item(frame.getItem(), t), t);
+						specArray.set(entity_spec.KEY_ITEM_FRAME_ITEM, ObjectGenerator.GetGenerator().item(frame.getItem(), t), t);
 					} else {
-						specArray.set("item", CNull.NULL, t);
+						specArray.set(entity_spec.KEY_ITEM_FRAME_ITEM, CNull.NULL, t);
 					}
-					specArray.set("rotation", new CString(frame.getRotation().name(), t), t);
+					specArray.set(entity_spec.KEY_ITEM_FRAME_ROTATION, new CString(frame.getRotation().name(), t), t);
 					break;
 				case LIGHTNING:
 					MCLightningStrike lightning = (MCLightningStrike) entity;
-					specArray.set("effect", new CBoolean(lightning.isEffect(), t), t);
+					specArray.set(entity_spec.KEY_LIGHTNING_EFFECT, new CBoolean(lightning.isEffect(), t), t);
 					break;
 				case MAGMA_CUBE:
 				case SLIME:
 					MCSlime cube = (MCSlime) entity;
-					specArray.set("size", new CInt(cube.getSize(), t), t);
+					specArray.set(entity_spec.KEY_SLIME_SIZE, new CInt(cube.getSize(), t), t);
 					break;
 				case MINECART_COMMAND:
 					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
-					specArray.set("command", new CString(commandminecart.getCommand(), t), t);
-					specArray.set("customname", new CString(commandminecart.getName(), t), t);
+					specArray.set(entity_spec.KEY_MINECART_COMMAND_COMMAND, new CString(commandminecart.getCommand(), t), t);
+					specArray.set(entity_spec.KEY_MINECART_COMMAND_CUSTOMNAME, new CString(commandminecart.getName(), t), t);
 					break;
 				case OCELOT:
 					MCOcelot ocelot = (MCOcelot) entity;
-					specArray.set("type", new CString(ocelot.getCatType().name(), t), t);
-					specArray.set("sitting", new CBoolean(ocelot.isSitting(), t), t);
+					specArray.set(entity_spec.KEY_OCELOT_TYPE, new CString(ocelot.getCatType().name(), t), t);
+					specArray.set(entity_spec.KEY_OCELOT_SITTING, new CBoolean(ocelot.isSitting(), t), t);
 					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
-					specArray.set("art", new CString(painting.getArt().name(), t), t);
+					specArray.set(entity_spec.KEY_PAINTING_ART, new CString(painting.getArt().name(), t), t);
 					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
-					specArray.set("saddled", new CBoolean(pig.isSaddled(), t), t);
+					specArray.set(entity_spec.KEY_PIG_SADDLED, new CBoolean(pig.isSaddled(), t), t);
 					break;
 				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
-					specArray.set("angry", new CBoolean(pigZombie.isAngry(), t), t);
-					specArray.set("anger", new CInt(pigZombie.getAnger(), t), t);
-					specArray.set("baby", new CBoolean(pigZombie.isBaby(), t), t);
-					specArray.set("villager", new CBoolean(pigZombie.isVillager(), t), t);
+					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGRY, new CBoolean(pigZombie.isAngry(), t), t);
+					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGER, new CInt(pigZombie.getAnger(), t), t);
+					specArray.set(entity_spec.KEY_ZOMBIE_BABY, new CBoolean(pigZombie.isBaby(), t), t);
+					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, new CBoolean(pigZombie.isVillager(), t), t);
 					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
-					specArray.set("fuseticks", new CInt(tnt.getFuseTicks(), t), t);
+					specArray.set(entity_spec.KEY_PRIMED_TNT_FUSETICKS, new CInt(tnt.getFuseTicks(), t), t);
 					MCEntity source = tnt.getSource();
 					if (source != null) {
-						specArray.set("source", new CInt(source.getEntityId(), t), t);
+						specArray.set(entity_spec.KEY_PRIMED_TNT_SOURCE, new CInt(source.getEntityId(), t), t);
 					} else {
-						specArray.set("source", CNull.NULL, t);
+						specArray.set(entity_spec.KEY_PRIMED_TNT_SOURCE, CNull.NULL, t);
 					}
 					break;
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
-					specArray.set("color", new CString(sheep.getColor().name(), t), t);
-					specArray.set("sheared", new CBoolean(sheep.isSheared(), t), t);
+					specArray.set(entity_spec.KEY_SHEEP_COLOR, new CString(sheep.getColor().name(), t), t);
+					specArray.set(entity_spec.KEY_SHEEP_SHEARED, new CBoolean(sheep.isSheared(), t), t);
 					break;
 				case SKELETON:
 					MCSkeleton skeleton = (MCSkeleton) entity;
-					specArray.set("type", new CString(skeleton.getSkeletonType().name(), t), t);
+					specArray.set(entity_spec.KEY_SKELETON_TYPE, new CString(skeleton.getSkeletonType().name(), t), t);
 					break;
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
-					specArray.set("item", ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
+					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
 					break;
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
-					specArray.set("profession", new CString(villager.getProfession().name(), t), t);
+					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(villager.getProfession().name(), t), t);
+					break;
+				case WITHER_SKULL:
+					MCWitherSkull skull = (MCWitherSkull) entity;
+					specArray.set(entity_spec.KEY_WITHER_SKULL_CHARGED, new CBoolean(skull.isCharged(), t), t);
+					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().velocity(skull.getDirection(), t), t);
 					break;
 				case WOLF:
 					MCWolf wolf = (MCWolf) entity;
-					specArray.set("angry", new CBoolean(wolf.isAngry(), t), t);
-					specArray.set("color", new CString(wolf.getCollarColor().name(), t), t);
-					specArray.set("sitting", new CBoolean(wolf.isSitting(), t), t);
+					specArray.set(entity_spec.KEY_WOLF_ANGRY, new CBoolean(wolf.isAngry(), t), t);
+					specArray.set(entity_spec.KEY_WOLF_COLOR, new CString(wolf.getCollarColor().name(), t), t);
+					specArray.set(entity_spec.KEY_WOLF_SITTING, new CBoolean(wolf.isSitting(), t), t);
 					break;
 				case ZOMBIE:
 					MCZombie zombie = (MCZombie) entity;
-					specArray.set("baby", new CBoolean(zombie.isBaby(), t), t);
-					specArray.set("villager", new CBoolean(zombie.isVillager(), t), t);
+					specArray.set(entity_spec.KEY_ZOMBIE_BABY, new CBoolean(zombie.isBaby(), t), t);
+					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, new CBoolean(zombie.isVillager(), t), t);
 					break;
 			}
 			return specArray;
 		}
+
+		//used to ensure that the indexes are the same in entity_spec(), set_entity_spec(), and in the documentation.
+		private static final String KEY_ARROW_CRITICAL = "critical";
+		private static final String KEY_ARROW_KNOCKBACK = "knockback";
+		private static final String KEY_CREEPER_POWERED = "powered";
+		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
+		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
+		private static final String KEY_ENDERMAN_CARRIED = "carried";
+		private static final String KEY_EXPERIENCE_ORB_AMOUNT = "amount";
+		private static final String KEY_FALLING_BLOCK_BLOCK = "block";
+		private static final String KEY_FALLING_BLOCK_DROPITEM = "dropitem";
+		private static final String KEY_FIREBALL_DIRECTION = "direction";
+		private static final String KEY_FISHING_HOOK_CHANCE = "chance";
+		private static final String KEY_HORSE_COLOR = "color";
+		private static final String KEY_HORSE_STYLE = "style";
+		private static final String KEY_HORSE_VARIANT = "variant";
+		private static final String KEY_HORSE_CHEST = "chest";
+		private static final String KEY_HORSE_JUMP = "jump";
+		private static final String KEY_HORSE_DOMESTICATION = "domestication";
+		private static final String KEY_HORSE_MAXDOMESTICATION = "maxdomestication";
+		private static final String KEY_HORSE_ARMOR = "armor";
+		private static final String KEY_HORSE_SADDLE = "saddle";
+		private static final String KEY_IRON_GOLEM_PLAYERCREATED = "playercreated";
+		private static final String KEY_ITEM_FRAME_ITEM = "item";
+		private static final String KEY_ITEM_FRAME_ROTATION = "rotation";
+		private static final String KEY_LIGHTNING_EFFECT = "effect";
+		private static final String KEY_MINECART_COMMAND_COMMAND = "command";
+		private static final String KEY_MINECART_COMMAND_CUSTOMNAME = "customname";
+		private static final String KEY_OCELOT_TYPE = "type";
+		private static final String KEY_OCELOT_SITTING = "sitting";
+		private static final String KEY_PAINTING_ART = "type";
+		private static final String KEY_PIG_SADDLED = "saddled";
+		private static final String KEY_PIG_ZOMBIE_ANGRY = "angry";
+		private static final String KEY_PIG_ZOMBIE_ANGER = "anger";
+		private static final String KEY_PRIMED_TNT_FUSETICKS = "fuseticks";
+		private static final String KEY_PRIMED_TNT_SOURCE = "source";
+		private static final String KEY_SHEEP_COLOR = "color";
+		private static final String KEY_SHEEP_SHEARED = "sheared";
+		private static final String KEY_SKELETON_TYPE = "type";
+		private static final String KEY_SLIME_SIZE = "size";
+		private static final String KEY_SPLASH_POTION_ITEM = "item";
+		private static final String KEY_VILLAGER_PROFESSION = "profession";
+		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
+		private static final String KEY_WOLF_ANGRY = "angry";
+		private static final String KEY_WOLF_COLOR = "color";
+		private static final String KEY_WOLF_SITTING = "sitting";
+		private static final String KEY_ZOMBIE_BABY = "baby";
+		private static final String KEY_ZOMBIE_VILLAGER = "villager";
 	}
 
 	@api
@@ -2437,6 +2507,10 @@ public class EntityManagement {
 							+ " All indexes in the specArray are optional.";
 		}
 
+		private static void throwException(String index, Target t) throws ConfigRuntimeException {
+			throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+		}
+
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
@@ -2444,158 +2518,191 @@ public class EntityManagement {
 			CArray specArray = Static.getArray(args[1], t);
 
 			switch (entity.getType()) {
+				case ARROW:
+					MCArrow arrow = (MCArrow) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ARROW_CRITICAL:
+								arrow.setCritical(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_ARROW_KNOCKBACK:
+								int k = Static.getInt32(specArray.get(index, t), t);
+								if (k < 0) {
+									throw new ConfigRuntimeException("Knockback can not be negative.", ExceptionType.RangeException, t);
+								} else {
+									arrow.setKnockbackStrength(k);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("powered")) {
-							creeper.setPowered(Static.getBoolean(specArray.get(index, t)));
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_CREEPER_POWERED:
+								creeper.setPowered(Static.getBoolean(specArray.get(index, t)));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
-							case "itemstack":
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_DROPPED_ITEM_ITEMSTACK:
 								item.setItemStack(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
-							case "pickupdelay":
+							case entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY:
 								item.setPickupDelay(Static.getInt32(specArray.get(index, t), t));
 								break;
 							default:
-								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+								throwException(index, t);
 						}
 					}
 					break;
 				case ENDERMAN:
 					MCEnderman enderman = (MCEnderman) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("carried")) {
-							enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ENDERMAN_CARRIED:
+								enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case EXPERIENCE_ORB:
 					MCExperienceOrb orb = (MCExperienceOrb) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("amount")) {
-							orb.setExperience(Static.getInt32(specArray.get(index, t), t));
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_EXPERIENCE_ORB_AMOUNT:
+								orb.setExperience(Static.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case FALLING_BLOCK:
 					MCFallingBlock block = (MCFallingBlock) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("dropitem")) {
-							block.setDropItem(Static.getBoolean(specArray.get(index, t)));
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_FALLING_BLOCK_DROPITEM:
+								block.setDropItem(Static.getBoolean(specArray.get(index, t)));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case FIREBALL:
 				case SMALL_FIREBALL:
-				case WITHER_SKULL:
 					MCFireball ball = (MCFireball) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("direction")) {
-							ball.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index, t), t));
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_FIREBALL_DIRECTION:
+								ball.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case FISHING_HOOK:
 					MCFishHook hook = (MCFishHook) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("chance")) {
-							try {
-								hook.setBiteChance(Static.getDouble(specArray.get(index, t), t));
-							} catch (IllegalArgumentException exception) {
-								throw new ConfigRuntimeException("The chance must be between 0.0 and 1.0", ExceptionType.RangeException, t);
-							}
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_FISHING_HOOK_CHANCE:
+								try {
+									hook.setBiteChance(Static.getDouble(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("The chance must be between 0.0 and 1.0", ExceptionType.RangeException, t);
+								}
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
-							case "color":
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_HORSE_COLOR:
 								try {
 									horse.setColor(MCHorseColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("Invalid horse color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
-							case "style":
+							case entity_spec.KEY_HORSE_STYLE:
 								try {
 									horse.setPattern(MCHorsePattern.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("Invalid horse style: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
-							case "variant":
+							case entity_spec.KEY_HORSE_VARIANT:
 								try {
 									horse.setVariant(MCHorseVariant.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("Invalid horse variant: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
-							case "chest":
+							case entity_spec.KEY_HORSE_CHEST:
 								horse.setHasChest(Static.getBoolean(specArray.get(index, t)));
 								break;
-							case "jump":
+							case entity_spec.KEY_HORSE_JUMP:
 								try {
 									horse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("The jump strength must be between 0.0 and 2.0", ExceptionType.RangeException, t);
 								}
 								break;
-							case "domestication":
+							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									horse.setDomestication(Static.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("The domestication level can not be higher than the max domestication level.", ExceptionType.RangeException, t);
 								}
 								break;
-							case "maxdomestication":
+							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
 								horse.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
 								break;
-							case "saddle":
+							case entity_spec.KEY_HORSE_SADDLE:
 								horse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
-							case "armor":
+							case entity_spec.KEY_HORSE_ARMOR:
 								horse.setArmor(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
 							default:
-								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+								throwException(index, t);
 						}
 					}
 					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("playercreated")) {
-							golem.setPlayerCreated(Static.getBoolean(specArray.get(index, t)));
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_IRON_GOLEM_PLAYERCREATED:
+								golem.setPlayerCreated(Static.getBoolean(specArray.get(index, t)));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
-							case "item":
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ITEM_FRAME_ITEM:
 								frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								if (specArray.get(index, t) instanceof CNull) {
 									frame.setItem(null);
@@ -2603,7 +2710,7 @@ public class EntityManagement {
 									frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								}
 								break;
-							case "rotation":
+							case entity_spec.KEY_ITEM_FRAME_ROTATION:
 								try {
 									frame.setRotation(MCRotation.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
@@ -2611,7 +2718,7 @@ public class EntityManagement {
 								}
 								break;
 							default:
-								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+								throwException(index, t);
 						}
 					}
 					break;
@@ -2619,25 +2726,27 @@ public class EntityManagement {
 				case SLIME:
 					MCSlime cube = (MCSlime) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("size")) {
-							cube.setSize(Static.getInt32(specArray.get(index, t), t));
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_SLIME_SIZE:
+								cube.setSize(Static.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case MINECART_COMMAND:
 					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
-							case "customname":
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_MINECART_COMMAND_CUSTOMNAME:
 								if(specArray.get(index, t) instanceof CNull) {
 									commandminecart.setName(null);
 								} else {
 									commandminecart.setName(specArray.get(index, t).val());
 								}
 								break;
-							case "command":
+							case entity_spec.KEY_MINECART_COMMAND_COMMAND:
 								if(specArray.get(index, t) instanceof CNull) {
 									commandminecart.setCommand(null);
 								} else {
@@ -2645,181 +2754,208 @@ public class EntityManagement {
 								}
 								break;
 							default:
-								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+								throwException(index, t);
 						}
 					}
 					break;
 				case OCELOT:
 					MCOcelot ocelot = (MCOcelot) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
-							case "type":
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_OCELOT_TYPE:
 								try {
 									ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("Invalid ocelot type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
-							case "sitting":
+							case entity_spec.KEY_OCELOT_SITTING:
 								ocelot.setSitting(Static.getBoolean(specArray.get(index, t)));
 								break;
 							default:
-								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+								throwException(index, t);
 						}
 					}
 					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("art")) {
-							try {
-								painting.setArt(MCArt.valueOf(specArray.get(index, t).val().toUpperCase()));
-							} catch (IllegalArgumentException exception) {
-								throw new ConfigRuntimeException("Invalid art type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
-							}
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_PAINTING_ART:
+								try {
+									painting.setArt(MCArt.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid art type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("saddled")) {
-							pig.setSaddled(Static.getBoolean(specArray.get(index, t)));
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_PIG_SADDLED:
+								pig.setSaddled(Static.getBoolean(specArray.get(index, t)));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
-							case "baby":
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ZOMBIE_BABY:
 								pigZombie.setBaby(Static.getBoolean(specArray.get(index, t)));
 								break;
-							case "villager":
+							case entity_spec.KEY_ZOMBIE_VILLAGER:
 								pigZombie.setVillager(Static.getBoolean(specArray.get(index, t)));
 								break;
-							case "angry":
+							case entity_spec.KEY_PIG_ZOMBIE_ANGRY:
 								pigZombie.setAngry(Static.getBoolean(specArray.get(index, t)));
 								break;
-							case "anger":
+							case entity_spec.KEY_PIG_ZOMBIE_ANGER:
 								pigZombie.setAnger(Static.getInt32(specArray.get(index, t), t));
 								break;
 							default:
-								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+								throwException(index, t);
 						}
 					}
 					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("fuseticks")) {
-							tnt.setFuseTicks(Static.getInt32(specArray.get(index, t), t));
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_PRIMED_TNT_FUSETICKS:
+								tnt.setFuseTicks(Static.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
-							case "color":
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_SHEEP_COLOR:
 								try {
 									sheep.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("Invalid sheep color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
-							case "sheared":
+							case entity_spec.KEY_SHEEP_SHEARED:
 								sheep.setSheared(Static.getBoolean(specArray.get(index, t)));
 								break;
 							default:
-								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+								throwException(index, t);
 						}
 					}
 					break;
 				case SKELETON:
 					MCSkeleton skeleton = (MCSkeleton) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("type")) {
-							try {
-								skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index, t).val().toUpperCase()));
-							} catch (IllegalArgumentException exception) {
-								throw new ConfigRuntimeException("Invalid skeleton type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
-							}
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_SKELETON_TYPE:
+								try {
+									skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid skeleton type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("item")) {
-							potion.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_SPLASH_POTION_ITEM:
+								potion.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
 					for (String index : specArray.stringKeySet()) {
-						if (index.equals("profession")) {
-							try {
-								villager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
-							} catch (IllegalArgumentException exception) {
-								throw new ConfigRuntimeException("Invalid profession: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
-							}
-						} else {
-							throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_VILLAGER_PROFESSION:
+								try {
+									villager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid profession: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case WITHER_SKULL:
+					MCWitherSkull skull = (MCWitherSkull) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_WITHER_SKULL_CHARGED:
+								skull.setCharged(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_FIREBALL_DIRECTION:
+								skull.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
 				case WOLF:
 					MCWolf wolf = (MCWolf) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
-							case "angry":
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_WOLF_ANGRY:
 								wolf.setAngry(Static.getBoolean(specArray.get(index, t)));
 								break;
-							case "color":
+							case entity_spec.KEY_WOLF_COLOR:
 								try {
 									wolf.setCollarColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new ConfigRuntimeException("Invalid collar color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
-							case "sitting":
+							case entity_spec.KEY_WOLF_SITTING:
 								wolf.setSitting(Static.getBoolean(specArray.get(index, t)));
 								break;
 							default:
-								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+								throwException(index, t);
 						}
 					}
 					break;
 				case ZOMBIE:
 					MCZombie zombie = (MCZombie) entity;
 					for (String index : specArray.stringKeySet()) {
-						switch (index) {
-							case "baby":
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ZOMBIE_BABY:
 								zombie.setBaby(Static.getBoolean(specArray.get(index, t)));
 								break;
-							case "villager":
+							case entity_spec.KEY_ZOMBIE_VILLAGER:
 								zombie.setVillager(Static.getBoolean(specArray.get(index, t)));
 								break;
 							default:
-								throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+								throwException(index, t);
 						}
 					}
 					break;
 				default:
 					for (String index : specArray.stringKeySet()) {
-						throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+						throwException(index, t);
 					}
 			}
 
@@ -2997,6 +3133,5 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityId, amount} Damage an entity";
 		}
-
 	}
 }

@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.MCBookMeta;
@@ -12,6 +10,8 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPotionMeta;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
@@ -936,5 +936,27 @@ public class ObjectGenerator {
 		} else {
 			throw new ConfigRuntimeException("Expected array but recieved " + c, ExceptionType.CastException, t);
 		}
+	}
+
+	/**
+	 * Gets a MetadataValue, given a construct and a plugin.
+	 *
+	 * @param value
+	 * @param plugin
+	 * @return
+	 */
+	public MCMetadataValue metadataValue(Construct value, MCPlugin plugin) {
+		return metadataValue(Static.getJavaObject(value), plugin);
+	}
+
+	/**
+	 * Gets a MetadataValue, given an object and a plugin.
+	 *
+	 * @param value
+	 * @param plugin
+	 * @return
+	 */
+	public MCMetadataValue metadataValue(Object value, MCPlugin plugin) {
+		return StaticLayer.GetMetadataValue(value, plugin);
 	}
 }
