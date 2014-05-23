@@ -2290,12 +2290,12 @@ public class EntityManagement {
 			switch (entity.getType()) {
 				case ARROW:
 					MCArrow arrow = (MCArrow) entity;
-					specArray.set(entity_spec.KEY_ARROW_CRITICAL, new CBoolean(arrow.isCritical(), t), t);
+					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
 					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
-					specArray.set(entity_spec.KEY_CREEPER_POWERED, new CBoolean(creeper.isPowered(), t), t);
+					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t);
 					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
@@ -2318,7 +2318,7 @@ public class EntityManagement {
 				case FALLING_BLOCK:
 					MCFallingBlock block = (MCFallingBlock) entity;
 					specArray.set(entity_spec.KEY_FALLING_BLOCK_BLOCK, new CInt(block.getMaterial().getName(), t), t);
-					specArray.set(entity_spec.KEY_FALLING_BLOCK_DROPITEM, new CBoolean(block.getDropItem(), t), t);
+					specArray.set(entity_spec.KEY_FALLING_BLOCK_DROPITEM, CBoolean.get(block.getDropItem()), t);
 					break;
 				case FIREBALL:
 				case SMALL_FIREBALL:
@@ -2334,7 +2334,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(horse.getColor().name(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_STYLE, new CString(horse.getPattern().name(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_VARIANT, new CString(horse.getVariant().name(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_CHEST, new CBoolean(horse.hasChest(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_CHEST, CBoolean.get(horse.hasChest()), t);
 					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(horse.getJumpStrength(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(horse.getDomestication(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(horse.getMaxDomestication(), t), t);
@@ -2343,7 +2343,7 @@ public class EntityManagement {
 					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
-					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, new CBoolean(golem.isPlayerCreated(), t), t);
+					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, CBoolean.get(golem.isPlayerCreated()), t);
 					break;
 				case ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
@@ -2357,7 +2357,7 @@ public class EntityManagement {
 					break;
 				case LIGHTNING:
 					MCLightningStrike lightning = (MCLightningStrike) entity;
-					specArray.set(entity_spec.KEY_LIGHTNING_EFFECT, new CBoolean(lightning.isEffect(), t), t);
+					specArray.set(entity_spec.KEY_LIGHTNING_EFFECT, CBoolean.get(lightning.isEffect()), t);
 					break;
 				case MAGMA_CUBE:
 				case SLIME:
@@ -2372,7 +2372,7 @@ public class EntityManagement {
 				case OCELOT:
 					MCOcelot ocelot = (MCOcelot) entity;
 					specArray.set(entity_spec.KEY_OCELOT_TYPE, new CString(ocelot.getCatType().name(), t), t);
-					specArray.set(entity_spec.KEY_OCELOT_SITTING, new CBoolean(ocelot.isSitting(), t), t);
+					specArray.set(entity_spec.KEY_OCELOT_SITTING, CBoolean.get(ocelot.isSitting()), t);
 					break;
 				case PAINTING:
 					MCPainting painting = (MCPainting) entity;
@@ -2380,14 +2380,14 @@ public class EntityManagement {
 					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
-					specArray.set(entity_spec.KEY_PIG_SADDLED, new CBoolean(pig.isSaddled(), t), t);
+					specArray.set(entity_spec.KEY_PIG_SADDLED, CBoolean.get(pig.isSaddled()), t);
 					break;
 				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
-					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGRY, new CBoolean(pigZombie.isAngry(), t), t);
+					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
 					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGER, new CInt(pigZombie.getAnger(), t), t);
-					specArray.set(entity_spec.KEY_ZOMBIE_BABY, new CBoolean(pigZombie.isBaby(), t), t);
-					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, new CBoolean(pigZombie.isVillager(), t), t);
+					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(pigZombie.isBaby()), t);
+					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, CBoolean.get(pigZombie.isVillager()), t);
 					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
@@ -2402,7 +2402,7 @@ public class EntityManagement {
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
 					specArray.set(entity_spec.KEY_SHEEP_COLOR, new CString(sheep.getColor().name(), t), t);
-					specArray.set(entity_spec.KEY_SHEEP_SHEARED, new CBoolean(sheep.isSheared(), t), t);
+					specArray.set(entity_spec.KEY_SHEEP_SHEARED, CBoolean.get(sheep.isSheared()), t);
 					break;
 				case SKELETON:
 					MCSkeleton skeleton = (MCSkeleton) entity;
@@ -2418,19 +2418,19 @@ public class EntityManagement {
 					break;
 				case WITHER_SKULL:
 					MCWitherSkull skull = (MCWitherSkull) entity;
-					specArray.set(entity_spec.KEY_WITHER_SKULL_CHARGED, new CBoolean(skull.isCharged(), t), t);
+					specArray.set(entity_spec.KEY_WITHER_SKULL_CHARGED, CBoolean.get(skull.isCharged()), t);
 					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().velocity(skull.getDirection(), t), t);
 					break;
 				case WOLF:
 					MCWolf wolf = (MCWolf) entity;
-					specArray.set(entity_spec.KEY_WOLF_ANGRY, new CBoolean(wolf.isAngry(), t), t);
+					specArray.set(entity_spec.KEY_WOLF_ANGRY, CBoolean.get(wolf.isAngry()), t);
 					specArray.set(entity_spec.KEY_WOLF_COLOR, new CString(wolf.getCollarColor().name(), t), t);
-					specArray.set(entity_spec.KEY_WOLF_SITTING, new CBoolean(wolf.isSitting(), t), t);
+					specArray.set(entity_spec.KEY_WOLF_SITTING, CBoolean.get(wolf.isSitting()), t);
 					break;
 				case ZOMBIE:
 					MCZombie zombie = (MCZombie) entity;
-					specArray.set(entity_spec.KEY_ZOMBIE_BABY, new CBoolean(zombie.isBaby(), t), t);
-					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, new CBoolean(zombie.isVillager(), t), t);
+					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombie.isBaby()), t);
+					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, CBoolean.get(zombie.isVillager()), t);
 					break;
 			}
 			return specArray;

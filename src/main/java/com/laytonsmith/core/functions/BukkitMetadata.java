@@ -159,15 +159,15 @@ public class BukkitMetadata {
 					MCPlugin plugin = Static.getPlugin(args[2], t);
 					for (MCMetadataValue value : metadatable.getMetadata(key)) {
 						if (value.getOwningPlugin().equals(plugin)) {
-							return new CBoolean(true, t);
+							return CBoolean.TRUE;
 						}
 					}
-					return new CBoolean(false, t);
+					return CBoolean.FALSE;
 				} else {
-					return new CBoolean(true, t);
+					return CBoolean.TRUE;
 				}
 			} else {
-				return new CBoolean(false, t);
+				return CBoolean.FALSE;
 			}
 		}
 	}

@@ -218,10 +218,10 @@ public class ExtensionMeta {
 			for (ExtensionTracker tracker : trackers.values()) {
 				String identifier = tracker.getIdentifier();
 				if ((identifier != null) && identifier.equalsIgnoreCase(args[0].val())) {
-					return new CBoolean(true, t);
+					return CBoolean.TRUE;
 				}
 			}
-			return new CBoolean(false, t);
+			return CBoolean.FALSE;
 		}
 
 		@Override
@@ -250,7 +250,7 @@ public class ExtensionMeta {
 		public Set<OptimizationOption> optimizationOptions() {
 			 return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
-		
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() != 1) {
