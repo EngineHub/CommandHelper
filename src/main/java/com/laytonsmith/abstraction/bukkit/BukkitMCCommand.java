@@ -168,14 +168,14 @@ public class BukkitMCCommand implements MCCommand {
 	@Override
 	public void setExecutor(MCPlugin plugin) {
 		if (cmd instanceof PluginCommand) {
-			((PluginCommand) cmd).setExecutor(((BukkitMCPlugin) plugin).getPlugin());
+			((PluginCommand) cmd).setExecutor(((BukkitMCPlugin) plugin).getHandle());
 		}
 	}
 
 	@Override
 	public void setTabCompleter(MCPlugin plugin) {
 		if (cmd instanceof PluginCommand) {
-			((PluginCommand) cmd).setTabCompleter(((BukkitMCPlugin) plugin).getPlugin());
+			((PluginCommand) cmd).setTabCompleter(((BukkitMCPlugin) plugin).getHandle());
 		}
 	}
 	

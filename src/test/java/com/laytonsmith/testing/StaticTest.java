@@ -18,8 +18,10 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
@@ -793,8 +795,23 @@ public class StaticTest {
 		public MCMaterial GetMaterial(String name) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
-    }
-    
+
+		@Override
+		public MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public String GetPluginName() {
+			return new BukkitConvertor().GetPluginName();
+		}
+
+		@Override
+		public MCPlugin GetPlugin() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+	}
+
     public static class FakeServerMixin implements EventMixinInterface{
         
         public static MCPlayer fakePlayer;

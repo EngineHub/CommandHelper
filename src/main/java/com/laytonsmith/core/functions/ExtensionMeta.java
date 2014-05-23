@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -103,6 +104,10 @@ public class ExtensionMeta {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if (children.size() != 1) {
+				throw new ConfigCompileException(getName() + " can only accept one argument", t);
+			}
+
 			if (!(children.get(0).getData() instanceof CString)) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
@@ -123,6 +128,7 @@ public class ExtensionMeta {
 	}
 
 	@api
+	@seealso(function_exists.class)
 	public static class event_exists extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -160,7 +166,9 @@ public class ExtensionMeta {
 		@Override
 		public String docs() {
 			return "boolean {name} Returns true if the event is known to "
-					+ Implementation.GetServerType().getBranding() + ".";
+					+ Implementation.GetServerType().getBranding() + "."
+					+ " Like function_exists(), this function is resolved at compile time,"
+					+ " and allows for conditional uses of events that may or may not exist.";
 		}
 
 		@Override
@@ -175,11 +183,85 @@ public class ExtensionMeta {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if (children.size() != 1) {
+				throw new ConfigCompileException(getName() + " can only accept one argument", t);
+			}
+
 			if (!(children.get(0).getData() instanceof CString)) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
 			return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
+		}
+	}
+
+	@api
+	@seealso(function_exists.class)
+	public static class extension_exists extends AbstractFunction implements Optimizable {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
+			for (ExtensionTracker tracker : trackers.values()) {
+				String identifier = tracker.getIdentifier();
+				if ((identifier != null) && identifier.equalsIgnoreCase(args[0].val())) {
+					return new CBoolean(true, t);
+				}
+			}
+			return new CBoolean(false, t);
+		}
+
+		@Override
+		public String getName() {
+			return "extension_exists";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {name} Returns true if the extention is known to "
+					+ Implementation.GetServerType().getBranding() + " and loaded."
+					+ " Like function_exists(), this function is resolved at compile time.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			 return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+		
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if (children.size() != 1) {
+				throw new ConfigCompileException(getName() + " can only accept one argument", t);
+			} else if (!(children.get(0).getData() instanceof CString)) {
+				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
+			} else {
+				return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
+			}
 		}
 	}
 
@@ -206,52 +288,81 @@ public class ExtensionMeta {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 
 			CArray retn = new CArray(t);
-			for (URL url: trackers.keySet()) {
-				ExtensionTracker trk = trackers.get(url);
-				CArray trkdata;
 
-				if (!retn.containsKey(trk.getIdentifier())) {
-					trkdata = new CArray(t);
-				} else {
-					trkdata = (CArray)retn.get(trk.getIdentifier(), t);
-				}
+			if (args.length == 0) {
+				for (URL url: trackers.keySet()) {
+					ExtensionTracker trk = trackers.get(url);
+					CArray trkdata;
 
-				// For both events and functions, make sure we don't overwrite
-				// in cases of extensions with the same name. Shouldn't happen,
-				// but lets handle it nicely. This will ALWAYS happen for old
-				// style extensions, as they don't have an identifier.
-				CArray funcs;
-				if (!trkdata.containsKey("functions")) {
-					funcs = new CArray(t);
-				} else {
-					funcs = (CArray)trkdata.get("functions", t);
-				}
-				for (FunctionBase func: trk.getFunctions()) {
-					if (!funcs.contains(func.getName())) {
-						funcs.push(new CString(func.getName(), t));
+					if (!retn.containsKey(trk.getIdentifier())) {
+						trkdata = new CArray(t);
+					} else {
+						trkdata = (CArray) retn.get(trk.getIdentifier(), t);
+					}
+
+					// For both events and functions, make sure we don't overwrite
+					// in cases of extensions with the same name. Shouldn't happen,
+					// but lets handle it nicely. This will ALWAYS happen for old
+					// style extensions, as they don't have an identifier.
+					CArray funcs;
+					if (!trkdata.containsKey("functions")) {
+						funcs = new CArray(t);
+					} else {
+						funcs = (CArray) trkdata.get("functions", t);
+					}
+					for (FunctionBase func: trk.getFunctions()) {
+						if (!funcs.contains(func.getName())) {
+							funcs.push(new CString(func.getName(), t));
+						}
+					}
+					funcs.sort(CArray.SortType.STRING_IC);
+					trkdata.set("functions", funcs, t);
+
+					CArray events;
+					if (!trkdata.containsKey("events")) {
+						events = new CArray(t);
+					} else {
+						events = (CArray) trkdata.get("events", t);
+					}
+					for (Event event: trk.getEvents()) {
+						events.push(new CString(event.getName(), t));
+					}
+					events.sort(CArray.SortType.STRING_IC);
+					trkdata.set("events", events, t);
+
+					trkdata.set("version", trk.getVersion().toString());
+
+					if (trk.getIdentifier() != null) {
+						retn.set(trk.getIdentifier(), trkdata, t);
+					} else {
+						retn.set("__unidentified__", trkdata, t);
 					}
 				}
-				funcs.sort(CArray.SortType.STRING_IC);
-				trkdata.set("functions", funcs, t);
-
-				CArray events;
-				if (!trkdata.containsKey("events")) {
-					events = new CArray(t);
-				} else {
-					events = (CArray)trkdata.get("events", t);
-				}
-				for (Event event: trk.getEvents()) {
-					events.push(new CString(event.getName(), t));
-				}
-				events.sort(CArray.SortType.STRING_IC);
-				trkdata.set("events", events, t);
-
-				trkdata.set("version", trk.getVersion().toString());
-
-				if (trk.getIdentifier() != null) {
-					retn.set(trk.getIdentifier(), trkdata, t);
-				} else {
-					retn.set("__unidentified__", trkdata, t);
+			} else {
+				for (ExtensionTracker tracker : trackers.values()) {
+					String identifier = tracker.getIdentifier();
+					if (identifier == null) {
+						identifier = "__unidentified__";
+					}
+					if (identifier.equals(args[0].val())) {
+						CArray functions = (retn.containsKey("functions")) ? (CArray) retn.get("functions", t) : new CArray(t);
+						for (FunctionBase function : tracker.getFunctions()) {
+							if (!functions.contains(function.getName())) {
+								functions.push(new CString(function.getName(), t));
+							}
+						}
+						functions.sort(CArray.SortType.STRING_IC);
+						retn.set("functions", functions, t);
+						CArray events = (retn.containsKey("events")) ? (CArray) retn.get("events", t) : new CArray(t);
+						for (Event event : tracker.getEvents()) {
+							if (!events.contains(event.getName())) {
+								events.push(new CString(event.getName(), t));
+							}
+						}
+						events.sort(CArray.SortType.STRING_IC);
+						retn.set("events", events, t);
+						retn.set("version", tracker.getVersion().toString(), t);
+					}
 				}
 			}
 
@@ -265,13 +376,13 @@ public class ExtensionMeta {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0};
+			return new Integer[]{0, 1};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {name} Returns extension info for the extensions"
-					+ " the system has loaded. Included data will be events,"
+			return "array {[extensionName]} Returns extension info for the extensions"
+					+ " the system has loaded, or the given extension if extensionName is specified. Included data will be events,"
 					+ " functions and version, keyed by the name of the extension"
 					+ " (or __unidentified__ if it's an old-style extension).";
 		}

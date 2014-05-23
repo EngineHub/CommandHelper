@@ -49,6 +49,8 @@ public interface Convertor {
 
 	public MCMaterial GetMaterial(String name);
 
+	public MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin);
+
     /**
      * A future runnable is run on a server accessible thread at roughly the time specified in the future.
      * This is no guarantee however, as the particular server implementation may make this hard to do. The
@@ -207,4 +209,16 @@ public interface Convertor {
 	 * @return a properly typed MCCommandSender
 	 */
 	public MCCommandSender GetCorrectSender(MCCommandSender unspecific);
+
+	/**
+	 * Returns the name of CommandHelper by parsing the plugin.yml file.
+	 * @return 
+	 */
+	public String GetPluginName();
+
+	/**
+	 * Returns a MCPlugin instance of CommandHelper.
+	 * @return 
+	 */
+	public MCPlugin GetPlugin();
 }
