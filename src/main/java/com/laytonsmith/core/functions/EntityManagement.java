@@ -3114,7 +3114,13 @@ public class EntityManagement {
 			MCLivingEntity living = (MCLivingEntity)entity;
 
 			double damage = Static.getDouble(args[1], t);
-			living.damage(damage);
+			if (args.length == 3) {
+				int sourceid = Static.getInt32(args[2], t);
+				MCEntity source = Static.getEntity(sourceid, t);
+				living.damage(damage, source);
+			} else {
+				living.damage(damage);
+			}
 
 			return CVoid.VOID;
 		}
@@ -3126,12 +3132,13 @@ public class EntityManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
 		public String docs() {
-			return "void {entityId, amount} Damage an entity";
+			return "void {entityId, amount, [sourceEntityId]} Damage an entity. If given,"
+					+ " the source entity will be attributed as the damager.";
 		}
 	}
 }
