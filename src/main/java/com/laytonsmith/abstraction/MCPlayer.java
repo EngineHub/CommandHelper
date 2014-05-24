@@ -110,6 +110,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public void sendBlockChange(MCLocation loc, int material, byte data);
 
+    public void sendSignTextChange(MCLocation loc, String l1, String l2, String l3, String l4);
+
 	/**
 	 * Unlike {@see MCEntity#getLocation}, this will work when not run on the server
 	 * thread, but this does mean that the data recieved may be slightly outdated.
