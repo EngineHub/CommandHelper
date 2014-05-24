@@ -3637,27 +3637,27 @@ public class PlayerManagement {
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
 
-			String l1, l2, l3, l4;
+			String[] lines = new String[4];
 
 			if(args.length == 2 || args.length == 3) {
 				//Lines are in an array
-				CArray lines = Static.getArray(args[1 + offset], t);
-				if(lines.size() != 4) {
+				CArray lineArray = Static.getArray(args[1 + offset], t);
+				if(lineArray.size() != 4) {
 					throw new ConfigRuntimeException("Line array must have 4 elements.", ExceptionType.CastException, t);
 				}
-				l1 = lines.get(0, t).val();
-				l2 = lines.get(1, t).val();
-				l3 = lines.get(2, t).val();
-				l4 = lines.get(3, t).val();
+				lines[0] = lineArray.get(0, t).val();
+				lines[1] = lineArray.get(1, t).val();
+				lines[2] = lineArray.get(2, t).val();
+				lines[3] = lineArray.get(3, t).val();
 			} else {
 				//Lines are in different arguments
-				l1 = args[1 + offset].val();
-				l2 = args[2 + offset].val();
-				l3 = args[3 + offset].val();
-				l4 = args[4 + offset].val();
+				lines[0] = args[1 + offset].val();
+				lines[1] = args[2 + offset].val();
+				lines[2] = args[3 + offset].val();
+				lines[3] = args[4 + offset].val();
 			}
 
-			p.sendSignTextChange(loc, l1, l2, l3, l4);
+			p.sendSignTextChange(loc, lines);
 			return CVoid.VOID;
 		}
 
