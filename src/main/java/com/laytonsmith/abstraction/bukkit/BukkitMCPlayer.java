@@ -510,6 +510,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
+	public void sendSignTextChange(MCLocation loc, String[] lines) {
+		p.sendSignChange(((Location)loc.getHandle()), lines);
+	}
+
+	@Override
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note) {
 		p.playNote((Location)loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note)note.getHandle());
 	}
