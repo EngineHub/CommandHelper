@@ -1,0 +1,25 @@
+# This file contains the VFS's file system settings. It is a yml file
+# which maps globs to settings. The most specific setting will always
+# be used, but otherwise, globs follow the following rules:
+  
+# A VirtualGlob is a simple wrapper around a file matching glob. The following
+# rules are applied: All characters are taken literally, except for the asterisk,
+# double asterisk, or question mark, which mean the following:
+# * - Match any number of characters, except directory separators (forward slash)
+# ** - Match any number of characters, including directory separators (forward slash)
+# ? - Match exactly one character, except directory separators (forward slash)
+
+# Each glob can have various settings, noted below:
+ 
+# %%SETTING_TYPES%%
+
+# So, an example entry might be:
+# /path/to/folder: {
+#   hidden: false
+#   readonly: true
+# }
+# /path/to/all/**: {
+#   hidden: true
+# }
+
+# %%GENERATED_LINE%%

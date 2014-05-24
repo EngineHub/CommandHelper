@@ -1,0 +1,71 @@
+To help standardize the code formatting, please follow these guidelines for code
+formatting.
+
+For the most part, the standard Java code conventions should be followed. They can be found at
+http://www.oracle.com/technetwork/java/javase/documentation/codeconvtoc-136057.html
+There are a few exceptions and clarifications however:
+
+* Line Length
+Avoid lines longer than about 120 characters. When wrapping lines, follow these conventions:
+
+	* Break after a comma
+	* Break before an operator
+	* Indent to the current level + 2 tabs on the following lines, if the code
+	  directly beneath it is on a different indention level
+	* If breaking in the middle of a long string, the space should start the newline. 
+		String s = "This is a long string, which has a"
+					+ " break in the middle";
+
+* Indentions
+Use tabs for indentions, NOT spaces. This allows for tab length to be set by the client,
+and also allows for quicker backspacing if deleting indentation.
+
+* Brace style
+Braces should be on the same line as the statement.
+	if(condition) {
+		...
+	}
+	NOT
+	if(condition)
+	{
+		...
+	}
+
+This condenses the file size, and makes more code fit onscreen at once. Since the
+code inside of the block should be indented anyways, there is no readability issue
+as far as determining what code is actually inside the block or not.
+
+All braceable statements MUST use braces, and newlines.
+	if(condition) {
+		code;
+	}
+	NEVER
+	if(condition) code;
+	NEVER
+	if(condition){ code; }
+
+* Commits
+If you have more than 2 commits, please rebase, unless the commit has already
+been reviewed, in which case new commits should remain separate. (This allows reviewers
+to just see the changes in the new commits, instead of having to re-review all changes.)
+Do not make formatting changes to unrelated code, unless the entire commit is *soley* formatting
+changes. In general though, even that is discouraged, because the full commit needs to be reviewed
+regardless, and it's far easier for a single individual to do global code cleanup tools, rather
+than many individuals.
+
+Before committing, be sure to go through this checklist:
+	* The boilerplate unit tests should all pass. Unit tests for unrelated code does not need to pass,
+	  if they weren't already passing.
+	* Documentation for functions must be complete. Be sure that the return type and arguments are accurate.
+	* Be sure that only code in the com.laytonsmith.abstraction.bukkit.* packages accesses bukkit code directly.
+	  All other files should access the abstraction layer.
+	* Be sure that enums that map server values have a EnumConvertor class as well. Never do enum lookups directly
+	  by name.
+
+* Method Naming
+Methods should be named using standard camel case, in most cases. Exceptions exist where convention dictates otherwise.
+Static methods in a class should start with uppercase letters, and member methods should start with lowercase letters.
+
+* Comments
+Please document public methods using javadoc, unless they are boilerplate and completely obvious based on the method name.
+Potentially confusing code should have inline comments explaining what is happening.

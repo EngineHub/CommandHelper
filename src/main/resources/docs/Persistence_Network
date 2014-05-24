@@ -1,0 +1,260 @@
+
+The Persistence Network allows for a flexible, efficient, and intuitive way to store your persistence data. 
+The general idea is that your code doesn't need to know exactly where the data is stored, it simply needs to
+know what it's address is. Much like the DNS system, you don't need to remember 173.194.37.65, you just need
+to remember google.com. Persistence data is stored the same way as normal, as far as your code is concerned,
+but there is an extra layer of abstraction on top that allows you to customize precisely where data is stored 
+Like the DNS system, instead of knowing precisely how or where the data is stored, you just remember its 
+"address" (the key name). There are three factors you need to understand when dealing with the Persistence Network: connections, filters, and controls.
+
+==Connections==
+A connection is a read/write or read-only data source, to which persistence data is mapped.
+There are several supported formats, and there is the potential to add more in the future.
+In your configuration file, a connection can be aliased, to make re-specifying a connection 
+easier, but the actual connection specification is a URI that maps to a specific data source. 
+For instance, the default SQLite format is simply a pointer to a file:
+<pre>sqlite:///home/data/persistence.db</pre>
+
+There are several different connection types supported, and each has a slightly different requirement:
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" align="left" class="wikitable"
+|-
+! scope="col" width="10%" | Type
+! scope="col" width="50%" | Description
+! scope="col" width="30%" | Example
+! scope="col" width="10%" | Since
+%%persistence_connections%%
+|}
+
+In addition, several modifier types can be specified, which modify the connection type. 
+They are specified as extra protocols at the start of the URI.
+<pre>transient:readonly:yml://persistence.yml</pre>
+
+In the above example, the <code>transient</code> and <code>read-only</code> flags have been 
+added to the connection. The specific meaning of each flag is as follows, and they aren't always 
+applicable to all connection types.
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" align="left" class="wikitable"
+|-
+! scope="col" width="20%" | Flag Name
+! scope="col" width="80%" | Description
+%%data_source_modifiers%%
+|}
+
+Invalid modifiers will cause a warning to be raised during startup, but will otherwise be ignored.
+
+A note on file based URIs: The file path is specified after two forward slashes, so an absolute 
+path on unix looks like this: yml:///path/to/file, and an absolute path on windows looks like 
+this: yml://C:/path/to/file (alternatively yml://C:\path\to\file will also work). On all 
+platforms, a relative path would look like this: yml://path/to/file. Additionally, file based
+connections are '''usually''' going to be much faster, but less reliable than SQL based
+connections, so it is HIGHLY recommended that you use SQL connections, if nothing else, using
+the zero config SQLite (which is the default). The only case for a file based connection type is
+when using frequently read/written data, in which case a subset of your keys may be written
+out to a file based protocol. The <code>ser</code> protocol is the fastest and most compact,
+but as it stores the data in a lump binary form, it is not (easily) editable by hand, and
+is prone to total data corruption in the event of any section of the file being corrupted.
+For a full rundown of the speed comparisons, see the chart below.
+
+There are special implementation considerations you must take into account if you are writing 
+an external system that integrates with the persistence network, (including if you edit the 
+files by hand), so you should read up on the [[CommandHelper/Staged/Persistence_Network_Integration|Persistence Network Integration]] 
+guide before you attempt to edit the output files, or otherwise care about the internal storage specifications.
+
+===Connection Aliases===
+Often times you will want to re-use a connection, but you don't want to have to re-specify the 
+full connection details for each filter. In this case, you can use connection aliases. A 
+connection alias looks just like a filter, but the filter name starts with a dollar sign.
+<pre>
+$connection=mysql://username:password@host:3304/database/table
+</pre>
+
+Then, elsewhere, instead of rewriting the entire connection string, you may simply use <code>$connection</code>
+
+==Filters==
+
+Filters are what map namespaces to connections. The configuration file (persistence.ini) 
+is used to specify the actual filters. (An example is shown below). It is important to note that 
+the namespace conventions followed by the filter system map to the REAL namespace conventions, not 
+the namespaces you use in code. For instance, if you were to make a call to 
+<code>store_value('name.of.key', 'value')</code>, the value will actually be stored in 
+<code>storage.name.of.key</code>. For a more detailed description of the namespaces, see 
+[[CommandHelper/Data_Manager#Namespaces|this wiki page]].
+
+A filter is a simple regex style matcher; if a key matches this filter, it is stored via 
+this connection. Filters are specified as such: <code>filter=connection</code> where 
+connection is either a full connection URI, or an alias, and filter is a matcher as 
+specified below. Filters are matched from best fit to worst fit, top to bottom. The 
+following wildcards are supported:
+
+{| cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|- 
+| * || Any value in this namespace, but don't cross namespace boundries
+|-
+| ** || Any value in this namespace, and cross namespace boundries
+|}
+
+If we are attempting to store a value in "storage.key.name", and we have the following 
+two filters defined:
+<pre>
+storage.**.name=$connection1
+storage.**=$connection2
+</pre>
+Then it would be stored in $connection1, since that is a more specific match. It is defined 
+as a more specific match, because, minus wildcards, more namespaces match. This mechanism of 
+filter competition allows for very specific control over what data goes where, while also not 
+having to worry about providing specific filters for all possible namespaces. If not otherwise 
+specified, or if the connection is invalid, The filter ** is ALWAYS defined to be a connection 
+to the default serialized persistence file, so all otherwise unmatched keys will go there.
+
+==Controls==
+
+It is sometimes necessary to transfer data from one data source to another, in which 
+case you can use the data manager tools to do so. This should be done while the server 
+is off, to ensure corruption does not occur, though it is possible to do this with the 
+server running if you're careful. To transfer data, simply specify the keys to match, 
+and the destination connection. The data will be transferred appropriately. If a 
+conflict would occur, you will interactively be prompted with an action. After transferring, 
+these keys, you should update your persistence.ini file to reflect the new mappings. 
+This is the appropriate way to make modifications 
+to your data mappings, while ensuring that no data is lost in the process. Consider the 
+following scenario:
+
+We have data stored in a file, persistence.ser, and we want to change the mapping of 
+storage.player.** over to a database. If we simply changed it in the mapping file, all 
+the existing data would be hidden. Instead, you must export/import the 
+individual data beforehand, then change the mappings. Instead, we 
+can use the transfer tool.
+
+Sometimes, however, you have data in a source that isn't currently mapped in. In this 
+case, you want to use the merge tool. Accordingly, if you want 
+to copy data, and not move it, you also want to use the merge tool. You can also use the 
+data manager to show hidden data, that is, data that is stored in the data store 
+somewhere, but isn't accessible due to bad mappings.
+
+For more information on these tools and more, [[CommandHelper/Staged/Data_Manager|see this article]].
+
+==Usage==
+
+Your code will not need to change to change where data ends up being stored. 
+To use this feature, you simply need to change the key -> connection mappings in 
+the persistence.ini file. In the configuration file, 
+mappings and connection aliases are stored INI style, as shown below. Local file 
+paths are relative to the configuration file itself.
+
+===Example===
+
+<pre>
+#Lines starting with # are considered comments
+
+#These are our aliases
+$sqlite=sqlite://persistence.db
+$sp=ser://persistence.ser
+$remote=transient:readonly:http:yml://www.example.com/data.yml
+
+#Catch all default
+**=$sp
+
+#User based settings should be stored in the database
+storage.players.**=$sqlite
+
+#Assuming the page at www.example.com/data.yml was serving a yml file
+#that got server information, we might map that accordingly
+storage.server_info.**=$remote
+
+</pre>
+
+So, now, let's go over what would happen when we run our code.
+
+%%CODE|
+// First call
+store_value('server_info.start_time', time());
+//...
+// Second call
+store_value('players.' . player() . 'info', pinfo());
+//...
+// Third call
+store_value('other.data', 12345);
+%%
+
+The first call would fail, because we are trying to write to a readonly connection.
+
+The second call would store the data in the SQLite database, stored in the file persistence.db.
+The key will be the full key 'storage.players.player.info' though, it does not presume that the file is
+inherently aware of the key prefix, even if it is unique to this file.
+
+The third call will store the data in persistence.ser, in the Serialized Persistence format.
+Notice that our code doesn't care at all where data is actually being stored, or in what format,
+it is a routing layer on top of the global key=>value storage system.
+
+== Data Source Comparisons ==
+
+This table of data was generated based on the information obtained from the following script:
+
+%%CODE|
+@names = array('ini', 'mem', 'sqlite', 'json', 'ser', 'yml')
+@iterations = array(10, 100, 1000, 5000)
+foreach(@iterations, @iteration){
+        foreach(@names, @name){
+                sys_out('Now profiling '.@name.' with '.@iteration.' values')
+                @start = time()
+                foreach(cslice(1,@iteration), @i){
+                        store_value(@name, 'val'.@i, 'value')
+                }
+                foreach(cslice(1,@iteration), @i){
+                        get_value(@name, 'val'.@i)
+                }
+                @stop = time()
+                sys_out(@name.' took '.(@stop - @start).'ms to complete with '.@iteration.' values')
+        }
+}
+%%
+
+using the following persistence.ini:
+
+<pre>
+**=sqlite://persistence.db
+storage.ini.**=ini://persistence/persistence.ini
+storage.sqlite.**=sqlite://persistence/persistence.db
+storage.mem.**=mem://persistence/persistence.db
+storage.json.**=json://persistence/persistence.json
+storage.ser.**=ser://persistence/persistence.ser
+storage.yml.**=yml://persistence/persistence.yml
+</pre>
+
+Take what information you will from the data, and feel free to run it on your system to get actual values relevant to your system,
+not just relative to each other on the test system.
+
+<pre style='font-family: monospace'>
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+| iterations: |    1   |   10  |   100  |    1000   |     5000     | File size with 5000 values |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     yml     |  59 ms | 15 ms | 268 ms | 1.958 sec |    40 sec    |          103.7 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|    redis    |  24 ms |  3 ms |  17 ms |   184 ms  |    602 ms    |           Unknown          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|    sqlite   | 163 ms | 18 ms | 139 ms | 2.890 sec |    36 sec    |          360.4 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|    mysql    | 160 ms | 29 ms | 185 ms | 1.588 sec |   9.770 sec  |           Unknown          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     ini     |  1 ms  |  1 ms |  28 ms | 2.061 sec | 3.06 minutes |          138.9 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     mem     |  0 ms  |  1 ms |  2 ms  |   26 ms   |    107 ms    |             N/A            |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     json    |  2 ms  |  1 ms |  18 ms |   293 ms  |   5.274 sec  |          108.9 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+|     ser     |  3 ms  |  0 ms |  4 ms  |   36 ms   |    117 ms    |           31.0 kB          |
++-------------+--------+-------+--------+-----------+--------------+----------------------------+
+</pre>
+
+An important observation that could be made based on this data is that SQLite is 
+considerably slower than many of the other protocols. This is because SQLite
+is less prone to data corruption, and is multiprocess safe. SQLite manages its own
+locking and journaling systems, so it is unlikely to corrupt if a bad write
+occurs, or if multiple processes are accessing it at once. Due to this, it is the
+default storage mechanism, despite its slower runtime. The tradeoff of data protection
+vs. script speed vs. inter-operability is not something that can be generically decided
+in all cases though, so feel free to change defaults as you see fit. Each protocol
+has pros and cons, so you must decide which one to use.
+
+{{LearningTrail}}

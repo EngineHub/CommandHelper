@@ -1,0 +1,185 @@
+The Federation Protocol is the way that the client and server speak with each
+other. It is an object based streaming protocol. There are several steps required
+to set up a connection, but once the connection is established, making requests
+to the server is fairly straightforward. The version of the protocol that this
+document describes is version 1.0.0.
+
+== Connection Security ==
+
+Connections to the master server are secured differently than the connections
+to the slave server -- though the administrator may choose to use the same keys
+for both. If connections to the master servers are secured, all master servers
+must use the same private key. This is akin to DNSSEC system. Master server connections
+are authenticated only one way. The client knows it is connecting to the proper
+master server, but the master server does not care what servers connect to it.
+When allowing a connection, servers must provide the master server private key,
+if they are intending on requiring secure master server requests. When making a
+connection to the host, the client should provide the public key for master
+server requests. If the master server provides the private key, the client
+is required to provide the public key of the server.
+
+Connections to the slave servers are secured both ways. The client ensures it
+is connecting to the correct server (though this is admittedly slightly less
+important), and the server ensures that the client is allowed to connect to it.
+The client must provide the server's public key, and its private key. The slave
+server connection must provide a list of authorized keys, and its private key.
+This data is used to secure the connection both ways. If the server or client
+requires secure connections, then the other must also use secured connections.
+
+In addition, servers may require a password. This password must be shared between
+the client and the server, and adds a small amount of additional security, though
+it is highly recommended that PKI be used instead of simply a password, as the
+password can be easily obtained by a man in the middle. If MitM attacks are not
+a concern, a secure password is a valid way to secure the server, however. The
+password may be used in addition or instead of PKI.
+
+== Protocol Base ==
+
+Once a connection is established, and data can be sent across the stream, all
+data follows the same format. ObjectOutputStream and ObjectInputStream are used
+to transfer data, though the only data allowed are Java primitives and Java Strings,
+written using writeUTF/readUTF methods. At any point, if the client writes invalid
+data, the connection is immediately closed.
+
+== Master Server ==
+
+The master server is a random process on the machine that listens to the master
+port, and gives out server routing information to requesting processes. This
+setup works much like a dynamic DNS system. The master server is established
+by the first process to realize that there is no other process listening on the
+master port. The protocol it follows is different than the slave servers. Since
+connections are potentially long running, and we don't want to depend on the master
+server remaining up for other connections, a client first makes a request to the
+master server for the port that it should connect to, and then it disconnects
+from the master server, and initializes a new connection to the correct slave
+server.
+
+Each slave server should regularly check that the master port is bound to, and if
+not, it should spin up a master server in addition to the slave server it is already
+running. This can be done in the heartbeat thread for the slave server. Each
+slave server is responsible for picking a random unused port (usually between 
+%%CONST|com.laytonsmith.core.federation.Federation.DYNAMIC_PORT_MINIMUM%% and
+%%CONST|com.laytonsmith.core.federation.Federation.DYNAMIC_PORT_MAXIMUM%%), and
+then registering that information with the file system. In standard MethodScript
+servers, this will be the Persistence Network's registry, using the "federation.**"
+namespace. It is assumed that the administrator will keep all server instances
+pointed to the same registry. The registry contains information about each slave
+server, including the server name, the slave port it is listening on, and a "last_updated"
+timestamp, which if expires, voids the entry. The heartbeat thread, in addition to
+checking for the master server, should update this timestamp on a regular basis.
+
+A client request to the master server simply requests the port that the slave server
+is on. This is required, since the request may come in from an outside host, that
+wouldn't have access to the file system. The master server looks up the requested
+server in the registry, reports the port, and kills the socket. 
+
+If and only if the slave server only allows connections from localhost, may it
+not start up the master server. On the other hand, if a client is connecting
+to localhost, it can do the slave server lookup itself.
+
+Once the client has determined the correct slave port, either by making a request
+to the master server, or finding it itself it if it is a local request, it
+can then move on to step 2 of connecting, making a connection to the slave server.
+
+=== Master Server Protocol ===
+
+If the server requires PKI, the client must use the server's public key during connection.
+This encryption is inherent to the connection, and should be managed by the transport
+protocol. The client must first write the string "HELLO", followed by the version string
+of the protocol version it is speaking in. If the server supports that version, it will
+respond with the string "VERSION OK", and if it doesn't support that version, it will respond
+with the string "VERSION BAD" followed by another string, which is the error message, then
+it will disconnect.
+
+Assuming the HELLO and version check are successful, the client will write the string
+"GET PORT", then another string, the server name it is requesting the port of. The
+server will respond with the string "OK", then the integer port number, if it found the server, 
+or the string "ERROR" and then another string, which is the error message, if it could not.
+Then the connection is closed.
+
+This entire process must happen within 1 second, or the connection may be forcibly terminated,
+as it is assumed that the client has hung. This prevents misconfigured or malicious
+clients from taking up too many server resources.
+
+== Slave Server ==
+
+The connection to the slave server is a long running connection that allows for
+connections to remain open and run multiple commands after establishing and
+authorizing the connection. The connection security to the server is handled inherently by
+the underlying transport layer, using SSL. The authentication to the server (the two way authentication)
+and the password, if provided, is handled using the application logic.
+
+When a slave server comes online, it should pick a random port, then register that
+port, and the server name with the central registry. A single MethodScript process
+may have multiple servers running, though each will use a different port, and may
+also have different connection rules.
+
+=== Slave Server Protocol ===
+
+After the client has determined the proper port to connect to via the master server,
+it should initiate a new connection to the slave server. Upon initial connection,
+it should write the string "HELLO", followed by the version string
+of the protocol version it is speaking in. If the server supports that version, it will
+respond with the string "VERSION OK", and if it doesn't support that version, it will respond
+with the string "VERSION BAD" followed by another string, which is the error message, then
+it will disconnect. (This is the same as the master server connection.)
+
+The IP address will be checked to ensure that the IP the client is connecting from is allowed.
+If it is, the server will write the string "IP OK", and the connection will proceed. If not,
+the server will write the string "IP BAD" followed by the string error message, then it will
+disconnect.
+
+Next, if PKI authentication is enabled, the client should write a byte array, generated by
+signing the exact string "AUTHENTICATION" with the client's private key. The server will determine
+if one of the authorized keys can decrypt this array properly, and if so, the connection will
+proceed, and the server will write the string "AUTHENTICATION OK". If not, the server will write the
+string "AUTHENTICATION BAD" followed by the string error message. If the server does not require
+PKI authentication, then the client should write an empty byte array, and the server will reply with
+"AUTHENTICATION OK".
+
+The password should be written as a string. If it was not provided, an empty string
+is written. The server will respond with the string "PASSWORD OK" if the password was accepted,
+(or the password is blank, and not required by the server) or the string "PASSWORD BAD",
+followed by a string error message if the password was invalid.
+
+All actions up to this point must have taken less than a second, or the connection will be forcibly
+closed, to ensure that misconfigured or malicious clients that are not allowed to connect
+do not take up server resources. Once the password has been verified however, the connection
+is allowed to idle, up to the keep-alive time, which is generally much longer, possibly indefinite.
+
+Once the connection is established, the next thing written will be a string command, by the
+client. If the command is accepted, the server will write the string "COMMAND OK", and then the client
+may proceed with the command specific protocol. If the command is not recognized, the server
+will write the string "COMMAND INVALID" followed by a string error message, but the connection
+will NOT be closed, though the server will then again be waiting on a command.
+
+==== SCRIPT ====
+
+The SCRIPT command is the primary command used by the Federation system. This
+causes a script to be executed, and the results returned. The script to be
+executed has two parts, the variable list, and the script itself. The script
+is sent first, since it may cause a compile error, and if so, there is no
+point in sending the variable list.
+
+The first thing that should be sent is the entire script. It may be pre-compiled
+and optimized, or not, but the server will first compile the script locally, and
+verify that it does in fact compile. If the script did compile successfully,
+the server will respond with the string "SCRIPT OK". If the script did not compile,
+it will respond with the string "COMPILE ERROR", followed by the string error message
+that describes the compile error, at which point the server will then again be listening
+for a command. If the script was ok, the client should then send the variable list,
+serialized as a json string. The values in the variables should be serialized using
+the standard construct serialization mechanism. The server will then build the
+appropriate data structures from the data, and execute the script on that system.
+If an exception was generated during execution of the script, the server will
+respond with the string "EXCEPTION", followed by the json string exception object, which
+will be the serialized form of the exception. If no exception was generated,
+then the string "OK" will be written, followed by the json construct serialization
+of the return value of the construct. If the construct did not return anything,
+or returned void, an empty string is written.
+
+==== GOODBYE ====
+
+The GOODBYE command instructs the server to gracefully close the connection,
+cleaning up any resources. If the client closes the connection, this will also
+close the connection, though not necessarily gracefully.

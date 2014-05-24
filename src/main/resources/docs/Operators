@@ -1,0 +1,117 @@
+As of version 3.3.1, CommandHelper supports traditional operators, in addition to still allowing the pure functional approach. 
+(In fact, the operation functions are still used internally regardless). This allows you to write more readable code, by 
+using more standard symbols instead of only functions. Using operators instead of functions is highly recommended for all
+new code, though the functional usage will continue to remain supported.
+
+Consider the following perfectly valid code:
+
+%%CODE|
+if(and(equals(@var, 3), lte(2, @var2))){
+	msg('Something');
+}
+%%
+
+This is fairly hard to read, and could quickly get even more complicated and harder to read the more conditions you add. 
+Instead, you can use ''infix'' notation now, using standard C/Java operators. The same code as above, converted to the 
+infix notation looks like:
+
+%%CODE|
+if(@var == 3 && 2 <= @var2){
+	msg('Something');
+}
+%%
+
+Besides being less typing, it's much easier for a human to read, thanks to the operators. "@var equals 3 and 2 is less than or equal to 
+@var2" as opposed to "and equals @var 3 lte 2 @var2". Using parenthesis is also supported, to force an order of operations:
+
+%%CODE|
+if((@var == 3) && (2 <= @var2)){
+	msg('Something');
+}
+%%
+
+The following operators are supported, and their order of operations is from top to bottom. Note that all 
+operators are simply converted to the functional notation, so if your code is incorrect, the errors you 
+get will specify function names.
+
+{| class="wikitable"
+|-
+! Type
+! Symbol
+! Function Conversion
+! Notes
+|-
+| ''Postfix''
+| ++ --
+| {{function|postinc}}/{{function|postdec}}
+| This is only considered postfix when it comes after an identifier: @i++
+|-
+| ''Unary''
+| ! ++ --
+| {{function|not}}/{{function|inc}}/{{function|dec}}
+| These are ''unary'' operators, they only operate on one identifier
+|-
+|-
+| ''Exponential''
+| **
+| {{function|pow}}
+| 
+|-
+| ''Multiplicative''
+| * / %
+| {{function|multiply}}/{{function|divide}}/{{function|mod}}
+|
+|-
+| ''Additive''
+| + - .
+| {{function|add}}/{{function|subtract}}/{{function|concat}}
+| If a minus or plus sign is used to denote the sign of a number, it is handled slightly differently, for instance, ''2 + -1'' does not use any subtraction
+|-
+| ''Relational''
+| < > <= >=
+| {{function|lt}}/{{function|gt}}/{{function|lte}}/{{function|gte}}
+|
+|-
+| ''Equality''
+| == != === !==
+| {{function|equals}}/{{function|nequals}}/{{function|sequals}}/{{function|snequals}}
+| There is no operational equivalent for equals_ic
+|-
+| ''Logical AND''
+| &&
+| {{function|and}}
+|
+|-
+| ''Logical OR''
+| <nowiki>||</nowiki>
+| {{function|or}}
+|
+|-
+| ''Assignment''
+| = += -= *= /= .=
+| {{function|assign}}
+| There is no single functional equivalent except for = per se, <code>@var += 1</code> is equivalent to 
+<code>assign(@var, add(@var, 1))</code>, etc. += uses {{function|add}}, 
+-= uses {{function|subtract}}, *= uses {{function|multiply}}, /= uses {{function|divide}}, and .= uses {{function|concat}}. 
+|-
+| ''Array Sub-indices''
+| <nowiki>[ ]</nowiki>
+| {{function|array_get}}/{{function|array_set}}/{{function|array_push}}
+| Using square braces allows for array accesses, and in combination with the <code>=</code> sign, setting sub-indices.
+If the array set appears on the right hand side of an assignment, or in a general statement without an assign, it is an
+array_get operation. If it appears on the left hand side of an assignment, it is an array_set operation. The brackets
+apply to the element just preceeding, for instance with <code>@var['index']</code>, it is assumed that <code>@var</code>
+is an array or array like value. Empty braces, <code>[]</code>, when on the left hand side works as an array push, and
+when on the right hand side, or in a general statement without an assign, it is an array clone operation (which ultimately
+still uses array_get). Sub-strings within strings may be pulled out using the bracket notation as well, and slices are supported.
+<code>array(1, 2, 3)[1..2]</code> returns an array with 2 elements in it, namely 2 and 3. <code>'string'[0]</code> returns
+'s', and <code>'string'[0..1]</code> returns 'st'.
+|}
+
+Note the lack of bitwise operators, which are usually standard in other languages. These are not provided, because the 
+operators are infrequently used, and may be used for other operations in the future. The functions themselves, 
+{{function|bit_not}}, {{function|bit_and}}, and {{function|bit_or}} still exist, so no functionality has been removed.
+
+Also of note, auto-concatenation always takes lowest priority to all other operations.
+
+{{LearningTrail}}

@@ -1,0 +1,5 @@
+# This file sets up the persistence network. For more details on
+# The persistence network, see the wiki page at
+# http://wiki.sk89q.com/wiki/CommandHelper/Persistence_Network
+
+**=sqlite://persistence.db

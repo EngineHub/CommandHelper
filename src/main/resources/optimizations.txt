@@ -1,0 +1,121 @@
+This file documents the strongly coupled components in the optimizer.
+
+An assignment may be optimizable, but only if there aren't code branches under it
+that would cause the variable to change. Consider the following code:
+
+assign(@a, 'hi')
+if(dyn()){
+    msg(@a)
+} else {
+    msg('blah')
+}
+
+In this code, @a is never used as a true variable, it's used as a constant. To
+cut down on overhead for the variable lookup (and more importantly being able to
+possibly optimize things like if(@a, ...)) variables need to have two states,
+constant, and dynamic. In a fully linear code progression, it is always a constant;
+it isn't until it hits a dynamic code branch AND is changed before it actually
+becomes dynamic. Also, you need to watch out for trickery, two duplicate assignments
+if known to be the same should not be repeated, the second on should simply be dropped,
+instead of defining it to be a dynamic variable at that point. Also worth noting
+is that reflective information should remain; you can't remove the assign completely,
+however you can reduce all others possibly.
+
+Scope
+
+Variables have scope, and this is important to remember. In a position where the
+scope changes, the "known variable list" must also be adjusted in the optimizer.
+
+Procedures
+
+Inside of a proc, if there is only one code path, and it can end up being condensed
+to a single return(), then the proc can be replaced entirely by that value. This
+allows for user code to not have to worry about dynamics in the code. Indeed, only
+extension writers need to worry about such a concept, as the only dynamic functions
+are functions that rely on external factors. As an example, consider the following:
+
+proc(_a,
+    return('xxxxx')
+)
+msg(_a())
+
+In no case will this not always message 'xxxxx'.
+
+Closures
+
+A closure can likely never be removed entirely, however, its contents may be optimized.
+Special note does need to be made to scope however, the variables defined in the closure
+are always to be considered dynamic. Consider:
+
+assign(@var, 'hi')
+assign(@closure, closure(@a, @b, msg(@var . @a . @b)))
+
+The @var can be optimized here. Note however, that it is important to treat the previous
+code as such:
+
+assign(@var, 'hi')
+assign(@closure, closure(@a, @b, assign(@closureVar, 'hi') msg(@closureVar . @a . @b)))
+
+This is due to the fact that if it makes changes to the variable, it doesn't actually affect
+the code under it, as the variables do not reference the same values anymore, (except in the
+case of an array, but that would be dynamic anyways, and wouldn't be optimized)
+
+Loops
+Consider the following code:
+
+assign(@val, '')
+for(assign(@a, 0), @a < 5, @a++,
+    assign(@val, @val . 'x')
+)
+msg(@val)
+
+Upon considering the code, it is obvious that this will always result in 
+msg('xxxxx'). However, at first glance, this appears to be incredibly dynamic, we
+are creating a code branch, are we not? In this particular case, no, we are not.
+Consider the @a. We assign it a static value, and our comparison also yields a static
+value. Due to this, we know we will always go into the loop. Essentially, as long as
+all three values return static values, we can optimize.
+
+What about the halting problem?? Have you solved it?
+No, not in all cases. Consider this code:
+for(assign(@a, 0), @a < 5, @a++,
+    if(dyn(), @a--)
+)
+This turns out to be an infinite loop if the dynamic element is always true. 
+However, consider this:
+for(assign(@a, 0), @a < 5, @a++,
+    @a--
+)
+We can detect this case, because we can use static code analysis to generate an
+algorithm, and we see that it will never have an intersection. 
+This does require special analysis on the part of the for loop however. The general
+idea is that as long as the equation is decideable, and it intersects, the loop
+can be optimized out fully, and if it can be shown that an equation will NEVER
+have an intersection, we can actually cause a compile error.
+
+There are three cases in loop optimization: we know the loop will end, we know the
+loop will never end, or the loop ending is determined by dynamic factors. Let us
+first consider the easy case, where the loop ending is determined by dynamic factors.
+If the loop counter is affected inside a dynamic code branch, we cannot optimize or
+unroll. In the other two cases, it is possible to optimize, but I haven't figured
+that out yet.
+
+Arrays
+
+Arrays can be used statically, but cannot be optimized. Each time we create an array
+we actually need a new reference, and if we compile that out, weird things start
+to happen. However, at compile time, we can create said array, and use it during
+the compilation process, if it is otherwise static. For instance:
+
+assign(@var, '')
+foreach(range(5), @x,
+    assign(@var, 'x')
+)
+msg(@var)
+
+This code will always result in 'xxxxx', just as above, so this could be optimized.
+Of course, an array is harder to deal with, since it is comprised of many parts, and
+references are not immutable. So in any case where an array may "leak", it cannot
+be optimized, or unintended consequences could occur. (This will mostly be a problem
+when multithreading is implemented, but could also occur in some cases now, using a
+combination of factors including scheduling and import/export.)

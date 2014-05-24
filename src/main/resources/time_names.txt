@@ -1,0 +1,13 @@
+morning=0
+day=2000
+midday=6000
+noon=6000
+afternoon=8000
+evening=12000
+sunset=13000
+dusk=13500
+night=14000
+midnight=18000
+earlymorning=20000
+dawn=22500
+sunrise=23000

@@ -1,0 +1,104 @@
+The data manager is a tool that is built directly in to CommandHelper that assists you in managing your persisted data.
+There are several functions available to help you view, edit, and move your stored data around. Before you jump into using
+the data manager, it is important that you understand the lower level details, so you don't mess anything up. The data
+manager gives you direct access to the underlying data, so you could possibly screw things up if you aren't careful,
+so please read this documentation carefully, and be sure you understand what's happening before you try it.
+
+==Persistence Details==
+Currently, several methods of data storage are available. Usage of the actual Persistence Network is described 
+[[CommandHelper/Staged/Persistence_Network|here]], and explains how to configure the different backends.
+Conversion between the types is also be possible, so if you begin storing values now, these will be portable
+later. The data in each row is stored as a partial [http://en.wikipedia.org/wiki/JSON JSON], but otherwise follows
+all rules of JSONs. <nowiki>{Objects}</nowiki> and <nowiki>[Arrays]</nowiki> are supported.
+
+The simplest and quickest way to view all the currently stored values is to open up a terminal, and change to the
+directory the CommandHelper jar is in, and run the following command:
+<pre>
+java -jar CommandHelper.jar print-db
+</pre>
+This will print all the stored values to the console. Using pipes and redirects, you can further manipulate this output if desired. Let's take a look at the output and explain it further:
+
+<pre>
+Printing all persisted values:
+storage.value1: 1
+storage.hi: "hi"
+storage.value2: ["string", null, true, false, []]
+storage.value3: "\"string\" with special characters \\"
+Done printing persisted values
+</pre>
+
+The <code>storage.</code> bit simply namespaces the data. This way we can reserve other namespaces for future use. The part that you typically have control over from your scripts is this:
+
+<pre>
+value1: 1
+hi: "hi"
+value2: ["string", null, true, false, []]
+value3: "\"string\" with special characters \\"
+</pre>
+
+The key for the data is on the left, and the value is on the right. Each piece of data (other than arrays) are stored as ''partial JSONs'', which by themselves aren't any kind of standard thing, but can be combined to form a true JSON. You can determine the datatype of each node by noting the [http://www.json.org/ rules that JSONs follow]. In the future, CommandHelper will allow you to create your own JSONs from internal data structures, which will be usable by all sorts of neat advanced functions. Also, once values are stored in databases, you'll be able to manipulate this data from external or even remote applications, which will allow you to do all sorts of cool things.
+
+==Using the Data Manager==
+The data manager is an interactive shell program that runs as a standalone program. Before using the data manager to edit your data, you should first ensure that nothing else is using your persistance files (so, shut down your server). The only exception to this is for locking databases, such as SQL based backends, there should be no issues with read/write access, even if the server is running, and read access for all other backends. 
+
+To access the data manager, open up a terminal (command prompt in Windows) and cd to the plugins folder of your server, and run the following command:
+<pre>
+java -jar CommandHelper.jar manager
+</pre>
+
+The manager should then load up. Type "help" at the prompt to view the possible functions.
+
+<!-- ===print===
+The <code>print</code> command allows you to print out the data currently stored to your console. Running the command will simply return the same thing as <code>java -jar CommandHelper.jar print-db</code>. However, the interactive print command will also allow you to specify a namespace as an argument, which will allow you to narrow down a result set, similar to <code>get_values()</code>.
+
+===upgrade===
+If CommandHelper upgrades the persistance storage format, the upgrade function will automatically upgrade your data to the new format. Simply run this command if the upgrade notices tell you to, or if an error message tells you to. Due to the nature of the persistance files, it will no longer be necessary to delete the database when changes are made, you will simply have to run this command. After running this command, no data will be lost, and nothing should change from your script's perspective. Before doing the upgrade, a backup is created automatically, however, you should always create your own backup before, just in case.
+
+===edit===
+The edit command allows you to directly edit the data in your database. While this feature works similarly to the store_value function, this method gives you direct access to the information, and doesn't do any error checking at all, so be sure you understand the underlying mechanisms before using this feature.
+
+===cleardb===
+This clears out your database entirely. This is most useful for map resets. Currently, with just the default backend, it is a trivial matter to clear out your database already; just delete the database file. However, if you have other backends in place, this may become a more complex task, but no worries, when using the Data Manager, it will always be just a few commands.
+
+===refactor===
+THIS FEATURE IS NOT YET IMPLEMENTED. Refactoring allows you to transfer your data from one backend to the other. By default, CommandHelper uses the SerializedPersistance backend, but say after running your server for a while, you decide to switch to another backend type, perhaps MySQL. You can use the refactor tool to easily transfer all of your data from the SerializedPersistance backend to the new MySQL backend, without any hassle, and without losing any data. As new backend providers become available, this tool will be updated, so you are able to switch around as often as desired.
+
+===export===
+THIS FEATURE IS NOT YET IMPLEMENTED. The export tool allows you to move your data out of CommandHelper, and in to a standardized, text based file. Currently, you have the option of exporting the data as either XML, plain text, INI format, or YML. Once the data is out of CommandHelper and in to one of these formats, it becomes a very straightforward thing to programmatically parse or otherwise manipulate this data with an external application. The plain text export can also be used if you simple want to read over your data in an external program.
+
+===import===
+THIS FEATURE IS NOT YET IMPLEMENTED. The import tool works opposite of the export tool. Given an xml, ini, or yml file, it reads it in, and merges the data with your existing database. This can be used to import information from an external application, or to add information en masse. The format of the imports much exactly match the respective export format.
+
+===merge===
+The merge tool allows you to move entire databases around. It works by you specifying a source database, and a destination database, and it moves ALL the keys over to the new database, without touching the source. If there are key conflicts, it will prompt you for a decision, so it should be safe from accidental data loss. The merge tool isn't necessarily a replacement for the import and export tools, because it doesn't work transparently; it will only operate on entire databases at a time, as opposed to namespaces and such. However, it can be used as a crude method of importing and exporting, and if your entire persistance network is contained in one database, it will work exactly like a full import/export.
+-->
+
+%%dataManagerTools%%
+
+==Namespaces==
+If you have a script that runs <code>store_value('MyKey','MyValue')</code>, then the following entry would be created in the database:
+<pre>
+storage.MyKey: "MyValue"
+</pre>
+
+The <code>storage</code> namespace is reserved for values that are created and accessible from our script's store_value and get_value functions. If you manually edit the data from the data manager, or import other external data, if you want this data to be accessible from your scripts, you must include the correct namespace in the key name. The following namespaces are reserved for future use, and should not be used outside of their given scope:
+
+* storage.**: Values accessible from your main script's store_value and get_value functions. 
+* federation.**: The Federation system stores values here. The namespace should never be set to read only, and should be in a transient data source.
+* extension.<extension name>.**: Extensions may store data in this namespace.
+* custom.**: CommandHelper will not ever touch any values stored in here, and you may use this however you wish with external scripts.
+<!-- These are "reserved" but not listed.
+* snapin.**: Data about snapins resides here.
+* global.**: Values accessible from any script using the store_gvalue and get_gvalue functions. All scripts have access to this namespace, which provides a way for snap ins and other scripts to share data. Child namespaces are allowed to be created here, but are not managed by CommandHelper.
+* prefs.**: If CommandHelper stores preferences, it would use this namespace.
+* user.**: Automatically managed data about users are stored here
+* user.*.aliases.*: User aliases are stored here
+* user.*.**: Data about a particular user is stored here.
+* history.**: Journaling meta data for databases, to allow for database change events.
+-->
+
+If you intend on putting in your own values, the only namespace you should use is custom. All other namespaces are not currently planned to hold data, but are not guaranteed to remain unused in the future.
+
+''Note:'' The <code>store_value()</code> function allows for namespaces to be added, but that, <code>get_value()</code> and <code>get_values()</code> namespaces are all children of the underlying <code>storage</code> namespace, and should not be referenced when using the functions from code.
+
+{{LearningTrail}}

@@ -1,0 +1,329 @@
+
+If you are wanting to do more dynamic things other than variables, CommandHelper allows you to do this through the 
+use of Turing complete language, MethodScript. If you aren't familiar with any type of programming, you may wish to 
+find resources on languages like Java and PHP. The language mirrors both languages in certain ways, as well as 
+introducing its own methodologies.
+
+
+===Functions===
+
+Functions allow for very dynamic scripts to be run. There are many defined functions, including functions that provide 
+control flow functionality. For the full list of functions, see the [[CommandHelper/API|API]]. A function is identified
+by a literal string, followed by parenthesis. So in <code>func()</code>, "func" is the name of the function, and "("
+and ")" begin and end the function argument list (in this case, there are no arguments being passed in.)
+
+===Data Types===
+In a script, there are several types of data. The language is currently loosely typed however, so the string '2' is 
+equivalent to the integer 2, is equivalent to the double 2.0, is equivalent to the boolean true. Values are cast just 
+before they are used. Note that sometimes data cannot be cast, for instance the string 'string' cannot be cast to a 
+number, so a runtime exception will be thrown if a function expects a number, and is given that. Also, arrays are not 
+able to be cast into other data types, but can contain values of any data type.
+
+* boolean - Created with the "true" or "false" keywords: true
+* int - Any number that doesn't have a decimal point: 2
+* double - Any number that has a decimal point: 2.0
+* string - Any set of characters surrounded by single quotes or double quotes: 'string', "also a string". 
+\u0000 inside a string will allow for arbitrary unicode characters to be inserted into a string, and \n is a newline. 
+\\ (double slash) inserts a literal slash, and \' will insert a literal quote.
+* array - An array of any other datatypes, including other arrays. Created by using the function <code>array</code>
+* null - Created with the "null" keyword: null
+* void - Some functions return void, which is actually a datatype. When viewed as a string, it is equivalent to an 
+empty string. Cannot be created directly.
+* ivariable - An ivarible (or simply a variable) is a variable that can be defined and used from within the script. 
+Constant variables ($var), are assigned by the user at command runtime, and are technically constants as far as the 
+rest of the script is concerned. IVariables can be defined by the script writer and assigned various values that can 
+change throughout the script running. To define and use an ivariable, use the assign() function, or the = operator. 
+If an ivariable is used without first being defined, the value of the variable will be 0, 0.0, <nowiki>''</nowiki>, 
+false, or null, depending on how it is used. Most functions use the value in the ivariable without caring that it is 
+an ivariable, but it is possible that a function requires that a certain argument be an ivariable, such as the for() 
+function.
+
+===Exception Handling===
+Sometimes a script may sometimes cause an error that could be anticipated. Instead of just having the script die, it is 
+possible to catch these errors, and perform alternate functionality. MethodScript mirrors the functionality of languages 
+like PHP and Java with exception handling. For more information about exception handling in MScript, see 
+[[CommandHelper/Exceptions|this page]]. For a more general discussion on exception handling, see 
+[http://en.wikipedia.org/wiki/Exception_handling this page] on Wikipedia.
+
+=== main.ms, auto_include.ms, and aliases.msa ===
+Each of these files serve a separate purpose. main.ms is run at server startup, only once. Typically, you use this to 
+register bound events, using the bind() function, or anything else you want to run only once. Keep in mind, this is 
+re-run when you /reloadaliases, but bound events and intervals and such are stopped, so you won't have multiples of 
+anything. main.ms uses '''pure MethodScript''', that is, it has a slightly different syntax than aliases.msa. In aliases.msa, 
+each alias is defined, along with a snippet of MethodScript. For instance, in the alias,
+
+%%CODE|
+/test [$command=''] = >>>
+    console($command);
+<<<
+%%
+
+the <code>/test [$command=<nowiki>''</nowiki>] = >>> <<<</code> part is the alias markup, and is not actual MethodScript, 
+that is, the symbols and characters follow different meanings than inside the alias definition. In this example, 
+<code>console($command);</code> is pure MethodScript.
+
+aliases.msa is where your aliases go, and each alias is a fully separate '''compilation unit''', in fact, even a compile 
+error in one alias will not usually interfere with the other aliases.
+
+The auto_include.ms file is also a pure MethodScript file, and it is as if in each '''execution unit''', it is 
+automatically {{function|include}}ed for you. There are a few different ways to make an execution unit. The first way is 
+to create a new alias. Each alias is it's own execution unit, and uniquely to the aliases, each alias is also it's own 
+compilation unit. A bound event handler is another execution unit, and the entirety of main.ms is an execution unit. 
+set_interval and set_timeout are also separate execution unit, as well as execution queue elements, and others.
+
+So, what is an execution unit? It is a unit of code that gets run, from top to bottom. You can think of it as an 
+'''insertion point''' to your code, or places that will start up your code. An execution unit is often times made up of 
+several parts, so let's create a multifile example, which demonstrates a few execution units.
+
+In auto_include.ms:
+%%CODE|
+proc(_my_proc){
+    console('In _my_proc');
+}
+%%
+
+In main.ms:
+%%CODE|
+bind(some_event, null, null, @event,
+    _my_proc();
+    console('In some_event');
+)
+console('Finished binding all events in main.ms');
+%%
+
+In aliases.msa:
+%%CODE|
+/test $alias = >>>
+    _my_proc();
+    console('In /test $alias');
+<<<
+%%
+
+Here, we have created 3 separate execution units. main.ms and aliases are implicitly created, simply by their existence, 
+but here we have also created an event handler, which will get run when some_event is triggered. main.ms is triggered 
+upon server startup (and /reloadaliases) and aliases are triggered when a command is run. When this script is compiled, 
+you can essentially visualize the execution units as ending up like this: (with some code removed to make things more 
+readable)
+
+First execution unit, main.ms:
+%%CODE|
+proc(_my_proc, ...);
+bind(some_event, null, null, @event, <CREATION OF EXECUTION UNIT>);
+console('Finished binding all events in main.ms');
+%%
+
+Second execution unit, the /test $alias alias:
+%%CODE|
+proc(_my_proc, ...);
+_my_proc();
+console('In /test $alias');
+%%
+
+Third execution unit, the event handler created in main.ms:
+%%CODE|
+proc(_my_proc, ...);
+_my_proc();
+console('In some_event');
+%%
+
+In this simple example, you can think of each execution path as a line through your code (in reality, it's a tree, but 
+if that doesn't make sense to you, ignore that for now). That line follows very specific rules based on code structure, 
+so how you lay out your code is important to be able to visualize.
+
+=== reloadaliases ===
+
+The built in <code>/reloadaliases</code> command is used to reload just CommandHelper, though <code>/reload</code> will 
+also reload CommandHelper. However, using the reloadaliases command can allow for finer grained control of what all gets 
+reloaded. By default, the command reloads the following things about CommandHelper:
+
+* <u>S</u>cripts - Any changes that you have made to any scripts will be reloaded and applied. Main files are re-run, 
+and any new commands are re-registered.
+* <u>G</u>lobals - Global values, set with {{function|export}} are cleared out.
+* <u>T</u>asks - Any tasks set with {{function|set_interval}} or {{function|set_timeout}} are cleared.
+* <u>E</u>xecution-Queue - Any tasks queued up with the queue_* family of functions is cleared.
+* Pe<u>r</u>sistance-Config - Any changes to the persistance.config file are reloaded
+* Pro<u>f</u>iler - The profiler.config file is reloaded
+* E<u>x</u>tensions - Extensions are reloaded
+
+You can actually reload these sub-modules individually if you want, by passing parameters to the command. There are two 
+modes, whitelist, or by default, blacklist. In blacklist mode, all modules get reloaded except the modules that are 
+blacklisted, which aren't reloaded. In whitelist mode, only the specified modules are reloaded. You use the underlined 
+letter to refer to that specific module. For instance, if you want to reload everything but leave the exported variables 
+and execution queue alone, you can run <code>/reloadaliases -ge</code>. If you ONLY want to reload preferences, you can 
+run <code>/reloadaliases --whitelist -p</code>. Note that reloading individual modules isn't normally encouraged, 
+because it can put your server in an inconsistent and unreproducable state if you aren't careful. Running 
+<code>/reloadaliases</code> by itself (which reloads everything) is recommended. You can also run 
+<code>/reloadaliases -h</code> for the usage instructions and long options list.
+
+===Scripting Examples===
+
+Here are a few more complex examples to get you started on how to use the advanced features of CommandHelper. Because of 
+the Turing completeness of the plugin, it is possible to do far more advanced things.
+
+%%CODE|
+/**
+ * Better tp. If "/tp name" is used, it implies "/tp thisplayer name"
+ * but if "/tp name1 name2" is used, it implies "/tp name1 name2"
+ */
+/tp $p1 [$p2=''] = >>>
+	@player = $p1;
+	if($p2 == ''){
+		@player = player();
+	}
+
+	@playerTo = $p2;
+	if($p2 == ''){
+		@playerTo = $p1;
+	}
+	run('/tp ' . @player . ' ' . @playerTo);
+<<<
+
+/**
+ * Sets the time on the server, and uses english words to set the time
+ * If the english word isn't "day" or "night", it uses the number
+ * Note that the equals operator returns a true value if the two
+ * parameters are the same, and the if/else if chain runs only
+ * one of the code branches, or none, depending on the true/false
+ * value of the arguments.
+ */
+/time $time = >>>
+	@time = $time;
+	if($time == 'day'){
+		@time = 1;
+	} else if($time == 'night'){
+		@time = 13500;
+	}
+	run('/time set '.@time);
+<<<
+
+/**
+ * Give the player 64 each of gold tools
+ * Note that the data_values function uses the enum values of
+ * the material, and we are taking advantage of the autoconcatenation
+ * principal in the first two runs, but not the third.
+ */
+/kit gold = >>>
+	run('/give' player() data_values('gold_pickaxe') 64);
+	run('/give' player() data_values('gold_spade') 64);
+	run('/give ' . player() . ' ' . data_values('gold_axe') . ' 64');
+<<<
+
+/**
+ * Shows help information
+ * This demonstrates how to use die() and msg(). They work basically the same, except
+ * die() kills the command if evaluated. They both send a message to the player.
+ */
+/help [$cmd=''] = >>>
+	if($cmd == ''){
+		die('Do you need help?');
+	} else if($cmd == 'commandhelper'){
+		msg('The best plugin ever!');
+	} else {
+		die('Invalid command specified!');
+	}
+<<<
+
+// Simple hello world scripts
+
+/hello world console = console('Hello Console!');
+/hello world player = msg('Hello Player!');
+%%
+
+===Symbol Table===
+
+In your scripts, there are a few special symbols that are not treated as literals. In the event of a compiler error, 
+it may be helpful to know what each symbol is called. These are as follows:
+
+{| class="wikitable" border="1"
+|-
+! width="15%" | Symbol
+! width="30%" | Name
+! width="55%" | Meaning
+|-
+| # or //
+| comment
+| Denotes that the rest of this line is a comment
+|-
+| /* ... */
+| block comment
+| Everything inside this (newlines included) is a comment. The only thing you can't have inside a block comment is a */ 
+(because that ends the comment)
+|-
+| =
+| opt_var_assign or alias_end
+| If inside an optional variable [$opt='val'], it's an opt_var_assign. Otherwise, it's a alias_end
+|-
+| [ and ]
+| lsquare_bracket and rsquare_bracket
+| Denotes that this variable is optional, if included on the left side of an alias, or accesses an element in an array 
+if used on the right. 
+|-
+| ,
+| comma
+| Separates arguments in a function
+|-
+| ( and )
+| func_start and func_end
+| The start and end of a function. If a literal proceeds the func_start symbol, it is called func_name
+|-
+| New Line
+| newline
+| An 'enter' in the file
+|-
+| >>> and <<< 
+| multiline_start and multiline_end
+| Starts and stops a multiline construct
+|-
+| /
+| command
+| This symbol followed by a literal denotes a command
+|-
+| \
+| separator
+| Separates each macro command
+|-
+| $...
+| variable
+| When a single dollar sign, it is final_var, otherwise variable
+|-
+| @...
+| ivariable
+| This is a variable that can be defined and then used on the right side
+|-
+| ...:
+| label
+| This is a label for commands
+|-
+| All other characters
+| lit
+| Anything not defined above is a lit
+|}
+
+Note that a lit and string are treated the same, however special characters must be put in a string to be treated as 
+literal character. Technically all other special characters are treated as literals, but to make your script compatible 
+with future versions, you must put any non-word character inside a string. 
+
+Note that string concatenation happens automatically (known as autoconcatenation). Let's take the following example:
+%%CODE|
+if(@i == 0){
+     run('/run' 'this' 'command');
+     die('The' 'command' 'has' 'been' 'run');
+} else {
+     run('/run' 'another' 'command');
+}
+%%
+
+In the first run function, we see that '/run', 'this', and 'command' are all technically separate arguments, but because 
+they are not separated by commas, operators, or other symbols, they are automatically concatenated together, using the
+{{function|sconcat}} function, essentially yeilding: '/run this command', as you would expect. This is also the 
+behavior exhibited by a simple alias that uses non-strict formatting: <code>/cmd = /real command</code>. 
+'/real' and 'command' are automatically sconcatenated together, and then run.
+
+===Continued Learning===
+
+Many of the scripting concepts are addressed in greater depth in the Learning Trail, shown below. The MScript topics
+are of great value to go through, and they build off what you have already learned in this tutorial. What is provided
+in this lesson should be enough to get you started with basic script writing, so start trying to apply these concepts
+to your own scripts, and continue going down the learning trail!
+
+{{LearningTrail}}

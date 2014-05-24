@@ -1,0 +1,277 @@
+MethodScript provides various methods for connecting to and running SQL commands.
+The methods exposed ALWAYS use prepared queries, making your code far less prone
+to database injection attacks, as well as better compile time checks where possible.
+
+The SQL framework uses JDBC to connect, so any database backend compatible with
+JDBC can be supported with MethodScript. You must have an SQL server set up and running
+already, which is beyond the scope of this article.
+
+== Configuration ==
+
+To simplify connection information to various databases, MethodScript allows two
+ways of connecting to a server. Either via ''profiles'' or via in code connection
+information. When connecting statically, connection via profiles is the preferred
+solution, since it makes coding easier, and makes it harder to accidentally leak
+database credentials when sharing code. To create a profile, create a file in the
+<code>profiles</code> directory. The name of the file should be the profile name.
+If any directories are in the profiles folder, they are ignored. The profile file
+is an xml style file, which should contain the same information that is used during
+the connection if you were using the query method that takes a connection object,
+however, if the profile doesn't exist at script startup time, it will immediately
+cause an error, instead of waiting until runtime, if possible. If the connection information
+is incorrect, that is a runtime error. Connections to different SQL server types
+may require different connection information, so you'll need to see the connection
+configuration information for each supported server type. In general, the configuration format
+is as follows:
+
+<pre>
+<?xml version="1.0" encoding="UTF-8" ?>
+<profiles>
+	<profile id="profileName">
+		<type>mysql</type>
+		<host>localhost</host>
+		<port>3306</port>
+		<database>db_name</database>
+		<username>username</username>
+		<password>password</password>
+	</profile>
+</profiles>
+</pre>
+
+Essentially, the connection information is specified via xml tags per profile, and
+connections can be referenced by id. In the following tables, the Tag column
+is the xml tag in the profile (in the above example, the username and password
+tags) and the status column tells you if the tag is required or optional. In all
+profiles, the id attribute is required, as is the type element. At startup, the xml is validated,
+and errors are reported, and must be corrected before continuing. 
+The XML must be valid. If these attributes are hard
+coded, then the connection information specified should be specified as an associative
+array, subject to the same policies as the xml for required tags.. For instance,
+
+%%CODE|
+array(type: 'mysql', database: 'db_name', username: 'username', password: 'password')
+%%
+
+is an example of a valid runtime specification for a mysql connection. In any place
+that the profile is specified, an array of this type may be provided instead.
+
+
+=== SQLite ===
+
+SQLite is the simplest SQL version to configure. No extra installation is required,
+as databases are plain files, and is supported out of the box. The base connection
+information required is just the file tag, though other information can be
+specified.
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="20%" | Tag
+! scope="col" width="60%" | Description
+! scope="col" width="20%" | Status
+|-
+| file
+| The path to the sql file. If the path is relative, it is considered relative to this file, however
+absolute paths are recommended, to prevent ambiguity.
+| Required
+
+|}
+
+
+=== MySQL ===
+
+MySQL requires a separate MySQL server to be running, either remotely or locally.
+For more information about setting up a MySQL server, look for more information
+on the MySQL website: http://www.mysql.com/
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="20%" | Tag
+! scope="col" width="60%" | Description
+! scope="col" width="20%" | Status
+|-
+| database
+| The name of the database you are connecting to
+| Required
+|-
+| username
+| The username you are connecting with.
+| Optional
+|-
+| password
+| The password you are connecting with.
+| Optional
+|-
+| host
+| The host you are connecting to. If not specified, "localhost" is assumed.
+| Optional
+|-
+| port
+| The port you are connecting to. If not specified, 3306 is assumed.
+| Optional
+|}
+
+== Making a query ==
+
+All queries use a standardized form of SQL provided by Java, though vendor specific
+SQL statements are supported, depending on the connection type. Learning SQL is
+beyond the scope of this article, and the article assumes you know at least basic
+SQL, however, if you need a refresher, [http://www.w3schools.com/sql/ this site]
+can provide a basic tutorial. Additionally, the [http://dev.mysql.com/doc/refman/5.6/en/ MySQL reference manual]
+is very well written, and most of the information in it will apply to other database
+systems as well. You may also consider purchasing a book on SQL for more in depth learning.
+
+The {{function|query}} function is the basis for all queries. Connections are
+automatically kept for the duration of the script, so there is no need to worry
+about manually opening and closing connections to the server; the runtime will
+handle that for you. During each query, there are only two required parameters,
+the connection information (either a profile name or a connection array) and
+the query itself (and any statement parameters). 
+All queries use a "prepared statement" format, which ensures that SQL injections are not possible.
+
+{{TakeNote|text=Though you can bypass prepared queries by doing concatenation, this is
+extremely bad practice, and will cause a warning to be issued. Query strings should
+be hardcoded and the prepared statement engine will insert the parameters automatically
+and safely.}}
+
+The query function returns an array (in the case of a select) or various other
+return types, depending on the SQL statement. For selects, an array of associative arrays
+with the results is returned. For inserts, null is returned, unless the statement used an auto-increment, in which
+case, that value is returned. Deletes and updates return the number of rows affected. All
+other operations return null. 
+
+Some common examples follow, though the full SQL language is available.
+
+=== SELECT ===
+A simple SELECT:
+
+%%CODE|
+@result = query('profileName', 'SELECT * FROM `table` WHERE id=?', @id)
+
+/*
+ * The returned result would look something like this:
+ * array(
+ *     array(columnName: 'value1'),
+ *     array(columnName: 'value2')
+ * )
+ */
+foreach(@result, @row){
+	msg(@row['columnName'])
+}
+%%
+
+As you can see, the id is automatically placed into the statement, no escaping
+required, and there is still a guarantee that no SQL injections will occur. Essentially,
+if @id were a string, this would translate into the following code:
+
+%%CODE|
+query('profileName', 'SELECT * FROM `table` WHERE id=\''._escape_this_parameter(@id).'\'')
+%%
+
+which as you can see could much more likely lead to errors or unsafe usage, and is much
+harder to read.
+
+A more complex SELECT:
+
+%%CODE|
+@results = query(array(type: 'mysql', database: 'db_name', username: 'username', password: 'password'),
+	'SELECT `table1.id`, `table2.name` FROM `table1` JOIN `table2` ON `table1.attribute`=`table2.attribute`'
+	.' WHERE `status`=? AND `online`=1 AND `group`=?', @status, @online)
+%%
+
+=== INSERT ===
+
+This statement is used for inserting rows into your table. You can use this in two different ways shown below. 
+The returned result would be the first rownumber that was added (with auto increment) or null.
+
+%%CODE|
+@result = query('profileName', 'INSERT INTO `table` '
+                              .'VALUES(?, ?, ?), (?, ?, ?)'
+                             , 'CommandHelper', 'descCH', 9001,
+                               'WorldEdit', 'descWE', 8999
+                )
+
+@result = query('profileName', 'INSERT INTO `table`(?, ?) '
+                              .'VALUES(?, ?), (?, ?)'
+                             , 'Plugin', 'Description', 
+                               'WorldGuard', 'descWG', 'Craftbook', 'descCB'
+                )
+
+/*
+ * Notice there are no column names in the first example, this means that these are not necessary.
+ * Below you can see a table that displays the rows we just inserted, there are three columns 
+ * but only 2 are specified in the second query, 
+ * this means that only 2 are going to get filled and the rest are set to null. 
+ * Going by this the first query is can be changed by this one.
+ */
+
+@result = query('profileName', 'INSERT INTO `table`(?, ?, ?)'
+                              .'VALUES(?, ?, ?), (?, ?, ?)'
+                             , 'Plugin', 'Description', 'Downloads',
+                               'CommandHelper', 'descCH', 9001,
+                               'WorldEdit', 'descWE', 8999
+                )
+
+%%
+
+This is the table generated by the first two queries.
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="20%" | Plugin
+! scope="col" width="60%" | Desc
+! scope="col" width="20%" | Downloads
+|-
+| CommandHelper
+| descCH
+| 9001
+|-
+| WorldEdit
+| descWE
+| 8999
+|-
+| WorldGuard
+| descWG
+| null
+|-
+| Craftbook
+| descCB
+| null
+|}
+
+=== UPDATE ===
+
+This statement is used for updating existing rows in your table. For example, 
+we may want to add 250 downloads to each plugin.
+
+%%CODE|
+@result = query('profileName', 'UPDATE `table`'
+                              .' SET Downloads=Downloads+250'
+                )
+
+/*
+ * The UPDATE statement also allows for using conditions, as shown below.
+ */
+
+@result = query('profileName', 'UPDATE `table`'
+                              .' SET Downloads=Downloads+250'
+                              .' WHERE Plugin=?'
+                             , 'CommandHelper'
+                )
+%%
+
+=== DELETE ===
+
+%%CODE|
+@result = query('profileName', 'DELETE FROM `table`')
+
+/* 
+* WARNING using this code will delete all rows in your table, check the second query for the use of conditions.
+* @result = null
+*/
+
+@result = query('profileName', 'DELETE FROM `table` WHERE column1=?', @value1)
+
+/* This will delete all rows where the value in column1==@value1 */
+%%
+
+{{LearningTrail}}

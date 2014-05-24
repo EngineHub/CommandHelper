@@ -1,0 +1,272 @@
+{{staged}}
+
+Arrays are a way to group multiple pieces of data together into one variable. Arrays are created with the {{function|array}} function, and can be manipulated with the array_* series of functions. Arrays also function like a map, or an [http://en.wikipedia.org/wiki/Associative_array associative array].
+
+==Array Creation==
+To create an array, you use the {{function|array}} function. Sending no arguments creates an empty array, or you can also send any number of arguments, and the array will be initialized with those elements.
+%%CODE|
+msg(array(1, 2, 3, 4))
+#Outputs {1, 2, 3, 4}
+%%
+
+Alternatively, to create an empty associative array, you can use {{function|associative_array}}.
+
+==Arrays stored in variables are references==
+Once you create an array, you typically store it in a variable for further operations, like so: <code>assign(@array, array())</code>. Once you have created an array like this, it is a reference to the array itself, so if you were to assign it to another variable, and then set the value in that variable, it will change the original array too. So, this would be the case:
+%%CODE|
+assign(@array, array(1, 2)) 
+assign(@array2, @array) 
+array_set(@array, 0, 2) 
+msg(@array) #Sends {2, 2}
+msg(@array2) #Also sends {2, 2}
+%%
+
+If you need a distinct copy of an array, you can make one by calling {{function|array_get}} with just one parameter, the array.
+%%CODE|
+assign(@array, array(1, 2)) 
+assign(@array2, array_get(@array)) 
+array_set(@array, 0, 2) 
+msg(@array) #Sends {2, 2}
+msg(@array2) #Sends the original values: {1, 2}
+%%
+
+===array_set using assign() (or <nowiki>==</nowiki>)===
+As of 3.3.0, it is possible to set the value of an array directly, with {{function|assign}}.
+
+%%CODE|
+assign(@array[0], 'value') # Equivalent to array_set(@array, 0, 'value')
+%%
+
+If you start to use multi dimensional arrays and associative arrays, this advantage becomes clearer:
+
+%%CODE|
+assign(@array['value']['sub-value']['sub-sub-value'], 'string')
+%%
+
+In addition, now if a variable is used as an array, it is converted to an array automatically when using <code>assign()</code>. Let's see an example:
+
+%%CODE|
+assign(@value, 'This is a plain old string') # Value now has a string in it
+msg(@value) # Echoes out "This is a plain old string"
+
+assign(@value[0], 'array') # Now @value is an array, and the string has been overwritten
+msg(@value) # Echoes {array}
+%%
+
+This behavior only happens when using <code>assign()</code>; if you use {{function|array_set}}, it will still complain if you don't send an array as the first argument.
+
+===array_push using operators===
+
+There is special syntax to do an array push as well. The following two blocks of code are equivalent.
+%%CODE|
+@array = array()
+@array[] = 1
+@array[] = 2
+%%
+
+Is the same as
+
+%%CODE|
+@array = array()
+array_push(@array, 1)
+array_push(@array, 2)
+%%
+
+Note that this is different than the array clone operator, as it only works as an array
+push when used on the left hand side of an assignment, so <code>@array[] = 5</code>
+is an array push operation, and <code>@newArray = @array[]</code> is an array clone operation.
+
+==Retrieving values==
+Now, the {{function|array_get}} function is how you retrieve a value from an existing array.
+
+%%CODE|
+msg(array_get(array(1, 2, 3), 2))
+#Outputs 3
+%%
+
+In all cases, this is exactly equivalent to the following notation:
+
+%%CODE|
+msg(array(1, 2, 3)[2])
+%%
+Much quicker. The only place this might be slightly confusing is the case of the single parameter <code>array_get()</code>.
+<code>array_get(@array)</code> is equivalent to <code>@array[]</code>
+
+It is worth noting that this square bracket notation is just a shortcut to using <code>array_get</code>. In fact, the compiler
+just uses a little magic under the covers to convert the bracket notation into the array_get notation. This means that if you
+mess up the syntax somehow, you will still get an error for array_get, even if you aren't actually using that function. In
+all the following examples, this guide will use the bracket notation, though you are free to use whichever method you like.
+
+==Complex Retrievals==
+
+In addition to the simple case of retrieving a single value from an array, MScript has support for negative indices, and array slices.
+
+===Negative Indices===
+Consider the following array:
+%%CODE|
+assign(@a, array(a, b, c, d, e))
+%%
+
+In typical fashion, the element <code>a</code> has an index of 0, and <code>e</code> has an index of 4. These two elements could also be referenced with -5 and -1, respectively. Therefore, when considering indexes, <code>array(0, 1, 2, 3, 4)</code> and <code>array(-5, -4, -3, -2, -1)</code> are equivalent. Note that when counting with negative indices, -1 refers to the right most element, because -0 and 0 are the same thing. If this is confusing, think of it this way: <code>@array[multiply(@n, -1)] == @array[subtract(length(@array), @n)]</code>
+
+===Array Slicing===
+You can also get a sub array from an array with array slicing. Using the <code>..</code> notation, you can specify the range of elements you wish to include in the sub array.
+
+Consider the following examples:
+%%CODE|
+array(a, b, c, d, e)[1..2] #Returns {b, c}
+array(a, b, c, d, e)[3..4] #Returns {d, e}
+%%
+
+You can also chain gets:
+%%CODE|
+array(a, array(1, 2), c, d, e)[0..1][1][0] #Returns 1
+%%
+
+In addition, you may use negative indices in either slot.
+
+%%CODE|
+array(a, b, c, d, e)[1..-1] #Returns {b, c, d, e}
+array(a, b, c, d, e)[0..-1] #Returns the whole array, equivalent to array(a, b, c, d, e)[]
+%%
+
+There are also two shortcuts when you want to select from the beginning of the array, or to the end of the array:
+
+%%CODE|
+array(a, b, c, d, e)[..1] #Returns {a, b}, equivalent to [0..1]
+array(a, b, c, d, e)[2..] #Returns {c, d, e}, equivalent to [2..-1] or [2..4]
+%%
+
+If the last index is less than the first index, an empty array is returned
+
+%%CODE|
+array(1, 2, 3, 4, 5)[3..0] #Returns {}
+%%
+
+Using this method of slicing requires the numbers to be hardcoded in, since this is a language construct. This makes it impossible to do dynamic slices using this method. Instead, you must use the {{function|cslice}} function if you wish to do this dynamically.
+
+%%CODE|
+assign(@a, array(1, 2, 3, 4, 5))
+assign(@start, 0)
+assign(@finish, 2)
+msg(@a[cslice(@start, @finish)]) #Returns {1, 2, 3}
+%%
+
+==Associative Arrays==
+Arrays can also be used like an associative array. Typically, a simple array is indexed with zero-based, consecutive integers only. However, in an associative array, you may also use strings to index the array, or out-of-order integer offsets. Arrays by default operate in normal mode, and once they are switched to associative mode, certain features (namely negative indexes) will no longer work. Further, once an array is switched to associative mode, it is not possible to switch them back. Technically, all indexes are stored as strings. This means that @array[0] and @array['0'] refer to the same thing. If you are familiar with other languages, this behavior is slightly different.
+
+===Creating an associative array===
+There are two ways to create an associative array. One is to create a completely new array, and the other is to take an existing array and turn it into an associative array.
+%%CODE|
+assign(@arr, array('string key': 'value', 'string key 2': 'value'))
+%%
+This creates an array with two values. Note that it is required to put quotes around the key if it contains spaces. Otherwise, bare strings are acceptable (and usually preferred). To access the values, one would use:
+%%CODE|
+@arr['string key'] #Returns 'value'
+%%
+
+The other approach is to take an existing array, and set an out-of-order key into it, or a string key.
+%%CODE|
+#Create a new, normal array
+assign(@arr, array(0, 1, 2, 3))
+array_set(@arr, 4, 4) #Still normal, because this is the index array_push would have put it in anyways.
+array_set(@arr, 0, 0) #Still normal, because this element already exists
+array_push(@arr, 5) #Still normal, this value was pushed onto index 5. The array looks like this now: {0, 1, 2, 3, 4, 5}
+#Note also that array_push doesn't accept a index, so we cannot create an associative array ever with it.
+array_set(@arr, 'key', 'value') #Now it is associative
+array_set(@arr, 10, 'value') #This also would make it associative
+%%
+
+If you use {{function|array_push}} on an associative array, it will take the largest integer + 1 in the array to be the next key.
+
+Only strings are acceptable for keys. If you use another data type, it is interpreted perhaps differently than you would want, so note the following conventions:
+*integers are taken as a string
+*null is taken as an empty string: ''
+*doubles are taken as a string
+*true and false are taken as string '1' and '0', respectively.
+*arrays will cause a runtime exception to be thrown.
+
+One word of warning, the following will not do what you expect:
+%%CODE|
+array(0: 0, 5: 5, 1) #1 gets inserted at index 6
+%%
+The above is exactly identical to:
+%%CODE|
+assign(@arr, array())
+array_set(@arr, 0, 0)
+array_set(@arr, 5, 5)
+array_push(@arr, 1)
+%%
+Because we are explicitly creating an associative array here, an unlabeled value is essentially pushed on. 1 is pushed onto index 6 because when pushing a value onto an array, the highest integer index + 1 is used as the insertion point. If no integer indexes exist yet, it is inserted at 0, but if there are only negative indexes, it is inserted at one above the highest negative index.
+
+===Iterating Associative Arrays===
+As stated earlier, some functionality is not available to an associative array. Typically though, if you are using an associative array, you aren't thinking of it as an ordered set of elements, you are thinking of it more like an object that has properties. Iterating through all the elements doesn't usually assume any particular order. This is where the {{function|foreach}} function comes in most handy. The elements are sorted according to their ''natural ordering'', that is, 1 comes before 2, a comes before b, etc, however there may be gaps in the array, i.e. 0, 1, 4, 5, 10. Therefore looping through the array with {{function|for}} usually isn't useful. There is one drawback to using foreach however, if you also need to know the key when iterating through, it isn't possible. That's where the {{function|array_keys}} function comes in. This returns a normal array of all the keys in the array. This array can be iterated against, and then used to pull out the value as well.
+
+%%CODE|
+assign(@arr, array(0, 1: 1, 2, 3: 3, a: 'a'))
+#Array looks like: {0: 0, 1: 1, 2: 2, 3: 3, a: a}
+foreach(array_keys(@arr), @key, #array_keys returns {0, 1, 2, 3, a}
+    msg(@arr[@key]) #Messages the value
+)
+%%
+Otherwise, if you don't need the key, you may use the foreach normally.
+%%CODE|
+foreach(@arr, @val
+    msg(@val)
+)
+%%
+
+If you want to convert an array back to a normal array, you may use the {{function|array_normalize}} function. This will return a new, non-associative array with the elements in their natural order, starting with index 0. All information about the keys will be lost however.
+
+Negative indexes don't work the same in an associative array, but that's not to say that negative indexes don't work at all. If you insert a negative index into the array, it will be available when you select it with a negative index.
+%%CODE|
+assign(@arr, array(-1: -1, 0, 1, 2: 2))
+msg(@arr[-1]) #Returns -1, NOT 2, like one might initially expect
+%%
+
+Because in particular this behavior is different, if you aren't sure if an array is associative or not, you can use the {{function|is_associative}} function. Array slicing doesn't work either, because you might in fact have a key with the index "0..1". If you do need to slice an associative array, and you don't care about the keys, you can use the <code>array_normalize()</code> function, and slice that. To copy an associative array, use the empty bracket notation.
+
+==Strings are sort of arrays==
+Strings behave like an array of characters, to an extent. You can access a character in a string as if the array were an array of characters. Also, slicing works in a string as well, so you can get a substring easily also. Strings are immutable however, so trying to set a character in a string will not work. 
+
+%%CODE|
+msg('Hello World!'[0]) #Returns 'H'
+msg('Slice!'[2..]) #Returns 'ice!'
+%%
+
+==Cloning an array==
+
+To make a deep copy of an array, you can use the array clone mechanism. 
+
+%%CODE|
+assign(@a, array(1, 2, 3))
+assign(@b, array_get(@a))
+assign(@a[1], 10)
+msg(@a) # {1, 10, 3}
+msg(@b) # {1, 2, 3} As you can see, the second array is unaffected by the assignment
+%%
+
+Additionally, there is a shorthand syntax for the no argument array_get:
+%%CODE|
+assign(@b, @a[])
+%%
+
+Note that this is a ''deep copy'' operation, which means that the clone is recursive. So arrays within the array are also cloned. 
+
+== Trailing Commas ==
+
+Trailing commas are allowed in arrays (and actually all functions, however, this is most useful in arrays). For instance, you can do the following:
+
+%%CODE|
+array(
+	1,
+	2,
+	4,
+	3,
+)
+%%
+
+This is useful, because if you realize that you've misordered 3 and 4, you can cut and paste the entire line,
+and not have to worry about adding or removing a comma. Double commas are not allowed, however.
+
+{{LearningTrail}}

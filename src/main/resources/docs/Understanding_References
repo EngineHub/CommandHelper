@@ -1,0 +1,201 @@
+In mscript, all values are passed by value of a reference, and assignments are too. However,
+primitives do not have a "reference," so are simply passed by value of.
+It is important to understand what this means in terms of how this will affect your code. Since
+this is a difficult concept to understand even for seasoned programmers, the concept will
+be described through examples.
+
+==Reference vs. Value==
+In programming in general, when you create a variable, it can be created in two ways,
+it can either create a new object/value, or it can simply point to an existing one.
+When you have a ''pointer'' to an existing value, it works much like a symlink on
+a file system; making changes to a pointer actually makes changes to the value pointed
+to. However, assignments (and by extension passing a value to a procedure) change what
+value the variable points to. For primitives, that is, a string or a number, this concept
+doesn't actually matter, because you can't "change" the underlying primitive value, you
+can only reassign a new value to the existing variable, and that assignment doesn't affect
+other variables.
+
+This code demonstrates assignment by value of primitives.
+%%CODE|
+	@a = 1;
+	@b = @a; # Note we are assigning @b to @a
+	msg(@a); # Msg's 1
+	msg(@b); # Also msg's 1
+	@a = 5; # Now we are assigning something different to @a
+	msg(@a); # Msg's 5
+	msg(@b); # Msg's 1 still
+%%
+
+As you can see, even though @b is assigned to @a, since it is actually assigned by
+value, changing the value of @a does not affect @b. This mechanism works in all cases for arrays
+as well.
+
+%%CODE|
+	@a = array(1, 2, 3);
+	@b = @a;
+	msg(array_implode(@a, ', ')); # Msg's 1, 2, 3
+	msg(array_implode(@b, ', ')); # Msg's 1, 2, 3
+	@a = array(4, 5, 6);
+	msg(array_implode(@a, ', ')); # Msg's 4, 5, 6
+	msg(array_implode(@b, ', ')); # Still msg's 1, 2, 3
+%%
+
+When we do the second assignment to @a, we aren't changing the ''value'' of what's
+being pointed to, we are simply changing what we are pointing to.
+
+Now, let's look at changing the underlying value of an array.
+
+%%CODE|
+	@a = array(1, 2, 3);
+	@b = @a;
+	msg(array_implode(@a, ', ')); # Msg's 1, 2, 3
+	msg(array_implode(@b, ', ')); # Msg's 1, 2, 3
+	array_set(@a, 0, 4);
+	array_set(@a, 1, 5);
+	array_set(@a, 2, 6);
+	msg(array_implode(@a, ', ')); # Msg's 4, 5, 6
+	msg(array_implode(@b, ', ')); # Now msg's 4, 5, 6
+%%
+
+As you can see, we are now changing the underlying value, instead of completely changing what
+value as a whole @a references. What might be confusing is that assignments provide a convenience method
+for setting values in arrays, so this code performs the same way:
+
+%%CODE|
+	@a = array(1, 2, 3);
+	@b = @a;
+	msg(array_implode(@a, ', ')); # Msg's 1, 2, 3
+	msg(array_implode(@b, ', ')); # Msg's 1, 2, 3
+	@a[0] = 4;
+	@a[1] = 5;
+	@a[2] = 6;
+	msg(array_implode(@a, ', ')); # Msg's 4, 5, 6
+	msg(array_implode(@b, ', ')); # Now msg's 4, 5, 6
+%%
+
+Keep in mind that it's not ''really'' an assign, however, it's simply an array_set() wrapped
+up in a more aesthetic syntax.
+
+When you think of sending parameters to a procedure as assign()'s, it becomes easier to see
+how the same concept applies to a proc as well.
+
+%%CODE|
+
+proc(_myProc, @a, @b){
+	@a = array('a', 'b', 'c');    # This call might actually get optimized out 
+										# entirely since it's not used, but 
+										# anyway, it has no effect
+
+	@b[0] = 4;
+	@b[1] = 5;
+	@b[2] = 6;
+}
+
+@myA = array(1, 2, 3);
+@myB = @myA;
+
+msg(array_implode(@myA, ', ')); # msg's 1, 2, 3
+msg(array_implode(@myB, ', ')); # msg's 1, 2, 3
+_myProc(@myA, @myB);
+msg(array_implode(@myA, ', ')); # msg's 4, 5, 6
+msg(array_implode(@myB, ', ')); # msg's 4, 5, 6
+
+%%
+
+As you can see here, though @a was re-assigned in the procedure, it did not affect
+@myA, as you can essentially think of the procedure call as working by doing several
+mini-assignments: assign(@a, @myA) assign(@b, @myB). When we change the assignment
+of @a inside the procedure, @myA is not affected, however changing the internals of
+the value @b, that does affect @myB (and by extension @myA, since @myA points to @myB).
+
+If we seemingly "''inline''" (we actually aren't inlining it, see below) 
+the procedure, we get different results though:
+
+%%CODE|
+@myA = array(1, 2, 3);
+@myB = @myA;
+
+msg(array_implode(@myA, ', ')); # msg's 1, 2, 3
+msg(array_implode(@myB, ', ')); # msg's 1, 2, 3
+# _myProc:
+@myA = array('a', 'b', 'c');
+@myB[0] = 4;
+@myB[1] = 5;
+@myB[2] = 6;
+
+msg(array_implode(@myA, ', ')); # msg's a, b, c <- Note the difference here
+msg(array_implode(@myB, ', ')); # msg's 4, 5, 6
+
+%%
+
+This works differently, because we have forgotten that a procedure call introduces
+an extra "assignment" before it runs. To truly "inline" a procedure, we must do an
+assignment beforehand, so something like this:
+
+%%CODE|
+@myA = array(1, 2, 3);
+@myB = @myA;
+
+msg(array_implode(@myA, ', ')); # msg's 1, 2, 3
+msg(array_implode(@myB, ', ')); # msg's 1, 2, 3
+
+# This bit duplicates the implied assignments done by the procedure
+@a = @myA;
+@b = @myB;
+
+#_myProc:
+@a = array('a', 'b', 'c');
+@b[0] = 4;
+@b[1] = 5;
+@b[2] = 6;
+
+
+msg(array_implode(@myA, ', ')); # msg's 4, 5, 6 <- Now it's back to what it was with an actual procedure
+msg(array_implode(@myB, ', ')); # msg's 4, 5, 6
+
+%%
+
+== Why the differences? ==
+
+An array could be quite large, so copying it around each time it is assigned could severely impact
+performance and memory usage. So by default, it copies the reference instead of the value (which is constant
+sized and much smaller typically), however, the easy
+clone operator means that you can quickly copy the value, without much hassle, if that's truly
+what you need.
+
+%%CODE|
+# Copy by reference
+@array1 = array(1, 2, 3);
+@array2 = @array1;
+@array1[0] = 'a';
+msg(@array1); # msg's a, 2, 3
+msg(@array2); # msg's a, 2, 3
+%%
+
+The above example copied by reference, as was explained in the earlier section. Changes
+to @array1 are reflected in @array2, because they both "point" to the same array. The
+variable itself only contains a reference to the array, not the value of the array itself.
+Contrast this to a cloned array, which copies the value over:
+
+%%CODE|
+#Copy by value
+@array1 = array(1, 2, 3);
+@array2 = @array1[]; #Note the clone operation here
+@array1[0] = 'a';
+msg(@array1); # msg's a, 2, 3
+msg(@array2); # msg's 1, 2, 3
+%%
+
+In this example, the value wasn't changed in array2. However, this comes at a cost.
+For large arrays, we now have two mostly identical copies of the array in memory. Sometimes
+this is required, and if so, there's nothing that can be done. But since most often this
+isn't strictly required, there's no point in eating up more memory than we actually
+need. Why aren't primitives handled the same way then? Well, actually, strings are
+reference based, thanks to the way the JVM works, but since they aren't modifiable,
+assigning by reference or value doesn't make a difference. But for other primitives,
+passing by value is done because there is no memory hit for reference vs value, because
+in general, the memory used to "point" to an int will be the same as just keeping the
+value of the int itself, but the extra layer of abstraction would slow down accesses.
+So passing by value makes more sense for primitives. 
+
+{{LearningTrail}}

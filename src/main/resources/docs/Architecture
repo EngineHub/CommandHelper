@@ -1,0 +1,280 @@
+CommandHelper has grown into quite a large plugin from its humble beginnings as a simple alias plugin. 
+Due to this, if you desire to contribute to CommandHelper, you may not even know where to begin! This 
+document will hopefully get you at least pointed in the right direction, though there is no replacement 
+for digging through the code some yourself. This document is just going over the high level details, and 
+won't cover anything too specific, and is not aimed at the typical user, though it will not cover 
+anything too java specific. Also included are sections that cover the testing architecture, and build process.
+
+==Core Architecture==
+There are 5 main "components" to CommandHelper, each of which is addressed separately below, 
+and a final section speaks as to how they all integrate with each other. Pictures are good, 
+right? Here's a picture that shows on a high level how the various components work together.
+
+[[File:CHDiagram.png]]
+
+===Core===
+The core is what glues everything together. The core knows how to register the plugin with 
+bukkit, handles the builtin commands, and manages the user aliases. When the plugin starts 
+up initially, it starts in bukkit specific code, which sets the abstraction layer type, as 
+well as hands control off to the more generic core.
+
+
+===Compiler===
+The compiler takes the source code it is given, then lexes, parses and optimizes it. Lexing 
+turns the raw string into tokens, parsing turns the token stream into a tree, and the 
+optimizer takes out unneeded code paths, and converts optimizable function calls into single 
+values (such as turning "2 + 2" into 4). Then, it passes the parse tree to the execution 
+mechanism, which preprocesses the alias files, which stores each alias's execution tree in 
+memory. The main.ms file is also executed, and if it registers any events, those registrations 
+are also stored in memory, to be executed when an applicable event occurs. Technically, 
+this mechanism is part of the Compiler proper, however it is really a separate mechanism, 
+and could easily be split off from the actual compilation procedure, so in the future, if 
+the compiled tree were to be saved to disk for instance, this could easily be accomplished 
+in the future. In addition, because the Abstract Syntax Tree is separate at this point, 
+much of the battle is done to turning this into a full blown compiler; compiling to some 
+other platform's native code base (for instance, DCPU).
+
+====Lexing====
+[http://en.wikipedia.org/wiki/Lexing Lexing] looks at each individual character in the 
+source code, and turns it into tokens. So, for instance, given the source code "1 + 1" 
+it would parse the 5 characters into 3 separate tokens, a number, a plus symbol, and a 
+number. At this point, only a few compile errors can be caught, for instance, an incomplete 
+string, but from this point on, it's much easier to gather meaning from the tokens.
+
+====Compiling====
+The compiler takes the tokens and turns them into a parse tree. So, given the following code, 
+it will be converted to this parse tree:
+
+%%CODE|
+msg(if(@variable, 'True text', 'False text'))
+%%
+
+[[File:ParseTree.png]]
+
+You can see that it roughly corresponds with each token being it's own node, and 
+"(" denoting a child beginning, "," denoting a sibling, and ")" denoting the end of 
+a node's children. This is more or less how the compiler actually works. In the first 
+stage, things like symbols aren't fully parsed yet, and things like array access 
+notation <nowiki>([ ])</nowiki> complicate things, so the tree looks a bit funny, 
+but the optimization step turns "1 + 1" into "add(1, 1)", and "@var[1]" to "array_get(@var, 1)" 
+which then finishes up creating a full parse tree where everything is a function.
+
+====Optimizing====
+
+Optimization is the final compilation step. There is one step that is required to 
+finish up the parse tree, which is sort of still a part of compiling, but is in the 
+optimization stage nonetheless. The "%%GET_FUNCTION_FILE|__autoconcat__%%" function is automatically placed 
+in the tree during compiling, which is what the compiler does to offload infix parsing 
+to other code, as well as other complicated constructs like <nowiki>[ ]</nowiki>. 
+The __autoconcat__ function isn't a function per se, but it implements Function so 
+that it can easily be integrated into the rest of the ecosystem. By the time 
+optimization is done, ALL __autoconcat__ functions will have been converted to something else.
+
+Optimization is a decent challenge, because you must ensure that any optimization 
+you do has zero side effects on the code's behavior. One of the simplest ideas 
+behind optimization though, is to go ahead and run code that can be run at compile time, 
+assuming it will ALWAYS have the same results, and does not require any external 
+inputs/outputs, including user input, dynamically linked functionality, or other 
+environment settings. So, for instance, if you put "1 + 1" in code, we know that 
+it will ALWAYS be 2, so we can go ahead and "run" that at compile time. This prevents 
+us from having to recalculate 1 + 1 each time the code is run. A good example of this 
+being used in practice is when a function takes milliseconds, and several seconds or 
+minutes are desired. Instead of putting the magic number 300000, a user might type 1000 * 60 * 5, 
+which is more easily read as "five minutes". However, there should be no performance 
+penalty for doing this, because 1000 * 60 * 5 is ALWAYS 300000, no matter what other 
+things the user types in. (Also, 1000 * 60 * @var is always 60000 * @var, so we can 
+do some optimization even if there is some user input.)
+
+You can also think of this as a ''code transformation'', which is the base functionality 
+of optimization. We want to transform all code into more efficient versions, without the 
+user having to know or care about these optimizations.  For instance, take the following code:
+
+%%CODE|
+if(@var1){
+    if(@var2){
+        msg('Both var1 and var2 are true')
+    }
+}
+%%
+
+This is exactly equivalent to:
+
+%%CODE|
+if(@var1 && @var2){
+    msg('Both var1 and var2 are true')
+}
+%%
+
+The question at this point is "which is more efficient?" Only through profiling can 
+we actually determine this, but constructs like this can be objectively measured and 
+transformed into the more efficient version, without the coder ever having to worry 
+about it. (BTW, turns out the second one is more efficient). In MethodScript, each 
+function is in charge of its own optimization. This makes it easier for core language 
+features to be added and optimized quite easily, as well as organizes the code a bit better. 
+Many functions can be optimized in a similar way too, so there is a framework in place for 
+handling much of the optimizations generically (and in fact ties into the documentation too). 
+To see if an individual function supports optimizations, check to see if it implements 
+%%GET_SIMPLE_CLASS|.*|Optimizable%%, which will then tell you more about the optimization techniques it uses.
+Each function has the ability to transform itself, based on analysing its child nodes.
+
+Many functions cannot be optimized, because they inherently access inputs or outputs, and 
+other functions can only be optimized if the input to them is ''fully static'', that is, 
+there are no variables. Variable tracking is not yet implemented, but once it is, that 
+will allow for automatic detection of variables that are guaranteed to be a certain 
+value at certain points in the code. For instance, 
+
+%%CODE|
+@var = 1
+if(@var == 1){
+    msg('Var is 1')
+}
+%%
+
+currently is not optimized, because it is usually unknown what the value of @var 
+would be, but as you can see, at least at the point that the if statement is 
+checked, it will in fact always be 1, so we could optimize this to
+
+%%CODE|
+@var = 1
+msg('Var is 1')
+%%
+
+===Annotation Processor and meta programming===
+CommandHelper makes heavy use of annotations to provide functionality. Annotations are
+a [http://docs.oracle.com/javase/1.5.0/docs/guide/language/annotations.html Java feature]
+that provides a way to "meta program" in Java. An annotation is a "tag" that can be
+use to mark various methods, fields, classes, or other constructs in that Java language.
+This meta programming allows for several different advantages, the main one in CommandHelper
+being the ability to maintain all information about classes in one place, instead of
+spreading the information around several different files. In general, when adding a new
+class, it is customary to copy paste another class, then modify it. The ability to do
+this in one place, instead of having to modify an existing list manually is following
+a principal known as the [https://en.wikipedia.org/wiki/Open/closed_principle open/closed]
+principal, and is one of the key components of a [https://en.wikipedia.org/wiki/SOLID_%28object-oriented_design%29 SOLID]
+architecture. It also enables easier Dependency Injection, one of the other heavily followed
+design principles. In general, CommandHelper uses annotations to mark events, functions,
+and other resources for addition to the api, and inherently allows for one-to-many relationships
+between code. An additional feature that CommandHelper includes is a 
+%%GET_SIMPLE_CLASS|.*|ClassDiscovery%% utility class, which provides the means
+to dynamically discover the constructs that are tagged with the various annotations,
+as well as providing other methods for meta class discovery for java sources that
+aren't aware of CommandHelper.
+
+
+===Abstraction Layer===
+The abstraction layer handles all communication between CommandHelper and Bukkit. 
+It is the only place in the code that should directly reference bukkit. All methods 
+of communication from CommandHelper to Bukkit are defined as interfaces, which 
+must be implemented once per server type, but are all that are required to be 
+implemented to add another server type. This will allow for easier migration to 
+and from Bukkit and other server mods, with minimal effort on the part of the 
+programmer. There is a disadvantage of code being harder to trace, but if you 
+use the tools available to you in an IDE, this should not be a huge barrier, 
+and the advantages far outweigh the problems.
+
+===Functions===
+For a function to exist, it must tag itself with @%%GET_SIMPLE_CLASS|.*|api%%, and implement %%GET_CLASS|.*|Function%%. 
+In most cases, it may extend %%GET_SIMPLE_CLASS|.*|AbstractFunction%%, and most likely not have to override anything. 
+Details about what each method expects is covered in source comments. The main method however, 
+exec is worth discussing. It is passed a %%GET_SIMPLE_CLASS|.*|Target%%, 
+an %%GET_SIMPLE_CLASS|.*.environments|Environment%%, and an array of %%GET_SIMPLE_CLASS|.*|Construct%%s. 
+At this point, all the Constructs are guaranteed to be atomic values, and if preResolveVariables 
+returns true (the default) they will not be %%GET_SIMPLE_CLASS|.*|IVariable%%s either. This means that the function will 
+only need to be able to deal with the primitive types: integer, double, string (and as a side 
+effect, void also, however that will act like an empty string), null, and arrays. (Very special 
+cases may have to deal with other data types, but those are primarily optimized out, and in any 
+case can be handled like strings.) In most cases, the %%GET_SIMPLE_CLASS|.*|Static%% class provides methods for converting 
+Constructs into Java primitives, and automatically throwing exceptions should a value be 
+uncastable to the said type. The code target indicates where in the codebase this function 
+is occurring in, and should be provided to any exception that is thrown, or can otherwise 
+be used by some functions. The Environment contains other information about the current execution 
+environment, which can be freely used inside the function.
+
+===Events===
+
+==Testing Architecture==
+
+You may have noticed that CommandHelper has a large base of unit tests. I take automated 
+testing very seriously; there is no way for me to scale up and maintain any semblance of 
+quality without automating as much testing as possible. This is where the unit tests come 
+in. Each time a new build occurs, all the unit tests are run, and failing tests are reported, 
+and very quickly fixed. If a unit test covers a use case, you can more or less bank on that 
+particular use case working in the final product. This allows you to have much higher confidence 
+in the product, despite most functionality not being manually tested before a release.
+
+===JUnit===
+
+===Mockito===
+
+===PowerMock===
+
+==Build Architecture==
+
+For the most part, because we use maven, building CommandHelper is as trivial as running 
+<code>mvn clean install</code>, but it is nice to understand what actually happens when 
+you do that, and what things could cause that to go wrong.
+
+===Git/Github===
+
+CommandHelper uses git as its version control system, and the code is hosted on github. 
+To get the source, you can use <code>git clone https://github.com/sk89q/commandhelper.git</code>
+
+===Maven===
+[http://maven.apache.org/ Maven] is a build tool, similar in many aspects to 
+[http://ant.apache.org/ Apache Ant] or [http://www.gnu.org/software/make/manual/make.html make], 
+but has several advantages over these other tools, once you know how to use it. It is 
+geared towards Java projects, which is one reason it is appealing for many bukkit plugins, 
+as well as its excellent dependency management system. The biggest advantage it has for 
+CH is that a new dependency can be added to CH, and as long as it is in any public repo, 
+there is zero extra configuration for you to build it. If you are curious for more details, 
+the [http://en.wikipedia.org/wiki/Apache_Maven wikipedia article] has some good information 
+on the subject. A resource that I have found helpful is the 
+[http://maven.apache.org/ref/3.0.4/maven-model/maven.html maven model], which shows 
+many of the possible elements in a pom, which can at first be confusing.
+
+===Dependencies===
+
+The main dependencies of CH are (of course) Bukkit and WorldEdit, but if you look 
+at it's dependency tree, you see almost 20 different dependencies! Not to worry, 
+most of those are not actually included by CH, they are transitive dependencies, 
+but anyways, with a few exceptions, they are not strictly required at runtime, 
+just build time. There are a few exceptions, but for the most part, for these 
+exceptions, I use a technique called <code>shading</code>. Shading allows you to 
+literally copy another dependency (or parts of a dependency) into the final jar 
+that is distributed. Doing this has both advantages and disadvantages. The main 
+disadvantage is that your distributable gets bigger, and you may end up distributing 
+code that they already have. To me, this is a non-issue, computer's hard disks are 
+huge and cheap, so even if you double the size of the jar, it won't make a dent in 
+the remaining free space for a person's disk drive. The advantage is that you only 
+need to distribute one single file instead of several, which tends to greatly 
+de-complicate the distribution process.
+
+
+===Common Failure Reasons===
+
+Sometimes a development version of WorldEdit may be linked. Dependencies are 
+downloaded from a variety of locations, but if none of them have the specified 
+dependency, it may be that it is only installed locally on developer machines. 
+If this is the case, you'll have to find the source for the dependency, then 
+compile and install it manually, but usually I try to stay away from doing this, 
+as it also makes my life harder. Also, before you build a project for the first 
+time, you may notice compile errors in your IDE. This is because the dependencies 
+have not yet been downloaded. Try to build it, this should download the resources 
+for you, which should the make the compile errors go away. This is known as priming 
+the build.
+
+===Jenkins===
+
+Jenkins is a <code>Continuous Integration Server</code>, which automatically builds 
+the project based on the code currently in the github repository. This allows for 
+quick detection of failures, which also usually leads to quick resolutions. This 
+also has the benefit of providing a convenient place to download the newest development 
+versions, without having to compile the code yourself.
+
+When Jenkins builds, if the build fails due to either compilation failures or unit 
+test failures, the IRC channel is notified. (Actually successful builds are pinged 
+as well.) When a successful build occurs, A link to the build is also posted in IRC. 
+Commits to the github account trigger a new build, so these builds are the freshest 
+you could possibly have, unless you're the developer.
+
+{{LearningTrail}}

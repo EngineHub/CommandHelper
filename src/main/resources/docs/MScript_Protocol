@@ -1,0 +1,37 @@
+The MScript protocol is a defined standard which works much like [http://en.wikipedia.org/wiki/Remote_procedure_call RPC], but is specific to MScript.
+The advantages it offers over other protocols is that the underlying transport mechanism is undefined, leaving it open to specific needs, depending
+on the means of connection to the remote system (i.e. TCP, HTTP, DBus, etc). All data is passed as UTF-8 strings, and is interpreted on the remote end.
+Mechanisms exist to support passing of data, (primitives and objects/arrays), function calls, exceptions, and meta data.
+
+== Overview ==
+The end of each pipe must simply implement a two way protocol, which translates network/remote requests into UTF-8 strings, which are passed to/from
+the MScript interpreter. The interpreter will always provide at minimum a TCP socket connection, but other platforms/extensions may provide support
+for others, such as DBus or named pipe communication. Connections may be stateless, though maintaining psuedo state is the responsibility
+of the transport extension, and the interpreter expects the connection to appear stateful.
+
+===Authentication===
+In the first stage of connection, the interpreter handshakes with the remote connection, and requests an initial capabilities list. 
+These capabilities are considered non-authoritative client side, but are used to minimize
+network connections that would fail. All capabilites may be claimed to be dynamic however, and the server is free
+to send meta information to adjust this list at any time. The client has the option in certain circumstances to ignore this list,
+so it is important to note that this is not a security mechanism. If a request does fail for capability reasons,
+that information is cached in these tables. This capability list doubles as a "permission" list.
+
+The first stage of authentication is not fully defined, which allows for various extensions to authenticate however they wish,
+but username/password and anonymous connections are supported by default. During connection, the transport has the ability to declare this connection
+secure, or insecure, and UI/control elements will respond accordingly. Once the connection has been established, all other calls become available.
+
+===Data passing===
+All primitives, objects, and arrays are passed via json. Each communication "burst" is a new json, which has the following meta information:
+ * "valueChecksum" - The md5 checksum of the value itself. If the value is present, this is required, otherwise it is not.
+ * "type" - The type of the value/request. It may be one of: %%BURST_VALUE_TYPES%%. (See below for an explanation of each)
+ * "id" - The id for this request, if it is a solicited request. If passed from the client to the server, this same id will be returned from the server
+in the corresponding response. The id is treated as a string value, and is not modified.
+ * "value" - The actual value of this request, which is optional, based on the type, and has variable data, again, based on the type.
+ * "rider" - Additional information provided to the client/server. This varies based on the type, and is simply provided as
+a convenience for various types.
+ * "riderChecksum" - The md5 checksum of the rider, if present. If the rider is present, this is required, otherwise it is not.
+
+====Burst types====
+
+%%BURST_TYPE_DOCS%%

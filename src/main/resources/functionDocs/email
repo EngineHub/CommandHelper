@@ -1,0 +1,96 @@
+void {options} Sends an email. See the extended description for more information. ----
+
+An email is a text based message that is sent using the standard email protocol. Various components of the message
+including a recipient list, subject, and attachments, including one that serves as the message body. The options are
+listed below, and most of them are optional, with a default provided. A FormatException is thrown if any of the required
+parameters are missing, or if any of the parameters are in the wrong format. An IOException is thrown if the underlying
+connection has an IOException, and all other exceptions will cause a PluginInternalException to be thrown.
+
+Note that if debug-mode is true, more information about the connection itself will be output during the connection.
+This method blocks until the email has completed sending, so it may be useful to send the email on a separate thread.
+
+There are two types of options that can be provided, transport settings, and email settings. The transport settings affect
+connection to the smtp server, and email settings affect the email itself.
+
+Transport settings:
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="6%" | Setting
+! scope="col" width="10%" | Type
+! scope="col" width="6%" | Default
+! scope="col" width="78%" | Description
+|-
+| host || string || 'localhost' || The host to connect to, e.g. 'smtp.example.com'. No protocol should be provided.
+|-
+| user || string || null || The username for authenticated connections.
+In general, if using authentication, it is also a good idea to set use_ssl to true, if the smtp host provides it,
+as otherwise authentication information is sent via cleartext. Many commercial providers require authentication
+before they will allow an email to be sent.
+|-
+| password || string || null || The password for authenticated connections.
+|-
+| port || int || 587 || The SMTP port to connect to
+|-
+| use_ssl || boolean || false || If true, the smtps protocol is used. Otherwise, plain smtp is used.
+|-
+| use_start_tls || boolean || false || Many smtp servers require this setting to be true.
+Check with the provider to find out if this is the case.
+|-
+| timeout || int || 10000 || The timeout for connections, in ms.
+If the connection takes longer than this to complete, the connection is terminated, and an IOException will be thrown.
+A value of 0 turns timeouts off, though this is not recommended.
+|}
+
+Email settings:
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="6%" | Setting
+! scope="col" width="10%" | Type
+! scope="col" width="6%" | Default
+! scope="col" width="78%" | Description
+|-
+| from || string || &lt;required&gt; || The from address to be used in the email.
+|-
+| to || string|array || &lt;required&gt; || The recipient, or recipient list.
+If the value is a string, it should be a simple email address, and will be set as a TO field.
+Alternatively, a list of addresses may be provided, in which case each of them will be added to the TO list.
+CC and BCC recipients may also be added. Instead of a string, provide an array with the keys "type" and "address",
+where type is one of "TO", "CC", or "BCC", and the address is the email address. To send the email to one
+recipient using CC or BCC, use this form: array(array(type: 'BCC', address: 'email@example.com'))
+|-
+| subject || string || '&lt;No Subject&gt;' || The subject of the email
+|-
+| body || string || <nowiki>''</nowiki> || This is shorthand for adding a plain text body to the email.
+|-
+| attachments || array || array() || Allows for providing various attachments to an email, such as HTML or a file.
+It is an array of zero or more arrays, with the following keys:
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! Setting
+! Type
+! Default
+! Description
+|-
+| type || string || &lt;required&gt; || The mime type of the attachment.
+|-
+| filename || string || <nowiki>''</nowiki> || The filename of this attachment.
+|-
+| description || string || <nowiki>''</nowiki> || The description of this attachment.
+|-
+| disposition || string || <nowiki>''</nowiki> || The content disposition. Generally, you will only use either
+"inline" or "attachment". If the disposition is set to "inline", then it will be up to the email client to display
+this attachment to the user automatically, selecting from the best type that it can render, for instance, or inline
+images. If it is set to "attachment", it will be offered as a download to the user, in most clients. Other content
+disposition headers may be set as well. See RFC 2183 for full information on how to use this field.
+|-
+| content || string|byte_array || &lt;required&gt; || The attachment content. It may be either a string, in which
+case it is added to the email as is, or a byte_array, in which case it is base64 encoded for you.
+|}
+
+Setting the body is actually shorthand for adding an attachment with type text/plain, inline disposition, and the plain
+string content. In order to send an html email, you'll need to use attachments.
+|}
+
+For full information about emails, see [http://tools.ietf.org/html/rfc2822 RFC 2822].

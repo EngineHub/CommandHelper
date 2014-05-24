@@ -1,0 +1,270 @@
+
+Looping is an important programming concept, because it allows you to do something more than once, without having 
+to rewrite the code over and over.
+
+=== General ===
+
+As a simple example, perhaps we want to echo "Hello World!" 5 times to 
+the player. The most straightforward way to do it would be this:
+
+%%CODE|
+msg('Hello World!');
+msg('Hello World!');
+msg('Hello World!');
+msg('Hello World!');
+msg('Hello World!');
+%%
+
+Now say we want to do it 6 times.
+
+%%CODE|
+msg('Hello World!');
+msg('Hello World!');
+msg('Hello World!');
+msg('Hello World!');
+msg('Hello World!');
+msg('Hello World!');
+%%
+
+Doing this continually would work, but if the number of times it is run can be dynamic, this approach
+won't work. The looping functions can be used to dynamically run code a given number of times.
+The {{function|for}} function can be used to rewrite the same code as above in just a few lines:
+
+===for===
+
+%%CODE|
+for(@i = 0, @i < 5, @i++){
+     msg('Hello World!');
+}
+%%
+
+First of all, let's look at the inner parts. <code>@i = 0</code> assigns 0 to the variable @i.
+This bit of code is run only once, and at the beginning of the loop.
+Since <code>=</code> returns a variable, and for() requires the first parameter to be a variable, 
+this works out perfect. Next, is the less than. Essentially, in English, this says 
+"while @i is less than 5, run the code". This condition is checked at the start of each iteration of the
+loop, (including the first) and if it is true, the code is run again. <code>@i++</code> adds one 
+to @i, and stores the value back in the variable. This is run each time at the end of the loop, and is not
+required to return a value. So, in plain English, this entire statement says, "Starting at 0, run this code if 
+@i is less than 5, and after each run of the code, add 1 to @i". In the code of the loop, 
+you can also use @i, which is often useful. Say we want to write out the numbers from 1-10.
+
+%%CODE|
+for(@i = 1, @i <= 10, @i++){
+     msg(@i);
+}
+%%
+
+This can be read in English as: "Starting from 1, run the code if @i is less than or equal to 10, and add 1 to @i each time."
+
+Most often though, when you are running through a loop, you are not going through a set number of times. 
+So, usually you will see a variable as the limiting factor.
+
+%%CODE|
+for(@i = 0, @i < $userInput, @i++){
+     msg(@i);
+}
+%%
+
+Or, maybe we want to count down:
+
+%%CODE|
+for(@i = $userInput, @i >= 0, @i--){
+     msg(@i);
+}
+%%
+
+Often times you're looping through an array. Perhaps we want to print all the words in this array:
+%%CODE|
+@array = array('one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten');
+for(@i = 0, @i < array_size(@array), @i++){
+     msg(@array[@i]);
+}
+%%
+
+
+===foreach===
+
+While that last example would work, since we often want to walk through an array just like this, 
+we have a special function just for walking through arrays, {{function|foreach}}. This code be be rewritten like so:
+
+%%CODE|
+foreach(@val in @array){
+     msg(@val);
+}
+%%
+
+Much simpler. In fact, looping through an array with <code>for()</code> is only possible if you aren't 
+using an associative array. If you have an associative array, you MUST use <code>foreach()</code> 
+to walk through it.
+
+%%CODE|
+@array = array(key1: 'val1', key2: 'val2', key3: 'val3');
+foreach(@value in @array){
+     msg(@value); # Messages 'val1', 'val2', 'val3'
+}
+%%
+
+What if you are also interested in messaging out the key of the array? You can use {{function|array_keys}} to get them,
+or use the special key parameter of foreach.
+
+%%CODE|
+foreach(@key: @value in @array){
+     msg(@key . ': ' . @value); # Messages 'key1: val1', 'key2: val2', 'key3: val3'
+}
+%%
+
+Another common task with arrays is to do one thing if the array is empty, or loop through it if it isn't.
+You could check the array size and have an if/else statement, but since this is a common enough task,
+special syntax exists.
+
+%%CODE|
+foreach(@value in @array){
+	msg('This code runs for each element in the array, if the array isn\'t empty');
+} else {
+	msg('This code runs only if the array is empty');
+}
+%%
+
+<code>foreach()</code> also has other forms, though only the "foreach([@key:]@value in @array)" format is recommended. You
+may also use the no-keywords method:
+
+%%CODE|
+// Without key
+foreach(@array, @value){
+	//
+}
+
+// With key
+foreach(@array, @key, @value){
+	//
+}
+%%
+
+or the "as" keyword method:
+
+%%CODE|
+// Without key
+foreach(@array as @value){
+	//
+}
+
+// With key
+foreach(@array as @key: @value){
+	//
+}
+%%
+
+or the no-brace method (old style):
+
+%%CODE|
+// Without key
+foreach(@array, @value,
+	code()
+)
+
+// With key
+foreach(@array, @key, @value,
+	code()
+)
+%%
+
+{{TakeNote|text=Modifications to the array being iterated are handled specially. Read the page on %%DOCLINK|Array Iteration|array iteration%% for
+full details.}}
+
+===while===
+
+Sometimes you don't know how many times you want to do something, or the "counter" variable is otherwise too difficult to write using the for() syntax,
+and you aren't using an array. 
+In that case, you can use a while loop, and you control all the conditions except for loop decision value.
+
+%%CODE|
+@times = 10;
+while(@times > 0){
+    @times = @times - rand(2);
+    msg(@times);
+}
+%%
+
+
+You can also make an "infinite" loop with a while(true) loop, and control stopping the loop with {{function|continue}} and {{function|break}}.
+%%CODE|
+while(true){
+    if(rand(5) == 0){
+        msg('rand returned 0, breaking!');
+        break();
+    }
+    if(rand(5) > 3){
+        continue();
+    }
+    msg('Looping!');
+}
+%%
+
+The above example will take an indefinite period of time, but once the first rand() 
+generates a 0, it will break(). Otherwise, it will output "Looping!" each run of the loop, 
+unless the second rand() generates a number greater than 3, in which case it will continue(), 
+which restarts the loop. (And in for() and foreach(), continue() moves to the next index).
+
+===dowhile===
+
+{{TakeNote|text=dowhile() does not currently support brace syntax. This feature will be added later.}}
+
+Once you understand while(), dowhile is trivial to understand. while() checks the condition THEN runs the code, 
+whereas dowhile() runs the code THEN checks the condition. In both cases, if the condition is true, it runs again. 
+So, <code>while(false, &lt;code&gt;)</code> will never run the code, whereas 
+<code>dowhile(&lt;code&gt;, false)</code> will run the code only once.
+
+=== break() and continue() ===
+
+Breaking and continuing in a loop works will all 4 loop types, for, foreach, while, and dowhile. A break causes
+the loop to exit immediately, and a continue causes that particular iteration to finish, and the loop restarts.
+Both break and continue can be given a counter as well, and they will do that operation that many times. break()
+must have a hardcoded integer value, however, as a dynamic value prevents code flow analysis and optimizations.
+Continuing can be done a dynamic number of times, and essentially works like this:
+
+%%CODE|
+@cont = 0;
+for(@i = 0, @i < 10, @i++){
+	if(@cont > 0){
+		@cont--;
+		continue();
+	} else if(@i == 1){
+		@cont = 2;
+		continue();
+	}
+	msg(@i);
+}
+// This would message out 0, 4, 5, 6, 7, 8, 9
+// But the same code can be written in less code, and less confusingly with:
+
+for(@i = 0, @i < 10, @i++){
+	if(@i == 1){
+		continue(3);
+	}
+	msg(@i);
+}
+%%
+
+Breaks with more than 1 break out of multiple loops.
+
+%%CODE|
+@output = array();
+for(@i = 0, @i < 5, @i++){
+	for(@j = 0, @j < 5, @j++){
+		if(@i == 2 && @j == 3){
+			break(2);
+		}
+		@output[] = "@i @j";
+	}
+}
+msg(@output); // {0 0, 0 1, 0 2, 0 3, 0 4, 1 0, 1 1, 1 2, 1 3, 1 4, 2 0, 2 1, 2 2}
+%%
+
+Breaks follow special rules, however. Breaks cannot bubble up past procedures, closures, or the root of the script. Since
+the break count must be hardcoded, the compiler will catch this at compile time, and cause an error.
+
+Break may also be used with switch statements. In this case, breaks work the same as if switch were a loop, even though
+it is technically a conditional, and not a loop.
+
+{{LearningTrail}}

@@ -1,0 +1,397 @@
+Objects in MethodScript allow for object oriented approaches to designing your 
+code. Object in MethodScript are extremely flexible and powerful, yet easy to use 
+and understand.
+
+=== Definition vs Instance ===
+
+An object is an instance of a class. A class is defined in code, and is used to 
+define methods and members that will be in an instance of that object. A class 
+can be instantiated, and get a real object out of it at runtime. You can think 
+of the difference between the two as a blueprint for a house, there is only one 
+blueprint, but multiple houses that are actually built, and in each house, some 
+things are different, like, the paint color.
+
+=== Example ===
+Before getting into the details about objects, lets look at an example:
+
+%%CODE|
+class A {
+
+    members {
+        protected @b, 
+        private static int @c = 0
+    }
+    public A(@b = 0){
+        this->@b = @b;
+        @c++
+    }
+    
+    public static int method1(int @a){
+        return(@a + 1)
+    }
+
+    public method2(int @b){
+        return(@b + this->@b)
+    }
+
+    public static final int instantiations(){
+        return(@c)
+    }
+}
+%%
+
+This example will be used in the explanation below.
+
+=== Members and Methods ===
+
+An object contains any number of '''members''' and '''methods'''. A member is a 
+variable, and a method is a function. Both members and variables can have various 
+'''modifiers''', which affect behavior in various ways. In the example, you can 
+see that we are defining @b as a member variable, and method1 and method2 
+are methods. The modifiers in use include '''public''', '''static''', '''final''', 
+'''int''', '''protected''' and '''private''' though there are others too. Members 
+are defined in the '''member block''', <code>members{ }</code>. The member block 
+may appear anywhere in the class, but there may be only one block. The rest of 
+the class definition should be method definitions.
+
+=== Basic Type Manipulation ===
+Before moving on to using objects, it is important to understand the type system 
+in MethodScript. All variables are ''mixed'' by default, which is actually an 
+object type. All objects extend from mixed, and all user defined objects extend 
+from Object. "Primitives" are in fact objects, though they are somewhat special, 
+in that they are handled differently internally, but in code, they behave exactly 
+like user defined objects, meaning you can dereference them to access their 
+methods. If a type isn't explicitly specified when defining a variable, it is 
+considered to be mixed, and any value can be put in it. Other than this caveat 
+which makes MethodScript different from other strongly typed languages, it is 
+otherwise a full strongly typed language, meaning types are checked at compile 
+time, and invalid types will cause compiler errors. Type intersections and 
+unions are discussed later, since they are an advanced topic, but they are also 
+supported.
+
+=== Instantiation ===
+
+In order to use an object, the first thing that must happen is that it is 
+instantiated. To instantiate our object that we defined above, we would use 
+the following code:
+
+%%CODE|
+@A = new A()
+%%
+
+Now, we can use the '''dereference operator''' to access members or methods in 
+the object, for instance,
+
+%%CODE|
+msg(@A->method2(2))
+%%
+
+would output 2, since we called the method that returns our input plus @b, 
+which in this case is 0.
+
+We can only have one constructor per object, but we can use default parameters, 
+and static methods can be created to fake multiple constructors, or we can use
+type unions. 
+The constructor is simply a method that is defined with the same name of the 
+class, and no return type.
+
+=== Inheritance ===
+
+An object can '''inherit''' from, or ''extend'' another object. Let's define the 
+object B, which extends A.
+
+%%CODE|
+class B extends A {
+    public B(){
+        super()
+    }
+    public method2(int @b){
+        return(@b + 3)
+    }
+}
+%%
+
+In this case, we are extending A, and '''overriding''' method2. In order to 
+override a method, you simply name it the same as the method in the parent 
+class. However, it is important to note that the method signatures must be 
+'''type compatible''', that is, it cannot completely redefine the types of the 
+variables that are passed in, but it can use ''more specificity''. For instance, 
+if class A defined the method <code>public f(Object @o)</code> it would be 
+invalid to define in class B the method <code>public f(int @i)</code>, however, 
+if class A instead defined f as <code>public f(mixed @o)</code>, it would be 
+valid for B to '''narrow''' the type required. 
+
+Examining the constructor, there is the new function, <code>super()</code>, 
+which is used to call the parent's constructor. <code>super</code> is optional, 
+however, in the case where a call to <code>super()</code> is omitted, it is 
+implied to have been called at the top of the child's constructor. If 
+<code>super()</code> is called, it must be called ''before'' manipulating the 
+parent's members, even transiently, otherwise it is a compiler error. For 
+instance, consider the following:
+
+%%CODE|
+class A{
+    members{
+        private @a
+    }
+    public A(){
+        @a = 0
+    }
+
+    public void initA(){
+        @a = 9000
+    }
+
+    public int getA(){
+        if(time() % 2 == 0){
+            initA()
+        }
+    }
+}
+
+class B{
+    public B(){
+        @var = getA()
+        super()
+    }
+}
+%%
+
+In this example, we have a compile error, because the call to getA() could 
+potentially call initA(), which manipulates @a, which is a member variable. 
+The reason for this is so that the object is never in an ''inconsistent state'' 
+which could occur if a subclass manipulates members of the parent before it is 
+allowed to run its initialization. Had we left off the call to super, it would 
+have been automatically placed at the top of the constructor, and this would not 
+have been a compile error.
+
+==== Default Constructors ====
+
+If no constructors are provided, a default constructor is always provided, with 
+the definition <code>public A(){ }</code> (assuming the class name is A).
+
+==== Destructors ====
+
+A destructor is automatically called when an object goes out of scope, and can 
+be used to do various things. It is never required to implement, however. It is 
+implemented in a '''destructor block''', much like member blocks.
+
+%%CODE|
+class A{
+    members{
+        private static int @instances = 0
+    }
+
+    public static int totalInstances(){
+        return(@instances)
+    }
+
+    public A(){
+        @instances++
+    }
+
+    destructor{
+        @instances--
+    }
+}
+%%
+
+
+=== Static members and methods ===
+You may have noticed that the keyword '''static''' has been used a few times.
+A ''static'' variable is one that is usable outside of any instances, often times
+utility methods, singletons, and factory methods are defined this way. A static
+method can be accessed as such:
+
+%%CODE|
+class A {
+	public static void init(){
+		return()
+	}
+}
+
+#Usage:
+A::init()
+%%
+
+You do not need to instantiate a class before using a static method. Since a static
+method is essentially a convenient way to namespace a method, or otherwise
+associate it with similar non-static code and it isn't ''really'' part of the class,
+it is not possible to call a static method by dereferencing an instance. If you are creating
+a pure utility class, that only has methods (no members), then consider using
+a namespace instead.
+
+==== <code>self</code> keyword ====
+The <code>self</code> keyword is 
+
+=== Access Modifiers ===
+'''public''', '''private''', and '''protected''' are the three modifiers that 
+control what can access an object's methods or members. If something is public, 
+anything can access it. If it is private, only that class can access it, and if 
+it is protected, only that class, or subclasses can access it.
+
+=== Explicit namespacing ===
+In an instance, we can always using explicit namespacing to reference a parent's 
+methods. If we are in a static context, it will be a compiler error to reference 
+instance methods in this manner, but static references are always valid. For 
+instance, assume class B had been defined this way:
+
+%%CODE|
+class B extends A {
+    public B(){
+        A::super()
+    }
+    public method2(int @b){
+        return(A::super->method2(@b))
+    }
+}
+%%
+
+Note that we are explicitely calling A's constructor with the call to super, 
+and A's method2. If there had been several parents, this could be used to 
+"un-override" a call, or otherwise explicitely selected a method that had been 
+overriden by multiple children. This is useful outside of diamond inheritance, 
+but is more often used when dealing with multiple inheritance. Note that in the 
+case of super() constructors, it is always an error to cause a child's 
+constructor to be invoked before the parent's constructor. Calling a parent's
+method is only valid inside the class, an overridden method is not callable
+from outside of the instance.
+
+=== Reflection ===
+Using reflection, you are able to access all members and methods reflectively, 
+using simple, array-like notation. Using reflection bypasses the safeguards put 
+in place with public/private/protected accesses though, which may be desired, 
+but should be used with caution, since it violates the object's contract of 
+access. All objects implement the ability to get, set, and enumerate all the 
+members and methods in it, using string based names. New members and even methods 
+can be added to an object at runtime by using this mechanism. Compilation type 
+checks obviously won't apply, so things that normally would be a compile error 
+will be runtime errors, so code that uses reflection must be very careful. 
+Consider our class A, defined above, and instantiated as such:
+
+%%CODE|
+@a = new A()
+%%
+
+We can access both the protected and private static variables in the class by 
+using the following code:
+
+%%CODE|
+msg(@a['A::b'])
+msg(@a['c'])
+%%
+
+If you do not fully qualify a variable name, it is automatically qualified with
+that instance's actual runtime type. So unless you want to actually get a type's
+method without caring precisely which method it will be, consider always fully
+qualifying the variable name. (@a['A::b'] vs @a['b'])
+
+We can change existing variables (or add new ones) with:
+
+%%CODE|
+@a['A::b'] = 5
+@a['A::c'] = 10
+@a['A::d'] = proc(@a, @b){ return(@a + @b) } #Add a new method
+%%
+
+If a variable is added with reflection, it will obviously only be 
+accessible through reflection, and it only becomes part of that instance. 
+Changes to static variables or methods are not possible, because static variables
+are not actually a part of that instance. You must use the class reflection methods
+to manipulate those. The array 
+notation is merely a convenience, using this notation simply hides the 
+complexity of getting and setting static and instance variables reflectively. 
+You can iterate through the variables using foreach, and array_keys will work 
+as well. As you can see, for this reason, a member and a method cannot share 
+the same name in a class. It is also important to note that variables are 
+prefixed with the class name, because a parent's variables are also available. 
+In the case of inherited variables, the child class will not have a variable in 
+the array, even though calling the method non-reflectively would work.
+
+This mechanism of reflection is useful for setting and getting variables in an 
+''instance'', but if you are interested in information about the Class itself 
+(not an instance of it, or you are interested in static variables) 
+you can use the functions that are provided in the reflection namespace.
+
+
+=== Interfaces ===
+
+=== Abstract Classes ===
+
+=== Multiple Inheritance ===
+
+==== <code>inherit</code> keyword ====
+
+Though default inheritance would work in singly inherited classes, it is really
+only useful when dealing with multiple inheritance. In the case where multiple
+objects are inherited from, and each defines their own version of a method,
+it may be useful to inherit the method's behavior from the non-primary inherited
+class. One way to do this would be to override the method yourself, and simply
+delegate behavior to the correct super class's method, for instance:
+
+%%CODE|
+class A {
+	public mixed method(){
+		return(1)
+	}
+}
+
+class B {
+	public mixed method(){
+		return(2)
+	}
+}
+class C extends A, B {
+	public mixed method(){
+		return(B::method())
+	}
+}
+%%
+
+However, since this could occur fairly often, you may simply indicate that you
+would like to ''inherit'' functionality from the specified parent. So instead
+of defining the class C as above, we can get the exact same functionality by
+defining it as such:
+
+%%CODE|
+class C extends A, B {
+	inherit B::method()
+}
+%%
+
+By default, methods with multiple overrides in parent classes inherit from the
+primary parent, in this case, A, though you can also be explicit and inherit a
+method individually.
+
+=== Type Unions ===
+
+A type union can be used any time disjoint types are required. Assume the following
+hierarchy:
+
+%%CODE|
+class A { }
+class B extends A { }
+class C extends A { }
+class D extends B { }
+%%
+
+Now, assume that we want to accept an instance of either type D or type C, but not
+type B or A. In this case, the nearest parent is type A, so we could accept type A and
+do a runtime check to ensure that it is of type D or C only, but this is a runtime
+check, and it would be better if we could simply declare that we only want those
+two types. In that case, we can use a '''type union''' to signal to the compiler
+the various types we will accept. To specify a type union, use the 
+'''<nowiki>|</nowiki>''' character.
+
+%%CODE|
+D | C @var
+%%
+
+As many types as required can be chained this way. As far as the inferred type of
+that object, it will be whatever the nearest '''type intersection''' is. So, in this
+case, the code using the variable @var must assume that it is of type A, unless it
+does an explicit cast first. So, as far as code that ''uses'' the variable, it will
+work as if it were defined as <code>A @var</code>, but with the guarantee that only
+a D or C type instance will have been assigned to it.
+
+{{LearningTrail}}

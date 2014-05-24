@@ -1,0 +1,40 @@
+## Nano color coding for CommandHelpers methodscript.
+##
+syntax "ms" "\.ms|config\.txt$" 
+
+## Legal colors: white, black, red, blue, green, yellow, magenta, cyan.
+
+color red start="\[" end="\]" 
+
+color brightgreen "\<(%%pipe:functions:restricted%%)\>" 
+color green "\<(%%pipe:functions:unrestricted%%)\>" 
+color blue "\<(%%pipe:keywords%%)\>"
+color magenta "\<(%%pipe:events%%)\>"  
+
+icolor brightred "color\(red\)" 
+icolor red "color\(dark_red\)" 
+icolor black,blue "color\(black\)" 
+icolor blue "color\(dark_blue\)" 
+icolor green "color\(dark_green\)" 
+icolor cyan "color\(dark_aqua\)" 
+icolor magenta "color\(dark_purple\)" 
+icolor yellow "color\(gold\)" 
+icolor white "color\(gray\)" 
+icolor brightblack "color\(dark_gray\)" 
+icolor brightblue "color\(blue\)" 
+icolor brightgreen "color\(green\)" 
+icolor brightcyan "color\(aqua\)" 
+icolor brightmagenta "color\(light_purple\)" 
+icolor brightyellow "color\(yellow\)" 
+icolor brightwhite "color\(white\)" 
+
+icolor brightred "@[a-z0-9_]*" 
+icolor red "\$[a-z0-9_]*" 
+
+color brightyellow "'(\\.|[^\'])*'" 
+color brightblack "^[[:space:]]*#.*$" 
+color brightblack "^[[:space:]]*//.*$"
+color brightblack start="/\*" end="\*/" 
+
+## Trailing whitespace
+color ,green "[[:space:]]+$" 

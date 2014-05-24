@@ -1,0 +1,17 @@
+/target/
+/.settings/
+/plugins/
+/com/
+/CommandHelper/
+/bin/
+.classpath
+.project
+nbactions-provisional-build.xml
+nbactions-release-profile.xml
+nbactions.xml
+true
+/logs/
+/.logs/
+/preferences.*
+.DS_Store
+/test-backend/

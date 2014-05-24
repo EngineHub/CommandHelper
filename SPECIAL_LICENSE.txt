@@ -1,0 +1,18 @@
+As a special restriction, by submitting code that modifies the core compiler,
+the core functions (platform independent functions such as if, while, for, etc, including but
+not necessarily limited to the functions tagged with the @core annotation), 
+language constructs, optimizer, exceptions, tools, PureUtilities, Persistence and
+Persistence Network, you agree to release this code under the Creative Commons Zero
+license. https://creativecommons.org/publicdomain/zero/1.0/
+Furthermore, the core language grammar is copyright to the original author of the language, 
+in all cases. Note that this does not affect the release license. All code is still released 
+under MIT/GPL. In layman's terms, this means that you cannot submit code that adds 
+Objects, for instance, and keep the copyright on it, you must release that to the public domain,
+however, your code will still be available to use under the MIT or GPL license, since
+it is immediately released under those licenses, in addition to the copyright being relinquished.
+
+If commercialization of the software without crediting
+you in the future makes you uncomfortable, please do not submit code to the core.
+
+All other code unrelated to the core language that is included or linked to are
+still licensed and released under the MIT license.
