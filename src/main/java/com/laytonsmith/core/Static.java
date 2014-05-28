@@ -734,7 +734,7 @@ public final class Static {
 	}
 
 	/**
-	 * Returns the world with the specified name. If it does not exists, a ConfigRuntimeException is thrown.
+	 * Returns the world with the specified name. If it does not exist, a ConfigRuntimeException is thrown.
 	 * @param name
 	 * @param t
 	 * @return
@@ -748,6 +748,12 @@ public final class Static {
 		}
 	}
 
+	/**
+	 * Returns the world with the specified name. If it does not exist, a ConfigRuntimeException is thrown.
+	 * @param name
+	 * @param t
+	 * @return
+	 */
 	public static MCWorld getWorld(Construct name, Target t) {
 		return getWorld(name.val(), t);
 	}

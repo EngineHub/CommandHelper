@@ -99,7 +99,7 @@ import org.bukkit.material.MaterialData;
 
 /**
  *
- * 
+ *
  */
 public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
@@ -270,10 +270,10 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
-		w.playSound(((BukkitMCLocation) l).asLocation(), 
+		w.playSound(((BukkitMCLocation) l).asLocation(),
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}
-	
+
 	@Override
 	public void playSound(MCLocation l, String sound, float volume, float pitch) {
 		for(Player p: w.getPlayers())
@@ -316,17 +316,17 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
     public void refreshChunk(int x, int z) {
         w.refreshChunk(x, z);
     }
-	
+
 	@Override
 	public void loadChunk(int x, int z) {
  		w.loadChunk(x, z);
  	}
- 	
+
 	@Override
  	public void unloadChunk(int x, int z) {
  		w.unloadChunk(x, z);
  	}
-	
+
 
 	@Override
     public void setTime(long time) {
@@ -479,7 +479,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
             if (name == MCMobs.SPIDERJOCKEY) {
                 e.setPassenger(l.getWorld().spawn(l, Skeleton.class));
             }
-			if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all 
+			if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all
 				if (((BukkitMCEntity)e).getHandle() instanceof Sheep) {
 					Sheep s = (Sheep) ((BukkitMCEntity)e).getHandle();
 					MCDyeColor color = MCDyeColor.WHITE;
@@ -502,7 +502,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							o.setCatType(BukkitMCOcelotType.getConvertor().getConcreteEnum(otype));
 						} catch (IllegalArgumentException ex){
 							throw new ConfigRuntimeException(type + " is not an ocelot type",
-									ExceptionType.FormatException, t);					
+									ExceptionType.FormatException, t);
 						}
 					}
 				}
@@ -592,7 +592,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							sk.setSkeletonType(BukkitMCSkeletonType.getConvertor().getConcreteEnum(stype));
 						} catch (IllegalArgumentException ex){
 							throw new ConfigRuntimeException(type + " is not a skeleton type",
-									ExceptionType.FormatException, t);					
+									ExceptionType.FormatException, t);
 						}
 					}
 				}
@@ -706,7 +706,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public MCChunk getChunkAt(MCLocation l) {
 		return new BukkitMCChunk(w.getChunkAt(((BukkitMCLocation) l).asLocation()));
 	}
-	
+
 	@Override
 	public MCChunk[] getLoadedChunks() {
 		Chunk[] chunks = w.getLoadedChunks();
@@ -740,5 +740,10 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public boolean isThundering() {
 		return w.isThundering();
+	}
+
+	@Override
+	public void save(){
+		w.save();
 	}
 }

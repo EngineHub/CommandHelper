@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  *
- * 
+ *
  */
 public interface MCWorld extends MCMetadatable {
 	public List<MCPlayer> getPlayers();
@@ -57,7 +57,7 @@ public interface MCWorld extends MCMetadatable {
     public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data);
 
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
-	
+
 	public void playSound(MCLocation l, String sound, float volume, float pitch);
 
     public MCItem dropItemNaturally(MCLocation l, MCItemStack is);
@@ -100,7 +100,9 @@ public interface MCWorld extends MCMetadatable {
 
 	/**
 	 * This method performs some check on the world to ensure it exists.
-	 * @return 
+	 * @return
 	 */
 	public boolean exists();
+
+	public void save();
 }

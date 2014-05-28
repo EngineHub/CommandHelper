@@ -1754,4 +1754,51 @@ public class World {
 			return new CDouble(pitch, t);
 		}
 	}
+
+	@api
+	public static class save_world extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld world = Static.getWorld(args[0], t);
+			world.save();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "save_world";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {world_name} Saves the specified world.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
 }
