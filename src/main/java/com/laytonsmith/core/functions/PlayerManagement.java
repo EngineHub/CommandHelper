@@ -3610,6 +3610,80 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class psend_sign_text extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			int offset = 0;
+			if (args.length == 3 || args.length == 6) {
+				p = Static.GetPlayer(args[0], t);
+				offset = 1;
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+
+			String[] lines = new String[4];
+
+			if(args.length == 2 || args.length == 3) {
+				//Lines are in an array
+				CArray lineArray = Static.getArray(args[1 + offset], t);
+				if(lineArray.size() != 4) {
+					throw new ConfigRuntimeException("Line array must have 4 elements.", ExceptionType.CastException, t);
+				}
+				lines[0] = lineArray.get(0, t).val();
+				lines[1] = lineArray.get(1, t).val();
+				lines[2] = lineArray.get(2, t).val();
+				lines[3] = lineArray.get(3, t).val();
+			} else {
+				//Lines are in different arguments
+				lines[0] = args[1 + offset].val();
+				lines[1] = args[2 + offset].val();
+				lines[2] = args[3 + offset].val();
+				lines[3] = args[4 + offset].val();
+			}
+
+			p.sendSignTextChange(loc, lines);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "psend_sign_text";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3, 5, 6};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], locationArray, 1, 2, 3, 4 | [player], locationArray, lineArray} Changes a signs' text, but only temporarily, and only for the specified player."
+				   + " This can be used to \"fake\" sign text for a player. LineArray, if used, must have 4 elements.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class psend_block_change extends AbstractFunction {
 
 		@Override
