@@ -812,7 +812,7 @@ public class PlayerManagement {
 			MCPlayer p = Static.GetPlayer(player, t);
 
 			Static.AssertPlayerNonNull(p, t);
-			int maxIndex = 19;
+			int maxIndex = 20;
 			if (index < -1 || index > maxIndex) {
 				throw new ConfigRuntimeException(this.getName() + " expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);

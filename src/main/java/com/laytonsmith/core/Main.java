@@ -275,7 +275,7 @@ public class Main {
 				MSLPMaker.start(mslp);
 				System.exit(0);
 			} else if (mode == versionMode) {
-				System.out.println("You are running CommandHelper version " + loadSelfVersion());
+				System.out.println("You are running " + Implementation.GetServerType().getBranding() + " version " + loadSelfVersion());
 				System.exit(0);
 			} else if (mode == copyrightMode) {
 				System.out.println("The MIT License (MIT)\n"
