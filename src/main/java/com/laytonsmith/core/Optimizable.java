@@ -11,10 +11,10 @@ import java.util.Set;
 
 /**
  *
- * 
+ *
  */
 public interface Optimizable extends Function {
-	
+
 	/**
 	 * This constant can be returned from an optimization method to indicate that
 	 * the need for this node has been removed entirely, and it should be removed from the code tree
@@ -22,7 +22,7 @@ public interface Optimizable extends Function {
 	 * method, so that the side effects are removed.
 	 */
 	public static final ParseTree REMOVE_ME = new ParseTree(null);
-	
+
 	/**
 	 * This constant can be returned from an optimization method to indicate that the
 	 * first child of this method should be pulled up and replace this method.
@@ -101,8 +101,17 @@ public interface Optimizable extends Function {
 		NO_SIDE_EFFECTS("If a function is \"side effect free\", that is, if the return value is unused, the function"
 				+ " itself does nothing, then this optimization can be specified. This is mostly useful for cases"
 				+ " where the value returns a check, but the check has been determined by the compiler to be unused,"
-				+ " making the entire call itself unneeded, allowing the call itself to be removed from the tree.", CHVersion.V3_3_1);
-		
+				+ " making the entire call itself unneeded, allowing the call itself to be removed from the tree.", CHVersion.V3_3_1),
+
+		/**
+		 * Some functions do want to do linking, but in a special, custom way. If this is specified, then
+		 * the function will have the link() method called on it, in place of the default linking mechanism that
+		 * the compiler provides.
+		 */
+		CUSTOM_LINK("Some functions do want to do linking, but in a special, custom way. If this is specified, then"
+				+ " the function will have the link() method called on it, in place of the default linking mechanism that"
+				+ " the compiler provides.", CHVersion.V3_3_1);
+
 		private final CHVersion since;
 		private final String docs;
 		private OptimizationOption(String docs, CHVersion since){
@@ -124,7 +133,7 @@ public interface Optimizable extends Function {
 		public CHVersion since() {
 			return since;
 		}
-		
+
 	}
 
 	/**
@@ -161,5 +170,15 @@ public interface Optimizable extends Function {
 	 * @return
 	 */
 	public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException;
+
+	/**
+	 * Does custom linking in a given function. This is called if the {@link OptimizationOption#CUSTOM_LINK} option
+	 * is specified. This is useful to override if some error checking should happen after all optimizations are done,
+	 * across the entire AST, not just across this function and it's children. For instance, bind() uses this to provide
+	 * a compile error if it isn't compiled out via an event_exists directive.
+	 * @param t
+	 * @param children
+	 */
+	public void link(Target t, List<ParseTree> children) throws ConfigCompileException;
 
 }

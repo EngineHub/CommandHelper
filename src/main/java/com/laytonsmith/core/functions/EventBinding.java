@@ -53,7 +53,7 @@ public class EventBinding {
 
 	private static final AtomicInteger bindCounter = new AtomicInteger(0);
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class bind extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -159,15 +159,15 @@ public class EventBinding {
 			}
 
 			//Set up our bind counter, but only if the event is supposed to be added to the counter
-			if(event.addCounter()){
-				synchronized(bindCounter){
-					if(bindCounter.get() == 0){
+			if (event.addCounter()) {
+				synchronized (bindCounter) {
+					if (bindCounter.get() == 0) {
 						env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
 						StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
 							@Override
 							public void run() {
-								synchronized(bindCounter){
+								synchronized (bindCounter) {
 									bindCounter.set(0);
 								}
 							}
@@ -191,7 +191,7 @@ public class EventBinding {
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CUSTOM_LINK);
 		}
 
 		@Override
@@ -199,20 +199,23 @@ public class EventBinding {
 			if (children.size() < 5) {
 				throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, t);
 			}
-			if(children.get(0).isConst()){
-				String name = children.get(0).getData().val();
-				try {
-					EventUtils.verifyEventName(name);
-				} catch(IllegalArgumentException ex){
-					throw new ConfigCompileException(ex.getMessage(), t);
-				}
-			} else {
+			if (!children.get(0).isConst()) {
 				// This ability may be removed in the future, to allow for better compilation checks of event type, once objects are added.
 				// We'll add this warning to gauge impact.
 				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of dynamic bind. This may be removed in the future, please"
 						+ " contact the developers to provide feedback if this affects you.", t);
 			}
 			return null;
+		}
+
+		@Override
+		public void link(Target t, List<ParseTree> children) throws ConfigCompileException {
+			String name = children.get(0).getData().val();
+			try {
+				EventUtils.verifyEventName(name);
+			} catch (IllegalArgumentException ex) {
+				throw new ConfigCompileException(ex.getMessage(), t);
+			}
 		}
 
 	}
@@ -262,7 +265,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class unbind extends AbstractFunction {
 
 		@Override
@@ -316,15 +319,15 @@ public class EventBinding {
 			}
 			BoundEvent be = EventUtils.GetEventById(id);
 			Event event = null;
-			if(be != null){
+			if (be != null) {
 				event = be.getEventDriver();
 			}
 			EventUtils.UnregisterEvent(id);
 			//Only remove the counter if it had been added in the first place.
-			if(event != null && event.addCounter()){
-				synchronized(bindCounter){
+			if (event != null && event.addCounter()) {
+				synchronized (bindCounter) {
 					bindCounter.decrementAndGet();
-					if(bindCounter.get() == 0){
+					if (bindCounter.get() == 0) {
 						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 					}
 				}
@@ -333,7 +336,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class cancel extends AbstractFunction {
 
 		@Override
@@ -392,7 +395,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class is_cancelled extends AbstractFunction {
 
 		@Override
@@ -507,7 +510,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class modify_event extends AbstractFunction {
 
 		@Override
@@ -591,7 +594,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class lock extends AbstractFunction {
 
 		@Override
@@ -660,7 +663,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class is_locked extends AbstractFunction {
 
 		@Override
@@ -710,7 +713,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class consume extends AbstractFunction {
 
 		@Override
@@ -760,7 +763,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class is_consumed extends AbstractFunction {
 
 		@Override
@@ -816,7 +819,7 @@ public class EventBinding {
 //    @api public static class when_cancelled extends AbstractFunction{
 //
 //    }
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class event_meta extends AbstractFunction {
 
 		@Override
@@ -868,7 +871,8 @@ public class EventBinding {
 		}
 	}
 
-	@api public static class has_bind extends AbstractFunction {
+	@api
+	public static class has_bind extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -888,11 +892,11 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			for(Driver d : Driver.values()){
+			for (Driver d : Driver.values()) {
 				Set<BoundEvent> events = EventUtils.GetEvents(d);
 				if (events != null) {
-					for(BoundEvent b : events){
-						if(b.getId().equals(id)){
+					for (BoundEvent b : events) {
+						if (b.getId().equals(id)) {
 							return CBoolean.TRUE;
 						}
 					}
@@ -924,4 +928,5 @@ public class EventBinding {
 		}
 
 	}
+
 }

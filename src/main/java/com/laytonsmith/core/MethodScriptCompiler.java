@@ -1489,6 +1489,7 @@ public final class MethodScriptCompiler {
 			//This can happen if the treeFunction isn't a function, is a proc, etc,
 			//but we don't care, we just want to continue.
 		}
+		// Check the argument count, and do any custom linking the function may have
 		if(treeFunction != null){
 			Integer[] numArgs = treeFunction.numArgs();
 			if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) &&
@@ -1496,12 +1497,19 @@ public final class MethodScriptCompiler {
 				throw new ConfigCompileException("Incorrect number of arguments passed to "
 						+ tree.getData().val(), tree.getData().getTarget());
 			}
+			if(treeFunction instanceof Optimizable){
+				Optimizable op = (Optimizable) treeFunction;
+				if(op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)){
+					op.link(tree.getData().getTarget(), tree.getChildren());
+				}
+			}
 		}
-
+		// Walk the children
 		for(ParseTree child : tree.getChildren()){
 			if(child.getData() instanceof CFunction){
 				FunctionBase f = null;
 				if (!child.getData().val().matches("^_[^_].*")) {
+					// This will throw an exception if the function doesn't exist.
 					f = FunctionList.getFunction(child.getData());
 				}
 				link(child);

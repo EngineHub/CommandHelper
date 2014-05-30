@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
@@ -2773,6 +2774,71 @@ public class BasicLogic {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+
+	@api
+	public static class compile_error extends AbstractFunction implements Optimizable {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "compile_error";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "nothing {message} Throws a compile error unconditionally at link time, if the function has not been fully compiled"
+					+ " out with preprocessor directives. This is useful for causing a custom compile error if certain compilation environment"
+					+ " settings are not correct.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.CUSTOM_LINK, OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(!children.get(0).isConst()){
+				throw new ConfigCompileException(getName() + "'s argument must be a hardcoded string.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public void link(Target t, List<ParseTree> children) throws ConfigCompileException {
+			throw new ConfigCompileException(children.get(0).getData().val(), t);
+		}
+
 	}
 
 }

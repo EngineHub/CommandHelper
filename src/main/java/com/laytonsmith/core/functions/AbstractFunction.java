@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ *
  */
 public abstract class AbstractFunction implements Function {
 
@@ -129,7 +129,7 @@ public abstract class AbstractFunction implements Function {
 	@Override
 	public boolean preResolveVariables() {
 		return true;
-	}	
+	}
 
 	@Override
 	public ExampleScript[] examples() throws ConfigCompileException {
@@ -172,24 +172,24 @@ public abstract class AbstractFunction implements Function {
 		}
 		return "Executing function: " + this.getName() + "(" + b.toString() + ")";
 	}
-	
+
 	/**
 	 * Returns the documentation for this function that is provided as an external resource.
 	 * This is useful for functions that have especially long or complex documentation, and adding
 	 * it as a string directly in code would be cumbersome.
-	 * @return 
+	 * @return
 	 */
 	protected String getBundledDocs(){
 		return getBundledDocs(null);
 	}
-	
+
 	/**
 	 * Returns the documentation for this function that is provided as an external resource.
 	 * This is useful for functions that have especially long or complex documentation, and adding
 	 * it as a string directly in code would be cumbersome. To facilitate dynamic docs, templates
 	 * can be provided, which will be replaced for you.
 	 * @param map
-	 * @return 
+	 * @return
 	 */
 	protected String getBundledDocs(Map<String, DocGenTemplates.Generator> map){
 		String template = StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/" + getName()));
@@ -214,14 +214,14 @@ public abstract class AbstractFunction implements Function {
 	public URL getSourceJar() {
 		return ClassDiscovery.GetClassContainer(this.getClass());
 	}
-	
+
 	private final static Class[] EMPTY_CLASS = new Class[0];
 
 	/**
 	 * Checks for the &#64;seealso annotation on this class, and returns
 	 * the value listed there. This is to prevent subclasses from inheriting
 	 * the list from super classes.
-	 * @return 
+	 * @return
 	 */
 	@Override
 	public final Class<? extends Documentation>[] seeAlso() {
@@ -244,5 +244,9 @@ public abstract class AbstractFunction implements Function {
 		} while(c != null);
 		return false;
 	}
-	
+
+	public void link(Target t, List<ParseTree> children) throws ConfigCompileException {
+		// Do nothing, as a default
+	}
+
 }
