@@ -1,13 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -23,7 +21,9 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -43,9 +43,12 @@ public class ServerEvents {
 		public String docs() {
 			return "{players: <math match> | maxplayers: <math match>}"
 					+ " Fired when a user who has saved this server looks at their serverlist."
-					+ " {ip: The address the ping is coming from | players: the number of players online"
-					+ " | maxplayers: the number of slots on the server | motd}"
-					+ " {motd: The message a player is shown on the serverlist | maxplayers}"
+					+ " {ip: The address the ping is coming from | players: The number of players online"
+					+ " | maxplayers: The number of slots on the server | motd: The message a player is shown on the serverlist"
+					+ " | list: The list of connected players"
+					+ " {motd | maxplayers | list: It is only possible to remove players, the added players"
+					+ " will be ignored, moreover, add offline players will throw a PlayerOfflineException each time the event is triggered."
+					+ " The player count will be updated once the list changed.}"
 					+ " {}";
 		}
 
@@ -83,6 +86,11 @@ public class ServerEvents {
 				ret.put("motd", new CString(event.getMOTD(), t));
 				ret.put("players", new CInt(event.getNumPlayers(), t));
 				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
+				CArray players = new CArray(t);
+				for (MCPlayer player : event.getPlayers()) {
+					players.push(new CString(player.getName(), t));
+				}
+				ret.put("list", players);
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCPingEvent");
@@ -90,17 +98,23 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCServerPingEvent) {
 				MCServerPingEvent e = (MCServerPingEvent) event;
-				if (key.equals("motd")) {
-					e.setMOTD(value.val());
-					return true;
-				}
-				if (key.equals("maxplayers")) {
-					e.setMaxPlayers(Static.getInt32(value, Target.UNKNOWN));
-					return true;
+				switch (key.toLowerCase()) {
+					case "motd":
+						e.setMOTD(value.val());
+						return true;
+					case "maxplayers":
+						e.setMaxPlayers(Static.getInt32(value, Target.UNKNOWN));
+						return true;
+					case "list":
+						Set<MCPlayer> players = new HashSet<>();
+						for (Construct construct : ArgumentValidation.getArray(value, Target.UNKNOWN).asList()) {
+							players.add(Static.GetPlayer(construct, Target.UNKNOWN));
+						}
+						e.setPlayers(players);
+						return true;
 				}
 			}
 			return false;
