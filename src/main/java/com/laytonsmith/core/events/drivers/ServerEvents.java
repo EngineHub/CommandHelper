@@ -45,10 +45,10 @@ public class ServerEvents {
 					+ " Fired when a user who has saved this server looks at their serverlist."
 					+ " {ip: The address the ping is coming from | players: The number of players online"
 					+ " | maxplayers: The number of slots on the server | motd: The message a player is shown on the serverlist"
-					+ " | list: The list of connected players"
+					+ " | list: The list of connected players}"
 					+ " {motd | maxplayers | list: It is only possible to remove players, the added players"
 					+ " will be ignored, moreover, add offline players will throw a PlayerOfflineException each time the event is triggered."
-					+ " The player count will be updated once the list changed.}"
+					+ " This will also change the player count.}"
 					+ " {}";
 		}
 
