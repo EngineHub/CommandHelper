@@ -968,7 +968,7 @@ public class Environment {
 				Construct... args) throws ConfigRuntimeException {
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			MCSound sound = MCSound.BREATH;
+			MCSound sound;
 			float volume = 1, pitch = 1;
 
 			if (!(args[1] instanceof CArray))
