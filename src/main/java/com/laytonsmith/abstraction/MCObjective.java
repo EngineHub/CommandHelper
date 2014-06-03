@@ -3,7 +3,7 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 
 /**
- * 
+ *
  * @author jb_aero
  */
 public interface MCObjective {
@@ -11,7 +11,7 @@ public interface MCObjective {
 	public String getDisplayName();
 	public MCDisplaySlot getDisplaySlot();
 	public String getName();
-	public MCScore getScore(MCOfflinePlayer player);
+	public MCScore getScore(String entry);
 	public MCScoreboard getScoreboard();
 	public boolean isModifiable();
 	public void setDisplayName(String displayName);

@@ -28,22 +28,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 
+ *
  * @author jb_aero
  */
 public class Scoreboards {
-	
+
 	public static String docs() {
 		return "A class of functions for manipulating the server scoreboard.";
 	}
-	
+
 	/**
 	 * The name storing the server's main scoreboard
 	 */
 	public static final String MAIN = "main";
 	private static final String DEF_MSG = "Scoreboard defaults to '" + MAIN + "' if not given.";
 	private static Map<String, MCScoreboard> boards = new HashMap<String, MCScoreboard>();
-	
+
 	static {
 		if (!isBoard(MAIN)) {
 			try{
@@ -55,7 +55,7 @@ public class Scoreboards {
 			}
 		}
 	}
-	
+
 	/**
 	 * Checks if a scoreboard is being tracked
 	 * @param id Name to check for
@@ -78,7 +78,7 @@ public class Scoreboards {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Adds a scoreboard to the cache
 	 * @param id The name to save the new scoreboard as
@@ -95,7 +95,7 @@ public class Scoreboards {
 		}
 		boards.put(id, board);
 	}
-	
+
 	/**
 	 * Gets a scoreboard from the cache
 	 * @param id Name of the scoreboard to look for
@@ -109,7 +109,7 @@ public class Scoreboards {
 		}
 		return boards.get(id);
 	}
-	
+
 	/**
 	 * Searches the cache for the given scoreboard, and returns the ID matching it.
 	 * @param board The scoreboard to find the ID for
@@ -125,7 +125,7 @@ public class Scoreboards {
 		}
 		throw new ScoreboardException("The given scoreboard has not been registered yet.", t);
 	}
-	
+
 	/**
 	 * Removes a scoreboard from the cache, without clearing any of its data
 	 * @param id The scoreboard to remove
@@ -141,7 +141,7 @@ public class Scoreboards {
 		}
 		boards.remove(id);
 	}
-	
+
 	/**
 	 * A shortcut for making a scoreboard argument optional
 	 * @param numArgsToReadName the number of arguments that will cause the function to check user input
@@ -156,18 +156,18 @@ public class Scoreboards {
 		}
 		return getBoard(MAIN, t);
 	}
-	
+
 	public static class ScoreboardException extends ConfigRuntimeException {
 		public ScoreboardException(String msg, Target t) {
 			super(msg, ExceptionType.ScoreboardException, t);
 		}
 	}
-	
+
 	/**
 	 * Contains methods that should be the same for most scoreboard functions
 	 */
 	public static abstract class SBFunction extends AbstractFunction {
-		
+
 		/**
 		 * @return true
 		 */
@@ -197,7 +197,7 @@ public class Scoreboards {
 			return new ExceptionType[]{ExceptionType.ScoreboardException};
 		}
 	}
-	
+
 	@api
 	public static class get_pscoreboard extends SBFunction {
 
@@ -237,7 +237,7 @@ public class Scoreboards {
 					+ " Using this method, it should be possible to import scoreboards created by other plugins.";
 		}
 	}
-	
+
 	@api
 	public static class set_pscoreboard extends SBFunction {
 
@@ -270,7 +270,7 @@ public class Scoreboards {
 					+ " The scoreboard argument is the id of a registered scoreboard. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class get_scoreboards extends SBFunction {
 
@@ -306,7 +306,7 @@ public class Scoreboards {
 					+ " scoreboard which can be managed by the vanilla /scoreboard command.";
 		}
 	}
-	
+
 	@api
 	public static class get_objectives extends SBFunction {
 
@@ -366,7 +366,7 @@ public class Scoreboards {
 					+ " The arrays contain the keys name, displayname, slot, modifiable, and criteria.";
 		}
 	}
-	
+
 	@api
 	public static class get_teams extends SBFunction {
 
@@ -418,7 +418,7 @@ public class Scoreboards {
 					+ " displayname, prefix, suffix, size, options, and players.";
 		}
 	}
-	
+
 	@api
 	public static class create_scoreboard extends SBFunction {
 
@@ -445,7 +445,7 @@ public class Scoreboards {
 					+ " and stores it internally for later use. Throws an exception if the name is already in use.";
 		}
 	}
-	
+
 	@api
 	public static class create_objective extends SBFunction {
 
@@ -453,7 +453,7 @@ public class Scoreboards {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
-		
+
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -498,7 +498,7 @@ public class Scoreboards {
 					+ " Throws a LengthException if the name is more than 16 characters. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class create_team extends SBFunction {
 
@@ -506,7 +506,7 @@ public class Scoreboards {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
-		
+
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -540,7 +540,7 @@ public class Scoreboards {
 					+ " Throws a LengthException if the team name is more than 16 characters. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class set_objective_display extends SBFunction {
 
@@ -614,7 +614,7 @@ public class Scoreboards {
 					+ ". Displayname can be a max of 32 characters, otherwise it throws a LengthException. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class set_team_display extends SBFunction {
 
@@ -701,10 +701,10 @@ public class Scoreboards {
 					+ " prefix and suffix can only be 16, otherwise a LengthException is thrown. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class team_add_player extends SBFunction {
-		
+
 		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
@@ -743,7 +743,7 @@ public class Scoreboards {
 					+ " The player will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class team_remove_player extends SBFunction {
 
@@ -774,7 +774,7 @@ public class Scoreboards {
 					+ " and returns true if successful, for false if the player was not part of the team." + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class remove_scoreboard extends SBFunction {
 
@@ -788,10 +788,12 @@ public class Scoreboards {
 			}
 			if (nullify) {
 				MCScoreboard s = getBoard(id, t);
-				for (MCOfflinePlayer p : s.getPlayers()) {
+				for (String p : s.getEntries()) {
 					s.resetScores(p);
-					if (p.isOnline()) {
-						p.getPlayer().setScoreboard(getBoard(MAIN, t));
+					try {
+						Static.GetPlayer(p, t).setScoreboard(getBoard(MAIN, t));
+					} catch (ConfigRuntimeException ex){
+						// Not an exception in this case
 					}
 				}
 				for (MCTeam g : s.getTeams()) {
@@ -824,7 +826,7 @@ public class Scoreboards {
 					+ " essentially removing all references to the board so it can be garbage-collected.";
 		}
 	}
-	
+
 	@api
 	public static class remove_objective extends SBFunction {
 
@@ -858,7 +860,7 @@ public class Scoreboards {
 			return "void {objectivename, [scoreboard]} Unregisters an objective from the scoreboard. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class remove_team extends SBFunction {
 
@@ -892,7 +894,7 @@ public class Scoreboards {
 			return "void {teamname, [scoreboard]} Unregisters a team from the scoreboard. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class get_pscore extends SBFunction {
 
@@ -904,8 +906,7 @@ public class Scoreboards {
 			if (o == null) {
 				throw new ScoreboardException("The given objective does not exist.", t);
 			}
-			MCOfflinePlayer ofp = Static.getServer().getOfflinePlayer(args[1].val());
-			return new CInt(o.getScore(ofp).getScore(), t);
+			return new CInt(o.getScore(args[1].val()).getScore(), t);
 		}
 
 		@Override
@@ -924,7 +925,7 @@ public class Scoreboards {
 					+ " Works for offline players, so the name must be exact. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class set_pscore extends SBFunction {
 
@@ -932,7 +933,7 @@ public class Scoreboards {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
 		}
-		
+
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
@@ -944,8 +945,7 @@ public class Scoreboards {
 			if (args[1].val().length() > 16) {
 				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
 			}
-			MCOfflinePlayer ofp = Static.getServer().getOfflinePlayer(args[1].val());
-			o.getScore(ofp).setScore(Static.getInt32(args[2], t));
+			o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
 			return CVoid.VOID;
 		}
 
@@ -961,19 +961,19 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {objectiveName, player, int, [scoreboard]} Sets the player's score for the given objective."
-					+ " Works for offline players, so the name must be exact. Alternatively,"
-					+ " you can set scores for fake players to create custom displays,"
+			return "void {objectiveName, name, int, [scoreboard]} Sets the player's score for the given objective,"
+					+ " or an arbitrary name if not a valid player name."
+					+ " You can set scores for fake players to create custom displays,"
 					+ " but the 16 character name limit still applies. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class reset_all_pscores extends SBFunction {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			assignBoard(2, 1, t, args).resetScores(Static.getServer().getOfflinePlayer(args[0].val()));
+			assignBoard(2, 1, t, args).resetScores(args[0].val());
 			return CVoid.VOID;
 		}
 
@@ -993,7 +993,7 @@ public class Scoreboards {
 					+ " This means they will not be show up on any displays. " + DEF_MSG;
 		}
 	}
-	
+
 	@api
 	public static class set_team_options extends SBFunction {
 
@@ -1001,7 +1001,7 @@ public class Scoreboards {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.ScoreboardException, ExceptionType.FormatException};
 		}
-		
+
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {

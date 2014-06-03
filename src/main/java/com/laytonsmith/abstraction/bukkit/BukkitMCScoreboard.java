@@ -64,12 +64,8 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	}
 
 	@Override
-	public Set<MCOfflinePlayer> getPlayers() {
-		Set<MCOfflinePlayer> ret = new HashSet<MCOfflinePlayer>();
-		for (OfflinePlayer o : s.getPlayers()) {
-			ret.add(new BukkitMCOfflinePlayer(o));
-		}
-		return ret;
+	public Set<String> getEntries() {
+		return s.getEntries();
 	}
 
 	@Override
@@ -82,9 +78,9 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	}
 
 	@Override
-	public Set<MCScore> getScores(MCOfflinePlayer player) {
+	public Set<MCScore> getScores(String entry) {
 		Set<MCScore> ret = new HashSet<MCScore>();
-		for (Score o : s.getScores((OfflinePlayer) player.getHandle())) {
+		for (Score o : s.getScores(entry)) {
 			ret.add(new BukkitMCScore(o));
 		}
 		return ret;
@@ -119,10 +115,10 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	}
 
 	@Override
-	public void resetScores(MCOfflinePlayer player) {
-		s.resetScores((OfflinePlayer) player.getHandle());
+	public void resetScores(String entry) {
+		s.resetScores(entry);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof MCScoreboard) {

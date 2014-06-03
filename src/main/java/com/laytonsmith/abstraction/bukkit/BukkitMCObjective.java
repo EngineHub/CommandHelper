@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCObjective;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCScore;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
@@ -42,8 +41,8 @@ public class BukkitMCObjective implements MCObjective {
 	}
 
 	@Override
-	public MCScore getScore(MCOfflinePlayer player) {
-		return new BukkitMCScore(o.getScore((OfflinePlayer) player.getHandle()));
+	public MCScore getScore(String entry) {
+		return new BukkitMCScore(o.getScore(entry));
 	}
 
 	@Override
