@@ -11,7 +11,11 @@ import com.laytonsmith.abstraction.events.MCPluginIncomingMessageEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.event.server.ServerCommandEvent;
@@ -83,48 +87,73 @@ public class BukkitMiscEvents {
 	}
 
 	public static class BukkitMCServerPingEvent implements MCServerPingEvent {
-	
-		ServerListPingEvent slp;
+
+		private final ServerListPingEvent slp;
+
 		public BukkitMCServerPingEvent(ServerListPingEvent event) {
 			slp = event;
 		}
-		
+
 		@Override
 		public Object _GetObject() {
 			return slp;
 		}
-	
+
 		@Override
 		public InetAddress getAddress() {
 			return slp.getAddress();
 		}
-	
+
 		@Override
 		public int getMaxPlayers() {
 			return slp.getMaxPlayers();
 		}
-	
+
 		@Override
 		public String getMOTD() {
 			return slp.getMotd();
 		}
-	
+
 		@Override
 		public int getNumPlayers() {
 			return slp.getNumPlayers();
 		}
-	
+
 		@Override
 		public void setMaxPlayers(int max) {
 			slp.setMaxPlayers(max);
 		}
-	
+
 		@Override
 		public void setMOTD(String motd) {
 			slp.setMotd(motd);
 		}
+
+		@Override
+		public Set<MCPlayer> getPlayers() {
+			Set<MCPlayer> players = new HashSet<>();
+			Iterator<Player> iterator = slp.iterator();
+			while (iterator.hasNext()) {
+				players.add(new BukkitMCPlayer(iterator.next()));
+			}
+			return players;
+		}
+
+		@Override
+		public void setPlayers(Collection<MCPlayer> players) {
+			Set<Player> ps = new HashSet<>();
+			for (MCPlayer player : players) {
+				ps.add((Player) player.getHandle());
+			}
+			Iterator<Player> iterator = slp.iterator();
+			while (iterator.hasNext()) {
+				if (!ps.contains(iterator.next())) {
+					iterator.remove();
+				}
+			}
+		}
 	}
-	
+
 	public static class BukkitMCCommandTabCompleteEvent implements MCCommandTabCompleteEvent {
 
 		List<String> comp;
