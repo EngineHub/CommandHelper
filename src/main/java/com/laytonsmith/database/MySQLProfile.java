@@ -1,5 +1,6 @@
 package com.laytonsmith.database;
 
+import com.laytonsmith.core.Profiles;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.SQLException;
@@ -8,8 +9,8 @@ import java.util.Map;
 /**
  *
  */
-@SQLProfiles.SQLProfileType(type = "mysql")
-public class MySQLProfile extends SQLProfiles.SQLProfile {
+@Profiles.ProfileType(type = "mysql")
+public class MySQLProfile extends SQLProfile {
 
 	private final String host;
 	private final int port;
@@ -17,10 +18,10 @@ public class MySQLProfile extends SQLProfiles.SQLProfile {
 	private final String username;
 	private final String password;
 
-	public MySQLProfile(String id, Map<String, String> elements) throws SQLProfiles.InvalidSQLProfileException {
+	public MySQLProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
 		super(id);
 		if (!elements.containsKey("database")) {
-			throw new SQLProfiles.InvalidSQLProfileException("Required \"database\" tag is missing for profile \"" + id + "\"");
+			throw new Profiles.InvalidProfileException("Required \"database\" tag is missing for profile \"" + id + "\"");
 		}
 		database = elements.get("database");
 		if (elements.containsKey("username")) {
@@ -42,7 +43,7 @@ public class MySQLProfile extends SQLProfiles.SQLProfile {
 			try {
 				port = Integer.parseInt(elements.get("port"));
 			} catch (NumberFormatException ex) {
-				throw new SQLProfiles.InvalidSQLProfileException(ex.getMessage());
+				throw new Profiles.InvalidProfileException(ex.getMessage());
 			}
 		} else {
 			port = 3306;

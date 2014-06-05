@@ -17,9 +17,12 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.EmailProfile;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -690,7 +693,34 @@ public class Web {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			// Argument processing
-			CArray options = ArgumentValidation.getArray(args[0], t);
+			CArray options;
+			if(args.length == 1){
+				options = ArgumentValidation.getArray(args[0], t);
+			} else {
+				// Load the profile for transport data, if specified.
+				String profileName = ArgumentValidation.getString(args[0], t);
+				options = CArray.GetAssociativeArray(t);
+				Profiles.Profile p;
+				try {
+					p = environment.getEnv(GlobalEnv.class).getProfiles().getProfileById(profileName);
+				} catch(Profiles.InvalidProfileException ex){
+					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.FormatException, t, ex);
+				}
+				if(!(p instanceof EmailProfile)){
+					throw new ConfigRuntimeException("Profile type is expected to be \"email\", but \"" + p.getType() + "\"  was found.", ExceptionType.CastException, t);
+				}
+				Map<String, Object> data = ((EmailProfile)p).getMap();
+				for(String key : data.keySet()){
+					options.set(key, Construct.GetConstruct(data.get(key)), t);
+				}
+				// Override any transport data that was also specified in the options, as
+				// well as adding the email settings here too.
+				CArray options2 = ArgumentValidation.getArray(args[1], t);
+				for(String key : options2.stringKeySet()){
+					options.set(key, options2.get(key, t), t);
+				}
+			}
+
 
 			// Transport options
 			String host = ArgumentValidation.getItemFromArray(options, "host", t, new CString("localhost", t)).val();
@@ -879,10 +909,6 @@ public class Web {
 			return CVoid.VOID;
 		}
 
-		private boolean isContentBase64(Construct c){
-			return c instanceof CByteArray;
-		}
-
 		/**
 		 * Parses the content from the construct.
 		 * @param c
@@ -907,7 +933,7 @@ public class Web {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
@@ -941,6 +967,14 @@ public class Web {
 						+ "\tsubject: 'Subject',\n"
 						+ "\tbody: 'Body'\n"
 						+ "));", "<Would send a basic email through gmail's smtp server>"),
+				new ExampleScript("Sending a plain text email settings saved in " + MethodScriptFileLocations.getDefault().getProfilesFile().getName()
+						+ " as type \"email\" and id \"myID\". This is most useful for keeping credentials out of code directly.",
+						"email('myID', array(\n"
+						+ "\tfrom: 'from@gmail.com',\n"
+						+ "\tto: 'to@example.com',\n"
+						+ "\tsubject: 'Subject',\n"
+						+ "\tbody: 'Body'\n"
+						+ "));", "<Would send a basic email using the transport settings specified in the profile>"),
 				new ExampleScript("Sending a html email, with text fallback", "email(array(\n"
 						+ "\tfrom: 'from@example.com',\n"
 						+ "\tto: 'to@example.com',\n"

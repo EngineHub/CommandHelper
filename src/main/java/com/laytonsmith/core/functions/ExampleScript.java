@@ -15,7 +15,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.database.SQLProfiles;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
@@ -216,7 +216,7 @@ public class ExampleScript {
 		Environment env;
 		try {
 			env = Static.GenerateStandaloneEnvironment();
-		} catch (SQLProfiles.InvalidSQLProfileException ex) {
+		} catch (Profiles.InvalidProfileException ex) {
 			throw new RuntimeException(ex);
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);

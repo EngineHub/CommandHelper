@@ -30,7 +30,8 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.database.SQLProfiles;
+import com.laytonsmith.core.Profiles;
+import com.laytonsmith.database.SQLProfile;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ParameterMetaData;
@@ -77,16 +78,19 @@ public class SQL {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				SQLProfiles.SQLProfile profile;
+				Profiles.Profile profile;
 				if (args[0] instanceof CArray) {
 					Map<String, String> data = new HashMap<>();
 					for (String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key, t).val());
 					}
-					profile = SQLProfiles.getProfile(data);
+					profile = Profiles.getProfile(data);
 				} else {
-					SQLProfiles profiles = environment.getEnv(GlobalEnv.class).getSQLProfiles();
+					Profiles profiles = environment.getEnv(GlobalEnv.class).getProfiles();
 					profile = profiles.getProfileById(args[0].val());
+				}
+				if(!(profile instanceof SQLProfile)){
+					throw new ConfigRuntimeException("Profile must be an SQL type profile, but found \"" + profile.getType() + "\"", ExceptionType.CastException, t);
 				}
 				String query = args[1].val();
 				Construct[] params = new Construct[args.length - 2];
@@ -98,7 +102,7 @@ public class SQL {
 					}
 				}
 				//Parameters are now all parsed into java objects.
-				Connection conn = DriverManager.getConnection(profile.getConnectionString());
+				Connection conn = DriverManager.getConnection(((SQLProfile)profile).getConnectionString());
 				try (PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 					for (int i = 0; i < params.length; i++) {
 						int type = ps.getParameterMetaData().getParameterType(i + 1);
@@ -207,7 +211,7 @@ public class SQL {
 				} finally {
 					conn.close();
 				}
-			} catch (SQLProfiles.InvalidSQLProfileException | SQLException ex) {
+			} catch (Profiles.InvalidProfileException | SQLException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
 			}
 		}
@@ -253,7 +257,7 @@ public class SQL {
 //				if(children.get(0).isConst() && children.get(0).getData() instanceof CString){
 //					if(true){ //Prefs.verifyQueries()
 //						String profileName = children.get(0).getData().val();
-//						SQLProfiles.SQLProfile profile = null;
+//						SQLProfiles.Profile profile = null;
 //						Connection conn;
 //						try {
 //							conn = DriverManager.getConnection(profile.getConnectionString());

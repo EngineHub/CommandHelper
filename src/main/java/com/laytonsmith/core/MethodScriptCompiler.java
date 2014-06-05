@@ -31,7 +31,6 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
-import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
@@ -1700,7 +1699,7 @@ public final class MethodScriptCompiler {
 				Environment env = null;
 				try{
 					env = Static.GenerateStandaloneEnvironment();
-				} catch(IOException | DataSourceException | URISyntaxException | SQLProfiles.InvalidSQLProfileException e){
+				} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e){
 					//
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));

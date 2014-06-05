@@ -67,7 +67,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
-import com.laytonsmith.database.SQLProfiles;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.File;
@@ -100,35 +100,35 @@ public final class Interpreter {
 	 * BAD THINGS WILL HAPPEN TO EVERYBODY YOU LOVE IF THIS IS CHANGED!
 	 */
 	private static final String INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/mscript";
-	
+
 	private boolean inTTYMode = false;
 	private boolean multilineMode = false;
 	private String script = "";
 	private Environment env;
 	private Thread scriptThread = null;
-	
+
 	private volatile boolean isExecuting = false;
-	
+
 	private final Queue<String> commandHistory = new LimitedQueue<>(MAX_COMMAND_HISTORY);
-	
+
 	/**
 	 * If they mash ctrlC a bunch, they probably really want to quit, so we'll
 	 * keep track of this, and reset it only if they then run an actual command.
 	 */
 	private volatile int ctrlCcount = 0;
-	
+
 	/**
 	 * After this many mashes of Ctrl+C, clearly they want to exit, so we'll
 	 * exit the shell.
 	 */
 	private static final int MAX_CTRL_C_MASHES = 5;
-	
+
 	/**
 	 * Max commands that are tracked.
 	 */
 	private static final int MAX_COMMAND_HISTORY = 100;
 
-	public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
+	public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File fromFile = new File(file).getCanonicalFile();
 		Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
 		try {
@@ -139,7 +139,7 @@ public final class Interpreter {
 			System.exit(1);
 		}
 	}
-	
+
 	private String getHelpMsg(){
 		String msg = YELLOW + "You are now in cmdline interpreter mode. Use exit() to exit, and >>> to enter"
 					+ " multiline mode.";
@@ -150,7 +150,7 @@ public final class Interpreter {
 		}
 		return msg;
 	}
-	
+
 	/**
 	 * Creates a new Interpreter object. This object can then be manipulated via
 	 * the cmdline interactively, or standalone, via the execute method.
@@ -161,11 +161,11 @@ public final class Interpreter {
 	 * @throws DataSourceException
 	 * @throws URISyntaxException
 	 */
-	public Interpreter(List<String> args, String cwd) throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
+	public Interpreter(List<String> args, String cwd) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		this(args, cwd, false);
 	}
 
-	private Interpreter(List<String> args, String cwd, boolean inTTYMode) throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
+	private Interpreter(List<String> args, String cwd, boolean inTTYMode) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		doStartup();
 		env.getEnv(GlobalEnv.class).SetRootFolder(new File(cwd));
 		if(inTTYMode){
@@ -225,7 +225,7 @@ public final class Interpreter {
 					}
 					return ret;
 				}
-				
+
 			}));
 			while(true){
 				String prompt;
@@ -239,7 +239,7 @@ public final class Interpreter {
 					break;
 				}
 			}
-			
+
 			//Perhaps this code will be revisited in the future, so that more things
 			//can be done, like syntax highlighting, function keys, etc, but in order
 			//to do that, history, command completion, etc, will all have to be re-implemented,
@@ -330,37 +330,37 @@ public final class Interpreter {
 //											if(c4 == 53){
 //												//F5
 //												System.out.println("F5");
-//												continue;												
+//												continue;
 //											} else if(c4 == 55){
 //												//F6
 //												System.out.println("F6");
-//												continue;												
+//												continue;
 //											} else if(c4 == 56){
 //												//F7
 //												System.out.println("F7");
-//												continue;												
+//												continue;
 //											} else if(c4 == 57){
 //												//F8
 //												System.out.println("F8");
-//												continue;												
+//												continue;
 //											}
 //										} else if(c3 == 50){
 //											if(c4 == 48){
 //												//F9
 //												System.out.println("F9");
-//												continue;												
-//											} else if(c4 == 49){	
+//												continue;
+//											} else if(c4 == 49){
 //												//F10
 //												System.out.println("F10");
-//												continue;												
-//											} else if(c4 == 51){	
+//												continue;
+//											} else if(c4 == 51){
 //												//F11
 //												System.out.println("F11");
-//												continue;												
-//											} else if(c4 == 52){	
+//												continue;
+//											} else if(c4 == 52){
 //												//F12
 //												System.out.println("F12");
-//												continue;												
+//												continue;
 //											}
 //										} else {
 //											//Unknown
@@ -398,7 +398,7 @@ public final class Interpreter {
 //			}
 		}
 	}
-	
+
 	private String getPrompt(){
 		CClosure c = (CClosure) env.getEnv(GlobalEnv.class).GetCustom("cmdline_prompt");
 		if(c != null){
@@ -414,11 +414,11 @@ public final class Interpreter {
 		return BLUE + ":" + TermColors.RESET;
 	}
 
-	private void doStartup() throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
+	private void doStartup() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 
 		Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		Installer.InstallCmdlineInterpreter();
-		
+
 		env = Static.GenerateStandaloneEnvironment();
 		env.getEnv(GlobalEnv.class).SetCustom("cmdline", true);
 		if (Prefs.UseColors()) {
@@ -426,7 +426,7 @@ public final class Interpreter {
 		} else {
 			TermColors.DisableColors();
 		}
-		
+
 		String auto_include = FileUtil.read(MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile());
 		try {
 			MethodScriptCompiler.execute(auto_include, MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile(), true, env, null, null, null);
@@ -476,7 +476,7 @@ public final class Interpreter {
 	 * This evaluates each line of text
 	 * @param line
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private boolean textLine(String line) throws IOException {
 		switch (line) {
@@ -521,7 +521,7 @@ public final class Interpreter {
 	 * @param script
 	 * @param args
 	 * @throws ConfigCompileException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void execute(String script, List<String> args) throws ConfigCompileException, IOException {
 		execute(script, args, null);
@@ -534,7 +534,7 @@ public final class Interpreter {
 	 * @param args
 	 * @param fromFile
 	 * @throws ConfigCompileException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void execute(String script, List<String> args, File fromFile) throws ConfigCompileException, IOException {
 		CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput input = new CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput(script);

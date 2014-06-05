@@ -400,7 +400,13 @@ public class Main {
 				}
 				String fileName = allArgs.get(0);
 				allArgs.remove(0);
-				Interpreter.startWithTTY(fileName, allArgs);
+				try {
+					Interpreter.startWithTTY(fileName, allArgs);
+				} catch(Profiles.InvalidProfileException ex){
+					System.err.println("Invalid profile file at " + MethodScriptFileLocations.getDefault().getProfilesFile()
+						+ ": " + ex.getMessage());
+					System.exit(1);
+				}
 				System.exit(0);
 			} else if(mode == extensionDocsMode){
 				String inputJarS = parsedArgs.getStringArgument("input-jar");

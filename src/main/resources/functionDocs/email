@@ -1,4 +1,4 @@
-void {options} Sends an email. See the extended description for more information. ----
+void {[profile], options} Sends an email. See the extended description for more information. ----
 
 An email is a text based message that is sent using the standard email protocol. Various components of the message
 including a recipient list, subject, and attachments, including one that serves as the message body. The options are
@@ -11,6 +11,24 @@ This method blocks until the email has completed sending, so it may be useful to
 
 There are two types of options that can be provided, transport settings, and email settings. The transport settings affect
 connection to the smtp server, and email settings affect the email itself.
+
+If the profile is specified, then the transport settings are pulled from the profile specified instead, with any other options specified
+overridding the values specified in the profile. The type of the profile is "email".
+All transport settings may be specified in the profile. This is
+useful so that sensitive information isn't hardcoded. Here is an example profile:
+
+<pre>
+<profile id="myEmailProfile">
+	<type>email</type>
+	<host>example.com</host>
+	<user>user@example.com</host>
+	<password>hunter2</password>
+	<port>12345</port>
+	<use_ssl>true</use_ssl>
+	<use_start_tls>true</use_start_tls>
+	<timeout>10000</timeout>
+</profile>
+</pre>
 
 Transport settings:
 

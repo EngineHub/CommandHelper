@@ -25,7 +25,6 @@ import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.packetjumper.PacketJumper;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.database.SQLProfiles;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.MemoryDataSource;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -117,11 +116,11 @@ public class AliasCore {
 			gEnv = new GlobalEnv(parent.executionQueue, parent.profiler,
 					parent.persistenceNetwork, parent.permissionsResolver,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		} catch (IOException ex) {
 			Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
-		} catch (SQLProfiles.InvalidSQLProfileException ex) {
+		} catch (Profiles.InvalidProfileException ex) {
 			throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), Target.UNKNOWN);
 		}
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
@@ -396,8 +395,8 @@ public class AliasCore {
 			try {
 				gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork, parent.permissionsResolver,
 						MethodScriptFileLocations.getDefault().getConfigDirectory(),
-						new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
-			} catch (SQLProfiles.InvalidSQLProfileException ex) {
+						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+			} catch (Profiles.InvalidProfileException ex) {
 				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;
 			}

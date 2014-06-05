@@ -20,7 +20,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.database.SQLProfiles;
+import com.laytonsmith.core.Profiles;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -142,11 +142,11 @@ public class CommandHelperInterpreterListener implements Listener {
 			gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler,
 					plugin.persistenceNetwork, plugin.permissionsResolver,
 					CommandHelperFileLocations.getDefault().getConfigDirectory(),
-					new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		} catch (IOException ex) {
 			CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 			return;
-		} catch (SQLProfiles.InvalidSQLProfileException ex) {
+		} catch (Profiles.InvalidProfileException ex) {
 			CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 			return;
 		}

@@ -1,5 +1,6 @@
 package com.laytonsmith.database;
 
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -18,7 +19,7 @@ public class ProfilesTest {
 	
 	@BeforeClass
 	public static void setUpClass() {
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(SQLProfiles.class));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Profiles.class));
 	}
 	
 	@AfterClass
@@ -50,7 +51,7 @@ public class ProfilesTest {
 				+ "		<password>password2</password>"
 				+ "	</profile>"
 				+ "</profiles>";
-		SQLProfiles profiles = new SQLProfiles(good);
+		Profiles profiles = new Profiles(good);
 		
 	}
 	

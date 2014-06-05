@@ -35,7 +35,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.database.SQLProfiles;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.persistence.DataSource;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.DataSourceFactory;
@@ -71,7 +71,7 @@ public class Manager {
 	};
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
-	public static void start() throws IOException, DataSourceException, URISyntaxException, SQLProfiles.InvalidSQLProfileException {
+	public static void start() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		Implementation.useAbstractEnumThread(false);
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
@@ -82,7 +82,7 @@ public class Manager {
 		CHLog.initialize(chDirectory);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork, 
-				new PermissionsResolver.PermissiveResolver(), chDirectory, new SQLProfiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+				new PermissionsResolver.PermissiveResolver(), chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 

@@ -325,6 +325,18 @@ public class ArgumentValidation {
 	}
 
 	/**
+	 * Returns a String object from the given construct. Note that no
+	 * validation is done, because all Constructs can be toString'd, but
+	 * this method is provided for consistency sake.
+	 * @param c
+	 * @param t
+	 * @return
+	 */
+	public static String getString(Construct c, Target t){
+		return c.val();
+	}
+
+	/**
 	 * Returns true if any of the constructs are a CDouble, false otherwise.
 	 *
 	 * @param c

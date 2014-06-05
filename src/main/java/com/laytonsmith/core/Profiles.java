@@ -1,4 +1,4 @@
-package com.laytonsmith.database;
+package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
@@ -12,7 +12,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,26 +19,26 @@ import javax.xml.xpath.XPathExpressionException;
 import org.xml.sax.SAXException;
 
 /**
- * A SQLProfiles object represents an xml document that lists out all the
+ * A Profiles object represents an xml document that lists out all the
  * profiles available on the system. A profile can then be retrieved based on
  * the profile name. XML validation also occurs during startup with this class.
  */
-public class SQLProfiles {
+public class Profiles {
 
 	private final XMLDocument document;
-	private final Map<String, SQLProfile> profiles = new HashMap<>();
-	private static Map<String, Class<SQLProfile>> profileTypes = null;
+	private final Map<String, Profile> profiles = new HashMap<>();
+	private static Map<String, Class<Profile>> profileTypes = null;
 
 	/**
 	 *
 	 * @param xml
-	 * @throws com.laytonsmith.database.SQLProfiles.InvalidSQLProfileException
+	 * @throws InvalidProfileException
 	 */
-	public SQLProfiles(String xml) throws InvalidSQLProfileException {
+	public Profiles(String xml) throws InvalidProfileException {
 		try {
 			document = new XMLDocument(xml);
 		} catch (SAXException ex) {
-			throw new InvalidSQLProfileException(ex);
+			throw new InvalidProfileException(ex);
 		}
 		parse();
 	}
@@ -48,9 +47,9 @@ public class SQLProfiles {
 	 *
 	 * @param profileFile
 	 * @throws IOException
-	 * @throws com.laytonsmith.database.SQLProfiles.InvalidSQLProfileException
+	 * @throws InvalidProfileException
 	 */
-	public SQLProfiles(File profileFile) throws IOException, InvalidSQLProfileException {
+	public Profiles(File profileFile) throws IOException, InvalidProfileException {
 		this(FileUtil.readAsStream(profileFile));
 	}
 
@@ -58,23 +57,23 @@ public class SQLProfiles {
 	 *
 	 * @param profileData
 	 * @throws IOException
-	 * @throws com.laytonsmith.database.SQLProfiles.InvalidSQLProfileException
+	 * @throws InvalidProfileException
 	 */
-	public SQLProfiles(InputStream profileData) throws IOException, InvalidSQLProfileException {
+	public Profiles(InputStream profileData) throws IOException, InvalidProfileException {
 		try {
 			document = new XMLDocument(profileData);
 		} catch (SAXException ex) {
-			throw new InvalidSQLProfileException(ex);
+			throw new InvalidProfileException(ex);
 		}
 		parse();
 	}
 
-	private void parse() throws InvalidSQLProfileException {
+	private void parse() throws InvalidProfileException {
 		int profileCount;
 		try {
 			profileCount = document.countNodes("/profiles/profile");
 		} catch (XPathExpressionException ex) {
-			throw new InvalidSQLProfileException("Missing root /profiles element");
+			throw new InvalidProfileException("Missing root /profiles element");
 		}
 
 		for (int i = 1; i < profileCount + 1; i++) {
@@ -83,12 +82,12 @@ public class SQLProfiles {
 			try {
 				id = document.getNode("/profiles/profile[" + i + "]/@id");
 			} catch (XPathExpressionException ex) {
-				throw new InvalidSQLProfileException("All <profile> elements must have an id attribute.");
+				throw new InvalidProfileException("All <profile> elements must have an id attribute.");
 			}
 			try {
 				type = document.getNode("/profiles/profile[" + i + "]/type");
 			} catch (XPathExpressionException ex) {
-				throw new InvalidSQLProfileException("All <profile> elements must have a type attribute.");
+				throw new InvalidProfileException("All <profile> elements must have a type attribute.");
 			}
 			List<String> children;
 			try {
@@ -108,9 +107,9 @@ public class SQLProfiles {
 			}
 			//Type is only used internally, so we remove it at this point.
 			elements.remove("type");
-			//If the profile already exists in the set, throw an exception. (SQLProfiles are sorted by ID, so that needs to be unique.)
+			//If the profile already exists in the set, throw an exception. (Profiles are sorted by ID, so that needs to be unique.)
 			if (profiles.containsKey(id)) {
-				throw new InvalidSQLProfileException("Duplicate profile id found: \"" + id + "\"");
+				throw new InvalidProfileException("Duplicate profile id found: \"" + id + "\"");
 			}
 			profiles.put(id, getProfile0(id, type, elements));
 		}
@@ -122,12 +121,12 @@ public class SQLProfiles {
 	 *
 	 * @param id
 	 * @return
-	 * @throws com.laytonsmith.database.SQLProfiles.InvalidSQLProfileException If the
+	 * @throws InvalidProfileException If the
 	 * profile doesn't exist.
 	 */
-	public SQLProfile getProfileById(String id) throws InvalidSQLProfileException {
+	public Profile getProfileById(String id) throws InvalidProfileException {
 		if (!profiles.containsKey(id)) {
-			throw new InvalidSQLProfileException("No profile by the name \"" + id + "\" was found.");
+			throw new InvalidProfileException("No profile by the name \"" + id + "\" was found.");
 		}
 		return profiles.get(id);
 	}
@@ -144,36 +143,36 @@ public class SQLProfiles {
 	 * @param type
 	 * @param data
 	 * @return
-	 * @throws com.laytonsmith.database.SQLProfiles.InvalidSQLProfileException
+	 * @throws InvalidProfileException
 	 */
-	private static SQLProfile getProfile0(String id, String type, Map<String, String> data) throws InvalidSQLProfileException {
+	private static Profile getProfile0(String id, String type, Map<String, String> data) throws InvalidProfileException {
 		if (profileTypes == null) {
 			profileTypes = new HashMap<>();
-			for (Class<SQLProfile> p : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(SQLProfileType.class, SQLProfile.class)) {
-				String t = p.getAnnotation(SQLProfileType.class).type();
+			for (Class<Profile> p : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(ProfileType.class, Profile.class)) {
+				String t = p.getAnnotation(ProfileType.class).type();
 				profileTypes.put(t, p);
 			}
 		}
 		if (!profileTypes.containsKey(type)) {
-			throw new InvalidSQLProfileException("Unknown type \"" + type + "\"");
+			throw new InvalidProfileException("Unknown type \"" + type + "\"");
 		}
-		SQLProfile profile = ReflectionUtils.newInstance(profileTypes.get(type), new Class[]{String.class, Map.class},
+		Profile profile = ReflectionUtils.newInstance(profileTypes.get(type), new Class[]{String.class, Map.class},
 				new Object[]{id, data});
 		return profile;
 	}
 
 	/**
-	 * Utility method for retrieving a SQLProfile object given pre-parsed
+	 * Utility method for retrieving a Profile object given pre-parsed
 	 * connection information. The type is assumed to be apart of the data
 	 * provided. No id is required as part of the data.
 	 *
 	 * @param data
 	 * @return
-	 * @throws com.laytonsmith.database.SQLProfiles.InvalidSQLProfileException
+	 * @throws InvalidProfileException
 	 */
-	public static SQLProfile getProfile(Map<String, String> data) throws InvalidSQLProfileException {
+	public static Profile getProfile(Map<String, String> data) throws InvalidProfileException {
 		if (!data.containsKey("type")) {
-			throw new InvalidSQLProfileException("Missing \"type\"");
+			throw new InvalidProfileException("Missing \"type\"");
 		}
 		String type = data.get("type");
 		data.remove("type");
@@ -181,17 +180,17 @@ public class SQLProfiles {
 	}
 
 	/**
-	 * Utility method for retrieving a SQLProfile object given pre-parsed
+	 * Utility method for retrieving a Profile object given pre-parsed
 	 * connection information, including the type. No id is required as part of
 	 * the data.
 	 *
 	 * @param type
 	 * @param data
 	 * @return
-	 * @throws com.laytonsmith.database.SQLProfiles.InvalidSQLProfileException If
+	 * @throws InvalidProfileException If
 	 * anything is invalid about the data, including the type being unknown.
 	 */
-	public static SQLProfile getProfile(String type, Map<String, String> data) throws InvalidSQLProfileException {
+	public static Profile getProfile(String type, Map<String, String> data) throws InvalidProfileException {
 		return getProfile0(null, type, data);
 	}
 
@@ -201,13 +200,13 @@ public class SQLProfiles {
 	 * It is expected that subclasses have a constructor that matches the
 	 * signature (String id, Map&lt;String, String&gt; elements) that contains
 	 * the parsed xml for that profile. validation can be done in the
-	 * constructor, and an InvalidSQLProfileException can be thrown if there is
+	 * constructor, and an InvalidProfileException can be thrown if there is
 	 * invalid or missing data.
 	 */
-	public static abstract class SQLProfile implements Comparable<SQLProfile> {
+	public static abstract class Profile implements Comparable<Profile> {
 		private final String id;
 
-		protected SQLProfile(String id) {
+		protected Profile(String id) {
 			this.id = id;
 		}
 
@@ -226,24 +225,13 @@ public class SQLProfiles {
 		 * @return
 		 */
 		public String getType() {
-			return this.getClass().getAnnotation(SQLProfileType.class).type();
+			return this.getClass().getAnnotation(ProfileType.class).type();
 		}
 
 		@Override
-		public int compareTo(SQLProfile o) {
+		public int compareTo(Profile o) {
 			return this.id.compareTo(o.id);
 		}
-
-		/**
-		 * Given the connection details, this should return the proper
-		 * connection string that the actual database connector will use to
-		 * create a connection with this profile. Additionally, during this
-		 * step, it should be verified that the SQL driver is present.
-		 *
-		 * @return
-		 * @throws SQLException If the database driver doesn't exist.
-		 */
-		public abstract String getConnectionString() throws SQLException;
 
 		//Subclasses are encouraged to override this
 		@Override
@@ -253,14 +241,14 @@ public class SQLProfiles {
 	}
 
 	/**
-	 * Subclasses of SQLProfile should tag with this annotation, and provide the
+	 * Subclasses of Profile should tag with this annotation, and provide the
 	 * type specified.
 	 */
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface SQLProfileType {
+	public static @interface ProfileType {
 		/**
-		 * This is the type for the SQLProfile. If this class has this type, it
+		 * This is the type for the Profile. If this class has this type, it
 		 * is selected when that type is specified in the profile.
 		 *
 		 * @return
@@ -269,23 +257,23 @@ public class SQLProfiles {
 	}
 
 	/**
-	 * An InvalidSQLProfileException is thrown if the profile provided is
+	 * An InvalidProfileException is thrown if the profile provided is
 	 * invalid, either due to invalid profile data or bad xml validation.
 	 */
-	public static class InvalidSQLProfileException extends Exception {
+	public static class InvalidProfileException extends Exception {
 
-		public InvalidSQLProfileException() {
+		public InvalidProfileException() {
 		}
 
-		public InvalidSQLProfileException(String message) {
+		public InvalidProfileException(String message) {
 			super(message);
 		}
 
-		public InvalidSQLProfileException(String message, Throwable t) {
+		public InvalidProfileException(String message, Throwable t) {
 			super(message, t);
 		}
 
-		public InvalidSQLProfileException(Throwable t) {
+		public InvalidProfileException(Throwable t) {
 			super(t);
 		}
 
