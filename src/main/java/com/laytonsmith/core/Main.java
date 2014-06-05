@@ -13,10 +13,8 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.extensions.ExtensionManager;
-import com.laytonsmith.core.functions.Cmdline;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -76,6 +74,7 @@ public class Main {
 	private static final ArgumentParser profilerSummaryMode;
 	private static final ArgumentParser rsaKeyGenMode;
 	private static final ArgumentParser pnViewerMode;
+	private static final ArgumentParser coreFunctionsMode;
 
 	static {
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -182,6 +181,9 @@ public class Main {
 				.addArgument("port", ArgumentParser.Type.NUMBER, "The port for the server to listen on.", "port", false)
 				.addArgument("password", ArgumentParser.Type.STRING, "The password that remote clients will need to provide to connect. Leave the field blank to be prompted for a password.", "password", false);
 		suite.addMode("pn-viewer", pnViewerMode);
+		coreFunctionsMode = ArgumentParser.GetParser()
+				.addDescription("Prints a list of functions tagged with the @core annotation, then exits.");
+		suite.addMode("core-functions", coreFunctionsMode);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -253,6 +255,17 @@ public class Main {
 
 			if (mode == managerMode) {
 				Manager.start();
+				System.exit(0);
+			} else if (mode == coreFunctionsMode){
+				List<String> core = new ArrayList<>();
+				for(api.Platforms platform : api.Platforms.values()){
+					for(FunctionBase f : FunctionList.getFunctionList(platform)){
+						if(f.isCore()){
+							core.add(f.getName());
+						}
+					}
+				}
+				System.out.println(StringUtils.Join(core, ", "));
 				System.exit(0);
 			} else if (mode == interpreterMode) {
 				new Interpreter(parsedArgs.getStringListArgument(), parsedArgs.getStringArgument("location-----"));
