@@ -42,6 +42,7 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
+import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
@@ -125,11 +126,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public void onLoad() {
 		Implementation.setServerType(Implementation.Type.BUKKIT);
-		
-		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());		
+
+		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());
 		CommandHelperFileLocations.getDefault().getCacheDirectory().mkdirs();
 		CommandHelperFileLocations.getDefault().getPreferencesDirectory().mkdirs();
-		
+
 		UpgradeLog upgradeLog = new UpgradeLog(CommandHelperFileLocations.getDefault().getUpgradeLogFile());
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
@@ -156,7 +157,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 					"preferences.txt");
 			@Override
 			public boolean doRun() {
-				return oldPreferences.exists() 
+				return oldPreferences.exists()
 						&& !CommandHelperFileLocations.getDefault().getPreferencesFile().exists();
 			}
 
@@ -165,7 +166,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				try {
 					Prefs.init(oldPreferences);
 					Prefs.SetColors();
-					Logger.getLogger("Minecraft").log(Level.INFO, 
+					Logger.getLogger("Minecraft").log(Level.INFO,
 							TermColors.YELLOW + "[" + Implementation.GetServerType().getBranding() + "] Old preferences.txt file detected. Moving preferences.txt to preferences.ini." + TermColors.reset());
 					FileUtil.copy(oldPreferences, CommandHelperFileLocations.getDefault().getPreferencesFile(), true);
 					oldPreferences.deleteOnExit();
@@ -224,19 +225,41 @@ public class CommandHelperPlugin extends JavaPlugin {
 				System.out.println("CommandHelper: The loggerPreferences.txt file has been deleted and re-created, as the defaults have changed.");
 			}
 		});
-		
+
+		// Renames the sql-profiles.xml file to the new name.
+		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
+
+			// This should never change
+			private final File oldProfilesFile = new File(MethodScriptFileLocations.getDefault().getPreferencesDirectory(), "sql-profiles.xml");
+
+			@Override
+			public boolean doRun() {
+				return oldProfilesFile.exists();
+			}
+
+			@Override
+			public void run() {
+				try {
+					FileUtil.move(oldProfilesFile, MethodScriptFileLocations.getDefault().getProfilesFile());
+					System.out.println("CommandHelper: sql-profiles.xml has been renamed to " + MethodScriptFileLocations.getDefault().getProfilesFile().getName());
+				} catch (IOException ex) {
+					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+		});
+
 		try {
 			upgradeLog.runTasks();
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		
+
 		try{
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		
+
 		Prefs.SetColors();
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
@@ -244,7 +267,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 7. You should have plans"
 					+ " to upgrade at some point, as " + Implementation.GetServerType().getBranding() + " may require it at some point.", Target.UNKNOWN);
 		}
-		
+
 		self = this;
 
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
@@ -256,14 +279,14 @@ public class CommandHelperPlugin extends JavaPlugin {
 		System.out.println("[CommandHelper] Running initial class discovery,"
 				+ " this will probably take a few seconds...");
 		myServer = StaticLayer.GetServer();
-		
+
 		System.out.println("[CommandHelper] Loading extensions in the background...");
-		
+
 		loadingThread = new Thread("extensionloader") {
 			@Override
 			public void run() {
 				ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
-			
+
 				if (OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
 					// Using System.out here instead of the logger as the logger doesn't
 					// immediately print to the console.
@@ -271,12 +294,12 @@ public class CommandHelperPlugin extends JavaPlugin {
 					ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
 					System.out.println("[CommandHelper] Extension caching complete.");
 				}
-				
+
 				ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 				System.out.println("[CommandHelper] Extension loading complete.");
 			}
 		};
-		
+
 		loadingThread.start();
 	}
 
@@ -287,14 +310,14 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void onEnable() {
 		if(loadingThread.isAlive()){
 			System.out.println("[CommandHelper] Waiting for extension loading to complete...");
-			
+
 			try {
 				loadingThread.join();
 			} catch (InterruptedException ex) {
 				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		
+
 		//Metrics
 		try {
 			org.mcstats.Metrics m = new Metrics(this);
@@ -309,7 +332,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} catch (IOException e) {
 			// Failed to submit the stats :-(
 		}
-		
+
 		try {
 			//This may seem redundant, but on a /reload, we want to refresh these
 			//properties.
@@ -329,7 +352,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		if (pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin) {
 			wep = (WorldEditPlugin) pwep;
 		}
-		
+
 		String script_name = Prefs.ScriptName();
 		String main_file = Prefs.MainFile();
 		boolean showSplashScreen = Prefs.ShowSplashScreen();
@@ -373,7 +396,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		playerListener.loadGlobalAliases();
 		interpreterListener.reload();
-		
+
 		Static.getLogger().log(Level.INFO, "[CommandHelper] CommandHelper {0} enabled", getDescription().getVersion());
 	}
 
@@ -389,9 +412,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 		//free up some memory
 		StaticLayer.GetConvertor().runShutdownHooks();
 		stopExecutionQueue();
-		
+
 		ExtensionManager.Cleanup();
-		
+
 		ac = null;
 		wep = null;
 	}
@@ -410,7 +433,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void registerEvent(Listener listener) {
 		getServer().getPluginManager().registerEvents(listener, this);
 	}
-	
+
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		MCCommandSender mcsender = BukkitConvertor.BukkitGetCorrectSender(sender);
@@ -424,7 +447,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 * @param cmd
 	 * @param commandLabel
 	 * @param args
-	 * @return 
+	 * @return
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
@@ -540,7 +563,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				commandRunning.remove(player);
 				return true;
 			}
-			
+
 			if (args.length > 0) {
 				String alias = CommandHelperPlugin.joinString(args, " ");
 				try {
@@ -611,9 +634,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 					if(Prefs.InterpreterTimeout() != 0){
 						if(interpreterUnlockedUntil < System.currentTimeMillis()){
 							player.sendMessage(MCChatColor.RED + "Interpreter mode is currently locked. Run \"interpreter-on\" from console to unlock it."
-									+ " If you want to turn this off entirely, set the interpreter-timeout option to 0 in " 
+									+ " If you want to turn this off entirely, set the interpreter-timeout option to 0 in "
 									+ CommandHelperFileLocations.getDefault().getPreferencesFile().getName());
-							commandRunning.remove(player); 
+							commandRunning.remove(player);
 							return true;
 						}
 					}
@@ -628,7 +651,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			}
 			commandRunning.remove(player);
 			return true;
-		} 
+		}
 		commandRunning.remove(player);
 		return false;
 	}
