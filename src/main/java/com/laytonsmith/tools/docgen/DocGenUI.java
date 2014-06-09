@@ -22,7 +22,7 @@ import javax.swing.SwingUtilities;
 
 /**
  *
- * 
+ *
  */
 public class DocGenUI extends javax.swing.JFrame {
 
@@ -45,14 +45,14 @@ public class DocGenUI extends javax.swing.JFrame {
 							}
 						});
 					}
-					
+
 					@Override
 					public void setStatus(final String status){
 						SwingUtilities.invokeLater(new Runnable() {
 
 							@Override
 							public void run() {
-								infoLabel.setText(status);								
+								infoLabel.setText(status);
 							}
 						});
 					}
@@ -63,16 +63,16 @@ public class DocGenUI extends javax.swing.JFrame {
 	public DocGenUI() {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		initComponents();
-		UIUtils.centerWindow(this);	
+		UIUtils.centerWindow(this);
 		this.setTitle("Documentation Generator");
 	}
-	
+
 	private void doUpload(){
 		infoLabel.setText("Info:");
 		manager.setProgress(null);
 		try {
 			try{
-				handler = new DocGenUIHandler(manager, new URL("http://" + wikiURL.getText()), username.getText(), 
+				handler = new DocGenUIHandler(manager, new URL("http://" + wikiURL.getText()), username.getText(),
 						new String(password.getPassword()), "CommandHelper/" + (staged.isSelected()?"Staged/":""),
 						"CommandHelper/", staged.isSelected(),
 						functions.isSelected(), examples.isSelected(), events.isSelected(), templates.isSelected());
@@ -297,18 +297,18 @@ public class DocGenUI extends javax.swing.JFrame {
     private void singleFunctionUploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singleFunctionUploadButtonActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_singleFunctionUploadButtonActionPerformed
-	
+
 	/**
 	 * @param args the command line arguments
 	 */
 	public static void main(String args[]) {
-		Implementation.setServerType(Implementation.Type.BUKKIT);
+		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		try {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 		} catch (IOException ex) {
 			Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		
+
 //		try {
 //			SwingUtilities.invokeAndWait(new Runnable() {
 //
@@ -320,7 +320,7 @@ public class DocGenUI extends javax.swing.JFrame {
 //						JDialog.setDefaultLookAndFeelDecorated(true);
 //					} catch (UnsupportedLookAndFeelException ex) {
 //						Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
-//					} 
+//					}
 //				}
 //			});
 //		} catch (Exception ex) {
@@ -333,7 +333,7 @@ public class DocGenUI extends javax.swing.JFrame {
 //				e.printStackTrace(System.err);
 //			}
 //		}
-		
+
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenUI.class));
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
@@ -344,9 +344,9 @@ public class DocGenUI extends javax.swing.JFrame {
 				new DocGenUI().setVisible(true);
 			}
 		});
-		
+
 		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-		
+
 		//This goes ahead and initializes the platform.
 		FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA);
 	}

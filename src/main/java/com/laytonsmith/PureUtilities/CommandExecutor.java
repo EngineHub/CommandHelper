@@ -16,28 +16,25 @@ import java.util.logging.Logger;
 /**
  * Contains utilities to execute an external process and retrieve various
  * results from it.
- * 
+ *
  */
 public class CommandExecutor {
 	
-	public static void main(String [] args) throws Exception{
-		System.out.println(Execute("ping -c 2 google.com"));
-	}
 	/**
 	 * If you're in a hurry, and all you want is to get the output of System.out
 	 * from a process started with a string, this will do it for you.
 	 * @param command
-	 * @return 
+	 * @return
 	 */
-	public static String Execute(String command) throws InterruptedException, IOException{		
+	public static String Execute(String command) throws InterruptedException, IOException{
 		return Execute(StringToArray(command));
 	}
-	
+
 	/**
 	 * If you're in a hurry, and all you want is to get the output of System.out
 	 * from a process started with a list of arguments, this will do it for you.
 	 * @param args
-	 * @return 
+	 * @return
 	 */
 	public static String Execute(String [] args) throws InterruptedException, IOException{
 		final List<Byte> output = new ArrayList<Byte>();
@@ -50,7 +47,7 @@ public class CommandExecutor {
 			}
 		});
 		c.setSystemOut(os);
-		c.start();		
+		c.start();
 		c.waitFor();
 		Byte[] Bytes = new Byte[output.size()];
 		byte[] bytes = new byte[output.size()];
@@ -58,22 +55,22 @@ public class CommandExecutor {
 		for(int i = 0; i < Bytes.length; i++){
 			bytes[i] = Bytes[i];
 		}
-		
+
 		return new String(bytes, "UTF-8");
 	}
-	
+
 	private static String [] StringToArray(String s){
 		List<String> argList = StringUtils.ArgParser(s);
 		String [] args = new String[argList.size()];
 		args = argList.toArray(args);
 		return args;
 	}
-	
-	
+
+
 	public CommandExecutor(String command){
 		this(StringToArray(command));
 	}
-	
+
 	private String [] args;
 	private Process process;
 	private InputStream in;
@@ -83,15 +80,15 @@ public class CommandExecutor {
 	private Thread outThread;
 	private Thread errThread;
 	private Thread inThread;
-	public CommandExecutor(String [] command){		
+	public CommandExecutor(String [] command){
 		args = command;
 	}
-	
+
 	/**
 	 * Starts this CommandExecutor. Afterwards, you can call .waitFor to wait
 	 * until the process has finished.
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public CommandExecutor start() throws IOException{
 		ProcessBuilder builder = new ProcessBuilder(args);
@@ -183,7 +180,7 @@ public class CommandExecutor {
 		}
 		return this;
 	}
-	
+
 	public CommandExecutor setSystemIn(InputStream input){
 		if(process != null){
 			throw new RuntimeException("Process is already started! Cannot set a new InputStream!");
@@ -191,7 +188,7 @@ public class CommandExecutor {
 		in = input;
 		return this;
 	}
-	
+
 	public CommandExecutor setSystemOut(OutputStream output){
 		if(process != null){
 			throw new RuntimeException("Process is already started! Cannot set a new InputStream!");
@@ -199,7 +196,7 @@ public class CommandExecutor {
 		out = output;
 		return this;
 	}
-	
+
 	public CommandExecutor setSystemErr(OutputStream error){
 		if(process != null){
 			throw new RuntimeException("Process is already started! Cannot set a new OutputStream!");
@@ -207,19 +204,19 @@ public class CommandExecutor {
 		err = error;
 		return this;
 	}
-	
+
 	public InputStream getSystemIn(){
 		return in;
 	}
-	
+
 	public OutputStream getSystemOut(){
 		return out;
 	}
-	
+
 	public OutputStream getSystemErr(){
 		return err;
 	}
-	
+
 	public CommandExecutor setWorkingDir(File workingDir){
 		if(process != null){
 			throw new RuntimeException("Process is already started! Cannot set a new working directory!");
@@ -227,7 +224,7 @@ public class CommandExecutor {
 		this.workingDir = workingDir;
 		return this;
 	}
-	
+
 	public int waitFor() throws InterruptedException {
 		int ret = process.waitFor();
 		if(out != null){
@@ -248,10 +245,10 @@ public class CommandExecutor {
 		errThread.join();
 		return ret;
 	}
-	
+
 	/**
 	 * Sets the inputs and outputs to be System.in, System.out, and System.err.
-	 * @return 
+	 * @return
 	 */
 	public CommandExecutor setSystemInputsAndOutputs(){
 		setSystemOut(System.out);
@@ -259,5 +256,5 @@ public class CommandExecutor {
 		setSystemIn(System.in);
 		return this;
 	}
-	
+
 }

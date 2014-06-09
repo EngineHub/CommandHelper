@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ArgumentSuite;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
+import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
@@ -25,6 +26,7 @@ import com.laytonsmith.tools.MSLPMaker;
 import com.laytonsmith.tools.Manager;
 import com.laytonsmith.tools.ProfilerSummary;
 import com.laytonsmith.tools.SyntaxHighlighters;
+import com.laytonsmith.tools.UILauncher;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenUI;
@@ -37,9 +39,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import jline.console.ConsoleReader;
@@ -75,6 +79,7 @@ public class Main {
 	private static final ArgumentParser rsaKeyGenMode;
 	private static final ArgumentParser pnViewerMode;
 	private static final ArgumentParser coreFunctionsMode;
+	private static final ArgumentParser uiMode;
 
 	static {
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -184,6 +189,11 @@ public class Main {
 		coreFunctionsMode = ArgumentParser.GetParser()
 				.addDescription("Prints a list of functions tagged with the @core annotation, then exits.");
 		suite.addMode("core-functions", coreFunctionsMode);
+		uiMode = ArgumentParser.GetParser()
+				.addDescription("Launches a GUI that provides a list of all the sub GUI tools provided, and allows selection of a module. This"
+						+ " command creates a subshell to run the launcher in, so that the original cmdline shell returns.")
+				.addFlag("in-shell", "Runs the launcher in the same shell process. By default, it creates a new process and causes the initial shell to return.");
+		suite.addMode("ui", uiMode);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -265,6 +275,7 @@ public class Main {
 						}
 					}
 				}
+				Collections.sort(core);
 				System.out.println(StringUtils.Join(core, ", "));
 				System.exit(0);
 			} else if (mode == interpreterMode) {
@@ -527,6 +538,19 @@ public class Main {
 						System.err.println("The Persistence Network Viewer may not be run from a headless environment.");
 						System.exit(1);
 					}
+				}
+			} else if(mode == uiMode){
+				if(parsedArgs.isFlagSet("in-shell")){
+					// Actually launch the GUI
+					UILauncher.main(args);
+				} else {
+					// Relaunch the jar in a new process with the --run flag set,
+					// so that the process will be in its own subshell
+					CommandExecutor ce = new CommandExecutor("java -jar "
+							+ ClassDiscovery.GetClassContainer(Main.class).getPath() + " "
+							+ StringUtils.Join(args, " ") + " --in-shell");
+					ce.start();
+					System.exit(0);
 				}
 			} else {
 				throw new Error("Should not have gotten here");
