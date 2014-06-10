@@ -282,7 +282,7 @@ public class AliasCore {
 		reloadOptions = ArgumentParser.GetParser().addFlag("whitelist", "Sets the list of arguments to be a whitelist, that is,"
 				+ " only the specified modules get reloaded, the rest will be skipped. Without this option, the specified modules"
 				+ " don't get reloaded.")
-				.addFlag('g', "globals", "Specifies that globals memory (values stored with export/import) should be preserved")
+				.addFlag('g', "globals", "Specifies that globals memory (values stored with export/import) should be preserved.")
 				.addFlag('t', "tasks", "Specifies that tasks registered with set_interval/set_timeout should be preserved.")
 				.addFlag('e', "execution-queue", "Specifies that tasks registered in execution queues should be preserved.")
 				.addFlag('r', "persistence-config", "Specifies that the persistence config file should not be reloaded.")
