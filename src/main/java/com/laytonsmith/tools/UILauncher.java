@@ -6,6 +6,8 @@ import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractListModel;
@@ -92,6 +94,16 @@ public class UILauncher extends javax.swing.JFrame {
 				UI ui = uis.get(e.getFirstIndex());
 				descriptionTextArea.setText(ui.getTooltip());
 				selectedUI = ui;
+			}
+		});
+
+		launcherList.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2){
+					launchButton.doClick();
+				}
 			}
 		});
 

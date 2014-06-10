@@ -1,12 +1,19 @@
 package com.laytonsmith.PureUtilities.Common;
 
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides common UI utilites
@@ -62,5 +69,27 @@ public class UIUtils {
 		for(Component component : components){
 			component.setEnabled(enabled);
 		}
+	}
+
+	/**
+	 * Opens the system's default browser to the specified URI.
+	 * @param uri
+	 * @throws java.io.IOException
+	 */
+	public static void openWebpage(URI uri) throws IOException {
+		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)){
+			desktop.browse(uri);
+		}
+	}
+
+	/**
+	 * Opens the system's default browser to the specified URL.
+	 * @param url
+	 * @throws java.io.IOException
+	 * @throws java.net.URISyntaxException
+	 */
+	public static void openWebpage(URL url) throws IOException, URISyntaxException {
+		openWebpage(url.toURI());
 	}
 }

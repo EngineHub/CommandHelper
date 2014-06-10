@@ -1,10 +1,16 @@
 package com.laytonsmith.tools.pnviewer;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.UI.TextDialog;
 import com.laytonsmith.PureUtilities.Common.AutoFlushObjectOutputStream;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.TemplateBuilder;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -19,14 +25,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.management.ManagementFactory;
@@ -44,6 +47,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -84,6 +88,11 @@ public class PNViewer extends javax.swing.JFrame {
 		keyLabel.setText("");
 		valueTypeLabel.setText("");
 		sourceLabel.setText("");
+		try {
+			setIconImage(ImageIO.read(PNViewer.class.getResourceAsStream("GearIcon.png")));
+		} catch (IOException ex) {
+			Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
+		}
 		setStatus("Waiting for configuration to be loaded...", false);
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
@@ -206,6 +215,69 @@ public class PNViewer extends javax.swing.JFrame {
 						}
 					}
 				}
+			}
+		});
+
+		aboutMenu.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				TemplateBuilder builder = new TemplateBuilder();
+				builder.addTemplate("version", new TemplateBuilder.Generator() {
+
+					@Override
+					public String generate(String... args) {
+						return CHVersion.LATEST.toString();
+					}
+				});
+				builder.addTemplate("implementation", new TemplateBuilder.Generator() {
+
+					@Override
+					public String generate(String... args) {
+						try {
+							return Implementation.GetServerType().getBranding();
+						} catch(Exception ex){
+							return "MethodScript";
+						}
+					}
+				});
+				builder.addTemplate("clientVersion", new TemplateBuilder.Generator() {
+
+					@Override
+					public String generate(String... args) {
+						return Integer.toString(PROTOCOL_VERSION);
+					}
+				});
+				String text = builder.build(StreamUtils.GetString(PNViewer.class.getResourceAsStream("AboutDialog.html")));
+				TextDialog td = new TextDialog(PNViewer.this, true, text);
+				UIUtils.centerWindowOnWindow(td, PNViewer.this);
+				td.setVisible(true);
+			}
+		});
+
+		helpMenu.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				TemplateBuilder builder = new TemplateBuilder();
+				builder.addTemplate("wiki", new TemplateBuilder.Generator() {
+
+					@Override
+					public String generate(String... args) {
+						return "http://wiki.sk89q.com/wiki/CommandHelper/Staged/" + args[0];
+					}
+				});
+				builder.addTemplate("jarName", new TemplateBuilder.Generator() {
+
+					@Override
+					public String generate(String... args) {
+						return new File(ClassDiscovery.GetClassContainer(PNViewer.class).getPath()).getName();
+					}
+				});
+				String text = builder.build(StreamUtils.GetString(PNViewer.class.getResourceAsStream("HelpDialog.html")));
+				TextDialog td = new TextDialog(PNViewer.this, false, text);
+				UIUtils.centerWindowOnWindow(td, PNViewer.this);
+				td.setVisible(true);
 			}
 		});
 
@@ -794,6 +866,9 @@ public class PNViewer extends javax.swing.JFrame {
         bookmarksMenu = new javax.swing.JMenu();
         manageBookmarksMenu = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        jMenu1 = new javax.swing.JMenu();
+        helpMenu = new javax.swing.JMenuItem();
+        aboutMenu = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -916,6 +991,16 @@ public class PNViewer extends javax.swing.JFrame {
 
         jMenuBar1.add(bookmarksMenu);
 
+        jMenu1.setText("Help");
+
+        helpMenu.setText("Help...");
+        jMenu1.add(helpMenu);
+
+        aboutMenu.setText("About...");
+        jMenu1.add(aboutMenu);
+
+        jMenuBar1.add(jMenu1);
+
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -991,16 +1076,19 @@ public class PNViewer extends javax.swing.JFrame {
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem aboutMenu;
     private javax.swing.JMenu bookmarksMenu;
     private javax.swing.JMenuItem closeRemoteConnectionMenu;
     private javax.swing.JLabel configurationFromLabel;
     private javax.swing.JMenu fileMenu;
+    private javax.swing.JMenuItem helpMenu;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;

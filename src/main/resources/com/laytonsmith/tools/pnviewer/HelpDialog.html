@@ -1,0 +1,89 @@
+<div>
+	<h1>Persistence Network Viewer Help</h1>
+	<h3>Contents</h3>
+	<ul>
+		<li><a href="#general">General</a></li>
+		<li><a href="#local">Local Connections</a></li>
+		<li><a href="#remote">Remote Connections</a></li>
+		<li><a href="#use">Main Page</a></li>
+	</ul>
+
+	<div id="general">
+		<h3>General</h3>
+		<p>
+			The Persistence Network Viewer (PNV) allows for viewing and modifying of the contents of a Persistence
+			Network (PN). A PN is defined by the persistence.ini configuration file. A network is made up of various
+			data sources, but the network as a whole doesn't care where those data sources come from, or what the
+			data format of each one is. The system as a whole deals with key-value pairs, where the keys themselves
+			form a hierarchy, and can be visualized as a tree. Any data may be stored in the values themselves,
+			including arrays. This help section does not cover setting up the PN, for more information on that, please
+			see the documentation on <a href="%%wiki|Persistence_Network%%">the wiki</a>.
+
+			The first step to using the tool is to connect to a data source. This differs depending on whether or not
+			you are connecting to a local network (on the same computer) or a remote network (on another computer). A
+			local connection is the easiest to set up, as it doesn't require any extra steps. Click File -> Load from
+			Configuration... to open the Load configuration dialog, then select either Local or Remote.
+		</p>
+	</div>
+	<div id="local">
+		<h3>Local Connections</h3>
+		<p>
+			Local connections are the simplest to use. Simply specify the persistence.ini file that configures the
+			network, and click Load. Normally this file will be located in your prefs directory. The configuration will
+			be read in, and the data loaded into the window.
+		</p>
+	</div>
+	<div id="remote">
+		<h3>Remote Connections</h3>
+		<p>
+			Remote connections allow you to use the UI on your local desktop, and connect to a headless server.
+		</p><p>
+			Establishing a remote connection is a two step process. First you must run the pn-viewer server on the computer
+			that you wish to access the PN on. To do this, use the command <code>java -jar %%jarName%% pn-viewer --server --port 12345 --password</code>.
+			You may specify whatever port you wish, though note that the port must not already be in use, and if you use a port between
+			1 and 1024, you must run the program as root. You may also leave off the --password argument, in which case no password
+			will be required of clients, though this isn't recommended, and you may also follow the --password flag with the actual password, directly
+			in the command. If the password isn't specified however, it will be prompted for interactively.
+		</p><p>
+			Once the server starts up, you can kill it at any point with Ctrl+C, or using your OS's task manager. The program's
+			process id will be printed upon startup. The server version will also be printed out. Clients and servers can only connect
+			if they are running the same version. (The client version can be found in Help -> About in the client.) Assuming everything
+			started up properly, you will see that the server will now be listening for connections. You may also need to ensure that your
+			firewall is configured to allow connections to the port you specified.
+		</p><p>
+			Now, you may open the client on your local machine, and select the Remote radio button in the Load configuration
+			dialog. The host is the ip or url of the remote host. Do not include "http://" or any other url parts, simply use "example.com"
+			or an ip address "1.2.3.4". The port is the same port that you configured the remote server to listen on. The password
+			is whatever you specified (leave the field blank if you didn't specify anything). The remote file is the path to
+			the remote persistence.ini file on the remote computer.
+		</p><p>
+			Once you have the fields filled out, click Load, and the data will be loaded from the remote server. This process
+			may take longer than loading from a local connection, but the progress will be shown with a progress bar. As activity
+			occurs on the client, it will be shown in the console on the remote machine. A constant connection needs to be made
+			with the remote server in order to use the client.
+		</p><p>
+			Connections may be made to "localhost" using the remote connection as well. Once the remote connection is established,
+			it stays up until you close it or it times out. Click File -> Close Remote Connection to close a connection without
+			closing the application.
+		</p>
+	</div>
+	<div id="use">
+		<h3>Main Page</h3>
+		<p>
+			As the data is loading, the progress bar and status indicator will become visible and give you feedback. Once
+			the data is fully loaded, the tree on the left hand side will populate with the hierarchical key data. You may
+			navigate to any key and click on it to load the value information on the right hand side. Some keys can be thought
+			of as "folders"	and others thought of as "folders with data". The former is a key which has no data, but which
+			serves as the parent for other keys. The latter is a key which has data and serves as a parent for other keys.
+			Finally, "leaf nodes" are nodes with only data.
+		</p><p>
+			The namespace is the parent namespace of a key. The key is the actual key name. The source is the actual location
+			of the data source that this key came from. The value type is the object type of the value, and the value box
+			is the full actual value itself. If the value is a folder with no data, it will show <code>(empty key)</code>
+			in the value type.
+		</p><p>
+			The data may be refreshed by clicking the Reload button in the top right, and it will be reloaded from the same
+			place as it was initially loaded.
+		</p>
+	</div>
+</div>
