@@ -282,13 +282,13 @@ public class AliasCore {
 		reloadOptions = ArgumentParser.GetParser().addFlag("whitelist", "Sets the list of arguments to be a whitelist, that is,"
 				+ " only the specified modules get reloaded, the rest will be skipped. Without this option, the specified modules"
 				+ " don't get reloaded.")
-				.addFlag('g', "globals", "Specifies the globals memory. (Values stored with export/import.)")
-				.addFlag('t', "tasks", "Specifies the tasks registered with set_interval/set_timeout.")
-				.addFlag('e', "execution-queue", "Specifies the tasks registered in execution queues.")
-				.addFlag('r', "persistence-config", "Specifies that the persistence config file should be reloaded.")
-				.addFlag('f', "profiler", "Specifies the profiler config should not be reloaded.")
-				.addFlag('s', "scripts", "Specifies that the scripts should not be reloaded.")
-				.addFlag('x', "extensions", "Specifies that extensions should be reloaded.")
+				.addFlag('g', "globals", "Specifies that globals memory (values stored with export/import) should be preserved")
+				.addFlag('t', "tasks", "Specifies that tasks registered with set_interval/set_timeout should be preserved.")
+				.addFlag('e', "execution-queue", "Specifies that tasks registered in execution queues should be preserved.")
+				.addFlag('r', "persistence-config", "Specifies that the persistence config file should not be reloaded.")
+				.addFlag('f', "profiler", "Specifies that the profiler config should not be reloaded.")
+				.addFlag('s', "scripts", "Specifies that scripts should not be reloaded.")
+				.addFlag('x', "extensions", "Specifies that extensions should not be reloaded.")
 				.addFlag('h', "help", "Prints this list and returns. Nothing is reloaded if this option is set.");
 	}
 
