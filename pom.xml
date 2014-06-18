@@ -278,6 +278,13 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<!-- PostgreSQL -->
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.1-901-1.jdbc4</version>
+		</dependency>
+
 		<!-- Yaml parsing -->
 		<dependency>
 			<groupId>org.yaml</groupId>
@@ -558,6 +565,7 @@
 									<include>jline:jline:jar:*</include>
 									<include>javax.mail:mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
+									<include>postgresql:postgresql:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -653,6 +661,10 @@
 									<pattern>com.sun.activation</pattern>
 									<shadedPattern>com.laytonsmith.libs.com.sun.activation</shadedPattern>
 								</relocation>-->
+								<relocation>
+									<pattern>org.postgresql</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.postgresql</shadedPattern>
+								</relocation>
 							</relocations>
 							<filters>
 								<filter>
@@ -779,6 +791,12 @@
 								</filter>
 								<filter>
 									<artifact>javax.activation:activation:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>postgresql:postgresql:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>

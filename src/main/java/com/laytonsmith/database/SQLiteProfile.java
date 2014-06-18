@@ -15,7 +15,7 @@ public class SQLiteProfile extends SQLProfile {
 	private String file;
 
 	public SQLiteProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
-		super(id);
+		super(id, elements);
 		if(!elements.containsKey("file")){
 			throw new Profiles.InvalidProfileException("\"file\" parameter is required for profile \"" + id + "\"");
 		}
