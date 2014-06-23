@@ -48,6 +48,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.events.drivers.ServerEvents;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -58,6 +59,7 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
@@ -1684,5 +1686,71 @@ public class Minecraft {
 				OptimizationOption.TERMINAL
 			);
 		}
+	}
+
+	@api
+	public static class monitor_redstone extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld world = null;
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null){
+				world = p.getWorld();
+			}
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], world, t);
+			boolean add = true;
+			if(args.length > 1){
+				add = Static.getBoolean(args[1]);
+			}
+
+			Map<MCLocation, Boolean> redstoneMonitors = ServerEvents.getRedstoneMonitors();
+
+			if(add){
+				redstoneMonitors.put(location, location.getBlock().isBlockPowered());
+			} else {
+				redstoneMonitors.remove(location);
+			}
+
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "monitor_redstone";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {location, [isMonitored]} Sets up a location to be monitored for redstone changes. If a location is monitored,"
+					+ " it will cause redstone_changed events to be trigged. By default, isMonitored is true, however, setting it to false"
+					+ " will remove the previously monitored location from the list of monitors.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
 	}
 }

@@ -1,14 +1,18 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
+import com.laytonsmith.abstraction.events.MCRedstoneChangedEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -21,6 +25,8 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -212,5 +218,79 @@ public class ServerEvents {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+
+	private final static Map<MCLocation, Boolean> redstoneMonitors = Collections.synchronizedMap(new HashMap<MCLocation, Boolean>());
+
+	/**
+	 * Returns a synchronized set of redstone monitors. When iterating on the
+	 * list, be sure to synchronize manually.
+	 * @return
+	 */
+	public static Map<MCLocation, Boolean> getRedstoneMonitors(){
+		return redstoneMonitors;
+	}
+
+	@api
+	public static class redstone_changed extends AbstractEvent {
+
+		@Override
+		public void hook() {
+			redstoneMonitors.clear();
+		}
+
+		@Override
+		public String getName() {
+			return "redstone_changed";
+		}
+
+		@Override
+		public String docs() {
+			return "{location: <location match>}"
+					+ " Fired when a redstone activatable block is toggled, either on or off, AND the block has been set to be monitored"
+					+ " with the monitor_redstone function."
+					+ " {location: The location of the block | active: Whether or not the block is now active, or disabled.}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCRedstoneChangedEvent){
+				MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
+				Prefilters.match(prefilter, "location", event.getLocation(), PrefilterType.LOCATION_MATCH);
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
+			Map<String, Construct> map = evaluate_helper(e);
+			map.put("location", ObjectGenerator.GetGenerator().location(event.getLocation()));
+			map.put("active", CBoolean.get(event.isActive()));
+			return map;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.REDSTONE_CHANGED;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
 	}
 }

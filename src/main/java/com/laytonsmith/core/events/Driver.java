@@ -5,7 +5,7 @@ package com.laytonsmith.core.events;
 /**
  * This class is an enum class that represents all the types of events that CH is aware of. The
  * reason an enum is required, is because events can more easily be sorted and found this way.
- * 
+ *
  */
 public enum Driver {
 
@@ -19,6 +19,7 @@ public enum Driver {
 	BLOCK_IGNITE,
 	BLOCK_PLACE,
 	SIGN_CHANGED,
+	REDSTONE_CHANGED,
 
 	/**
 	 * Entity events
@@ -73,8 +74,8 @@ public enum Driver {
 	PLAYER_PRELOGIN,
 	PLAYER_QUIT,
 	PLAYER_SPAWN,
-	PLAYER_TOGGLE_FLIGHT, 
-	PLAYER_TOGGLE_SNEAK, 
+	PLAYER_TOGGLE_FLIGHT,
+	PLAYER_TOGGLE_SNEAK,
 	PLAYER_TOGGLE_SPRINT,
 	PLAYER_TELEPORT,
 	TAB_COMPLETE,
@@ -98,7 +99,7 @@ public enum Driver {
 	VEHICLE_ENTER,
 	VEHICLE_LEAVE,
 	VEHICLE_MOVE,
-	
+
 	/**
 	 * Cmdline events
 	 */

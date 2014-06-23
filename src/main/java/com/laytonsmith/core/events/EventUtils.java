@@ -285,7 +285,12 @@ public final class EventUtils {
 		return ca;
 	}
 
-	@Deprecated // Use TriggerListener instead!
+	/**
+	 *
+	 * @param mce
+	 * @deprecated Use {@link #TriggerListener(com.laytonsmith.core.events.Driver, java.lang.String, com.laytonsmith.core.events.BindableEvent)} instead
+	 */
+	@Deprecated
 	public static void TriggerExternal(BindableEvent mce) {
 		for (Method m : ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(event.class)) {
 			Class<?>[] params = m.getParameterTypes();
