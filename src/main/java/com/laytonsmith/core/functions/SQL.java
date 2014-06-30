@@ -198,7 +198,11 @@ public class SQL {
 									// can set it to null regardless of the data type.
 									value = CNull.NULL;
 								}
-								row.set(md.getColumnName(i), value, t);
+								// We *could* use getColumnName here, but if the column has been renamed,
+								// for instance SELECT foo AS bar... then we would get "foo" from that. Instead,
+								// we use the column label, which in the example, would return "bar", which is what
+								// the user will expect in the results.
+								row.set(md.getColumnLabel(i), value, t);
 							}
 							ret.push(row);
 						}
