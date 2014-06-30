@@ -25,6 +25,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -45,15 +47,15 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
  *
- * 
+ *
  */
 public class BukkitMCServer implements MCServer {
-    
+
     Server s;
     public BukkitMCServer(){
         this.s = Bukkit.getServer();
     }
-    
+
     public BukkitMCServer(Server server) {
 		this.s = server;
 	}
@@ -62,7 +64,7 @@ public class BukkitMCServer implements MCServer {
 	public Object getHandle(){
         return s;
     }
-    
+
     public Server __Server(){
         return s;
     }
@@ -73,14 +75,14 @@ public class BukkitMCServer implements MCServer {
     }
 
 	@Override
-    public MCPlayer[] getOnlinePlayers() {
+    public Collection<MCPlayer> getOnlinePlayers() {
         if(s.getOnlinePlayers() == null){
             return null;
         }
-        Player[] pa = s.getOnlinePlayers();
-        MCPlayer[] mcpa = new MCPlayer[pa.length];
-        for(int i = 0; i < pa.length; i++){
-            mcpa[i] = new BukkitMCPlayer(pa[i]);
+        Collection<? extends Player> pa = s.getOnlinePlayers();
+		Set<MCPlayer> mcpa = new HashSet<>();
+		for(Player p : pa){
+            mcpa.add(new BukkitMCPlayer(p));
         }
         return mcpa;
     }
@@ -88,7 +90,7 @@ public class BukkitMCServer implements MCServer {
     public static MCServer Get() {
         return new BukkitMCServer();
     }
-    
+
 	@Override
     public boolean dispatchCommand(MCCommandSender sender, String command){
 		CommandSender cs;
@@ -103,12 +105,12 @@ public class BukkitMCServer implements MCServer {
 	private class CommandSenderInterceptor implements InvocationHandler {
 		private final StringBuilder buffer;
 		private final CommandSender sender;
-		
+
 		public CommandSenderInterceptor(CommandSender sender){
 			this.buffer = new StringBuilder();
 			this.sender = sender;
 		}
-		
+
 		@Override
 		public Object invoke(Object o, Method method, Object[] args) throws Throwable {
 			if ("sendMessage".equals(method.getName())) {
@@ -118,37 +120,37 @@ public class BukkitMCServer implements MCServer {
 				return method.invoke(sender, args);
 			}
 		}
-		
+
 		public String getBuffer(){
 			return buffer.toString();
 		}
 	}
-	
+
 	@Override
 	public String dispatchAndCaptureCommand(MCCommandSender commandSender, String cmd) {
 		// Grab the CommandSender object from the abstraction layer
 		CommandSender sender = (CommandSender)commandSender.getHandle();
-		
+
 		// Create the interceptor
 		CommandSenderInterceptor interceptor = new CommandSenderInterceptor(sender);
-		
+
 		// Create a new proxy and abstraction layer wrapper around the proxy
 		CommandSender newCommandSender = (CommandSender)Proxy.newProxyInstance(BukkitMCServer.class.getClassLoader(), new Class[]{CommandSender.class}, interceptor);
 		BukkitMCCommandSender aCommandSender = new BukkitMCCommandSender(newCommandSender);
-		
+
 		MCCommandSender oldSender = Static.UninjectPlayer(commandSender);
 		// Inject our new wrapped object
 		Static.InjectPlayer(aCommandSender);
-		
+
 		// Dispatch the command now
 		s.dispatchCommand(newCommandSender, cmd);
-		
+
 		// Clean up
 		Static.UninjectPlayer(aCommandSender);
 		if(oldSender != null){
 			Static.InjectPlayer(oldSender);
 		}
-		
+
 		// Return the buffered text (if any)
 		return interceptor.getBuffer();
 	}
@@ -176,7 +178,7 @@ public class BukkitMCServer implements MCServer {
         }
         return new BukkitMCWorld(s.getWorld(name));
     }
-    
+
 	@Override
     public List<MCWorld> getWorlds(){
         if(s.getWorlds() == null){
@@ -198,7 +200,7 @@ public class BukkitMCServer implements MCServer {
 	public void broadcastMessage(String message, String permission) {
 		s.broadcast(message, permission);
 	}
-	
+
 	@Override
 	public MCConsoleCommandSender getConsole() {
 		return new BukkitMCConsoleCommandSender(s.getConsoleSender());
@@ -208,7 +210,7 @@ public class BukkitMCServer implements MCServer {
 	public MCItemFactory getItemFactory() {
 		return new BukkitMCItemFactory(s.getItemFactory());
 	}
-	
+
 	@Override
 	public MCCommandMap getCommandMap() {
 		return new BukkitMCCommandMap((SimpleCommandMap) ReflectionUtils.invokeMethod(s.getClass(), s, "getCommandMap"));
@@ -262,7 +264,7 @@ public class BukkitMCServer implements MCServer {
     public Boolean getAllowNether() {
         return s.getAllowNether();
     }
-    
+
 	@Override
     public Boolean getOnlineMode() {
     	return s.getOnlineMode();
@@ -331,7 +333,7 @@ public class BukkitMCServer implements MCServer {
         } catch(ClassNotFoundException e){
             //Ignored, it means they don't have Vault installed.
         }
-        return null;            
+        return null;
     }
 
 	@Override
@@ -339,7 +341,7 @@ public class BukkitMCServer implements MCServer {
 		CommandSender sender = (CommandSender)Static.GetCommandSender("~console", Target.UNKNOWN).getHandle();
 		s.dispatchCommand(sender, cmd);
     }
-	
+
 	@Override
 	public String toString() {
 		return s.toString();
@@ -358,7 +360,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCInventory createInventory(MCInventoryHolder holder, MCInventoryType type) {
 		InventoryHolder ih = null;
-		
+
 		if (holder instanceof MCPlayer) {
 			ih = ((BukkitMCPlayer)holder)._Player();
 		} else if (holder instanceof MCHumanEntity) {
@@ -366,14 +368,14 @@ public class BukkitMCServer implements MCServer {
 		} else if (holder.getHandle() instanceof InventoryHolder) {
 			ih = (InventoryHolder)holder.getHandle();
 		}
-		
+
 		return new BukkitMCInventory(Bukkit.createInventory(ih, InventoryType.valueOf(type.name())));
 	}
-	
+
 	@Override
 	public MCInventory createInventory(MCInventoryHolder holder, int size) {
 		InventoryHolder ih = null;
-		
+
 		if (holder instanceof MCPlayer) {
 			ih = ((BukkitMCPlayer)holder)._Player();
 		} else if (holder instanceof MCHumanEntity) {
@@ -381,14 +383,14 @@ public class BukkitMCServer implements MCServer {
 		} else if (holder.getHandle() instanceof InventoryHolder) {
 			ih = (InventoryHolder)holder.getHandle();
 		}
-		
+
 		return new BukkitMCInventory(Bukkit.createInventory(ih, size));
 	}
-	
+
 	@Override
 	public MCInventory createInventory(MCInventoryHolder holder, int size, String title) {
 		InventoryHolder ih = null;
-		
+
 		if (holder instanceof MCPlayer) {
 			ih = ((BukkitMCPlayer)holder)._Player();
 		} else if (holder instanceof MCHumanEntity) {
@@ -396,25 +398,25 @@ public class BukkitMCServer implements MCServer {
 		} else if (holder.getHandle() instanceof InventoryHolder) {
 			ih = (InventoryHolder)holder.getHandle();
 		}
-		
+
 		return new BukkitMCInventory(Bukkit.createInventory(ih, size, title));
 	}
-	
+
 	@Override
 	public void banIP(String address) {
 		s.banIP(address);
 	}
-	
+
 	@Override
 	public Set<String> getIPBans() {
 		return s.getIPBans();
 	}
-	
+
 	@Override
 	public void unbanIP(String address) {
 		s.unbanIP(address);
 	}
-	
+
 	@Override
 	public MCMessenger getMessenger() {
 		return new BukkitMCMessenger(s.getMessenger());
@@ -429,7 +431,7 @@ public class BukkitMCServer implements MCServer {
 	public MCScoreboard getNewScoreboard() {
 		return new BukkitMCScoreboard(s.getScoreboardManager().getNewScoreboard());
 	}
-	
+
 	@Override
 	public boolean unloadWorld(MCWorld world, boolean save) {
 		return s.unloadWorld(((BukkitMCWorld) world).__World(), save);
@@ -439,12 +441,12 @@ public class BukkitMCServer implements MCServer {
 	public void shutdown() {
 		s.shutdown();
 	}
-	
+
 	@Override
 	public boolean addRecipe(MCRecipe recipe) {
 		return s.addRecipe(((BukkitMCRecipe) recipe).r);
 	}
-	
+
 	@Override
 	public List<MCRecipe> getRecipesFor(MCItemStack result) {
 		List<MCRecipe> ret = new ArrayList<MCRecipe>();
@@ -454,7 +456,7 @@ public class BukkitMCServer implements MCServer {
 		}
 		return ret;
 	}
-	
+
 	@Override
 	public List<MCRecipe> allRecipes() {
 		List<MCRecipe> ret = new ArrayList<MCRecipe>();
@@ -464,16 +466,16 @@ public class BukkitMCServer implements MCServer {
 		}
 		return ret;
 	}
-	
+
 //	public Iterator<MCRecipe> recipe iterator() {
 //		Iterator<MCRecipe> ret = //create iterator;
 //	}
-	
+
 	@Override
 	public void clearRecipes() {
 		s.clearRecipes();
 	}
-	
+
 	@Override
 	public void resetRecipes() {
 		s.resetRecipes();

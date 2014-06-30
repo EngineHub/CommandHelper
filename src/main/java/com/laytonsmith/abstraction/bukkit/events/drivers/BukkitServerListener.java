@@ -50,6 +50,8 @@ public class BukkitServerListener implements Listener{
 			boolean wasPowered = locations.get(blockLocation);
 			final boolean isPowered = blockLocation.getBlock().isBlockPowered();
 			if(wasPowered != isPowered){
+				// It was changed, so set the state appropriately now.
+				locations.put(blockLocation, isPowered);
 				EventUtils.TriggerListener(Driver.REDSTONE_CHANGED, "redstone_changed", new MCRedstoneChangedEvent() {
 
 					@Override

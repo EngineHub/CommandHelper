@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import net.milkbowl.vault.economy.Economy;
@@ -9,11 +10,11 @@ import net.milkbowl.vault.economy.Economy;
 
 /**
  *
- * 
+ *
  */
 public interface MCServer extends AbstractionObject{
     public String getName();
-    public MCPlayer[] getOnlinePlayers();
+    public Collection<MCPlayer> getOnlinePlayers();
     public boolean dispatchCommand(MCCommandSender cs, String string) throws MCCommandException;
     public MCPluginManager getPluginManager();
     public MCPlayer getPlayer(String name);
@@ -59,16 +60,16 @@ public interface MCServer extends AbstractionObject{
 	public MCMessenger getMessenger();
 
 	public boolean unloadWorld(MCWorld world, boolean save);
-	
+
 	public boolean addRecipe(MCRecipe recipe);
 	public List<MCRecipe> getRecipesFor(MCItemStack result);
 	public List<MCRecipe> allRecipes();
 	public void clearRecipes();
 	public void resetRecipes();
-	
+
 
 	public void shutdown();
-	
+
 	/**
 	 * Dispatches a command like {@link #dispatchCommand(com.laytonsmith.abstraction.MCCommandSender, java.lang.String) }, but
 	 * attempts to capture the output of the command, and returns that.

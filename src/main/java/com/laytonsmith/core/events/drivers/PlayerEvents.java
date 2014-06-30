@@ -1804,8 +1804,7 @@ public class PlayerEvents {
 								//If it's a different thread, kill it.
 								return;
 							}
-							MCPlayer players[] = Static.getServer().getOnlinePlayers();
-							for(final MCPlayer p : players){
+							for(final MCPlayer p : Static.getServer().getOnlinePlayers()){
 								//We need to loop through all the thresholds
 								//and see if any of the points meet them. If so,
 								//we know we need to fire the event. If none of them

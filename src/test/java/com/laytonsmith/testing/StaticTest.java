@@ -71,7 +71,9 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,14 +88,14 @@ import static org.mockito.Mockito.when;
 //import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
- * 
- * 
+ *
+ *
  */
 //@RunWith(PowerMockRunner.class)
 
 public class StaticTest {
 	static com.laytonsmith.core.environments.Environment env;
-	
+
 	static{
 		try {
 			Implementation.setServerType(Implementation.Type.TEST);
@@ -105,7 +107,7 @@ public class StaticTest {
     /**
      * Tests the boilerplate functions in a Function. While all functions should conform to
      * at least this, it is useful to also use the more strict TestBoilerplate function.
-     * @param f 
+     * @param f
      */
     public static void TestBoilerplate(FunctionBase ff, String name) throws Exception {
         if(!(ff instanceof Function)){
@@ -130,7 +132,7 @@ public class StaticTest {
             fail("Expected name of function to be " + name + ", but was given " + f.getName());
         }
 
-        //docs needs to at least be more than a non-empty string, though in the future this should follow a more strict 
+        //docs needs to at least be more than a non-empty string, though in the future this should follow a more strict
         //requirement set.
         if (f.docs().length() <= 0) {
             fail("docs must return a non-empty string");
@@ -150,7 +152,7 @@ public class StaticTest {
             TestExec(f, null, "null command sender");
             TestExec(f, StaticTest.GetFakeConsoleCommandSender(), "fake console command sender");
         }
-        
+
         //Let's make sure that if execs is defined in the class, useSpecialExec returns true.
         //Same thing for optimize/canOptimize and optimizeDynamic/canOptimizeDynamic
 		if(f instanceof Optimizable){
@@ -165,7 +167,7 @@ public class StaticTest {
                     fail(f.getName() + " declares execs, but returns false for useSpecialExec.");
                 }
             }
-			
+
 			if(f instanceof Optimizable){
 				Set<Optimizable.OptimizationOption> options = ((Optimizable)f).optimizationOptions();
 				if(method.getName().equals("optimize")){
@@ -180,7 +182,7 @@ public class StaticTest {
 				}
 			}
         }
-        
+
 
         //now the only function left to test is exec. This cannot be abstracted, unfortunately.
     }
@@ -291,7 +293,7 @@ public class StaticTest {
 
     /**
      * Gets the value out of s construct, ignoring information like line numbers.
-     * @return 
+     * @return
      */
     public static Object Val(Construct c) {
         return c.val();
@@ -301,7 +303,7 @@ public class StaticTest {
      * Checks to see if two constructs are equal, using the same method that MethodScript equals() uses. In
      * fact, this method depends on equals() working, as it actually uses the function.
      * @param expected
-     * @param actual 
+     * @param actual
      */
     public static void assertCEquals(Construct expected, Construct actual) throws CancelCommandException {
         equals e = new equals();
@@ -315,7 +317,7 @@ public class StaticTest {
      * Does the opposite of assertCEquals
      * @param expected
      * @param actual
-     * @throws CancelCommandException 
+     * @throws CancelCommandException
      */
     public static void assertCNotEquals(Construct expected, Construct actual) throws CancelCommandException {
         equals e = new equals();
@@ -328,7 +330,7 @@ public class StaticTest {
     /**
      * Verifies that the given construct <em>resolves</em> to true. The resolution uses Static.getBoolean to
      * do the resolution.
-     * @param actual 
+     * @param actual
      */
     public static void assertCTrue(Construct actual) {
         if (!Static.getBoolean(actual)) {
@@ -339,7 +341,7 @@ public class StaticTest {
     /**
      * Verifies that the given construct <em>resolves</em> to false. The resolution uses Static.getBoolean to
      * do the resolution.
-     * @param actual 
+     * @param actual
      */
     public static void assertCFalse(Construct actual) {
         if (Static.getBoolean(actual)) {
@@ -350,7 +352,7 @@ public class StaticTest {
     /**
      * This function is used to assert that the type of a construct is one of the specified types.
      * @param test
-     * @param retTypes 
+     * @param retTypes
      */
     public static void assertReturn(Construct test, Class... retTypes) {
         if (!Arrays.asList(retTypes).contains(test.getClass())) {
@@ -381,34 +383,34 @@ public class StaticTest {
         }
         return tokens;
     }
-    
+
     public static MCPlayer GetOnlinePlayer(){
         MCServer s = GetFakeServer();
         return GetOnlinePlayer("wraithguard01", s);
     }
-    
+
     public static MCPlayer GetOnlinePlayer(MCServer s){
         return GetOnlinePlayer("wraithguard01", s);
     }
-    
+
     public static MCPlayer GetOnlinePlayer(String name, MCServer s){
         return GetOnlinePlayer(name, "world", s);
     }
-    
+
     public static MCPlayer GetOnlinePlayer(String name, String worldName, MCServer s){
         MCPlayer p = mock(MCPlayer.class);
         MCWorld w = mock(MCWorld.class);
         MCLocation fakeLocation = StaticTest.GetFakeLocation(w, 0, 0, 0);
         MCItemStack fakeItemStack = mock(MCItemStack.class);
-        
+
         when(w.getName()).thenReturn(worldName);
         when(p.getWorld()).thenReturn(w);
         when(p.isOnline()).thenReturn(true);
-        when(p.getName()).thenReturn(name);        
-        when(p.getServer()).thenReturn(s); 
+        when(p.getName()).thenReturn(name);
+        when(p.getServer()).thenReturn(s);
         when(p.isOp()).thenReturn(true);
         if(s != null && s.getOnlinePlayers() != null){
-            List<MCPlayer> online = new ArrayList<MCPlayer>(Arrays.asList(s.getOnlinePlayers()));
+            Collection<MCPlayer> online = s.getOnlinePlayers();
             boolean alreadyOnline = false;
             for(MCPlayer o : online){
                 if(o.getName().equals(name)){
@@ -418,29 +420,29 @@ public class StaticTest {
             }
             if(!alreadyOnline){
                 online.add(p);
-                when(s.getOnlinePlayers()).thenReturn(online.toArray(new MCPlayer[]{}));
-            }            
+                when(s.getOnlinePlayers()).thenReturn(new HashSet<MCPlayer>());
+            }
         }
-        
-        
+
+
         //Plethora of fake data
         when(p.getCompassTarget()).thenReturn(fakeLocation);
         when(p.getItemAt((Integer)Mockito.any())).thenReturn(fakeItemStack);
         return p;
     }
-    
+
     public static MCPlayer GetOp(String name, MCServer s){
         MCPlayer p = GetOnlinePlayer(name, s);
         when(p.isOp()).thenReturn(true);
         return p;
     }
-    
+
     public static BukkitMCWorld GetWorld(String name){
         BukkitMCWorld w = mock(BukkitMCWorld.class);
         when(w.getName()).thenReturn(name);
         return w;
     }
-    
+
     public static MCConsoleCommandSender GetFakeConsoleCommandSender(){
         MCConsoleCommandSender c = mock(MCConsoleCommandSender.class);
         when(c.getName()).thenReturn("CONSOLE");
@@ -448,7 +450,7 @@ public class StaticTest {
         when(c.getServer()).thenReturn(s);
         return c;
     }
-    
+
     public static MCLocation GetFakeLocation(MCWorld w, double x, double y, double z){
         MCLocation loc = mock(BukkitMCLocation.class);
         when(loc.getWorld()).thenReturn(w);
@@ -457,7 +459,7 @@ public class StaticTest {
         when(loc.getZ()).thenReturn(z);
         return loc;
     }
-    
+
     public static Object GetVariable(Object instance, String var) throws Exception{
         return GetVariable(instance.getClass(), var, instance);
     }
@@ -466,17 +468,17 @@ public class StaticTest {
         f.setAccessible(true);
         return f.get(instance);
     }
-    
+
     /**
      * Lexes, compiles, and runs a given MethodScript, using the given player.
      * @param script
      * @param player
-     * @throws ConfigCompileException 
+     * @throws ConfigCompileException
      */
     public static void Run(String script, MCCommandSender player) throws ConfigCompileException{
         Run(script, player, null, null);
     }
-    
+
     public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env) throws ConfigCompileException{
 		InstallFakeServerFrontend();
 		if(env == null){
@@ -485,7 +487,7 @@ public class StaticTest {
         env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, done, null);
     }
-    
+
     public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws ConfigCompileException{
 		RunCommand(combinedScript, player, command, env);
 	}
@@ -503,7 +505,7 @@ public class StaticTest {
             }
         }
     }
-    
+
 	public static String SRun(String script, MCCommandSender player, Environment env) throws ConfigCompileException{
 		InstallFakeServerFrontend();
         final StringBuffer b = new StringBuffer();
@@ -514,7 +516,7 @@ public class StaticTest {
                 b.append(output);
             }
         }, env);
-        return b.toString();		
+        return b.toString();
 	}
     public static String SRun(String script, MCCommandSender player) throws ConfigCompileException{
 		return SRun(script, player, env);
@@ -525,19 +527,19 @@ public class StaticTest {
 //        env.SetCommandSender(player);
 //        MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));
 //        injectAliasCore();
-//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(script, null), env).get(0);        
+//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(script, null), env).get(0);
 //        s.compile();
 //        s.run(vars, env, null);
-//        
+//
 //    }
-    
+
     //Blarg. Dumb thing.
 //    private static void injectAliasCore() throws ConfigCompileException{
 //        PermissionsResolverManager prm = mock(PermissionsResolverManager.class);
 //        CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
-//        AliasCore ac = new AliasCore(new File("plugins/CommandHelper/config.txt"), 
-//                new File("plugins/CommandHelper/LocalPackages"), 
-//                new File("plugins/CommandHelper/preferences.ini"), 
+//        AliasCore ac = new AliasCore(new File("plugins/CommandHelper/config.txt"),
+//                new File("plugins/CommandHelper/LocalPackages"),
+//                new File("plugins/CommandHelper/preferences.ini"),
 //                new File("plugins/CommandHelper/main.ms"), prm, chp);
 //        try{
 //            Field aliasCore = CommandHelperPlugin.class.getDeclaredField("ac");
@@ -547,7 +549,7 @@ public class StaticTest {
 //            throw new RuntimeException("Core could not be injected", e);
 //        }
 //    }
-    
+
     /**
      * Creates an entire fake server environment, adding players and everything.
      */
@@ -559,11 +561,11 @@ public class StaticTest {
             MCPlayer pp = GetOnlinePlayer(p, fakeServer);
             pps.add(pp);
         }
-        when(fakeServer.getOnlinePlayers()).thenReturn(pps.toArray(new MCPlayer[]{}));  
-        CommandHelperPlugin.myServer = fakeServer;  
+        when(fakeServer.getOnlinePlayers()).thenReturn(new HashSet<MCPlayer>());
+        CommandHelperPlugin.myServer = fakeServer;
         return fakeServer;
     }
-    
+
     private static boolean frontendInstalled = false;
     /**
      * This installs a fake server frontend. You must have already included @PrepareForTest(Static.class)
@@ -579,7 +581,7 @@ public class StaticTest {
 		Implementation.setServerType(Implementation.Type.TEST);
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();
-		SetPrivate(CommandHelperPlugin.class, "ac", fakeCore, AliasCore.class);       
+		SetPrivate(CommandHelperPlugin.class, "ac", fakeCore, AliasCore.class);
        frontendInstalled = true;
 		try {
 			Prefs.init(new File("preferences.ini"));
@@ -588,15 +590,15 @@ public class StaticTest {
 		}
 		CHLog.initialize(new File("."));
     }
-    
+
     /**
      * Installs the fake convertor into the server, so event based calls will
      * work. Additionally, adds the fakePlayer to the server, if player based
      * events are to be called, this is the player returned.
-     * @param fakePlayer 
+     * @param fakePlayer
      */
     public static void InstallFakeConvertor(MCPlayer fakePlayer) throws Exception{
-        InstallFakeServerFrontend();               
+        InstallFakeServerFrontend();
         try {
             //We need to add the test directory to the ClassDiscovery path
             //This should probably not be hard coded at some point.
@@ -605,17 +607,17 @@ public class StaticTest {
         catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
         }
-        
+
         Implementation.setServerType(Implementation.Type.TEST);
         MCServer fakeServer = GetFakeServer();
         TestConvertor.fakeServer = fakeServer;
-        FakeServerMixin.fakePlayer = fakePlayer;       
-        
+        FakeServerMixin.fakePlayer = fakePlayer;
+
     }
-    
+
     @convert(type=Implementation.Type.TEST)
     public static class TestConvertor extends AbstractConvertor{
-        
+
         private static MCServer fakeServer;
 		private RunnableQueue queue = new RunnableQueue("TestConvertorRunnableQueue");
 
@@ -813,12 +815,12 @@ public class StaticTest {
 	}
 
     public static class FakeServerMixin implements EventMixinInterface{
-        
+
         public static MCPlayer fakePlayer;
         public boolean cancelled = false;
-        
+
         public FakeServerMixin(AbstractEvent e){
-            
+
         }
 
 		@Override
@@ -849,20 +851,20 @@ public class StaticTest {
         public boolean isCancelled(BindableEvent o) {
             return cancelled;
         }
-        
+
     }
-    
+
     /**
      * Returns the value of a private (or any other variable for that matter) data member contained in the object provided.
      * If the value isn't there, the test fails automatically.
      * @param in The object to look in, or the Class object for static varibles.
      * @param name The name of the variable to get.
-     * @return 
+     * @return
      */
     public static <T> T GetPrivate(Object in, String name, Class<T> expected){
         return GetSetPrivate(in, name, null, false, expected);
     }
-    
+
 	/**
 	 * Sets the value of a private (or any other variable for that matter) data member contained in the object provided.
 	 * @param in Either the class of the object (for static variables) or an instance of the object.
@@ -873,7 +875,7 @@ public class StaticTest {
     public static void SetPrivate(Object in, String name, Object value, Class expected){
         GetSetPrivate(in, name, value, true, expected);
     }
-    
+
     private static <T> T GetSetPrivate(Object in, String name, Object value, boolean isSet, Class<T> expected){
         Object ret = null;
         try {
@@ -901,7 +903,7 @@ public class StaticTest {
             if(isSet){
                 f.set(in, value);
             } else {
-                ret = f.get(in);               
+                ret = f.get(in);
             }
         }
         catch (IllegalArgumentException ex) {
@@ -920,5 +922,5 @@ public class StaticTest {
         }
         return (T)ret;
     }
-    
+
 }

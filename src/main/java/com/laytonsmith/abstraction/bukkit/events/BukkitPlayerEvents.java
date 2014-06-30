@@ -99,7 +99,7 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  *
- * 
+ *
  */
 public class BukkitPlayerEvents {
 	@abstraction(type=Implementation.Type.BUKKIT)
@@ -125,12 +125,12 @@ public class BukkitPlayerEvents {
 	public static class BukkitMCPlayerItemConsumeEvent extends BukkitMCPlayerEvent
 			implements MCPlayerItemConsumeEvent {
 		PlayerItemConsumeEvent pic;
-		
+
 		public BukkitMCPlayerItemConsumeEvent(PlayerItemConsumeEvent event) {
 			super(event);
 			pic = event;
 		}
-		
+
 		@Override
 		public MCItemStack getItem() {
 			return new BukkitMCItemStack(pic.getItem());
@@ -140,11 +140,11 @@ public class BukkitPlayerEvents {
 		public void setItem(MCItemStack item) {
 			pic.setItem(((BukkitMCItemStack) item).asItemStack());
 		}
-		
+
 		public static BukkitMCPlayerItemConsumeEvent _instantiate(
 				MCPlayer player, MCItemStack item) {
 			return new BukkitMCPlayerItemConsumeEvent(
-					new PlayerItemConsumeEvent(((BukkitMCPlayer) player)._Player(), 
+					new PlayerItemConsumeEvent(((BukkitMCPlayer) player)._Player(),
 							((BukkitMCItemStack) item).asItemStack()));
 		}
 	}
@@ -159,13 +159,13 @@ public class BukkitPlayerEvents {
 			this.event = event;
 			this.block = new BukkitMCBlock(event.getBed());
 		}
-		
+
 		public BukkitMCPlayerBedEvent(PlayerBedLeaveEvent event) {
 			super(event);
 			this.event = event;
 			this.block = new BukkitMCBlock(event.getBed());
 		}
-		
+
 		@Override
 		public MCBlock getBed() {
 			return block;
@@ -395,7 +395,7 @@ public class BukkitPlayerEvents {
     public static class BukkitMCPlayerChatEvent  extends BukkitMCPlayerEvent
 	implements MCPlayerChatEvent{
         AsyncPlayerChatEvent pce;
-		
+
         public BukkitMCPlayerChatEvent(AsyncPlayerChatEvent event) {
 			super(event);
             pce = event;
@@ -408,7 +408,7 @@ public class BukkitPlayerEvents {
 
         public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message, String format){
 			AsyncPlayerChatEvent apce = new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message,
-                    new HashSet<>(Arrays.asList(Bukkit.getServer().getOnlinePlayers())));
+                    new HashSet<>(Bukkit.getServer().getOnlinePlayers()));
 			apce.setFormat(format);
             return new BukkitMCPlayerChatEvent(apce);
         }
@@ -455,7 +455,7 @@ public class BukkitPlayerEvents {
     public static class BukkitMCPlayerQuitEvent  extends BukkitMCPlayerEvent
 	implements MCPlayerQuitEvent{
         PlayerQuitEvent pce;
-		
+
         public BukkitMCPlayerQuitEvent(PlayerQuitEvent event) {
 			super(event);
             pce = event;
@@ -481,7 +481,7 @@ public class BukkitPlayerEvents {
     public static class BukkitMCPlayerJoinEvent  extends BukkitMCPlayerEvent
 	implements MCPlayerJoinEvent{
         PlayerJoinEvent pje;
-		
+
         public BukkitMCPlayerJoinEvent(PlayerJoinEvent e){
 			super(e);
             pje = e;
@@ -544,7 +544,7 @@ public class BukkitPlayerEvents {
     public static class BukkitMCPlayerRespawnEvent extends BukkitMCPlayerEvent
 	implements MCPlayerRespawnEvent {
         PlayerRespawnEvent pre;
-		
+
         public BukkitMCPlayerRespawnEvent(PlayerRespawnEvent event) {
 			super(event);
             pre = event;
@@ -575,7 +575,7 @@ public class BukkitPlayerEvents {
     public static class BukkitMCPlayerDeathEvent extends BukkitMCEntityDeathEvent
     		implements MCPlayerDeathEvent {
         PlayerDeathEvent pde;
-		
+
         public BukkitMCPlayerDeathEvent(PlayerDeathEvent event) {
         	super(event);
             pde = event;
@@ -584,15 +584,15 @@ public class BukkitPlayerEvents {
         public static BukkitMCPlayerDeathEvent _instantiate(MCPlayer entity, List<MCItemStack> listOfDrops,
                 int droppedExp, String deathMessage){
             List<ItemStack> drops = new ArrayList<ItemStack>();
-			
+
             return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer)entity)._Player(), drops, droppedExp, deathMessage));
         }
-        
+
         @Override
         public MCPlayer getEntity() {
             return new BukkitMCPlayer(pde.getEntity());
         }
-		
+
 		@Override
 		public MCEntity getKiller() {
 			return StaticLayer.GetCorrectEntity(new BukkitMCEntity(pde.getEntity().getKiller()));
@@ -654,7 +654,7 @@ public class BukkitPlayerEvents {
 	implements MCPlayerCommandEvent{
         PlayerCommandPreprocessEvent pcpe;
         boolean isCancelled = false;
-		
+
         public BukkitMCPlayerCommandEvent(PlayerCommandPreprocessEvent pcpe){
 			super(pcpe);
             this.pcpe = pcpe;
@@ -691,7 +691,7 @@ public class BukkitPlayerEvents {
     public static class BukkitMCWorldChangedEvent extends BukkitMCPlayerEvent
 	implements MCWorldChangedEvent{
         PlayerChangedWorldEvent pcwe;
-		
+
         public BukkitMCWorldChangedEvent(PlayerChangedWorldEvent e){
 			super(e);
             pcwe = e;
@@ -718,7 +718,7 @@ public class BukkitPlayerEvents {
 		BukkitMCLocation to;
 		BukkitMCPlayer player;
 		boolean cancelled = false;
-		
+
 		public BukkitMCPlayerMovedEvent(Player p, Location from, Location to){
 			this.player = new BukkitMCPlayer(p);
 			this.from = new BukkitMCLocation(from);
@@ -760,12 +760,12 @@ public class BukkitPlayerEvents {
 	public static class BukkitMCPlayerFishEvent extends BukkitMCPlayerEvent
 	implements MCPlayerFishEvent {
 		PlayerFishEvent e;
-		
+
 		public BukkitMCPlayerFishEvent(PlayerFishEvent event) {
 			super(event);
 			e = event;
 		}
-	
+
 		@Override
 		public MCEntity getCaught() {
 			if (e.getCaught() == null) {
@@ -773,37 +773,37 @@ public class BukkitPlayerEvents {
 			}
 			return new BukkitMCEntity(e.getCaught());
 		}
-	
+
 		@Override
 		public int getExpToDrop() {
 			return e.getExpToDrop();
 		}
-	
+
 		@Override
 		public MCFishHook getHook() {
 			return new BukkitMCFishHook(e.getHook());
 		}
-	
+
 		@Override
 		public MCFishingState getState() {
 			return BukkitMCFishingState.getConvertor().getAbstractedEnum(e.getState());
 		}
-	
+
 		@Override
 		public void setExpToDrop(int exp) {
 			e.setExpToDrop(exp);
 		}
 	}
-	
+
 	public static class BukkitMCGamemodeChangeEvent extends BukkitMCPlayerEvent
 	implements MCGamemodeChangeEvent {
 		PlayerGameModeChangeEvent gmc;
-		
+
 		public BukkitMCGamemodeChangeEvent(PlayerGameModeChangeEvent event) {
 			super(event);
 			gmc = event;
 		}
-		
+
 		@Override
 		public MCGameMode getNewGameMode() {
 			return BukkitMCGameMode.getConvertor().getAbstractedEnum(gmc.getNewGameMode());
@@ -813,22 +813,22 @@ public class BukkitPlayerEvents {
 	public static class BukkitMCChatTabCompleteEvent extends BukkitMCPlayerEvent
 	implements MCChatTabCompleteEvent {
 		PlayerChatTabCompleteEvent tc;
-		
+
 		public BukkitMCChatTabCompleteEvent(PlayerChatTabCompleteEvent event) {
 			super(event);
 			this.tc = event;
 		}
-	
+
 		@Override
 		public String getChatMessage() {
 			return tc.getChatMessage();
 		}
-	
+
 		@Override
 		public String getLastToken() {
 			return tc.getLastToken();
 		}
-	
+
 		@Override
 		public Collection<String> getTabCompletions() {
 			return tc.getTabCompletions();
@@ -838,7 +838,7 @@ public class BukkitPlayerEvents {
 	public static class BukkitMCExpChangeEvent extends BukkitMCPlayerEvent
 	implements MCExpChangeEvent {
 		PlayerExpChangeEvent ec;
-		
+
 		public BukkitMCExpChangeEvent(PlayerExpChangeEvent event) {
 			super(event);
 			ec = event;
@@ -895,7 +895,7 @@ public class BukkitPlayerEvents {
 			pebe.setSigning(isSigning);
 		}
 	}
-	
+
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerToggleFlightEvent extends BukkitMCPlayerEvent
 	implements MCPlayerToggleFlightEvent {
@@ -910,7 +910,7 @@ public class BukkitPlayerEvents {
 		public boolean isFlying() {
 			return ptfe.isFlying();
 		}
-		
+
 		@Override
 		public boolean isCancelled() {
 			return ptfe.isCancelled();
@@ -962,7 +962,7 @@ public class BukkitPlayerEvents {
 		public boolean isSprinting() {
 			return ptse.isSprinting();
 		}
-		
+
 		@Override
 		public boolean isCancelled() {
 			return ptse.isCancelled();

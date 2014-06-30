@@ -325,7 +325,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 				@Override
 				public int getValue() {
-					return Static.getServer().getOnlinePlayers().length;
+					return Static.getServer().getOnlinePlayers().size();
 				}
 			});
 			m.start();

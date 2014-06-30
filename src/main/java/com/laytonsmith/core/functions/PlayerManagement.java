@@ -44,6 +44,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -234,7 +235,7 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCPlayer[] pa = Static.getServer().getOnlinePlayers();
+			Collection<MCPlayer> pa = Static.getServer().getOnlinePlayers();
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
 			MCLocation loc;
@@ -256,9 +257,9 @@ public class PlayerManagement {
 
 			CArray sa = new CArray(t);
 
-			for (int i = 0; i < pa.length; i++) {
-				if (inRadius(pa[i], dist, loc)) {
-					sa.push(new CString(pa[i].getName(), t));
+			for (MCPlayer pa1 : pa) {
+				if (inRadius(pa1, dist, loc)) {
+					sa.push(new CString(pa1.getName(), t));
 				}
 			}
 

@@ -259,6 +259,7 @@ public class ServerEvents {
 			if(e instanceof MCRedstoneChangedEvent){
 				MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
 				Prefilters.match(prefilter, "location", event.getLocation(), PrefilterType.LOCATION_MATCH);
+				return true;
 			}
 			return false;
 		}
