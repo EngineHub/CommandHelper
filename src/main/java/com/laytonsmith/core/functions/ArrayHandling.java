@@ -8,7 +8,9 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -1341,16 +1343,99 @@ public class ArrayHandling {
 			}
 			CArray ca = (CArray) args[0];
 			CArray.SortType sortType = CArray.SortType.REGULAR;
+			CClosure customSort = null;
 			try {
 				if (args.length == 2) {
-					sortType = CArray.SortType.valueOf(args[1].val().toUpperCase());
+					if(args[1] instanceof CClosure){
+						sortType = null;
+						customSort = (CClosure) args[1];
+					} else {
+						sortType = CArray.SortType.valueOf(args[1].val());
+					}
 				}
 			} catch (IllegalArgumentException e) {
 				throw new ConfigRuntimeException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "),
 						ExceptionType.FormatException, t);
 			}
-			ca.sort(sortType);
+			if(sortType == null){
+				// It's a custom sort, which we have implemented below.
+				if(ca.isAssociative()){
+					throw new Exceptions.CastException("Associative arrays may not be sorted using a custom comparator.", t);
+				}
+				CArray sorted = customSort(ca, customSort, t);
+				//Clear it out and re-apply the values, so this is in place.
+				ca.clear();
+				for(Construct c : sorted.keySet()){
+					ca.set(c, sorted.get(c, t), t);
+				}
+			} else {
+				ca.sort(sortType);
+			}
 			return ca;
+		}
+
+		private CArray customSort(CArray ca, CClosure closure, Target t){
+			if(ca.size() <= 1){
+				return ca;
+			}
+
+			CArray left = new CArray(t);
+			CArray right = new CArray(t);
+			int middle = (int)(ca.size() / 2);
+			for(int i = 0; i < middle; i++){
+				left.push(ca.get(i, t));
+			}
+			for(int i = middle; i < ca.size(); i++){
+				right.push(ca.get(i, t));
+			}
+
+			left = customSort(left, closure, t);
+			right = customSort(right, closure, t);
+
+			return merge(left, right, closure, t);
+		}
+
+		private CArray merge(CArray left, CArray right, CClosure closure, Target t){
+			CArray result = new CArray(t);
+			while(left.size() > 0 || right.size() > 0){
+				if(left.size() > 0 && right.size() > 0){
+					// Compare the first two elements of each side
+					Construct l = left.get(0, t);
+					Construct r = right.get(0, t);
+					Construct c = null;
+					try {
+						closure.execute(l, r);
+					} catch(FunctionReturnException ex){
+						c = ex.getReturn();
+					}
+					int value;
+					if(c instanceof CNull){
+						value = 0;
+					} else if(c instanceof CBoolean){
+						if(((CBoolean)c).getBoolean()){
+							value = 1;
+						} else {
+							value = -1;
+						}
+					} else {
+						throw new ConfigRuntimeException("The custom closure did not return a value. It must always return true, false, or null.", ExceptionType.CastException, t);
+					}
+					if(value <= 0){
+						result.push(left.get(0, t));
+						left.remove(0);
+					} else {
+						result.push(right.get(0, t));
+						right.remove(0);
+					}
+				} else if(left.size() > 0){
+					result.push(left.get(0, t));
+					left.remove(0);
+				} else if(right.size() > 0){
+					result.push(right.get(0, t));
+					right.remove(0);
+				}
+			}
+			return result;
 		}
 
 		@Override
@@ -1371,7 +1456,8 @@ public class ArrayHandling {
 					+ " is passed in as a variable, the contents of that variable will be sorted, even if you don't re-assign"
 					+ " the returned array back to the variable. If you really need the old array, you should create a copy of"
 					+ " the array first, like so: assign(@sorted, array_sort(@array[])). The sort type may be one of the following:"
-					+ " " + StringUtils.Join(CArray.SortType.values(), ", ", " or ") + ". A regular sort sorts the elements without changing types first. A"
+					+ " " + StringUtils.Join(CArray.SortType.values(), ", ", " or ") + ", or it may be a closure, if the sort should follow"
+					+ " custom rules (explained below). A regular sort sorts the elements without changing types first. A"
 					+ " numeric sort always converts numeric values to numbers first (so 001 becomes 1). A string sort compares"
 					+ " values as strings, and a string_ic sort is the same as a string sort, but the comparision is case-insensitive."
 					+ " If the array contains array values, a CastException is thrown; inner arrays cannot be sorted against each"
@@ -1380,7 +1466,12 @@ public class ArrayHandling {
 					+ " you can use array_normalize() to normalize the array first. Note that the reason this function is an"
 					+ " in place sort instead of explicitely cloning the array is because in most cases, you may not need"
 					+ " to actually clone the array, an expensive operation. Due to this, it has slightly different behavior"
-					+ " than array_normalize, which could have also been implemented in place.";
+					+ " than array_normalize, which could have also been implemented in place.\n\n"
+					+ "If the sortType is a closure, it will perform a custom sort type, and the array may be associative, and"
+					+ " may even contain sub array values. The closure should accept two values, @left and @right, and should"
+					+ " return true if the left value is larger than the right, and false if the left value is smaller than the"
+					+ " right, and null if they are equal. The array will then be re-ordered using a merge sort, using your custom"
+					+ " comparator to determine the sort order.";
 		}
 
 		@Override
@@ -1412,11 +1503,20 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Regular sort", "assign(@array, array('a', 2, 4, 'string'))\narray_sort(@array, 'REGULAR')\nmsg(@array)"),
-				new ExampleScript("Numeric sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'NUMERIC')\nmsg(@array)"),
-				new ExampleScript("String sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'STRING')\nmsg(@array)"),
-				new ExampleScript("String sort (with words)", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING')\nmsg(@array)"),
-				new ExampleScript("Ignore case sort", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING_IC')\nmsg(@array)"),
+				new ExampleScript("Regular sort", "@array = array('a', 2, 4, 'string');\narray_sort(@array, 'REGULAR');\nmsg(@array);"),
+				new ExampleScript("Numeric sort", "@array = array('03', '02', '4', '1');\narray_sort(@array, 'NUMERIC');\nmsg(@array);"),
+				new ExampleScript("String sort", "@array = array('03', '02', '4', '1');\narray_sort(@array, 'STRING');\nmsg(@array);"),
+				new ExampleScript("String sort (with words)", "@array = array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple');\narray_sort(@array, 'STRING');\nmsg(@array);"),
+				new ExampleScript("Ignore case sort", "@array = array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple');\narray_sort(@array, 'STRING_IC');\nmsg(@array);"),
+				new ExampleScript("Custom sort", "@array = array(\n"
+						+ "\tarray(name: 'Jack', age: 20),\n"
+						+ "\tarray(name: 'Jill', age: 19)\n"
+						+ ");\n"
+						+ "msg(\"Before sort: @array\");"
+						+ "array_sort(@array, closure(@left, @right){\n"
+						+ "\t return(@left['age'] > @right['age']);\n"
+						+ "});\n"
+						+ "msg(\"After sort: @array\");")
 			};
 		}
 	}

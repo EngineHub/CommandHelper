@@ -43,7 +43,6 @@ public class CArray extends Construct implements ArrayAccess{
     private String mutVal;
     CArray parent = null;
 	private boolean valueDirty = true;
-	private boolean loadedExterns = false;
 
 
     public CArray(Target t){
@@ -578,6 +577,29 @@ public class CArray extends Construct implements ArrayAccess{
         }
     }
 
+	/**
+	 * Removes the value at the specified integer key.
+	 * @param i
+	 * @return
+	 */
+	public Construct remove(int i){
+		return remove(new CInt(i, Target.UNKNOWN));
+	}
+
+	/**
+	 * Removes the value at the specified string key.
+	 * @param s
+	 * @return
+	 */
+	public Construct remove(String s){
+		return remove(new CString(s, Target.UNKNOWN));
+	}
+
+	/**
+	 * Removes the value at the specified key
+	 * @param construct
+	 * @return
+	 */
     public Construct remove(Construct construct) {
         String c = normalizeConstruct(construct);
         Construct ret;
@@ -795,5 +817,16 @@ public class CArray extends Construct implements ArrayAccess{
 
 	public boolean isEmpty(){
 		return size() == 0;
+	}
+
+	/**
+	 * Clears all the values out of this array
+	 */
+	public void clear(){
+		this.array.clear();
+		this.associative_array.clear();
+		this.next_index = 0;
+		this.parent = null;
+		this.valueDirty = true;
 	}
 }
