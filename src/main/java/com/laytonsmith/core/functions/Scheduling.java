@@ -10,6 +10,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
@@ -32,6 +33,7 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +50,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -561,6 +565,75 @@ public class Scheduling {
 						/* 12 */ new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')", ":2013-06-05T11:42:56.799-0500"),
 			};
 		}
+	}
+
+	@api
+	@seealso(simple_date.class)
+	public static class parse_date extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			SimpleDateFormat dateFormat;
+			try{
+				dateFormat = new SimpleDateFormat(args[0].toString());
+				Date d = dateFormat.parse(args[1].val());
+				return new CInt(d.getTime(), t);
+			} catch(IllegalArgumentException | ParseException ex){
+				throw new Exceptions.FormatException(ex.getMessage(), t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "parse_date";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "int {dateFormat, dateString} Parses a date string, and returns an integer timestamp representing that time. This essentially"
+					+ " works in reverse of {{function|simple_date}}. The dateFormat string is the same as simple_date, see the documentation for"
+					+ " that function to see full details on that. The dateString is the actual date to be parsed. The dateFormat should be the"
+					+ " equivalent format that was used to generate the dateString. In general, this function is fairly lenient, and will still"
+					+ " try to parse a dateString that doesn't necessarily conform to the given format, but it shouldn't be relied on to work"
+					+ " with malformed data. Various portions of the date may be left off, in which case the missing portions will be assumed,"
+					+ " for instance, if the time is left off completely, it is assumed to be midnight, and if the minutes are left off, "
+					+ " it is assumed to be on the hour, if the date is left off, it is assumed to be today, etc.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Simple example", "parse_date('yyMMddHHmmssZ', '130605114256-0500')"),
+				new ExampleScript("Using the results of simple_date", "@format = 'EEE, d MMM yyyy HH:mm:ss Z';\n"
+						+ "msg(parse_date(@format, simple_date(@format, 1)));")
+			};
+		}
+
 	}
 
 	@api
