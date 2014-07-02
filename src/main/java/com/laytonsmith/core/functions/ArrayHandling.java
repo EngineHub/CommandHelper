@@ -367,7 +367,7 @@ public class ArrayHandling {
 			} catch (IndexOutOfBoundsException e) {
 				throw new ConfigRuntimeException("The index " + index.asString().getQuote() + " is out of bounds", ExceptionType.IndexOverflowException, t);
 			}
-			return CVoid.VOID;
+			return value;
 		}
 
 		@Override
@@ -378,7 +378,7 @@ public class ArrayHandling {
 				} catch (IndexOutOfBoundsException e) {
 					throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
 				}
-				return CVoid.VOID;
+				return args[2];
 			}
 			throw new ConfigRuntimeException("Argument 1 of array_set must be an array", ExceptionType.CastException, t);
 		}
@@ -390,8 +390,9 @@ public class ArrayHandling {
 
 		@Override
 		public String docs() {
-			return "void {array, index, value} Sets the value of the array at the specified index. array_set(array, index, value). Returns void. If"
-					+ " the element at the specified index isn't already set, throws an exception. Use array_push to avoid this.";
+			return "mixed {array, index, value} Sets the value of the array at the specified index. array_set(array, index, value). Returns void. If"
+					+ " the element at the specified index isn't already set, throws an exception. Use array_push to avoid this. The value"
+					+ " that was set is returned, to allow for chaining.";
 		}
 
 		@Override
