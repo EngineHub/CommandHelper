@@ -170,7 +170,11 @@ public class ArrayHandling {
 							return na;
 						}
 						for (long i = start; i <= finish; i++) {
-							na.push(ca.get((int) i, t));
+							try {
+								na.push(ca.get((int) i, t).clone());
+							} catch (CloneNotSupportedException e) {
+								na.push(ca.get((int) i, t));
+							}
 						}
 						return na;
 					} catch (NumberFormatException e) {
@@ -2135,84 +2139,56 @@ public class ArrayHandling {
 
 	}
 
-	@api
-	public static class array_deep_clone extends AbstractFunction {
-
-		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CArray a = Static.getArray(args[0], t);
-			CArray clone = doClone(a, t);
-			return clone;
-		}
-
-		private CArray doClone(CArray a, Target t){
-			CArray clone = new CArray(t);
-			for(Construct key : a.keySet()){
-				Construct value = a.get(key, t);
-				if(key instanceof CArray){
-					key = doClone((CArray)key, t);
-				}
-				if(value instanceof CArray){
-					value = doClone((CArray)value, t);
-				}
-				clone.set(key, value, t);
-			}
-			return clone;
-		}
-
-		@Override
-		public String getName() {
-			return "array_deep_clone";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "array {array} Performs a deep clone on an array (as opposed to a shallow clone). This is useful"
-					+ " for multidimensional arrays. See the examples for more info.";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "@a = array(array(1, 2, 3), 4, 5);\n"
-						+ "@c = array_deep_clone(@a);\n"
-						+ "@c[0][1] = 5;\n"
-						+ "@c[1] = 10;\n"
-						+ "msg(@a);\n"
-						+ "msg(@c);"),
-				new ExampleScript("Comparison to normal clone", "@a = array(array(1, 2, 3), 4, 5);\n"
-						+ "@c = @a[];\n"
-						+ "@c[0][1] = 5; // This line changes the results of both\n"
-						+ "@c[1] = 10; // This line only affects @c however\n"
-						+ "msg(@a);\n"
-						+ "msg(@c);\n")
-			};
-		}
-
-	}
+//	@api
+//	public static class array_deep_clone extends AbstractFunction {
+//
+//		@Override
+//		public ExceptionType[] thrown() {
+//			return new ExceptionType[]{ExceptionType.CastException};
+//		}
+//
+//		@Override
+//		public boolean isRestricted() {
+//			return false;
+//		}
+//
+//		@Override
+//		public Boolean runAsync() {
+//			return null;
+//		}
+//
+//		@Override
+//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//			throw new UnsupportedOperationException("TODO: Not supported yet.");
+//		}
+//
+//		@Override
+//		public String getName() {
+//			return "array_deep_clone";
+//		}
+//
+//		@Override
+//		public Integer[] numArgs() {
+//			return new Integer[]{1};
+//		}
+//
+//		@Override
+//		public String docs() {
+//			return "array {array} Performs a deep clone on an array (as opposed to a shallow clone). This is useful"
+//					+ " for multidimensional arrays. See the examples for more info.";
+//		}
+//
+//		@Override
+//		public Version since() {
+//			return CHVersion.V3_3_1;
+//		}
+//
+//		@Override
+//		public ExampleScript[] examples() throws ConfigCompileException {
+//			return new ExampleScript[]{
+//				new ExampleScript("", "")
+//			};
+//		}
+//
+//	}
 }
