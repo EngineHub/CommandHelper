@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.events;
 
 /**
@@ -101,6 +99,14 @@ public enum Driver {
 	VEHICLE_MOVE,
 
 	/**
+	 * World events
+	 */
+	TREE_GROW,
+	WORLD_LOAD,
+	WORLD_UNLOAD,
+	WORLD_SAVE,
+
+	/**
 	 * Cmdline events
 	 */
 	CMDLINE_PROMPT_INPUT,
@@ -108,5 +114,5 @@ public enum Driver {
 	/**
 	 * Extension events, used by events fired from the extension system.
 	 */
-	EXTENSION
+	EXTENSION;
 }

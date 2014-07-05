@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.annotations.typeof;
@@ -38,25 +36,87 @@ public class CArray extends Construct implements ArrayAccess{
 
     private boolean associative_mode = false;
     private long next_index = 0;
-    private List<Construct> array;
+    private ArrayList<Construct> array;
     private SortedMap<String, Construct> associative_array;
     private String mutVal;
     CArray parent = null;
 	private boolean valueDirty = true;
 
+	public CArray(Target t) {
+		this(t, -1, (Construct[]) null);
+	}
 
-    public CArray(Target t){
-        this(t, (Construct[])null);
-    }
+	public CArray(Target t, Construct... items) {
+		this(t, -1, items);
+	}
 
-	public CArray(Target t, Collection<Construct> items){
-		this(t, getArray(items));
+	public CArray(Target t, int initialCapacity) {
+		this(t, initialCapacity, (Construct[]) null);
+	}
+
+	public CArray(Target t, Collection<Construct> items) {
+		this(t, -1, getArray(items));
+	}
+
+	public CArray(Target t, int initialCapacity, Collection<Construct> items) {
+		this(t, initialCapacity, getArray(items));
+	}
+
+	public CArray(Target t, int initialCapacity, Construct... items) {
+		super("{}", ConstructType.ARRAY, t);
+		if(items != null){
+			for(Construct item : items){
+				if(item instanceof CEntry){
+					//it's an associative array
+					associative_mode = true;
+					break;
+				}
+			}
+		}
+		associative_array = new TreeMap<>(comparator);
+		array = associative_mode ? new ArrayList<Construct>() : initialCapacity > -1 ? new ArrayList<Construct>(initialCapacity) : items != null ? new ArrayList<Construct>(items.length) : new ArrayList<Construct>();
+		if(associative_mode){
+			if(items != null){
+				for(Construct item : items){
+					if(item instanceof CEntry){
+						associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).construct);
+					} else {
+						int max = Integer.MIN_VALUE;
+						for (String key : associative_array.keySet()) {
+							try {
+								int i = Integer.parseInt(key);
+								max = java.lang.Math.max(max, i);
+							} catch(NumberFormatException e){}
+						}
+						if(max == Integer.MIN_VALUE){
+							max = -1; //Special case, there are no integer indexes in here yet.
+						}
+						associative_array.put(Integer.toString(max + 1), item);
+						if(item instanceof CArray){
+							((CArray)item).parent = this;
+						}
+					}
+				}
+			}
+		} else {
+			if(items != null){
+				for(Construct item : items){
+					array.add(item);
+					if(item instanceof CArray){
+						((CArray)item).parent = this;
+					}
+				}
+			}
+			this.next_index = array.size();
+		}
+		regenValue(new HashSet<CArray>());
 	}
 
 	/**
 	 * Returns if this array is in associative mode or not.
 	 * @return
 	 */
+	@Override
 	public boolean isAssociative(){
 		return associative_mode;
 	}
@@ -99,56 +159,6 @@ public class CArray extends Construct implements ArrayAccess{
 		return c;
 	}
 
-    public CArray(Target t,  Construct... items) {
-        super("{}", ConstructType.ARRAY, t);
-        if(items != null){
-            for(Construct item : items){
-                if(item instanceof CEntry){
-                    //it's an associative array
-                    associative_mode = true;
-                    break;
-                }
-            }
-        }
-        associative_array = new TreeMap<String, Construct>(comparator);
-        array = new ArrayList<Construct>();
-        if(associative_mode){
-            if(items != null){
-                for(Construct item : items){
-                    if(item instanceof CEntry){
-                        associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).construct);
-                    } else {
-                        int max = Integer.MIN_VALUE;
-                        for (String key : associative_array.keySet()) {
-                            try{
-                                int i = Integer.parseInt(key);
-                                max = java.lang.Math.max(max, i);
-                            } catch(NumberFormatException e){}
-                        }
-                        if(max == Integer.MIN_VALUE){
-                            max = -1; //Special case, there are no integer indexes in here yet.
-                        }
-                        associative_array.put(Integer.toString(max + 1), item);
-                        if(item instanceof CArray){
-                            ((CArray)item).parent = this;
-                        }
-                    }
-                }
-            }
-        } else {
-            if(items != null){
-                for(Construct item : items){
-                    array.add(item);
-                    if(item instanceof CArray){
-                        ((CArray)item).parent = this;
-                    }
-                }
-            }
-            this.next_index = array.size();
-        }
-        regenValue(new HashSet<CArray>());
-    }
-
     /**
      * @return Whether or not this array is operating in associative mode
      */
@@ -166,7 +176,7 @@ public class CArray extends Construct implements ArrayAccess{
 	}
 
 	public static CArray GetAssociativeArray(Target t, Construct[] args){
-		return new CArray(t, args).forceAssociativeMode();
+		return new CArray(t, -1, args).forceAssociativeMode();
 	}
 
     /**
@@ -727,7 +737,7 @@ public class CArray extends Construct implements ArrayAccess{
         STRING_IC
     }
     public void sort(final SortType sort){
-        List<Construct> list = array;
+        ArrayList<Construct> list = array;
         if(this.associative_mode){
             list = new ArrayList(associative_array.values());
             this.associative_array.clear();
@@ -828,5 +838,9 @@ public class CArray extends Construct implements ArrayAccess{
 		this.next_index = 0;
 		this.parent = null;
 		this.valueDirty = true;
+	}
+
+	public void ensureCapacity(int capacity) {
+		array.ensureCapacity(capacity);
 	}
 }
