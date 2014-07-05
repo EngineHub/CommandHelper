@@ -30,7 +30,6 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
-import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -50,11 +49,6 @@ public class InventoryEvents {
 
 	@api
 	public static class inventory_click extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "inventory_click";
-		}
 
 		@Override
 		public String docs() {
@@ -89,11 +83,6 @@ public class InventoryEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
 
 		@Override
@@ -140,11 +129,6 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.INVENTORY_CLICK;
-		}
-
-		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
@@ -179,11 +163,6 @@ public class InventoryEvents {
 	public static class inventory_drag extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "inventory_drag";
-		}
-
-		@Override
 		public String docs() {
 			return "{world: <string match> World name | type: <macro> Can be " + StringUtils.Join(MCDragType.values(), ", ", ", or ")
 					+ " | cursoritem: <item match> item in hand, before event starts}"
@@ -208,11 +187,6 @@ public class InventoryEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -264,11 +238,6 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.INVENTORY_DRAG;
-		}
-
-		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
 			if (event instanceof MCInventoryDragEvent) {
@@ -300,11 +269,6 @@ public class InventoryEvents {
 	public static class inventory_open extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "inventory_open";
-		}
-
-		@Override
 		public String docs() {
 			return "{} "
 					+ "Fired when a player opens an inventory. "
@@ -313,17 +277,6 @@ public class InventoryEvents {
 					+ "inventorytype: type of inventory} "
 					+ "{} "
 					+ "{} ";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
-				throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -354,30 +307,13 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.INVENTORY_OPEN;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
-			return false;
-		}
-
-		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-
 	}
 
 	@api
 	public static class inventory_close extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "inventory_close";
-		}
 
 		@Override
 		public String docs() {
@@ -388,17 +324,6 @@ public class InventoryEvents {
 					+ "inventorytype: type of inventory} "
 					+ "{} "
 					+ "{} ";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
-				throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -429,30 +354,13 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.INVENTORY_CLOSE;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
-			return false;
-		}
-
-		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-
 	}
 
 	@api
 	public static class item_enchant extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "item_enchant";
-		}
 
 		@Override
 		public String docs() {
@@ -469,16 +377,6 @@ public class InventoryEvents {
 					+ "item: The item to be enchanted | "
 					+ "enchants: The enchants to add to the item}"
 					+ "{}";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -508,11 +406,6 @@ public class InventoryEvents {
 			} else {
 				throw new EventException("Cannot convert e to MCEnchantItemEvent");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ITEM_ENCHANT;
 		}
 
 		@Override
@@ -548,11 +441,6 @@ public class InventoryEvents {
 	public static class item_pre_enchant extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "item_pre_enchant";
-		}
-
-		@Override
 		public String docs() {
 			return "{} "
 					+ "Fired when a player places an item in an enchantment table "
@@ -565,16 +453,6 @@ public class InventoryEvents {
 					+ "{item: The item to be enchanted | "
 					+ "expcosts: The costs of the 3 options on the enchantment table}"
 					+ "{}";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -611,11 +489,6 @@ public class InventoryEvents {
 			} else {
 				throw new EventException("Cannot convert e to MCPrepareItemEnchantEvent");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ITEM_PRE_ENCHANT;
 		}
 
 		@Override
@@ -656,16 +529,10 @@ public class InventoryEvents {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-
 	}
 
 	@api
 	public static class item_held extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "item_held";
-		}
 
 		@Override
 		public String docs() {
@@ -674,19 +541,6 @@ public class InventoryEvents {
 					+ " {player | to | from: the slot the player is switching from}"
 					+ " {to: the slot that the player is switching to}"
 					+ " {}";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if (event instanceof MCItemHeldEvent) {
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
 		}
 
 		@Override
@@ -700,11 +554,6 @@ public class InventoryEvents {
 			} else {
 				throw new EventException("Event received was not an MCItemHeldEvent");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ITEM_HELD;
 		}
 
 		@Override
@@ -729,11 +578,6 @@ public class InventoryEvents {
 	public static class item_pre_craft extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "item_pre_craft";
-		}
-
-		@Override
 		public String docs() {
 			return "{}"
 					+ " Fires when a recipe is formed in a crafting matrix, but the result has not yet been clicked."
@@ -742,19 +586,6 @@ public class InventoryEvents {
 					+ " | recipe: information about the formed recipe, or null if there is not one}"
 					+ " {}"/*" {matrix: the slots that make up the crafting grid | result: the result slot of crafting}"*/
 					+ " {}";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if (event instanceof MCPrepareItemCraftEvent) {
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
 		}
 
 		@Override
@@ -781,11 +612,6 @@ public class InventoryEvents {
 			} else {
 				throw new EventException("Event received was not an MCPrepareItemCraftEvent.");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ITEM_PRE_CRAFT;
 		}
 
 		@Override

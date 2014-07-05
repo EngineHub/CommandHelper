@@ -99,11 +99,6 @@ public class PlayerEvents {
 	public static class player_consume extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "player_consume";
-		}
-
-		@Override
 		public String docs() {
 			return "{item: <item match>}"
 					+ " Fires as a player is finishing eating/drinking an item."
@@ -148,11 +143,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.PLAYER_CONSUME;
-		}
-
-		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
 			if (event instanceof MCPlayerItemConsumeEvent) {
@@ -174,11 +164,6 @@ public class PlayerEvents {
 
     @api
     public static class player_kick extends AbstractEvent {
-
-		@Override
-        public String getName() {
-            return "player_kick";
-        }
 
 		@Override
         public String docs() {
@@ -208,11 +193,6 @@ public class PlayerEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject, Target t) {
-            return null;
-        }
-
-		@Override
         public Map<String, Construct> evaluate(BindableEvent e)
                 throws EventException {
             if (e instanceof MCPlayerKickEvent) {
@@ -225,11 +205,6 @@ public class PlayerEvents {
             } else {
                 throw new EventException("Cannot convert e to MCPlayerKickEvent");
             }
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.PLAYER_KICK;
         }
 
 		@Override
@@ -258,10 +233,6 @@ public class PlayerEvents {
 
 	@api
 	public static class player_teleport extends AbstractEvent {
-		@Override
-		public String getName() {
-			return "player_teleport";
-		}
 
 		@Override
 		public String docs() {
@@ -329,11 +300,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.PLAYER_TELEPORT;
-		}
-
-		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCPlayerTeleportEvent) {
 				MCPlayerTeleportEvent e = (MCPlayerTeleportEvent)event;
@@ -357,11 +323,6 @@ public class PlayerEvents {
 
 	@api
 	public static class player_portal_travel extends player_teleport {
-
-		@Override
-		public String getName() {
-			return "player_portal_travel";
-		}
 
 		@Override
 		public String docs() {
@@ -431,11 +392,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.PLAYER_PORTAL_TRAVEL;
-		}
-
-		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCPlayerPortalEvent) {
 				MCPlayerPortalEvent e = (MCPlayerPortalEvent)event;
@@ -473,11 +429,6 @@ public class PlayerEvents {
     public static class player_prelogin extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "player_prelogin";
-		}
-
-		@Override
 		public String docs() {
 			return "{player: <string match>} "
 					+ "This event is called when a player is about to be authed. "
@@ -508,11 +459,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
 			if(e instanceof MCPlayerPreLoginEvent){
@@ -528,11 +474,6 @@ public class PlayerEvents {
             } else{
                 throw new EventException("Cannot convert e to PlayerPreLoginEvent");
             }
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PLAYER_PRELOGIN;
 		}
 
 		@Override
@@ -564,11 +505,6 @@ public class PlayerEvents {
     public static class player_login extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "player_login";
-		}
-
-		@Override
 		public String docs() {
 			return "{player: <string match>} "
 					+ "This event is called when a player is about to log in. "
@@ -598,11 +534,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
 			if(e instanceof MCPlayerLoginEvent){
@@ -619,11 +550,6 @@ public class PlayerEvents {
             } else{
                 throw new EventException("Cannot convert e to PlayerLoginEvent");
             }
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PLAYER_LOGIN;
 		}
 
 		@Override
@@ -672,12 +598,7 @@ public class PlayerEvents {
     }
 
     @api
-    public static class player_join extends AbstractEvent{
-
-		@Override
-        public String getName() {
-            return "player_join";
-        }
+    public static class player_join extends AbstractEvent {
 
 		@Override
         public String docs() {
@@ -694,11 +615,6 @@ public class PlayerEvents {
 		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
-        }
-
-		@Override
-        public Driver driver(){
-            return Driver.PLAYER_JOIN;
         }
 
 		@Override
@@ -762,11 +678,6 @@ public class PlayerEvents {
     public static class player_interact extends AbstractEvent {
 
 		@Override
-        public String getName() {
-            return "player_interact";
-        }
-
-		@Override
         public String docs() {
             return "{block: <item match> If the block the player interacts with is this"
                     + " | button: <string match> left or right. If they left or right clicked |"
@@ -786,11 +697,6 @@ public class PlayerEvents {
 		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.PLAYER_INTERACT;
         }
 
 		@Override
@@ -922,11 +828,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
-
-		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -944,11 +845,6 @@ public class PlayerEvents {
                     + "{}"
                     + "{location|player}";
 		}
-
-		@Override
-		public String getName() {
-			return "player_enter_bed";
-		}
 	}
 
 	@api
@@ -963,20 +859,10 @@ public class PlayerEvents {
                     + "{}"
                     + "{location|player}";
 		}
-
-		@Override
-		public String getName() {
-			return "player_leave_bed";
-		}
 	}
 
 	@api
     public static class pressure_plate_activated extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "pressure_plate_activated";
-		}
 
 		@Override
 		public String docs() {
@@ -1036,24 +922,13 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
-
-		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-
 	}
 
     @api
     public static class player_spawn extends AbstractEvent {
-
-		@Override
-        public String getName() {
-            return "player_spawn";
-        }
 
 		@Override
         public String docs() {
@@ -1068,11 +943,6 @@ public class PlayerEvents {
 					+ "bed_spawn: True if the respawn location is the player's bed}"
                     + "{location}"
                     + "{player|location|bed_spawn}";
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.PLAYER_SPAWN;
         }
 
 		@Override
@@ -1157,11 +1027,6 @@ public class PlayerEvents {
 	public static class player_death extends entity_death {
 
 		@Override
-        public String getName() {
-            return "player_death";
-        }
-
-		@Override
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when a player dies."
@@ -1177,11 +1042,6 @@ public class PlayerEvents {
         }
 
 		@Override
-        public Driver driver() {
-            return Driver.PLAYER_DEATH;
-        }
-
-		@Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1190,7 +1050,7 @@ public class PlayerEvents {
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
-                Prefilters.match(prefilter, "player", ((MCPlayer)event.getEntity()).getName(), PrefilterType.MACRO);
+                Prefilters.match(prefilter, "player", event.getEntity().getName(), PrefilterType.MACRO);
                 return true;
             }
             return false;
@@ -1262,22 +1122,12 @@ public class PlayerEvents {
     public static class player_quit extends AbstractEvent {
 
 		@Override
-        public String getName() {
-            return "player_quit";
-        }
-
-		@Override
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when any player quits."
                     + "{message: The message to be sent}"
                     + "{message}"
                     + "{player|message}";
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.PLAYER_QUIT;
         }
 
 		@Override
@@ -1360,11 +1210,6 @@ public class PlayerEvents {
     public static class player_chat extends AbstractEvent {
 
 		@Override
-        public String getName() {
-            return "player_chat";
-        }
-
-		@Override
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when any player attempts to send a chat message."
@@ -1376,11 +1221,6 @@ public class PlayerEvents {
 					+ " default: \"<%1$s> %2$s\". The first parameter is the player's display"
 					+ " name, and the second one is the message.}"
                     + "{player|message|format}";
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.PLAYER_CHAT;
         }
 
 		@Override
@@ -1472,11 +1312,6 @@ public class PlayerEvents {
     @api
 	@hide("Experimental until further notice")
     public static class async_player_chat extends AbstractEvent {
-
-		@Override
-        public String getName() {
-            return "async_player_chat";
-        }
 
 		@Override
         public String docs() {
@@ -1588,11 +1423,6 @@ public class PlayerEvents {
     public static class player_command extends AbstractEvent {
 
 		@Override
-        public String getName() {
-            return "player_command";
-        }
-
-		@Override
         public String docs() {
             return "{command: <string match> The entire command the player ran "
                     + "| prefix: <string match> Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'"
@@ -1602,11 +1432,6 @@ public class PlayerEvents {
                     + "{command: The entire command | prefix: Just the prefix of the command}"
                     + "{command}"
                     + "{command}";
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.PLAYER_COMMAND;
         }
 
 		@Override
@@ -1691,11 +1516,6 @@ public class PlayerEvents {
     public static class world_changed extends AbstractEvent {
 
 		@Override
-        public String getName() {
-            return "world_changed";
-        }
-
-		@Override
         public String docs() {
             return "{player: <macro> The player that switched worlds "
                     + "| from: <string match> The world the player is coming from "
@@ -1705,11 +1525,6 @@ public class PlayerEvents {
                     + "{player | from: The world the player is coming from | to: The world the player is now in}"
                     + "{}"
                     + "{player, from}";
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.WORLD_CHANGED;
         }
 
 		@Override
@@ -1918,11 +1733,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public String getName() {
-			return "player_move";
-		}
-
-		@Override
 		public String docs() {
 			return "{player: <macro> The player that moved. Switching worlds does not trigger this event. "
 					+ "| from: <location match> This should be a location array (x, y, z, world)."
@@ -2018,30 +1828,13 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.PLAYER_MOVE;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			//Nothing can be modified, so always return false
-			return false;
-		}
-
-		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-
 	}
 
 	@api
 	public static class player_fish extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "player_fish";
-		}
 
 		@Override
 		public String docs() {
@@ -2065,11 +1858,6 @@ public class PlayerEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -2117,11 +1905,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.PLAYER_FISH;
-		}
-
-		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2129,11 +1912,6 @@ public class PlayerEvents {
 
 	@api
 	public static class gamemode_change extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "gamemode_change";
-		}
 
 		@Override
 		public String docs() {
@@ -2157,11 +1935,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCGamemodeChangeEvent) {
 				MCGamemodeChangeEvent e = (MCGamemodeChangeEvent) event;
@@ -2174,16 +1947,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.GAMEMODE_CHANGE;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
-
-		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -2191,11 +1954,6 @@ public class PlayerEvents {
 
 	@api
 	public static class tab_complete_chat extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "tab_complete_chat";
-		}
 
 		@Override
 		public String docs() {
@@ -2215,11 +1973,6 @@ public class PlayerEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
 
 		@Override
@@ -2273,11 +2026,6 @@ public class PlayerEvents {
 	public static class exp_change extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "exp_change";
-		}
-
-		@Override
 		public String docs() {
 			return "{player: <macro>}"
 					+ " Fired when a player's experience changes naturally."
@@ -2297,11 +2045,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCExpChangeEvent) {
 				MCExpChangeEvent e = (MCExpChangeEvent) event;
@@ -2311,11 +2054,6 @@ public class PlayerEvents {
 			} else {
 				throw new EventException("Could not convert to MCExpChangeEvent.");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.EXP_CHANGE;
 		}
 
 		@Override
@@ -2338,16 +2076,6 @@ public class PlayerEvents {
 
 	@api
 	public static class book_edited extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "book_edited";
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.BOOK_EDITED;
-		}
 
 		@Override
 		public String docs() {
@@ -2376,11 +2104,6 @@ public class PlayerEvents {
 			} else {
 				return false;
 			}
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -2484,15 +2207,6 @@ public class PlayerEvents {
 
 	@api
 	public static class player_toggle_flight extends AbstractEvent {
-		@Override
-		public String getName() {
-			return "player_toggle_flight";
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PLAYER_TOGGLE_FLIGHT;
-		}
 
 		@Override
 		public String docs() {
@@ -2524,11 +2238,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCPlayerToggleFlightEvent) {
 				MCPlayerToggleFlightEvent ptfe = (MCPlayerToggleFlightEvent) event;
@@ -2542,24 +2251,10 @@ public class PlayerEvents {
 				throw new EventException("Cannot convert event to PlayerToggleFlightEvent");
 			}
 		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
 	}
 
 	@api
 	public static class player_toggle_sneak extends AbstractEvent {
-		@Override
-		public String getName() {
-			return "player_toggle_sneak";
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PLAYER_TOGGLE_SNEAK;
-		}
 
 		@Override
 		public String docs() {
@@ -2591,11 +2286,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCPlayerToggleSneakEvent) {
 				MCPlayerToggleSneakEvent ptse = (MCPlayerToggleSneakEvent) event;
@@ -2609,24 +2299,10 @@ public class PlayerEvents {
 				throw new EventException("Cannot convert event to PlayerToggleSneakEvent");
 			}
 		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
 	}
 
 	@api
 	public static class player_toggle_sprint extends AbstractEvent {
-		@Override
-		public String getName() {
-			return "player_toggle_sprint";
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PLAYER_TOGGLE_SPRINT;
-		}
 
 		@Override
 		public String docs() {
@@ -2658,11 +2334,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCPlayerToggleSprintEvent) {
 				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
@@ -2675,11 +2346,6 @@ public class PlayerEvents {
 			} else {
 				throw new EventException("Cannot convert event to PlayerToggleSprintEvent");
 			}
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
 		}
 	}
 }

@@ -3,14 +3,12 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.abstraction.events.MCPluginIncomingMessageEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
-import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -27,11 +25,6 @@ public class PluginEvents {
 		@Override
 		public boolean isCancellable(BindableEvent o) {
 			return false;
-		}
-
-		@Override
-		public String getName() {
-			return "plugin_message_received";
 		}
 
 		@Override
@@ -57,11 +50,6 @@ public class PluginEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent) e;
@@ -81,16 +69,6 @@ public class PluginEvents {
 			} else {
 				throw new EventException("Cannot convert to MCPluginIncomingMessageEvent");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PLUGIN_MESSAGE_RECEIVED;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
 		}
 
 		@Override

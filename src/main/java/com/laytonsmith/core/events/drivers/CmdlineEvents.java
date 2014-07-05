@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Version;
@@ -76,21 +75,9 @@ public class CmdlineEvents {
 			}
 		}
 
-
-
-		@Override
-		public String getName() {
-			return "cmdline_test_event";
-		}
-
 		@Override
 		public String docs() {
 			return "Fires off every 5 seconds, with no other side effects.";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
 		}
 
 		@Override
@@ -117,11 +104,6 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
-
-		@Override
 		public Version since() {
 			return CHVersion.V0_0_0;
 		}
@@ -132,11 +114,6 @@ public class CmdlineEvents {
 	public static class cmdline_prompt_input extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "cmdline_prompt_input";
-		}
-
-		@Override
 		public String docs() {
 			return "{}"
 					+ " Fired when a command is issued from the interactive prompt. If the event is not"
@@ -145,11 +122,6 @@ public class CmdlineEvents {
 					+ " {command: The command that was triggered}"
 					+ " {}"
 					+ " {}";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
 		}
 
 		@Override
@@ -164,16 +136,6 @@ public class CmdlineEvents {
 			Map<String, Construct> map = new HashMap<>();
 			map.put("command", new CString(cpi.getCommand(), Target.UNKNOWN));
 			return map;
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.CMDLINE_PROMPT_INPUT;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
 		}
 
 		@Override
@@ -211,10 +173,6 @@ public class CmdlineEvents {
 			public boolean isCancelled(){
 				return isCancelled;
 			}
-
-
-
 		}
-
 	}
 }

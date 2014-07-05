@@ -26,7 +26,6 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
-import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
@@ -50,11 +49,6 @@ public class BlockEvents {
     public static class block_break extends AbstractEvent {
 
 		@Override
-        public String getName() {
-            return "block_break";
-        }
-
-		@Override
         public String docs() {
             return "{player: <string match> | type: <string match> | data: <string match>} "
                     + "This event is called when a block is broken. "
@@ -73,11 +67,6 @@ public class BlockEvents {
 		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.BLOCK_BREAK;
         }
 
 		@Override
@@ -122,11 +111,6 @@ public class BlockEvents {
             }
 
             return true;
-        }
-
-		@Override
-        public BindableEvent convert(CArray manualObject, Target t) {
-            return null;
         }
 
 		@Override
@@ -220,11 +204,6 @@ public class BlockEvents {
     public static class block_place extends AbstractEvent {
 
 		@Override
-        public String getName() {
-            return "block_place";
-        }
-
-		@Override
         public String docs() {
             return "{player: <string match> | type: <string match> | data: <string match>} "
                     + "This event is called when a player places a block. "
@@ -242,11 +221,6 @@ public class BlockEvents {
 		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.BLOCK_PLACE;
         }
 
 		@Override
@@ -291,11 +265,6 @@ public class BlockEvents {
             }
 
             return true;
-        }
-
-		@Override
-        public BindableEvent convert(CArray manualObject, Target t) {
-            return null;
         }
 
 		@Override
@@ -381,11 +350,6 @@ public class BlockEvents {
     public static class block_burn extends AbstractEvent {
 
 		@Override
-        public String getName() {
-            return "block_burn";
-        }
-
-		@Override
         public String docs() {
             return "{type: <string match> | data: <string match>} "
                     + "This event is called when a block is burned. "
@@ -401,11 +365,6 @@ public class BlockEvents {
 		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.BLOCK_BURN;
         }
 
 		@Override
@@ -444,11 +403,6 @@ public class BlockEvents {
             }
 
             return true;
-        }
-
-		@Override
-        public BindableEvent convert(CArray manualObject, Target t) {
-            return null;
         }
 
 		@Override
@@ -495,11 +449,6 @@ public class BlockEvents {
 	public static class block_ignite extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "block_ignite";
-		}
-
-		@Override
 		public String docs() {
 			return "{player: <string match> | cause: <macro> | world: <macro>} "
 					+ "This event is called when a block or entity is ignited."
@@ -513,11 +462,6 @@ public class BlockEvents {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.BLOCK_IGNITE;
 		}
 
 		@Override
@@ -535,11 +479,6 @@ public class BlockEvents {
 			}
 
 			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -568,20 +507,10 @@ public class BlockEvents {
 				throw new EventException("Cannot convert e to MCBlockIgniteEvent");
 			}
 		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
 	}
 
     @api
     public static class sign_changed extends AbstractEvent {
-
-		@Override
-        public String getName() {
-            return "sign_changed";
-        }
 
 		@Override
         public String docs() {
@@ -599,11 +528,6 @@ public class BlockEvents {
 		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.SIGN_CHANGED;
         }
 
 		@Override
@@ -716,11 +640,6 @@ public class BlockEvents {
 	public static class block_dispense extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "block_dispense";
-		}
-
-		@Override
 		public String docs() {
 			return "{type: <string match> Type of dispenser | item: <item match> Item which is dispensed}"
 					+ " This event is called when a dispenser dispense an item. Cancelling the event cancels dispensing."
@@ -737,11 +656,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.BLOCK_DISPENSE;
-		}
-
-		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
 				throws PrefilterNonMatchException {
 			if (e instanceof MCBlockDispenseEvent) {
@@ -752,11 +666,6 @@ public class BlockEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -799,16 +708,6 @@ public class BlockEvents {
 	public static class block_grow extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "block_grow";
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.BLOCK_GROW;
-		}
-
-		@Override
 		public String docs() {
 			return "{oldtype: <string match> The block type before the growth | olddata: <string match> The block data before the growth |"
 					+ " newtype: <string match> The block type after the growth | newdata: <string match> The block data after the growth |"
@@ -843,11 +742,6 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCBlockGrowEvent) {
 				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
@@ -867,11 +761,6 @@ public class BlockEvents {
 			} else {
 				throw new EventException("Cannot convert event to BlockGrowEvent");
 			}
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
-			return false;
 		}
 	}
 }

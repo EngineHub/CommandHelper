@@ -72,11 +72,6 @@ public class EntityEvents {
 	public static class item_spawn extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "item_spawn";
-		}
-
-		@Override
 		public String docs() {
 			return "{item: <item match> the item id and data value to check}"
 					+ " Fires when an item entity comes into existance."
@@ -96,11 +91,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCItemSpawnEvent) {
 				Target t = Target.UNKNOWN;
@@ -113,11 +103,6 @@ public class EntityEvents {
 			} else {
 				throw new EventException("Could not convert to MCItemSpawnEvent");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ITEM_SPAWN;
 		}
 
 		@Override
@@ -139,11 +124,6 @@ public class EntityEvents {
 
 	@api
 	public static class entity_explode extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "entity_explode";
-		}
 
 		@Override
 		public String docs() {
@@ -186,11 +166,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCEntityExplodeEvent) {
 				Target t = Target.UNKNOWN;
@@ -215,11 +190,6 @@ public class EntityEvents {
 			} else {
 				throw new EventException("Could not convert to MCEntityExplodeEvent");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ENTITY_EXPLODE;
 		}
 
 		@Override
@@ -255,11 +225,6 @@ public class EntityEvents {
 
 	@api
 	public static class projectile_hit extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "projectile_hit";
-		}
 
 		@Override
 		public String docs() {
@@ -323,11 +288,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.PROJECTILE_HIT;
-		}
-
-		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
 			if (event instanceof MCProjectileHitEvent) {
@@ -355,16 +315,6 @@ public class EntityEvents {
 
 	@api
 	public static class projectile_launch extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "projectile_launch";
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PROJECTILE_LAUNCH;
-		}
 
 		@Override
 		public String docs() {
@@ -407,11 +357,6 @@ public class EntityEvents {
 			} else {
 				return false;
 			}
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -467,11 +412,6 @@ public class EntityEvents {
 	public static class entity_death extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "entity_death";
-		}
-
-		@Override
 		public String docs() {
 			return "{id: <macro> The entityID | type: <macro> The type of entity dying.}"
 					+ " Fires when any living entity dies."
@@ -493,11 +433,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -529,11 +464,6 @@ public class EntityEvents {
 			} else {
 				throw new EventException("Cannot convert e to EntityDeathEvent");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ENTITY_DEATH;
 		}
 
 		@Override
@@ -573,11 +503,6 @@ public class EntityEvents {
 	public static class creature_spawn extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "creature_spawn";
-		}
-
-		@Override
 		public String docs() {
 			return "{type: <macro> | reason: <macro> One of " + StringUtils.Join(MCSpawnReason.values(), ", ", ", or ", " or ") + "}"
 				+ " Fired when a living entity spawns on the server."
@@ -600,11 +525,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent event)
 				throws EventException {
 			if (event instanceof MCCreatureSpawnEvent) {
@@ -620,11 +540,6 @@ public class EntityEvents {
 			} else {
 				throw new EventException("Could not convert to MCCreatureSpawnEvent");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.CREATURE_SPAWN;
 		}
 
 		@Override
@@ -652,11 +567,6 @@ public class EntityEvents {
 
 	@api
 	public static class entity_damage extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "entity_damage";
-		}
 
 		@Override
 		public String docs() {
@@ -688,11 +598,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
 			if (e instanceof MCEntityDamageEvent) {
@@ -705,11 +610,6 @@ public class EntityEvents {
 			} else {
 				throw new EventException("Cannot convert e to MCEntityDamageEvent");
 			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ENTITY_DAMAGE;
 		}
 
 		@Override
@@ -736,11 +636,6 @@ public class EntityEvents {
 	public static class player_interact_entity extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "player_interact_entity";
-		}
-
-		@Override
 		public String docs() {
 			return "{clicked: the type of entity being clicked}"
 				+ " Fires when a player right clicks an entity. Note, not all entities are clickable."
@@ -759,11 +654,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
 		}
 
 		@Override
@@ -790,30 +680,13 @@ public class EntityEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.PLAYER_INTERACT_ENTITY;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
-			return false;
-		}
-
-		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-
 	}
 
     @api
     public static class item_drop extends AbstractEvent {
-
-		@Override
-        public String getName() {
-            return "item_drop";
-        }
 
 		@Override
         public String docs() {
@@ -826,18 +699,8 @@ public class EntityEvents {
         }
 
 		@Override
-        public BindableEvent convert(CArray manualObject, Target t) {
-            return null;
-        }
-
-		@Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
-        }
-
-		@Override
-        public Driver driver() {
-            return Driver.ITEM_DROP;
         }
 
 		@Override
@@ -890,11 +753,6 @@ public class EntityEvents {
 	public static class item_pickup extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "item_pickup";
-		}
-
-		@Override
 		public String docs() {
 			return "{player: <string match> | item: <item match>} "
 				+ "This event is called when a player picks up an item."
@@ -920,11 +778,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCPlayerPickupItemEvent) {
                 MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
@@ -940,11 +793,6 @@ public class EntityEvents {
             } else {
                 throw new EventException("Cannot convert e to MCPlayerPickupItemEvent");
             }
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ITEM_PICKUP;
 		}
 
 		@Override
@@ -968,17 +816,10 @@ public class EntityEvents {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-
 	}
-
 
     @api
     public static class entity_damage_player extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "entity_damage_player";
-		}
 
 		@Override
 		public String docs() {
@@ -1002,11 +843,6 @@ public class EntityEvents {
 				return event.getEntity() instanceof MCPlayer;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -1050,11 +886,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.ENTITY_DAMAGE_PLAYER;
-		}
-
-		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent e) {
 			MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent)e;
@@ -1073,16 +904,10 @@ public class EntityEvents {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-
     }
 
     @api
-    public static class target_player extends AbstractEvent{
-
-		@Override
-        public String getName() {
-            return "target_player";
-        }
+    public static class target_player extends AbstractEvent {
 
 		@Override
         public String docs() {
@@ -1185,11 +1010,6 @@ public class EntityEvents {
 	public static class entity_enter_portal extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "entity_enter_portal";
-		}
-
-		@Override
 		public String docs() {
 			return "{type: <macro> the type of entity | block: <math match> the blockID of the portal}"
 					+ " Fires when an entity touches a portal block."
@@ -1208,11 +1028,6 @@ public class EntityEvents {
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -1239,11 +1054,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public Driver driver() {
-			return Driver.ENTITY_ENTER_PORTAL;
-		}
-
-		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -1251,11 +1061,6 @@ public class EntityEvents {
 
 	@api
 	public static class entity_change_block extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "entity_change_block";
-		}
 
 		@Override
 		public String docs() {
@@ -1283,11 +1088,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
 			if (e instanceof MCEntityChangeBlockEvent) {
@@ -1303,17 +1103,6 @@ public class EntityEvents {
 			} else {
 				throw new EventException("Could not convert to MCEntityChangeBlockEvent");
 			}
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
-			return false;
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ENTITY_CHANGE_BLOCK;
 		}
 
 		@Override
@@ -1359,16 +1148,6 @@ public class EntityEvents {
 	public static class hanging_break extends AbstractEvent {
 
 		@Override
-		public String getName() {
-			return "hanging_break";
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.HANGING_BREAK;
-		}
-
-		@Override
 		public String docs() {
 			return "{type: <macro> The entity type of the hanging entity | cause: <macro> The cause of the removing | world: <macro>}"
 					+ " This event is called when a hanged entity is broken."
@@ -1401,11 +1180,6 @@ public class EntityEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCHangingBreakEvent) {
 				MCHangingBreakEvent hangingBreakEvent = (MCHangingBreakEvent) event;
@@ -1431,11 +1205,6 @@ public class EntityEvents {
 			} else {
 				throw new EventException("Cannot convert event to HangingBreakEvent");
 			}
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
 		}
 	}
 }
