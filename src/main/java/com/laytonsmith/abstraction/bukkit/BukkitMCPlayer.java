@@ -304,12 +304,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.sendMessage(string);
     }
 
-    @Override
+        @Override
     public void sendTexturePack(String url) {
             p.setTexturePack(url);
     }
 
-    @Override
+        @Override
     public void sendResourcePack(String url) {
             p.setResourcePack(url);
     }
