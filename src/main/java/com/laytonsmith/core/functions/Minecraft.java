@@ -1431,12 +1431,11 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "void {player, url} Sends a resourcepack URL to the player's client."
-					+ " If the client has not been requested to change resources in the"
+			return "void {player, url} Sends a texturepack URL to the player's client."
+					+ " If the client has not been requested to change textures in the"
 					+ " past, they will recieve a confirmation dialog before downloading"
-					+ " and switching to the new pack. Clients that ignore server resources"
-					+ " will not recieve the request, so this function will not affect them."
-					+ " This function is no longer useful, use send_resourcepack().";
+					+ " and switching to the new pack. Clients that ignore server textures"
+					+ " will not recieve the request, so this function will not affect them.";
 		}
 
 		@Override
