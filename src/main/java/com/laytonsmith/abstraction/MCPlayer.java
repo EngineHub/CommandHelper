@@ -74,6 +74,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public void sendTexturePack(String url);
 
+	public void sendResourcePack(String url);
+
     public void setAllowFlight(boolean flight);
 
     public void setCompassTarget(MCLocation l);
