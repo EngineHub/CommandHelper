@@ -315,6 +315,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
 	@Override
+	public void sendResourcePack(String url) {
+		p.setResourcePack(url);
+	}
+
+	@Override
     public void setAllowFlight(boolean flight) {
         p.setAllowFlight(flight);
     }

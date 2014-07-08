@@ -1382,6 +1382,59 @@ public class Minecraft {
 					+ " If the client has not been requested to change textures in the"
 					+ " past, they will recieve a confirmation dialog before downloading"
 					+ " and switching to the new pack. Clients that ignore server textures"
+					+ " will not recieve the request, so this function will not affect them."
+					+ " This function will not work for versions in which Texture Packs have"
+					+ "been replaced with Resource Packs. Use send_resourcepack()";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class send_resourcepack extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = Static.GetPlayer(args[0], t);
+			p.sendResourcePack(args[1].val());
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "send_resourcepack";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {player, url} Sends a texturepack URL to the player's client."
+					+ " If the client has not been requested to change textures in the"
+					+ " past, they will recieve a confirmation dialog before downloading"
+					+ " and switching to the new pack. Clients that ignore server textures"
 					+ " will not recieve the request, so this function will not affect them.";
 		}
 
