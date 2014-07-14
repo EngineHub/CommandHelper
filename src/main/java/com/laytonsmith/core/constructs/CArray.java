@@ -36,7 +36,7 @@ public class CArray extends Construct implements ArrayAccess{
 
     private boolean associative_mode = false;
     private long next_index = 0;
-    private ArrayList<Construct> array;
+    private List<Construct> array;
     private SortedMap<String, Construct> associative_array;
     private String mutVal;
     CArray parent = null;
@@ -737,7 +737,7 @@ public class CArray extends Construct implements ArrayAccess{
         STRING_IC
     }
     public void sort(final SortType sort){
-        ArrayList<Construct> list = array;
+        List<Construct> list = array;
         if(this.associative_mode){
             list = new ArrayList(associative_array.values());
             this.associative_array.clear();
@@ -841,6 +841,6 @@ public class CArray extends Construct implements ArrayAccess{
 	}
 
 	public void ensureCapacity(int capacity) {
-		array.ensureCapacity(capacity);
+		((ArrayList) array).ensureCapacity(capacity);
 	}
 }

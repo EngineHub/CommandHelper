@@ -56,12 +56,12 @@ public class WorldEvents {
 
 		@Override
 		public String getName() {
-			return getClass().getSimpleName();
+			return "world_load";
 		}
 
 		@Override
 		public Driver driver() {
-			return Driver.valueOf(getName().toUpperCase());
+			return Driver.WORLD_LOAD;
 		}
 
 		@Override
@@ -95,7 +95,7 @@ public class WorldEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new UnsupportedOperationException("Not supported yet.");
+			return null;
 		}
 	}
 
@@ -104,12 +104,12 @@ public class WorldEvents {
 
 		@Override
 		public String getName() {
-			return getClass().getSimpleName();
+			return "world_unload";
 		}
 
 		@Override
 		public Driver driver() {
-			return Driver.valueOf(getName().toUpperCase());
+			return Driver.WORLD_UNLOAD;
 		}
 
 		@Override
@@ -143,7 +143,7 @@ public class WorldEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new UnsupportedOperationException("Not supported yet.");
+			return null;
 		}
 	}
 
@@ -152,12 +152,12 @@ public class WorldEvents {
 
 		@Override
 		public String getName() {
-			return getClass().getSimpleName();
+			return "world_save";
 		}
 
 		@Override
 		public Driver driver() {
-			return Driver.valueOf(getName().toUpperCase());
+			return Driver.WORLD_SAVE;
 		}
 
 		@Override
@@ -191,7 +191,7 @@ public class WorldEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new UnsupportedOperationException("Not supported yet.");
+			return null;
 		}
 	}
 
@@ -200,12 +200,12 @@ public class WorldEvents {
 
 		@Override
 		public String getName() {
-			return getClass().getSimpleName();
+			return "tree_grow";
 		}
 
 		@Override
 		public Driver driver() {
-			return Driver.valueOf(getName().toUpperCase());
+			return Driver.TREE_GROW;
 		}
 
 		@Override
@@ -214,8 +214,8 @@ public class WorldEvents {
 					+ "Fires when a tree grows."
 					+ "{world: The world where the tree grown. | type: The tree type, can be one of " + StringUtils.Join(MCTreeType.values(), ", ", ", or ", " or ")
 					+ " | bonemeal: If the tree grown due to a bonemeal or not. | player: The player who used the bonemeal, or null.}"
-					+ " {}"
-					+ " {}";
+					+ "{}"
+					+ "{}";
 		}
 
 		@Override
@@ -263,7 +263,7 @@ public class WorldEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new UnsupportedOperationException("Not supported yet.");
+			return null;
 		}
 	}
 }
