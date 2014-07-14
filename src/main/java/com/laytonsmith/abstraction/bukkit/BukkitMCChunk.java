@@ -1,10 +1,10 @@
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCWorld;
 import org.bukkit.Chunk;
+import org.bukkit.entity.Entity;
 
 /**
  *
@@ -29,11 +29,12 @@ public class BukkitMCChunk implements MCChunk {
 
 	@Override
 	public MCEntity[] getEntities() {
-		MCEntity[] ret = new MCEntity[c.getEntities().length];
-		for (int i=0; i < c.getEntities().length; i++) {
-			ret[i] = new BukkitMCEntity(c.getEntities()[i]);
+		Entity[] entities = c.getEntities();
+		MCEntity[] r = new MCEntity[entities.length];
+		for (int i = 0 ; i < r.length ; i++) {
+			r[i] = new BukkitMCEntity(entities[i]);
 		}
-		return ret;
+		return r;
 	}
 
 	@Override
