@@ -1,9 +1,10 @@
-
-
 package com.laytonsmith.abstraction.bukkit.blocks;
 
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMaterialData;
+import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
 import org.bukkit.block.BlockState;
@@ -35,5 +36,14 @@ public class BukkitMCBlockState extends BukkitMCMetadatable implements MCBlockSt
     public int getTypeId() {
         return bs.getTypeId();
     }
-    
+
+	@Override
+	public MCBlock getBlock() {
+		return new BukkitMCBlock(bs.getBlock());
+	}
+
+	@Override
+	public MCLocation getLocation() {
+		return new BukkitMCLocation(bs.getLocation());
+	}
 }
