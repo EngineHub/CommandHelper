@@ -1,8 +1,11 @@
+
+
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -17,7 +20,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -62,6 +64,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     public void hook() {
 
     }
+
 
     /**
      * This function is run when the actual event occurs.
@@ -166,7 +169,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * @return
      */
     public static Object DoConvert(CArray manualObject){
-        Map<String, Construct> map = new HashMap<>();
+        Map<String, Construct> map = new HashMap<String, Construct>();
         for(String key : manualObject.stringKeySet()){
             map.put(key, manualObject.get(key, Target.UNKNOWN));
         }
@@ -258,56 +261,4 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		return this.convert(manualObject, Target.UNKNOWN);
 	}
 
-	/**
-	 * By default, the simple name of the class is returned.
-	 * @return 
-	 */
-	@Override
-	public String getName() {
-		return getClass().getSimpleName();
-	}
-
-	/**
-	 * By default, the Driver value corresponding to the name of the event in upper case is returned.
-	 * @return 
-	 */
-	@Override
-	public Driver driver() {
-		return Driver.valueOf(getName().toUpperCase());
-	}
-
-	/**
-	 * By default, the event is not modifiable (false is returned).
-	 * @param key
-	 * @param value
-	 * @param event
-	 * @return 
-	 */
-	@Override
-	public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-		return false;
-	}
-
-	/**
-	 * By default, manual trigger is not supported, and null is returned.
-	 * @param manualObject
-	 * @param t
-	 * @return 
-	 */
-	@Override
-	public BindableEvent convert(CArray manualObject, Target t) {
-		return null;
-	}
-
-	/**
-	 * By default, true is returned (there is no prefilter).
-	 * @param prefilter
-	 * @param e
-	 * @return
-	 * @throws PrefilterNonMatchException 
-	 */
-	@Override
-	public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-		return true;
-	}
 }

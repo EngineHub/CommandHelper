@@ -22,6 +22,7 @@ import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Collections;
@@ -38,6 +39,11 @@ public class ServerEvents {
 
 	@api
 	public static class server_ping extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "server_ping";
+		}
 
 		@Override
 		public String docs() {
@@ -62,6 +68,11 @@ public class ServerEvents {
 				return true;
 			}
 			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -116,6 +127,11 @@ public class ServerEvents {
 		}
 
 		@Override
+		public Driver driver() {
+			return Driver.SERVER_PING;
+		}
+
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -125,12 +141,30 @@ public class ServerEvents {
 	public static class tab_complete_command extends AbstractEvent {
 
 		@Override
+		public String getName() {
+			return "tab_complete_command";
+		}
+
+		@Override
 		public String docs() {
 			return "{}"
 					+ " This will fire if a tab completer has not been set, or if the set tab completer doesn't return an array."
 					+ " {command | alias | completions | args | sender}"
 					+ " {completions}"
 					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCCommandTabCompleteEvent) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -206,6 +240,11 @@ public class ServerEvents {
 		}
 
 		@Override
+		public String getName() {
+			return "redstone_changed";
+		}
+
+		@Override
 		public String docs() {
 			return "{location: <location match>}"
 					+ " Fired when a redstone activatable block is toggled, either on or off, AND the block has been set to be monitored"
@@ -226,6 +265,11 @@ public class ServerEvents {
 		}
 
 		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
 			Map<String, Construct> map = evaluate_helper(e);
@@ -235,8 +279,19 @@ public class ServerEvents {
 		}
 
 		@Override
+		public Driver driver() {
+			return Driver.REDSTONE_CHANGED;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
+
 	}
 }

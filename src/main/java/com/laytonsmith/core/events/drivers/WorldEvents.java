@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -54,6 +55,16 @@ public class WorldEvents {
 	public static class world_load extends WorldEvent {
 
 		@Override
+		public String getName() {
+			return getClass().getSimpleName();
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.valueOf(getName().toUpperCase());
+		}
+
+		@Override
 		public String docs() {
 			return "{world: <macro>}"
 					+ "Fires when a world is loaded."
@@ -76,10 +87,30 @@ public class WorldEvents {
 				return false;
 			}
 		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 	}
 
 	@api
 	public static class world_unload extends WorldEvent {
+
+		@Override
+		public String getName() {
+			return getClass().getSimpleName();
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.valueOf(getName().toUpperCase());
+		}
 
 		@Override
 		public String docs() {
@@ -104,10 +135,30 @@ public class WorldEvents {
 				return false;
 			}
 		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 	}
 
 	@api
 	public static class world_save extends WorldEvent {
+
+		@Override
+		public String getName() {
+			return getClass().getSimpleName();
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.valueOf(getName().toUpperCase());
+		}
 
 		@Override
 		public String docs() {
@@ -132,10 +183,30 @@ public class WorldEvents {
 				return false;
 			}
 		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 	}
 
 	@api
 	public static class tree_grow extends WorldEvent {
+
+		@Override
+		public String getName() {
+			return getClass().getSimpleName();
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.valueOf(getName().toUpperCase());
+		}
 
 		@Override
 		public String docs() {
@@ -183,6 +254,16 @@ public class WorldEvents {
 			r.put("type", new CString(event.getSpecies().name(), Target.UNKNOWN));
 			r.put("bonemeal", CBoolean.get(event.isFromBonemeal()));
 			return r;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 	}
 }

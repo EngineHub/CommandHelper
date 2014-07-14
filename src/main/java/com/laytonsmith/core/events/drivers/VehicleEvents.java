@@ -60,6 +60,11 @@ public class VehicleEvents {
 	public static class vehicle_enter extends AbstractEvent {
 
 		@Override
+		public String getName() {
+			return "vehicle_enter";
+		}
+
+		@Override
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
 					+ " the enitytype of the passenger} Fires when an entity enters a vehicle."
@@ -78,6 +83,11 @@ public class VehicleEvents {
 				return true;
 			}
 			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -102,6 +112,16 @@ public class VehicleEvents {
 		}
 
 		@Override
+		public Driver driver() {
+			return Driver.VEHICLE_ENTER;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -109,6 +129,11 @@ public class VehicleEvents {
 
 	@api
 	public static class vehicle_leave extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "vehicle_leave";
+		}
 
 		@Override
 		public String docs() {
@@ -132,6 +157,11 @@ public class VehicleEvents {
 		}
 
 		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
@@ -153,6 +183,16 @@ public class VehicleEvents {
 		}
 
 		@Override
+		public Driver driver() {
+			return Driver.VEHICLE_LEAVE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
@@ -160,6 +200,11 @@ public class VehicleEvents {
 
 	@api
 	public static class vehicle_collide extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "vehicle_collide";
+		}
 
 		@Override
 		public String docs() {
@@ -203,6 +248,11 @@ public class VehicleEvents {
 		}
 
 		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
 			if (event instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent e = (MCVehicleCollideEvent) event;
@@ -239,6 +289,11 @@ public class VehicleEvents {
 			} else {
 				throw new EventException("The event could not be converted to MCVehicleCollideEvent.");
 			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.VEHICLE_COLLIDE;
 		}
 
 		@Override
@@ -411,6 +466,11 @@ public class VehicleEvents {
 		}
 
 		@Override
+		public String getName() {
+			return "vehicle_move";
+		}
+
+		@Override
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
 					+ " the enitytype of the passenger} Fires when an vehicle is moving."
@@ -537,6 +597,17 @@ public class VehicleEvents {
 			} else {
 				throw new EventException("Could not convert to MCVehicleMoveEvent");
 			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.VEHICLE_MOVE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			//Nothing can be modified, so always return false
+			return false;
 		}
 
 		@Override
