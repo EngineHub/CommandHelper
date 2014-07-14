@@ -59,7 +59,7 @@ import java.util.zip.ZipFile;
  * Objects, so that if the Minecraft API Hook changes, porting the code will
  * only require changing the API specific portions, not this core file.
  *
- * 
+ *
  */
 public class AliasCore {
 
@@ -308,7 +308,7 @@ public class AliasCore {
 		boolean reloadProfiler = true;
 		boolean reloadScripts = true;
 		boolean reloadExtensions = true;
-		
+
 		if (settings != null) {
 			ArgumentParser.ArgumentParserResults results;
 			try {
@@ -362,34 +362,55 @@ public class AliasCore {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
 						+ CommandHelperFileLocations.getDefault().getProfilerConfigFile().getName() + " you should set this to false, except during development.", Target.UNKNOWN);
 			}
-			
-			// Allow new-style extensions know we are about to reload aliases.
-			ExtensionManager.PreReloadAliases(reloadGlobals, reloadTimeouts, 
-				reloadExecutionQueue, reloadPersistenceConfig, true, // TODO: This should be an object, not a bunch of booleans
-				reloadProfiler, reloadScripts, reloadExtensions);    // and this hardcoded true should be removed then.
- 
-			StaticLayer.GetConvertor().runShutdownHooks();
-			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
-			
-			//Clear out the data source cache
-			DataSourceFactory.DisconnectAll();
-			
-			PacketJumper.startup();
-			
-			if (reloadExtensions) {
-				ExtensionManager.Startup();
-			}
-			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
+
 			if (parent.profiler == null || reloadProfiler) {
 				parent.profiler = new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
 			}
+
+			ProfilePoint extensionPreReload = parent.profiler.start("Extension PreReloadAliases call", LogLevel.VERBOSE);
+			try {
+				// Allow new-style extensions know we are about to reload aliases.
+				ExtensionManager.PreReloadAliases(reloadGlobals, reloadTimeouts,
+					reloadExecutionQueue, reloadPersistenceConfig, true, // TODO: This should be an object, not a bunch of booleans
+					reloadProfiler, reloadScripts, reloadExtensions);    // and this hardcoded true should be removed then.
+			} finally {
+				extensionPreReload.stop();
+			}
+
+			ProfilePoint shutdownHooks = parent.profiler.start("Shutdown hooks call", LogLevel.VERBOSE);
+			try {
+				StaticLayer.GetConvertor().runShutdownHooks();
+			} finally {
+				shutdownHooks.stop();
+			}
+			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
+
+			//Clear out the data source cache
+			DataSourceFactory.DisconnectAll();
+
+			PacketJumper.startup();
+
+			if (reloadExtensions) {
+				ProfilePoint extensionManagerStartup = parent.profiler.start("Extension manager startup", LogLevel.VERBOSE);
+				try {
+					ExtensionManager.Startup();
+				} finally {
+					extensionManagerStartup.stop();
+				}
+			}
+			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
 			if (parent.persistenceNetwork == null || reloadPersistenceConfig) {
-				MemoryDataSource.ClearDatabases();
-				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-				parent.persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
-						new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
-						.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
+				ProfilePoint persistenceConfigReload = parent.profiler.start("Reloading persistence configuration", LogLevel.VERBOSE);
+				try {
+					MemoryDataSource.ClearDatabases();
+					ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
+					options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
+					parent.persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+							new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
+							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
+				} finally {
+					persistenceConfigReload.stop();
+				}
 			}
 			GlobalEnv gEnv;
 			try {
@@ -401,15 +422,30 @@ public class AliasCore {
 				return;
 			}
 			if (reloadExecutionQueue) {
-				parent.executionQueue.stopAllNow();
+				ProfilePoint stoppingExecutionQueue = parent.profiler.start("Stopping execution queues", LogLevel.VERBOSE);
+				try {
+					parent.executionQueue.stopAllNow();
+				} finally {
+					stoppingExecutionQueue.stop();
+				}
 			}
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 			Environment env = Environment.createEnvironment(gEnv, cEnv);
 			if (reloadGlobals) {
-				Globals.clear();
+				ProfilePoint clearingGlobals = parent.profiler.start("Clearing globals", LogLevel.VERBOSE);
+				try {
+					Globals.clear();
+				} finally {
+					clearingGlobals.stop();
+				}
 			}
 			if (reloadTimeouts) {
-				Scheduling.ClearScheduledRunners();
+				ProfilePoint clearingTimeouts = parent.profiler.start("Clearing timeouts/intervals", LogLevel.VERBOSE);
+				try {
+					Scheduling.ClearScheduledRunners();
+				} finally {
+					clearingTimeouts.stop();
+				}
 			}
 			if (!aliasConfig.exists()) {
 				aliasConfig.getParentFile().mkdirs();
@@ -442,16 +478,26 @@ public class AliasCore {
 			}
 
 			if (reloadScripts) {
-				EventUtils.UnregisterAll();
-				ExtensionManager.RunHooks();
+				ProfilePoint unregisteringEvents = parent.profiler.start("Unregistering events", LogLevel.VERBOSE);
+				try {
+					EventUtils.UnregisterAll();
+				} finally {
+					unregisteringEvents.stop();
+				}
+				ProfilePoint runningExtensionHooks = parent.profiler.start("Running event hooks", LogLevel.VERBOSE);
+				try {
+					ExtensionManager.RunHooks();
+				} finally {
+					runningExtensionHooks.stop();
+				}
 				IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
 				Static.getServer().getMessenger().closeAllChannels(); // Close all channel messager channels registered by CH.
-				
+
 				scripts = new ArrayList<Script>();
 
 				LocalPackage localPackages = new LocalPackage();
 
-				//Run the main file once           
+				//Run the main file once
 				String main = file_get_contents(mainFile.getAbsolutePath());
 				localPackages.appendMS(main, mainFile);
 
@@ -489,8 +535,13 @@ public class AliasCore {
 						+ " errors will occur, unless you try to use an Economy function.");
 			}
 		}
-		
-		ExtensionManager.PostReloadAliases();
+
+		ProfilePoint postReloadAliases = parent.profiler.start("Extension manager post reload aliases", LogLevel.VERBOSE);
+		try {
+			ExtensionManager.PostReloadAliases();
+		} finally {
+			postReloadAliases.stop();
+		}
 	}
 
 	/**
