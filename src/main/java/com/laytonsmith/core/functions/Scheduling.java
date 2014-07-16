@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.Range;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -50,8 +51,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -642,7 +641,6 @@ public class Scheduling {
 		private static Thread cronThread = null;
 		private static final Object cronThreadLock = new Object();
 		private static final Map<Integer, CronFormat> cronJobs = new HashMap<Integer, CronFormat>();
-		private static boolean stopCron = false;
 		private static final AtomicInteger jobIDs = new AtomicInteger(1);
 
 		/**
@@ -693,13 +691,16 @@ public class Scheduling {
 			synchronized(cronThreadLock){
 				if(cronThread == null){
 					final DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
-					stopCron = false;
+					final MutableObject<Boolean> stopCron = new MutableObject<>(false);
 					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
 						@Override
 						public void run() {
 							cronThread = null;
-							stopCron = true;
+							stopCron.setObject(true);
+							synchronized(cronJobs){
+								cronJobs.clear();
+							}
 							synchronized(cronThreadLock){
 								cronThreadLock.notifyAll();
 							}
@@ -710,7 +711,7 @@ public class Scheduling {
 						@Override
 						public void run() {
 							long lastMinute = 0;
-							while(!stopCron){
+							while(!stopCron.getObject()){
 								//We want to check to make sure that we only run once per minute, even though the
 								//checks happen every second. This ensures that we have a fast enough sampling
 								//period, while ensuring that we don't repeat tasks within the same minute.
