@@ -4,6 +4,8 @@ import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
+import com.laytonsmith.abstraction.MCFireworkBuilder;
+import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.MCFurnaceRecipe;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -21,6 +23,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -361,7 +364,7 @@ public class ObjectGenerator {
     }
 
 	public Construct itemMeta(MCItemStack is, Target t) {
-		Construct ret, display, lore, color, title, author, pages, owner, stored;
+		Construct ret, display, lore, color, title, author, pages, owner, stored, firework;
 		CArray enchants, effects;
 		if (!is.hasItemMeta()) {
 			ret = CNull.NULL;
@@ -381,6 +384,35 @@ public class ObjectGenerator {
 			} else {
 				lore = CNull.NULL;
 			}
+
+			if(meta instanceof MCFireworkMeta){
+				firework = CArray.GetAssociativeArray(t);
+				CArray cf = (CArray) firework;
+				MCFireworkMeta mcfm = (MCFireworkMeta) meta;
+				cf.set("strength", new CInt(mcfm.getStrength(), t), t);
+				cf.set("flicker", CBoolean.get(mcfm.getFlicker()), t);
+				cf.set("trail", CBoolean.get(mcfm.getTrail()), t);
+				MCFireworkType type = mcfm.getType();
+				if(type != null){
+					cf.set("type", new CString(mcfm.getType().name(), t), t);
+				} else {
+					cf.set("type", CNull.NULL, t);
+				}
+				CArray colors = new CArray(t);
+				for(MCColor c : mcfm.getColors()){
+					colors.push(ObjectGenerator.GetGenerator().color(c, t));
+				}
+				cf.set("colors", colors, t);
+				CArray fadeColors = new CArray(t);
+				for(MCColor c : mcfm.getFadeColors()){
+					fadeColors.push(ObjectGenerator.GetGenerator().color(c, t));
+				}
+				cf.set("fade", fadeColors, t);
+			} else {
+				firework = CNull.NULL;
+			}
+			ma.set("firework", firework, t);
+
 			enchants = enchants(meta.getEnchants(), t);
 			ma.set("display", display, t);
 			ma.set("lore", lore, t);
@@ -471,6 +503,10 @@ public class ObjectGenerator {
 						throw new Exceptions.FormatException("Lore was expected to be an array.", t);
 					}
 				}
+				
+				// TODO:
+				// Need to add firework meta handling here
+
 				if (ma.containsKey("enchants")) {
 					Construct enchants = ma.get("enchants", t);
 					if (enchants instanceof CArray) {

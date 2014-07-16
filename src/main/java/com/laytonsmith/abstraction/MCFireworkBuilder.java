@@ -8,14 +8,14 @@ import com.laytonsmith.abstraction.enums.MCFireworkType;
 
 /**
  *
- * 
+ *
  */
 public interface MCFireworkBuilder {
-	
+
 	/**
 	 * Sets whether or not this firework has a flicker
 	 * @param flicker
-	 * @return 
+	 * @return
 	 */
 	MCFireworkBuilder setFlicker(boolean flicker);
 	/**
@@ -25,33 +25,33 @@ public interface MCFireworkBuilder {
 	/**
 	 * Adds a primary color
 	 * @param color
-	 * @return 
+	 * @return
 	 */
 	MCFireworkBuilder addColor(MCColor color);
 	/**
 	 * Adds a secondary color
 	 * @param color
-	 * @return 
+	 * @return
 	 */
 	MCFireworkBuilder addFadeColor(MCColor color);
 	/**
 	 * Sets the launch strength of the firework
 	 * @param i
-	 * @return 
+	 * @return
 	 */
 	MCFireworkBuilder setStrength(int i);
-	
+
 	/**
 	 * Sets the firework type of the firework.
 	 * @param type
-	 * @return 
+	 * @return
 	 */
 	MCFireworkBuilder setType(MCFireworkType type);
 	/**
 	 * Launches the firework from the specified location, upward.
-	 * @param l 
+	 * @param l
 	 * @return entityID of the firework
 	 */
 	int launch(MCLocation l);
-	
+
 }

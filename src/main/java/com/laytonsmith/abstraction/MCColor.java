@@ -10,10 +10,10 @@ import java.util.Map;
 
 /**
  *
- * 
+ *
  */
 public interface MCColor {
-	
+
 	/**
      * White, or (0xFF,0xFF,0xFF) in (R,G,B)
      */
@@ -98,29 +98,29 @@ public interface MCColor {
      * Orange, or (0xFF,0xA5,0x00) in (R,G,B)
      */
     public static final MCColor ORANGE = StaticLayer.GetConvertor().GetColor(0xFF, 0xA5, 0x00);
-	
+
 	/**
 	 * A mapping of string color name values to the standard MCColor objects.
 	 * Note that the map is immutable, so any attempts to write to it will fail.
 	 */
 	public static final Map<String, MCColor> STANDARD_COLORS = Internal.buildColors();
-	
+
 	int getRed();
 	int getGreen();
 	int getBlue();
-	
+
 	/**
 	 * Returns a NEW instance of a color, given the specified RGB values.
 	 * @param red
 	 * @param green
 	 * @param blue
-	 * @return 
+	 * @return
 	 */
 	MCColor build(int red, int green, int blue);
-	
+
 	static class Internal {
 		private static Map<String, MCColor> buildColors(){
-			Map<String, MCColor> map = new HashMap<String, MCColor>();
+			Map<String, MCColor> map = new HashMap<>();
 			map.put("AQUA", AQUA);
 			map.put("BLACK", BLACK);
 			map.put("BLUE", BLUE);
@@ -142,5 +142,5 @@ public interface MCColor {
 			return Collections.unmodifiableMap(map);
 		}
 	}
-	
+
 }
