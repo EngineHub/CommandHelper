@@ -25,7 +25,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import org.bukkit.event.Cancellable;
 
 /**
- * 
+ *
  */
 public class Sandbox {
 
@@ -120,7 +120,7 @@ public class Sandbox {
 //            return CVoid.VOID;
 //        }
 //    }
-        
+
 
     @api(environments={CommandHelperEnvironment.class})
     public static class super_cancel extends AbstractFunction {
@@ -376,17 +376,17 @@ public class Sandbox {
             return CHVersion.V3_3_0;
         }
     }
-	
+
 	@api
 	@hide("This is an easter egg.")
-	public static class moo extends DummyFunction{
+	public static class moo extends DummyFunction {
 
 		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{1};
 		}
 
-		
+
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String saying = args[0].val();
@@ -395,7 +395,7 @@ public class Sandbox {
 				divider += "-";
 			}
 			return new CString(divider + "\n"
-				+ "| " + saying + " |\n" 
+				+ "| " + saying + " |\n"
 				+ divider + "\n"
 				+ " \\   ^__^\n"
 				+ "  \\  (oo)\\_______\n"
@@ -403,6 +403,35 @@ public class Sandbox {
 				+ "         ||----w |\n"
 				+ "         ||     ||\n", t);
 		}
-		
+
+	}
+
+	@api
+	@hide("This is an easter egg.")
+	public static class moo2 extends DummyFunction {
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String saying = args[0].val();
+			String divider = "";
+			for(int i = 0; i < saying.length() + 4; i++){
+				divider += "-";
+			}
+			return new CString(
+				  "                     " + divider + "\n"
+				+ "                     | " + saying + " |\n"
+				+ "                     " + divider + "\n"
+				+ "              ^__^   /\n"
+				+ "      _______/(oo)  /\n"
+				+ " /\\/(        /(__)\n"
+				+ "      | w----||\n"
+				+ "      ||     ||\n", t);
+		}
+
 	}
 }
