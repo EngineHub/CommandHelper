@@ -25,6 +25,7 @@ import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.packetjumper.PacketJumper;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.MemoryDataSource;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -116,7 +117,8 @@ public class AliasCore {
 			gEnv = new GlobalEnv(parent.executionQueue, parent.profiler,
 					parent.persistenceNetwork, parent.permissionsResolver,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
+					new TaskManager());
 		} catch (IOException ex) {
 			Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
@@ -416,7 +418,8 @@ public class AliasCore {
 			try {
 				gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork, parent.permissionsResolver,
 						MethodScriptFileLocations.getDefault().getConfigDirectory(),
-						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
+						new TaskManager());
 			} catch (Profiles.InvalidProfileException ex) {
 				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;

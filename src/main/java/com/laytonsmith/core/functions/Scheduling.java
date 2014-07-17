@@ -33,6 +33,10 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.ProfilePoint;
+import com.laytonsmith.core.taskmanager.CoreTaskType;
+import com.laytonsmith.core.taskmanager.TaskManager;
+import com.laytonsmith.core.taskmanager.TaskState;
+import com.laytonsmith.core.taskmanager.TimeoutTaskHandler;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -50,6 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -347,16 +352,20 @@ public class Scheduling {
 
 		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+			final TaskManager taskManager = environment.getEnv(GlobalEnv.class).GetTaskManager();
 			long time = Static.getInt(args[0], t);
 			if (!(args[1] instanceof CClosure)) {
 				throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
 			}
 			final CClosure c = (CClosure) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
+			final AtomicBoolean isRunning = new AtomicBoolean(false);
 			ret.set(StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, new Runnable() {
 				@Override
 				public void run() {
+					isRunning.set(true);
 					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
+					taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.RUNNING);
 					try {
 						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 						try {
@@ -370,9 +379,24 @@ public class Scheduling {
 						//Ok
 					} catch (ProgramFlowManipulationException e) {
 						ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
+					} finally {
+						taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.FINISHED);
+						environment.getEnv(GlobalEnv.class).SetInterrupt(false);
 					}
 				}
 			}));
+			taskManager.addTask(new TimeoutTaskHandler(ret.get(), t, new Runnable() {
+
+				@Override
+				public void run() {
+					if(isRunning.get()){
+						new clear_task().exec(t, environment, new CInt(ret.get(), t));
+						environment.getEnv(GlobalEnv.class).SetInterrupt(true);
+						taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.KILLED);
+					}
+				}
+			}));
+			taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.IDLE);
 			return new CInt(ret.get(), t);
 		}
 

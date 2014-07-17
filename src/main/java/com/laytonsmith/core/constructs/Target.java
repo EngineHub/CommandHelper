@@ -6,7 +6,7 @@ import java.io.File;
  * A target allows code to be exactly identified in source. It contains the line
  * number, file, and column that this target represents.
  *
- * 
+ *
  */
 public class Target {
 
@@ -74,6 +74,7 @@ public class Target {
 
 	/**
 	 * Returns a string in the form: <code>absolute/path:0</code>
+	 * @return
 	 */
     @Override
     public String toString() {

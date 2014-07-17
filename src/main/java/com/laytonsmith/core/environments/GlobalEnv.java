@@ -15,6 +15,7 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.File;
 import java.util.ArrayList;
@@ -24,10 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A global environment is always available, and contains the objects that the
+ * A global environment is always available at runtime, and contains the objects that the
  * core functionality uses.
- *
- * 
  */
 public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
@@ -35,11 +34,11 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	//This makes some things "system wide", for instance, the uncaught
 	//exception handler should not be different for closures vs outside
 	//of closures. This only applies to things that can change during runtime
-	//via a script, and should be totally global. 
+	//via a script, and should be totally global.
 	//Anything else varies based on the particular needs of
 	//that field. Note that lists, maps, and other reference based objects don't
 	//need to use MutableObjects, as they are inherently Mutable themselves.
-	
+
 	private ExecutionQueue executionQueue = null;
 	private Profiler profiler = null;
 	//This is changed reflectively in a test, please don't rename.
@@ -59,6 +58,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private BoundEvent.ActiveEvent event = null;
 	private boolean interrupt = false;
 	private final List<ArrayAccess.ArrayAccessIterator> arrayAccessList = Collections.synchronizedList(new ArrayList<ArrayAccess.ArrayAccessIterator>());
+	private final MutableObject<TaskManager> taskManager = new MutableObject<>();
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
@@ -68,14 +68,16 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param resolver The PermissionsResolver to use
 	 * @param root The root working directory to use
 	 * @param profiles The SQL SQLProfiles object to use
+	 * @param taskManager The TaskManager object to use
 	 */
-	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network, PermissionsResolver resolver, 
-			File root, Profiles profiles) {
+	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network, PermissionsResolver resolver,
+			File root, Profiles profiles, TaskManager taskManager) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
 		Static.AssertNonNull(profiler, "Profiler cannot be null");
 		Static.AssertNonNull(network, "PersistenceNetwork cannot be null");
 		Static.AssertNonNull(resolver, "PermissionsResolver cannot be null");
 		Static.AssertNonNull(root, "Root file cannot be null");
+		Static.AssertNonNull(taskManager, "TaskManager cannot be null");
 		this.executionQueue = queue;
 		this.profiler = profiler;
 		this.persistenceNetwork = network;
@@ -85,6 +87,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 			((MethodScriptExecutionQueue) executionQueue).setEnvironment(this);
 		}
 		this.profiles = profiles;
+		this.taskManager.setObject(taskManager);
 	}
 
 	public ExecutionQueue GetExecutionQueue() {
@@ -101,6 +104,10 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	public PermissionsResolver GetPermissionsResolver() {
 		return permissionsResolver;
+	}
+
+	public TaskManager GetTaskManager(){
+		return taskManager.getObject();
 	}
 
 	/**
@@ -191,16 +198,16 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	/**
 	 * Gets the current working directory. It is guaranteed that this will be
 	 * a folder, not a file, and that it will not be null.
-	 * @return 
+	 * @return
 	 */
 	public File GetRootFolder() {
 		return root.getObject();
 	}
-	
+
 	/**
 	 * Sets the root working directory. It cannot be null, or a file, it
 	 * must be a directory.
-	 * @param file 
+	 * @param file
 	 * @throws NullPointerException If file is null
 	 * @throws IllegalArgumentException If the file specified is not a directory.
 	 */
@@ -263,26 +270,26 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public void SetLabel(String label) {
 		this.label = label;
 	}
-	
+
 	public DaemonManager GetDaemonManager(){
 		return daemonManager;
 	}
-	
+
 	/**
 	 * Turns dynamic scripting mode on or off. If this is true, that means
 	 * that the script came from a dynamic source, such as eval, or other sources
 	 * other than the file system.
-	 * @param dynamicScriptingMode 
+	 * @param dynamicScriptingMode
 	 */
 	public void SetDynamicScriptingMode(boolean dynamicScriptingMode){
 		this.dynamicScriptingMode = dynamicScriptingMode;
 	}
-	
+
 	/**
 	 * Returns whether or not dynamic script mode is on or off. If this is true, that means
 	 * that the script came from a dynamic source, such as eval, or other sources
 	 * other than the file system.
-	 * @return 
+	 * @return
 	 */
 	public boolean GetDynamicScriptingMode(){
 		return this.dynamicScriptingMode;
@@ -291,48 +298,48 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public Profiles getProfiles() {
 		return this.profiles;
 	}
-	
+
 	public void SetEvent(BoundEvent.ActiveEvent e){
         event = e;
     }
-    
+
     /**
      * Returns the active event, or null if not in scope.
-     * @return 
+     * @return
      */
     public BoundEvent.ActiveEvent GetEvent(){
         return event;
     }
-	
+
 	/**
 	 * Sets the interrupted flag. Interrupted scripts should halt immediately.
-	 * @param interrupted 
+	 * @param interrupted
 	 */
 	public synchronized void SetInterrupt(boolean interrupted){
 		interrupt = interrupted;
 	}
-	
+
 	/**
 	 * Returns true if this script has been interrupted, and should immediately halt execution.
-	 * @return 
+	 * @return
 	 */
 	public synchronized boolean IsInterrupted(){
 		return interrupt;
 	}
-	
+
 	/**
 	 * Returns the array access list. Note that the returned array is threadsafe,
 	 * though iteration over the list requires manual synchronization on the list.
-	 * @return 
+	 * @return
 	 */
 	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIterators(){
 		return arrayAccessList;
 	}
-	
+
 	/**
-	 * Returns a list of all ArrayAccessIterators for the specified array. 
+	 * Returns a list of all ArrayAccessIterators for the specified array.
 	 * @param array
-	 * @return 
+	 * @return
 	 */
 	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIteratorsFor(ArrayAccess array){
 		List<ArrayAccess.ArrayAccessIterator> list = new ArrayList<>();

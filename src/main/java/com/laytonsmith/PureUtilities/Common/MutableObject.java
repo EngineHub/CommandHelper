@@ -8,33 +8,33 @@ package com.laytonsmith.PureUtilities.Common;
  */
 public final class MutableObject<T> {
 	private T obj = null;
-	
+
 	/**
 	 * Constructs a new MutableObject, which is null.
 	 */
 	public MutableObject(){
-		
+
 	}
-	
+
 	/**
 	 * Constructs a new MutableObject, wrapping the specified object.
-	 * @param obj 
+	 * @param obj
 	 */
 	public MutableObject(T obj){
 		setObject(obj);
 	}
-	
+
 	/**
 	 * Sets the underlying object.
-	 * @param obj 
+	 * @param obj
 	 */
 	public void setObject(T obj){
 		this.obj = obj;
 	}
-	
+
 	/**
 	 * Gets the underlying object.
-	 * @return 
+	 * @return
 	 */
 	public T getObject(){
 		return obj;

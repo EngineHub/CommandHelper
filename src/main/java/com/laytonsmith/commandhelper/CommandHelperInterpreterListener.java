@@ -21,6 +21,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.taskmanager.TaskManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -40,18 +41,18 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  *
- * 
+ *
  */
 public class CommandHelperInterpreterListener implements Listener {
 
     private Set<String> interpreterMode = Collections.synchronizedSet(new HashSet<String>());
 	private CommandHelperPlugin plugin;
     Map<String, String> multilineMode = new HashMap<String, String>();
-    
+
     public boolean isInInterpreterMode(String player){
         return (interpreterMode.contains(player));
     }
-	
+
 	public CommandHelperInterpreterListener(CommandHelperPlugin plugin){
 		this.plugin = plugin;
 	}
@@ -60,7 +61,7 @@ public class CommandHelperInterpreterListener implements Listener {
     public void onPlayerChat(final AsyncPlayerChatEvent event) {
         if (interpreterMode.contains(event.getPlayer().getName())) {
             final MCPlayer p = new BukkitMCPlayer(event.getPlayer());
-            event.setCancelled(true);                    
+            event.setCancelled(true);
             StaticLayer.SetFutureRunnable(null, 0, new Runnable() {
 
 				@Override
@@ -142,7 +143,8 @@ public class CommandHelperInterpreterListener implements Listener {
 			gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler,
 					plugin.persistenceNetwork, plugin.permissionsResolver,
 					CommandHelperFileLocations.getDefault().getConfigDirectory(),
-					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
+					new TaskManager());
 		} catch (IOException ex) {
 			CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 			return;

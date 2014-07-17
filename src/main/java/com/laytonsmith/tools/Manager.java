@@ -27,6 +27,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.PermissionsResolver;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -35,7 +36,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.DataSource;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.DataSourceFactory;
@@ -76,13 +77,14 @@ public class Manager {
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(chDirectory);
-		persistenceNetwork = new PersistenceNetwork(CommandHelperFileLocations.getDefault().getPersistenceConfig(), 
+		persistenceNetwork = new PersistenceNetwork(CommandHelperFileLocations.getDefault().getPersistenceConfig(),
 				CommandHelperFileLocations.getDefault().getDefaultPersistenceDBFile().toURI(), options);
 		Installer.Install(chDirectory);
 		CHLog.initialize(chDirectory);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
-		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork, 
-				new PermissionsResolver.PermissiveResolver(), chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()));
+		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
+				new PermissionsResolver.PermissiveResolver(), chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
+				new TaskManager());
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 
@@ -504,7 +506,7 @@ public class Manager {
 			pl(RED + e.getMessage());
 		}
 	}
-	
+
 	public static void refactor(){
 		pl("This tool allows you to granularly move individual keys from one datasource to another."
 				+ " Unlike the merge tool, this works with individual keys, not necessarily keys that are"
@@ -640,7 +642,7 @@ public class Manager {
 			}
 		}
 	}
-	
+
 	public static void hiddenKeys(){
 		String action;
 		while(true){
@@ -753,11 +755,11 @@ public class Manager {
 			ex.printStackTrace(System.err);
 		}
 	}
-	
+
 	private static void pl(){
 		out.println();
 	}
-	
+
 	private static void pl(String string){
 		out.println(string + WHITE);
 	}
