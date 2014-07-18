@@ -490,17 +490,20 @@ public class ObjectGenerator {
 				}
 				if (ma.containsKey("lore")) {
 					Construct li = ma.get("lore", t);
+					if(li instanceof CString){
+						li = new CArray(t, li);
+					}
 					if (li instanceof CNull) {
 						//do nothing
 					} else if (li instanceof CArray) {
 						CArray la = (CArray) li;
-						List<String> ll = new ArrayList<String>();
+						List<String> ll = new ArrayList<>();
 						for (int j = 0; j < la.size(); j++) {
 							ll.add(la.get(j, t).val());
 						}
 						meta.setLore(ll);
 					} else {
-						throw new Exceptions.FormatException("Lore was expected to be an array.", t);
+						throw new Exceptions.FormatException("Lore was expected to be an array or a string.", t);
 					}
 				}
 
