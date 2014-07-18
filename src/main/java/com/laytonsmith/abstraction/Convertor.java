@@ -6,6 +6,8 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.functions.Exceptions;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -170,6 +172,16 @@ public interface Convertor {
 	 * @return
 	 */
 	public MCColor GetColor(int red, int green, int blue);
+
+	/**
+	 * Returns a color object given the color name. The color
+	 * name must come from the standard color types, or a
+	 * FormatException is thrown.
+	 * @param colorName
+	 * @param t
+	 * @return
+	 */
+	public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException;
 
 	/**
 	 * Returns an MCFirework which can be built.

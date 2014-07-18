@@ -1265,13 +1265,9 @@ public class Minecraft {
 
 		private List<MCColor> parseColor(CString cs, Target t){
 			String split[] = cs.val().split("\\|");
-			List<MCColor> colors = new ArrayList<MCColor>();
+			List<MCColor> colors = new ArrayList<>();
 			for(String s : split){
-				if(MCColor.STANDARD_COLORS.containsKey(s.toUpperCase())){
-					 colors.add(MCColor.STANDARD_COLORS.get(s.toUpperCase()));
-				} else {
-					throw new Exceptions.FormatException("Unknown color type: " + s, t);
-				}
+				 colors.add(StaticLayer.GetConvertor().GetColor(s, t));
 			}
 			return colors;
 		}

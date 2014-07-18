@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.AbstractConvertor;
+import com.laytonsmith.abstraction.ConvertorHelper;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommand;
@@ -70,6 +71,7 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.functions.Exceptions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -790,5 +792,10 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCPlugin GetPlugin() {
 		return new BukkitMCPlugin(CommandHelperPlugin.self);
+	}
+
+	@Override
+	public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+		return ConvertorHelper.GetColor(colorName, t);
 	}
 }

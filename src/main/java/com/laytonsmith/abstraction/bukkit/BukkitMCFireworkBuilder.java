@@ -17,6 +17,7 @@ import org.bukkit.Location;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
+import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 
 /**
@@ -77,6 +78,15 @@ public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 		fwmeta.setPower(strength);
 		fw.setFireworkMeta(fwmeta);
 		return fw.getEntityId();
+	}
+
+	@Override
+	public void createFireworkMeta(MCFireworkMeta meta) {
+		FireworkMeta m = ((BukkitMCFireworkMeta)meta).fm;
+		FireworkEffect fem = builder.build();
+		m.clearEffects();
+		m.addEffect(fem);
+		m.setPower(strength);
 	}
 
 

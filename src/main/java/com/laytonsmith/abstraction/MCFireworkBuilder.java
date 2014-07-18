@@ -54,4 +54,11 @@ public interface MCFireworkBuilder {
 	 */
 	int launch(MCLocation l);
 
+	/**
+	 * Given the entered builder data, create a firework meta with these attributes
+	 * for a given MCFireworkMeta
+	 * @return
+	 */
+	void createFireworkMeta(MCFireworkMeta meta);
+
 }

@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Convertor;
+import com.laytonsmith.abstraction.ConvertorHelper;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -62,6 +63,7 @@ import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.BasicLogic.equals;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import java.io.File;
@@ -811,6 +813,11 @@ public class StaticTest {
 		@Override
 		public MCPlugin GetPlugin() {
 			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+			return ConvertorHelper.GetColor(colorName, t);
 		}
 	}
 

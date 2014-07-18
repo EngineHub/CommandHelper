@@ -68,6 +68,7 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.File;
@@ -935,6 +936,11 @@ public final class Interpreter {
 		@Override
 		public MCPlugin GetPlugin() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 	}
 
