@@ -158,12 +158,17 @@ public abstract class AbstractFunction implements Function {
 			if (ccc instanceof CArray) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
-				b.append("<arrayNotShown>");
+				b.append("<arrayNotShown size:" + ((CArray)ccc).size() + ">");
 			} else if (ccc instanceof CClosure) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");
 			} else if (ccc instanceof CString) {
-				b.append("'").append(ccc.val().replace("\\", "\\\\").replace("'", "\\'")).append("'");
+				String val = ccc.val().replace("\\", "\\\\").replace("'", "\\'");
+				int max = 1000;
+				if(val.length() > max){
+					val = val.substring(0, max) + "... (" + (val.length() - max) + " more characters hidden)";
+				}
+				b.append("'").append(val).append("'");
 			} else if (ccc instanceof IVariable) {
 				b.append(((IVariable) ccc).getName());
 			} else {
