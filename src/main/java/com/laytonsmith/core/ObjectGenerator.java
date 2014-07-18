@@ -503,7 +503,7 @@ public class ObjectGenerator {
 						throw new Exceptions.FormatException("Lore was expected to be an array.", t);
 					}
 				}
-				
+
 				// TODO:
 				// Need to add firework meta handling here
 
@@ -600,7 +600,7 @@ public class ObjectGenerator {
 					}
 				}
 			} catch(Exception ex) {
-				throw new Exceptions.FormatException("Could not get ItemMeta from the given information.", t);
+				throw new Exceptions.FormatException("Could not get ItemMeta from the given information.", t, ex);
 			}
 		} else {
 			throw new Exceptions.FormatException("An array was expected but recieved " + c + " instead.", t);
