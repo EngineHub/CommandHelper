@@ -974,19 +974,18 @@ public class WorldEdit {
 			if ("__global__".equalsIgnoreCase(region)) {
 				newRegion = new GlobalProtectedRegion(region);
 			} else {
+				if (verticies.size() == 2) {
+					newRegion = new ProtectedCuboidRegion(region, verticies.get(0), verticies.get(1));
+				} else {
 
-				List<BlockVector> pointsCuboid = new ArrayList<>();
-				List<BlockVector2D> pointsPoly = new ArrayList<>();
-				int minY = 0;
-				int maxY = 0;
+					List<BlockVector2D> pointsPoly = new ArrayList<>();
+					int minY = 0;
+					int maxY = 0;
 
-				for (int i = 0; i < verticies.size(); i++) {
+					for (int i = 0; i < verticies.size(); i++) {
 
-					BlockVector vector = verticies.get(i);
+						BlockVector vector = verticies.get(i);
 
-					if (verticies.size() == 2) {
-						pointsCuboid.add(vector);
-					} else {
 						int x = vector.getBlockX();
 						int y = vector.getBlockY();
 						int z = vector.getBlockZ();
@@ -1003,11 +1002,6 @@ public class WorldEdit {
 							}
 						}
 					}
-				}
-
-				if (verticies.size() == 2) {
-					newRegion = new ProtectedCuboidRegion(region, pointsCuboid.get(0), pointsCuboid.get(1));
-				} else {
 					newRegion = new ProtectedPolygonalRegion(region, pointsPoly, minY, maxY);
 				}
 
