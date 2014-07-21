@@ -2193,7 +2193,10 @@ public class DataHandling {
 	}
 
 	@api
-	public static class include extends AbstractFunction implements Optimizable {
+	public static class include extends AbstractFunction /*implements Optimizable*/ {
+		// Can't currently optimize this, because it depends on knowing whether or not
+		// we are in cmdline mode, which is included with the environment, which doesn't
+		// exist in optimizations yet.
 
 		@Override
 		public String getName() {
@@ -2251,21 +2254,22 @@ public class DataHandling {
 			return true;
 		}
 
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_CONSTANT
-			);
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			//We can't optimize per se, but if the path is constant, and the code is uncompilable, we
-			//can give a warning, and go ahead and cache the tree.
-			String path = args[0].val();
-			IncludeCache.get(new File(t.file().getParent(), path), t);
-			return null;
-		}
+//		@Override
+//		public Set<OptimizationOption> optimizationOptions() {
+//			return EnumSet.of(
+//					OptimizationOption.OPTIMIZE_CONSTANT
+//			);
+//		}
+//
+//		@Override
+//		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+//			//We can't optimize per se, but if the path is constant, and the code is uncompilable, we
+//			//can give a warning, and go ahead and cache the tree.
+//			String path = args[0].val();
+//			File file = Static.GetFileFromArgument(path, env, t, null);
+//			IncludeCache.get(file, t);
+//			return null;
+//		}
 	}
 
 	@api

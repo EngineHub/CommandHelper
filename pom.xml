@@ -720,6 +720,7 @@
 										<include>com/sk89q/worldguard/protection/regions/ProtectedPolygonalRegion.*</include>
 										<include>com/sk89q/worldguard/protection/flags/EnumFlag.*</include>
 										<include>com/sk89q/worldguard/protection/regions/ProtectedRegion$CircularInheritanceException*</include>
+										<include>com/sk89q/worldguard/protection/databases/ProtectionDatabaseException.*</include>
 									</includes>
 								</filter>
 								<!-- Profiler -->
