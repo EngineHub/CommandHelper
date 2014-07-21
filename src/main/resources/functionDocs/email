@@ -21,7 +21,7 @@ useful so that sensitive information isn't hardcoded. Here is an example profile
 <profile id="myEmailProfile">
 	<type>email</type>
 	<host>example.com</host>
-	<user>user@example.com</host>
+	<user>user@example.com</user>
 	<password>hunter2</password>
 	<port>12345</port>
 	<use_ssl>true</use_ssl>
