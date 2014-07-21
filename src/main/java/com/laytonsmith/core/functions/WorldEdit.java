@@ -44,6 +44,7 @@ import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
+import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.databases.RegionDBUtil;
 import com.sk89q.worldguard.protection.flags.BooleanFlag;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
@@ -822,115 +823,174 @@ public class WorldEdit {
         }
     }
 
-    @api
-    public static class sk_region_create extends SKFunction {
+	@api
+	public static class sk_region_create extends SKFunction {
 
 		@Override
-        public String getName() {
-            return "sk_region_create";
-        }
+		public String getName() {
+			return "sk_region_create";
+		}
 
 		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2, 3};
-        }
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
 
 		@Override
-        public String docs() {
-            return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])|[world], '__global__'}"
+		public String docs() {
+			return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])|[world], '__global__'}"
 					+ " Create region of the given name in the given world. You can omit list of points if you want to create a __global__ region.";
-        }
+		}
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
-        }
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
+		}
 
 		@Override
-        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Static.checkPlugin("WorldGuard", t);
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			Static.checkPlugin("WorldGuard", t);
 
-            World world = null;
-            String region;
+			MCWorld w = null;
+			String region;
+			CArray points;
+			List<BlockVector> verticies = new ArrayList<>();
 
-			if (args.length == 1) {
-                region = args[0].val();
+			if ((args.length == 3) || (args.length == 2 && "__global__".equalsIgnoreCase(args[1].val()))) {
 
-                MCPlayer m = null;
+				w = Static.getServer().getWorld(args[0].val());
+				region = args[1].val();
 
-                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-                }
-
-                if (m != null) {
-                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
-                }
+				if (w == null) {
+					throw new ConfigRuntimeException("The specified world \"" + args[0].val() + "\" is not a valid world.", ExceptionType.InvalidWorldException, t);
+				}
+			} else {
+				region = args[0].val();
 			}
-            if (args.length == 2 && "__global__".equalsIgnoreCase(args[1].val())) {
-                region = args[1].val();
-                world = Bukkit.getServer().getWorld(args[0].val());
+
+			if (!"__global__".equalsIgnoreCase(region)) {
+
+				if ((args.length == 1) || !(args[args.length - 1] instanceof CArray)) {
+					throw new ConfigRuntimeException("Pass an array of LocationArrays for a new region.", ExceptionType.PluginInternalException, t);
+				}
+
+				points = (CArray) args[args.length - 1];
+
+				if (points.isEmpty()) {
+					throw new ConfigRuntimeException("Expecting an array of LocationArrays but found none.", ExceptionType.PluginInternalException, t);
+				}
+
+				for (int i = 0; i < points.size(); i++) {
+
+					if (!(points.get(i, t) instanceof CArray)) {
+						throw new ConfigRuntimeException("LocationArrays must be arrays.", ExceptionType.PluginInternalException, t);
+					}
+
+					CArray point = (CArray) points.get(i, t);
+
+					if (point.size() >= 3) {
+
+						double x = 0;
+						double y = 0;
+						double z = 0;
+
+						if (!point.inAssociativeMode()) {
+							x = Static.getNumber(point.get(0, t), t);
+							y = Static.getNumber(point.get(1, t), t);
+							z = Static.getNumber(point.get(2, t), t);
+						}
+
+						if (point.containsKey("x")) {
+							x = Static.getNumber(point.get("x", t), t);
+						}
+						if (point.containsKey("y")) {
+							y = Static.getNumber(point.get("y", t), t);
+						}
+						if (point.containsKey("z")) {
+							z = Static.getNumber(point.get("z", t), t);
+						}
+
+						verticies.add(new BlockVector(x, y, z));
+					}
+				}
+
+				if (verticies.isEmpty()) {
+					throw new ConfigRuntimeException("Expecting an array of LocationArrays but found no valid Location arrays.", ExceptionType.PluginInternalException, t);
+				}
+				
+				if (w == null) {
+					for (int i = 0; i < points.size(); i++) {
+
+						CArray point = (CArray) points.get(i, t);
+
+						if (point.size() >= 4) {
+
+							MCWorld world = null;
+
+							if (!point.inAssociativeMode()) {
+								world = Static.getServer().getWorld(point.get(3, t).val());
+							}
+
+							if (point.containsKey("world")) {
+								world = Static.getServer().getWorld(point.get("world", t).val());
+							}
+							
+							if (world != null) {
+								if (w == null) {
+									w = world;
+								} else {
+									if (!w.equals(world)) {
+										throw new ConfigRuntimeException(String.format("Conflicting worlds in LocationArrays."
+												+ " (%s) & (%s)",w.getName(),world.getName()), ExceptionType.InvalidWorldException, t);
+									}
+								}
+							}
+						}
+					}
+				}
 			}
-			else if (args.length == 2) {
 
-                region = args[0].val();
+			if (w == null){
+				if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+				}
+			}
 
-                MCPlayer m = null;
+			if (w == null) {
+				throw new ConfigRuntimeException("No world specified.", ExceptionType.InvalidWorldException, t);
+			}
 
-                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-                }
+			RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(((BukkitMCWorld) w).__World());
 
-                if (m != null) {
-                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
-                }
-            } else {
-                region = args[1].val();
-                world = Bukkit.getServer().getWorld(args[0].val());
-            }
+			ProtectedRegion regionExists = mgr.getRegion(region);
 
-            if (world == null) {
-                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
-            }
+			if (regionExists != null) {
+				throw new ConfigRuntimeException(String.format("The region (%s) already exists in world (%s),"
+						+ " and cannot be created again.", region, w.getName()), ExceptionType.PluginInternalException, t);
+			}
 
-            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
-
-            ProtectedRegion regionExists = mgr.getRegion(region);
-
-            if (regionExists != null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) already exists in world (%s),"
-						+ " and cannot be created again.", region, world.getName()), ExceptionType.PluginInternalException, t);
-            }
-
-			ProtectedRegion newRegion = null;
+			ProtectedRegion newRegion;
 
 			if ("__global__".equalsIgnoreCase(region)) {
 				newRegion = new GlobalProtectedRegion(region);
 			} else {
+				if (verticies.size() == 2) {
+					newRegion = new ProtectedCuboidRegion(region, verticies.get(0), verticies.get(1));
+				} else {
 
-				if (args.length == 1 || !(args[args.length - 1] instanceof CArray)) {
-					throw new ConfigRuntimeException("Pass an array of points for a new region", ExceptionType.PluginInternalException, t);
-				}
+					List<BlockVector2D> pointsPoly = new ArrayList<>();
+					int minY = 0;
+					int maxY = 0;
 
-				List<BlockVector> points = new ArrayList<BlockVector>();
-				List<BlockVector2D> points2D = new ArrayList<BlockVector2D>();
+					for (int i = 0; i < verticies.size(); i++) {
 
+						BlockVector vector = verticies.get(i);
 
-				int minY = 0;
-				int maxY = 0;
+						int x = vector.getBlockX();
+						int y = vector.getBlockY();
+						int z = vector.getBlockZ();
 
-				CArray arg = (CArray) args[args.length - 1];
-
-				for (int i = 0; i < arg.size(); i++) {
-					MCLocation point = ObjectGenerator.GetGenerator().location(arg.get(i, t), null, t);
-
-					int x = point.getBlockX();
-					int y = point.getBlockY();
-					int z = point.getBlockZ();
-
-					if (arg.size() == 2) {
-						points.add(new BlockVector(x, y, z));
-					} else {
-						points2D.add(new BlockVector2D(x, z));
+						pointsPoly.add(new BlockVector2D(x, z));
 
 						if (i == 0) {
 							minY = maxY = y;
@@ -942,12 +1002,7 @@ public class WorldEdit {
 							}
 						}
 					}
-				}
-
-				if (arg.size() == 2) {
-					newRegion = new ProtectedCuboidRegion(region, points.get(0), points.get(1));
-				} else {
-					newRegion = new ProtectedPolygonalRegion(region, points2D, minY, maxY);
+					newRegion = new ProtectedPolygonalRegion(region, pointsPoly, minY, maxY);
 				}
 
 				if (newRegion == null) {
@@ -959,18 +1014,18 @@ public class WorldEdit {
 
 			try {
 				mgr.save();
-			} catch (Exception e) {
+			} catch (ProtectionDatabaseException e) {
 				throw new ConfigRuntimeException("Error while creating protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
-            return CVoid.VOID;
-        }
+			return CVoid.VOID;
+		}
 
-        @Override
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-    }
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 
     @api
     public static class sk_region_update extends SKFunction {
