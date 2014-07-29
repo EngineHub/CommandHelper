@@ -164,7 +164,7 @@ public class ArrayHandling {
 						if (finish < 0) {
 							finish = ca.size() + finish;
 						}
-						CArray na = new CArray(t);
+						CArray na = ca.createNew(t);
 						if (finish < start) {
 							//return an empty array in cases where the indexes don't make sense
 							return na;

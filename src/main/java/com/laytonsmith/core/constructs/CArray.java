@@ -11,6 +11,8 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A class that represents a dynamic array.
@@ -653,6 +657,28 @@ public class CArray extends Construct implements ArrayAccess{
 			}
 		}
 		regenValue(new HashSet<CArray>());
+	}
+
+	/**
+	 * Creates a new, empty array, with the same type. Note to subclasses: By default,
+	 * this method expects a constructor that accepts a {@link Target}. If this assumption
+	 * is not valid, you may override this method as needed.
+	 * @param t
+	 * @return
+	 */
+	public CArray createNew(Target t){
+		try {
+			Constructor<CArray> con = (Constructor<CArray>) this.getClass().getConstructor(Target.class);
+			try {
+				return con.newInstance(t);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+				throw new RuntimeException(ex);
+			}
+		} catch (NoSuchMethodException ex) {
+			throw new RuntimeException(this.typeof() + " does not support creating a new value.");
+		} catch (SecurityException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
     private Comparator<String> comparator = new Comparator<String>(){

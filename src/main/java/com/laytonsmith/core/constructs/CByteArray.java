@@ -15,11 +15,11 @@ import java.util.SortedMap;
 
 /**
  *
- * 
+ *
  */
 @typeof("byte_array")
-public class CByteArray extends Construct implements Sizable, ArrayAccess {
-	
+public class CByteArray extends CArray implements Sizable, ArrayAccess {
+
 	/**
 	 * Initial size of the ByteBuffer
 	 */
@@ -28,14 +28,14 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	 * How much to scale the ByteBuffer by when re-allocating
 	 */
 	private static final int scaleMultiplier = 2;
-	
+
 	/**
 	 * Creates a new CByteArray, wrapping the given byte buffer. It is important
 	 * to note that it is NOT copied, but is instead simply wrapped, meaning changes to the
 	 * underlying byte array will be reflected in the CByteArray created, and vice versa.
 	 * @param b
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static CByteArray wrap(byte[] b, Target t){
 		CByteArray ba = new CByteArray(t, 0);
@@ -43,27 +43,28 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 		ba.maxValue = b.length;
 		return ba;
 	}
-	
+
 	private ByteBuffer data;
 	private int maxValue = 0;
 	private String value = null;
-	
+
 	/**
 	 * Creates a new, empty CByteArray, with initial capacity 1024.
-	 * @param t 
+	 * @param t
 	 */
 	public CByteArray(Target t){
 		this(t, initialSize);
 	}
-	
+
 	/**
 	 * Creates a new, empty CByteArray, with initial capacity set as
 	 * specified.
 	 * @param t
-	 * @param capacity 
+	 * @param capacity
 	 */
 	public CByteArray(Target t, int capacity){
-		super("", ConstructType.BYTE_ARRAY, t);
+		super(t, initialSize);
+		//super("", ConstructType.BYTE_ARRAY, t);
 		data = ByteBuffer.allocate(capacity);
 	}
 
@@ -71,7 +72,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	public boolean isDynamic() {
 		return true;
 	}
-	
+
 	private void checkSize(int need, Integer pos){
 		//set our max position
 		int spos = pos == null ? data.position() : pos;
@@ -107,14 +108,14 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 		}
 		return value;
 	}
-	
+
 	/**
 	 * Resets the position to zero on this byte array.
 	 */
 	public void rewind(){
 		data.rewind();
 	}
-	
+
 	/**
 	 * Writes a java byte into the array.
 	 * @param b The data to write.
@@ -127,7 +128,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 		}
 		data.put(b);
 	}
-	
+
 	/**
 	 * Writes a java char into the array.
 	 * @param c The data to write.
@@ -141,7 +142,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			data.putChar(pos, c);
 		}
 	}
-	
+
 	/**
 	 * Writes a java double into the array.
 	 * @param d The data to write.
@@ -155,7 +156,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			data.putDouble(pos, d);
 		}
 	}
-	
+
 	/**
 	 * Writes a java float into the array.
 	 * @param f The data to write.
@@ -169,7 +170,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			data.putFloat(pos, f);
 		}
 	}
-	
+
 	/**
 	 * Writes a java int into the array.
 	 * @param i The data to write.
@@ -183,7 +184,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			data.putInt(pos, i);
 		}
 	}
-	
+
 	/**
 	 * Writes a java long into the array.
 	 * @param l The data to write.
@@ -197,7 +198,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			data.putLong(pos, l);
 		}
 	}
-	
+
 	/**
 	 * Writes a java short into the array.
 	 * @param s The data to write.
@@ -211,11 +212,11 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			data.putShort(pos, s);
 		}
 	}
-	
+
 	/**
 	 * Reads a java byte from this array, and advances the position.
 	 * @param pos The position to read from, or null to read from the current position.
-	 * @return 
+	 * @return
 	 */
 	public byte getByte(Integer pos){
 		if(pos == null){
@@ -224,11 +225,11 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			return data.get(pos);
 		}
 	}
-	
+
 	/**
 	 * Reads a java char from this array, and advances the position.
 	 * @param pos The position to read from, or null to read from the current position.
-	 * @return 
+	 * @return
 	 */
 	public char getChar(Integer pos){
 		if(pos == null){
@@ -237,11 +238,11 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			return data.getChar(pos);
 		}
 	}
-	
+
 	/**
 	 * Reads a java double from this array, and advances the position.
 	 * @param pos The position to read from, or null to read from the current position.
-	 * @return 
+	 * @return
 	 */
 	public double getDouble(Integer pos){
 		if(pos == null){
@@ -250,11 +251,11 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			return data.getDouble(pos);
 		}
 	}
-	
+
 	/**
 	 * Reads a java float from this array, and advances the position.
 	 * @param pos The position to read from, or null to read from the current position.
-	 * @return 
+	 * @return
 	 */
 	public float getFloat(Integer pos){
 		if(pos == null){
@@ -263,11 +264,11 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			return data.getFloat(pos);
 		}
 	}
-	
+
 	/**
 	 * Reads a java int from this array, and advances the position.
 	 * @param pos The position to read from, or null to read from the current position.
-	 * @return 
+	 * @return
 	 */
 	public int getInt(Integer pos){
 		if(pos == null){
@@ -276,11 +277,11 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			return data.getInt(pos);
 		}
 	}
-	
+
 	/**
 	 * Reads a java long from this array, and advances the position.
 	 * @param pos The position to read from, or null to read from the current position.
-	 * @return 
+	 * @return
 	 */
 	public long getLong(Integer pos){
 		if(pos == null){
@@ -293,7 +294,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	/**
 	 * Reads a java short from this array, and advances the position.
 	 * @param pos The position to read from, or null to read from the current position.
-	 * @return 
+	 * @return
 	 */
 	public short getShort(Integer pos){
 		if(pos == null){
@@ -302,7 +303,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			return data.getShort(pos);
 		}
 	}
-	
+
 	/**
 	 * Writes another CByteArray into the array.
 	 * @param d The data to write.
@@ -311,7 +312,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	public void putBytes(CByteArray d, Integer pos){
 		putBytes(d.asByteArrayCopy(), pos);
 	}
-	
+
 	/**
 	 * Writes a java byte[] into the array.
 	 * @param d The data to write.
@@ -324,13 +325,13 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 		}
 		data.put(d);
 	}
-	
+
 	/**
 	 * Returns a byte array, of the given size, read from pos, or
 	 * the current position, if null.
 	 * @param size
 	 * @param pos
-	 * @return 
+	 * @return
 	 */
 	public CByteArray getBytes(int size, Integer pos){
 		CByteArray ba = new CByteArray(this.getTarget(), 0);
@@ -342,32 +343,32 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 		ba.data = ByteBuffer.wrap(d);
 		return ba;
 	}
-	
+
 	/**
 	 * Returns the current size of the byte array. This is not to be confused with the
 	 * capacity.
-	 * @return 
+	 * @return
 	 */
 	@Override
 	public long size(){
 		return maxValue;
 	}
-	
+
 	/**
 	 * Returns the maximum size of the underlying data before it would have to be
 	 * resized to add more data. This is not to be confused with the size.
-	 * @return 
+	 * @return
 	 */
 	public int capacity(){
 		return data.capacity();
 	}
-	
+
 	//Supplemental methods
 	/**
 	 * Writes out a UTF-8 encoded string to the buffer. First, it writes out
 	 * a short representing the length of the string.
 	 * @param string
-	 * @param pos 
+	 * @param pos
 	 * @param encoding Defaults to UTF-8 if null, but may be specified otherwise
 	 * @throws IndexOutOfBoundsException If the length of the string is greater than 65536 bytes.
 	 * @throws java.io.UnsupportedEncodingException
@@ -389,14 +390,14 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 		data.putShort((short)array.length);
 		data.put(array);
 	}
-	
+
 	/**
-	 * Reads in a UTF-8 encoded string. It is assumed that 
+	 * Reads in a UTF-8 encoded string. It is assumed that
 	 * the string begins with a 16 bit length marker.
 	 * @param pos
 	 * @param encoding If null, defaults to UTF-8, but may be specified directly.
-	 * @return 
-	 * @throws java.io.UnsupportedEncodingException 
+	 * @return
+	 * @throws java.io.UnsupportedEncodingException
 	 */
 	public String readUTF8String(Integer pos, String encoding) throws UnsupportedEncodingException {
 		if(pos != null){
@@ -409,7 +410,7 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 		data.get(array);
 		return new String(array, encoding);
 	}
-	
+
 	/**
 	 * Returns a new read only CArray object with integers at each index,
 	 * representing the underlying byte array. They are not linked. This
@@ -418,28 +419,23 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	 * fully functional array that way. The backing for the CArray is independant
 	 * of this CByteArray (it is a new copy).
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public CArray asArray(Target t){
 		return new CArrayByteBacking(asByteArrayCopy(), t);
 	}
-	
+
 	/**
 	 * Returns a copy of this CByteArray, as a Java byte array, at this
 	 * point in time. This is meant to be used as the final step before sending the
 	 * data off to an external process, or when interfacing mscript with other POJO code.
-	 * @return 
+	 * @return
 	 */
 	public byte[] asByteArrayCopy(){
 		byte[] src = data.array();
 		byte[] dest = new byte[maxValue];
 		System.arraycopy(src, 0, dest, 0, maxValue);
 		return dest;
-	}
-
-	@Override
-	public Construct get(String index, Target t) throws ConfigRuntimeException {
-		return get(Integer.parseInt(index), t);
 	}
 
 	@Override
@@ -450,12 +446,6 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	@Override
 	public Construct slice(int begin, int end, Target t) {
 		return getBytes(end - begin, begin);
-	}
-
-	@Override
-	public Construct get(int index, Target t) throws ConfigRuntimeException {
-		byte b = getByte(index);
-		return new CInt(b, t);
 	}
 
 	@Override
@@ -471,9 +461,10 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 	@Override
 	public Construct get(Construct index, Target t) throws ConfigRuntimeException {
 		int i = Static.getInt32(index, t);
-		return get(i, t);
+		byte b = getByte(i);
+		return new CInt(b, t);
 	}
-	
+
 	/**
 	 * This is a more efficient implementation of CArray for the backing byte arrays.
 	 */
@@ -543,13 +534,13 @@ public class CByteArray extends Construct implements Sizable, ArrayAccess {
 			//This is even more serious, because it shouldn't ever happen.
 			throw new Error("This error should not happen. Please report this bug to the developers");
 		}
-		
+
 		public class ROException extends ConfigRuntimeException{
 			public ROException(){
 				super("Arrays copied from ByteArrays are read only", Exceptions.ExceptionType.ReadOnlyException, CArrayByteBacking.this.getTarget());
 			}
 		}
-		
+
 	}
-	
+
 }
