@@ -20,6 +20,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
@@ -70,7 +71,7 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
+			if (args[0] instanceof CArray && !(args[0] instanceof CMutablePrimitive)) {
 				return new CInt(((CArray) args[0]).size(), t);
 			}
 			throw new ConfigRuntimeException("Argument 1 of array_size must be an array", ExceptionType.CastException, t);

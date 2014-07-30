@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
@@ -592,6 +593,9 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
 				}
+				if(v.ival() instanceof CMutablePrimitive){
+					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
+				}
 				v = new IVariable(v.getName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
@@ -705,6 +709,9 @@ public class Math {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
+				}
+				if(v.ival() instanceof CMutablePrimitive){
+					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
 				Construct oldVal = null;
 				try {
@@ -833,6 +840,9 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
 				}
+				if(v.ival() instanceof CMutablePrimitive){
+					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
+				}
 				v = new IVariable(v.getName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
@@ -947,6 +957,9 @@ public class Math {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
+				}
+				if(v.ival() instanceof CMutablePrimitive){
+					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
 				Construct oldVal = null;
 				try {

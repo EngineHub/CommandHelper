@@ -30,6 +30,7 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
@@ -3598,6 +3599,114 @@ public class DataHandling {
 		public Boolean runAsync() {
 			return null;
 		}
+	}
+
+	/**
+	 * For now, this feature works as is. However, I'm debating on whether or not I should just override assign() instead.
+	 * The only issue with this is that if assign is overwritten, then a mutable_primitive will be "stuck" in the variable.
+	 * So if later you wanted to make a value not a mutable primitive, there would be no way to do so. Another method could
+	 * be introduced to "clear" the value out, but then there would be no way to tell if the value were actually mutable or
+	 * not, so a third function would have to be added. The other point of concern is how to handle typeof() for a CMutablePrimitive.
+	 * Should it return the underlying type, or mutable_primitive? If assignments are "sticky", then it would make sense to have
+	 * it return the underlying type, but there's an issue with that, because then typeof wouldn't be useable for debug type
+	 * situations. Given all these potential issues, it is still hidden, but available for experimental cases.
+	 */
+	@api
+	@hide("This is still experimental")
+	public static class mutable_primitive extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Construct val = CNull.NULL;
+			if(args.length > 0){
+				val = args[0];
+			}
+			return new CMutablePrimitive(val, t);
+		}
+
+		@Override
+		public String getName() {
+			return "mutable_primitive";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "mutable_primitive {[primitive_value]} Creates a mutable primitive object, initially setting the value of the object to"
+					+ " null, or the specified value. The value must be a primitive value, and cannot be an array or object. ----"
+					+ " The underlying primitive value is used in all cases where a value can be inferred. In all other cases, you must convert"
+					+ " the primitive to the desired type, e.g. double(@mutable_primitive). Mutable primitives work like an array as well,"
+					+ " in some cases, but not others. In general, setting of the underlying values may be done with array_push(). Assigning"
+					+ " a new value to the variable works the same as assigning a new value to any other value, it overwrites the value with"
+					+ " the new type. Most array functions will work with the mutable primitive, however, they will return useless data, for"
+					+ " instance, array_resize() will simply set the value to the default value shown. array_size() is an exception to this"
+					+ " rule, it will not work, and will throw an exception. See the examples for more use cases. In general, this is meant"
+					+ " as a convenience feature for values that are passed to closures or procs, but should be passed by reference. Cloning the"
+					+ " mutable primitive with the array clone operation creates a distinct copy.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "@val = mutable_primitive(0);\n"
+						+ "msg('typeof: ' . typeof(@val));\n"
+						+ "msg('value: ' . @val);\n"
+						+ "msg('@val + 5: ' . (@val + 5)); // Works as if it were a primitive with most functions\n"
+						+ "(++@val); // As a special exception to how assignments work, increment/decrement works as well\n"
+						+ "msg(@val); // 1\n"),
+				new ExampleScript("Basic usage with procs", "proc(_testWithMutable, @a){\n"
+						+ "\t@a[] = 5;\n"
+						+ "}\n\n"
+						+ ""
+						+ "proc(_testWithoutMutable, @a){\n"
+						+ "\t@a = 10;\n"
+						+ "}\n\n"
+						+ ""
+						+ "@a = mutable_primitive(0);\n"
+						+ "msg(@a); // The value starts out as 0\n"
+						+ "_testWithMutable(@a); // This will actually change the value\n"
+						+ "msg(@a); // Here, the value is 5\n"
+						+ "_testWithoutMutable(@a); // This will not change the value\n"
+						+ "msg(@a); // Still teh value is 5\n"),
+				new ExampleScript("Basic usage with closure", "@a = mutable_primitive(0);\n"
+						+ "execute(closure(){\n"
+						+ "\t@a++;\n"
+						+ "});\n"
+						+ "msg(@a); // 1\n"),
+				new ExampleScript("Cloning the value", "@a = mutable_primitive(0);\n"
+						+ "@b = @a[];\n"
+						+ "@a[] = 5;\n"
+						+ "msg(@a);\n"
+						+ "msg(@b);\n")
+			};
+		}
+
+
+
 	}
 
 }

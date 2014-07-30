@@ -6,6 +6,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -126,6 +127,9 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static double getNumber(Construct c, Target t) {
+		if(c instanceof CMutablePrimitive){
+			c = ((CMutablePrimitive)c).get();
+		}
 		double d;
 		if (c == null || c instanceof CNull) {
 			return 0.0;
@@ -162,6 +166,9 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static double getDouble(Construct c, Target t) {
+		if(c instanceof CMutablePrimitive){
+			c = ((CMutablePrimitive)c).get();
+		}
 		try {
 			return getNumber(c, t);
 		} catch (ConfigRuntimeException e) {
@@ -181,6 +188,9 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static float getDouble32(Construct c, Target t) {
+		if(c instanceof CMutablePrimitive){
+			c = ((CMutablePrimitive)c).get();
+		}
 		// Use 6 places at most else the imprecisions of float makes this function throw the exception.
 		double delta = 0.0000001;
 		double l = getDouble(c, t);
@@ -199,6 +209,9 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static long getInt(Construct c, Target t) {
+		if(c instanceof CMutablePrimitive){
+			c = ((CMutablePrimitive)c).get();
+		}
 		long i;
 		if (c == null || c instanceof CNull) {
 			return 0;
@@ -233,6 +246,9 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static int getInt32(Construct c, Target t) {
+		if(c instanceof CMutablePrimitive){
+			c = ((CMutablePrimitive)c).get();
+		}
 		long l = getInt(c, t);
 		int i = (int) l;
 		if (i != l) {
@@ -253,6 +269,9 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static short getInt16(Construct c, Target t) {
+		if(c instanceof CMutablePrimitive){
+			c = ((CMutablePrimitive)c).get();
+		}
 		long l = getInt(c, t);
 		short s = (short) l;
 		if (s != l) {
@@ -273,6 +292,9 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static byte getInt8(Construct c, Target t) {
+		if(c instanceof CMutablePrimitive){
+			c = ((CMutablePrimitive)c).get();
+		}
 		long l = getInt(c, t);
 		byte b = (byte) l;
 		if (b != l) {
@@ -292,6 +314,9 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static boolean getBoolean(Construct c, Target t) {
+		if(c instanceof CMutablePrimitive){
+			c = ((CMutablePrimitive)c).get();
+		}
 		boolean b = false;
 		if (c == null) {
 			return false;
