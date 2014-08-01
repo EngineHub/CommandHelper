@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCScore;
@@ -9,7 +10,9 @@ import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
 import java.util.HashSet;
 import java.util.Set;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -65,7 +68,18 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public Set<String> getEntries() {
-		return s.getEntries();
+		if(ReflectionUtils.hasMethod(s.getClass(), "getEntries", null)){
+			// This is the newer method, just call the method and return it.
+			return (Set<String>) ReflectionUtils.invokeMethod(s, "getEntries");
+		} else {
+			// Old style, where we have to build it from the list of players
+			Set<String> ret = new HashSet<>();
+			for (OfflinePlayer o : s.getPlayers()) {
+				// Deprecated usage, but required.
+				ret.add(o.getName());
+			}
+			return ret;
+		}
 	}
 
 	@Override
@@ -79,9 +93,18 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public Set<MCScore> getScores(String entry) {
-		Set<MCScore> ret = new HashSet<MCScore>();
-		for (Score o : s.getScores(entry)) {
-			ret.add(new BukkitMCScore(o));
+		Set<MCScore> ret = new HashSet<>();
+		if(ReflectionUtils.hasMethod(s.getClass(), "getScores", null, OfflinePlayer.class)){
+			// Old style, we have to build the list of offline players ourselves
+			Player player = Bukkit.getPlayer(entry);
+			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", (OfflinePlayer) player)) {
+				ret.add(new BukkitMCScore(o));
+			}
+		} else {
+			// New style
+			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", entry)) {
+				ret.add(new BukkitMCScore(o));
+			}
 		}
 		return ret;
 	}
@@ -97,7 +120,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public Set<MCTeam> getTeams() {
-		Set<MCTeam> ret = new HashSet<MCTeam>();
+		Set<MCTeam> ret = new HashSet<>();
 		for (Team t : s.getTeams()) {
 			ret.add(new BukkitMCTeam(t));
 		}
@@ -116,7 +139,13 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public void resetScores(String entry) {
-		s.resetScores(entry);
+		if(ReflectionUtils.hasMethod(s.getClass(), "resetScores", null, String.class)){
+			// New style
+			ReflectionUtils.invokeMethod(s, "resetScores", entry);
+		} else {
+			Player player = Bukkit.getPlayer(entry);
+			ReflectionUtils.invokeMethod(s, "resetScores", player);
+		}
 	}
 
 	@Override

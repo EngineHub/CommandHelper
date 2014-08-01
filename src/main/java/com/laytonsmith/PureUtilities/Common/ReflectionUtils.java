@@ -10,10 +10,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
- * 
+ *
  */
 public class ReflectionUtils {
 
@@ -45,7 +47,7 @@ public class ReflectionUtils {
 	 * @param <T> The class type returned, specified by the class type requested
 	 * @param clazz
 	 * @return
-	 * @throws com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
+	 * @throws ReflectionException
 	 */
 	public static <T> T newInstance(Class<T> clazz) throws ReflectionException {
 		return newInstance(clazz, new Class[]{}, new Object[]{});
@@ -61,24 +63,14 @@ public class ReflectionUtils {
 	 * @param argTypes
 	 * @param args
 	 * @return
-	 * @throws com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
+	 * @throws ReflectionException
 	 */
 	public static <T> T newInstance(Class<T> clazz, Class[] argTypes, Object[] args) throws ReflectionException {
 		try {
 			Constructor<T> c = clazz.getDeclaredConstructor(argTypes);
 			c.setAccessible(true);
 			return c.newInstance(args);
-		} catch (InstantiationException ex) {
-			throw new ReflectionException(ex);
-		} catch (IllegalAccessException ex) {
-			throw new ReflectionException(ex);
-		} catch (IllegalArgumentException ex) {
-			throw new ReflectionException(ex);
-		} catch (InvocationTargetException ex) {
-			throw new ReflectionException(ex);
-		} catch (NoSuchMethodException ex) {
-			throw new ReflectionException(ex);
-		} catch (SecurityException ex) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -128,13 +120,7 @@ public class ReflectionUtils {
 				f.setAccessible(true);
 				return f.get(instance);
 			}
-		} catch (IllegalArgumentException ex) {
-			throw new ReflectionException(ex);
-		} catch (IllegalAccessException ex) {
-			throw new ReflectionException(ex);
-		} catch (NoSuchFieldException ex) {
-			throw new ReflectionException(ex);
-		} catch (SecurityException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -191,13 +177,7 @@ public class ReflectionUtils {
 				f.set(instance, value);
 
 			}
-		} catch (IllegalArgumentException ex) {
-			throw new ReflectionException(ex);
-		} catch (IllegalAccessException ex) {
-			throw new ReflectionException(ex);
-		} catch (NoSuchFieldException ex) {
-			throw new ReflectionException(ex);
-		} catch (SecurityException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -222,13 +202,16 @@ public class ReflectionUtils {
 	 *
 	 * @param instance
 	 * @param methodName
-	 * @throws com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
+	 * @param params
+	 * @return
+	 * @throws ReflectionException
 	 */
+	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
 	public static Object invokeMethod(Object instance, String methodName, Object... params) throws ReflectionException {
 		Class c = instance.getClass();
 		Class[] argTypes;
 		{
-			List<Class> cl = new ArrayList<Class>();
+			List<Class> cl = new ArrayList<>();
 			for (Object o : params) {
 				if (o != null) {
 					cl.add(o.getClass());
@@ -256,11 +239,7 @@ public class ReflectionUtils {
 							}
 							return m.invoke(instance, params);
 						}
-					} catch (IllegalAccessException ex) {
-						throw new ReflectionException(ex);
-					} catch (IllegalArgumentException ex) {
-						throw new ReflectionException(ex);
-					} catch (InvocationTargetException ex) {
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
 				}
@@ -276,8 +255,10 @@ public class ReflectionUtils {
 	 *
 	 * @param instance
 	 * @param methodName
-	 * @throws com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
+	 * @return
+	 * @throws ReflectionException
 	 */
+	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
 	public static Object invokeMethod(Object instance, String methodName) throws ReflectionException {
 		Class c = instance.getClass();
 		while (c != null) {
@@ -285,11 +266,7 @@ public class ReflectionUtils {
 				if (methodName.equals(m.getName())) {
 					try {
 						return m.invoke(instance);
-					} catch (IllegalAccessException ex) {
-						throw new ReflectionException(ex);
-					} catch (IllegalArgumentException ex) {
-						throw new ReflectionException(ex);
-					} catch (InvocationTargetException ex) {
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
 				}
@@ -315,21 +292,15 @@ public class ReflectionUtils {
 			Method m = clazz.getDeclaredMethod(methodName, argTypes);
 			m.setAccessible(true);
 			return m.invoke(instance, args);
-		} catch (InvocationTargetException ex) {
-			throw new ReflectionException(ex);
-		} catch (NoSuchMethodException ex) {
-			throw new ReflectionException(ex);
-		} catch (IllegalArgumentException ex) {
-			throw new ReflectionException(ex);
-		} catch (IllegalAccessException ex) {
-			throw new ReflectionException(ex);
-		} catch (SecurityException ex) {
+		} catch (InvocationTargetException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
 
 	/**
 	 * Shorthand for {@link #PrintObjectTrace(instance, instanceOnly, null)}
+	 * @param instance
+	 * @param instanceOnly
 	 */
 	public static void PrintObjectTrace(Object instance, boolean instanceOnly) {
 		PrintObjectTrace(instance, instanceOnly, null);
@@ -378,13 +349,13 @@ public class ReflectionUtils {
 			}
 		} while (!instanceOnly && (iClass = iClass.getSuperclass()) != null);
 	}
-	
+
 	/**
 	 * Gets a set of all classes that this class extends or implements. In other words,
 	 * {@link Class#isAssignableFrom(java.lang.Class)} will return true for
 	 * all returned classes.
 	 * @param c
-	 * @return 
+	 * @return
 	 */
 	public static Set<Class> getAllExtensions(Class c){
 		Set<Class> cs = new HashSet<>();
@@ -395,7 +366,7 @@ public class ReflectionUtils {
 				cs.addAll(getAllExtensions(ccc));
 			}
 			cc = cc.getSuperclass();
-			
+
 		}
 		for(Class i : c.getInterfaces()){
 			cs.addAll(getAllExtensions(i));
@@ -403,4 +374,32 @@ public class ReflectionUtils {
 		}
 		return cs;
 	}
+
+	/**
+	 * Checks to see if a method with the given signature exists.
+	 * @param c The class to check
+	 * @param methodName The method name
+	 * @param returnType The return type of the method, or if it is otherwise castable to this. Sending
+	 * null or Object.class implies that the return type doesn't matter.
+	 * @param params The signature of the method
+	 * @return True, if the method with this signature exists.
+	 * @throws ReflectionException If a SecurityException is thrown by the underlying
+	 * code, this will be thrown.
+	 */
+	public static boolean hasMethod(Class<?> c, String methodName, Class returnType, Class ... params) throws ReflectionException {
+		if(returnType == null){
+			returnType = Object.class;
+		}
+		Method m;
+		try {
+			m = c.getClass().getMethod(methodName, params);
+		} catch (NoSuchMethodException ex) {
+			return false;
+		} catch (SecurityException ex) {
+			throw new ReflectionException(ex);
+		}
+		return returnType.isAssignableFrom(m.getReturnType());
+	}
+
+
 }

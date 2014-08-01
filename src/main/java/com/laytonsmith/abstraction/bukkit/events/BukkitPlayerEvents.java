@@ -18,6 +18,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
@@ -408,7 +409,7 @@ public class BukkitPlayerEvents {
 
         public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message, String format){
 			AsyncPlayerChatEvent apce = new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message,
-                    new HashSet<>(Bukkit.getServer().getOnlinePlayers()));
+                    new HashSet<>(BukkitMCServer.getOnlinePlayersOverwrite(Bukkit.getServer())));
 			apce.setFormat(format);
             return new BukkitMCPlayerChatEvent(apce);
         }
