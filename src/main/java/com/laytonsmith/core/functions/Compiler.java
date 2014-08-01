@@ -10,10 +10,12 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.constructs.CBrace;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
@@ -32,7 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 
+ *
  */
 @core
 public class Compiler {
@@ -70,7 +72,7 @@ public class Compiler {
 					return CVoid.VOID;
 				case 1:
 					return parent.eval(nodes[0], env);
-				default: 
+				default:
 					return new __autoconcat__().execs(t, env, parent, nodes);
 			}
 		}
@@ -422,6 +424,18 @@ public class Compiler {
 				}
 			}
 
+			// Keyword processing
+			KeywordList.getKeywordList();
+			for(int i = 0; i < list.size(); i++){
+				ParseTree node = list.get(i);
+				// Keywords can be standalone, or a function can double as a keyword. So we have to check for both
+				// conditions.
+				if(node.getData() instanceof CKeyword
+						|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)){
+					i = KeywordList.getKeywordByName(node.getData().val()).process(list, i);
+				}
+			}
+
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
 			//left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
 			//be handled in MethodScriptCompiler's optimize function. Also, we must scan for CPreIdentifiers,
@@ -552,35 +566,35 @@ public class Compiler {
 
 	@api
 	@hide("This is only used internally by the compiler, and will be removed at some point.")
-	public static class __cbrace__ extends DummyFunction implements Optimizable {
+	public static class __cbrace__ extends DummyFunction /*implements Optimizable*/ {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			ParseTree node;
-			if (children.isEmpty()) {
-				node = new ParseTree(CVoid.VOID, fileOptions);
-			} else if (children.size() == 1) {
-				node = children.get(0);
-			} else {
-				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
-				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
-						+ " report this error to the developer.", t);
-			}
-			return new ParseTree(new CBrace(node), fileOptions);
-		}
+//		@Override
+//		public Set<OptimizationOption> optimizationOptions() {
+//			return EnumSet.of(
+//					OptimizationOption.OPTIMIZE_DYNAMIC);
+//		}
+//
+//		@Override
+//		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+//			ParseTree node;
+//			if (children.isEmpty()) {
+//				node = new ParseTree(CVoid.VOID, fileOptions);
+//			} else if (children.size() == 1) {
+//				node = children.get(0);
+//			} else {
+//				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
+//				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
+//						+ " report this error to the developer.", t);
+//			}
+//			return new ParseTree(new CBrace(node), fileOptions);
+//		}
 	}
-	
+
 	@api
 	@hide("This is more of a compiler feature, rather than a function, and so it is hidden from normal"
 			+ " documentation.")
@@ -638,7 +652,7 @@ public class Compiler {
 				throw new ConfigCompileException(getName() + " can only take one parameter", t);
 			}
 			String value = children.get(0).getData().val();
-			
+
 			StringBuilder b = new StringBuilder();
 			boolean inBrace = false;
 			boolean inSimpleVar = false;
@@ -686,7 +700,7 @@ public class Compiler {
 						root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
 					} else {
 						//Complex variable name, with arrays (or perhaps an error case)
-						
+
 					}
 					continue;
 				}
@@ -706,6 +720,6 @@ public class Compiler {
 			//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
 			return root;
 		}
-		
+
 	}
 }

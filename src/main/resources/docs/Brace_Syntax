@@ -1,0 +1,94 @@
+In MethodScript, just about everything is a function. In many cases, this makes the language easier to learn, and in small,
+self contained examples, it often makes the code easier to read: if(condition, do this, do that) for instance is perfectly
+valid code, and it's reasonably easy to learn. However, this can lead to ''unreadable'' code in large sections of code.
+Due to this, a C-inspired brace syntax is also available for some "functions", which should increase the readability of
+your code. In most all cases, using brace syntax is highly preferred over functional syntax, and thus should almost
+always be used.
+
+===if===
+{{function|if}} and {{function|ifelse}} can both be "combined" and use a typical if-else if-else chain:
+
+%%CODE|
+if(@condition){
+     do_this();
+} else if(is_null(@whatever)){
+     do_that();
+} else {
+     do_me();
+}
+%%
+
+%%CODE|
+if(@condition){
+    do_this();
+} else if(!@condition){
+    do_that();
+}
+%%
+
+%%CODE|
+if(@condition){
+    do_this();
+} else {
+    do_that();
+}
+%%
+
+%%CODE|
+if(@condition){
+    do_this();
+}
+%%
+
+are all valid examples.
+
+===for/foreach===
+%%CODE|
+for(@i = 0, @i < 5, @i++){
+    do_in_loop()
+}
+
+foreach(@item in @array){
+    do_with(@item);
+}
+%%
+
+===while===
+
+%%CODE|
+while(@value > 0){
+	msg(@value);
+	@value++;
+}
+%%
+
+===switch===
+%%CODE|
+switch(@item){
+    case 'case1':
+        do_if_case1();
+    case 'case2':
+        do_if_case2();
+	default:
+        do_if_default();
+}
+%%
+
+===closures===
+
+%%CODE|
+closure(@var1, @var2){
+    msg(@var1 . ' ' . @var2);
+}
+%%
+
+===procedures===
+
+%%CODE|
+proc(_my_proc){
+	return(1);
+}
+%%
+
+==Note==
+The bracket system simply converts your code into the functional notation, and so it may be possible to do strange looking things; don't. They will eventually be patched, and it will make your code less readable in the meantime. There is a bit more complexity than a simple conversion, but essentially, <code>if(@cond){ do() }</code> is turned into <code>if(@cond, do())</code> by merely converting <code>){</code> into a comma, and <code>}</code> into a right parenthesis.

@@ -9,7 +9,7 @@ import java.util.Set;
 
 /**
  *
- * 
+ *
  */
 public class Token {
 
@@ -21,16 +21,16 @@ public class Token {
     public final Target target;
 
 	private enum TokenVariant{
-		ADDITIVE, EQUALITY, EXPONENTIAL, IDENTIFIER, LOGICAL_AND, LOGICAL_OR, 
+		ADDITIVE, EQUALITY, EXPONENTIAL, IDENTIFIER, LOGICAL_AND, LOGICAL_OR,
 		MULTIPLICATIVE, PLUS_MINUS, POSTFIX, RELATIONAL, SYMBOL, UNARY, ASSIGNMENT,
-		SEPARATOR, ATOMIC_LIT, WHITESPACE
+		SEPARATOR, ATOMIC_LIT, WHITESPACE, KEYWORD
 	}
     public enum TType {
 
 		//TODO: Comment this out once the compiler is replaced, and clean up unused ones
-        UNKNOWN(TokenVariant.IDENTIFIER), 
-		LSQUARE_BRACKET(TokenVariant.SEPARATOR), 
-		RSQUARE_BRACKET(TokenVariant.SEPARATOR), 
+        UNKNOWN(TokenVariant.IDENTIFIER),
+		LSQUARE_BRACKET(TokenVariant.SEPARATOR),
+		RSQUARE_BRACKET(TokenVariant.SEPARATOR),
 		OPT_VAR_ASSIGN(TokenVariant.SEPARATOR),
 		ALIAS_END(TokenVariant.SEPARATOR),
 		COMMA(TokenVariant.SEPARATOR),
@@ -54,7 +54,7 @@ public class Token {
 		LABEL(TokenVariant.SEPARATOR),
 		DEREFERENCE(),
 		SLICE(),
-		
+
 		PLUS(TokenVariant.SYMBOL, TokenVariant.UNARY, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
 		MINUS(TokenVariant.SYMBOL, TokenVariant.UNARY, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
         MULTIPLICATION(TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
@@ -63,7 +63,7 @@ public class Token {
 		NOT_EQUALS(TokenVariant.SYMBOL, TokenVariant.EQUALITY),
         STRICT_EQUALS(TokenVariant.SYMBOL, TokenVariant.EQUALITY),
 		STRICT_NOT_EQUALS(TokenVariant.SYMBOL, TokenVariant.EQUALITY),
-		
+
 		GT(TokenVariant.SYMBOL, TokenVariant.RELATIONAL),
 		LT(TokenVariant.SYMBOL, TokenVariant.RELATIONAL),
 		LTE(TokenVariant.SYMBOL, TokenVariant.RELATIONAL),
@@ -76,23 +76,24 @@ public class Token {
 		MODULO(TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
 		CONCAT(TokenVariant.SYMBOL, TokenVariant.ADDITIVE),
 		EXPONENTIAL(TokenVariant.SYMBOL, TokenVariant.EXPONENTIAL),
-		
+
 		WHITESPACE(TokenVariant.WHITESPACE),
 		LCURLY_BRACKET(TokenVariant.SEPARATOR),
 		RCURLY_BRACKET(TokenVariant.SEPARATOR),
 		IDENTIFIER(),
-		
+
 		DOUBLE(TokenVariant.IDENTIFIER, TokenVariant.ATOMIC_LIT),
 		INTEGER(TokenVariant.IDENTIFIER, TokenVariant.ATOMIC_LIT),
 		CONST_START(),
-		ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL), 
+		ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL),
 		PLUS_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
 		MINUS_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
 		MULTIPLICATION_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
-		DIVISION_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE), 
+		DIVISION_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
 		CONCAT_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.ADDITIVE),
-		SEMICOLON(TokenVariant.SEPARATOR);
-		
+		SEMICOLON(TokenVariant.SEPARATOR),
+		KEYWORD(TokenVariant.KEYWORD);
+
 		private Set<TokenVariant> variants = EnumSet.noneOf(TokenVariant.class);
 		private TType(TokenVariant ... variants){
 			this.variants.addAll(Arrays.asList(variants));
@@ -100,24 +101,24 @@ public class Token {
 
 		/**
 		 * True if the token is a symbol, i.e. + - =
-		 * @return 
+		 * @return
 		 */
         public boolean isSymbol() {
             return this.variants.contains(TokenVariant.SYMBOL);
-        }      
+        }
 
 		/**
 		 * Returns true if the token is a postfix operator. This implies it is a
 		 * prefix operator as well. -- ++
-		 * @return 
+		 * @return
 		 */
         public boolean isPostfix(){
             return this.variants.contains(TokenVariant.POSTFIX);
         }
-        
+
 		/**
 		 * Returns true if this symbol is a unary operator, ! - + -- ++
-		 * @return 
+		 * @return
 		 */
         public boolean isUnary() {
             return this.variants.contains(TokenVariant.UNARY);
@@ -125,67 +126,67 @@ public class Token {
 
 		/**
 		 * Returns true if this symbol is multiplicative
-		 * @return 
+		 * @return
 		 */
         public boolean isMultaplicative() {
             return this.variants.contains(TokenVariant.MULTIPLICATIVE);
         }
-        
+
 		/**
 		 * Returns true if this symbol is additive + += . etc
-		 * @return 
+		 * @return
 		 */
         public boolean isAdditive(){
             return this.variants.contains(TokenVariant.ADDITIVE);
         }
-        
+
 		/**
 		 * Returns true if this symbol is relational, &lt; &gt;
-		 * @return 
+		 * @return
 		 */
         public boolean isRelational(){
             return this.variants.contains(TokenVariant.RELATIONAL);
         }
-        
+
 		/**
 		 * Returns true if this symbol is equalitative, === == != !==
-		 * @return 
+		 * @return
 		 */
         public boolean isEquality(){
             return this.variants.contains(TokenVariant.EQUALITY);
         }
-        
+
 //        public boolean isBitwiseAnd(){
 //            return (this == BIT_AND);
 //        }
-//        
+//
 //        public boolean isBitwiseXor(){
 //            return (this == BIT_XOR);
 //        }
-//        
+//
 //        public boolean isBitwiseOr(){
 //            return (this == BIT_OR);
 //        }
-        
+
 		/**
 		 * Returns true if this is a logical and
-		 * @return 
+		 * @return
 		 */
         public boolean isLogicalAnd(){
             return this.variants.contains(TokenVariant.LOGICAL_AND);
         }
-        
+
 		/**
 		 * Return true if this is a logical or
-		 * @return 
+		 * @return
 		 */
         public boolean isLogicalOr(){
-            return this.variants.contains(TokenVariant.LOGICAL_OR);          
+            return this.variants.contains(TokenVariant.LOGICAL_OR);
         }
 
 		/**
 		 * Returns true if this is a plus/minus operator + - += -=
-		 * @return 
+		 * @return
 		 */
         public boolean isPlusMinus() {
             return this.variants.contains(TokenVariant.PLUS_MINUS);
@@ -194,7 +195,7 @@ public class Token {
 		/**
 		 * Returns true if this is an identifier. Variables, strings, bare strings,
 		 * integers, doubles, etc. Unknown tokens are assumed to be identifiers.
-		 * @return 
+		 * @return
 		 */
         public boolean isIdentifier() {
             return this.variants.contains(TokenVariant.IDENTIFIER);
@@ -202,47 +203,51 @@ public class Token {
 
 		/**
 		 * Returns true if this is an exponential symbol **
-		 * @return 
+		 * @return
 		 */
         public boolean isExponential() {
             return this.variants.contains(TokenVariant.EXPONENTIAL);
         }
-		
+
 		/**
 		 * Returns true if this is an assigment operator = += etc
-		 * @return 
+		 * @return
 		 */
 		public boolean isAssignment(){
 			return this.variants.contains(TokenVariant.ASSIGNMENT);
 		}
-		
+
 		/**
 		 * Returns true if this is a separator, that is, it ends a logical
 		 * statement. [ ] { } ( ) , ; etc
-		 * @return 
+		 * @return
 		 */
 		public boolean isSeparator(){
 			return this.variants.contains(TokenVariant.SEPARATOR);
 		}
-		
+
 		/**
 		 * Returns true if this is an atomic literal, that is a string
 		 * (including bare strings), integer, or double only. Variables
 		 * are not included.
-		 * @return 
+		 * @return
 		 */
 		public boolean isAtomicLit(){
 			return this.variants.contains(TokenVariant.ATOMIC_LIT);
 		}
-		
+
 		/**
 		 * Returns true if this is a whitespace token, i.e. space, tab, or newline.
-		 * @return 
+		 * @return
 		 */
 		public boolean isWhitespace(){
 			return this.variants.contains(TokenVariant.WHITESPACE);
 		}
-        
+
+		public boolean isKeyword(){
+			return this.variants.contains(TokenVariant.KEYWORD);
+		}
+
     }
 
     public Token(TType type, String value, Target t) {
@@ -299,7 +304,7 @@ public class Token {
         }
         return value;
     }
-    
+
     public Target getTarget(){
         return target;
     }

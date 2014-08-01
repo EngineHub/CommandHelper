@@ -5,9 +5,11 @@ import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CPreIdentifier;
@@ -82,6 +84,7 @@ public final class MethodScriptCompiler {
 		}
 		script = script.replaceAll("\r\n", "\n");
 		script = script + "\n";
+		Set<String> keywords = KeywordList.getKeywordNames();
 		List<Token> token_list = new ArrayList<>();
 		//Set our state variables
 		boolean state_in_quote = false;
@@ -737,6 +740,8 @@ public final class MethodScriptCompiler {
 					t.type = TType.IVARIABLE;
 				} else if (t.val().equals("$")) {
 					t.type = TType.FINAL_VAR;
+				} else if(keywords.contains(t.val())){
+					t.type = TType.KEYWORD;
 				} else {
 					t.type = TType.LIT;
 				}
@@ -908,103 +913,119 @@ public final class MethodScriptCompiler {
 		}
 
 		List<Token> tempStream = new ArrayList<>(stream.size());
-		List<Integer> irrelevantWhitespace = new ArrayList<>();
-		int startingRelevant = -1;
-		int endingRelevant = -1;
-		int bracketBlocks = 0;
-		for (int i = 0; i < stream.size(); i++) {
-			if (!irrelevantWhitespace.isEmpty()) {
-				//We have to be careful about the whitespace we remove, just
-				//because we think it's irrelevant doesn't mean it is, for token
-				//patterns that are < lookahead's size.
-				for (int ii = irrelevantWhitespace.size() - 1; ii >= 0; ii--) {
-					int index = irrelevantWhitespace.get(ii);
-					if (index >= startingRelevant && index <= endingRelevant) {
-						stream.remove(index);
-					}
-				}
-				irrelevantWhitespace.clear();
-				startingRelevant = -1;
-				endingRelevant = -1;
+		for (Token t : stream) {
+			if(!t.type.isWhitespace()){
+				tempStream.add(t);
 			}
-			//We need a 4 lookahead
-			int lookahead = 4;
-			Token[] t = new Token[lookahead + 1];
-			int[] pos = new int[t.length - 1];
-			//We could have removed all the indexes due to irrelevantNewlines being cleared, so if
-			//i is >= stream.size(), we're done!
-			if (i >= stream.size()) {
-				break;
-			}
-			t[1] = stream.get(i);
-			pos[0] = i;
-			for (int ii = 2; ii < t.length; ii++) {
-				int offset = i + (ii - 1) + irrelevantWhitespace.size();
-				pos[ii - 1] = offset;
-				t[ii] = offset < stream.size() ? stream.get(offset) : new Token(TType.UNKNOWN, "", t[1].target);
-				if (t[ii].type == TType.NEWLINE || t[ii].type == TType.WHITESPACE) {
-					//Skip newlines for the purposes of comparisons. If a newline was t[1], it'll still
-					//get added in the right spot, but we do want to make note of the irrelevant newlines
-					//afterwards, so we can toss them from the stream. We also have to deal with whitespace at this point.
-					irrelevantWhitespace.add(offset);
-					ii--;
-				}
-			}
-
-			//Look for the longest; the "} else if(" and replace with elseif
-			if (t[1].type == TType.RCURLY_BRACKET
-					&& t[2].type == TType.LIT && t[2].value.equals("else")
-					&& t[3].type == TType.FUNC_NAME && t[3].value.equals("if")
-					&& t[4].type == TType.FUNC_START) {
-				tempStream.add(new Token(TType.COMMA, ",", t[1].target));
-				tempStream.add(new Token(TType.IDENTIFIER, "elseif", t[1].target));
-				startingRelevant = pos[0];
-				endingRelevant = pos[3];
-				bracketBlocks--;
-				i += 3;
-				continue;
-			}
-			//Look for "} else {" and replace with else
-			if (t[1].type == TType.RCURLY_BRACKET
-					&& t[2].type == TType.LIT && t[2].value.equals("else")
-					&& t[3].type == TType.LCURLY_BRACKET) {
-				tempStream.add(new Token(TType.COMMA, ",", t[1].target));
-				tempStream.add(new Token(TType.IDENTIFIER, "else", t[1].target));
-				startingRelevant = pos[0];
-				endingRelevant = pos[2];
-				i += 2;
-				continue;
-			}
-			//Look for "){" and replace with ,
-			if (t[1].type == TType.FUNC_END
-					&& t[2].type == TType.LCURLY_BRACKET) {
-				tempStream.add(new Token(TType.SCOMMA, ",", t[1].target));
-				startingRelevant = pos[0];
-				endingRelevant = pos[1];
-				i++;
-				bracketBlocks++;
-				continue;
-			}
-			//Look for "}" and replace with )
-			if (t[1].type == TType.RCURLY_BRACKET) {
-				tempStream.add(new Token(TType.FUNC_END, ")", t[1].target));
-				bracketBlocks--;
-				if (bracketBlocks < 0) {
-					throw new ConfigCompileException("Unexpected right curly brace", unknown);
-				}
-				startingRelevant = endingRelevant = pos[0];
-				continue;
-			}
-
-			//Nothing. Add it to the tempStream. Also, clear irrelevantNewlines,
-			//because they may not be irrelevant at this point.
-			tempStream.add(t[1]);
-			irrelevantWhitespace.clear();
-		}
-		if (bracketBlocks > 0) {
-			throw new ConfigCompileException("Unclosed code block, check for missing right curly brace", unknown);
 		}
 		stream = tempStream;
+
+
+//		List<Token> tempStream = new ArrayList<>(stream.size());
+//		List<Integer> irrelevantWhitespace = new ArrayList<>();
+//		int startingRelevant = -1;
+//		int endingRelevant = -1;
+//		int bracketBlocks = 0;
+//		for (int i = 0; i < stream.size(); i++) {
+//			if (!irrelevantWhitespace.isEmpty()) {
+//				//We have to be careful about the whitespace we remove, just
+//				//because we think it's irrelevant doesn't mean it is, for token
+//				//patterns that are < lookahead's size.
+//				for (int ii = irrelevantWhitespace.size() - 1; ii >= 0; ii--) {
+//					int index = irrelevantWhitespace.get(ii);
+//					if (index >= startingRelevant && index <= endingRelevant) {
+//						stream.remove(index);
+//					}
+//				}
+//				irrelevantWhitespace.clear();
+//				startingRelevant = -1;
+//				endingRelevant = -1;
+//			}
+//			//We need a 4 lookahead
+//			int lookahead = 4;
+//			Token[] t = new Token[lookahead + 1];
+//			int[] pos = new int[t.length - 1];
+//			//We could have removed all the indexes due to irrelevantNewlines being cleared, so if
+//			//i is >= stream.size(), we're done!
+//			if (i >= stream.size()) {
+//				break;
+//			}
+//			t[1] = stream.get(i);
+//			pos[0] = i;
+//			for (int ii = 2; ii < t.length; ii++) {
+//				int offset = i + (ii - 1) + irrelevantWhitespace.size();
+//				pos[ii - 1] = offset;
+//				t[ii] = offset < stream.size() ? stream.get(offset) : new Token(TType.UNKNOWN, "", t[1].target);
+//				if (t[ii].type == TType.NEWLINE || t[ii].type == TType.WHITESPACE) {
+//					//Skip newlines for the purposes of comparisons. If a newline was t[1], it'll still
+//					//get added in the right spot, but we do want to make note of the irrelevant newlines
+//					//afterwards, so we can toss them from the stream. We also have to deal with whitespace at this point.
+//					irrelevantWhitespace.add(offset);
+//					ii--;
+//				}
+//			}
+//
+//			//Look for the longest; the "} else if(" and replace with elseif
+//			if (t[1].type == TType.RCURLY_BRACKET
+//					&& t[2].type == TType.LIT && t[2].value.equals("else")
+//					&& t[3].type == TType.FUNC_NAME && t[3].value.equals("if")
+//					&& t[4].type == TType.FUNC_START) {
+//				tempStream.add(new Token(TType.COMMA, ",", t[1].target));
+//				tempStream.add(new Token(TType.IDENTIFIER, "elseif", t[1].target));
+//				startingRelevant = pos[0];
+//				endingRelevant = pos[3];
+//				bracketBlocks--;
+//				i += 3;
+//				continue;
+//			}
+//			//Look for "} else {" and replace with else
+//			if (t[1].type == TType.RCURLY_BRACKET
+//					&& t[2].type == TType.LIT && t[2].value.equals("else")
+//					&& t[3].type == TType.LCURLY_BRACKET) {
+//				tempStream.add(new Token(TType.COMMA, ",", t[1].target));
+//				tempStream.add(new Token(TType.IDENTIFIER, "else", t[1].target));
+//				startingRelevant = pos[0];
+//				endingRelevant = pos[2];
+//				i += 2;
+//				continue;
+//			}
+//			//Look for "){" and replace with ,
+//			if (t[1].type == TType.FUNC_END
+//					&& t[2].type == TType.LCURLY_BRACKET) {
+//				tempStream.add(new Token(TType.SCOMMA, ",", t[1].target));
+//				startingRelevant = pos[0];
+//				endingRelevant = pos[1];
+//				i++;
+//				bracketBlocks++;
+//				continue;
+//			}
+//			//Look for "}" and replace with )
+//			if (t[1].type == TType.RCURLY_BRACKET) {
+//				bracketBlocks--;
+//				if (bracketBlocks < 0) {
+//					throw new ConfigCompileException("Unexpected right curly brace", unknown);
+//				}
+//				tempStream.add(new Token(TType.FUNC_END, ")", t[1].target));
+//				startingRelevant = endingRelevant = pos[0];
+//				continue;
+//			}
+//
+//			//Look for "{"
+//			if(t[1].type == TType.LCURLY_BRACKET){
+//				tempStream.add(t[1]);
+//				bracketBlocks++;
+//				continue;
+//			}
+//
+//			//Nothing. Add it to the tempStream. Also, clear irrelevantNewlines,
+//			//because they may not be irrelevant at this point.
+//			tempStream.add(t[1]);
+//			irrelevantWhitespace.clear();
+//		}
+//		if (bracketBlocks > 0) {
+//			throw new ConfigCompileException("Unclosed code block, check for missing right curly brace", unknown);
+//		}
+//		stream = tempStream;
 
 		ParseTree tree = new ParseTree(fileOptions);
 		tree.setData(CNull.NULL);
@@ -1033,6 +1054,8 @@ public final class MethodScriptCompiler {
 
 		int parens = 0;
 		Token t = null;
+
+		int bracketCount = 0;
 
 		for (int i = 0; i < stream.size(); i++) {
 			t = stream.get(i);
@@ -1080,6 +1103,46 @@ public final class MethodScriptCompiler {
 					prevNonWhitespaceIndex = j;
 					break;
 				}
+			}
+
+			// Brace handling
+			if(t.type == TType.LCURLY_BRACKET){
+				ParseTree b = new ParseTree(new CFunction("__cbrace__", t.getTarget()), fileOptions);
+				tree.addChild(b);
+				tree = b;
+				parents.push(b);
+				bracketCount++;
+				constructCount.push(new AtomicInteger(0));
+				continue;
+			}
+
+			if(t.type == TType.RCURLY_BRACKET){
+				bracketCount--;
+				if (constructCount.peek().get() > 1) {
+					//We need to autoconcat some stuff
+					int stacks = constructCount.peek().get();
+					int replaceAt = tree.getChildren().size() - stacks;
+					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
+					List<ParseTree> subChildren = new ArrayList<>();
+					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
+						subChildren.add(tree.getChildAt(b));
+					}
+					c.setChildren(subChildren);
+					if (replaceAt > 0) {
+						List<ParseTree> firstChildren = new ArrayList<>();
+						for (int d = 0; d < replaceAt; d++) {
+							firstChildren.add(tree.getChildAt(d));
+						}
+						tree.setChildren(firstChildren);
+					} else {
+						tree.removeChildren();
+					}
+					tree.addChild(c);
+				}
+				parents.pop();
+				tree = parents.peek();
+				constructCount.pop();
+				continue;
 			}
 
 			//Associative array/label handling
@@ -1344,6 +1407,9 @@ public final class MethodScriptCompiler {
 			} else if (t.type.equals(TType.IDENTIFIER)) {
 				tree.addChild(new ParseTree(new CPreIdentifier(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
+			} else if(t.type.isKeyword()){
+				tree.addChild(new ParseTree(new CKeyword(t.val(), t.getTarget()), fileOptions));
+				constructCount.peek().incrementAndGet();
 			} else if (t.type.equals(TType.IVARIABLE)) {
 				tree.addChild(new ParseTree(new IVariable(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
@@ -1368,6 +1434,9 @@ public final class MethodScriptCompiler {
 		}
 		if (parens != 0) {
 			throw new ConfigCompileException("Mismatched parenthesis", t.target);
+		}
+		if (bracketCount != 0){
+			throw new ConfigCompileException("Mismatched curly braces", t.target);
 		}
 
 		Stack<List<Procedure>> procs = new Stack<>();

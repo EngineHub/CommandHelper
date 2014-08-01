@@ -1,0 +1,177 @@
+Writing readable code is a huge part of easily debugging potential problems. While technically the compiler can read your
+code no matter how it's formatted (so long as it is syntactically correct), the compiler isn't the only thing that needs
+to read it, humans do too. So making your code "pretty" is a big step in making maintainable, debuggable, and shareable
+code. Many code styles are equally readable, and so in many cases, it is pure preference how you choose to format your
+code, however, this style guide is what will be used by any standard compilant code formatting tools that may be written
+in the future, and so following these examples is good practice.
+
+== Whitespace ==
+
+Technically, most all whitespace is optional. For technical reasons, it is possible to fit all scripts on one line, and no
+tabs, spaces, or newlines are required by the lexer. However, this does not lend itself to human readability, so proper
+whitespace is vital to making code easily readable.
+
+=== Tabs ===
+
+Many text editors change tabs to spaces, and this is generally undesirable. The general rational behind this is that a tab
+is generally more flexible in text editors, it is usually possible to define "tab width," which allows programmers to
+customize this to their tastes, without actually having to change the code.
+
+=== Indentation ===
+
+"Code branches", that is conditional blocks, should be indented one tab further than their parent, except in the case of
+tertiary usage of an if(). For example:
+
+%%CODE|
+if(@condition){
+    trueCode();
+} else {
+    falseCode();
+}
+
+proc(_my_proc){
+	if(someCondition()){
+		return(1);
+	} else {
+		if(otherCondition()){
+			return(2);
+		} else if(otherCondition2()){
+			return(3);
+		} else {
+			return(4);
+		}
+	}
+}
+%%
+
+The exception is when if is being used as a tertiary statement (that is, the return value of if is not being ignored):
+
+%%CODE|
+msg('You wrote ' . if($arg > 0, 'a positive number!', 'a negative number! (or zero!)'));
+%%
+
+In general, code should only be nested up to a maximum of 5-7 levels, if you begin to nest deeper than this, consider breaking
+code off into a procedure, and calling that procedure. Indentation is one of the most important metrics for making code readable,
+and in general, poorly indented code will be far less readable, all other formatting issues aside.
+
+== Ending blocks ==
+
+In cases where you are using multiple blocks, at some point, all the blocks must end. In this case, do not put all the
+ending parenthesis on the same line, but instead, match the end parenthesis with the start of the block
+
+%%CODE|
+# BAD:
+@a = array(
+	array(1, 2, 3),
+	array(4, 5, 6));
+
+if(@condition){
+	code(); }
+
+msg(@a[
+	someValue()]);
+
+# Good:
+@a = array(
+	array(1, 2, 3),
+	array(4, 5, 6)
+);
+
+if(@condition){
+	code();
+}
+
+msg(@a[
+	someValue()
+]);
+%%
+
+Using this syntax, should extra code need to be added to the end of the block, it is much easier to locate the
+corresponding ending parenthesis/brace/bracket.
+
+== else, and else if ==
+
+In the case of using if or ifelse, it is preferred that brace syntax is used, however, code that still uses the pure
+functional approach should follow these guidelines:
+
+The code inside the blocks should be indented one more than the condition statements, but comma that represents the else
+should be on a line of its own, and aligned with the parent if. Additionally, a # else comment is helpful.
+
+<pre>
+if(@condition,
+    trueCode()
+, #else
+    falseCode()
+)
+</pre>
+
+Ifelses should follow the same general guidelines, though
+
+<pre>
+ifelse(@condition1,
+    condition1Code()
+, @condition2,
+    condition2Code()
+, #else
+    falseCode()
+)
+</pre>
+
+Again, brace syntax is much preferred however.
+
+== Switch ==
+
+{{function|switch}} statements should use the following format:
+
+%%CODE|
+switch(@value){
+	case 1:
+		codeForCase1();
+	case 2:
+	case 3:
+		codeForCase2();
+	default:
+		codeForDefault();
+}
+%%
+
+Note that there is one level of indention for each case, and two levels of indentation for the code
+inside the case. The functional usage of switch should never be used, as it is exceedingly difficult
+to read.
+
+== Naming Convention ==
+
+Variables should be named using camel case.
+
+%%CODE|
+@thisIsAVariable = null; // Good
+@this_is_a_variable = null; // Bad
+%%
+
+Global procedures should be named using snake case, however.
+
+%%CODE|
+/**
+ * Good
+ */
+proc(_this_is_a_proc){
+	return(0);
+}
+
+/**
+ * Bad
+ */
+proc(_thisIsAProc){
+	return(1);
+}
+%%
+
+This aligns with the function naming convention of MethodScript itself: use snake case for globals methods, and camel case
+for instance methods.
+
+
+== Brace Syntax ==
+
+For a full discussion on brace syntax, please see this article: [[CommandHelper/Staged/Brace_Syntax|Brace Syntax]]. Brace
+syntax is preferred in all cases over functional syntax where possible, unless otherwise noted. (Most notably tertiary if
+statements.)
