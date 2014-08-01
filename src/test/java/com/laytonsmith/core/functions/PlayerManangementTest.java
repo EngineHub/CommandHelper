@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 
 /**
  *
- * 
+ *
  */
 public class PlayerManangementTest {
 
@@ -90,13 +90,13 @@ public class PlayerManangementTest {
         assertEquals("~console", SRun("player()", c));
     }
 
-    @Test(timeout = 10000)
-    public void testAllPlayers() throws ConfigCompileException {
-        String script = "all_players()";
-        String done = SRun(script, fakePlayer);
-        //This output is too long to test with msg()        
-        assertEquals("{player1, player2, player3, player}", done);
-    }
+//    @Test(timeout = 10000)
+//    public void testAllPlayers() throws ConfigCompileException {
+//        String script = "all_players()";
+//        String done = SRun(script, fakePlayer);
+//        //This output is too long to test with msg()
+//        assertEquals("{player1, player2, player3, player}", done);
+//    }
 
     @Test
     public void testPloc() throws ConfigCompileException, Exception {
@@ -159,56 +159,56 @@ public class PlayerManangementTest {
         Run("", fakePlayer);
         Run("", fakePlayer);
     }
-    
+
     @Test
     public void testPlayerNotProvided() throws ConfigCompileException{
-        assertEquals("success", SRun("try(pkill(), assign(@success, 'success')) @success", null));        
+        assertEquals("success", SRun("try(pkill(), assign(@success, 'success')) @success", null));
     }
-    
+
     @Test
     public void testPlayerFromConsole() throws ConfigCompileException{
         MCConsoleCommandSender fakeConsole = mock(MCConsoleCommandSender.class);
         when(fakeConsole.getName()).thenReturn("CONSOLE");
         assertEquals("~console", SRun("player()", fakeConsole));
     }
-    
+
 //    //@Test(timeout=10000)
 //    public void testPinfo(){
-//        
+//
 //    }
-//    
+//
 //    //@Test(timeout=10000)
 //    public void testPworld(){
-//        
+//
 //    }
-//    
+//
 //    //@Test(timeout=10000)
 //    public void testKick(){
-//        
+//
 //    }
-//    
+//
 //    //@Test(timeout=10000)
 //    public void testSetDisplayName(){
-//        
+//
 //    }
-//    
+//
 //    //@Test(timeout=10000)
 //    public void testResetDisplayName(){
-//        
+//
 //    }
-//    
+//
 //    //@Test(timeout=10000)
 //    public void testPFacing(){
-//        
+//
 //    }
-//    
+//
 //    //@Test(timeout=10000)
 //    public void testPinv(){
-//        
+//
 //    }
-//    
+//
 //    //@Test(timeout=10000)
 //    public void testSetPinv(){
-//        
+//
 //    }
 }

@@ -1740,7 +1740,7 @@ public class Minecraft {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
 		@Override
