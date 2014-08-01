@@ -76,14 +76,27 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
     public Collection<MCPlayer> getOnlinePlayers() {
-        if(s.getOnlinePlayers() == null){
+		// Bukkit changed the signature of getOnlinePlayers from returning an array of players,
+		// to returning a list. We will use reflection here to determine which it is, and
+		// respond dynamically, to provide support for both versions.
+		Object retValue = ReflectionUtils.invokeMethod(s, "getOnlinePlayers");
+        if(retValue == null){
             return null;
         }
-        Collection<? extends Player> pa = s.getOnlinePlayers();
 		Set<MCPlayer> mcpa = new HashSet<>();
-		for(Player p : pa){
-            mcpa.add(new BukkitMCPlayer(p));
-        }
+		if(retValue instanceof Collection){
+			// New version
+			Collection<? extends Player> pa = (Collection) retValue;
+			for(Player p : pa){
+				mcpa.add(new BukkitMCPlayer(p));
+			}
+		} else {
+			// Old version, it's an array
+			Player[] pa = (Player[]) retValue;
+			for(Player p : pa){
+				mcpa.add(new BukkitMCPlayer(p));
+			}
+		}
         return mcpa;
     }
 
