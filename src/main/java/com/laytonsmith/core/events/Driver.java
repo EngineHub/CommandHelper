@@ -80,6 +80,7 @@ public enum Driver {
 	PLAYER_TELEPORT,
 	TAB_COMPLETE,
 	WORLD_CHANGED,
+	FOOD_LEVEL_CHANGED,
 
 	/**
 	 * Plugin events

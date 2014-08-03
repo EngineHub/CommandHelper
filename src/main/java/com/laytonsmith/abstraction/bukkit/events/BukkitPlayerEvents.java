@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit.events;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -15,6 +16,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
@@ -35,6 +37,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
 import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
+import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
 import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
@@ -60,7 +63,6 @@ import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +72,7 @@ import org.bukkit.TravelAgent;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
@@ -103,6 +106,50 @@ import org.bukkit.inventory.ItemStack;
  *
  */
 public class BukkitPlayerEvents {
+	@abstraction(type=Implementation.Type.BUKKIT)
+	public static class BukkitMCFoodLevelChangeEvent implements MCFoodLevelChangeEvent {
+		FoodLevelChangeEvent event;
+
+		public BukkitMCFoodLevelChangeEvent(FoodLevelChangeEvent event) {
+			this.event = event;
+		}
+		
+		@Override
+		public MCHumanEntity getEntity() {
+			return new BukkitMCHumanEntity(event.getEntity());
+		}
+		
+		@Override
+		public int getDifference() {
+			return ((Player)event.getEntity()).getFoodLevel() - getFoodLevel();
+		}
+
+		@Override
+		public int getFoodLevel() {
+			return event.getFoodLevel();
+		}
+
+		@Override
+		public void setFoodLevel(int level) {
+			event.setFoodLevel(level);
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return event.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			event.setCancelled(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return event;
+		}
+	}
+	
 	@abstraction(type=Implementation.Type.BUKKIT)
 	public static abstract class BukkitMCPlayerEvent implements MCPlayerEvent {
 
