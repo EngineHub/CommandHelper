@@ -10,6 +10,8 @@ public enum Driver {
 	/**
 	 * Block events
 	 */
+	PISTON_EXTEND,
+	PISTON_RETRACT,
 	BLOCK_BREAK,
 	BLOCK_BURN,
 	BLOCK_DISPENSE,

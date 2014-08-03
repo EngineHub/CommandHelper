@@ -1,10 +1,13 @@
-
-
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -13,15 +16,63 @@ import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
-
 
 /**
  *
  * 
  */
 public class BukkitBlockListener implements Listener{
+	// Track piston state, because Bukkit tends to multi-fire it's piston events.
+	// HAX!
+	List<Block> pistonsOut = new ArrayList<>();
+	List<Block> pistonsIn = new ArrayList<>();
+	
+	@EventHandler(priority=EventPriority.LOWEST)
+    public void onPistonExtend(final BlockPistonExtendEvent e){
+		pistonsIn.remove(e.getBlock());
+		if (pistonsOut.contains(e.getBlock())) {
+			return;
+		}
+		
+		Bukkit.getScheduler().runTaskLater(CommandHelperPlugin.self, new Runnable() {
+			@Override
+			public void run() {
+				pistonsOut.remove(e.getBlock());
+			}
+		}, 20);
+		
+		pistonsOut.add(e.getBlock());
+		
+		BukkitBlockEvents.BukkitMCBlockPistonExtendEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonExtendEvent(e);
+		EventUtils.TriggerExternal(mce);
+        EventUtils.TriggerListener(Driver.PISTON_EXTEND, "piston_extend", mce);
+    }
+	
+	@EventHandler(priority=EventPriority.LOWEST)
+    public void onPistonRetract(final BlockPistonRetractEvent e){
+		pistonsOut.remove(e.getBlock());
+		if (pistonsIn.contains(e.getBlock())) {
+			return;
+		}
+		
+		Bukkit.getScheduler().runTaskLater(CommandHelperPlugin.self, new Runnable() {
+			@Override
+			public void run() {
+				pistonsIn.remove(e.getBlock());
+			}
+		}, 20);
+		
+		pistonsIn.add(e.getBlock());
+		
+		BukkitBlockEvents.BukkitMCBlockPistonRetractEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonRetractEvent(e);
+		EventUtils.TriggerExternal(mce);
+        EventUtils.TriggerListener(Driver.PISTON_RETRACT, "piston_retract", mce);
+    }
+	
 	@EventHandler(priority=EventPriority.LOWEST)
     public void onSignChange(SignChangeEvent e){
 		BukkitBlockEvents.BukkitMCSignChangeEvent mce = new BukkitBlockEvents.BukkitMCSignChangeEvent(e);
