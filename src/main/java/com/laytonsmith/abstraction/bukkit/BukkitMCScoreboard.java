@@ -143,7 +143,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 			// New style
 			ReflectionUtils.invokeMethod(s, "resetScores", entry);
 		} else {
-			Player player = Bukkit.getPlayer(entry);
+			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			ReflectionUtils.invokeMethod(s, "resetScores", player);
 		}
 	}
