@@ -216,8 +216,8 @@ public class ReflectionUtils {
 				if (o != null) {
 					cl.add(o.getClass());
 				} else {
-					//If it's null, we'll just have to assume Object
-					cl.add(Object.class);
+					//If it's null, we'll just add null, and check it below
+					cl.add(null);
 				}
 			}
 			argTypes = cl.toArray(new Class[cl.size()]);
@@ -233,10 +233,13 @@ public class ReflectionUtils {
 							//of the method's parameters. If so, this is our method,
 							//otherwise, not.
 							for (int i = 0; i < argTypes.length; i++) {
-								if (!args[i].isAssignableFrom(argTypes[i])) {
+								// Null types match everything, so if argTypes[i] is null, then we
+								// don't care what the actual method type is.
+								if (argTypes[i] != null && !args[i].isAssignableFrom(argTypes[i])) {
 									continue method;
 								}
 							}
+							m.setAccessible(true);
 							return m.invoke(instance, params);
 						}
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
