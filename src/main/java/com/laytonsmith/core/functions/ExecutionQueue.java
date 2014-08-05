@@ -13,10 +13,11 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
- * 
+ *
  */
 public class ExecutionQueue {
 	public static String docs(){
@@ -28,7 +29,7 @@ public class ExecutionQueue {
 			+ " [[CommandHelper/Execution_Queue|article on the learning trail]]"
 			+ " for more information.";
 	}
-	
+
 	@api(environments={GlobalEnv.class})
 	public static class queue_push extends AbstractFunction{
 
@@ -58,7 +59,7 @@ public class ExecutionQueue {
 			if(args.length == 2){
 				queue = args[1].nval();
 			}
-			
+
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
@@ -71,12 +72,14 @@ public class ExecutionQueue {
 								c.execute();
 							} catch(ConfigRuntimeException ex){
 								ConfigRuntimeException.HandleUncaughtException(ex, environment);
+							} catch(ProgramFlowManipulationException ex){
+								// Ignored
 							}
 						}
 					});
 				}
 			});
-			
+
 			return CVoid.VOID;
 		}
 
@@ -99,9 +102,9 @@ public class ExecutionQueue {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={GlobalEnv.class})
 	public static class queue_push_front extends AbstractFunction{
 
@@ -131,7 +134,7 @@ public class ExecutionQueue {
 			if(args.length == 2){
 				queue = args[1].nval();
 			}
-			
+
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
@@ -144,12 +147,14 @@ public class ExecutionQueue {
 								c.execute();
 							} catch(ConfigRuntimeException ex){
 								ConfigRuntimeException.HandleUncaughtException(ex, environment);
+							} catch(ProgramFlowManipulationException ex){
+								// Ignored
 							}
 						}
 					});
 				}
 			});
-			
+
 			return CVoid.VOID;
 		}
 
@@ -172,9 +177,9 @@ public class ExecutionQueue {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={GlobalEnv.class})
 	public static class queue_remove extends AbstractFunction{
 
@@ -222,9 +227,9 @@ public class ExecutionQueue {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={GlobalEnv.class})
 	public static class queue_remove_front extends AbstractFunction{
 
@@ -273,9 +278,9 @@ public class ExecutionQueue {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={GlobalEnv.class})
 	public static class queue_clear extends AbstractFunction{
 
@@ -324,9 +329,9 @@ public class ExecutionQueue {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={GlobalEnv.class})
 	public static class queue_running extends AbstractFunction{
 
@@ -373,9 +378,9 @@ public class ExecutionQueue {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={GlobalEnv.class})
 	public static class queue_delay extends AbstractFunction{
 
@@ -435,9 +440,9 @@ public class ExecutionQueue {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={GlobalEnv.class})
 	public static class queue_delay_front extends AbstractFunction{
 
@@ -496,6 +501,6 @@ public class ExecutionQueue {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }
