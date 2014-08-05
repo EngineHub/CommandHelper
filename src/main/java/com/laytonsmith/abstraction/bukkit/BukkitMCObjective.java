@@ -51,7 +51,7 @@ public class BukkitMCObjective implements MCObjective {
 			return new BukkitMCScore((Score) ReflectionUtils.invokeMethod(o, "getScore", entry));
 		} else {
 			// Old style
-			Player player = Bukkit.getPlayer(entry);
+			OfflinePlayer player = Bukkit.getPlayer(entry);
 			return new BukkitMCScore((Score) ReflectionUtils.invokeMethod(o, "getScore", player));
 		}
 	}
