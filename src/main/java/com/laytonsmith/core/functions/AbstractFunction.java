@@ -104,16 +104,6 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * Only an extreme few functions should allow braces.
-	 *
-	 * @return
-	 */
-	@Override
-	public boolean allowBraces() {
-		return false;
-	}
-
-	/**
 	 * Most functions don't need the varlist.
 	 *
 	 * @param varList

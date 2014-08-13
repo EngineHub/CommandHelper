@@ -391,11 +391,6 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean allowBraces() {
-			return true;
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 5, @i++,\n\tmsg(@i)\n)"),
@@ -761,11 +756,6 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean allowBraces() {
-			return true;
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Using \"in\" keyword", "@array = array(1, 2, 3);\n"
@@ -1065,11 +1055,6 @@ public class DataHandling {
 		public String profileMessageS(List<ParseTree> args) {
 			return "Executing function: " + this.getName() + "("
 					+ args.get(0).toStringVerbose() + ", <code>)";
-		}
-
-		@Override
-		public boolean allowBraces() {
-			return true;
 		}
 
 	}
@@ -2134,10 +2119,6 @@ public class DataHandling {
 //            //that here. If we don't, we lose the information
 //            return ;
 //        }
-		@Override
-		public boolean allowBraces() {
-			return true;
-		}
 
 	}
 
@@ -2869,11 +2850,7 @@ public class DataHandling {
 		public boolean useSpecialExec() {
 			return true;
 		}
-
-		@Override
-		public boolean allowBraces() {
-			return true;
-		}
+		
 	}
 
 	@api

@@ -5,8 +5,8 @@ import com.laytonsmith.core.compiler.Keyword;
 /**
  *
  */
-@Keyword.keyword("while")
-public class WhileKeyword extends SimpleBlockKeywordFunction {
+@Keyword.keyword("switch")
+public class SwitchKeyword extends SimpleBlockKeywordFunction {
 
 	@Override
 	protected Integer[] getFunctionArgumentCount() {

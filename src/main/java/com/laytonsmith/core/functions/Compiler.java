@@ -424,18 +424,6 @@ public class Compiler {
 				}
 			}
 
-			// Keyword processing
-			KeywordList.getKeywordList();
-			for(int i = 0; i < list.size(); i++){
-				ParseTree node = list.get(i);
-				// Keywords can be standalone, or a function can double as a keyword. So we have to check for both
-				// conditions.
-				if(node.getData() instanceof CKeyword
-						|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)){
-					i = KeywordList.getKeywordByName(node.getData().val()).process(list, i);
-				}
-			}
-
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
 			//left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
 			//be handled in MethodScriptCompiler's optimize function. Also, we must scan for CPreIdentifiers,

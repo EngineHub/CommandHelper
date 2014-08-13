@@ -1,6 +1,7 @@
-package com.laytonsmith.core.compiler;
+package com.laytonsmith.core.compiler.keywords;
 
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.List;
@@ -16,7 +17,7 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
 		Target t = list.get(keywordPosition).getTarget();
-		if(list.size() > keywordPosition){
+		if(list.size() > keywordPosition + 1){
 			ParseTree code = list.get(keywordPosition + 1);
 			if(this.isCodeBlock(code)){
 				// This is a valid format, but we need to make sure that there is only one argument passed
@@ -50,7 +51,6 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 						}
 					}
 				}
-				this.validateCodeBlock(code, "");
 				list.get(keywordPosition).addChild(getArgumentOrNull(code));
 				list.remove(keywordPosition + 1);
 			}

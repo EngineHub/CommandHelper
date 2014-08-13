@@ -5,12 +5,12 @@ import com.laytonsmith.core.compiler.Keyword;
 /**
  *
  */
-@Keyword.keyword("while")
-public class WhileKeyword extends SimpleBlockKeywordFunction {
+@Keyword.keyword("proc")
+public class ProcKeyword extends SimpleBlockKeywordFunction {
 
 	@Override
 	protected Integer[] getFunctionArgumentCount() {
-		return new Integer[]{1};
+		return null;
 	}
 
 }

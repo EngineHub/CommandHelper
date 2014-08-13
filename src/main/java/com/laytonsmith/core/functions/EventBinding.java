@@ -185,11 +185,6 @@ public class EventBinding {
 		}
 
 		@Override
-		public boolean allowBraces() {
-			return true;
-		}
-
-		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CUSTOM_LINK);
 		}

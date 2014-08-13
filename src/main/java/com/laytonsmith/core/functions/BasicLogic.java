@@ -138,54 +138,57 @@ public class BasicLogic {
 			);
 		}
 
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> args, FileOptions fileOptions) throws ConfigCompileException {
-			//Just, always turn this into an ifelse, though throw a compile error if there are more than
-			//3 arguments, if this isn't a pre-ifelse
-			boolean allowOverloading = false;
-			for (ParseTree arg : args) {
-				//If any are CIdentifiers, forward this to ifelse
-				if (arg.getData().wasIdentifier()) {
-					allowOverloading = true;
-					break;
-				}
-			}
-			//Now check for too many/too few arguments
-			if (args.size() == 1) {
-				//Can't error for this, because if(..){ } is valid, and at this point, there is no
-				//difference between if(..) and if(..){ }. For now, a warning, but once { } is its
-				//own data structure, this can be revisited.
-				//throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
-				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Empty if statement. This could likely be an error.", t);
-			}
-			if (!allowOverloading && args.size() > 3) {
-				throw new ConfigCompileException("if() can only have 3 parameters", t);
-			}
-			return new ifelse().optimizeDynamic(t, args, fileOptions);
-//			if (args.get(0).getData().isDynamic()) {
-//				return super.optimizeDynamic(t, args); //Can't optimize
-//			} else {
-//				if (Static.getBoolean(args.get(0).getData())) {
-//					return args.get(1);
-//				} else {
-//					if (args.size() == 3) {
-//						return args.get(2);
-//					} else {
-//						FileOptions options = new FileOptions(new HashMap<String, String>());
-//						if (!args.isEmpty()) {
-//							options = args.get(0).getFileOptions();
-//						}
-//						ParseTree node = new ParseTree(CVoid.VOID, options);
-//						node.setOptimized(true);
-//						return node;
-//					}
-//				}
-//			}
-		}
+		private static final String and = new and().getName();
 
 		@Override
-		public boolean allowBraces() {
-			return true;
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> args, FileOptions fileOptions) throws ConfigCompileException {
+			//Check for too many/too few arguments
+			if (args.size() == 1) {
+				throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
+			}
+			if (args.size() > 3) {
+				throw new ConfigCompileException("if() can only have 3 parameters", t);
+			}
+			if(args.get(0).isConst()){
+				// We can optimize this one way or the other, since the condition is const
+				if(Static.getBoolean(args.get(0).getData())){
+					// It's true, return the true condition
+					return args.get(1);
+				} else {
+					// If there are three args, return the else condition, otherwise,
+					// have it entirely remove us from the parse tree.
+					if(args.size() == 3){
+						return args.get(2);
+					} else {
+						return Optimizable.REMOVE_ME;
+					}
+				}
+			}
+			// If the code looks like this:
+			// if(@a){
+			//		if(@b){
+			//		}
+			// }
+			// then we can turn this into if(@a && @b){ }, as they are functionally
+			// equivalent, and this construct tends to be faster (less stack frames, presumably).
+			// The caveat is that if the inner if statement has an else statement (or is ifelse)
+			// or there are other nodes inside the statement, or we have an else clause
+			// we cannot do this optimization, as it then has side effects.
+			if(args.get(1).getData() instanceof CFunction && args.get(1).getData().val().equals("if") && args.size() == 2){
+				ParseTree _if = args.get(1);
+				if(_if.getChildren().size() == 2){
+					// All the conditions are met, move this up
+					ParseTree myCondition = args.get(0);
+					ParseTree theirCondition = _if.getChildAt(0);
+					ParseTree theirCode = _if.getChildAt(1);
+					ParseTree andClause = new ParseTree(new CFunction(and, t), fileOptions);
+					andClause.addChild(myCondition);
+					andClause.addChild(theirCondition);
+					args.set(0, andClause);
+					args.set(1, theirCode);
+				}
+			}
+			return null;
 		}
 
 		@Override
@@ -196,6 +199,114 @@ public class BasicLogic {
 				new ExampleScript("With braces, false condition", "msg('Start')\nif(false){\n\tmsg('This will not show')\n}\nmsg('Finish')"),};
 		}
 
+	}
+
+		@api(environments = {GlobalEnv.class})
+	public static class ifelse extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "ifelse";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {[boolean1, code]..., [elseCode]} Provides a more convenient method"
+					+ " for running if/else chains. If none of the conditions are true, and"
+					+ " there is no 'else' condition, void is returned.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public boolean preResolveVariables() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CNull.NULL;
+		}
+
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			if (nodes.length < 2) {
+				throw new ConfigRuntimeException("ifelse expects at least 2 arguments", ExceptionType.InsufficientArgumentsException, t);
+			}
+			for (int i = 0; i <= nodes.length - 2; i += 2) {
+				ParseTree statement = nodes[i];
+				ParseTree code = nodes[i + 1];
+				Construct evalStatement = parent.seval(statement, env);
+				if (evalStatement instanceof CIdentifier) {
+					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
+				}
+				if (Static.getBoolean(evalStatement)) {
+					Construct ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
+					return ret;
+				}
+			}
+			if (nodes.length % 2 == 1) {
+				Construct ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
+				if (ret instanceof CIdentifier) {
+					return parent.seval(((CIdentifier) ret).contained(), env);
+				} else {
+					return ret;
+				}
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
+
+		private static final String g = new DataHandling.g().getName();
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			// TODO: Redo this optimization.
+			return null;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "ifelse(false, msg('This is false'), true, msg('This is true'))"),
+				new ExampleScript("With braces", "if(false){\n\tmsg('This is false')\n} else {\n\tmsg('This is true')\n}"),
+				new ExampleScript("With braces, with else if", "if(false){\n\tmsg('This will not show')\n} else if(false){\n"
+				+ "\n\tmsg('This will not show')\n} else {\n\tmsg('This will show')\n}"),};
+		}
 	}
 
 	@api
@@ -318,11 +429,6 @@ public class BasicLogic {
 
 		@Override
 		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public boolean allowBraces() {
 			return true;
 		}
 
@@ -622,252 +728,6 @@ public class BasicLogic {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-	}
-
-	@api(environments = {GlobalEnv.class})
-	public static class ifelse extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "ifelse";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public String docs() {
-			return "mixed {[boolean1, code]..., [elseCode]} Provides a more convenient method"
-					+ " for running if/else chains. If none of the conditions are true, and"
-					+ " there is no 'else' condition, void is returned.";
-		}
-
-		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public boolean preResolveVariables() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CNull.NULL;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if (nodes.length < 2) {
-				throw new ConfigRuntimeException("ifelse expects at least 2 arguments", ExceptionType.InsufficientArgumentsException, t);
-			}
-			for (int i = 0; i <= nodes.length - 2; i += 2) {
-				ParseTree statement = nodes[i];
-				ParseTree code = nodes[i + 1];
-				Construct evalStatement = parent.seval(statement, env);
-				if (evalStatement instanceof CIdentifier) {
-					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
-				}
-				if (Static.getBoolean(evalStatement)) {
-					Construct ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
-					return ret;
-				}
-			}
-			if (nodes.length % 2 == 1) {
-				Construct ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
-				if (ret instanceof CIdentifier) {
-					return parent.seval(((CIdentifier) ret).contained(), env);
-				} else {
-					return ret;
-				}
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC
-			);
-		}
-
-		private static final String and = new and().getName();
-		private static final String g = new DataHandling.g().getName();
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-
-			FileOptions options = new FileOptions(new HashMap<String, String>());
-			if (!children.isEmpty()) {
-				options = children.get(0).getFileOptions();
-			}
-			ParseTree node = new ParseTree(new CFunction(this.getName(), t), options);
-			node.setOptimized(true);
-			List<ParseTree> optimizedTree = new ArrayList<>();
-			//We have to cache the return value if even if we find it, so we can check for syntax errors
-			//in all the branches, not just the ones before the first hardcoded true
-			ParseTree toReturn = null;
-			for (int i = 0; i <= children.size() - 2; i += 2) {
-				ParseTree statement = children.get(i);
-				ParseTree code = children.get(i + 1);
-				Construct evalStatement = statement.getData();
-				if (evalStatement instanceof CIdentifier) {
-					//check for an else here, if so, it's a compile error
-					if (evalStatement.val().equals("else")) {
-						throw new ConfigCompileException("Unexpected else", t);
-					}
-				}
-				if (!statement.getData().isDynamic()) {
-					if (evalStatement instanceof CIdentifier) {
-						evalStatement = ((CIdentifier) evalStatement).contained().getData();
-					}
-					//If it's hardcoded true, we found it.
-					if (Static.getBoolean(evalStatement)) {
-						if (toReturn == null) {
-							toReturn = code;
-						}
-					} //else it's hard coded false, and we can ignore it.
-				} else {
-					//It's dynamic, so we can't do anything with it
-					optimizedTree.add(statement);
-					optimizedTree.add(code);
-				}
-				// We can pull up if(@a){ if(@b){ ...} } to if(@a && @b){ ... },
-				// which, in my profiling is faster. The only special consideration
-				// we have to make is to ensure that the inner if is the only statement
-				// in the entire block, (including lack of an else) so any code outside the inner if causes this
-				// optimization to be impossible. An inner ifelse cannot be optimized, unless it only has 2 arguments
-				// (in which case, it's a normal if())
-				// If the outer if has an else, we can't do it either, so check that the outer if only has 2 children too.
-				if (children.size() == 2 && code.getChildren().size() == 2 && code.getData() instanceof CFunction && code.getData().val().equals("ifelse")) {
-					CFunction andNode = new CFunction(and, t);
-					ParseTree andTree = new ParseTree(andNode, statement.getFileOptions());
-					andTree.addChild(statement);
-					andTree.addChild(code.getChildAt(0));
-					if (optimizedTree.size() < 1) {
-						optimizedTree.add(andTree);
-					} else {
-						optimizedTree.set(i, andTree);
-					}
-					if (optimizedTree.size() < 2) {
-						optimizedTree.add(code.getChildAt(1));
-					} else {
-						optimizedTree.set(i + 1, code.getChildAt(1));
-					}
-					//We need to set this to re-optimize the children, because the and() construction may be unoptimal now
-					for (ParseTree pt : andTree.getChildren()) {
-						pt.setOptimized(false);
-					}
-					node.setOptimized(false);
-				}
-			}
-			if (toReturn != null) {
-				return toReturn;
-			}
-			if (children.size() % 2 == 1) {
-				ParseTree ret = children.get(children.size() - 1);
-				if (ret.getData() instanceof CIdentifier) {
-					optimizedTree.add(((CIdentifier) ret.getData()).contained());
-				} else {
-					optimizedTree.add(ret);
-				}
-				if (children.size() == 1 && optimizedTree.size() == 1) {
-					//Oh. Well, we can just return this node then, though we have
-					//to surround it with g() so there are no side effects. However,
-					//if the function itself has no side effects, we can simply remove
-					//it altogether.
-					if (optimizedTree.get(0).getData() instanceof CFunction) {
-						Function f = ((CFunction) optimizedTree.get(0).getData()).getFunction();
-						if (f instanceof Optimizable) {
-							if (((Optimizable) f).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)) {
-								return Optimizable.REMOVE_ME;
-							}
-						}
-					}
-					ParseTree gNode = new ParseTree(new CFunction(g, t), options);
-					gNode.addChild(optimizedTree.get(0));
-					return gNode;
-				}
-			}
-			if (optimizedTree.size() == 1) {
-				//The whole tree has been optimized out. Return just the element
-				return optimizedTree.get(0);
-			}
-			node.setChildren(optimizedTree);
-			if (node.getChildren().isEmpty()) {
-				//We have optimized it out entirely, so remove us
-				return Optimizable.REMOVE_ME;
-			}
-			return node;
-
-		}
-//        @Override
-//        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-//            boolean inNewMode = false;
-//            for(int i = 0; i < args.length; i++){
-//                if(args[0] instanceof CIdentifier){
-//                    inNewMode = true;
-//                    break;
-//                }
-//            }
-//
-//            if(!inNewMode){
-//                return null;//TODO: We can optimize this, even with some parameters dynamic, but
-//                we need the tree.
-//            } else {
-//                Only an else shoved in the middle is disallowed
-//                if(!(args[args.length - 1] instanceof CIdentifier)){
-//                    throw new ConfigCompileException("Syntax error", t);
-//                }
-//                for(int i = 1; i <= args.length; i++){
-//                    if(!(args[i] instanceof CIdentifier)){
-//                        throw new ConfigCompileException("Syntax error", t);
-//                    } else {
-//                        CIdentifier ci = (CIdentifier)args[i];
-//                        if(ci.val().equals("else")){
-//                            throw new ConfigCompileException("Unexpected else, was expecting else if", t);
-//                        }
-//                    }
-//                }
-//                return null;
-//            }
-//        }
-//
-//        public ParseTree optimizeSpecial(Target target, List<ParseTree> children) {
-//            throw new UnsupportedOperationException("Not yet implemented");
-//        }
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Functional usage", "ifelse(false, msg('This is false'), true, msg('This is true'))"),
-				new ExampleScript("With braces", "if(false){\n\tmsg('This is false')\n} else {\n\tmsg('This is true')\n}"),
-				new ExampleScript("With braces, with else if", "if(false){\n\tmsg('This will not show')\n} else if(false){\n"
-				+ "\n\tmsg('This will not show')\n} else {\n\tmsg('This will show')\n}"),};
 		}
 	}
 
@@ -2649,130 +2509,6 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "urshift(2, 1)"),
 				new ExampleScript("Basic usage", "urshift(-2, 1)"),};
-		}
-	}
-
-	@api
-	@hide("This isn't a true function, and shouldn't be directly used. It will eventually be removed.")
-	public static class _elseif extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "elseif";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "elseif {param} Returns an elseif construct. Used internally by the compiler, use"
-					+ " in actual code will have undefined behavior.";
-		}
-
-		@Override
-		public ExceptionType[] thrown() {
-			return null;
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			return new CIdentifier("elseif", nodes[0], t);
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CNull.NULL;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC
-			);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			return Optimizable.PULL_ME_UP;
-		}
-	}
-
-	@api
-	@hide("This isn't a true function, and shouldn't be used as such. Eventually this will be removed.")
-	public static class _else extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "else";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "else {param} Returns an else construct. Used internally by the compiler, use in"
-					+ " code will result in undefined behavior.";
-		}
-
-		@Override
-		public ExceptionType[] thrown() {
-			return null;
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			return new CIdentifier("else", nodes[0], t);
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CNull.NULL;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
 		}
 	}
 

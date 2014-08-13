@@ -34,7 +34,6 @@ public class Token {
 		OPT_VAR_ASSIGN(TokenVariant.SEPARATOR),
 		ALIAS_END(TokenVariant.SEPARATOR),
 		COMMA(TokenVariant.SEPARATOR),
-		SCOMMA(TokenVariant.SEPARATOR),
 		FUNC_NAME(),
 		FUNC_START(TokenVariant.SEPARATOR),
         FUNC_END(TokenVariant.SEPARATOR),

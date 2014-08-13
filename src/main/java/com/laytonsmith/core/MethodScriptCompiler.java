@@ -1036,7 +1036,6 @@ public final class MethodScriptCompiler {
 		 * is greater than 1, will be moved down into an autoconcat.
 		 */
 		Stack<AtomicInteger> constructCount = new Stack<>();
-		Stack<AtomicBoolean> usesBraces = new Stack<>();
 		constructCount.push(new AtomicInteger(0));
 		parents.push(tree);
 
@@ -1243,24 +1242,12 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException("Unexpected parenthesis", t.target);
 				}
 				parens++;
-				usesBraces.push(new AtomicBoolean(false));
 			} else if (t.type.equals(TType.FUNC_END)) {
 				if (parens <= 0) {
 					throw new ConfigCompileException("Unexpected parenthesis", t.target);
 				}
 				parens--;
 				ParseTree function = parents.pop();
-				if (usesBraces.peek().get()) {
-					Function f;
-					try {
-						f = (Function) FunctionList.getFunction(function.getData());
-					} catch (ConfigCompileException e) {
-						throw new ConfigCompileException("Could not find function " + function.getData().val(), t.target);
-					}
-					if (!f.allowBraces()) {
-						throw new ConfigCompileException("Improper use of braces with " + f.getName() + "()", t.target);
-					}
-				}
 				if (constructCount.peek().get() > 1) {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
@@ -1282,7 +1269,6 @@ public final class MethodScriptCompiler {
 					}
 					tree.addChild(c);
 				}
-				usesBraces.pop();
 				constructCount.pop();
 				try {
 					constructCount.peek().incrementAndGet();
@@ -1294,10 +1280,7 @@ public final class MethodScriptCompiler {
 				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
-			} else if (t.type.equals(TType.COMMA) || t.type == TType.SCOMMA) {
-				if (t.type == TType.SCOMMA) {
-					usesBraces.peek().set(true);
-				}
+			} else if (t.type.equals(TType.COMMA)) {
 				if (constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
@@ -1441,6 +1424,7 @@ public final class MethodScriptCompiler {
 
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<Procedure>());
+		processKeywords(tree);
 		optimize(tree, procs);
 		link(tree);
 		checkLabels(tree);
@@ -1720,6 +1704,7 @@ public final class MethodScriptCompiler {
 				hasIVars = true;
 			}
 		}
+
 		//In all cases, at this point, we are either unable to optimize, or we will
 		//optimize, so set our optimized variable at this point.
 		tree.setOptimized(true);
@@ -1856,6 +1841,34 @@ public final class MethodScriptCompiler {
 		}
 
 		//It doesn't know how to optimize. Oh well.
+	}
+
+	/**
+	 * Runs keyword processing on the tree. Note that this is run before optimization, and is
+	 * a depth first process.
+	 * @param tree
+	 */
+	private static void processKeywords(ParseTree tree) throws ConfigCompileException{
+		// Keyword processing
+		List<ParseTree> children = tree.getChildren();
+		for(int i = 0; i < children.size(); i++){
+			ParseTree node = children.get(i);
+			// Keywords can be standalone, or a function can double as a keyword. So we have to check for both
+			// conditions.
+			processKeywords(node);
+			if(node.getData() instanceof CKeyword
+					|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)){
+				// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of all
+				// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will
+				// be able to independently process it. We don't want to process THIS level though, just the children of this level.
+				for(int j = i + 1; j < children.size(); j++){
+					processKeywords(children.get(j));
+				}
+				// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
+				i = KeywordList.getKeywordByName(node.getData().val()).process(children, i);
+			}
+		}
+
 	}
 
 	/**

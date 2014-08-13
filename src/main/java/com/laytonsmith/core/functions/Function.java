@@ -17,11 +17,11 @@ import java.util.List;
 
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation
- * to it. 
+ * to it.
  */
 //This will be re-added at some point, so get ready!
 //@MustUseOverride
-public interface Function extends FunctionBase, Documentation {    
+public interface Function extends FunctionBase, Documentation {
 
     /**
      * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)
@@ -34,7 +34,7 @@ public interface Function extends FunctionBase, Documentation {
      * with a user compiling, or running this function. If this function returns true, the permissions file will be checked for
      * commandhelper.func.compile.&lt;function name&gt; upon compilation, and commandhelper.func.use.&lt;function name&gt; upon
      * usage in game. Note that the config script is never barred from compiling any function.
-     * @return 
+     * @return
      */
     public boolean isRestricted();
 
@@ -43,17 +43,17 @@ public interface Function extends FunctionBase, Documentation {
      * an atomic, resolved value, the function can return true from this function. This will signal the interpreter
      * to go ahead and resolve the variable into one of the atomic Constructs. If it returns false, it is possible
      * the exec function will receive an IVariable Construct.
-     * @return 
+     * @return
      */
     public boolean preResolveVariables();
 
     /**
-     * Whether or not to run this function asynchronously from the main server thread. If you 
+     * Whether or not to run this function asynchronously from the main server thread. If you
      * return true, you may NOT have any interaction with the bukkit api, other than
      * bukkit thread safe methods. Returning true WILL run this function in the CH thread, returning
      * false WILL run this function in the main server thread, and returning null will run this
      * function in whatever context the script is currently running in.
-     * @return 
+     * @return
      */
     public Boolean runAsync();
 
@@ -71,72 +71,65 @@ public interface Function extends FunctionBase, Documentation {
      * @param f The file that this function call is being run from
      * @param args An array of evaluated Constructs
      * @return
-     * @throws CancelCommandException 
+     * @throws CancelCommandException
      */
     public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException;
-    
+
     /**
      * If a function needs a code tree instead of a resolved construct, it should return true here. Most
      * functions will return false for this value.
-     * @return 
+     * @return
      */
     public boolean useSpecialExec();
-    
+
     /**
      * If useSpecialExec indicates it needs the code tree instead of the resolved constructs,
      * this gets called instead of exec. If execs is needed, exec should return CVoid.
      * @param t
      * @param env
      * @param nodes
-     * @return 
+     * @return
      */
     public Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
 
-    /**
-     * If a function's syntax allows { braces }, then this method should return true. Exceedingly few functions
-     * should allow this, as only language construct emulators should use braces.
-     * @return 
-     */
-    public boolean allowBraces();
-	
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.
-	 * @return 
+	 * @return
 	 */
 	public ExampleScript[] examples() throws ConfigCompileException;
-	
+
 	/**
 	 * Returns true if this function should be profilable. Only a very select few functions
 	 * should avoid profiling. AbstractFunction handles this by checking if the noprofile
 	 * annotation is present.
-	 * @return 
+	 * @return
 	 */
-	public boolean shouldProfile();	
-	
+	public boolean shouldProfile();
+
 	/**
 	 * Returns the minimum level at which this function should be profiled at.
-	 * @return 
+	 * @return
 	 */
 	public LogLevel profileAt();
-	
+
 	/**
 	 * Returns the message to use when this function gets profiled, if
 	 * useSpecialExec returns false.
-	 * @return 
+	 * @return
 	 */
 	public String profileMessage(Construct ... args);
-	
+
 	/**
 	 * Returns the message to use when this function gets profiled, if
 	 * useSpecialExec returns true.
 	 * @param args
-	 * @return 
+	 * @return
 	 */
 	public String profileMessageS(List<ParseTree> args);
-    
+
     /**
      * In addition to being a function, an object may also be a code branch, that is,
-     * it conditionally will execute some of its arguments. 
+     * it conditionally will execute some of its arguments.
      * For optimization and static code analysis purposes,
      * it it important for these functions to be able to provide more information
      * about their branches; if the branch conditions are static, they should be reduceable to a single
