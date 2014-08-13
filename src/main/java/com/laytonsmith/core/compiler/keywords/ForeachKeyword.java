@@ -27,8 +27,8 @@ public class ForeachKeyword extends Keyword {
 			if(isCodeBlock(codeBlock)){
 				validateCodeBlock(codeBlock, "");
 				foreach.addChild(getArgumentOrNull(codeBlock));
+				list.remove(keywordPosition + 1);
 			}
-			list.remove(keywordPosition + 1);
 		}
 		if(list.size() > keywordPosition + 1){
 			// This part handles the else keyword, i.e. foreach(...){ } else { }

@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  *
- * 
+ *
  */
 public class BasicLogicTest {
 
@@ -363,16 +363,16 @@ public class BasicLogicTest {
                 + "3, wrong,"
                 + "correct)", null));
     }
-    
+
     @Test public void testSwitch2() throws ConfigCompileException{
         SRun("switch(2, 1, msg('nope'), 2, msg('yep'))", fakePlayer);
         verify(fakePlayer).sendMessage("yep");
     }
-    
+
     @Test public void testSwitch3() throws ConfigCompileException{
         SRun("assign(@args, 'test')" +
                 "switch(@args," +
-                    "'test'," + 
+                    "'test'," +
                         "msg('test')," +
                     "msg('default')" +
                 ")",
@@ -401,25 +401,25 @@ public class BasicLogicTest {
                 + "if(@true, msg('Hello World!'))", fakePlayer);
         verify(fakePlayer).sendMessage("Hello World!");
     }
-	
+
 	@Test
 	public void testSwitchWithRange() throws Exception{
 		SRun("switch(dyn(1)){"
-				+ "0..5, msg('yes'),"
-				+ "6..10, msg('no')"
+				+ "case 0..5: msg('yes')"
+				+ "case 6..10: msg('no')"
 				+ "}"
 				+ "switch(dyn(1)){"
-				+ "1..5, msg('yes')"
+				+ "case 1..5: msg('yes')"
 				+ "}"
 				+ "switch(dyn(1)){"
-				+ "5..0, msg('yes')"
+				+ "case 5..0: msg('yes')"
 				+ "}"
 				+ "switch(dyn(1)){"
-				+ "array(1..2, 3..4), msg('yes')"
+				+ "case 1..2: case 3..4: msg('yes')"
 				+ "}", fakePlayer);
 		verify(fakePlayer, times(4)).sendMessage("yes");
 	}
-	
+
 	@Test
 	public void testRefEquals1() throws Exception {
 		SRun("@a = array(1, 2, 3)\n" //Same reference

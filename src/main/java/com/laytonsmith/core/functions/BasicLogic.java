@@ -182,8 +182,14 @@ public class BasicLogic {
 					ParseTree theirCondition = _if.getChildAt(0);
 					ParseTree theirCode = _if.getChildAt(1);
 					ParseTree andClause = new ParseTree(new CFunction(and, t), fileOptions);
-					andClause.addChild(myCondition);
-					andClause.addChild(theirCondition);
+					// If it's already an and(), just tack the other condition on
+					if(myCondition.getData() instanceof CFunction && myCondition.getData().val().equals(and)){
+						andClause = myCondition;
+						andClause.addChild(theirCondition);
+					} else {
+						andClause.addChild(myCondition);
+						andClause.addChild(theirCondition);
+					}
 					args.set(0, andClause);
 					args.set(1, theirCode);
 				}

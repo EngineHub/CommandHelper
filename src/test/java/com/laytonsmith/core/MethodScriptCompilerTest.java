@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  *
- * 
+ *
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(CommandHelperPlugin.class)
@@ -62,7 +62,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Before
-    public void setUp() throws Exception {        
+    public void setUp() throws Exception {
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
 		env = Static.GenerateStandaloneEnvironment();
@@ -140,7 +140,7 @@ public class MethodScriptCompilerTest {
         } catch (ConfigCompileException e) {
             //passed
         }
-        
+
         try{
             //no multiline end construct
             MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = >>>\nmsg('hi')\n", null, false)).get(0).compileRight();
@@ -150,24 +150,24 @@ public class MethodScriptCompilerTest {
         }
 
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("if(1, msg('') msg(''))", null, true));
-        
+
     }
-    
+
     @Test public void testLabel() throws ConfigCompileException{
         assertEquals(PermissionsResolver.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("*:/cmd = die()", null, false)).get(0).compile().getLabel());
         assertEquals(PermissionsResolver.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("* : /cmd = die()", null, false)).get(0).compile().getLabel());
         assertEquals("~lol/fun", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("~lol/fun: /cmd = die()", null, false)).get(0).compile().getLabel());
     }
-    
+
     @Test
     public void testCompile13() throws ConfigCompileException{
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg ('hi')", null, true));
     }
-    
+
     @Test public void testCompile14() throws ConfigCompileException{
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg(('hi'))", null, true));
     }
-    
+
     @Test
     public void testCompile15() throws ConfigCompileException{
         try{
@@ -299,8 +299,8 @@ public class MethodScriptCompilerTest {
                 + "yup, still a comment. yay() */";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
-    } 
-    
+    }
+
     @Test
     public void testExecute13() throws ConfigCompileException {
         String script =
@@ -309,7 +309,7 @@ public class MethodScriptCompilerTest {
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
         verify(fakePlayer).sendMessage("0");
     }
-    
+
     @Test
     public void testExecute14() throws ConfigCompileException {
         String script =
@@ -322,7 +322,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("hello");
         verify(fakePlayer).sendMessage("world");
     }
-    
+
     @Test public void testExecute15() throws ConfigCompileException{
         String script =
                 "assign(@i, 0)\n"
@@ -338,7 +338,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("@i is currently hello and @j is");
         verify(fakePlayer).sendMessage("@i is currently world and @j is");
     }
-    
+
     @Test public void testExecute16() throws ConfigCompileException{
         String script =
                 "proc(_myProc, @i, @j, @k, msg(trim(@i @j @k)))\n"
@@ -352,7 +352,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("1 2");
         verify(fakePlayer, times(2)).sendMessage("1 2 3");
     }
-    
+
     @Test public void testExecute17() throws ConfigCompileException{
         String script =
                 "proc(_addition, @i, @j, msg(add(@i, @j)))\n"
@@ -361,9 +361,9 @@ public class MethodScriptCompilerTest {
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
         //verify(fakePlayer).sendMessage("null null null");
         verify(fakePlayer).sendMessage("2");
-        verify(fakePlayer).sendMessage("4");       
+        verify(fakePlayer).sendMessage("4");
     }
-    
+
     @Test public void testExecute18() throws ConfigCompileException{
         String script =
                 "proc(_myProc, msg(@arguments))\n"
@@ -373,13 +373,13 @@ public class MethodScriptCompilerTest {
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
         //verify(fakePlayer).sendMessage("null null null");
         verify(fakePlayer).sendMessage("{}");
-        verify(fakePlayer).sendMessage("{1}");       
-        verify(fakePlayer).sendMessage("{1, 2}");       
+        verify(fakePlayer).sendMessage("{1}");
+        verify(fakePlayer).sendMessage("{1, 2}");
     }
-    
+
     /**
      * Variables are locked in when the procedure is defined
-     * @throws ConfigCompileException 
+     * @throws ConfigCompileException
      */
     @Test
     public void testExecute19() throws ConfigCompileException {
@@ -411,7 +411,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("hello");
         assertTrue(bool.get());
     }
-    
+
     @Test
     public void testExecute21() throws ConfigCompileException{
         String script = "#*\n"
@@ -420,7 +420,7 @@ public class MethodScriptCompilerTest {
         SRun(script, fakePlayer);
         verify(fakePlayer).sendMessage("Not a comment");
     }
-    
+
     @Test public void testExecute22() throws ConfigCompileException{
         SRun("msg('hi' (this is a thing))", fakePlayer);
         verify(fakePlayer).sendMessage("hi this is a thing");
@@ -436,7 +436,7 @@ public class MethodScriptCompilerTest {
             //Passed
         }
     }
-    
+
 //    @Test
 //    public void testCompileWithDoubleSlashCommand() throws ConfigCompileException{
 //        AliasCore ac = mock(AliasCore.class);
@@ -447,11 +447,11 @@ public class MethodScriptCompilerTest {
 //        String config = "//cmd blah = msg('success')";
 //        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
 //        s.compile();
-//        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);		
+//        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 //        s.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
 //        verify(fakePlayer).sendMessage("success");
 //    }
-//    
+//
 //    @Test
 //    public void testCompileTwoAliases() throws ConfigCompileException{
 //        AliasCore ac = mock(AliasCore.class);
@@ -490,7 +490,7 @@ public class MethodScriptCompilerTest {
                 + "<<<";
         MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false));
     }
-    
+
     @Test
     public void testCompile5() throws ConfigCompileException {
         String config = "label:/cmd = >>>\n"
@@ -500,7 +500,7 @@ public class MethodScriptCompilerTest {
         s.compile();
         assertEquals("label", s.getLabel());
     }
-    
+
     @Test
     public void testCompile6() throws ConfigCompileException {
         String config = "/cmd = >>>\n"
@@ -509,7 +509,7 @@ public class MethodScriptCompilerTest {
         RunCommand(config, fakePlayer, "/cmd");
         verify(fakePlayer).sendMessage("hello world \\ '");
     }
-    
+
     @Test
     public void testCompile7() throws ConfigCompileException {
         String config = "/cmd = >>>\n"
@@ -519,14 +519,14 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("hello");
         verify(fakePlayer).sendMessage("world");
     }
-    
+
     //TODO: Make these tests possible
 //    @Test
 //    public void testCompile8() throws ConfigCompileException {
 //        String config = "/cmd $one $ = >>>\n"
 //                + "msg($one) \\ msg($)"
 //                + "<<<";
-//        
+//
 //        RunVars(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, Target.UNKNOWN),
 //            new Variable("$", "several variables", false, true, Target.UNKNOWN)}), config, fakePlayer);
 //        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
@@ -536,7 +536,7 @@ public class MethodScriptCompilerTest {
 //        verify(fakePlayer).sendMessage("first");
 //        verify(fakePlayer).sendMessage("several variables");
 //    }
-//    
+//
 //    @Test
 //    public void testCompile9() throws ConfigCompileException {
 //        String config = "/test [$var=1] = >>>\n"
@@ -551,7 +551,7 @@ public class MethodScriptCompilerTest {
 //        s.run(new ArrayList<Variable>(), env, null);
 //        verify(fakePlayer).sendMessage("1");
 //    }
-    
+
     @Test
     public void testCompile10() throws ConfigCompileException{
         String config = "/test $var = >>>\n"
@@ -563,10 +563,10 @@ public class MethodScriptCompilerTest {
         assertFalse(s.match("/test"));
         s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
     }
-    
+
     //TODO: Make this test possible
 //    @Test public void testCompile11() throws ConfigCompileException{
-//        
+//
 //        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
 //        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getName(), "ch.alias.safe")).thenReturn(true);
 //        CommandHelperPlugin.myServer = fakeServer;
@@ -575,7 +575,7 @@ public class MethodScriptCompilerTest {
 //                + "all_players()\n"
 //                + "msg($var)\n"
 //                + "<<<";
-//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);        
+//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
 //        s.compile();
 //        assertEquals("safe", s.getLabel());
 //        assertTrue(s.match("/test 2"));
@@ -583,7 +583,7 @@ public class MethodScriptCompilerTest {
 //        verify(fakePlayer).sendMessage("2");
 //        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
 //    }
-    
+
     @Test public void testCompile12() throws ConfigCompileException{
         String config = "/*/one = bad()*/\n"
                 + "/two = msg('Good')\n";
@@ -592,57 +592,57 @@ public class MethodScriptCompilerTest {
         assertFalse(s.match("/one"));
         assertTrue(s.match("/two"));
     }
-    
+
     @Test public void testUnicode() throws ConfigCompileException{
         SRun("msg('\\u0037 is win!')", fakePlayer);
         verify(fakePlayer).sendMessage("7 is win!");
         SRun("msg('\\u20ac')", fakePlayer);
         verify(fakePlayer).sendMessage("€");
     }
-    
+
     @Test public void testInfixMath1() throws ConfigCompileException{
         assertEquals("4", SRun("2 + 2", fakePlayer));
         assertEquals("4", SRun("8 - 4", fakePlayer));
         assertEquals("4", SRun("2 * 2", fakePlayer));
-        assertEquals("4", SRun("16/4", fakePlayer));        
+        assertEquals("4", SRun("16/4", fakePlayer));
     }
-    
+
     @Test public void testInfixMath2() throws ConfigCompileException{
         assertEquals("2", SRun("-2 + 2 + 2", fakePlayer));
         assertEquals("18", SRun("(2 + 4) * 3", fakePlayer));
         assertEquals("14", SRun("2 + 4 * 3", fakePlayer));
     }
-    
+
     @Test public void testInfixMath3() throws ConfigCompileException{
         assertEquals("8.0", SRun("2 ** 3", fakePlayer));
     }
-    
+
     @Test public void testUnary() throws ConfigCompileException{
         assertEquals("1", SRun("2 + - 1", fakePlayer));
     }
-    
+
     @Test public void testSymbolicConcat() throws ConfigCompileException{
         SRun("@hello = 'hello'\n"
 				+ "@world = 'world'\n"
 				+ "msg(@hello.@world)", fakePlayer);
 		verify(fakePlayer).sendMessage("helloworld");
     }
-    
+
     @Test public void testSymbolicLogic1() throws ConfigCompileException{
         assertEquals("true", SRun("2 <= 5", fakePlayer));
         assertEquals("false", SRun("2 === '2'", fakePlayer));
-        assertEquals("true", SRun("g(assign(@var, false)) !@var", fakePlayer));        
+        assertEquals("true", SRun("g(assign(@var, false)) !@var", fakePlayer));
     }
-    
+
     @Test public void testSymbolicLogic2() throws ConfigCompileException{
         assertEquals("true", SRun("true || true", fakePlayer));
         assertEquals("false", SRun("true && false", fakePlayer));
     }
-    
+
     @Test public void testComplexSymbolicLogic() throws ConfigCompileException{
         assertEquals("true", SRun("2 == 2 && true", fakePlayer));
     }
-    
+
     @Test public void testSymbolCompileError(){
         try{
             SRun("(+ * 2)", fakePlayer);
@@ -652,49 +652,49 @@ public class MethodScriptCompilerTest {
         } catch(ConfigRuntimeException e){
             //pass?
         }
-    }        
-    
+    }
+
     @Test public void testComplexSymbols() throws ConfigCompileException{
         SRun("assign(@var, 2) if((@var + 2) == 4, msg('Success!'))", fakePlayer);
         verify(fakePlayer).sendMessage("Success!");
     }
-    
+
     @Test public void testPostfix() throws ConfigCompileException{
         SRun("assign(@var, 2) msg(@var++) msg(@var)", fakePlayer);
         verify(fakePlayer).sendMessage("2");
         verify(fakePlayer).sendMessage("3");
     }
-    
+
     @Test public void testPrefix() throws ConfigCompileException{
         SRun("assign(@var, 2) msg(++@var) msg(@var)", fakePlayer);
-        verify(fakePlayer, times(2)).sendMessage("3");        
+        verify(fakePlayer, times(2)).sendMessage("3");
     }
-    
+
     @Test public void testModulo() throws ConfigCompileException{
         assertEquals(Integer.toString(2 % 3), SRun("2 % 3", fakePlayer));
     }
-    
+
     @Test public void TestOperationsWithFunction() throws ConfigCompileException{
         SRun("if(!and(false, false), msg('yes'))", fakePlayer);
         verify(fakePlayer).sendMessage("yes");
     }
-    
+
     @Test public void testArrayBooleanType() throws ConfigCompileException{
         assertEquals("true", SRun("boolean(array(1))", null));
         assertEquals("false", SRun("boolean(array())", null));
     }
-    
+
     @Test public void testParenthesisAfterQuotedString() throws ConfigCompileException{
         assertEquals("2 + 2 is 4", SRun("'2 + 2 is' (2 + 2)", fakePlayer));
     }
-    
+
     @Test(expected=ConfigCompileException.class)
     public void testCompileErrorOfStaticConstructOptimization() throws ConfigCompileException{
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("2 / 0", null, true));
     }
-    
+
     @Test public void testLineNumberCorrectInException1() throws ConfigCompileException{
-        String script = 
+        String script =
                 "try(\n" //Line 1
                 + "assign(@a, array(1, 2))\n" //Line 2
                 + "\n" //Line 3
@@ -702,11 +702,11 @@ public class MethodScriptCompilerTest {
                 + "\n" //Line 5
                 + ", @e, msg(@e[3]))\n"; //Line 6
         SRun(script, fakePlayer);
-        verify(fakePlayer).sendMessage("4");                
+        verify(fakePlayer).sendMessage("4");
     }
-    
+
     @Test public void testLineNumberCorrectInException2() throws ConfigCompileException{
-        String script = 
+        String script =
                 "assign(@a, array(1, 2))\n" //Line 1
                 + "\n" //Line 2
                 + "assign(@d, @a[@b])\n"; //Line 3
@@ -715,11 +715,11 @@ public class MethodScriptCompilerTest {
         } catch(ConfigRuntimeException e){
             assertEquals(3, e.getLineNum());
         }
-        
+
     }
-    
+
     @Test public void testLineNumberCorrectInException3() throws ConfigCompileException{
-        String script = 
+        String script =
                 "\n"
                 + "assign(@a, array('aaa', 'bbb'))\n"
                 + "assign(@b, 'test')\n"
@@ -732,7 +732,7 @@ public class MethodScriptCompilerTest {
             assertEquals(5, e.getLineNum());
         }
     }
-    
+
     @Test public void testExtraParenthesis(){
         try{
             SRun("\n"
@@ -742,12 +742,12 @@ public class MethodScriptCompilerTest {
             assertEquals("3", e.getLineNum());
         }
     }
-    
-    @Test(expected=ConfigCompileException.class) 
+
+    @Test(expected=ConfigCompileException.class)
     public void testSpuriousSymbols() throws ConfigCompileException{
         SRun("2 +", fakePlayer);
     }
-    
+
     @Test
     public void testBraceIf() throws ConfigCompileException{
         SRun("if(true)\n\n"
@@ -756,7 +756,7 @@ public class MethodScriptCompilerTest {
                 + "}", fakePlayer);
         verify(fakePlayer).sendMessage("success!");
     }
-    
+
     @Test
     public void testBraceElseIfElse() throws ConfigCompileException{
         SRun("if(false){"
@@ -768,7 +768,7 @@ public class MethodScriptCompilerTest {
                 + "}", fakePlayer);
         verify(fakePlayer).sendMessage("success!");
     }
-    
+
     @Test
     public void testBraceElseIfElseWithElseCondTrue() throws ConfigCompileException{
         SRun("if(false){"
@@ -780,12 +780,12 @@ public class MethodScriptCompilerTest {
                 + "}", fakePlayer);
         verify(fakePlayer).sendMessage("success!");
     }
-    
+
     @Test(expected=ConfigCompileException.class)
     public void testFailureOfBraces() throws ConfigCompileException{
         SRun("and(1){ 1 }", fakePlayer);
     }
-    
+
     @Test(expected=ConfigCompileException.class)
     public void testInnerElseInElseIf() throws ConfigCompileException{
         SRun("if(true){"
@@ -796,7 +796,7 @@ public class MethodScriptCompilerTest {
                 + "msg('fail')"
                 + "}", fakePlayer);
     }
-    
+
     @Test
     public void testBracketsOnFor() throws ConfigCompileException{
         SRun("for(assign(@i, 0), @i < 5, @i++){\n"
@@ -804,7 +804,7 @@ public class MethodScriptCompilerTest {
                 + "}", fakePlayer);
         verify(fakePlayer, times(5)).sendMessage("worked");
     }
-    
+
     @Test
     public void testBracketsOnForeach() throws ConfigCompileException{
         SRun("foreach(range(2), @i){\n"
@@ -813,23 +813,12 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("0");
         verify(fakePlayer).sendMessage("1");
     }
-    
-    @Test
-    public void testBracketsOnSwitch() throws ConfigCompileException{
-        SRun("switch('hi'){\n"
-                + "'nope',"
-                + "     msg('fail'),"
-                + "'hi',"
-                + "     msg('pass')"
-                + "}", fakePlayer);
-        verify(fakePlayer).sendMessage("pass");
-    }     
-    
+
     @Test public void testWhitespaceInBetweenFunctionAndParen() throws ConfigCompileException{
         SRun("msg ('hi')", fakePlayer);
         verify(fakePlayer).sendMessage("hi");
     }
-    
+
     @Test public void testMultipleFunctionsWithBraces() throws ConfigCompileException{
         SRun("if(dyn(false)){\n"
                 + "msg('nope')\n"
@@ -839,7 +828,7 @@ public class MethodScriptCompilerTest {
                 + "}", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("hi");
     }
-    
+
     @Test
     public void testArrayGetCatchesInvalidParameter(){
         try{
@@ -859,86 +848,87 @@ public class MethodScriptCompilerTest {
             fail("Expecting a compile error here, not a runtime exception");
         }
     }
-    
+
     @Test
     public void testBlockComments1() throws ConfigCompileException{
         SRun(     "/*\n"
                 + " * Herp\n"
                 + " * Derp\n"
-                + " */\n", fakePlayer);
+                + " */\n"
+				+ "msg('hi');", fakePlayer);
     }
-    
+
     @Test
     public void testCommentsInStrings() throws ConfigCompileException{
 	    SRun("'#'", fakePlayer);
     }
-    
+
     @Test
     public void testCommentsInStrings2() throws ConfigCompileException{
 	    SRun("'/*'", fakePlayer);
     }
-	
+
 	@Test
 	public void testDoubleQuotesInSingleQuotes() throws Exception{
 		SRun("'This \"should work\" correctly, and not throw an exception'", null);
 	}
-	
+
 	@Test public void testClosureToString1() throws Exception{
 		SRun("msg(closure(msg('')))", fakePlayer);
 		verify(fakePlayer).sendMessage("msg('')");
 	}
-	
+
 	@Test public void testClosureToString2() throws Exception{
 		SRun("msg(closure('\\n'))", fakePlayer);
 		verify(fakePlayer).sendMessage("'\\n'");
 	}
-	
+
 	@Test public void testClosureToString3() throws Exception{
 		SRun("msg(closure('\\\\'))", fakePlayer);
 		verify(fakePlayer).sendMessage("'\\\\'");
 	}
-    
+
 	@Test public void testClosureToString4() throws Exception{
 		SRun("msg(closure('\\''))", fakePlayer);
 		verify(fakePlayer).sendMessage("'\\''");
 	}
-	
+
 	@Test public void testCSlices() throws Exception{
 		assertEquals("-1", SRun("p(-1..-3[0])", null));
 		assertEquals("-2", SRun("p(-1..-3[1])", null));
 		assertEquals("-3", SRun("p(-1..-3[2])", null));
-		
+
 		assertEquals("0", SRun("p(0..2[0])", null));
 		assertEquals("1", SRun("p(0..2[1])", null));
 		assertEquals("2", SRun("p(0..2[2])", null));
-		
+
 		assertEquals("5", SRun("p(5..3[0])", null));
 		assertEquals("4", SRun("p(5..3[1])", null));
 		assertEquals("3", SRun("p(5..3[2])", null));
-		
+
 		assertEquals("1", SRun("p(1..3[0])", null));
 		assertEquals("2", SRun("p(1..3[1])", null));
 		assertEquals("3", SRun("p(1..3[2])", null));
-		
+
 		try{
 			SRun("1..2[10]", null);
 			fail("Expected an exception");
 		} catch (ConfigRuntimeException e){
 			//pass
 		}
-		
+
 		assertEquals("2", SRun("array_size(1..2)", null));
-		
+
 		assertEquals("true", SRun("array_contains(1..2, 1)", null));
 		assertEquals("false", SRun("array_contains(1..2, 3)", null));
-		
+
 		assertEquals("true", SRun("array_contains(-1..-2, -2)", null));
 		assertEquals("false", SRun("array_contains(-1..-2, -3)", null));
-		
+
 		assertEquals("true", SRun("array_index_exists(1..2, 0)", null));
 		assertEquals("false", SRun("array_index_exists(1..2, 2)", null));
 	}
-	
+
 	@Test public void testWhitespaceAroundSymbol1() throws Exception{
 		assertEquals("true", SRun("false == false", null));
 	}
@@ -946,24 +936,24 @@ public class MethodScriptCompilerTest {
 //	@Test public void testWhitespaceAroundSymbol2() throws Exception{
 //		assertEquals("true", SRun("false==false", null));
 //	}
-    
+
     //TODO: Once the lexer is rewritten, this should work
 //    @Test
 //    public void testAssignmentWithEquals1() throws ConfigCompileException{
 //	    SRun("@var=yep nope msg(@var)", fakePlayer);
 //	    verify(fakePlayer).sendMessage("yep");
 //    }
-//    
+//
 //    @Test
 //    public void testAssignmentWithEquals2() throws ConfigCompileException{
 //	    SRun("@var = yep nope msg(@var)", fakePlayer);
-//	    verify(fakePlayer).sendMessage("yep");	    
+//	    verify(fakePlayer).sendMessage("yep");
 //    }
-//    
+//
 //    @Test
 //    public void testAssignmentWithEquals3() throws ConfigCompileException{
 //	    SRun("@var = 'yep yep' msg(@var)", fakePlayer);
-//	    verify(fakePlayer).sendMessage("yep yep");	    	    
+//	    verify(fakePlayer).sendMessage("yep yep");
 //    }
-    
+
 }

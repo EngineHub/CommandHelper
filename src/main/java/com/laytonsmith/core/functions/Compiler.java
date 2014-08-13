@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -554,33 +555,23 @@ public class Compiler {
 
 	@api
 	@hide("This is only used internally by the compiler, and will be removed at some point.")
-	public static class __cbrace__ extends DummyFunction /*implements Optimizable*/ {
+	public static class __cbrace__ extends DummyFunction implements Optimizable {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
-//		@Override
-//		public Set<OptimizationOption> optimizationOptions() {
-//			return EnumSet.of(
-//					OptimizationOption.OPTIMIZE_DYNAMIC);
-//		}
-//
-//		@Override
-//		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-//			ParseTree node;
-//			if (children.isEmpty()) {
-//				node = new ParseTree(CVoid.VOID, fileOptions);
-//			} else if (children.size() == 1) {
-//				node = children.get(0);
-//			} else {
-//				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
-//				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
-//						+ " report this error to the developer.", t);
-//			}
-//			return new ParseTree(new CBrace(node), fileOptions);
-//		}
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			throw new ConfigCompileException("Unexpected use of braces", t);
+		}
 	}
 
 	@api
