@@ -1141,6 +1141,11 @@ public final class MethodScriptCompiler {
 				parents.pop();
 				tree = parents.peek();
 				constructCount.pop();
+				try {
+					constructCount.peek().incrementAndGet();
+				} catch (EmptyStackException e) {
+					throw new ConfigCompileException("Unexpected end curly brace", t.target);
+				}
 				continue;
 			}
 
@@ -1848,7 +1853,7 @@ public final class MethodScriptCompiler {
 	 * a depth first process.
 	 * @param tree
 	 */
-	private static void processKeywords(ParseTree tree) throws ConfigCompileException{
+	private static void processKeywords(ParseTree tree) throws ConfigCompileException {
 		// Keyword processing
 		List<ParseTree> children = tree.getChildren();
 		for(int i = 0; i < children.size(); i++){
