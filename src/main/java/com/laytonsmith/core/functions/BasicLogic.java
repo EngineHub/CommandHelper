@@ -476,26 +476,26 @@ public class BasicLogic {
 				+ "\t, #Default:\n"
 				+ "\t\tmsg('Success')\n"
 				+ ")"),
-				new ExampleScript("With multiple matches using an array", "switch('string'){\n"
+				new ExampleScript("With multiple matches using an array", "switch('string',\n"
 				+ "\tarray('value1', 'value2', 'string'),\n"
 				+ "\t\tmsg('Match'),\n"
 				+ "\t'value3',\n"
 				+ "\t\tmsg('No match')\n"
 				+ "}"),
-				new ExampleScript("With slices", "switch(5){\n"
+				new ExampleScript("With slices", "switch(5,\n"
 				+ "\t1..2,\n"
 				+ "\t\tmsg('First'),\n"
 				+ "\t3..5,\n"
 				+ "\t\tmsg('Second'),\n"
 				+ "\t6..8,\n"
 				+ "\t\tmsg('Third')\n"
-				+ "}"),
-				new ExampleScript("With slices in an array", "switch(5){\n"
+				+ ")"),
+				new ExampleScript("With slices in an array", "switch(5,\n"
 				+ "\tarray(1..2, 3..5),\n"
 				+ "\t\tmsg('First'),\n"
 				+ "\t6..8,\n"
 				+ "\t\tmsg('Second')\n"
-				+ "}"),};
+				+ ")"),};
 		}
 
 		@Override
