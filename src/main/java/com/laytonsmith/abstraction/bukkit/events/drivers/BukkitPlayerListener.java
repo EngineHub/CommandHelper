@@ -16,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
@@ -45,6 +46,13 @@ import org.bukkit.event.player.PlayerToggleSprintEvent;
  */
 public class BukkitPlayerListener implements Listener {
 
+	@EventHandler(priority = EventPriority.LOWEST)
+    public void onFoodLevelChange(FoodLevelChangeEvent e) {
+		BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent pke = new BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent(e);
+        //EventUtils.TriggerExternal(pke);
+		EventUtils.TriggerListener(Driver.FOOD_LEVEL_CHANGED, "food_level_changed", pke);
+    }
+	
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerKick(PlayerKickEvent e) {
 		BukkitPlayerEvents.BukkitMCPlayerKickEvent pke = new BukkitPlayerEvents.BukkitMCPlayerKickEvent(e);

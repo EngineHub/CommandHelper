@@ -2,6 +2,7 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
@@ -12,6 +13,9 @@ import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
 import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
 import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
 import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.api;
@@ -19,6 +23,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -33,6 +38,7 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -45,8 +51,170 @@ public class BlockEvents {
     public static String docs() {
         return "Contains events related to a block";
     }
+	
+	// Stub for actual events below.
+	public static abstract class piston_event extends AbstractEvent {
+		@Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+		
+		@Override
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+                throws PrefilterNonMatchException {
+            return true;
+        }
+
+		@Override
+        public BindableEvent convert(CArray manualObject, Target t) {
+            return null;
+        }
+
+		@Override
+        public boolean modifyEvent(String key, Construct value,
+                BindableEvent e) {
+            return false;
+        }
+		
+        public Map<String, Construct> evaluate_stub(BindableEvent e)
+                throws EventException {
+
+            MCBlockPistonEvent event = (MCBlockPistonEvent) e;
+            Map<String, Construct> map = evaluate_helper(event);
+
+            CArray blk = new CArray(Target.UNKNOWN);
+
+            int blktype = event.getBlock().getTypeId();
+            blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
+
+            int blkdata = event.getBlock().getData();
+            blk.set("data", new CInt(blkdata, Target.UNKNOWN), Target.UNKNOWN);
+
+            blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN), Target.UNKNOWN);
+            blk.set("Y", new CInt(event.getBlock().getY(), Target.UNKNOWN), Target.UNKNOWN);
+            blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN), Target.UNKNOWN);
+            blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
+
+            map.put("block", blk);
+
+			CArray location = ObjectGenerator.GetGenerator()
+					.location(StaticLayer.GetLocation(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
+			map.put("location", location);
+
+            CBoolean isSticky = CBoolean.get(event.isSticky());
+			map.put("isSticky", isSticky);
+			
+			CString direction = new CString(event.getDirection().name(), Target.UNKNOWN);
+			map.put("direction", direction);
+			
+            return map;
+        }
+	}
+	
+	@api
+    public static class piston_extend extends piston_event {
+		@Override
+        public String getName() {
+            return "piston_extend";
+        }
+
+		@Override
+        public String docs() {
+            return "{} "
+                    + "This event is called when a piston is extended. "
+                    + "Cancelling the event cancels the move. "
+                    + "{block: An array with "
+                    + "keys 'type' (int), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int) "
+                    + "and 'world' (string) for the physical location of the block | "
+                    + "location: the locationArray of this block | direction: direction of travel | "
+					+ "sticky: true if the piston is sticky | affectedBlocks: blocks pushed } "
+                    + "{} "
+                    + "{} "
+                    + "{}";
+        }
+
+		@Override
+        public Driver driver() {
+            return Driver.PISTON_EXTEND;
+        }
+
+		@Override
+        public Map<String, Construct> evaluate(BindableEvent e)
+                throws EventException {
+            Map<String, Construct> map = evaluate_stub(e);
+			
+			MCBlockPistonExtendEvent event = (MCBlockPistonExtendEvent)e;
+			
+			CArray affected = new CArray(Target.UNKNOWN);
+			
+			for (MCBlock block : event.getPushedBlocks()) {
+				CArray blk = new CArray(Target.UNKNOWN);
+
+				int blktype = block.getTypeId();
+				blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
+
+				int blkdata = block.getData();
+				blk.set("data", new CInt(blkdata, Target.UNKNOWN), Target.UNKNOWN);
+
+				blk.set("X", new CInt(block.getX(), Target.UNKNOWN), Target.UNKNOWN);
+				blk.set("Y", new CInt(block.getY(), Target.UNKNOWN), Target.UNKNOWN);
+				blk.set("Z", new CInt(block.getZ(), Target.UNKNOWN), Target.UNKNOWN);
+				blk.set("world", new CString(block.getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
+				
+				affected.push(blk);
+			}
+			
+			map.put("affectedBlocks", affected);
+			
+            return map;
+        }
+    }
 
     @api
+    public static class piston_retract extends piston_event {
+		@Override
+        public String getName() {
+            return "piston_retract";
+        }
+
+		@Override
+        public String docs() {
+            return "{} "
+                    + "This event is called when a piston is retracted. "
+                    + "Cancelling the event cancels the move. "
+                    + "{block: An array with "
+                    + "keys 'type' (int), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int) "
+                    + "and 'world' (string) for the physical location of the block | "
+                    + "location: the locationArray of this block | direction: direction of travel | "
+					+ "sticky: true if the piston is sticky | retractedLocation: if the piston "
+					+ "is sticky and attached to a block, where the attached block would end up }"
+                    + "{} "
+                    + "{} "
+                    + "{}";
+        }
+
+		@Override
+        public Driver driver() {
+            return Driver.PISTON_RETRACT;
+        }
+
+		@Override
+        public Map<String, Construct> evaluate(BindableEvent e)
+                throws EventException {
+            Map<String, Construct> map = evaluate_stub(e);
+			
+			MCBlockPistonRetractEvent event = (MCBlockPistonRetractEvent)e;
+			
+			MCLocation loc = event.getRetractedLocation();
+			CArray location = ObjectGenerator.GetGenerator()
+					.location(StaticLayer.GetLocation(loc.getWorld(), loc.getX(), loc.getY(), loc.getZ()));
+			map.put("retractedLocation", location);
+			
+            return map;
+        }
+    }
+	
+	@api
     public static class block_break extends AbstractEvent {
 
 		@Override

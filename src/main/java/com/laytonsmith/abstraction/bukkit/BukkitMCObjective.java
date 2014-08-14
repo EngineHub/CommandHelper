@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -51,7 +50,7 @@ public class BukkitMCObjective implements MCObjective {
 			return new BukkitMCScore((Score) ReflectionUtils.invokeMethod(o, "getScore", entry));
 		} else {
 			// Old style
-			Player player = Bukkit.getPlayer(entry);
+			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			return new BukkitMCScore((Score) ReflectionUtils.invokeMethod(o, "getScore", player));
 		}
 	}

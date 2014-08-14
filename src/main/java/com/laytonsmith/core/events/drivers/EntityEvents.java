@@ -717,10 +717,8 @@ public class EntityEvents {
 				BindableEvent event) {
 			MCEntityDamageEvent e = (MCEntityDamageEvent) event;
 			if (key.equals("amount")) {
-				if (value instanceof CInt) {
-					e.setDamage((int) Static.getInt(value, Target.UNKNOWN));
-					return true;
-				}
+				e.setDamage(Static.getDouble(value, value.getTarget()));
+				return true;
 			}
 			return false;
 		}

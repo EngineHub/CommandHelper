@@ -18,6 +18,7 @@ import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
+import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
 import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
@@ -94,6 +95,88 @@ public class PlayerEvents {
     public static String docs(){
         return "Contains events related to a player";
     }
+	
+	@api
+	public static class food_level_changed extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "food_level_changed";
+		}
+
+		@Override
+		public String docs() {
+			return "{player: <string match>}"
+					+ " Fires as a player's food level changes."
+					+ " Cancelling the event will cause the change to not be"
+					+ " applied."
+					+ " {player: the player | level: the new food level to be applied"
+					+ " | difference: the difference between the old level and the new }"
+					+ " {level: A different level to be applied }"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if (e instanceof MCFoodLevelChangeEvent) {
+				
+				MCFoodLevelChangeEvent event = (MCFoodLevelChangeEvent) e;
+				Prefilters.match(prefilter, "player", event.getEntity().getName(), PrefilterType.STRING_MATCH);
+				
+				return true;
+			}
+			
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if (e instanceof MCFoodLevelChangeEvent) {
+				Map<String, Construct> ret = evaluate_helper(e);
+				MCFoodLevelChangeEvent event = (MCFoodLevelChangeEvent) e;
+				
+				ret.put("player", new CString(event.getEntity().getName(), Target.UNKNOWN));
+				ret.put("level", new CInt(event.getFoodLevel(), Target.UNKNOWN));
+				ret.put("difference", new CInt(event.getDifference(), Target.UNKNOWN));
+				
+				return ret;
+			} else {
+				throw new EventException("Cannot convert to MCFoodLevelChangeEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.FOOD_LEVEL_CHANGED;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			if (event instanceof MCFoodLevelChangeEvent) {
+				MCFoodLevelChangeEvent e = (MCFoodLevelChangeEvent) event;
+				
+				if (key.equalsIgnoreCase("level")) {
+					e.setFoodLevel(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 
 	@api
 	public static class player_consume extends AbstractEvent {

@@ -10,6 +10,8 @@ public enum Driver {
 	/**
 	 * Block events
 	 */
+	PISTON_EXTEND,
+	PISTON_RETRACT,
 	BLOCK_BREAK,
 	BLOCK_BURN,
 	BLOCK_DISPENSE,
@@ -78,6 +80,7 @@ public enum Driver {
 	PLAYER_TELEPORT,
 	TAB_COMPLETE,
 	WORLD_CHANGED,
+	FOOD_LEVEL_CHANGED,
 
 	/**
 	 * Plugin events

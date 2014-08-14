@@ -5,16 +5,20 @@ package com.laytonsmith.abstraction.bukkit.events;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.Velocity;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
 import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
 import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
@@ -22,18 +26,27 @@ import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
 import com.laytonsmith.abstraction.events.MCBlockEvent;
 import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
 import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPistonEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.util.Vector;
@@ -43,8 +56,83 @@ import org.bukkit.util.Vector;
  * @author EntityReborn
  */
 public class BukkitBlockEvents {
+	
+	// Stub for actual events below.
+	public static class BukkitMCBlockPistonEvent implements MCBlockPistonEvent {
+		BlockPistonEvent event;
+
+        public BukkitMCBlockPistonEvent(BlockPistonEvent e) {
+            event = e;
+        }
+
+		@Override
+        public Object _GetObject() {
+            return event;
+        }
+
+		@Override
+        public MCBlockFace getDirection() {
+            return BukkitMCBlockFace.getConvertor().getAbstractedEnum(event.getDirection());
+        }
+
+		@Override
+        public MCBlock getBlock() {
+            return new BukkitMCBlock(event.getBlock());
+        }
+
+		@Override
+		public boolean isSticky() {
+			return event.isSticky();
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return event.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancelled) {
+			event.setCancelled(cancelled);
+		}
+	}
 
     @abstraction(type = Implementation.Type.BUKKIT)
+    public static class BukkitMCBlockPistonExtendEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonExtendEvent {
+		BlockPistonExtendEvent event;
+		
+		public BukkitMCBlockPistonExtendEvent(BlockPistonExtendEvent e) {
+			super(e);
+			
+			event = e;
+		}
+		
+		public List<MCBlock> getPushedBlocks() {
+			List<MCBlock> blocks = new ArrayList<>();
+			
+			for (Block b : event.getBlocks()) {
+				blocks.add(new BukkitMCBlock(b));
+			}
+			
+			return blocks;
+		}
+    }
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
+    public static class BukkitMCBlockPistonRetractEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonRetractEvent {
+		BlockPistonRetractEvent event;
+		
+		public BukkitMCBlockPistonRetractEvent(BlockPistonRetractEvent e) {
+			super(e);
+			
+			event = e;
+		}
+		
+		public MCLocation getRetractedLocation() {
+			return new BukkitMCLocation(event.getRetractLocation());
+		}
+    }
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
     public static class BukkitMCBlockBreakEvent implements MCBlockBreakEvent {
 
         BlockBreakEvent event;
