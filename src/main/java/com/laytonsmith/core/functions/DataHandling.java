@@ -544,9 +544,10 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "void {assign, condition, expression1, expression2, else} Works like a normal for, but if upon checking the condition the first time,"
+			return "void {assign, condition, expression1, expression2, else} Works like a normal for loop, but if upon checking the condition the first time,"
 					+ " it is determined that it is false (that is, NO code loops are going to be run) the else code is run instead. If the loop runs,"
-					+ " even once, it will NOT run the else branch.";
+					+ " even once, it will NOT run the else branch. In general, brace syntax and use of for(){ } else { } syntax is preferred, instead"
+					+ " of using forelse directly.";
 		}
 
 		@Override
@@ -1099,7 +1100,8 @@ public class DataHandling {
 			return "void {code, condition} Like while, but always runs the code at least once. The condition is checked"
 					+ " after each run of the code, and if it is true, the code is run again. break and continue work"
 					+ " inside a dowhile, but continuing more than once is pointless, since the loop isn't inherently"
-					+ " keeping track of any counters anyways. Breaking multiple times still works however.";
+					+ " keeping track of any counters anyways. Breaking multiple times still works however. In general, using brace"
+					+ " syntax is preferred: do { code(); } while(@condition); instead of using dowhile() directly.";
 		}
 
 		@Override
@@ -1950,7 +1952,8 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "void {[name], [ivar...], procCode} Creates a new user defined procedure (also known as \"function\") that can be called later in code. Please see the more detailed"
-					+ " documentation on procedures for more information.";
+					+ " documentation on procedures for more information. In general, brace syntax and keyword usage is preferred:"
+					+ " proc _myProc(@a, @b){ procCode(@a, @b); }";
 		}
 
 		@Override
@@ -2850,7 +2853,7 @@ public class DataHandling {
 		public boolean useSpecialExec() {
 			return true;
 		}
-		
+
 	}
 
 	@api

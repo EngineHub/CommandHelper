@@ -45,11 +45,27 @@ are all valid examples.
 ===for/foreach===
 %%CODE|
 for(@i = 0, @i < 5, @i++){
-    do_in_loop()
+    do_in_loop();
 }
 
 foreach(@item in @array){
     do_with(@item);
+}
+%%
+
+foreachelse/forelse can also be used as such:
+
+%%CODE|
+for(@i = 0, @i < @input, @i++){
+	msg('Loop condition');
+} else {
+	msg('Else condition');
+}
+
+foreach(@key: @value in @array){
+	msg('Loop condition');
+} else {
+	msg('Else condition');
 }
 %%
 
@@ -60,6 +76,14 @@ while(@value > 0){
 	msg(@value);
 	@value++;
 }
+%%
+
+===dowhile===
+
+%%CODE|
+do {
+	msg('loop');
+} while(@value == get_value('loop'));
 %%
 
 ===switch===
@@ -85,10 +109,12 @@ closure(@var1, @var2){
 ===procedures===
 
 %%CODE|
-proc(_my_proc){
-	return(1);
+proc _my_proc(@a){
+	return(@a);
+}
+
+// Alternatively, though less desirably:
+proc(_my_proc, @a){
+	return(@a);
 }
 %%
-
-==Note==
-The bracket system simply converts your code into the functional notation, and so it may be possible to do strange looking things; don't. They will eventually be patched, and it will make your code less readable in the meantime. There is a bit more complexity than a simple conversion, but essentially, <code>if(@cond){ do() }</code> is turned into <code>if(@cond, do())</code> by merely converting <code>){</code> into a comma, and <code>}</code> into a right parenthesis.
