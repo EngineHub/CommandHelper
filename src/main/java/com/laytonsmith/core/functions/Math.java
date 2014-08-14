@@ -486,7 +486,7 @@ public class Math {
 	 * consolidates the code to do so.
 	 * @return
 	 */
-	private static Construct doIncrementDecrement(ParseTree[] nodes,
+	protected static Construct doIncrementDecrement(ParseTree[] nodes,
 			Script parent, Environment env, Target t,
 			Function func, boolean pre, boolean inc){
 		if(nodes[0].getData() instanceof CFunction){
@@ -688,7 +688,7 @@ public class Math {
 		}
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			return doIncrementDecrement(nodes, parent, env, t, this, false, true);
+			return Math.doIncrementDecrement(nodes, parent, env, t, this, false, true);
 		}
 
 		@Override
