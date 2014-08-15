@@ -1,0 +1,286 @@
+A closure is a block of code that is treated as ''code'', not as a ''result'' of code. Closures are actually used quite frequently
+in your code already, and you just aren't aware, however, with the closure architecture, you yourself can harness the power of a
+closure, and in fact they are required to be used in many of the newer, more powerful functions.
+
+==Explanation==
+
+So, what is a closure? You can [http://en.wikipedia.org/wiki/Closure_%28computer_science%29 read the wikipedia article]
+if you wish, but it's fairly complex. So, instead, we'll discuss something that you probably are already familiar with;
+the <code>if()</code> function.
+
+The if function internally implements closures, transparently to you. Let's take a look at some code:
+
+%%CODE|
+if(true){
+     msg('Hello World!');
+} else {
+     msg('You should not see me!');
+}
+%%
+
+If you notice, this code will only message you "Hello World", it will not message the other code. However this will
+message you twice:
+
+%%CODE|
+array(msg('One message'), msg('Two message'));
+%%
+
+So, why is that? That's because the code in the if function is ''lazily'' evaluated. That is to say, it's not evaluated
+until it is determined that it is needed. Other functions do this too, some for optimization reasons, others, because
+it's just the nature of the function. For instance, <code>for()</code> does as well. In most cases, the "special"
+functions, (functions that have a language construct dedicated to them in other languages) implement closures. Some
+functions, such as <code>and</code> also are lazily evaluated, for performance reasons. Consider the case:
+<code>and(false, true, true, true, ....lots of trues)</code>. If we evaluate from left to right (which we do), after we
+determine that the first argument evaluates to false, we know for a fact that the <code>and</code> will return false,
+regardless of what the rest of the arguments return. Same with <code>or</code> and true values:
+<code>or(true, false, false, false)</code>.
+
+However, in the case of the <code>array()</code>, this has to be ''hastily'' evaluated, that is, we need to know how ALL
+the arguments are going to resolve, before we send them to the array function itself. So if we break it down, with
+<code>if</code>, we are sending ''code'' to the function, and with <code>array</code> we are sending ''values'' to the
+function. When we are sending ''code'' to a function, as an executable set of instructions, we say we have created a
+'''closure'''.
+
+When we think about the <code>[[CommandHelper/Procedures|proc]]</code> function, we then realize that it's much like a
+closure. When we define the procedure, nothing is run at that time. And in fact, internally, it does create a type of
+closure. Procs are slightly special though, because they do not save environment information (at least variable scope).
+Let's observe the more complicated case with an if statement:
+
+%%CODE|
+@a = 'variable';
+if(true){
+     msg(@a);
+}
+%%
+
+This works, and messages "variable" like we would expect. However, the following does not work the same:
+
+%%CODE|
+@a = 'variable';
+proc _doit(){
+     msg(@a);
+}
+_doit();
+%%
+
+This will send us a blank message, because @a is not ''in scope'' inside of the proc. This makes it not a true closure,
+by the technical definition, but it's pretty close. The difference is that the '''environment''' is not stored along
+with the code. A mscript closure uses this concept, but also adds an extra feature, the ability to pass in extra
+environment information upon actual execution of the code.
+
+== Using closures ==
+
+Using the {{function|closure}} and {{function|execute}} functions allows you to harness the power of closures yourself,
+however you wish.
+
+===closure()===
+
+The signature of the <code>closure</code> function looks quite similar to <code>proc</code>.
+
+%%CODE|
+closure([@vars...,]){
+	// Some code
+}
+%%
+
+The vars passed in must be ivars, but much like procs, you may <code>assign</code> default values to them.
+
+%%CODE|
+closure(@a = 'a value', @b){
+     msg(@a @b)
+}
+%%
+
+Also, note that the code inside the closure has access to the special variable @arguments, which is an array containing
+all the arguments passed to the closure.
+
+Values may also be returned from the closure, using {{function|return}}:
+
+%%CODE|
+closure(){
+	return(5);
+}
+%%
+
+===execute()===
+Execute is used as follows:
+
+%%CODE|
+execute([values...,] <closure>);
+%%
+
+The values may be any value, but the closure must be a closure created with the closure function. A small, self
+contained example then:
+
+%%CODE|
+execute(1, 2, 3, closure(@a, @b, @c){
+	msg(@a . @b . @c);
+});
+%%
+
+Any values returned from the closure are returned by <code>execute</code>.
+
+%%CODE|
+@five = execute(closure(){
+	return(5);
+});
+msg(@five); // 5
+%%
+
+=== Combined Usage ===
+
+The closure function actually returns a special data type, a '''closure'''. This data type has all the same qualities
+of other data types, that is, it can be stored in a variable, passed around to procedures, returned, imported/exported,
+persisted. It's very much like an anonymous procedure, and in fact has nearly the same signature as the
+<code>proc</code> function, minus the name. That's because you essentially give it a name when you store it somewhere,
+for instance in a variable.
+
+%%CODE|
+@a = closure(){
+	msg('This is some code that will run later');
+};
+// Now we have defined this closure in the variable @a
+execute(@a); // Here, we actually execute the closure, we now get msg'd!
+%%
+
+We also have access to variables that are passed in, if we named them:
+
+%%CODE|
+@a = closure(@one, @two){
+	msg(@one @two);
+};
+execute('one', 'two', @a); // msg's "one two"
+%%
+
+Also, we can implement vararg functionality with the special @arguments variable:
+
+%%CODE|
+@a = closure(){
+	msg('You passed in ' . array_size(@arguments) . ' arguments');
+};
+execute(1, 2, 3, 4, 5, @a); //msg's "You passed in 5 arguments"
+%%
+
+If you define more parameters than are passed in, they take the default values that are assigned.
+
+%%CODE|
+@a = closure(@one, @two = 'two'){
+	msg(@one . ' ' . @two);
+};
+execute('one', @a); // msg's "one two"
+%%
+
+=== Scope ===
+So, you may ask yourself, what's the difference between this and a proc, other than the name is missing? A huge
+difference. With a proc, all variables go out of scope, other than what you pass in. With closures, everything that was
+in scope remains in scope. The only thing that may get overridden is if you named a variable that is passed in, and in
+addition, the meta scope values, such as the current player also remain in scope.
+
+
+Recall the example above:
+
+%%CODE|
+@a = 'variable';
+proc _doit(){
+     msg(@a);
+}
+_doit();
+%%
+
+If we rewrite this with closures, we can see the difference:
+
+%%CODE|
+@a = 'variable';
+@doit = closure(){
+     msg(@a);
+};
+execute(@doit);
+%%
+
+In the first example with procs, we get an empty message. With the second example, we get msg'd "variable", because @a
+remained in scope when we executed the closure.
+
+Now, it is important to note that the scope is frozen at closure bind time, NOT at execution time, so the following will
+happen:
+
+%%CODE|
+@value = 'Hello World!';
+@closure = closure(){
+	msg(@value);
+};
+// Let's change the value stored in @value
+@value = 'Goodbye World!';
+// Now we execute the closure, which echoes what it thinks @value is
+execute(@closure); // msg's "Hello World", not "Goodbye World"
+%%
+
+This is because when we execute the closure, the values have already been bound, and can no longer be changed, as the
+closure sees it. This doesn't mean that something can't pass in extra values though, that's where the extra arguments
+come from. Let's modify the previous example some.
+
+%%CODE|
+@value = 'Hello World!';
+@closure = closure(@value){
+	msg(@value);
+};
+// Let's change @value again
+@value = 'Goodbye World!';
+// Now pass @value back in when we execute the closure
+execute(@value, @closure); // This time it does echo "Goodbye World"
+%%
+
+As you can see, we are able to change the environment at execution time if we put a little more thought into it.
+
+Another important point to make here is to remind you that arrays are passed by reference, so the following is possible:
+
+%%CODE|
+@a = closure(@array){
+	@array[0] = 'Hello World';
+};
+@value = array();
+execute(@value, @a);
+msg(@value); // msg's "{Hello World}", because the array can be edited from inside the closure
+%%
+
+Assigning a variable inside of a closure will not affect the external variable table however, so this code will function
+as follows:
+%%CODE|
+@a = closure(@array){
+	@array = null;
+};
+@value = array();
+execute(@value, @a);
+msg(@value); // msg's array; it's still an array!
+%%
+
+This is because arrays are passed by reference, not by value, and it's simply the reference that is getting copied into
+the closure's @array variable. So, if inside the closure, we change the values pointed at by the reference, those
+changes are visible from outside the closure. However, in the second example, we're changing the reference to the array,
+and simply putting something else inside of it. This doesn't affect the outside code having a reference to the array
+though, it still is pointing to the same empty array it created earlier.
+
+== Serialization of closures ==
+
+Closures can be serialized too! They get output as a basic string, however, so it's important to note the
+advantages/disadvantages of this. When they get serialized, they completely loose their scope. They become a standalone
+string. If you output the string, it may not look precisely like it did when you put it in either, in fact it will have
+sconcats added, and be minified, however, the guarantee is that it is functionally equivalent. However, do note that if
+you import/export the closure, the scope will remain, it is only if you move the closure outside of CH that it will
+lose it's scope (for instance, with store_value/get_value). If the closure is to-string'd, you will have to use eval()
+on it, instead of execute, and if previously it had accepted values, you'll have to manually assign them yourself. They
+are not meant for out of memory storage, and so they do not support that very well, however, it is important to note
+what their behavior would be if you attempt to serialize them.
+
+%%CODE|
+msg(closure(){
+	msg('This is a' . ' closure');
+});
+// msg's "msg('This is a closure')", which is functionally equivalent to the above code
+%%
+
+== Common usage ==
+The most common usage that you will find is likely when you use a built in function that requires use of a closure. You
+may also use them in a library project, where you are wanting to create a callback of some sort, or as a way to abstract
+up a loop, for instance.
+
+{{LearningTrail}}

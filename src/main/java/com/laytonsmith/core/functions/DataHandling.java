@@ -2789,7 +2789,7 @@ public class DataHandling {
 					+ " only stored in memory, it isn't retained during a serialization operation."
 					+ " Also, the special variable @arguments is automatically created for you, and contains"
 					+ " an array of all the arguments passed to the closure, much like procedures."
-					+ " See the wiki article on [[CommandHelper/Closures|closures]] for more details"
+					+ " See the wiki article on [[CommandHelper/Staged/Closures|closures]] for more details"
 					+ " and examples.";
 		}
 
@@ -2856,6 +2856,18 @@ public class DataHandling {
 		@Override
 		public boolean useSpecialExec() {
 			return true;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Creates a closure", "closure(){\n"
+						+ "\tmsg('Hello World!');\n"
+						+ "};"),
+				new ExampleScript("Executes a closure", "execute(closure(){\n"
+						+ "\tmsg('Hello World!');"
+						+ "});")
+			};
 		}
 
 	}
