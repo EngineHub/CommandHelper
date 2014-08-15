@@ -38,7 +38,10 @@ $language_data = array(
         ),
         4 => array(
 ///!            %%comma:colors:quoted%%
-        )
+        ),
+		5 => array(
+///!				%%comma:keywords:quoted%%
+		)
     ),
     'SYMBOLS' => array (
         0 => array(
@@ -57,7 +60,8 @@ $language_data = array(
             1 => 'color: #1265A9;',
             2 => 'color: #B35900;',
             3 => 'color: #B30059;',
-            4 => 'color: #5900B3;'
+            4 => 'color: #5900B3;',
+			5 => 'color: #0000FF;'
         ),
         'COMMENTS' => array(
             1 => 'color: #666666; font-weight: bold;'
@@ -103,5 +107,6 @@ $language_data = array(
             'DISALLOWED_AFTER' =>  "(?![\.\-a-zA-Z0-9_%=\\/\&])",
             'DISALLOWED_BEFORE' => "(?<![\.\-a-zA-Z0-9_\$\@\#\&])"
         )
-    )
+    ),
+	'SCRIPT_DELIMITERS' => array()
 );

@@ -1135,10 +1135,14 @@ public class DataHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "dowhile(\n"
+				new ExampleScript("Basic usage", "do {\n"
+						+ "\tmsg('This will only run once');\n"
+						+ "} while(false);"),
+				new ExampleScript("Pure functional usage", "dowhile(\n"
 				+ "\tmsg('This will only run once')\n"
 				+ ", #while\n"
-				+ "false)"),};
+				+ "false)")
+			};
 		}
 
 		@Override
@@ -3130,7 +3134,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "double(1)"),
-				new ExampleScript("Failure", "assign(@var, 'string')\ndouble(@var)"),};
+				new ExampleScript("Failure", "@var = 'string';\ndouble(@var);"),};
 		}
 	}
 

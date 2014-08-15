@@ -20,6 +20,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
@@ -481,7 +482,7 @@ public class BasicLogic {
 				+ "\t\tmsg('Match'),\n"
 				+ "\t'value3',\n"
 				+ "\t\tmsg('No match')\n"
-				+ "}"),
+				+ ")"),
 				new ExampleScript("With slices", "switch(5,\n"
 				+ "\t1..2,\n"
 				+ "\t\tmsg('First'),\n"

@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * 
+ *
  */
 public class SyntaxHighlighters {
 
@@ -43,7 +43,7 @@ public class SyntaxHighlighters {
                 return template("/syntax-templates/notepad++/solarized_light.xml");
             }
 
-            return "Available themes for Notepad++: default, obsidian, solarized-dark, solarized-light";            
+            return "Available themes for Notepad++: default, obsidian, solarized-dark, solarized-light";
         }
         if("textwrangler".equals(type)){
             return template("/syntax-templates/text-wrangler/default.plist");
@@ -85,9 +85,9 @@ public class SyntaxHighlighters {
     /**
      * Available macros are listed in the code below.
      * @param location
-     * @return 
+     * @return
      */
-    private static String template(String location) {        
+    private static String template(String location) {
         String template = Static.GetStringResource(location);
 		//Replace all instances of ///! with nothing.
 		template = template.replace("///!", "");
@@ -98,7 +98,7 @@ public class SyntaxHighlighters {
         }
         return template;
     }
-    
+
     private static String macro(String macroName){
         String[] split = macroName.split(":");
         String type = split[0];
@@ -118,6 +118,10 @@ public class SyntaxHighlighters {
 			}
         } else if(datalist.equalsIgnoreCase("functions")){
             for(Function f : GetFunctions()){
+				if(SimpleSyntaxHighlighter.KEYWORDS.contains(f.getName())){
+					// Keywords override functions
+					continue;
+				}
                 if(!f.appearInDocumentation()){
                     continue;
                 }
@@ -187,11 +191,11 @@ public class SyntaxHighlighters {
             }
         }
         return header + Join(base, spliter) + footer;
-        
+
     }
 
-    
-    
+
+
     private static List<Documentation> GetEvents(){
         List<Documentation> l = new ArrayList<Documentation>();
         Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
@@ -204,11 +208,11 @@ public class SyntaxHighlighters {
                 } catch (Exception ex) {
                     System.err.println(ex.getMessage());
                 }
-            }           
+            }
         }
         return l;
     }
-    
+
     private static List<Function> GetFunctions(){
         List<Function> fl = new ArrayList<Function>();
         Set<Class> functions = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
@@ -224,13 +228,13 @@ public class SyntaxHighlighters {
                     //Hmm. No real good way to handle this... echo out to stderr, I guess.
                     System.err.println(e.getMessage());
                 }
-                
+
             }
         }
         return fl;
     }
-    
-    
+
+
     private static String Join(List l, String joiner){
         StringBuilder b = new StringBuilder();
         for(int i = 0; i < l.size(); i++){
@@ -242,5 +246,5 @@ public class SyntaxHighlighters {
         }
         return b.toString();
     }
-    
+
 }

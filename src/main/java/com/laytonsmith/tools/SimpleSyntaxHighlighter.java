@@ -1,11 +1,12 @@
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
+import com.laytonsmith.core.compiler.KeywordList;
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -13,22 +14,21 @@ import java.util.regex.Pattern;
  * a given block of plain text code.
  */
 public class SimpleSyntaxHighlighter {
-	
+
 	public static void main(String[] args){
-		System.out.println(SimpleSyntaxHighlighter.Highlight("'<escape>'"));
+		System.out.println(SimpleSyntaxHighlighter.Highlight("a\na\na\na\na\na\na\na\na\na\na\na"));
 	}
-	
+
 	/**
 	 * A list of keywords in the MethodScript language.
 	 */
-	public static final List<String> KEYWORDS;
-	
+	public static final Set<String> KEYWORDS;
+
 	static {
-		KEYWORDS = Collections.unmodifiableList(Arrays.asList(new String[]{
-			"true", "false", "null", "else", "case", "default", "as", "in"
-		}));
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(SimpleSyntaxHighlighter.class));
+		KEYWORDS = Collections.unmodifiableSet(KeywordList.getKeywordNames());
 	}
-	
+
 	private static final EnumMap<ElementTypes, Color> CLASSES = new EnumMap<>(ElementTypes.class);
 	static{
 		CLASSES.put(ElementTypes.COMMENT, new Color(0x88, 0x88, 0x88));
@@ -42,17 +42,17 @@ public class SimpleSyntaxHighlighter {
 		CLASSES.put(ElementTypes.LINE_NUMBER, new Color(0xBD, 0xC4, 0xB1));
 		CLASSES.put(ElementTypes.FUNCTION, new Color(0x00, 0x00, 0x00));
 	}
-	
+
 	private final EnumMap<ElementTypes, Color> classes;
 	private final String code;
-	
+
 	private SimpleSyntaxHighlighter(EnumMap<ElementTypes, Color> classes, String code){
 		this.classes = classes;
 		this.code = code;
 	}
-	
-	
-	
+
+
+
 	private String getColor(ElementTypes type){
 		Color c = classes.get(type);
 		if(c == null){
@@ -60,11 +60,11 @@ public class SimpleSyntaxHighlighter {
 		}
 		return "color: #" + getRGB(c) + ";";
 	}
-	
+
 	private String getRGB(Color c){
 		return String.format("%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
 	}
-	
+
 	private String highlight(){
 		String[] lines = code.split("\r\n|\n\r|\n");
 		StringBuilder out = new StringBuilder();
@@ -210,36 +210,38 @@ public class SimpleSyntaxHighlighter {
 				inDollarVar = false;
 				lout.append("</span>");
 			}
+			int lineToOutput = blankLine ? i : i + 1;
+			int lineBufferSize = Integer.toString(lines.length - 1).length();
 			out.append("<span style=\"font-style: italic; ").append(getColor(ElementTypes.LINE_NUMBER))
-					.append("\">").append(blankLine ? i : i + 1).append("</span>&nbsp;&nbsp;&nbsp;").append(lout.toString()).append("<br />\n");
+					.append("\">").append(String.format("%0" + lineBufferSize + "d", lineToOutput)).append("</span>&nbsp;&nbsp;&nbsp;").append(lout.toString()).append("<br />\n");
 		}
-		return "<div style=\"font-family: 'Consolas','DejaVu Sans','Lucida Console',monospace; background-color: #" 
+		return "<div style=\"font-family: 'Consolas','DejaVu Sans','Lucida Console',monospace; background-color: #"
 					+ getRGB(classes.get(ElementTypes.BACKGROUND_COLOR)) + ";"
-					+ " border-color: #" + getRGB(classes.get(ElementTypes.BORDER_COLOR)) 
+					+ " border-color: #" + getRGB(classes.get(ElementTypes.BORDER_COLOR))
 					+ "; border-style: solid; border-width: 1px 0px 1px 0px; margin: 1em 2em;"
 					+ " padding: 0 0 0 1em;\">\n" + out.toString().replace("\t", "&nbsp;&nbsp;&nbsp;") + "</div>\n";
 	}
-	
+
 	private static final String FUNCTION_PATTERN = "([^a-zA-Z0-9_])?([a-zA-Z_]*[a-zA-Z0-9_]+)((?:&nbsp;)*\\()";
 	/**
 	 * Unknown buffer text should be sent here for processing for keywords.
 	 * @param buffer
-	 * @return 
+	 * @return
 	 */
 	private String processBuffer(String buffer){
 		buffer = HTMLUtils.escapeHTML(buffer).replace(" ", "&nbsp;");
 		for(String keyword : KEYWORDS){
-			buffer = buffer.replaceAll("([^a-zA-Z0-9_])(" + Pattern.quote(keyword) + ")([^a-zA-Z0-9_])", 
+			buffer = buffer.replaceAll("([^a-zA-Z0-9_]|^)(" + Pattern.quote(keyword) + ")([^a-zA-Z0-9_]|$)",
 					"$1<span style=\"" + getColor(ElementTypes.KEYWORD) + "\">$2</span>$3");
 		}
 		buffer = buffer.replaceAll(FUNCTION_PATTERN, "$1<span style=\"font-style: italic; " + getColor(ElementTypes.FUNCTION) + "\">$2</span>$3");
 		return buffer;
 	}
-	
+
 	/**
 	 * Processes and highlights double strings
 	 * @param buffer
-	 * @return 
+	 * @return
 	 */
 	private String processDoubleString(String value){
 		StringBuilder b = new StringBuilder();
@@ -288,11 +290,11 @@ public class SimpleSyntaxHighlighter {
 		}
 		return b.toString();
 	}
-	
+
 	/**
 	 * Brace strings are more complicated, so do this processing separately.
 	 * @param v
-	 * @return 
+	 * @return
 	 */
 	private String processBraceString(String value){
 		StringBuilder b = new StringBuilder();
@@ -337,7 +339,7 @@ public class SimpleSyntaxHighlighter {
 	public static String Highlight(String code) {
 		return new SimpleSyntaxHighlighter(CLASSES, code).highlight();
 	}
-	
+
 	/**
 	 * Highlights the given code, using the specified color scheme. If any
 	 * elements are missing from the EnumMap, the default color is used.
@@ -348,7 +350,7 @@ public class SimpleSyntaxHighlighter {
 	public static String Highlight(EnumMap<ElementTypes, Color> colors, String code){
 		return new SimpleSyntaxHighlighter(colors, code).highlight();
 	}
-	
+
 	public enum ElementTypes {
 		/**
 		 * Denotes a comment, either line or block

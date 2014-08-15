@@ -97,17 +97,17 @@ functional approach should follow these guidelines:
 The code inside the blocks should be indented one more than the condition statements, but comma that represents the else
 should be on a line of its own, and aligned with the parent if. Additionally, a # else comment is helpful.
 
-<pre>
+%%CODE|
 if(@condition,
     trueCode()
 , #else
     falseCode()
 )
-</pre>
+%%
 
 Ifelses should follow the same general guidelines, though
 
-<pre>
+%%CODE|
 ifelse(@condition1,
     condition1Code()
 , @condition2,
@@ -115,9 +115,9 @@ ifelse(@condition1,
 , #else
     falseCode()
 )
-</pre>
+%%
 
-Again, brace syntax is much preferred however.
+{{TakeNote|text=Brace syntax is much preferred in both of these cases}}
 
 == Switch ==
 
@@ -154,14 +154,14 @@ Global procedures should be named using snake case, however.
 /**
  * Good
  */
-proc(_this_is_a_proc){
+proc _this_is_a_proc(){
 	return(0);
 }
 
 /**
  * Bad
  */
-proc(_thisIsAProc){
+proc _thisIsAProc(){
 	return(1);
 }
 %%

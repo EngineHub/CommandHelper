@@ -87,7 +87,7 @@ public class ClassDiscovery {
 	public ClassDiscovery() {
 		//
 	}
-	
+
 	/**
 	 * Stores the mapping of class name to ClassMirror object. At any given
 	 * time, after doDiscovery is called, this will be up to date with all known
@@ -149,16 +149,16 @@ public class ClassDiscovery {
 	 * If true, debug information will be printed out.
 	 */
 	private boolean debug;
-	
+
 	/**
 	 * May be null, but if set, is the cache retriever.
 	 */
 	private ClassDiscoveryCache classDiscoveryCache;
-	
+
 	/**
 	 * Turns debug mode on. If true, data about what is happening is printed out,
 	 * as well as timing information.
-	 * @param on 
+	 * @param on
 	 */
 	public void setDebugMode(boolean on){
 		debug = on;
@@ -193,11 +193,11 @@ public class ClassDiscovery {
 		}
 		preCaches.put(url, cache);
 	}
-	
+
 	/**
 	 * Sets the class discovery cache. This is optional, but if set
 	 * is used to potentially speed up caching.
-	 * @param cache 
+	 * @param cache
 	 */
 	public void setClassDiscoveryCache(ClassDiscoveryCache cache){
 		this.classDiscoveryCache = cache;
@@ -243,14 +243,14 @@ public class ClassDiscovery {
 				ClassDiscoveryURLCache cduc = classDiscoveryCache.getURLCache(rootLocation);
 				preCaches.put(rootLocation, cduc);
 			}
-			
+
 			String url;
 			try {
 				url = URLDecoder.decode(rootLocation.toString(), "UTF8");
 			} catch (UnsupportedEncodingException ex) {
 				url = URLDecoder.decode(rootLocation.toString());
 			}
-			
+
 			if (url == null) {
 				url = GetClassContainer(ClassDiscovery.class).toString();
 			}
@@ -284,7 +284,7 @@ public class ClassDiscovery {
 //						return new Thread(r, "ClassDiscovery-Async-" + id.incrementAndGet());
 //					}
 //				});
-				
+
 				//Remove file: from the front
 				String root = url.substring(5);
 				rootLocationFile = new File(root);
@@ -370,7 +370,7 @@ public class ClassDiscovery {
 	/**
 	 * Gets the classloader set with {@link #setDefaultClassLoader(java.lang.ClassLoader)}, or the
 	 * builtin default if none was specified ever. Regardless, never returns null.
-	 * @return 
+	 * @return
 	 */
 	public ClassLoader getDefaultClassLoader() {
 		if (defaultClassLoader == null) {
@@ -399,12 +399,12 @@ public class ClassDiscovery {
 		dirtyURLs.add(url);
 		classCache.put(url, new HashSet<ClassMirror<?>>());
 	}
-	
+
 	/**
 	 * Searches one deep, finding all jar files, and adds them, using
 	 * addDiscoveryLocation. If folder doesn't exist, is null,
 	 * doesn't contain any jars, or otherwise can't be read, nothing happens.
-	 * @param folder 
+	 * @param folder
 	 */
 	public void addAllJarsInFolder(File folder){
 		if(folder != null && folder.exists() && folder.isDirectory()){
@@ -419,17 +419,17 @@ public class ClassDiscovery {
 			}
 		}
 	}
-	
+
 	/**
 	 * Remove a discovery URL. Will invalidate caches.
-	 * 
+	 *
 	 * @param url
 	 */
 	public synchronized void removeDiscoveryLocation(URL url) {
 		if (url == null) {
 			throw new NullPointerException("url cannot be null");
 		}
-		
+
 		if (!urlCache.contains(url)) {
 			//Not here, so just return.
 			return;
@@ -526,14 +526,14 @@ public class ClassDiscovery {
 		classSubtypeCache.put(superType, mirrors);
 		return (Set) mirrors;
 	}
-	
+
 	/**
 	 * Returns true if subClass extends, implements, or is superClass.
 	 * This searches the entire known class ecosystem, including the known ClassMirrors
 	 * for this information.
 	 * @param subClass
 	 * @param superClass
-	 * @return 
+	 * @return
 	 */
 	public boolean doesClassExtend(ClassMirror subClass, Class superClass){
 		if (subClass.directlyExtendsFrom(superClass)) {
@@ -571,6 +571,12 @@ public class ClassDiscovery {
 				}
 			} else {
 				su = find.getSuperClass();
+			}
+		}
+		for(ClassReferenceMirror r : supers){
+			// Look through the supers. If any of them equal the search class, return true
+			if(r.getJVMName().equals(ClassUtils.getJVMName(superClass))){
+				return true;
 			}
 		}
 		//Same thing now, but for interfaces
@@ -662,8 +668,8 @@ public class ClassDiscovery {
 			return jvmNameToMirror.get(className);
 		}
 		for (ClassMirror c : getKnownClasses()) {
-			if (("L" + c.getJVMClassName() + ";").equals(className)) {
-				jvmNameToMirror.put("L" + c.getJVMClassName() + ";", c);
+			if (c.getJVMClassName().equals(className)) {
+				jvmNameToMirror.put(c.getJVMClassName(), c);
 				return c;
 			}
 		}
@@ -694,7 +700,7 @@ public class ClassDiscovery {
 		classAnnotationCache.put(annotation, mirrors);
 		return mirrors;
 	}
-	
+
 	/**
 	 * Combines finding classes with a specified annotation, and classes that extend a certain type.
 	 * @param <T> The type that will be returned, based on superClass
@@ -711,9 +717,9 @@ public class ClassDiscovery {
 		}
 		return mirrors;
 	}
-	
+
 	/**
-	 * Unlike {@link #getClassesWithAnnotationThatExtend(java.lang.Class, java.lang.Class)}, this actually 
+	 * Unlike {@link #getClassesWithAnnotationThatExtend(java.lang.Class, java.lang.Class)}, this actually
 	 * loads the matching classes into PermGen, and returns a Set of these classes.
 	 * This is useful if you are for sure going to use these classes immediately, and don't want to have
 	 * to lazy load them individually.
@@ -725,9 +731,9 @@ public class ClassDiscovery {
 	public <T> Set<Class<T>> loadClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass){
 		return loadClassesWithAnnotationThatExtend(annotation, superClass, getDefaultClassLoader(), true);
 	}
-	
+
 	/**
-	 * Unlike {@link #getClassesWithAnnotationThatExtend(java.lang.Class, java.lang.Class)}, this actually 
+	 * Unlike {@link #getClassesWithAnnotationThatExtend(java.lang.Class, java.lang.Class)}, this actually
 	 * loads the matching classes into PermGen, and returns a Set of these classes.
 	 * This is useful if you are for sure going to use these classes immediately, and don't want to have
 	 * to lazy load them individually.

@@ -1152,7 +1152,7 @@ public final class MethodScriptCompiler {
 			//Associative array/label handling
 			if (nextNonWhitespace.type.equals(TType.LABEL)) {
 				//If it's not an atomic identifier it's an error.
-				if(!t.type.isAtomicLit() && t.type != TType.IVARIABLE){
+				if(!t.type.isAtomicLit() && t.type != TType.IVARIABLE && t.type != TType.KEYWORD){
 					throw new ConfigCompileException("Invalid label specified", t.getTarget());
 				}
 				Construct val;

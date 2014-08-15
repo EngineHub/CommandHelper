@@ -19,13 +19,13 @@ import java.util.logging.Logger;
 
 
 public final class Prefs {
-    
+
     private Prefs(){}
-    
+
 	/**
 	 * Given a preference name, returns the preference value.
 	 * @param name
-	 * @return 
+	 * @return
 	 */
     public static Object pref(PNames name){
         if(prefs == null){
@@ -34,10 +34,10 @@ public final class Prefs {
         }
         return prefs.getPreference(name.config());
     }
-    
+
     private static Preferences prefs;
 	private static Thread watcherThread;
-    
+
 	/**
 	 * A list of preferences that are known to MethodScript. Additional preferences
 	 * may be set in the preferences table, but they will not be listed here.
@@ -72,7 +72,7 @@ public final class Prefs {
 		/**
 		 * Returns the name that will be listed in the config, not the name
 		 * of the enum.
-		 * @return 
+		 * @return
 		 */
         public String config(){
             return name;
@@ -84,7 +84,7 @@ public final class Prefs {
 	 * point as well, and changes to the file specified will result in the preferences immediately
 	 * updated.
 	 * @param f
-	 * @throws IOException 
+	 * @throws IOException
 	 */
     public static void init(final File f) throws IOException {
         ArrayList<Preferences.Preference> a = new ArrayList<>();
@@ -130,97 +130,97 @@ public final class Prefs {
 			//else. We won't support this feature in that case.
 			return;
 		}
-		// Set up a watcher on this file to watch for changes to it. Once the changes
-		// take effect, we want to reparse the prefs
-		if(watcherThread != null){
-			watcherThread.interrupt();
-		}
-		final WatchService watcher = FileSystems.getDefault().newWatchService();
-		final Path path = f.getParentFile().toPath();
-		path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
-		watcherThread = new Thread(new Runnable(){
-
-			@Override
-			public void run() {
-				while(true){
-					WatchKey key;
-					try {
-						key = watcher.take();
-					} catch(InterruptedException ex){
-						return;
-					}
-					if(Thread.currentThread().isInterrupted()){
-						return;
-					}
-					for(WatchEvent<?> event : key.pollEvents()){
-						WatchEvent.Kind kind = event.kind();
-						if(kind == StandardWatchEventKinds.OVERFLOW){
-							continue;
-						}
-						
-						WatchEvent<Path> ev = ((WatchEvent<Path>)event);
-						Path name = ev.context();
-						Path child = path.resolve(name);
-						if(child.toFile().equals(f)){
-							try {
-								prefs.init(f);
-							} catch (IOException ex) {
-								Logger.getLogger(Prefs.class.getName()).log(Level.SEVERE, null, ex);
-							}
-						}
-					}
-					key.reset();
-				}
-			}
-		}, Implementation.GetServerType().getBranding() + "-PrefsWatcher");
-		watcherThread.setDaemon(true);
-		watcherThread.start();
-		//The convertor may not have been set up yet, so we need to kick off a new
-		//thread and try over and over until this is valid. This may not ever
-		//actually register in cmdline mode, which is fine, this whole operation
-		//is merely to kill the daemon thread properly. If the whole server dies
-		//and this doesn't run, that's ok.
-		new Thread(new Runnable() {
-
-			@Override
-			@SuppressWarnings("SleepWhileInLoop")
-			public void run() {
-				try {
-					//Not registered yet, sleep
-					Thread.sleep(500);
-				} catch (InterruptedException ex1) {
-
-				}
-				while(true){
-					try {
-						StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-
-							@Override
-							public void run() {
-								if(watcherThread != null){
-									watcherThread.interrupt();
-									watcherThread = null;
-								}
-							}
-						});
-						break;
-					} catch(Exception ex){
-						try {
-							//Not registered yet, sleep
-							Thread.sleep(500);
-						} catch (InterruptedException ex1) {
-							
-						}
-					}
-				}
-			}
-		}, Implementation.GetServerType().getBranding() + "-PrefsWatcherShutdownRegistration").start();
+//		// Set up a watcher on this file to watch for changes to it. Once the changes
+//		// take effect, we want to reparse the prefs
+//		if(watcherThread != null){
+//			watcherThread.interrupt();
+//		}
+//		final WatchService watcher = FileSystems.getDefault().newWatchService();
+//		final Path path = f.getParentFile().toPath();
+//		path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+//		watcherThread = new Thread(new Runnable(){
+//
+//			@Override
+//			public void run() {
+//				while(true){
+//					WatchKey key;
+//					try {
+//						key = watcher.take();
+//					} catch(InterruptedException ex){
+//						return;
+//					}
+//					if(Thread.currentThread().isInterrupted()){
+//						return;
+//					}
+//					for(WatchEvent<?> event : key.pollEvents()){
+//						WatchEvent.Kind kind = event.kind();
+//						if(kind == StandardWatchEventKinds.OVERFLOW){
+//							continue;
+//						}
+//
+//						WatchEvent<Path> ev = ((WatchEvent<Path>)event);
+//						Path name = ev.context();
+//						Path child = path.resolve(name);
+//						if(child.toFile().equals(f)){
+//							try {
+//								prefs.init(f);
+//							} catch (IOException ex) {
+//								Logger.getLogger(Prefs.class.getName()).log(Level.SEVERE, null, ex);
+//							}
+//						}
+//					}
+//					key.reset();
+//				}
+//			}
+//		}, Implementation.GetServerType().getBranding() + "-PrefsWatcher");
+//		watcherThread.setDaemon(true);
+//		watcherThread.start();
+//		//The convertor may not have been set up yet, so we need to kick off a new
+//		//thread and try over and over until this is valid. This may not ever
+//		//actually register in cmdline mode, which is fine, this whole operation
+//		//is merely to kill the daemon thread properly. If the whole server dies
+//		//and this doesn't run, that's ok.
+//		new Thread(new Runnable() {
+//
+//			@Override
+//			@SuppressWarnings("SleepWhileInLoop")
+//			public void run() {
+//				try {
+//					//Not registered yet, sleep
+//					Thread.sleep(500);
+//				} catch (InterruptedException ex1) {
+//
+//				}
+//				while(true){
+//					try {
+//						StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+//
+//							@Override
+//							public void run() {
+//								if(watcherThread != null){
+//									watcherThread.interrupt();
+//									watcherThread = null;
+//								}
+//							}
+//						});
+//						break;
+//					} catch(Exception ex){
+//						try {
+//							//Not registered yet, sleep
+//							Thread.sleep(500);
+//						} catch (InterruptedException ex1) {
+//
+//						}
+//					}
+//				}
+//			}
+//		}, Implementation.GetServerType().getBranding() + "-PrefsWatcherShutdownRegistration").start();
     }
-	
+
 	public static boolean isInitialized(){
 		return prefs != null;
 	}
-	
+
 	/**
 	 * Convenience function to set the term colors based on the UseColors preference.
 	 */
@@ -231,91 +231,91 @@ public final class Prefs {
 			TermColors.DisableColors();
 		}
 	}
-    
+
     public static Boolean DebugMode(){
         return (Boolean)pref(PNames.DEBUG_MODE) || ScreamErrors();
     }
-    
+
     public static Boolean ShowWarnings(){
         return (Boolean)pref(PNames.SHOW_WARNINGS);
     }
-    
+
     public static Boolean ConsoleLogCommands(){
         return (Boolean)pref(PNames.CONSOLE_LOG_COMMANDS);
     }
-    
+
     public static String ScriptName(){
         return (String)pref(PNames.SCRIPT_NAME);
     }
-    
+
     public static Boolean EnableInterpreter(){
         return (Boolean)pref(PNames.ENABLE_INTERPRETER);
     }
-    
+
     public static String BaseDir(){
         return (String)pref(PNames.BASE_DIR);
     }
-    
+
     public static Boolean PlayDirty(){
         return (Boolean)pref(PNames.PLAY_DIRTY);
     }
-    
+
     public static Boolean CaseSensitive(){
         return (Boolean)pref(PNames.CASE_SENSITIVE);
     }
-    
+
     public static String MainFile(){
         return (String)pref(PNames.MAIN_FILE);
     }
-    
+
     public static Boolean AllowDebugLogging(){
         return (Boolean)pref(PNames.ALLOW_DEBUG_LOGGING);
     }
-    
+
     public static String DebugLogFile(){
         return (String)pref(PNames.DEBUG_LOG_FILE);
     }
-    
+
     public static String StandardLogFile(){
         return (String)pref(PNames.STANDARD_LOG_FILE);
     }
-    
+
     public static Boolean AllowProfiling(){
         return (Boolean)pref(PNames.ALLOW_PROFILING);
     }
-    
+
     public static String ProfilingFile(){
         return (String)pref(PNames.PROFILING_FILE);
     }
-    
+
     public static Boolean ShowSplashScreen(){
         return (Boolean)pref(PNames.SHOW_SPLASH_SCREEN);
     }
-    
+
     public static Boolean UseColors(){
         return (Boolean)pref(PNames.USE_COLORS);
     }
-    
+
     public static Boolean HaltOnFailure() {
         return (Boolean)pref(PNames.HALT_ON_FAILURE);
     }
-	
+
 	public static Boolean UseSudoFallback(){
 		return (Boolean)pref(PNames.USE_SUDO_FALLBACK);
 	}
-	
+
 	public static Boolean AllowShellCommands(){
 		return (Boolean)pref(PNames.ALLOW_SHELL_COMMANDS);
 	}
-	
+
 	public static Boolean AllowDynamicShell(){
 		return (Boolean)pref(PNames.ALLOW_DYNAMIC_SHELL);
 	}
-	
+
 	public static Boolean ScreamErrors(){
 		return (Boolean)pref(PNames.SCREAM_ERRORS);
 	}
-	
+
 	public static Integer InterpreterTimeout(){
 		Integer i = (Integer)pref(PNames.INTERPRETER_TIMEOUT);
 		if(i < 0){
