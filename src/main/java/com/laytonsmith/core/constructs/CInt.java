@@ -9,11 +9,11 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
- * 
+ *
  */
 @typeof("int")
-public class CInt extends Construct implements Cloneable{
-    
+public class CInt extends CNumber implements Cloneable{
+
     public static final long serialVersionUID = 1L;
     final long val;
     public CInt(String value, Target t){
@@ -24,7 +24,7 @@ public class CInt extends Construct implements Cloneable{
             throw new ConfigRuntimeException("Could not parse " + value + " as an integer", ExceptionType.FormatException, t);
         }
     }
-    
+
     public CInt(long value, Target t){
         super(Long.toString(value), ConstructType.INT, t);
         val = value;
@@ -33,7 +33,7 @@ public class CInt extends Construct implements Cloneable{
     public long getInt(){
         return val;
     }
-    
+
     @Override
     public CInt clone() throws CloneNotSupportedException{
         return this;

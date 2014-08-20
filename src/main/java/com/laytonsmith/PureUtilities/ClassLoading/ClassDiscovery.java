@@ -93,49 +93,49 @@ public class ClassDiscovery {
 	 * time, after doDiscovery is called, this will be up to date with all known
 	 * classes.
 	 */
-	private final Map<URL, Set<ClassMirror<?>>> classCache = new HashMap<URL, Set<ClassMirror<?>>>();
+	private final Map<URL, Set<ClassMirror<?>>> classCache = new HashMap<>();
 	/**
 	 * This cache maps jvm name to the associated ClassMirror object, to speed
 	 * up lookups.
 	 */
-	private final Map<String, ClassMirror<?>> jvmNameToMirror = new HashMap<String, ClassMirror<?>>();
+	private final Map<String, ClassMirror<?>> jvmNameToMirror = new HashMap<>();
 	/**
 	 * Maps the fuzzy class name to actual Class object.
 	 */
-	private final Map<String, ClassMirror<?>> fuzzyClassCache = new HashMap<String, ClassMirror<?>>();
+	private final Map<String, ClassMirror<?>> fuzzyClassCache = new HashMap<>();
 	/**
 	 * Maps the forName cache.
 	 */
-	private final Map<String, ClassMirror<?>> forNameCache = new HashMap<String, ClassMirror<?>>();
+	private final Map<String, ClassMirror<?>> forNameCache = new HashMap<>();
 	/**
 	 * List of all URLs from which to pull classes.
 	 */
-	private final Set<URL> urlCache = new HashSet<URL>();
+	private final Set<URL> urlCache = new HashSet<>();
 	/**
 	 * When a URL is added to urlCache, it is also initially added here. If
 	 * there are any URLs in this set, they must be resolved first.
 	 */
-	private final Set<URL> dirtyURLs = new HashSet<URL>();
+	private final Set<URL> dirtyURLs = new HashSet<>();
 	/**
 	 * Cache for class subtypes. Whenever a new URL is added to the URL cache,
 	 * this is cleared.
 	 */
-	private final Map<Class<?>, Set<ClassMirror<?>>> classSubtypeCache = new HashMap<Class<?>, Set<ClassMirror<?>>>();
+	private final Map<Class<?>, Set<ClassMirror<?>>> classSubtypeCache = new HashMap<>();
 	/**
 	 * Cache for class annotations. Whenever a new URL is added to the URL
 	 * cache, this is cleared.
 	 */
-	private final Map<Class<? extends Annotation>, Set<ClassMirror<?>>> classAnnotationCache = new HashMap<Class<? extends Annotation>, Set<ClassMirror<?>>>();
+	private final Map<Class<? extends Annotation>, Set<ClassMirror<?>>> classAnnotationCache = new HashMap<>();
 	/**
 	 * Cache for field annotations. Whenever a new URL is added to the URL
 	 * cache, this is cleared.
 	 */
-	private final Map<Class<? extends Annotation>, Set<FieldMirror>> fieldAnnotationCache = new HashMap<Class<? extends Annotation>, Set<FieldMirror>>();
+	private final Map<Class<? extends Annotation>, Set<FieldMirror>> fieldAnnotationCache = new HashMap<>();
 	/**
 	 * Cache for method annotations. Whenever a new URL is added to the URL
 	 * cache, this is cleared.
 	 */
-	private final Map<Class<? extends Annotation>, Set<MethodMirror>> methodAnnotationCache = new HashMap<Class<? extends Annotation>, Set<MethodMirror>>();
+	private final Map<Class<? extends Annotation>, Set<MethodMirror>> methodAnnotationCache = new HashMap<>();
 	/**
 	 * By default null, but this can be set per instance.
 	 */
@@ -144,7 +144,7 @@ public class ClassDiscovery {
 	 * External cache. If added before discovery happens for a URL, this will
 	 * cause the discovery process to be skipped entirely for a given URL.
 	 */
-	private final Map<URL, ClassDiscoveryURLCache> preCaches = new HashMap<URL, ClassDiscoveryURLCache>();
+	private final Map<URL, ClassDiscoveryURLCache> preCaches = new HashMap<>();
 	/**
 	 * If true, debug information will be printed out.
 	 */
@@ -288,7 +288,7 @@ public class ClassDiscovery {
 				//Remove file: from the front
 				String root = url.substring(5);
 				rootLocationFile = new File(root);
-				List<File> fileList = new ArrayList<File>();
+				List<File> fileList = new ArrayList<>();
 				descend(new File(root), fileList);
 
 				//Now, we have all the class files in the package. But, it's the absolute path
@@ -471,7 +471,7 @@ public class ClassDiscovery {
 	 */
 	public Set<ClassMirror<?>> getKnownClasses() {
 		doDiscovery();
-		Set<ClassMirror<?>> ret = new HashSet<ClassMirror<?>>();
+		Set<ClassMirror<?>> ret = new HashSet<>();
 		for (URL url : urlCache) {
 			ret.addAll(getKnownClasses(url));
 		}
@@ -494,7 +494,7 @@ public class ClassDiscovery {
 			addDiscoveryLocation(url);
 		}
 		doDiscovery();
-		return new ArrayList<ClassMirror<?>>(classCache.get(url));
+		return new ArrayList<>(classCache.get(url));
 	}
 
 	/**
@@ -512,10 +512,10 @@ public class ClassDiscovery {
 			return (Set) getKnownClasses();
 		}
 		if (classSubtypeCache.containsKey(superType)) {
-			return new HashSet<ClassMirror<T>>((Set) classSubtypeCache.get(superType));
+			return new HashSet<>((Set) classSubtypeCache.get(superType));
 		}
 		doDiscovery();
-		Set<ClassMirror<?>> mirrors = new HashSet<ClassMirror<?>>();
+		Set<ClassMirror<?>> mirrors = new HashSet<>();
 		Set<ClassMirror<T>> knownClasses = (Set) getKnownClasses();
 		outer:
 		for (ClassMirror m : knownClasses) {
@@ -547,7 +547,7 @@ public class ClassDiscovery {
 		//the actual Class object for them. Essentially, this falls back
 		//to loading the class when it
 		//can't be found in the mirrors pool.
-		Set<ClassReferenceMirror> supers = new HashSet<ClassReferenceMirror>();
+		Set<ClassReferenceMirror> supers = new HashSet<>();
 		//Get the superclass. If it's java.lang.Object, we're done.
 		ClassReferenceMirror su = subClass.getSuperClass();
 		while (!su.getJVMName().equals("Ljava/lang/Object;")) {
@@ -580,8 +580,8 @@ public class ClassDiscovery {
 			}
 		}
 		//Same thing now, but for interfaces
-		Deque<ClassReferenceMirror> interfaces = new ArrayDeque<ClassReferenceMirror>();
-		Set<ClassReferenceMirror> handled = new HashSet<ClassReferenceMirror>();
+		Deque<ClassReferenceMirror> interfaces = new ArrayDeque<>();
+		Set<ClassReferenceMirror> handled = new HashSet<>();
 		interfaces.addAll(subClass.getInterfaces());
 		//Also have to add all the supers' interfaces too
 		for (ClassReferenceMirror r : supers) {
@@ -656,7 +656,7 @@ public class ClassDiscovery {
 	 * @return
 	 */
 	public <T> Set<Class<T>> loadClassesThatExtend(Class<T> superType, ClassLoader loader, boolean initialize) {
-		Set<Class<T>> set = new HashSet<Class<T>>();
+		Set<Class<T>> set = new HashSet<>();
 		for (ClassMirror<T> cm : getClassesThatExtend(superType)) {
 			set.add(cm.loadClass(loader, initialize));
 		}
@@ -688,10 +688,10 @@ public class ClassDiscovery {
 	 */
 	public Set<ClassMirror<?>> getClassesWithAnnotation(Class<? extends Annotation> annotation) {
 		if (classAnnotationCache.containsKey(annotation)) {
-			return new HashSet<ClassMirror<?>>(classAnnotationCache.get(annotation));
+			return new HashSet<>(classAnnotationCache.get(annotation));
 		}
 		doDiscovery();
-		Set<ClassMirror<?>> mirrors = new HashSet<ClassMirror<?>>();
+		Set<ClassMirror<?>> mirrors = new HashSet<>();
 		for (ClassMirror m : getKnownClasses()) {
 			if (m.hasAnnotation(annotation)) {
 				mirrors.add(m);
@@ -745,7 +745,7 @@ public class ClassDiscovery {
 	 * @return A set of classes that match the criteria
 	 */
 	public <T> Set<Class<T>> loadClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass, ClassLoader loader, boolean initialize){
-		Set<Class<T>> set = new HashSet<Class<T>>();
+		Set<Class<T>> set = new HashSet<>();
 		for (ClassMirror<T> cm : getClassesWithAnnotationThatExtend(annotation, superClass)) {
 			try {
 				set.add(cm.loadClass(loader, initialize));
@@ -782,7 +782,7 @@ public class ClassDiscovery {
 	 * @return
 	 */
 	public Set<Class> loadClassesWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
-		Set<Class> set = new HashSet<Class>();
+		Set<Class> set = new HashSet<>();
 		for (ClassMirror<?> cm : getClassesWithAnnotation(annotation)) {
 			try {
 				set.add(cm.loadClass(loader, initialize));
@@ -804,10 +804,10 @@ public class ClassDiscovery {
 	 */
 	public Set<FieldMirror> getFieldsWithAnnotation(Class<? extends Annotation> annotation) {
 		if (fieldAnnotationCache.containsKey(annotation)) {
-			return new HashSet<FieldMirror>(fieldAnnotationCache.get(annotation));
+			return new HashSet<>(fieldAnnotationCache.get(annotation));
 		}
 		doDiscovery();
-		Set<FieldMirror> mirrors = new HashSet<FieldMirror>();
+		Set<FieldMirror> mirrors = new HashSet<>();
 		for (ClassMirror m : getKnownClasses()) {
 			for (FieldMirror f : m.getFields()) {
 				if (f.hasAnnotation(annotation)) {
@@ -829,10 +829,10 @@ public class ClassDiscovery {
 	 */
 	public Set<MethodMirror> getMethodsWithAnnotation(Class<? extends Annotation> annotation) {
 		if (methodAnnotationCache.containsKey(annotation)) {
-			return new HashSet<MethodMirror>(methodAnnotationCache.get(annotation));
+			return new HashSet<>(methodAnnotationCache.get(annotation));
 		}
 		doDiscovery();
-		Set<MethodMirror> mirrors = new HashSet<MethodMirror>();
+		Set<MethodMirror> mirrors = new HashSet<>();
 		for (ClassMirror m : getKnownClasses()) {
 			for (MethodMirror mm : m.getMethods()) {
 				if (mm.hasAnnotation(annotation)) {
@@ -872,7 +872,7 @@ public class ClassDiscovery {
 	 */
 	public Set<Method> loadMethodsWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
 		try {
-			Set<Method> set = new HashSet<Method>();
+			Set<Method> set = new HashSet<>();
 			for (MethodMirror mm : getMethodsWithAnnotation(annotation)) {
 				set.add(mm.loadMethod(loader, initialize));
 			}
@@ -932,7 +932,7 @@ public class ClassDiscovery {
 		if (fuzzyClassCache.containsKey(index)) {
 			return fuzzyClassCache.get(index);
 		}
-		Set<ClassMirror> found = new HashSet<ClassMirror>();
+		Set<ClassMirror> found = new HashSet<>();
 		Set<ClassMirror<?>> searchSpace = getKnownClasses();
 		for (ClassMirror c : searchSpace) {
 			if (c.getPackage().getName().matches(packageRegex) && c.getSimpleName().equals(className)) {

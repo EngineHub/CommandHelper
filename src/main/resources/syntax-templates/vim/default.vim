@@ -2,11 +2,12 @@ if exists("b:current_syntax")
   finish
 endif
 
-syn keyword restrictedFunctions %%space:functions:restricted%% 
-syn keyword unrestrictedFunctions %%space:functions:unrestricted%% 
-syn keyword events %%space:events%% 
-syn keyword colors %%space:colors%% 
+syn keyword restrictedFunctions %%space:functions:restricted%%
+syn keyword unrestrictedFunctions %%space:functions:unrestricted%%
+syn keyword events %%space:events%%
+syn keyword colors %%space:colors%%
 syn keyword unsymboledkeywords %%space:keywords%%
+syn keyword classTypes %%space:types%%
 syn match linecomment /#.*/
 syn match linecomment /\/\/.*/
 syn region blockcomment start=/\/\*/ end=/\*\//
@@ -25,6 +26,7 @@ highlight restrictedFunctions ctermfg=DarkCyan guifg=#1265A9
 highlight unrestrictedFunctions ctermfg=DarkGreen guifg=#B35900
 highlight events ctermfg=LightMagenta guifg=#B30059
 highlight colors ctermfg=yellow guifg=#5900B3
+highlight classTypes ctermfg=LightCyan guifg=LightCyan
 highlight unsymboledkeywords ctermfg=LightBlue guifg=LightBlue
 highlight linecomment ctermfg=LightGray guifg=LightGray
 highlight blockcomment ctermfg=LightGray guifg=LightGray

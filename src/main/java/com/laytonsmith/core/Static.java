@@ -24,6 +24,7 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -31,6 +32,7 @@ import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -437,18 +439,22 @@ public final class Static {
 			return new CInt(Long.parseLong(val), t);
 		} catch (NumberFormatException e) {
 			try {
-				if (val.contains(" ") || val.contains("\t")) {
+				if (!(val.contains(" ") || val.contains("\t"))) {
                         //Interesting behavior in Double.parseDouble causes it to "trim" strings first, then
 					//try to parse them, which is not desireable in our case. So, if the value contains
 					//any characters other than [\-0-9\.], we want to make it a string instead
-					return new CString(val, t);
+					return new CDouble(Double.parseDouble(val), t);
 				}
-				return new CDouble(Double.parseDouble(val), t);
 			} catch (NumberFormatException g) {
-                    //It's a literal, but not a keyword. Push it in as a string to standardize everything
-				//later
-				return new CString(val, t);
+                    // Not a double either
 			}
+		}
+		// TODO: Once compiler environments are added, we would need to check to see if the value here is a custom
+		// type. However, as it stands, since we only support the native types, we will just hardcode the check here.
+		if(NativeTypeList.getNativeTypeList().contains(val)){
+			return new CClassType(val, t);
+		} else {
+			return new CString(val, t);
 		}
 	}
 

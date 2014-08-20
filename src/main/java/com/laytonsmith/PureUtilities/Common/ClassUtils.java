@@ -1,6 +1,8 @@
 
 package com.laytonsmith.PureUtilities.Common;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,7 +12,7 @@ import java.util.regex.Pattern;
  */
 public class ClassUtils {
 	private static final Pattern ARRAY_COUNT_PATTERN = Pattern.compile("\\[\\]");
-	
+
 	/**
 	 * Returns the Class object, given the in-code class name. This takes into
 	 * account inner classes not being handled the same normally, as well as ...
@@ -26,7 +28,7 @@ public class ClassUtils {
 	public static Class forCanonicalName(String className) throws ClassNotFoundException{
 		return forCanonicalName(className, false, false, null);
 	}
-	
+
 	/**
 	 * Returns the Class object, given the in-code class name. This takes into
 	 * account inner classes not being handled the same normally, as well as ...
@@ -44,7 +46,7 @@ public class ClassUtils {
 	public static Class forCanonicalName(String className, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException{
 		return forCanonicalName(className, true, initialize, classLoader);
 	}
-	
+
 	/**
 	 * Private version, which accepts the useInitializer parameter.
 	 * @param className
@@ -52,7 +54,7 @@ public class ClassUtils {
 	 * @param initialize
 	 * @param classLoader
 	 * @return
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException
 	 */
 	private static Class forCanonicalName(String className, boolean useInitializer, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
 		className = StringUtils.replaceLast(className, "\\.\\.\\.", "[]");
@@ -144,13 +146,13 @@ public class ClassUtils {
 		}
 		return c;
 	}
-	
+
 	/**
 	 * Returns the name of the class, as the JVM would output it. For instance,
 	 * for an int, "I" is returned, for an array of Objects, "[Ljava/lang/Object;" is
 	 * returned.
 	 * @param clazz
-	 * @return 
+	 * @return
 	 */
 	public static String getJVMName(Class clazz){
 		//For arrays, .getName() is fine.
@@ -177,14 +179,14 @@ public class ClassUtils {
 			return "L" + clazz.getName().replace(".", "/") + ";";
 		}
 	}
-	
+
 	/**
 	 * Returns the common name of a class, as it would be typed out in source code.
 	 * In general, this returns the same as Class.getName, but for arrays, it outputs
-	 * <code>[[Ljava.lang.Object;</code> which would be better written as 
+	 * <code>[[Ljava.lang.Object;</code> which would be better written as
 	 * <code>java.lang.Object[][]</code>.
 	 * @param c
-	 * @return 
+	 * @return
 	 */
 	public static String getCommonName(Class c){
 		if(!c.isArray()){
@@ -198,13 +200,13 @@ public class ClassUtils {
 		}
 		return cc.getName() + StringUtils.stringMultiply(arrayCount, "[]");
 	}
-	
+
 	/**
 	 * Converts the binary name to the common name. For instance,
 	 * for [Ljava/lang/Object;, java.lang.Object[] would be returned. The classes
 	 * don't necessarily need to exist for this method to work.
 	 * @param classname
-	 * @return 
+	 * @return
 	 */
 	public static String getCommonNameFromJVMName(String classname){
 		int arrayCount = classname.lastIndexOf("[") + 1;
@@ -233,4 +235,44 @@ public class ClassUtils {
 		}
 		return classname + StringUtils.stringMultiply(arrayCount, "[]");
 	}
+
+	/**
+	 * Returns a list of all classes that the specified class can be validly cast to. This includes
+	 * all super classes, as well as all interfaces (and superclasses of those interfaces, etc) and
+	 * java.lang.Object, as well as the class itself.
+	 * @param c The class to search for.
+	 * @return
+	 */
+	public static Set<Class<?>> getAllCastableClasses(Class<?> c){
+		Set<Class<?>> ret = new HashSet<>();
+		getAllCastableClassesWithBlacklist(c, ret);
+		return ret;
+	}
+
+	/**
+	 * Private version of {@link #getAllCastableClasses(java.lang.Class)}
+	 * @param c
+	 * @param blacklist
+	 * @return
+	 */
+	private static Set<Class<?>> getAllCastableClassesWithBlacklist(Class<?> c, Set<Class<?>> blacklist){
+		if(blacklist.contains(c)){
+			return blacklist;
+		}
+		while(true){
+			blacklist.add(c);
+			Class<?> su = c.getSuperclass();
+			if(su == null){
+				return blacklist;
+			}
+			blacklist.add(su);
+			blacklist.addAll(getAllCastableClassesWithBlacklist(su, blacklist));
+			for(Class<?> iface : c.getInterfaces()){
+				blacklist.add(iface);
+				blacklist.addAll(getAllCastableClassesWithBlacklist(iface, blacklist));
+			}
+			c = su;
+		}
+	}
+
 }

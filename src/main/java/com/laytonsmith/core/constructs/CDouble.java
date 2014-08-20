@@ -9,11 +9,11 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
- * 
+ *
  */
 @typeof("double")
-public class CDouble extends Construct implements Cloneable{
-    
+public class CDouble extends CNumber implements Cloneable{
+
     public static final long serialVersionUID = 1L;
     final double val;
 
@@ -34,7 +34,7 @@ public class CDouble extends Construct implements Cloneable{
     public double getDouble(){
         return val;
     }
-    
+
     @Override
     public CDouble clone() throws CloneNotSupportedException{
         return this;

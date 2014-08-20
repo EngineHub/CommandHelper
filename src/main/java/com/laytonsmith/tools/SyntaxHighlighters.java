@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
@@ -143,7 +144,10 @@ public class SyntaxHighlighters {
             for(Exceptions.ExceptionType e : Exceptions.ExceptionType.values()){
                 base.add(e.name());
             }
-        }
+        } else if(datalist.equalsIgnoreCase("types")){
+			base.addAll(NativeTypeList.getNativeTypeList());
+			base.remove("null"); // Null is technically in the list, but it shouldn't be added.
+		}
         String header = "";
         String spliter = "IMPROPER FORMATTING";
         String footer = "";

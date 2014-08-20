@@ -25,6 +25,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -37,6 +38,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -3404,7 +3406,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				return new CString(args[0].typeof(), t);
+				return new CClassType(args[0].typeof(), t);
 			} catch (IllegalArgumentException ex) {
 				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 						+ " error to the developers.");
@@ -3702,6 +3704,84 @@ public class DataHandling {
 		}
 
 
+
+	}
+
+	@api
+	public static class _instanceof extends AbstractFunction implements Optimizable {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			boolean b = InstanceofUtil.isInstanceof(args[0], args[1].val());
+			return CBoolean.get(b);
+		}
+
+		@Override
+		public String getName() {
+			return "instanceof";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {value, type} Checks to see if the value is, extends, or implements the given type. Keyword usage is preferred:"
+					+ " @value instanceof int instead of instanceof(@value, int).";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			// There are two specific cases here where we will give more precise error messages.
+			// If it's a string, yell at them
+			if(children.get(1).getData() instanceof CString){
+				throw new ConfigCompileException("Unexpected string type passed to \"instanceof\"", t);
+			}
+			// If it's a variable, also yell at them
+			if(children.get(1).getData() instanceof IVariable){
+				throw new ConfigCompileException("Variable types are not allowed in \"instanceof\"", t);
+			}
+			// Unknown error, but this is still never valid.
+			if(!(children.get(1).getData() instanceof CClassType)){
+				throw new ConfigCompileException("Unexpected type for \"instanceof\": " + children.get(1).getData(), t);
+			}
+			// null is technically a type, but instanceof shouldn't work with that
+			if(children.get(1).getData().val().equals("null")){
+				throw new ConfigCompileException("\"null\" cannot be compared against with instanceof", t);
+			}
+			// It's hardcoded, allow it, but optimize it out.
+			if(children.get(0).isConst()){
+				return new ParseTree(exec(t, null, children.get(0).getData(), children.get(1).getData()), fileOptions);
+			}
+			return null;
+		}
 
 	}
 
