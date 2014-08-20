@@ -10,6 +10,7 @@ import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Globals;
@@ -38,6 +39,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -217,19 +219,36 @@ public class DataHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			Construct c = args[1];
+			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
+			int offset = 0;
+			CClassType type = CClassType.AUTO;
+			String name;
+			if(args.length == 3){
+				offset = 1;
+				name = ((IVariable) args[offset + 0]).getName();
+				if(list.has(name)){
+					CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
+							+ list.get(name, t).getDefinedTarget() + " but is being redefined", t);
+				}
+				type = ArgumentValidation.getClassType(args[0], t);
+			}
+			name = ((IVariable) args[offset + 0]).getName();
+			Construct c = args[offset + 1];
 			while (c instanceof IVariable) {
 				IVariable cur = (IVariable) c;
-				c = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+				c = list.get(cur.getName(), cur.getTarget()).ival();
 			}
-			if (args[0] instanceof IVariable) {
-				IVariable v = new IVariable(((IVariable) args[0]).getName(), c, t);
-				env.getEnv(GlobalEnv.class).GetVarList().set(v);
+			if (args[offset + 0] instanceof IVariable) {
+				if(args.length == 2){
+					type = list.get(name, t).getDefinedType();
+				}
+				IVariable v = new IVariable(type, name, c, t);
+				list.set(v);
 				return v;
 			}
 			throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
@@ -242,8 +261,8 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "ivariable {ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it."
-					+ " Returns the variable that was assigned. Operator syntax is also supported: <code>@a = 5;</code>. Other"
+			return "ivariable {[type], ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it."
+					+ " Returns the variable that was assigned. Operator syntax is also supported: <code>@a = 5;</code>."
 					+ " Other forms are supported as well, +=, -=, *=, /=, .=, which do multiple operations at once. Array assigns"
 					+ " are also supported: @array[5] = 'new value in index 5';";
 		}
@@ -280,7 +299,14 @@ public class DataHandling {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			//We can't really optimize, but we can check that we are
 			//getting an ivariable.
-			if (!(args[0] instanceof IVariable)) {
+			int offset = 0;
+			if(args.length == 3){
+				offset = 1;
+				if(!(args[0] instanceof CClassType)){
+					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
+				}
+			}
+			if (!(args[offset + 0] instanceof IVariable)) {
 				throw new ConfigCompileException("Expecting an ivar for argument 1 to assign", t);
 			}
 			return null;

@@ -8,22 +8,31 @@ import java.util.Set;
 
 /**
  *
- * 
+ *
  */
 public class IVariableList {
     Map<String, IVariable> varList = new HashMap<String, IVariable>();
-    
+
     public void set(IVariable v){
         varList.put(v.getName(), v);
     }
-    
+
     public IVariable get(String name, Target t){
         if(!varList.containsKey(name)){
-            this.set(new IVariable(name, t));
+            this.set(new IVariable(CClassType.AUTO, name, CNull.NULL, t));
         }
         varList.get(name).setTarget(t);
         return varList.get(name);
     }
+
+	/**
+	 * Returns true if the variable table already has this value defined
+	 * @param name
+	 * @return
+	 */
+	public boolean has(String name){
+		return varList.containsKey(name);
+	}
 
     @Override
     public String toString() {
@@ -42,7 +51,7 @@ public class IVariableList {
         b.append("]");
         return b.toString();
     }
-    
+
     @Override
     public IVariableList clone(){
         IVariableList clone = new IVariableList();
@@ -54,6 +63,6 @@ public class IVariableList {
     public Set<String> keySet() {
         return varList.keySet();
     }
-    
-    
+
+
 }

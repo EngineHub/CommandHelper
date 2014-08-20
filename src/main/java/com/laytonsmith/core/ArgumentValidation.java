@@ -4,6 +4,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
@@ -345,7 +346,15 @@ public class ArgumentValidation {
 		} else if (c instanceof CNull) {
 			return new CByteArray(t, 0);
 		} else {
-			throw new Exceptions.CastException("Expecting byte array, but found " + c.getCType() + " instead.", t);
+			throw new Exceptions.CastException("Expecting byte array, but found " + c.typeof() + " instead.", t);
+		}
+	}
+
+	public static CClassType getClassType(Construct c, Target t){
+		if(c instanceof CClassType){
+			return (CClassType) c;
+		} else {
+			throw new Exceptions.CastException("Expecting a ClassType, but found " + c.typeof() + " instead.", t);
 		}
 	}
 

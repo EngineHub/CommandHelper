@@ -11,12 +11,10 @@ import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.compiler.KeywordList;
-import com.laytonsmith.core.constructs.CBrace;
 import com.laytonsmith.core.constructs.CBracket;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
@@ -116,7 +114,7 @@ public class Compiler {
 		public static ParseTree getParseTree(ParseTree child, FileOptions fo, Target t) {
 			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
 			ParseTree tree = new ParseTree(ac, fo);
-			List<ParseTree> children = new ArrayList<ParseTree>();
+			List<ParseTree> children = new ArrayList<>();
 			children.add(child);
 			tree.setChildren(children);
 			return tree;
@@ -407,6 +405,21 @@ public class Compiler {
 					}
 				} catch (IndexOutOfBoundsException e) {
 					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + "). Did you forget to quote your symbols?", list.get(list.size() - 1).getTarget());
+				}
+			}
+
+			// Look for typed assignments TODO: And eventually procs and closures as well
+			for(int k = 0; k < list.size() - 1; k++){
+				if(list.get(k).getData() instanceof CClassType && list.get(k + 1).getData() instanceof CFunction){
+					switch(list.get(k + 1).getData().val()){
+						case "assign":
+							// Typed assign
+							ParseTree type = list.remove(k);
+							List<ParseTree> children = list.get(k).getChildren();
+							children.add(0, type);
+							list.get(k).setChildren(children);
+							break;
+					}
 				}
 			}
 

@@ -17,6 +17,8 @@ public class NativeTypeList {
 		for(ClassMirror<Mixed> c : ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)){
 			ret.add(c.loadAnnotation(typeof.class).value());
 		}
+		// Also add this one in
+		ret.add("mixed");
 		return ret;
 	}
 }
