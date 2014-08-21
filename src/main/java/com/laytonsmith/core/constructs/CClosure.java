@@ -9,6 +9,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.functions.Exceptions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -17,28 +18,27 @@ import java.util.logging.Logger;
 /**
  * A closure is just an anonymous procedure.
  *
- * 
+ *
  */
 @typeof("closure")
 public class CClosure extends Construct {
 
     public static final long serialVersionUID = 1L;
-    ParseTree node;
-    Environment env;
-    String[] names;
-    Construct[] defaults;
-	
-    public CClosure(ParseTree node, Environment env, String[] names, Construct[] defaults, Target t) {
+    private ParseTree node;
+    private final Environment env;
+    private final String[] names;
+    private final Construct[] defaults;
+	private final CClassType[] types;
+	private final CClassType returnType;
+
+    public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Construct[] defaults, CClassType[] types, Target t) {
         super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
         this.node = node;
-        try {
-            this.env = env.clone();
-        }
-        catch (CloneNotSupportedException ex) {
-            throw ConfigRuntimeException.CreateUncatchableException("A failure occured while trying to clone the environment. " + ex.getMessage(), t);
-        }
+		this.env = env;
         this.names = names;
         this.defaults = defaults;
+		this.types = types;
+		this.returnType = returnType;
     }
 
     @Override
@@ -100,13 +100,13 @@ public class CClosure extends Construct {
     /**
      * Executes the closure, giving it the supplied arguments. {@code values}
      * may be null, which means that no arguments are being sent.
-	 * 
+	 *
 	 * LoopManipulationExceptions will never bubble up past this point, because they are
 	 * never allowed, so they are handled automatically, but
 	 * other ProgramFlowManipulationExceptions will, . ConfigRuntimeExceptions will
 	 * also bubble up past this, since an execution mechanism may need to do custom
 	 * handling.
-	 * 
+	 *
 	 * A typical execution will include the following code:
 	 * <pre>
 	 * try {
@@ -142,7 +142,7 @@ public class CClosure extends Construct {
                     catch (Exception e) {
                         value = defaults[i].clone();
                     }
-                    environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(name, value, getTarget()));
+                    environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
                 }
             }
             CArray arguments = new CArray(node.getData().getTarget());
@@ -164,6 +164,20 @@ public class CClosure extends Construct {
 				Target t = lme.getTarget();
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
+			} catch (FunctionReturnException ex){
+				// Check the return type of the closure to see if it matches the defined type
+				Construct ret = ex.getReturn();
+				if(!InstanceofUtil.isInstanceof(ret, returnType)){
+					throw new Exceptions.CastException("Expected closure to return a value of type " + returnType.val()
+							 + " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
+				}
+				// Now rethrow it
+				throw ex;
+			}
+			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
+			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
+				throw new Exceptions.CastException("Expecting closure to return a value of type " + returnType.val() + ","
+						+ " but no value was returned.", node.getTarget());
 			}
         }
         catch (CloneNotSupportedException ex) {

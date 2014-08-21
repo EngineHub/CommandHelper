@@ -11,23 +11,23 @@ import java.util.Set;
 
 /**
  *
- * 
+ *
  */
 @typeof("string")
-public class CString extends Construct implements Cloneable, ArrayAccess{
-    
+public class CString extends CPrimitive implements Cloneable, ArrayAccess{
+
     public CString(String value, Target t){
         super(value==null?"":value, ConstructType.STRING, t);
     }
-    
+
     public CString(char value, Target t){
         this(Character.toString(value), t);
     }
-    
+
     public CString(CharSequence value, Target t){
         this(value.toString(), t);
     }
-    
+
     @Override
     public CString clone() throws CloneNotSupportedException{
         return this;
@@ -65,7 +65,7 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
         }
         return new CString(this.val().substring(begin, end), t);
     }
-	
+
 	@Override
 	public String getQuote(){
 		return super.getQuote();

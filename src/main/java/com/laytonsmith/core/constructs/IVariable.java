@@ -30,11 +30,14 @@ public class IVariable extends Construct implements Cloneable {
 
     public IVariable(CClassType type, String name, Construct value, Target t) {
         super(name, ConstructType.IVARIABLE, t);
-		if(type != CClassType.AUTO){
+		if(!type.equals(CClassType.AUTO) && !(value instanceof CNull)){
 			if(!InstanceofUtil.isInstanceof(value, type.val())){
 				throw new ConfigRuntimeException(name + " is of type " + type.val() + ", but a value of type "
 						+ value.typeof() + " was assigned to it.", Exceptions.ExceptionType.CastException, t);
 			}
+		}
+		if(type.equals(CClassType.VOID)){
+			throw new ConfigRuntimeException("Variables may not be of type void", Exceptions.ExceptionType.CastException, t);
 		}
 		this.type = type;
 		if(value == null){

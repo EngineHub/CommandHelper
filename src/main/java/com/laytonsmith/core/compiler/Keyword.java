@@ -93,7 +93,7 @@ public abstract class Keyword {
 	 * @param node
 	 * @return
 	 */
-	protected boolean isCodeBlock(ParseTree node){
+	protected static boolean isCodeBlock(ParseTree node){
 		return node.getData() instanceof CFunction && node.getData().val().equals(__CBRACE__);
 	}
 
@@ -103,7 +103,7 @@ public abstract class Keyword {
 	 * @param node
 	 * @return
 	 */
-	protected ParseTree getArgumentOrNull(ParseTree node){
+	protected static ParseTree getArgumentOrNull(ParseTree node){
 		if(node.getChildren().isEmpty()){
 			return new ParseTree(CNull.NULL, node.getFileOptions());
 		} else {

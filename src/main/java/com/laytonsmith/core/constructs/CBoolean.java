@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.typeof;
  * Represents a MethodScript boolean.
  */
 @typeof("boolean")
-public final class CBoolean extends Construct implements Cloneable{
+public final class CBoolean extends CPrimitive implements Cloneable{
 
 	public static final long serialVersionUID = 1L;
 
@@ -31,7 +31,7 @@ public final class CBoolean extends Construct implements Cloneable{
 	/**
 	 * Private constructor to force usage of {@link #GenerateCBoolean(boolean, com.laytonsmith.core.constructs.Target)}, which can
 	 * return existing objects.
-	 * @param t 
+	 * @param t
 	 */
 	private CBoolean(boolean value, Target t) {
 		super(Boolean.toString(value), ConstructType.BOOLEAN, t);
@@ -41,7 +41,7 @@ public final class CBoolean extends Construct implements Cloneable{
 	/**
 	 * return b ? CBoolean.TRUE : CBoolean.FALSE;
 	 * @param b The boolean value
-	 * @return 
+	 * @return
 	 */
 	public static CBoolean get(boolean b) {
 		return b ? CBoolean.TRUE : CBoolean.FALSE;
@@ -67,7 +67,7 @@ public final class CBoolean extends Construct implements Cloneable{
 	 * {@link Target#UNKNOWN}, {@link #get(boolean)} is returned anyways.
 	 * @param b
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static CBoolean GenerateCBoolean(boolean b, Target t) {
 		return (t == Target.UNKNOWN) ? get(b) : new CBoolean(b, t);
@@ -75,7 +75,7 @@ public final class CBoolean extends Construct implements Cloneable{
 
 	/**
 	 * Returns the primitive boolean value of this CBoolean.
-	 * @return 
+	 * @return
 	 */
 	public boolean getBoolean() {
 		return val;
@@ -83,7 +83,7 @@ public final class CBoolean extends Construct implements Cloneable{
 
 	/**
 	 * Negates this CBoolean.
-	 * @return 
+	 * @return
 	 */
 	public CBoolean not() {
 		return GenerateCBoolean(!val, getTarget());

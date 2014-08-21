@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
@@ -141,6 +142,8 @@ public class Compiler {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
 			return optimizeSpecial(list, true);
 		}
+
+		private final static String ASSIGN = new DataHandling.assign().getName();
 
 		/**
 		 * __autoconcat__ has special optimization techniques needed, since it's
@@ -408,17 +411,38 @@ public class Compiler {
 				}
 			}
 
-			// Look for typed assignments TODO: And eventually procs and closures as well
-			for(int k = 0; k < list.size() - 1; k++){
-				if(list.get(k).getData() instanceof CClassType && list.get(k + 1).getData() instanceof CFunction){
-					switch(list.get(k + 1).getData().val()){
-						case "assign":
-							// Typed assign
-							ParseTree type = list.remove(k);
-							List<ParseTree> children = list.get(k).getChildren();
-							children.add(0, type);
-							list.get(k).setChildren(children);
-							break;
+			// Look for typed assignments
+			for(int k = 0; k < list.size(); k++){
+				if(list.get(k).getData() instanceof CClassType){
+					if(k == list.size() - 1){
+						throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
+					}
+					if(list.get(k + 1).getData() instanceof CFunction){
+						switch(list.get(k + 1).getData().val()){
+							// closure is missing from this, because "closure" is both a ClassType and a keyword,
+							// and since keywords take priority over __autoconcat__, it will have already been
+							// handled by the time we reach this code.
+							case "assign":
+							case "proc":
+								// Typed assign/closure
+								ParseTree type = list.remove(k);
+								List<ParseTree> children = list.get(k).getChildren();
+								children.add(0, type);
+								list.get(k).setChildren(children);
+								break;
+							default:
+								throw new ConfigCompileException("Unexpected ClassType \"" + list.get(k).getData().val() + "\"", list.get(k).getTarget());
+						}
+					} else if(list.get(k + 1).getData() instanceof IVariable){
+						// Not an assignment, a random variable declaration though.
+						ParseTree node = new ParseTree(new CFunction(ASSIGN, list.get(k).getTarget()), list.get(k).getFileOptions());
+						node.addChild(list.get(k));
+						node.addChild(list.get(k + 1));
+						node.addChild(new ParseTree(CNull.NULL, list.get(k).getFileOptions()));
+						list.set(k, node);
+						list.remove(k + 1);
+					} else {
+						throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
 					}
 				}
 			}

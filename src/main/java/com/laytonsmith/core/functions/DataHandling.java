@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
@@ -231,9 +232,14 @@ public class DataHandling {
 			if(args.length == 3){
 				offset = 1;
 				name = ((IVariable) args[offset + 0]).getName();
-				if(list.has(name)){
-					CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
-							+ list.get(name, t).getDefinedTarget() + " but is being redefined", t);
+				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null){
+					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null){
+						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "The variable " + name + " is hiding another value of the"
+								+ " same name in the main scope.", t);
+					} else {
+						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
+								+ list.get(name, t).getDefinedTarget() + " but is being redefined", t);
+					}
 				}
 				type = ArgumentValidation.getClassType(args[0], t);
 			}
@@ -2022,10 +2028,21 @@ public class DataHandling {
 
 		public static Procedure getProcedure(Target t, Environment env, Script parent, ParseTree... nodes) {
 			String name = "";
-			List<IVariable> vars = new ArrayList<IVariable>();
+			List<IVariable> vars = new ArrayList<>();
 			ParseTree tree = null;
-			List<String> varNames = new ArrayList<String>();
+			List<String> varNames = new ArrayList<>();
 			boolean usesAssign = false;
+			CClassType returnType = CClassType.AUTO;
+			if(nodes[0].getData() instanceof CClassType){
+				returnType = (CClassType) nodes[0].getData();
+				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
+				for(int i = 1; i < nodes.length; i++){
+					newNodes[i - 1] = nodes[i];
+				}
+				nodes = newNodes;
+			}
+			// We have to restore the variable list once we're done
+			IVariableList originalList = env.getEnv(GlobalEnv.class).GetVarList().clone();
 			for (int i = 0; i < nodes.length; i++) {
 				if (i == nodes.length - 1) {
 					tree = nodes[i];
@@ -2034,12 +2051,15 @@ public class DataHandling {
 					if (nodes[i].getData() instanceof CFunction) {
 						if (((CFunction) nodes[i].getData()).getValue().equals("assign")) {
 							thisNodeIsAssign = true;
-							if (nodes[i].getChildAt(1).getData().isDynamic()) {
+							if ((nodes[i].getChildren().size() == 3 && nodes[i].getChildAt(0).getData().isDynamic())
+								|| nodes[i].getChildAt(1).getData().isDynamic()) {
 								usesAssign = true;
 							}
 						}
 					}
+					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
 					Construct cons = parent.eval(nodes[i], env);
+					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
 					if (i == 0 && cons instanceof IVariable) {
 						throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, t);
 					} else {
@@ -2068,7 +2088,7 @@ public class DataHandling {
 										//into this proc, if the call to the proc didn't have a value in this slot.
 										c = new CString("", t);
 									}
-									ivar = new IVariable(((IVariable) cons).getName(), c.clone(), t);
+									ivar = new IVariable(((IVariable)cons).getDefinedType(), ((IVariable) cons).getName(), c.clone(), t);
 								} catch (CloneNotSupportedException ex) {
 									//
 								}
@@ -2078,7 +2098,8 @@ public class DataHandling {
 					}
 				}
 			}
-			Procedure myProc = new Procedure(name, vars, tree, t);
+			env.getEnv(GlobalEnv.class).SetVarList(originalList);
+			Procedure myProc = new Procedure(name, returnType, vars, tree, t);
 			if (usesAssign) {
 				myProc.definitelyNotConstant();
 			}
@@ -2850,29 +2871,51 @@ public class DataHandling {
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if (nodes.length == 0) {
 				//Empty closure, do nothing.
-				return new CClosure(null, env, new String[]{}, new Construct[]{}, t);
+				return new CClosure(null, env, CClassType.AUTO, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+			}
+			// Handle the closure type first thing
+			CClassType returnType = CClassType.AUTO;
+			if(nodes[0].getData() instanceof CClassType){
+				returnType = (CClassType) nodes[0].getData();
+				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
+				for(int i = 1; i < nodes.length; i++){
+					newNodes[i - 1] = nodes[i];
+				}
+				nodes = newNodes;
 			}
 			String[] names = new String[nodes.length - 1];
 			Construct[] defaults = new Construct[nodes.length - 1];
+			CClassType[] types = new CClassType[nodes.length - 1];
+			// We clone the enviornment at this point, because we don't want the values
+			// that are assigned here to overwrite values in the main scope.
+			Environment myEnv;
+			try {
+				myEnv = env.clone();
+			} catch (CloneNotSupportedException ex) {
+				myEnv = env;
+			}
 			for (int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
 				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
-				Script fakeScript = Script.GenerateScript(newNode, env.getEnv(GlobalEnv.class).GetLabel());
-				Construct ret = MethodScriptCompiler.execute(newNode, env, null, fakeScript);
+				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel());
+				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
+				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if (!(ret instanceof IVariable)) {
 					throw new ConfigRuntimeException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
 				}
 				names[i] = ((IVariable) ret).getName();
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
+					types[i] = ((IVariable)ret).getDefinedType();
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
-			CClosure closure = new CClosure(nodes[nodes.length - 1], env, names, defaults, t);
+			CClosure closure = new CClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
 			return closure;
 		}
 
@@ -3753,6 +3796,9 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args[0] instanceof CNull){
+				return CBoolean.FALSE;
+			}
 			boolean b = InstanceofUtil.isInstanceof(args[0], args[1].val());
 			return CBoolean.get(b);
 		}
@@ -3770,7 +3816,9 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "boolean {value, type} Checks to see if the value is, extends, or implements the given type. Keyword usage is preferred:"
-					+ " @value instanceof int instead of instanceof(@value, int).";
+					+ " @value instanceof int ---- Null is a special value, while any type may be assigned null, it does not extend"
+					+ " any type, and therefore \"null instanceof AnyType\" will always return false. Likewise, other than null, all"
+					+ " values extend \"mixed\", and therefore \"anyNonNullValue instanceof mixed\" will always return true.";
 		}
 
 		@Override

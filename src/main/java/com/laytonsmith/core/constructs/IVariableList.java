@@ -11,7 +11,15 @@ import java.util.Set;
  *
  */
 public class IVariableList {
-    Map<String, IVariable> varList = new HashMap<String, IVariable>();
+    Map<String, IVariable> varList = new HashMap<>();
+
+	/**
+	 * Removes a value from the variable table
+	 * @param name
+	 */
+	public void remove(String name){
+		varList.remove(name);
+	}
 
     public void set(IVariable v){
         varList.put(v.getName(), v);

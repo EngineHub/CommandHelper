@@ -1,11 +1,14 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -14,6 +17,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -38,16 +42,17 @@ public class Procedure implements Cloneable {
     private final Map<String, Construct> originals = new HashMap<>();
     private final List<IVariable> varIndex = new ArrayList<>();
     private ParseTree tree;
+	private CClassType returnType;
     private boolean possiblyConstant = false;
 	/**
 	 * The line the procedure is defined at (for stacktraces)
 	 */
 	private final Target definedAt;
 
-    public Procedure(String name, List<IVariable> varList, ParseTree tree, Target t) {
+    public Procedure(String name, CClassType returnType, List<IVariable> varList, ParseTree tree, Target t) {
         this.name = name;
 		this.definedAt = t;
-        this.varList = new HashMap<String, IVariable>();
+        this.varList = new HashMap<>();
         for (IVariable var : varList) {
             try {
                 this.varList.put(var.getName(), var.clone());
@@ -66,6 +71,7 @@ public class Procedure implements Cloneable {
         //If it is, it may or may not help us during compilation, but if it's not,
         //we can be sure that we cannot inline this in any way.
         this.possiblyConstant = checkPossiblyConstant(tree);
+		this.returnType = returnType;
     }
 
     private boolean checkPossiblyConstant(ParseTree tree) {
@@ -112,7 +118,7 @@ public class Procedure implements Cloneable {
                 }
             }
             catch (ConfigCompileException e) {
-                //It's a proc. We will treat this just like any other function call, 
+                //It's a proc. We will treat this just like any other function call,
             }
             //Ok, well, we have to check the children first.
             for (ParseTree child : tree.getChildren()) {
@@ -175,13 +181,19 @@ public class Procedure implements Cloneable {
             env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
             arguments.push(c);
         }
-        Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);        
+        Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);
         for (int i = 0; i < args.size(); i++) {
             Construct c = args.get(i);
             arguments.set(i, c, t);
             if (varIndex.size() > i) {
                 String varname = varIndex.get(i).getName();
-                env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varname, c, c.getTarget()));
+				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(CClassType.AUTO)){
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varname, c, c.getTarget()));
+				} else {
+					throw new Exceptions.CastException("Procedure \"" + name + "\" expects a value of type "
+							+ varIndex.get(i).getDefinedType().val() + " in argument " + (i + 1) + ", but"
+							+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
+				}
             }
         }
         env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", arguments, Target.UNKNOWN));
@@ -204,7 +216,12 @@ public class Procedure implements Cloneable {
 				fakeScript.eval(tree, env);
 			}
         } catch (FunctionReturnException e) {
-            return e.getReturn();
+            Construct ret = e.getReturn();
+			if(!InstanceofUtil.isInstanceof(ret, returnType)){
+				throw new Exceptions.CastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
+						 + " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
+			}
+			return ret;
 		} catch(LoopManipulationException ex){
 			// These cannot bubble up past procedure calls. This will eventually be
 			// a compile error.
@@ -214,9 +231,14 @@ public class Procedure implements Cloneable {
 			e.addStackTraceTrail(new ConfigRuntimeException.StackTraceElement("proc " + name, e.getTarget()), t);
 			throw e;
 		}
+		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
+		if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
+			throw new Exceptions.CastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
+					+ " but no value was returned.", tree.getTarget());
+		}
         return CVoid.VOID;
     }
-	
+
 	public Target getTarget(){
 		return definedAt;
 	}

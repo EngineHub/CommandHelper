@@ -14,15 +14,27 @@ import java.util.List;
  */
 public abstract class SimpleBlockKeywordFunction extends Keyword {
 
-	@Override
-	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
+	/**
+	 * This is the standalone version of the {@link #process(java.util.List, int)} function. All
+	 * values must be passed in.
+	 * @param keywordName The keyword name
+	 * @param functionArgumentCount The function clause argument count
+	 * @param isStandaloneFunction Whether or not this is a standalone function (that is, it can be used
+	 * without a block following it)
+	 * @param list The current list
+	 * @param keywordPosition The keyword position
+	 * @return
+	 * @throws ConfigCompileException
+	 */
+	public static int doProcess(String keywordName, Integer[] functionArgumentCount, boolean isStandaloneFunction, List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
+
 		Target t = list.get(keywordPosition).getTarget();
 		if(list.size() > keywordPosition + 1){
 			ParseTree code = list.get(keywordPosition + 1);
-			if(this.isCodeBlock(code)){
+			if(isCodeBlock(code)){
 				// This is a valid format, but we need to make sure that there is only one argument passed
 				// to the while so far.
-				Integer[] validArgs = getFunctionArgumentCount();
+				Integer[] validArgs = functionArgumentCount;
 				// If this is null, we don't care about argument count.
 				if(validArgs != null){
 					// If the valid argument count is only 1, we will use that value
@@ -31,10 +43,10 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 					int firstClauseArgumentCount = list.get(keywordPosition).getChildren().size();
 					if(validArgs.length == 1){
 						if(firstClauseArgumentCount != validArgs[0]){
-							throw new ConfigCompileException("\"" + getKeywordName() + "\" blocks "
+							throw new ConfigCompileException("\"" + keywordName + "\" blocks "
 									+ (firstClauseArgumentCount > validArgs[0] ? "may only" : "must") + " have " + validArgs[0]
 									+ " argument" + (validArgs[0] == 1 ? "" : "s") + " passed to the"
-									+ " " + getKeywordName() + " condition, " + firstClauseArgumentCount + " found.", t);
+									+ " " + keywordName + " condition, " + firstClauseArgumentCount + " found.", t);
 						}
 					} else {
 						boolean error = true;
@@ -45,9 +57,9 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 							}
 						}
 						if(error){
-							throw new ConfigCompileException("\"" + getKeywordName() + "\" blocks may not have " + firstClauseArgumentCount
+							throw new ConfigCompileException("\"" + keywordName + "\" blocks may not have " + firstClauseArgumentCount
 								+ " argument" + (firstClauseArgumentCount == 1 ? "" : "s") + " passed to the "
-								+ getKeywordName() + " condition", t);
+								+ keywordName + " condition", t);
 						}
 					}
 				}
@@ -55,11 +67,16 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 				list.remove(keywordPosition + 1);
 			}
 		} else {
-			if(!isStandaloneFunction()){
-				throw new ConfigCompileException("Missing code block, following \"" + getKeywordName() + "\"", t);
+			if(!isStandaloneFunction){
+				throw new ConfigCompileException("Missing code block, following \"" + keywordName + "\"", t);
 			}
 		}
 		return keywordPosition;
+	}
+
+	@Override
+	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
+		return doProcess(getKeywordName(), getFunctionArgumentCount(), isStandaloneFunction(), list, keywordPosition);
 	}
 
 	/**
