@@ -76,7 +76,7 @@ public final class MethodScriptCompiler {
 	@SuppressWarnings("UnnecessaryContinue")
 	public static List<Token> lex(String script, File file, boolean inPureMScript) throws ConfigCompileException {
 		if(script.isEmpty()){
-			return new ArrayList<Token>();
+			return new ArrayList<>();
 		}
 		if((int)script.charAt(0) == 65279){
 			// Remove the UTF-8 Byte Order Mark, if present.
@@ -385,7 +385,6 @@ public final class MethodScriptCompiler {
 				}
 				token_list.add(new Token(TType.EQUALS, "==", target));
 				i++;
-				i++;
 				continue;
 			}
 			if (c == '!' && c2 == '=' && !state_in_quote) {
@@ -394,7 +393,6 @@ public final class MethodScriptCompiler {
 					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.NOT_EQUALS, "!=", target));
-				i++;
 				i++;
 				continue;
 			}
