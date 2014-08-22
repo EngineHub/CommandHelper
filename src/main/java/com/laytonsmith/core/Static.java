@@ -419,6 +419,18 @@ public final class Static {
 		if (val == null) {
 			return new CString("", t);
 		}
+		if(val.equals("true")){
+			return CBoolean.TRUE;
+		}
+		if(val.equals("false")){
+			return CBoolean.FALSE;
+		}
+		if(val.equals("null")){
+			return CNull.NULL;
+		}
+		if(val.equals("void")){
+			return CClassType.VOID;
+		}
 		if (val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")) {
 			throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.",
 					ExceptionType.FormatException, t);

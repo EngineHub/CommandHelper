@@ -20,12 +20,12 @@ import static org.mockito.Mockito.verify;
 
 /**
  *
- * 
+ *
  */
 public class StringHandlingTest {
 
 	MCPlayer fakePlayer;
-	
+
     public StringHandlingTest() {
     }
 
@@ -84,7 +84,7 @@ public class StringHandlingTest {
     public void testSconcat() throws ConfigCompileException {
         StringHandling.sconcat a = new StringHandling.sconcat();
         assertEquals("1 2 3 4", SRun("1 2 3 4", null));
-        assertEquals("a string", SRun("a string", null));
+        assertEquals("a string", SRun("'a' 'string'", null));
     }
 
     @Test(timeout = 10000)
@@ -115,36 +115,36 @@ public class StringHandlingTest {
         assertCEquals(C.onstruct("test 123"), a.exec(Target.UNKNOWN, null, C.onstruct("    test 123    ")));
         assertCEquals(C.onstruct("test   123"), a.exec(Target.UNKNOWN, null, C.onstruct("test   123")));
     }
-    
+
     @Test
     public void testCC() throws ConfigCompileException{
         assertEquals("Thisshouldbeamess", SRun("cc(This should be a mess)", null));
     }
-	
+
 	@Test
 	public void testSplit1() throws ConfigCompileException{
 		assertEquals("{a, b}", SRun("split(',', 'a,b')", null));
 	}
-	
+
 	@Test
 	public void testSplit2() throws ConfigCompileException{
 		assertEquals("{a, , b}", SRun("split('.', 'a..b')", null));
 	}
-	
+
 	@Test
 	public void testSplitWithLimit() throws Exception {
 		assertEquals("{a, bzczd}", SRun("split('z', 'azbzczd', 1)", null));
 	}
-	
+
 	@Test
 	public void testSplitWithLimit2() throws Exception {
 		assertEquals("{a, b, czd}", SRun("split('z', 'azbzczd', 2)", null));
 	}
-	
+
 	@Test public void testMulticharacterSplit() throws Exception{
 		assertEquals("{aa, aa, aa}", SRun("split('ab', 'aaabaaabaa')", null));
 	}
-	
+
 	@Test public void testStringFormat() throws Exception{
 		assertEquals("%", SRun("sprintf('%%')", null));
 		//ultra simple tests
@@ -158,115 +158,115 @@ public class StringHandlingTest {
 		} catch(ConfigCompileException e){
 			//pass
 		}
-		
+
 		try{
 			SRun("sprintf('%d', 1, 1)", null);
 			fail("Expected sprintf('%d') to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
-		
+
 		try{
 			SRun("sprintf('%c', 'toobig')", null);
 			fail("Expected sprintf('%c', 'toobig') to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
-		
+
 		try{
 			SRun("sprintf('%0.3f', 1.1)", null);
 			fail("Expected sprintf('%0.3f', 1.1) to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
-		
+
 		//A few advanced usages
 		assertEquals("004.000", SRun("sprintf('%07.3f', 4)", null));
-		
+
 		long s = System.currentTimeMillis();
 		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("sprintf('%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
-		
+
 	}
-	
+
 	@Test public void testCharFromUnicode() throws Exception {
 		assertEquals("\u2665", SRun("char_from_unicode(parse_int(2665, 16))", null));
 	}
-	
+
 	@Test public void testUnicodeFromChar() throws Exception {
 		assertEquals("2665", SRun("to_radix(unicode_from_char('\\u2665'), 16)", null));
 	}
-	
+
 	//This test is the gold standard for the above two tests
 	@Test public void testCharFromUnicodeToChar() throws Exception {
 		assertEquals("a", SRun("char_from_unicode(unicode_from_char('a'))", null));
 	}
-	
+
 	//Double string tests
 	@Test
 	public void testDoubleStringWithNoControlCharacters() throws Exception {
 		SRun("msg(\"hi\");", fakePlayer);
 		verify(fakePlayer).sendMessage("hi");
 	}
-	
+
 	@Test
 	public void testDoubleStringWithLiteral() throws Exception {
 		SRun("msg(\"\\@literal\");", fakePlayer);
 		verify(fakePlayer).sendMessage("@literal");
 	}
-	
+
 	@Test
 	public void testDoubleStringWithOnlyVariable() throws Exception {
 		SRun("@v = 'hi'; msg(\"@v\");", fakePlayer);
 		verify(fakePlayer).sendMessage("hi");
 	}
-	
+
 	@Test(expected = ConfigCompileException.class)
 	public void testDoubleStringWithError() throws Exception {
 		SRun("msg(\"@ invalid\");", null);
 	}
-	
+
 	@Test public void testDoubleStringSimple() throws Exception {
 		SRun("@v = 'var';\n"
 				+ "msg(\"A @v!\");", fakePlayer);
 		verify(fakePlayer).sendMessage("A var!");
 	}
-	
+
 	@Test public void testDoubleStringSimpleUsingBraces() throws Exception {
 		SRun("@var = 'var';\n"
 				+ "msg(\"A @{var} here\");", fakePlayer);
 		verify(fakePlayer).sendMessage("A var here");
 	}
-	
+
 	@Test(expected = ConfigCompileException.class)
 	public void testDoubleStringUnendedBrace() throws Exception {
 		SRun("msg(\"@{unfinished\");", null);
 	}
-	
+
 	@Test public void testDoubleStringSimpleUsingBracesAndImmediateFollowingCharacters() throws Exception {
 		SRun("@var = 'var';\n"
 				+ "msg(\"A @{var}here\");", fakePlayer);
 		verify(fakePlayer).sendMessage("A varhere");
 	}
-	
+
 	//Not yet implemented. Once implemented, comment this out, and it should be fine.
 //	@Test public void testDoubleStringWithArrayWithNumericIndex() throws Exception {
 //		SRun("@a = array(1, 2, 3);\n"
 //				+ "msg(\"@{a[0]}\");", fakePlayer);
 //		verify(fakePlayer).sendMessage("1");
 //	}
-//	
+//
 //	@Test public void testDoubleStringWithArrayWithStringIndex() throws Exception {
 //		SRun("@a = array('one': 1, 'two': 2);\n"
 //				+ "msg(\"@{a['one']}\");", fakePlayer);
 //		verify(fakePlayer).sendMessage("1");
 //	}
-//	
+//
 //	@Test public void testDoubleStringWithArrayWithStringIndexWithInnerQuote() throws Exception {
 //		SRun("@a = array('\\'q\\'': 'hi');\n"
 //				+ "msg(\"@{a['\\'q\\'']}\");", fakePlayer);
 //		verify(fakePlayer).sendMessage("hi");
 //	}
-//	
+//
 //	@Test public void testDoubleStringWithMultiDimensionalArrayAndNumericIndexes() throws Exception {
 //		SRun("@a = array(\n"
 //				+ "array(1, 2, 3),\n"
@@ -275,7 +275,7 @@ public class StringHandlingTest {
 //				+ "msg(\"@{a[0][1]}\");", fakePlayer);
 //		verify(fakePlayer).sendMessage("2");
 //	}
-//	
+//
 //	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexes() throws Exception {
 //		SRun("@a = array(\n"
 //				+ "'one': array('a': 1, 'b': 2, 'c': 3),\n"
@@ -284,7 +284,7 @@ public class StringHandlingTest {
 //				+ "msg(\"@{a['one']['c']}\");", fakePlayer);
 //		verify(fakePlayer).sendMessage("3");
 //	}
-//	
+//
 //	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringAndNumericIndexes() throws Exception {
 //		SRun("@a = array(\n"
 //				+ "'one': array(1, 2, 3),"
@@ -293,7 +293,7 @@ public class StringHandlingTest {
 //				+ "msg(\"@{a['one'][2]}\");", fakePlayer);
 //		verify(fakePlayer).sendMessage("3");
 //	}
-//	
+//
 //	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuote() throws Exception {
 //		SRun("@a = array(\n"
 //				+ "'\\'q\\'': array(1, 2, '\\'m\\'': 3),"
@@ -302,7 +302,7 @@ public class StringHandlingTest {
 //				+ "msg(\"@{a['\\'q\\'']['\\'m\\'']}\");", fakePlayer);
 //		verify(fakePlayer).sendMessage("3");
 //	}
-//	
+//
 //	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuoteAndNumericIndex() throws Exception {
 //		SRun("@a = array(\n"
 //				+ "'\\'q\\'': array(1, 2, 3),"
@@ -311,5 +311,5 @@ public class StringHandlingTest {
 //				+ "msg(\"@{a['\\'q\\''][1]}\");", fakePlayer);
 //		verify(fakePlayer).sendMessage("2");
 //	}
-	
+
 }

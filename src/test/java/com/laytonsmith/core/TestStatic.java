@@ -3,6 +3,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -22,7 +23,7 @@ import org.junit.Test;
 
 /**
  *
- * 
+ *
  */
 public class TestStatic {
     Target t = Target.UNKNOWN;
@@ -36,7 +37,7 @@ public class TestStatic {
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
-    
+
     @Before
     public void setUp() {
     }
@@ -111,7 +112,8 @@ public class TestStatic {
         assertTrue(Static.resolveConstruct("false", Target.UNKNOWN) instanceof CBoolean);
         assertTrue(Static.resolveConstruct("null", Target.UNKNOWN) instanceof CNull);
         assertTrue(Static.resolveConstruct("1.1", Target.UNKNOWN) instanceof CDouble);
-        assertTrue(Static.resolveConstruct("string", Target.UNKNOWN) instanceof CString);
+        assertTrue(Static.resolveConstruct("astring", Target.UNKNOWN) instanceof CString);
+        assertTrue(Static.resolveConstruct("string", Target.UNKNOWN) instanceof CClassType);
     }
-        
+
 }

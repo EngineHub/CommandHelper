@@ -111,31 +111,31 @@ public class MethodScriptCompilerTest {
 
     @Test
     public void testCompile() throws ConfigCompileException {
-        MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)", null, false)).get(0).compileRight();
+        MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function')", null, false)).get(0).compileRight();
         try {
             //extra parameter
-            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another, oops) function)", null, false)).get(0).compileRight();
+            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another', 'oops') 'function')", null, false)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
         }
         try {
             //missing parenthesis
-            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function", null, false)).get(0).compileRight();
+            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function'", null, false)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
         }
         try {
             //extra parenthesis
-            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)))))", null, false)).get(0).compileRight();
+            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function')))))", null, false)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
         }
         try {
             //extra multiline end construct
-            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function) <<<", null, false)).get(0).compileRight();
+            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function') <<<", null, false)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
@@ -335,8 +335,8 @@ public class MethodScriptCompilerTest {
                 + "_out('world')\n";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
         verify(fakePlayer).sendMessage("@i is currently 0");
-        verify(fakePlayer).sendMessage("@i is currently hello and @j is");
-        verify(fakePlayer).sendMessage("@i is currently world and @j is");
+        verify(fakePlayer).sendMessage("@i is currently hello and @j is null");
+        verify(fakePlayer).sendMessage("@i is currently world and @j is null");
     }
 
     @Test public void testExecute16() throws ConfigCompileException{

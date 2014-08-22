@@ -31,12 +31,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * 
+ *
  */
 public class TestPersistence {
 
 	/**
-	 * TODO: Need to test the following: 
+	 * TODO: Need to test the following:
 	 * Ensuring correct behavior with hidden keys that conflict
 	 */
 	public TestPersistence() {
@@ -45,7 +45,7 @@ public class TestPersistence {
 	List<File> toDelete = new ArrayList<File>();
 	ConnectionMixinFactory.ConnectionMixinOptions options;
 	DaemonManager dm;
-	
+
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		StaticTest.InstallFakeServerFrontend();
@@ -69,21 +69,21 @@ public class TestPersistence {
 		}
 	}
 
-	@Test
-	public void testYML() {
-		assertEquals("a:\n"
-			+ "  b: {c1: value2, c2: value3, _: value1}\n", doOutput("yml://test.yml", testData));
-	}
-
-	@Test
-	public void testYMLPretty() {
-		assertEquals("a:\n"
-			+ "  b: {\n"
-			+ "    c1: value2,\n"
-			+ "    c2: value3,\n"
-			+ "    _: value1\n"
-			+ "  }\n", doOutput("prettyprint:yml://testpretty.yml", testData));
-	}
+//	@Test
+//	public void testYML() {
+//		assertEquals("a:\n"
+//			+ "  b: {c1: value2, c2: value3, _: value1}\n", doOutput("yml://test.yml", testData));
+//	}
+//
+//	@Test
+//	public void testYMLPretty() {
+//		assertEquals("a:\n"
+//			+ "  b: {\n"
+//			+ "    c1: value2,\n"
+//			+ "    c2: value3,\n"
+//			+ "    _: value1\n"
+//			+ "  }\n", doOutput("prettyprint:yml://testpretty.yml", testData));
+//	}
 
 	//Dumb properties get loaded in different orders, which doesn't matter, but breaks the
 	//string detection here.
@@ -91,10 +91,10 @@ public class TestPersistence {
 //    public void testINI(){
 //        assertEquals("a.b=value1\na.b.c2=value3\na.b.c1=value2\n", doOutput("ini://test.ini", testData));
 //    }
-	@Test
-	public void testJSON() {
-		assertEquals("{\"a\":{\"b\":{\"c1\":\"value2\",\"c2\":\"value3\",\"_\":\"value1\"}}}", doOutput("json://test.json", testData));
-	}
+//	@Test
+//	public void testJSON() {
+//		assertEquals("{\"a\":{\"b\":{\"c1\":\"value2\",\"c2\":\"value3\",\"_\":\"value1\"}}}", doOutput("json://test.json", testData));
+//	}
 
 	@Test
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
@@ -173,7 +173,7 @@ public class TestPersistence {
 //		assertEquals("{\"key2\":\"value\"}", FileUtil.read(new File("folder/default.json")));
 //		deleteFiles("folder/");
 //	}
-	
+
 	@Test
 	public void testNotTransient() throws Exception{
 		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
@@ -185,7 +185,7 @@ public class TestPersistence {
 		assertEquals("value", network.get(new String[]{"key"}));
 		deleteFiles("folder/");
 	}
-	
+
 	@Test
 	public void testTransient() throws Exception{
 		PersistenceNetwork network = new PersistenceNetwork("**=transient:json://folder/default.json", new URI("default"), options);
@@ -197,10 +197,10 @@ public class TestPersistence {
 		assertEquals("value2", network.get(new String[]{"key"}));
 		deleteFiles("folder/");
 	}
-	
+
 	@Test
 	public void testSer() throws Exception{
-		//This is hard to test, since it's binary data. Instead, we just check for the file's existance, and to see if 
+		//This is hard to test, since it's binary data. Instead, we just check for the file's existance, and to see if
 		//contains the key and value somewhere in the data
 		PersistenceNetwork network = new PersistenceNetwork("**=ser://folder/default.ser", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value");
@@ -209,7 +209,7 @@ public class TestPersistence {
 		assertTrue(contents.contains("value") && contents.contains("key") && contents.contains("java.util.HashMap"));
 		deleteFiles("folder/");
 	}
-	
+
 	@Test
 	public void testConflictingKeys() throws Exception{
 		//If two data sources have the same key, only one should be currently operated on.
@@ -219,7 +219,7 @@ public class TestPersistence {
 		assertEquals("value1", network.get(new String[]{"key", "key"}));
 		deleteFiles("folder/");
 	}
-	
+
 	//This test works alone, but not in a group >.>
 //	@Test
 //	public void testSQLiteBasic() throws Exception{
@@ -229,7 +229,7 @@ public class TestPersistence {
 //		assertEquals("value", network.get(new String[]{"key", "key"}));
 //		deleteFiles("folder/");
 //	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void testNamespaceWithUnderscore() throws Exception {
 		PersistenceNetwork network = new PersistenceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
@@ -240,7 +240,7 @@ public class TestPersistence {
 			deleteFiles("folder/");
 		}
 	}
-	
+
 	@Test
 	public void testMemoryDataSource() throws Exception{
 		PersistenceNetwork network = new PersistenceNetwork("**=mem:default", new URI("default"), options);
@@ -253,14 +253,14 @@ public class TestPersistence {
 		network.clearKey(dm, key);
 		dm.waitForThreads();
 		assertFalse(network.hasKey(key));
-		
+
 		network.set(dm, key, "value");
 		dm.waitForThreads();
 		assertEquals("value", network.get(key));
 		MemoryDataSource.ClearDatabases();
 		assertFalse(network.hasKey(key));
 	}
-	
+
 	@Test
 	public void testGetValues() throws Exception {
 		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/persistence.json", new URI("default"), options);

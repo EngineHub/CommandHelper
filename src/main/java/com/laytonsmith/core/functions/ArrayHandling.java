@@ -184,6 +184,9 @@ public class ArrayHandling {
 				} else {
 					try {
 						if (!ca.inAssociativeMode()) {
+							if(args[1] instanceof CNull){
+								throw new Exceptions.CastException("Expected a number, but recieved null instead", t);
+							}
 							long iindex = Static.getInt(args[1], t);
 							if (iindex < 0) {
 								//negative index, convert to positive index
