@@ -783,6 +783,16 @@ public class BasicLogic {
 			if (referenceMatch) {
 				return CBoolean.TRUE;
 			}
+			if(Static.anyNulls(args)){
+				boolean equals = true;
+				for(int i = 0; i < args.length; i++){
+					Construct c = args[i];
+					if(!(c instanceof CNull)){
+						equals = false;
+					}
+				}
+				return CBoolean.get(equals);
+			}
 			if (Static.anyBooleans(args)) {
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
@@ -795,6 +805,7 @@ public class BasicLogic {
 				}
 				return CBoolean.get(equals);
 			}
+
 
 			{
 				boolean equals = true;

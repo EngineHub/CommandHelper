@@ -401,6 +401,20 @@ public class ArgumentValidation {
 	}
 
 	/**
+	 * Returns true if any of the constructs are null
+	 * @param c
+	 * @return
+	 */
+	public static boolean anyNulls(Construct... c){
+		for(Construct c1 : c){
+			if(c1 instanceof CNull){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Returns true if any of the constructs are CBooleans, false otherwise.
 	 *
 	 * @param c

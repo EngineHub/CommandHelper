@@ -265,6 +265,15 @@ public final class Static {
 	}
 
 	/**
+	 * Returns true if any of the constructs are null.
+	 * @param c
+	 * @return
+	 */
+	public static boolean anyNulls(Construct... c){
+		return ArgumentValidation.anyNulls(c);
+	}
+
+	/**
 	 * Returns the logger for the plugin
 	 *
 	 * @return
