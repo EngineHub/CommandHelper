@@ -441,7 +441,7 @@ public final class Static {
 			return CClassType.VOID;
 		}
 		if (val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")) {
-			throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.",
+			throw new ConfigRuntimeException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.",
 					ExceptionType.FormatException, t);
 		}
 		if (val.matches("0x[a-fA-F0-9]+")) {
@@ -449,12 +449,19 @@ public final class Static {
 			return new CInt(Long.parseLong(val.substring(2), 16), t);
 		}
 		if (val.matches("0b[0-1]*[^0-1]+[0-1]*")) {
-			throw new ConfigRuntimeException("Hex numbers must only contain numbers 0-9, and the letters A-F, but \"" + val + "\" was found.",
+			throw new ConfigRuntimeException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.",
 					ExceptionType.FormatException, t);
 		}
 		if (val.matches("0b[0-1]+")) {
 			//Binary number
 			return new CInt(Long.parseLong(val.substring(2), 2), t);
+		}
+		if(val.matches("0o[0-7]*[^0-7]+[0-7]*")){
+			throw new ConfigRuntimeException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.",
+					ExceptionType.FormatException, t);
+		}
+		if(val.matches("0o[0-7]+")){
+			return new CInt(Long.parseLong(val.substring(2), 8), t);
 		}
 		try {
 			return new CInt(Long.parseLong(val), t);
