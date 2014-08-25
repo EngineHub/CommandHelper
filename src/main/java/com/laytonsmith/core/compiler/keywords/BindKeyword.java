@@ -10,7 +10,7 @@ public class BindKeyword extends SimpleBlockKeywordFunction {
 
 	@Override
 	protected Integer[] getFunctionArgumentCount() {
-		return new Integer[]{4};
+		return null;
 	}
 
 }
