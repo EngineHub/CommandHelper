@@ -11,6 +11,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
@@ -212,7 +213,7 @@ public class MathTest {
         try {
             StaticTest.SRun("sqrt(-1)", fakePlayer);
             fail("Did not expect to pass");
-        } catch (ConfigCompileException e) {
+        } catch (ConfigCompileException|ConfigCompileGroupException e) {
             //pass
         }
     }

@@ -5,6 +5,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
@@ -169,7 +170,7 @@ public class StringHandlingTest {
 		try{
 			SRun("sprintf('%c', 'toobig')", null);
 			fail("Expected sprintf('%c', 'toobig') to throw a compile exception");
-		} catch(ConfigCompileException e){
+		} catch(ConfigCompileException|ConfigCompileGroupException e){
 			//pass
 		}
 

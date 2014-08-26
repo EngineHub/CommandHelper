@@ -1744,50 +1744,50 @@ public final class MethodScriptCompiler {
 			} catch (ConfigCompileException ex) {
 				compilerErrors.add(ex);
 			}
-			if (!fullyStatic) {
-				return;
-			}
-			//Otherwise, everything is static, or an IVariable and we can proceed.
-			//Note since we could still have IVariables, we have to handle those
-			//specially from here forward
-			if (func.preResolveVariables() && hasIVars) {
-				//Well, this function isn't equipped to deal with IVariables.
-				return;
-			}
-			//It could have optimized by changing the name, in that case, we
-			//don't want to run this now
-			if (tree.getData().getValue().equals(oldFunctionName)
-					&& (options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
-				Construct[] constructs = new Construct[tree.getChildren().size()];
-				for (int i = 0; i < tree.getChildren().size(); i++) {
-					constructs[i] = tree.getChildAt(i).getData();
-				}
-				try {
-					try {
-						Construct result;
-						if (options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
-							result = func.exec(tree.getData().getTarget(), null, constructs);
-						} else {
-							result = ((Optimizable) func).optimize(tree.getData().getTarget(), constructs);
-						}
-
-						//If the result is null, it was just a check, it can't optimize further.
-						if (result != null) {
-							result.setWasIdentifier(tree.getData().wasIdentifier());
-							tree.setData(result);
-							tree.removeChildren();
-						}
-					} catch (ConfigRuntimeException e) {
-						//Turn this into a ConfigCompileException, then rethrow
-						throw new ConfigCompileException(e);
-					}
-				} catch (ConfigCompileException ex) {
-					compilerErrors.add(ex);
-				}
-			}
-
-			//It doesn't know how to optimize. Oh well.
 		}
+		if (!fullyStatic) {
+			return;
+		}
+			//Otherwise, everything is static, or an IVariable and we can proceed.
+		//Note since we could still have IVariables, we have to handle those
+		//specially from here forward
+		if (func.preResolveVariables() && hasIVars) {
+			//Well, this function isn't equipped to deal with IVariables.
+			return;
+		}
+			//It could have optimized by changing the name, in that case, we
+		//don't want to run this now
+		if (tree.getData().getValue().equals(oldFunctionName)
+				&& (options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
+			Construct[] constructs = new Construct[tree.getChildren().size()];
+			for (int i = 0; i < tree.getChildren().size(); i++) {
+				constructs[i] = tree.getChildAt(i).getData();
+			}
+			try {
+				try {
+					Construct result;
+					if (options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
+						result = func.exec(tree.getData().getTarget(), null, constructs);
+					} else {
+						result = ((Optimizable) func).optimize(tree.getData().getTarget(), constructs);
+					}
+
+					//If the result is null, it was just a check, it can't optimize further.
+					if (result != null) {
+						result.setWasIdentifier(tree.getData().wasIdentifier());
+						tree.setData(result);
+						tree.removeChildren();
+					}
+				} catch (ConfigRuntimeException e) {
+					//Turn this into a ConfigCompileException, then rethrow
+					throw new ConfigCompileException(e);
+				}
+			} catch (ConfigCompileException ex) {
+				compilerErrors.add(ex);
+			}
+		}
+
+		//It doesn't know how to optimize. Oh well.
 	}
 
 	/**
