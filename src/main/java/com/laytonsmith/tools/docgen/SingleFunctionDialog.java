@@ -1,18 +1,19 @@
 package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.Common.UIUtils;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 
 /**
  *
- * 
+ *
  */
 public class SingleFunctionDialog extends javax.swing.JDialog {
 
 	DocGenUI parent;
-	
+
 	/**
 	 * Creates new form SingleFunctionDialog
 	 */
@@ -87,7 +88,7 @@ public class SingleFunctionDialog extends javax.swing.JDialog {
     private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadButtonActionPerformed
 		Function f;
 		try {
-			f = (Function)FunctionList.getFunction(functionNameField.getText());
+			f = (Function)FunctionList.getFunction(functionNameField.getText(), Target.UNKNOWN);
 			if(!f.appearInDocumentation()){
 				statusLabel.setText("That function is not configured to have documentation.");
 				return;
@@ -103,8 +104,8 @@ public class SingleFunctionDialog extends javax.swing.JDialog {
 			statusLabel.setText("That function doesn't exist.");
 			return;
 		}
-		
-		
+
+
     }//GEN-LAST:event_uploadButtonActionPerformed
 
 

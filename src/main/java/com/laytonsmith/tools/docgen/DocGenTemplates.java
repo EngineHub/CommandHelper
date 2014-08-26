@@ -49,12 +49,12 @@ public class DocGenTemplates {
 	public static interface Generator{
 		public String generate(String ... args);
 	}
-	
+
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
 		System.out.println(Generate("Federation"));
 	}
-	
+
 	public static String Generate(String forPage){
 		return Generate(forPage, new HashMap<String, String>());
 	}
@@ -90,7 +90,7 @@ public class DocGenTemplates {
 				Field f = DocGenTemplates.class.getDeclaredField(name);
 				f.setAccessible(true);
 				if(Generator.class.isAssignableFrom(f.getType()) && Modifier.isStatic(f.getModifiers())){
-					String [] tmplArgs = new String[0]; 
+					String [] tmplArgs = new String[0];
 					if(m.group(2) != null && !m.group(2).equals("")){
 						//We have arguments
 						//remove the initial |, then split
@@ -102,8 +102,8 @@ public class DocGenTemplates {
 					appended = false;
 					//template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue);
 				} else {
-					throw new Error(DocGenTemplates.class.getSimpleName() + "." + f.getName() 
-						+ " is not an instance of " + Generator.class.getSimpleName() 
+					throw new Error(DocGenTemplates.class.getSimpleName() + "." + f.getName()
+						+ " is not an instance of " + Generator.class.getSimpleName()
 						+ ", or is not static. Please correct this error to use it as a template.");
 				}
 			} catch(Exception e){
@@ -115,10 +115,10 @@ public class DocGenTemplates {
 		}
 		return templateBuilder.toString();
 	}
-	
+
 	/**
 	 * Returns all the generators defined in this class.
-	 * @return 
+	 * @return
 	 */
 	public static Map<String, Generator> GetGenerators(){
 		Map<String, Generator> generators = new HashMap<>();
@@ -133,13 +133,13 @@ public class DocGenTemplates {
 		}
 		return generators;
 	}
-	
+
 	/**
 	 * A utility method to replace all template methods in a generic template string.
 	 * @param template The template string on which to perform the replacements
 	 * @param generators The list of String-Generator entries, where the String is the template
 	 * name, and the Generator is the replacement to use.
-	 * @return 
+	 * @return
 	 */
 	public static String DoTemplateReplacement(String template, Map<String, Generator> generators){
 		try {
@@ -162,7 +162,7 @@ public class DocGenTemplates {
 			String name = m.group(1);
 			try{
 				if(generators.containsKey(name)){
-					String [] tmplArgs = new String[0]; 
+					String [] tmplArgs = new String[0];
 					if(m.group(2) != null && !m.group(2).equals("")){
 						//We have arguments
 						//remove the initial |, then split
@@ -184,7 +184,7 @@ public class DocGenTemplates {
 		}
 		return templateBuilder.toString();
 	}
-	
+
 	public static Generator data_source_modifiers = new Generator() {
 
 		@Override
@@ -192,12 +192,12 @@ public class DocGenTemplates {
 			StringBuilder b = new StringBuilder();
 			for(DataSource.DataSourceModifier mod : DataSource.DataSourceModifier.values()){
 				b.append("|-\n| ").append(mod.getName().toLowerCase()).append(" || ").append(mod.docs()).append("\n");
-				
+
 			}
 			return b.toString();
 		}
 	};
-	
+
 	public static Generator persistence_connections = new Generator(){
 
 		@Override
@@ -229,7 +229,7 @@ public class DocGenTemplates {
 						}
 						if(name == null || example == null || description == null){
 							throw new Error("Invalid documentation for " + c.getSimpleName()
-								+ (name==null?" name was null;":"") 
+								+ (name==null?" name was null;":"")
 								+ (example==null?" example was null;":"")
 								+ (description==null?" description was null;":""));
 						}
@@ -246,9 +246,9 @@ public class DocGenTemplates {
 			}
 			return StringUtils.Join(set, "");
 		}
-		
+
 	};
-	
+
 	public static Generator optimization_explanations = new Generator(){
 
 		@Override
@@ -261,9 +261,9 @@ public class DocGenTemplates {
 			}
 			return b.toString();
 		}
-		
+
 	};
-	
+
 	public static Generator BURST_VALUE_TYPES = new Generator() {
 
 		@Override
@@ -271,7 +271,7 @@ public class DocGenTemplates {
 			return StringUtils.Join(Burst.BurstType.values(), ", ", ", or ", " or ");
 		}
 	};
-	
+
 	public static Generator BURST_TYPE_DOCS = new Generator() {
 
 		@Override
@@ -280,7 +280,7 @@ public class DocGenTemplates {
 			return "TODO";
 		}
 	};
-	
+
 	public static Generator EXCEPTION_TYPES = new Generator() {
 
 		@Override
@@ -294,9 +294,9 @@ public class DocGenTemplates {
 			return b.toString();
 		}
 	};
-	
+
 	private static final String githubBaseURL = "https://github.com/sk89q/commandhelper/tree/master/src/main/java";
-	
+
 	/**
 	 * Returns the fully qualified (and github linked) class name, given the package
 	 * regex and complete class name. For instance: %%GET_CLASS|.*|DocGenTemplates%% would
@@ -310,7 +310,7 @@ public class DocGenTemplates {
 			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getName() + "]";
 		}
 	};
-	
+
 	/**
 	 * Returns the base github url for sources.
 	 */
@@ -321,7 +321,7 @@ public class DocGenTemplates {
 			return githubBaseURL;
 		}
 	};
-	
+
 	/**
 	 * Returns the (github linked) simple class name, given the package
 	 * regex and complete class name. For instance: %%GET_CLASS|.*|DocGenTemplates%% would
@@ -335,7 +335,7 @@ public class DocGenTemplates {
 			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getSimpleName() + "]";
 		}
 	};
-	
+
 	/**
 	 * Returns a github link to the source file this function is in. Note that it is not possible
 	 * to get more specific line information (at least generically).
@@ -346,7 +346,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			try {
-				FunctionBase b = FunctionList.getFunction(args[0]);
+				FunctionBase b = FunctionList.getFunction(args[0], Target.UNKNOWN);
 				Class c = b.getClass();
 				while(c.getEnclosingClass() != null){
 					c = c.getEnclosingClass();
@@ -355,10 +355,10 @@ public class DocGenTemplates {
 			} catch (ConfigCompileException ex) {
 				return "Unknown function: " + args[0];
 			}
-			
+
 		}
 	};
-	
+
 	public static Generator cmdlinehelp = new Generator() {
 
 		@Override
@@ -380,7 +380,7 @@ public class DocGenTemplates {
 			return b.toString();
 		}
 	};
-	
+
 	public static Generator dataManagerTools = new Generator() {
 
 		@Override
@@ -407,19 +407,19 @@ public class DocGenTemplates {
 			}
 		}
 	};
-	
-	
+
+
 	public static Generator CODE = new Generator(){
-		
+
 		@Override
 		public String generate(String... args) {
 			String code = StringUtils.Join(args, "|");
 			String out = SimpleSyntaxHighlighter.Highlight(code);
 			return out;
 		}
-		
+
 	};
-	
+
 	public static Generator MySQL_CREATE_TABLE_QUERY = new Generator(){
 
 		@Override
@@ -427,9 +427,9 @@ public class DocGenTemplates {
 			MySQLDataSource ds = ReflectionUtils.newInstance(MySQLDataSource.class);
 			return ds.getTableCreationQuery("tableName");
 		}
-		
+
 	};
-	
+
 	public static Generator SQLite_CREATE_TABLE_QUERY = new Generator(){
 
 		@Override
@@ -437,9 +437,9 @@ public class DocGenTemplates {
 			SQLiteDataSource ds = ReflectionUtils.newInstance(SQLiteDataSource.class);
 			return ds.getTableCreationQuery();
 		}
-		
+
 	};
-	
+
 	public static Generator CONST = new Generator() {
 
 		@Override
@@ -474,7 +474,7 @@ public class DocGenTemplates {
 			}
 		}
 	};
-	
+
 	public static Generator DATE = new Generator() {
 
 		@Override
@@ -483,7 +483,7 @@ public class DocGenTemplates {
 			return new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString(template, Target.UNKNOWN)).val();
 		}
 	};
-	
+
 	public static Generator DOCLINK = new Generator() {
 
 		@Override

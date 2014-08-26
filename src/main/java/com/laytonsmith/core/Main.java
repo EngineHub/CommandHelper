@@ -14,6 +14,7 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -379,7 +380,7 @@ public class Main {
 				}
 				FunctionBase f;
 				try {
-					f = FunctionList.getFunction(function);
+					f = FunctionList.getFunction(function, Target.UNKNOWN);
 				} catch (ConfigCompileException e) {
 					System.err.println("The function '" + function + "' was not found.");
 					System.exit(1);

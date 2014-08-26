@@ -58,7 +58,7 @@ public class ExtensionMeta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				FunctionList.getFunction(args[0].val().toLowerCase());
+				FunctionList.getFunction(args[0].val().toLowerCase(), t);
 			} catch (ConfigCompileException ex) {
 				return CBoolean.FALSE;
 			}

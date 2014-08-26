@@ -38,10 +38,11 @@ public class CFunction extends Construct {
 	/**
 	 * Returns the underlying function for this construct.
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
 	public Function getFunction() throws ConfigCompileException{
 		if(function == null){
-			function = (Function)FunctionList.getFunction(val());
+			function = (Function)FunctionList.getFunction(val(), this.getTarget());
 		}
 		return function;
 	}

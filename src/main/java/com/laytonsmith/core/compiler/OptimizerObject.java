@@ -2,6 +2,7 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionList;
@@ -10,27 +11,27 @@ import java.util.List;
 
 /**
  *
- * 
+ *
  */
 class OptimizerObject {
 	private ParseTree root;
 	private CompilerEnvironment env;
-	
+
 	public OptimizerObject(ParseTree root, Environment compilerEnvironment){
 		this.root = root;
 		env = compilerEnvironment.getEnv(CompilerEnvironment.class);
 	}
-	
+
 	public ParseTree optimize() throws ConfigCompileException{
 		optimize01(root, env);
 		optimize02(root, env);
 		optimize03(root, env);
 		optimize04(root, env, new ArrayList<String>());
 		optimize05(root, env);
-		
+
 		return root;
 	}
-	
+
 	/**
 	 * This optimization level removes all the __autoconcat__s (and
 	 * inadvertently several other constructs as well)
@@ -40,7 +41,8 @@ class OptimizerObject {
 	 * @throws ConfigCompileException
 	 */
 	private void optimize01(ParseTree tree, CompilerEnvironment compilerEnvironment) throws ConfigCompileException {
-		com.laytonsmith.core.functions.Compiler.__autoconcat__ autoconcat = (com.laytonsmith.core.functions.Compiler.__autoconcat__) FunctionList.getFunction("__autoconcat__");
+		com.laytonsmith.core.functions.Compiler.__autoconcat__ autoconcat
+				= (com.laytonsmith.core.functions.Compiler.__autoconcat__) FunctionList.getFunction("__autoconcat__", Target.UNKNOWN);
 		if (tree.getData() instanceof CFunction && tree.getData().val().equals("cc")) {
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				ParseTree node = tree.getChildAt(i);
@@ -68,10 +70,10 @@ class OptimizerObject {
 	/**
 	 * This pass optimizes all turing functions. That is, branch functions like if, and for.
 	 * @param tree
-	 * @param compilerEnvironment 
+	 * @param compilerEnvironment
 	 */
 	private void optimize02(ParseTree tree, CompilerEnvironment compilerEnvironment){
-		
+
 	}
 
 	/**
