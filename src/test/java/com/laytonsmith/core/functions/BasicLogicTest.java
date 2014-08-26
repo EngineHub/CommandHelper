@@ -86,7 +86,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testEquals() throws CancelCommandException {
+    public void testEquals() throws Exception {
         BasicLogic.equals e = new BasicLogic.equals();
 
 //             T   F   1   0  -1  '1' '0' '-1' N  {} 'CH'  '' 1.0
@@ -128,19 +128,19 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testEqualsMulti() throws ConfigCompileException {
+    public void testEqualsMulti() throws Exception {
         assertEquals("true", SRun("equals(1, '1', 1.0)", fakePlayer));
         assertEquals("false", SRun("equals('blah', 'blah', 'blarg')", fakePlayer));
     }
 
     @Test(timeout = 10000)
-    public void testEqualsICMulti() throws ConfigCompileException {
+    public void testEqualsICMulti() throws Exception {
         assertEquals("true", SRun("equals_ic(1, '1', 1.0)", fakePlayer));
         assertEquals("false", SRun("equals_ic('blah', 'blah', 'blarg')", fakePlayer));
         assertEquals("true", SRun("equals_ic('blah', 'Blah', 'BLAH')", fakePlayer));
     }
 
-    public void _t(String val1, String val2) {
+    public void _t(String val1, String val2) throws Exception {
         try {
             assertEquals("true", SRun("equals(" + val1 + ", " + val2 + ")", null));
         } catch (ConfigCompileException ex) {
@@ -148,7 +148,7 @@ public class BasicLogicTest {
         }
     }
 
-    public void _f(String val1, String val2) {
+    public void _f(String val1, String val2) throws Exception {
         try {
             assertEquals("false", SRun("equals(" + val1 + ", " + val2 + ")", null));
         } catch (ConfigCompileException ex) {
@@ -156,7 +156,7 @@ public class BasicLogicTest {
         }
     }
 
-    public void testEqualsIC() throws ConfigCompileException {
+    public void testEqualsIC() throws Exception {
         SRun("if(equals_ic('hi', 'HI'), msg('pass'))", fakePlayer);
         SRun("if(equals_ic('hi', 'hi'), msg('pass'))", fakePlayer);
         SRun("if(not(equals_ic('what', 'hi')), msg('pass'))", fakePlayer);
@@ -166,7 +166,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testAnd1() throws CancelCommandException, ConfigCompileException {
+    public void testAnd1() throws Exception {
         SRun("if(and(true, true, true), msg(pass))", fakePlayer);
         SRun("if(and(true, true, false), '', msg(pass))", fakePlayer);
         SRun("if(and(true, true), msg(pass))", fakePlayer);
@@ -181,16 +181,16 @@ public class BasicLogicTest {
      * Tests lazy evaluation
      *
      * @return
-     * @throws ConfigCompileException
+     * @throws Exception
      */
     @Test(timeout = 10000)
-    public void testAnd2() throws ConfigCompileException {
+    public void testAnd2() throws Exception {
         SRun("and(false, msg(lol))", fakePlayer);
         verify(fakePlayer, times(0)).sendMessage("lol");
     }
 
     @Test(timeout = 10000)
-    public void testOr1() throws CancelCommandException, ConfigCompileException {
+    public void testOr1() throws Exception {
         SRun("if(or(true, true, true), msg(pass))", fakePlayer);
         SRun("if(or(true, true, false), msg(pass))", fakePlayer);
         SRun("if(or(true, true), msg(pass))", fakePlayer);
@@ -202,7 +202,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testOr2() throws ConfigCompileException {
+    public void testOr2() throws Exception {
         SRun("or(true, msg(lol))", fakePlayer);
         verify(fakePlayer, times(0)).sendMessage("lol");
     }
@@ -255,7 +255,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testIf() throws ConfigCompileException {
+    public void testIf() throws Exception {
         BasicLogic._if a = new BasicLogic._if();
         SRun("if(true, msg('correct'), msg('incorrect'))", fakePlayer);
         SRun("if(false, msg('incorrect'), msg('correct'))", fakePlayer);
@@ -263,7 +263,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testXor() throws ConfigCompileException {
+    public void testXor() throws Exception {
         assertEquals("false", SRun("xor(false, false)", null));
         assertEquals("true", SRun("xor(false, true)", null));
         assertEquals("true", SRun("xor(true, false)", null));
@@ -271,7 +271,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testNand() throws ConfigCompileException {
+    public void testNand() throws Exception {
         assertEquals("true", SRun("nand(false, false)", null));
         assertEquals("true", SRun("nand(false, true)", null));
         assertEquals("true", SRun("nand(true, false)", null));
@@ -279,7 +279,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testNor() throws ConfigCompileException {
+    public void testNor() throws Exception {
         assertEquals("true", SRun("nor(false, false)", null));
         assertEquals("false", SRun("nor(false, true)", null));
         assertEquals("false", SRun("nor(true, false)", null));
@@ -287,7 +287,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testXnor() throws ConfigCompileException {
+    public void testXnor() throws Exception {
         assertEquals("true", SRun("xnor(false, false)", null));
         assertEquals("false", SRun("xnor(false, true)", null));
         assertEquals("false", SRun("xnor(true, false)", null));
@@ -295,48 +295,48 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testBitAnd() throws ConfigCompileException {
+    public void testBitAnd() throws Exception {
         assertEquals("4", SRun("bit_and(4, 7)", null));
         assertEquals("5", SRun("bit_and(7, 5)", null));
         assertEquals("0", SRun("bit_and(1, 4)", null));
     }
 
     @Test(timeout = 10000)
-    public void testBitOr() throws ConfigCompileException {
+    public void testBitOr() throws Exception {
         assertEquals("3", SRun("bit_or(1, 3)", null));
         assertEquals("6", SRun("bit_or(2, 4)", null));
     }
 
     @Test(timeout = 10000)
-    public void testBitXor() throws ConfigCompileException {
+    public void testBitXor() throws Exception {
         assertEquals("6", SRun("bit_xor(5, 3)", null));
         assertEquals("8", SRun("bit_xor(2, 10)", null));
     }
 
     @Test(timeout = 10000)
-    public void testBitNot() throws ConfigCompileException {
+    public void testBitNot() throws Exception {
         assertEquals("-5", SRun("bit_not(4)", null));
     }
 
     @Test(timeout = 10000)
-    public void testLshift() throws ConfigCompileException {
+    public void testLshift() throws Exception {
         assertEquals("16", SRun("lshift(4, 2)", null));
     }
 
     @Test(timeout = 10000)
-    public void testRshift() throws ConfigCompileException {
+    public void testRshift() throws Exception {
         assertEquals("-3", SRun("rshift(-10, 2)", null));
         assertEquals("1", SRun("rshift(3, 1)", null));
     }
 
     @Test(timeout = 10000)
-    public void testUrshift() throws ConfigCompileException {
+    public void testUrshift() throws Exception {
         assertEquals("2", SRun("urshift(10, 2)", null));
         assertEquals("4611686018427387901", SRun("urshift(-10, 2)", null));
     }
 
     @Test
-    public void testIfelse() throws ConfigCompileException {
+    public void testIfelse() throws Exception {
         assertEquals("3", SRun("ifelse("
                 + "false, 1,"
                 + "false, 2,"
@@ -351,7 +351,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testSwitch() throws ConfigCompileException {
+    public void testSwitch() throws Exception {
         assertEquals("correct", SRun("switch(3,"
                 + "1, wrong,"
                 + "2, wrong,"
@@ -364,12 +364,12 @@ public class BasicLogicTest {
                 + "correct)", null));
     }
 
-    @Test public void testSwitch2() throws ConfigCompileException{
+    @Test public void testSwitch2() throws Exception{
         SRun("switch(2, 1, msg('nope'), 2, msg('yep'))", fakePlayer);
         verify(fakePlayer).sendMessage("yep");
     }
 
-    @Test public void testSwitch3() throws ConfigCompileException{
+    @Test public void testSwitch3() throws Exception{
         SRun("assign(@args, 'test')" +
                 "switch(@args," +
                     "'test'," +
@@ -381,7 +381,7 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testSwitchWithArray() throws ConfigCompileException {
+    public void testSwitchWithArray() throws Exception {
         assertEquals("correct", SRun("switch(3,"
                 + "array(1, 2), wrong,"
                 + "array(3, 4), correct,"
@@ -389,14 +389,14 @@ public class BasicLogicTest {
     }
 
     @Test(timeout = 10000)
-    public void testSequals() throws ConfigCompileException {
+    public void testSequals() throws Exception {
         assertEquals("true", SRun("sequals(1, 1)", null));
         assertEquals("false", SRun("sequals(1, '1')", null));
         assertEquals("false", SRun("sequals(1, '2')", null));
     }
 
     @Test(timeout = 10000)
-    public void testIf2() throws ConfigCompileException {
+    public void testIf2() throws Exception {
         SRun("assign(@true, true)\n"
                 + "if(@true, msg('Hello World!'))", fakePlayer);
         verify(fakePlayer).sendMessage("Hello World!");

@@ -71,27 +71,27 @@ public class PlayerManangementTest {
     }
 
     @Test(timeout = 10000)
-    public void testPlayer() throws ConfigCompileException {
+    public void testPlayer() throws Exception {
         String script = "player()";
         assertEquals(fakePlayer.getName(), SRun(script, fakePlayer));
         assertEquals("null", SRun(script, null));
     }
 
     @Test(timeout = 10000)
-    public void testPlayer2() throws ConfigCompileException {
+    public void testPlayer2() throws Exception {
         String script = "player()";
         MCConsoleCommandSender c = GetFakeConsoleCommandSender();
         assertEquals("~console", SRun(script, c));
     }
 
     @Test(timeout = 10000)
-    public void testPlayer3() throws ConfigCompileException {
+    public void testPlayer3() throws Exception {
         MCCommandSender c = GetFakeConsoleCommandSender();
         assertEquals("~console", SRun("player()", c));
     }
 
 //    @Test(timeout = 10000)
-//    public void testAllPlayers() throws ConfigCompileException {
+//    public void testAllPlayers() throws Exception {
 //        String script = "all_players()";
 //        String done = SRun(script, fakePlayer);
 //        //This output is too long to test with msg()
@@ -99,7 +99,7 @@ public class PlayerManangementTest {
 //    }
 
     @Test
-    public void testPloc() throws ConfigCompileException, Exception {
+    public void testPloc() throws Exception, Exception {
         String script = "msg(ploc())";
         BukkitMCWorld w = GetWorld("world");
         MCLocation loc = StaticLayer.GetLocation(w, 0, 1, 0);
@@ -109,7 +109,7 @@ public class PlayerManangementTest {
         verify(fakePlayer).sendMessage("{0: 0.0, 1: 1.0, 2: 0.0, 3: world, 4: 0.0, 5: 0.0, pitch: 0.0, world: world, x: 0.0, y: 1.0, yaw: 0.0, z: 0.0}");
     }
 
-    public void testSetPloc() throws ConfigCompileException, Exception {
+    public void testSetPloc() throws Exception, Exception {
         MCWorld w = GetWorld("world");
         CommandHelperPlugin.myServer = fakeServer;
         String name = fakePlayer.getName();
@@ -134,7 +134,7 @@ public class PlayerManangementTest {
     }
 
     @Test(timeout = 10000)
-    public void testPcursor() throws ConfigCompileException, Exception {
+    public void testPcursor() throws Exception, Exception {
         MCBlock b = mock(MCBlock.class);
         CommandHelperPlugin.myServer = fakeServer;
         when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
@@ -148,25 +148,25 @@ public class PlayerManangementTest {
     }
 
     @Test(timeout = 10000)
-    public void testKill() throws ConfigCompileException {
+    public void testKill() throws Exception {
         Run("pkill()", fakePlayer);
         Run("pkill('" + fakePlayer.getName() + "')", fakePlayer);
         verify(fakePlayer, times(2)).kill();
     }
 
     //@Test(timeout=10000)
-    public void testPgroup() throws ConfigCompileException {
+    public void testPgroup() throws Exception {
         Run("", fakePlayer);
         Run("", fakePlayer);
     }
 
     @Test
-    public void testPlayerNotProvided() throws ConfigCompileException{
+    public void testPlayerNotProvided() throws Exception{
         assertEquals("success", SRun("try(pkill(), assign(@success, 'success')) @success", null));
     }
 
     @Test
-    public void testPlayerFromConsole() throws ConfigCompileException{
+    public void testPlayerFromConsole() throws Exception{
         MCConsoleCommandSender fakeConsole = mock(MCConsoleCommandSender.class);
         when(fakeConsole.getName()).thenReturn("CONSOLE");
         assertEquals("~console", SRun("player()", fakeConsole));

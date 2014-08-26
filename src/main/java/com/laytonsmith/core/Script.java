@@ -31,6 +31,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
@@ -52,13 +53,13 @@ import java.util.Map;
 import java.util.logging.Level;
 
 /**
- * A script is a section of code that has been preprocessed and split into separate 
+ * A script is a section of code that has been preprocessed and split into separate
  * commands/actions. For instance, the config script:
- * 
+ *
  * /command = /cmd
- * 
+ *
  * /test = /test
- * 
+ *
  * would be two seperate scripts, the first being the /command, and the second being /test.
  * Certain key information is stored in the Script class. First, the information needed
  * to see if a target string should trigger this script. Secondly, the default values
@@ -92,15 +93,15 @@ public class Script {
     private Procedure getProc(String name) {
         return CurrentEnv.getEnv(GlobalEnv.class).GetProcs().get(name);
     }
-    
+
     public Environment getCurrentEnv(){
         return CurrentEnv;
     }
-    
+
     public String getLabel(){
         return label;
     }
-    
+
     /**
      * Returns what would normally be on the left side on an alias ie. in config.msa
      * @return label:/alias arg [ optionalArg ]
@@ -113,25 +114,25 @@ public class Script {
         }
         return b.toString();
     }
-    
+
     public Script(List<Token> left, List<Token> right) {
         this.left = left;
         this.fullRight = right;
-        this.left_vars = new HashMap<String, Variable>();        
+        this.left_vars = new HashMap<String, Variable>();
         //this.OriginalEnv = env;
     }
-    
+
     private Script(){}
-    
+
     public static Script GenerateScript(ParseTree tree, String label){
         Script s = new Script();
-        
+
         s.hasBeenCompiled = true;
         s.compilerError = false;
         s.cright = new ArrayList<ParseTree>();
         s.cright.add(tree);
         s.label = label;
-        
+
         return s;
     }
 
@@ -187,8 +188,8 @@ public class Script {
                                 new CString(
                                 Static.resolveDollarVar(left_vars.get(((Variable) tempNode).getName()), vars).toString(), tempNode.getTarget()));
                     }
-                }                
-				
+                }
+
                 MethodScriptCompiler.registerAutoIncludes(CurrentEnv, this);
                 MethodScriptCompiler.execute(rootNode, CurrentEnv, done, this);
             }
@@ -198,7 +199,7 @@ public class Script {
         } catch (CancelCommandException e) {
             //p.sendMessage(e.getMessage());
             //The message in the exception is actually empty
-        } catch (LoopBreakException e) {            
+        } catch (LoopBreakException e) {
             if(p != null){
                 p.sendMessage("The break() function must be used inside a for() or foreach() loop");
             }
@@ -228,12 +229,12 @@ public class Script {
             done.done(null);
         }
     }
-    
+
     /**
      * Runs eval on the code tree, and if it returns an ival, resolves it.
      * @param c
      * @param env
-     * @return 
+     * @return
      */
     public Construct seval(ParseTree c, final Environment env){
         Construct ret = eval(c, env);
@@ -249,7 +250,7 @@ public class Script {
 	 * @param c
 	 * @param env
 	 * @return
-	 * @throws CancelCommandException 
+	 * @throws CancelCommandException
 	 */
     public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
 		if(env.getEnv(GlobalEnv.class).IsInterrupted()){
@@ -290,7 +291,7 @@ public class Script {
                     //Turn it into a config runtime exception. This shouldn't ever happen though.
                     throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
                 }
-				
+
 				ArrayList<Construct> args = new ArrayList<Construct>();
                 try{
 					if (f.isRestricted()) {
@@ -300,7 +301,7 @@ public class Script {
 									ExceptionType.InsufficientPermissionException, m.getTarget());
 						}
 					}
-					
+
 					if(f.useSpecialExec()){
 						ProfilePoint p = null;
 						if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
@@ -309,7 +310,7 @@ public class Script {
 						Construct ret;
 						try {
 							ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
-						} finally { 
+						} finally {
 							if(p != null){
 								p.stop();
 							}
@@ -327,11 +328,11 @@ public class Script {
 						//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
 						if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
 								|| ca[i] instanceof CInt || ca[i] instanceof CNull
-								|| ca[i] instanceof CString || ca[i] instanceof CVoid 
+								|| ca[i] instanceof CString || ca[i] instanceof CVoid
 								|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
 								&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
-							throw new ConfigRuntimeException("Invalid Construct (" 
-									+ ca[i].getClass() + ") being passed as an argument to a function (" 
+							throw new ConfigRuntimeException("Invalid Construct ("
+									+ ca[i].getClass() + ") being passed as an argument to a function ("
 									+ f.getName() + ")", null, m.getTarget());
 						}
 						while(f.preResolveVariables() && ca[i] instanceof IVariable){
@@ -340,11 +341,11 @@ public class Script {
 						}
 					}
 
-					{ 
+					{
 						//It takes a moment to generate the toString of some things, so lets not do it
 						//if we actually aren't going to profile
-						ProfilePoint p = null;				
-						if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){						
+						ProfilePoint p = null;
+						if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
 							p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
 						}
 						Construct ret;
@@ -392,7 +393,7 @@ public class Script {
 							+ " itself.\nThe line of code that caused the error was this:\n" + TermColors.WHITE;
 					List<String> args2 = new ArrayList<>();
 					Map<String, String> vars = new HashMap<>();
-					
+
 					for(Construct cc : args){
 						if(cc instanceof IVariable){
 							Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc).getName(), cc.getTarget()).ival();
@@ -426,7 +427,7 @@ public class Script {
 					for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
 						for(Extension extension : tracker.getExtensions()){
 							try {
-								extensionData += TermColors.CYAN + extension.getName() + TermColors.RED 
+								extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
 										+ " (version " + TermColors.RESET + extension.getVersion() + TermColors.RED + ");\n";
 							} catch(AbstractMethodError ex){
 								// This happens with an old style extensions. Just skip it.
@@ -440,11 +441,11 @@ public class Script {
 					}
 					emsg += f.getName() + "(";
 					emsg += StringUtils.Join(args2, ", ");
-					emsg += ")\n" + TermColors.RED + "on or around " 
+					emsg += ")\n" + TermColors.RED + "on or around "
 							+ TermColors.YELLOW + m.getTarget().file() + TermColors.WHITE + ":" + TermColors.CYAN + m.getTarget().line() + TermColors.RED
 							+ ".\nPlease report this error to the developers, and be sure to include the version numbers:\n"
 							+ TermColors.CYAN + "Server " + TermColors.RED + "version: " + TermColors.RESET + modVersion + TermColors.RED + ";\n"
-							+ TermColors.CYAN + Implementation.GetServerType().getBranding() + TermColors.RED + " version: " + TermColors.RESET 
+							+ TermColors.CYAN + Implementation.GetServerType().getBranding() + TermColors.RED + " version: " + TermColors.RESET
 								+ version + TermColors.RED + ";\n"
 							+ "Loaded extensions and versions:\n"
 							+ extensionData
@@ -453,7 +454,7 @@ public class Script {
 					Static.getLogger().log(Level.SEVERE, emsg);
 					throw new CancelCommandException(null, Target.UNKNOWN);
 				}
-        } else if (m.getCType() == ConstructType.VARIABLE) {            
+        } else if (m.getCType() == ConstructType.VARIABLE) {
             return new CString(m.val(), m.getTarget());
         } else {
             return m;
@@ -462,7 +463,7 @@ public class Script {
 
     public boolean match(String command) {
         if(cleft == null){
-            //The compilation error happened during the signature declaration, so 
+            //The compilation error happened during the signature declaration, so
             //we can't match it, nor can we even tell if it's what they intended for us to run.
             return false;
         }
@@ -574,7 +575,7 @@ public class Script {
         return vars;
     }
 
-    public Script compile() throws ConfigCompileException {
+    public Script compile() throws ConfigCompileException, ConfigCompileGroupException {
         try {
             verifyLeft();
             compileLeft();
@@ -605,16 +606,16 @@ public class Script {
                 b.append(t.value);
                 i++;
                 Token m = left.get(i);
-                while(m.type.isSymbol() && m.type != TType.WHITESPACE){                    
+                while(m.type.isSymbol() && m.type != TType.WHITESPACE){
                     b.append(m.value);
                     i++;
                     m = left.get(i);
                 }
-                
+
                 if(m.type != TType.WHITESPACE && m.type != TType.LABEL){
                     b.append(m.value);
                 }
-                t = new Token(TType.STRING, b.toString(), t.target);  
+                t = new Token(TType.STRING, b.toString(), t.target);
                 if(m.type == TType.LABEL){
                     tempLeft.add(t);
                     tempLeft.add(m);
@@ -628,10 +629,10 @@ public class Script {
             if(t.type != TType.WHITESPACE){
                 tempLeft.add(t);
             }
-            
+
         }
         //Look through and concatenate all tokens before the label, if such exists.
-        boolean hasLabel = false;        
+        boolean hasLabel = false;
         for(int i = 0; i < tempLeft.size(); i++){
             if(tempLeft.get(i).type == TType.LABEL){
                 hasLabel = true;
@@ -644,11 +645,11 @@ public class Script {
             while(tempLeft.get(count).type != TType.LABEL){
                 b.append(tempLeft.get(count).val());
                 count++;
-            }            
+            }
             tempLeft.set(0, new Token(TType.STRING, b.toString(), Target.UNKNOWN));
             for(int i = 0; i < count - 1; i++){
                 tempLeft.remove(1);
-            }            
+            }
         }
         left = tempLeft;
         for (int j = 0; j < left.size(); j++) {
@@ -787,7 +788,7 @@ public class Script {
         return true;
     }
 
-    public void compileRight() throws ConfigCompileException {
+    public void compileRight() throws ConfigCompileException, ConfigCompileGroupException {
         List<Token> temp = new ArrayList<Token>();
         right = new ArrayList<List<Token>>();
         for (Token t : fullRight) {
@@ -883,12 +884,12 @@ public class Script {
 
     /**
      * This is only used by scriptas to hack the label in and out.
-     * @param label 
+     * @param label
      */
     public void setLabel(String label) {
         this.label = label;
     }
-	
+
 	public boolean doLog(){
 		return !nolog;
 	}

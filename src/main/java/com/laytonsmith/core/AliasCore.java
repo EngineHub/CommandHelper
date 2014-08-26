@@ -16,6 +16,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.extensions.ExtensionManager;
@@ -708,6 +709,10 @@ public class AliasCore {
 								scripts.add(s);
 							} catch (ConfigCompileException e) {
 								ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+							} catch(ConfigCompileGroupException ex){
+								for(ConfigCompileException e : ex.getList()){
+									ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+								}
 							}
 						} catch (RuntimeException ee) {
 							throw new RuntimeException("While processing a script, "
@@ -746,6 +751,9 @@ public class AliasCore {
 					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
 					MethodScriptCompiler.registerAutoIncludes(env, null);
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
+				} catch (ConfigCompileGroupException e){
+					exception = true;
+					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath() + " could not be compiled, due to compile errors.", player);
 				} catch (ConfigCompileException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);

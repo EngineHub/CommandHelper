@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  *
- * 
+ *
  */
 public class ArrayHandlingTest {
 
@@ -56,7 +56,7 @@ public class ArrayHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testArraySize() throws ConfigCompileException, CancelCommandException {
+    public void testArraySize() throws Exception, CancelCommandException {
         ArrayHandling.array_size a = new ArrayHandling.array_size();
         CArray arr = commonArray;
         Construct ret = a.exec(Target.UNKNOWN, env, arr);
@@ -71,7 +71,7 @@ public class ArrayHandlingTest {
     }
 
     @Test//(timeout = 10000)
-    public void testArraySet1() throws ConfigCompileException {
+    public void testArraySet1() throws Exception {
         String script =
                 "assign(@array, array(1,2,3)) "
 				+ "msg(@array) "
@@ -83,20 +83,20 @@ public class ArrayHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testArraySet2() throws ConfigCompileException {
+    public void testArraySet2() throws Exception {
         SRun("assign(@array, array(1, 2)) assign(@array2, @array) array_set(@array, 0, 2) msg(@array) msg(@array2)", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("{2, 2}");
     }
 
     @Test(timeout = 10000)
-    public void testArrayReferenceBeingCorrect() throws ConfigCompileException {
+    public void testArrayReferenceBeingCorrect() throws Exception {
         SRun("assign(@array, array(1, 2)) assign(@array2, @array[]) array_set(@array, 0, 2) msg(@array) msg(@array2)", fakePlayer);
         verify(fakePlayer).sendMessage("{2, 2}");
         verify(fakePlayer).sendMessage("{1, 2}");
     }
 
     @Test(timeout = 10000)
-    public void testArrayReferenceBeingCorrectWithArrayGet() throws ConfigCompileException {
+    public void testArrayReferenceBeingCorrectWithArrayGet() throws Exception {
         SRun("assign(@array, array(1, 2)) "
                 + "assign(@array2, array_get(@array)) "
                 + "array_set(@array, 0, 2) "
@@ -155,7 +155,7 @@ public class ArrayHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testArrayPush2() throws ConfigCompileException {
+    public void testArrayPush2() throws Exception {
         SRun("assign(@a, array(1))"
                 + "array_push(@a, 2, 3)"
                 + "msg(@a)", fakePlayer);
@@ -169,7 +169,7 @@ public class ArrayHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testArrayResize() throws ConfigCompileException {
+    public void testArrayResize() throws Exception {
         String script = "assign(@array, array(1)) msg(@array) array_resize(@array, 2) msg(@array) array_resize(@array, 3, 'hello') msg(@array)";
         StaticTest.Run(script, fakePlayer);
         verify(fakePlayer).sendMessage("{1}");
@@ -181,10 +181,10 @@ public class ArrayHandlingTest {
      * Because we are testing a loop, we put in an infinite loop detection of 10
      * seconds
      *
-     * @throws ConfigCompileException
+     * @throws Exception
      */
     @Test(timeout = 10000)
-    public void testRange() throws ConfigCompileException {
+    public void testRange() throws Exception {
         assertEquals("{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}", SRun("range(10)", fakePlayer));
         assertEquals("{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}", SRun("range(1, 11)", fakePlayer));
         assertEquals("{0, 5, 10, 15, 20, 25}", SRun("range(0, 30, 5)", fakePlayer));
@@ -195,7 +195,7 @@ public class ArrayHandlingTest {
     }
 
     @Test
-    public void testArraySliceAndNegativeIndexes() throws ConfigCompileException {
+    public void testArraySliceAndNegativeIndexes() throws Exception {
         assertEquals("{a, b}", SRun("array(a, b, c, d, e)[..1]", null));
         assertEquals("e", SRun("array(a, e)[-1]", null));
         assertEquals("{a, b, c, d, e}", SRun("array(a, b, c, d, e)[]", null));
@@ -211,17 +211,17 @@ public class ArrayHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testArrayMergeNormal() throws ConfigCompileException {
+    public void testArrayMergeNormal() throws Exception {
         assertEquals("{1, 2, 3, 4, 5, {6, 7}}", SRun("array_merge(array(1, 2, 3), array(4, 5, array(6, 7)))", fakePlayer));
     }
 
     @Test(timeout = 10000)
-    public void testArrayMergeAssociative() throws ConfigCompileException {
+    public void testArrayMergeAssociative() throws Exception {
         assertEquals("{a: a, b: b, c: c, d: {1, 2}}", SRun("array_merge(array(a: a, b: b), array(c: c, d: array(1, 2)))", fakePlayer));
     }
 
     @Test(timeout = 10000)
-    public void testArrayRemove() throws ConfigCompileException {
+    public void testArrayRemove() throws Exception {
         SRun("assign(@a, array(1, 2, 3)) array_remove(@a, 1) msg(@a)", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 3}");
         SRun("assign(@a, array(a: a, b: b, c: c)) array_remove(@a, 'b') msg(@a)", fakePlayer);
@@ -229,56 +229,56 @@ public class ArrayHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testStringSlice() throws ConfigCompileException {
+    public void testStringSlice() throws Exception {
         SRun("msg('slice'[2..])", fakePlayer);
         verify(fakePlayer).sendMessage("ice");
     }
-    
-    @Test public void testArraySort1() throws ConfigCompileException{
+
+    @Test public void testArraySort1() throws Exception{
         Run("msg(array_sort(array(3, 1, 2)))", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2, 3}");
     }
-    
-    @Test public void testArraySort2() throws ConfigCompileException{
+
+    @Test public void testArraySort2() throws Exception{
         Run("msg(array_sort(array('002', '1', '03')))", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 002, 03}");
     }
-    
-    @Test public void testArraySort3() throws ConfigCompileException{
+
+    @Test public void testArraySort3() throws Exception{
         Run("msg(array_sort(array('002', '1', '03'), STRING))", fakePlayer);
         verify(fakePlayer).sendMessage("{002, 03, 1}");
     }
-    
-    @Test public void testArrayImplode1() throws ConfigCompileException{
+
+    @Test public void testArrayImplode1() throws Exception{
         Run("msg(array_implode(array(1,2,3,4,5,6,7,8,9,1,2,3,4,5)))", fakePlayer);
         verify(fakePlayer).sendMessage("1 2 3 4 5 6 7 8 9 1 2 3 4 5");
     }
-	
-	@Test public void testArrayRemoveValues() throws ConfigCompileException{
+
+	@Test public void testArrayRemoveValues() throws Exception{
 		Run("assign(@array, array(1, 2, 2, 3)) array_remove_values(@array, 2) msg(@array)", fakePlayer);
 		verify(fakePlayer).sendMessage("{1, 3}");
 	}
-	
-	@Test public void testArrayIndex() throws ConfigCompileException{
+
+	@Test public void testArrayIndex() throws Exception{
 		Run("assign(@array, array(1, 2, 2, 3)) msg(array_index(@array, 2))", fakePlayer);
 		verify(fakePlayer).sendMessage("1");
 	}
-	
-	@Test public void testArrayIndexMissing() throws ConfigCompileException{
+
+	@Test public void testArrayIndexMissing() throws Exception{
 		Run("assign(@array, array(1, 3)) msg(array_index(@array, 2))", fakePlayer);
 		verify(fakePlayer).sendMessage("null");
 	}
-	
-	@Test public void testArrayIndexes() throws ConfigCompileException{
+
+	@Test public void testArrayIndexes() throws Exception{
 		Run("assign(@array, array(1, 2, 2, 3)) msg(array_indexes(@array, 2))", fakePlayer);
 		verify(fakePlayer).sendMessage("{1, 2}");
 	}
-	
-	@Test public void testArrayIndexesMissing() throws ConfigCompileException{
+
+	@Test public void testArrayIndexesMissing() throws Exception{
 		Run("assign(@array, array(1, 3)) msg(array_indexes(@array, 2))", fakePlayer);
 		verify(fakePlayer).sendMessage("{}");
 	}
-	
+
 	@Test public void testArrayRand() throws Exception{
 		assertEquals("{1}", SRun("array_rand(array(1, 1, 1), 1, false)", null));
 		String output = SRun("array_rand(array('a', 'b', 'c'))", null);
@@ -290,19 +290,19 @@ public class ArrayHandlingTest {
 			throw new Exception("Did not return the expected value");
 		}
 	}
-	
+
 	@Test public void testArrayUnique1() throws Exception {
 		assertEquals("{1}", SRun("array_unique(array(1, 1, 1), false)", fakePlayer));
 	}
-	
+
 	@Test public void testArrayUnique2() throws Exception {
 		assertEquals("{1, 1}", SRun("array_unique(array(1, '1'), true)", fakePlayer));
 	}
-	
+
 	@Test public void testArrayUnique3() throws Exception {
 		assertEquals("{1}", SRun("array_unique(array(1, '1'), false)", fakePlayer));
 	}
-	
+
 	@Test public void testArrayUnique4() throws Exception {
 		assertEquals("{1, 1}", SRun("array_unique(array(1, '1', 1), true)", fakePlayer));
 	}

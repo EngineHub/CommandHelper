@@ -68,6 +68,7 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
@@ -138,6 +139,10 @@ public final class Interpreter {
 			ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 			System.out.println(TermColors.reset());
 			System.exit(1);
+		} catch(ConfigCompileGroupException ex){
+			ConfigRuntimeException.HandleUncaughtException(ex, null);
+			System.out.println(TermColors.reset());
+			System.exit(1);
 		}
 	}
 
@@ -193,6 +198,10 @@ public final class Interpreter {
 			} catch (ConfigCompileException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 				System.out.print(TermColors.reset());
+				System.exit(1);
+			} catch(ConfigCompileGroupException ex){
+				ConfigRuntimeException.HandleUncaughtException(ex, null);
+				System.out.println(TermColors.reset());
 				System.exit(1);
 			}
 
@@ -433,6 +442,8 @@ public final class Interpreter {
 			MethodScriptCompiler.execute(auto_include, MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile(), true, env, null, null, null);
 		} catch (ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, "Interpreter will continue to run, however.", null);
+		} catch (ConfigCompileGroupException ex){
+			ConfigRuntimeException.HandleUncaughtException(ex, null);
 		}
 		//Install our signal handlers.
 		SignalHandler.SignalCallback signalHandler = new SignalHandler.SignalCallback() {
@@ -500,7 +511,10 @@ public final class Interpreter {
 					script = "";
 				} catch (ConfigCompileException e) {
 					ConfigRuntimeException.HandleUncaughtException(e, null, null);
-				}	break;
+				} catch(ConfigCompileGroupException e){
+					ConfigRuntimeException.HandleUncaughtException(e, null);
+				}
+				break;
 			default:
 				if (multilineMode) {
 					//Queue multiline
@@ -511,6 +525,8 @@ public final class Interpreter {
 						execute(line, null);
 					} catch (ConfigCompileException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, null, null);
+					} catch(ConfigCompileGroupException ex){
+						ConfigRuntimeException.HandleUncaughtException(ex, null);
 					}
 				}	break;
 		}
@@ -524,7 +540,7 @@ public final class Interpreter {
 	 * @throws ConfigCompileException
 	 * @throws IOException
 	 */
-	public void execute(String script, List<String> args) throws ConfigCompileException, IOException {
+	public void execute(String script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		execute(script, args, null);
 	}
 
@@ -537,7 +553,7 @@ public final class Interpreter {
 	 * @throws ConfigCompileException
 	 * @throws IOException
 	 */
-	public void execute(String script, List<String> args, File fromFile) throws ConfigCompileException, IOException {
+	public void execute(String script, List<String> args, File fromFile) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput input = new CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput(script);
 		EventUtils.TriggerListener(Driver.CMDLINE_PROMPT_INPUT, "cmdline_prompt_input", input);
 		if(input.isCancelled()){

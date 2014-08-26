@@ -29,38 +29,38 @@ public class ProcedureTest {
         fakePlayer = StaticTest.GetOnlinePlayer();
     }
 
-    @Test public void testSimpleProc() throws ConfigCompileException{
+    @Test public void testSimpleProc() throws Exception{
         SRun("proc(_blah, msg('blah')) _blah()", fakePlayer);
         verify(fakePlayer).sendMessage("blah");
     }
 
-    @Test public void testProcWithParameters() throws ConfigCompileException{
+    @Test public void testProcWithParameters() throws Exception{
         SRun("proc(_blah, @msg, msg(@msg)) _blah('blah')", fakePlayer);
         verify(fakePlayer).sendMessage("blah");
     }
 
-    @Test public void testProcWithArguments() throws ConfigCompileException{
+    @Test public void testProcWithArguments() throws Exception{
         SRun("proc(_blah, msg(@arguments)) _blah(1, 2, 3, 4)", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2, 3, 4}");
     }
 
-    @Test public void testProcCalledMultipleTimes() throws ConfigCompileException{
+    @Test public void testProcCalledMultipleTimes() throws Exception{
         SRun("proc(_blah, @blah, msg(@blah)) _blah('blah') _blah('blarg')", fakePlayer);
         verify(fakePlayer).sendMessage("blah");
         verify(fakePlayer).sendMessage("blarg");
     }
 
-    @Test public void ensureOutOfScopeWorks() throws ConfigCompileException{
+    @Test public void ensureOutOfScopeWorks() throws Exception{
         SRun("assign(@lol, '42') proc(_blah, msg(cc('notlol' @lol))) _blah()", fakePlayer);
         verify(fakePlayer).sendMessage("notlolnull");
     }
 
-    @Test public void ensureOutOfScopeDoesntInterfere() throws ConfigCompileException{
+    @Test public void ensureOutOfScopeDoesntInterfere() throws Exception{
         SRun("assign(@lol, '42') proc(_blah, assign(@lol, 'yo dawg herd u leik 42')) _blah() msg(@lol)", fakePlayer);
         verify(fakePlayer).sendMessage("42");
     }
 
-    @Test public void testProcCalledMultipleTimesWithAssign() throws ConfigCompileException{
+    @Test public void testProcCalledMultipleTimesWithAssign() throws Exception{
         SRun("proc(_parse_args, @args," +
                 "assign(@retn, array())" +
                 "foreach(range(1, length(@args), 2), @x," +

@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.RunCommand;
@@ -110,7 +111,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testCompile() throws ConfigCompileException {
+    public void testCompile() throws Exception {
         MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function')", null, false)).get(0).compileRight();
         try {
             //extra parameter
@@ -153,23 +154,23 @@ public class MethodScriptCompilerTest {
 
     }
 
-    @Test public void testLabel() throws ConfigCompileException{
+    @Test public void testLabel() throws Exception{
         assertEquals(PermissionsResolver.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("*:/cmd = die()", null, false)).get(0).compile().getLabel());
         assertEquals(PermissionsResolver.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("* : /cmd = die()", null, false)).get(0).compile().getLabel());
         assertEquals("~lol/fun", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("~lol/fun: /cmd = die()", null, false)).get(0).compile().getLabel());
     }
 
     @Test
-    public void testCompile13() throws ConfigCompileException{
+    public void testCompile13() throws Exception{
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg ('hi')", null, true));
     }
 
-    @Test public void testCompile14() throws ConfigCompileException{
+    @Test public void testCompile14() throws Exception{
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg(('hi'))", null, true));
     }
 
     @Test
-    public void testCompile15() throws ConfigCompileException{
+    public void testCompile15() throws Exception{
         try{
             SRun("\n\nmsg(/, 'test')\n\n", fakePlayer);
         } catch(ConfigCompileException e){
@@ -178,7 +179,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testExecute1() throws ConfigCompileException {
+    public void testExecute1() throws Exception {
         String script = "proc(_hello, @hello0,"
                 + "         msg(@hello0)"
                 + "      )"
@@ -191,7 +192,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testExecute2() throws ConfigCompileException {
+    public void testExecute2() throws Exception {
         String script =
                 "proc(_hello,\n"
                 + "     assign(@hello, 'hello')\n"
@@ -216,7 +217,7 @@ public class MethodScriptCompilerTest {
                     "[";
             MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
             fail("Test passed, but wasn't supposed to");
-        } catch (ConfigCompileException ex) {
+        } catch (ConfigCompileException|ConfigCompileGroupException ex) {
             //Passed
         }
         try {
@@ -224,13 +225,13 @@ public class MethodScriptCompilerTest {
                     "]";
             MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
             fail("Test passed, but wasn't supposed to");
-        } catch (ConfigCompileException ex) {
+        } catch (ConfigCompileException|ConfigCompileGroupException ex) {
             //Passed
         }
     }
 
     @Test
-    public void testExecute4() throws ConfigCompileException {
+    public void testExecute4() throws Exception {
         String script =
                 "proc(_hello,"
                 + "     return('hello')"
@@ -241,7 +242,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testExecute5() throws ConfigCompileException {
+    public void testExecute5() throws Exception {
         String script =
                 "proc(_hello,"
                 + "     return('hello')"
@@ -252,7 +253,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testExecute6() throws ConfigCompileException {
+    public void testExecute6() throws Exception {
         String script =
                 "#This is a comment invalid()'\"'' function\n"
                 + "msg('hello')";
@@ -261,7 +262,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testExecute7() throws ConfigCompileException {
+    public void testExecute7() throws Exception {
         String script =
                 "msg('hello') #This is a comment too invalid()'\"'' function\n";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
@@ -269,7 +270,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testExecute9() throws ConfigCompileException {
+    public void testExecute9() throws Exception {
         String script =
                 "msg('hello') /* This is a comment too invalid()'\"'' function\n"
                 + "yup, still a comment. yay() */";
@@ -278,7 +279,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test(expected = ConfigCompileException.class)
-    public void testExecute10() throws ConfigCompileException {
+    public void testExecute10() throws Exception {
         String script =
                 "msg('hello') /* This is a comment too invalid()'\"'' function\n"
                 + "yup, still a comment. yay() This will fail though, because the comment is unended.";
@@ -286,14 +287,14 @@ public class MethodScriptCompilerTest {
     }
 
     @Test(expected = ConfigCompileException.class)
-    public void testExecute11() throws ConfigCompileException {
+    public void testExecute11() throws Exception {
         String script =
                 "msg('hello') 'unended string";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
     }
 
     @Test
-    public void testExecute12() throws ConfigCompileException {
+    public void testExecute12() throws Exception {
         String script =
                 "msg('hello') /* This is a comment too invalid()'\"'' function\n"
                 + "yup, still a comment. yay() */";
@@ -302,7 +303,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testExecute13() throws ConfigCompileException {
+    public void testExecute13() throws Exception {
         String script =
                 "assign(@a, array(0, 1, 2))"
                 + "msg(@a[0])";
@@ -311,7 +312,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testExecute14() throws ConfigCompileException {
+    public void testExecute14() throws Exception {
         String script =
                 "proc(_hello, assign(@i, 'world'),"
                 + "     return(@i)"
@@ -323,7 +324,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("world");
     }
 
-    @Test public void testExecute15() throws ConfigCompileException{
+    @Test public void testExecute15() throws Exception{
         String script =
                 "assign(@i, 0)\n"
                 + "msg('@i is currently' @i)\n"
@@ -339,7 +340,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("@i is currently world and @j is null");
     }
 
-    @Test public void testExecute16() throws ConfigCompileException{
+    @Test public void testExecute16() throws Exception{
         String script =
                 "proc(_myProc, @i, @j, @k, msg(trim(@i @j @k)))\n"
                 + "_myProc()\n"
@@ -353,7 +354,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer, times(2)).sendMessage("1 2 3");
     }
 
-    @Test public void testExecute17() throws ConfigCompileException{
+    @Test public void testExecute17() throws Exception{
         String script =
                 "proc(_addition, @i, @j, msg(add(@i, @j)))\n"
                 + "_addition(1, 1)\n"
@@ -364,7 +365,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("4");
     }
 
-    @Test public void testExecute18() throws ConfigCompileException{
+    @Test public void testExecute18() throws Exception{
         String script =
                 "proc(_myProc, msg(@arguments))\n"
                 + "_myProc()\n"
@@ -379,10 +380,10 @@ public class MethodScriptCompilerTest {
 
     /**
      * Variables are locked in when the procedure is defined
-     * @throws ConfigCompileException
+     * @throws Exception
      */
     @Test
-    public void testExecute19() throws ConfigCompileException {
+    public void testExecute19() throws Exception {
         String script =
                 "assign(@j, 'world')\n"
                 + "proc(_hello, assign(@i, @j),"
@@ -396,7 +397,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("world");
     }
     @Test
-    public void testExecute20() throws ConfigCompileException {
+    public void testExecute20() throws Exception {
         final AtomicBoolean bool = new AtomicBoolean(false);
         String script =
                 "msg('hello') world";
@@ -413,7 +414,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testExecute21() throws ConfigCompileException{
+    public void testExecute21() throws Exception{
         String script = "#*\n"
                 + "msg('Not a comment')\n"
                 + "#*#";
@@ -421,7 +422,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("Not a comment");
     }
 
-    @Test public void testExecute22() throws ConfigCompileException{
+    @Test public void testExecute22() throws Exception{
         SRun("msg('hi' (this is a thing))", fakePlayer);
         verify(fakePlayer).sendMessage("hi this is a thing");
     }
@@ -432,13 +433,13 @@ public class MethodScriptCompilerTest {
             String config = "/cmd [$p] $q = msg('')";
             MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0).compile();
             fail("Test passed, but wasn't supposed to");
-        } catch (ConfigCompileException ex) {
+        } catch (ConfigCompileException|ConfigCompileGroupException ex) {
             //Passed
         }
     }
 
 //    @Test
-//    public void testCompileWithDoubleSlashCommand() throws ConfigCompileException{
+//    public void testCompileWithDoubleSlashCommand() throws Exception{
 //        AliasCore ac = mock(AliasCore.class);
 //        ac.autoIncludes = new ArrayList<File>();
 //        PowerMockito.mockStatic(CommandHelperPlugin.class);
@@ -453,7 +454,7 @@ public class MethodScriptCompilerTest {
 //    }
 //
 //    @Test
-//    public void testCompileTwoAliases() throws ConfigCompileException{
+//    public void testCompileTwoAliases() throws Exception{
 //        AliasCore ac = mock(AliasCore.class);
 //        ac.autoIncludes = new ArrayList<File>();
 //        PowerMockito.mockStatic(CommandHelperPlugin.class);
@@ -478,13 +479,13 @@ public class MethodScriptCompilerTest {
             String config = "/cmd [$p=player()] = msg('')";
             MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0).compile();
             fail("Test passed, but wasn't supposed to");
-        } catch (ConfigCompileException ex) {
+        } catch (ConfigCompileException|ConfigCompileGroupException ex) {
             //Passed
         }
     }
 
     @Test
-    public void testCompile4() throws ConfigCompileException {
+    public void testCompile4() throws Exception {
         String config = "/cmd = >>>\n"
                 + "msg('hello') #This is a comment too invalid()'\"'' function\n"
                 + "<<<";
@@ -492,7 +493,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testCompile5() throws ConfigCompileException {
+    public void testCompile5() throws Exception {
         String config = "label:/cmd = >>>\n"
                 + "msg('hello') #This is a comment too invalid()'\"'' function\n"
                 + "<<<";
@@ -502,7 +503,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testCompile6() throws ConfigCompileException {
+    public void testCompile6() throws Exception {
         String config = "/cmd = >>>\n"
                 + "msg(trim(hello 'world \\\\ \\' \\n'))"
                 + "<<<";
@@ -511,7 +512,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testCompile7() throws ConfigCompileException {
+    public void testCompile7() throws Exception {
         String config = "/cmd = >>>\n"
                 + "msg(hello) \\ msg(world)"
                 + "<<<";
@@ -522,7 +523,7 @@ public class MethodScriptCompilerTest {
 
     //TODO: Make these tests possible
 //    @Test
-//    public void testCompile8() throws ConfigCompileException {
+//    public void testCompile8() throws Exception {
 //        String config = "/cmd $one $ = >>>\n"
 //                + "msg($one) \\ msg($)"
 //                + "<<<";
@@ -538,7 +539,7 @@ public class MethodScriptCompilerTest {
 //    }
 //
 //    @Test
-//    public void testCompile9() throws ConfigCompileException {
+//    public void testCompile9() throws Exception {
 //        String config = "/test [$var=1] = >>>\n"
 //                + "msg($var)"
 //                + "<<<";
@@ -553,7 +554,7 @@ public class MethodScriptCompilerTest {
 //    }
 
     @Test
-    public void testCompile10() throws ConfigCompileException{
+    public void testCompile10() throws Exception{
         String config = "/test $var = >>>\n"
                 + "msg($var)"
                 + "<<<";
@@ -565,7 +566,7 @@ public class MethodScriptCompilerTest {
     }
 
     //TODO: Make this test possible
-//    @Test public void testCompile11() throws ConfigCompileException{
+//    @Test public void testCompile11() throws Exception{
 //
 //        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
 //        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getName(), "ch.alias.safe")).thenReturn(true);
@@ -584,7 +585,7 @@ public class MethodScriptCompilerTest {
 //        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
 //    }
 
-    @Test public void testCompile12() throws ConfigCompileException{
+    @Test public void testCompile12() throws Exception{
         String config = "/*/one = bad()*/\n"
                 + "/two = msg('Good')\n";
         Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
@@ -593,57 +594,57 @@ public class MethodScriptCompilerTest {
         assertTrue(s.match("/two"));
     }
 
-    @Test public void testUnicode() throws ConfigCompileException{
+    @Test public void testUnicode() throws Exception{
         SRun("msg('\\u0037 is win!')", fakePlayer);
         verify(fakePlayer).sendMessage("7 is win!");
         SRun("msg('\\u20ac')", fakePlayer);
         verify(fakePlayer).sendMessage("€");
     }
 
-    @Test public void testInfixMath1() throws ConfigCompileException{
+    @Test public void testInfixMath1() throws Exception{
         assertEquals("4", SRun("2 + 2", fakePlayer));
         assertEquals("4", SRun("8 - 4", fakePlayer));
         assertEquals("4", SRun("2 * 2", fakePlayer));
         assertEquals("4", SRun("16/4", fakePlayer));
     }
 
-    @Test public void testInfixMath2() throws ConfigCompileException{
+    @Test public void testInfixMath2() throws Exception{
         assertEquals("2", SRun("-2 + 2 + 2", fakePlayer));
         assertEquals("18", SRun("(2 + 4) * 3", fakePlayer));
         assertEquals("14", SRun("2 + 4 * 3", fakePlayer));
     }
 
-    @Test public void testInfixMath3() throws ConfigCompileException{
+    @Test public void testInfixMath3() throws Exception{
         assertEquals("8.0", SRun("2 ** 3", fakePlayer));
     }
 
-    @Test public void testUnary() throws ConfigCompileException{
+    @Test public void testUnary() throws Exception{
         assertEquals("1", SRun("2 + - 1", fakePlayer));
     }
 
-    @Test public void testSymbolicConcat() throws ConfigCompileException{
+    @Test public void testSymbolicConcat() throws Exception{
         SRun("@hello = 'hello'\n"
 				+ "@world = 'world'\n"
 				+ "msg(@hello.@world)", fakePlayer);
 		verify(fakePlayer).sendMessage("helloworld");
     }
 
-    @Test public void testSymbolicLogic1() throws ConfigCompileException{
+    @Test public void testSymbolicLogic1() throws Exception{
         assertEquals("true", SRun("2 <= 5", fakePlayer));
         assertEquals("false", SRun("2 === '2'", fakePlayer));
         assertEquals("true", SRun("g(assign(@var, false)) !@var", fakePlayer));
     }
 
-    @Test public void testSymbolicLogic2() throws ConfigCompileException{
+    @Test public void testSymbolicLogic2() throws Exception{
         assertEquals("true", SRun("true || true", fakePlayer));
         assertEquals("false", SRun("true && false", fakePlayer));
     }
 
-    @Test public void testComplexSymbolicLogic() throws ConfigCompileException{
+    @Test public void testComplexSymbolicLogic() throws Exception{
         assertEquals("true", SRun("2 == 2 && true", fakePlayer));
     }
 
-    @Test public void testSymbolCompileError(){
+    @Test public void testSymbolCompileError() throws Exception {
         try{
             SRun("(+ * 2)", fakePlayer);
             fail("Did not expect test to pass");
@@ -654,46 +655,46 @@ public class MethodScriptCompilerTest {
         }
     }
 
-    @Test public void testComplexSymbols() throws ConfigCompileException{
+    @Test public void testComplexSymbols() throws Exception{
         SRun("assign(@var, 2) if((@var + 2) == 4, msg('Success!'))", fakePlayer);
         verify(fakePlayer).sendMessage("Success!");
     }
 
-    @Test public void testPostfix() throws ConfigCompileException{
+    @Test public void testPostfix() throws Exception{
         SRun("assign(@var, 2) msg(@var++) msg(@var)", fakePlayer);
         verify(fakePlayer).sendMessage("2");
         verify(fakePlayer).sendMessage("3");
     }
 
-    @Test public void testPrefix() throws ConfigCompileException{
+    @Test public void testPrefix() throws Exception{
         SRun("assign(@var, 2) msg(++@var) msg(@var)", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("3");
     }
 
-    @Test public void testModulo() throws ConfigCompileException{
+    @Test public void testModulo() throws Exception{
         assertEquals(Integer.toString(2 % 3), SRun("2 % 3", fakePlayer));
     }
 
-    @Test public void TestOperationsWithFunction() throws ConfigCompileException{
+    @Test public void TestOperationsWithFunction() throws Exception{
         SRun("if(!and(false, false), msg('yes'))", fakePlayer);
         verify(fakePlayer).sendMessage("yes");
     }
 
-    @Test public void testArrayBooleanType() throws ConfigCompileException{
+    @Test public void testArrayBooleanType() throws Exception{
         assertEquals("true", SRun("boolean(array(1))", null));
         assertEquals("false", SRun("boolean(array())", null));
     }
 
-    @Test public void testParenthesisAfterQuotedString() throws ConfigCompileException{
+    @Test public void testParenthesisAfterQuotedString() throws Exception{
         assertEquals("2 + 2 is 4", SRun("'2 + 2 is' (2 + 2)", fakePlayer));
     }
 
     @Test(expected=ConfigCompileException.class)
-    public void testCompileErrorOfStaticConstructOptimization() throws ConfigCompileException{
+    public void testCompileErrorOfStaticConstructOptimization() throws Exception{
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("2 / 0", null, true));
     }
 
-    @Test public void testLineNumberCorrectInException1() throws ConfigCompileException{
+    @Test public void testLineNumberCorrectInException1() throws Exception{
         String script =
                 "try(\n" //Line 1
                 + "assign(@a, array(1, 2))\n" //Line 2
@@ -705,7 +706,7 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("4");
     }
 
-    @Test public void testLineNumberCorrectInException2() throws ConfigCompileException{
+    @Test public void testLineNumberCorrectInException2() throws Exception{
         String script =
                 "assign(@a, array(1, 2))\n" //Line 1
                 + "\n" //Line 2
@@ -718,7 +719,7 @@ public class MethodScriptCompilerTest {
 
     }
 
-    @Test public void testLineNumberCorrectInException3() throws ConfigCompileException{
+    @Test public void testLineNumberCorrectInException3() throws Exception{
         String script =
                 "\n"
                 + "assign(@a, array('aaa', 'bbb'))\n"
@@ -733,7 +734,7 @@ public class MethodScriptCompilerTest {
         }
     }
 
-    @Test public void testExtraParenthesis(){
+    @Test public void testExtraParenthesis() throws Exception {
         try{
             SRun("\n"
                     + "\n"
@@ -744,12 +745,12 @@ public class MethodScriptCompilerTest {
     }
 
     @Test(expected=ConfigCompileException.class)
-    public void testSpuriousSymbols() throws ConfigCompileException{
+    public void testSpuriousSymbols() throws Exception{
         SRun("2 +", fakePlayer);
     }
 
     @Test
-    public void testBraceIf() throws ConfigCompileException{
+    public void testBraceIf() throws Exception{
         SRun("if(true)\n\n"
                 + "{\n"
                 + "msg('success!')\n"
@@ -758,7 +759,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testBraceElseIfElse() throws ConfigCompileException{
+    public void testBraceElseIfElse() throws Exception{
         SRun("if(false){"
                 + "msg('fail')"
                 + "} else if(true == true){"
@@ -770,7 +771,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testBraceElseIfElseWithElseCondTrue() throws ConfigCompileException{
+    public void testBraceElseIfElseWithElseCondTrue() throws Exception{
         SRun("if(false){"
                 + "msg('fail')"
                 + "} else if(false){"
@@ -782,12 +783,12 @@ public class MethodScriptCompilerTest {
     }
 
     @Test(expected=ConfigCompileException.class)
-    public void testFailureOfBraces() throws ConfigCompileException{
+    public void testFailureOfBraces() throws Exception{
         SRun("and(1){ 1 }", fakePlayer);
     }
 
     @Test(expected=ConfigCompileException.class)
-    public void testInnerElseInElseIf() throws ConfigCompileException{
+    public void testInnerElseInElseIf() throws Exception{
         SRun("if(true){"
                 + "msg('fail')"
                 + "} else {"
@@ -798,7 +799,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testBracketsOnFor() throws ConfigCompileException{
+    public void testBracketsOnFor() throws Exception{
         SRun("for(assign(@i, 0), @i < 5, @i++){\n"
                 + "msg('worked')\n"
                 + "}", fakePlayer);
@@ -806,7 +807,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testBracketsOnForeach() throws ConfigCompileException{
+    public void testBracketsOnForeach() throws Exception{
         SRun("foreach(range(2), @i){\n"
                 + "msg(@i)\n"
                 + "}", fakePlayer);
@@ -814,12 +815,12 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("1");
     }
 
-    @Test public void testWhitespaceInBetweenFunctionAndParen() throws ConfigCompileException{
+    @Test public void testWhitespaceInBetweenFunctionAndParen() throws Exception{
         SRun("msg ('hi')", fakePlayer);
         verify(fakePlayer).sendMessage("hi");
     }
 
-    @Test public void testMultipleFunctionsWithBraces() throws ConfigCompileException{
+    @Test public void testMultipleFunctionsWithBraces() throws Exception{
         SRun("if(dyn(false)){\n"
                 + "msg('nope')\n"
                 + "} else {\n"
@@ -830,7 +831,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testArrayGetCatchesInvalidParameter(){
+    public void testArrayGetCatchesInvalidParameter() throws Exception {
         try{
             try {
                 SRun("1[4]", null);
@@ -850,7 +851,7 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testBlockComments1() throws ConfigCompileException{
+    public void testBlockComments1() throws Exception{
         SRun(     "/*\n"
                 + " * Herp\n"
                 + " * Derp\n"
@@ -859,12 +860,12 @@ public class MethodScriptCompilerTest {
     }
 
     @Test
-    public void testCommentsInStrings() throws ConfigCompileException{
+    public void testCommentsInStrings() throws Exception{
 	    SRun("'#'", fakePlayer);
     }
 
     @Test
-    public void testCommentsInStrings2() throws ConfigCompileException{
+    public void testCommentsInStrings2() throws Exception{
 	    SRun("'/*'", fakePlayer);
     }
 
@@ -939,19 +940,19 @@ public class MethodScriptCompilerTest {
 
     //TODO: Once the lexer is rewritten, this should work
 //    @Test
-//    public void testAssignmentWithEquals1() throws ConfigCompileException{
+//    public void testAssignmentWithEquals1() throws Exception{
 //	    SRun("@var=yep nope msg(@var)", fakePlayer);
 //	    verify(fakePlayer).sendMessage("yep");
 //    }
 //
 //    @Test
-//    public void testAssignmentWithEquals2() throws ConfigCompileException{
+//    public void testAssignmentWithEquals2() throws Exception{
 //	    SRun("@var = yep nope msg(@var)", fakePlayer);
 //	    verify(fakePlayer).sendMessage("yep");
 //    }
 //
 //    @Test
-//    public void testAssignmentWithEquals3() throws ConfigCompileException{
+//    public void testAssignmentWithEquals3() throws Exception{
 //	    SRun("@var = 'yep yep' msg(@var)", fakePlayer);
 //	    verify(fakePlayer).sendMessage("yep yep");
 //    }

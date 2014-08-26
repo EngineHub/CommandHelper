@@ -11,6 +11,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import java.io.File;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class OptimizationUtilities {
 	 * @return
 	 * @throws ConfigCompileException
 	 */
-	public static String optimize(String script, File source) throws ConfigCompileException{
+	public static String optimize(String script, File source) throws ConfigCompileException, ConfigCompileGroupException{
         ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, source, true));
         StringBuilder b = new StringBuilder();
         //The root always contains null.

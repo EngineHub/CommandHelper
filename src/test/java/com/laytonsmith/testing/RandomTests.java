@@ -61,7 +61,7 @@ import static org.mockito.Mockito.when;
 
 /**
  *
- * 
+ *
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(Static.class)
@@ -221,7 +221,7 @@ public class RandomTests {
 	}
 
 	@Test
-	public void testReturnArrayFromProc() throws ConfigCompileException {
+	public void testReturnArrayFromProc() throws Exception {
 		assertEquals("{1, 2, 3}", SRun("proc(_test, @var, assign(@array, array(1, 2)) array_push(@array, @var) return(@array)) _test(3)", null));
 	}
 
@@ -273,13 +273,13 @@ public class RandomTests {
 	}
 
 	@Test
-	public void testProcScope() throws ConfigCompileException {
+	public void testProcScope() throws Exception {
 		SRun("proc(_b, assign(@a, 2)) assign(@a, 1) _b() msg(@a)", fakePlayer);
 		verify(fakePlayer).sendMessage("1");
 	}
 
 	@Test
-	public void testCastFromBukkitMCPlayerToBukkitMCCommandSender() throws ConfigCompileException {
+	public void testCastFromBukkitMCPlayerToBukkitMCCommandSender() throws Exception {
 		Player p = mock(Player.class);
 		BukkitMCCommandSender c = new BukkitMCCommandSender(new BukkitMCPlayer(p));
 	}
@@ -289,7 +289,7 @@ public class RandomTests {
 		String ret = SRun("reflect_docs('reflect_docs', 'return')", null);
 		assertEquals("string", ret);
 	}
-	
+
 	@Test
 	public void testGetValues() throws Exception {
 		try{
@@ -315,7 +315,7 @@ public class RandomTests {
 			new File("persistence.json").deleteOnExit();
 		}
 	}
-	
+
 //    @Test
 //    public void testBlah() throws Throwable{
 //	    StaticTest.InstallFakeConvertor(fakePlayer);

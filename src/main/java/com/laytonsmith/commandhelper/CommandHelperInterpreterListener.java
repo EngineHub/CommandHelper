@@ -21,6 +21,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.taskmanager.TaskManager;
 import java.io.File;
 import java.io.IOException;
@@ -114,7 +115,11 @@ public class CommandHelperInterpreterListener implements Listener {
                 execute(script, p);
             } catch (ConfigCompileException e) {
                 Static.SendMessage(p, MCChatColor.RED + e.getMessage() + ":" + e.getLineNum());
-            }
+            } catch (ConfigCompileGroupException ex){
+				for(ConfigCompileException e : ex.getList()){
+					Static.SendMessage(p, MCChatColor.RED + e.getMessage() + ":" + e.getLineNum());
+				}
+			}
         } else {
             if (multilineMode.containsKey(p.getName())) {
                 //Queue multiline
@@ -126,7 +131,11 @@ public class CommandHelperInterpreterListener implements Listener {
                     execute(line, p);
                 } catch (ConfigCompileException ex) {
                     Static.SendMessage(p, MCChatColor.RED + ex.getMessage());
-                }
+                } catch(ConfigCompileGroupException e){
+					for(ConfigCompileException ex : e.getList()){
+						Static.SendMessage(p, MCChatColor.RED + ex.getMessage());
+					}
+				}
             }
         }
     }
@@ -134,7 +143,7 @@ public class CommandHelperInterpreterListener implements Listener {
     public void reload() {
     }
 
-    public void execute(String script, final MCPlayer p) throws ConfigCompileException {
+    public void execute(String script, final MCPlayer p) throws ConfigCompileException, ConfigCompileGroupException {
         List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
         ParseTree tree = MethodScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());

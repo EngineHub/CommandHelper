@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  *
- * 
+ *
  */
 public class MathTest {
 
@@ -89,7 +89,7 @@ public class MathTest {
     }
 
     @Test(timeout = 10000)
-    public void testDec() throws ConfigCompileException {
+    public void testDec() throws Exception {
         Math.dec a = new Math.dec();
         IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable("var", C.onstruct(1), Target.UNKNOWN));
         IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable("var2", C.onstruct(2.5), Target.UNKNOWN));
@@ -108,7 +108,7 @@ public class MathTest {
     }
 
     @Test(timeout = 10000)
-    public void testInc() throws ConfigCompileException {
+    public void testInc() throws Exception {
         Math.inc a = new Math.inc();
         IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable("var", C.onstruct(1), Target.UNKNOWN));
         IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable("var2", C.onstruct(2.5), Target.UNKNOWN));
@@ -174,7 +174,7 @@ public class MathTest {
         } catch (ConfigRuntimeException e) {
         }
     }
-	
+
 	@Test
 	public void testRand2() throws Exception{
 		SRun("assign(@rand, rand()) if(@rand >= 0 && @rand <= 1, msg('pass'), msg('fail'))", fakePlayer);
@@ -206,7 +206,7 @@ public class MathTest {
     }
 
     @Test(timeout = 10000)
-    public void testSqrt() throws ConfigCompileException {
+    public void testSqrt() throws Exception {
         assertEquals("3", StaticTest.SRun("sqrt(9)", fakePlayer));
         assertEquals("Test failed", java.lang.Math.sqrt(2), Double.parseDouble(StaticTest.SRun("sqrt(2)", fakePlayer)), .000001);
         try {
@@ -218,21 +218,21 @@ public class MathTest {
     }
 
     @Test(timeout = 10000)
-    public void testMin() throws ConfigCompileException {
+    public void testMin() throws Exception {
         assertEquals("-2", StaticTest.SRun("min(2, array(5, 6, 4), -2)", fakePlayer));
     }
 
     @Test(timeout = 10000)
-    public void testMax() throws ConfigCompileException {
+    public void testMax() throws Exception {
         assertEquals("50", StaticTest.SRun("max(6, 7, array(4, 4, 50), 2, 5)", fakePlayer));
     }
-	
+
 	@Test
 	public void testChained() throws Exception{
 		assertEquals("8", SRun("2 + 2 + 2 + 2", null));
 		assertEquals("20", SRun("2 * 2 + 2 * 2 * 2 + 2 * 2 * 2", null));
 	}
-	
+
 	@Test
 	public void testRound() throws Exception {
 		assertEquals("4", SRun("round(4.4)", null));

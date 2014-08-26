@@ -4,6 +4,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.functions.CompiledFunction;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -15,20 +16,20 @@ import java.util.List;
  * The static compiler uses the dynamic compiler, but using a platform specific framework,
  * ends up with output that can be written to out to disk, and run natively, or compiles
  * to another language entirely.
- * 
+ *
  */
 public final class MethodScriptStaticCompiler {
-    
+
     private MethodScriptStaticCompiler(){}
-    
+
     /**
      * Compiles the script, converting it into mid level object code, or in
      * the case of a language compiler, the other language's source code.
      * @param script
      * @param platform
-     * @return 
+     * @return
      */
-    public static String compile(String script, api.Platforms platform, File file) throws ConfigCompileException{
+    public static String compile(String script, api.Platforms platform, File file) throws ConfigCompileException, ConfigCompileGroupException{
         //First, we optimize. The "core" functions are always run through
         //the native interpreter's compiler for optimization.
         ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file, true));
@@ -38,10 +39,10 @@ public final class MethodScriptStaticCompiler {
         }
         return b.toString();
     }
-    
+
     private static void go(ParseTree node, StringBuilder b, api.Platforms platform) throws ConfigCompileException{
         if(node.hasChildren()){
-            FunctionBase f = FunctionList.getFunction(node.getData(), platform);            
+            FunctionBase f = FunctionList.getFunction(node.getData(), platform);
             if(!(f instanceof CompiledFunction)){
                 throw new ConfigCompileException("The function " + f.getName() + " is unknown in this platform.", node.getData().getTarget());
             }

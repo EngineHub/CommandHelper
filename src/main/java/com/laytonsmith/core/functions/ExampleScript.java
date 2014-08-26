@@ -16,6 +16,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
@@ -40,47 +41,47 @@ import org.bukkit.plugin.PluginManager;
  * running the code, but will still output the information in the standard format.
  */
 public class ExampleScript {
-	
+
 	String description;
 	String originalScript;
 	ParseTree script;
 	String output;
 	StringBuilder playerOutput = null;
-	
+
 	MCPlayer fakePlayer;
 	static MCServer fakeServer;
 	static Plugin fakePlugin;
 	static AliasCore fakeCore;
 	static boolean init = false;
-	
-	
+
+
 	/**
 	 * Creates a new example script, where the output will come from the
 	 * script itself.
 	 * @param description
-	 * @param script 
+	 * @param script
 	 */
 	public ExampleScript(String description, String script) throws ConfigCompileException{
 		this(description, script, null, false);
 	}
-	
+
 	public ExampleScript(String description, String script, boolean intentionalCompileError) throws ConfigCompileException{
 		this(description, script, null, intentionalCompileError);
 	}
-	
+
 	/**
 	 * Creates a new example script, but the output is also specified. Use
 	 * this in cases where the script cannot be run.
 	 * @param description
 	 * @param script
-	 * @param output 
+	 * @param output
 	 */
 	public ExampleScript(String description, String script, String output) throws ConfigCompileException{
 		this(description, script, output, false);
 	}
-	
+
 	private ExampleScript(String description, String script, String output, boolean intentionalCompileError) throws ConfigCompileException{
-		this.description = description;		
+		this.description = description;
 		this.originalScript = script;
 		try{
 			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Examples"), true));
@@ -89,9 +90,18 @@ public class ExampleScript {
 			if(intentionalCompileError){
 				this.output = "Causes compile error: " + e.getMessage();
 			}
+		} catch(ConfigCompileGroupException ex){
+			if(intentionalCompileError){
+				StringBuilder b = new StringBuilder();
+				b.append("Causes compile errors:\n");
+				for(ConfigCompileException e : ex.getList()){
+					b.append(e.getMessage()).append("\n");
+				}
+				this.output = b.toString();
+			}
 		}
 		playerOutput = new StringBuilder();
-		
+
 		fakePlayer = (MCPlayer)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{MCPlayer.class}, new InvocationHandler() {
 
 			@Override
@@ -116,14 +126,14 @@ public class ExampleScript {
 			fakeServer = (MCServer)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{MCServer.class}, new InvocationHandler() {
 
 				@Override
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {				
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					return genericReturn(method.getReturnType());
 				}
-			});		
+			});
 			final PluginManager bukkitPluginManager = (PluginManager)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{PluginManager.class}, new InvocationHandler() {
 
 				@Override
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {				
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					System.out.println(method.getReturnType().getSimpleName() + " " + method.getName());
 					return genericReturn(method.getReturnType());
 				}
@@ -159,24 +169,24 @@ public class ExampleScript {
 				throw new RuntimeException(ex);
 			}
 		}
-		
+
 	}
 
 	public String getDescription() {
 		return description;
 	}
-	
+
 	public boolean isAutomatic(){
 		return output == null;
 	}
-	
+
 	private class FakeCore extends AliasCore{
 		public FakeCore(){
 			super(null, null, null, null, new PermissionsResolver.PermissiveResolver(), null);
 			this.autoIncludes = new ArrayList<File>();
 		}
 	}
-	
+
 	private Object genericReturn(Class r){
 			if(r.isPrimitive()){
 				if(r == int.class){
@@ -201,13 +211,13 @@ public class ExampleScript {
 					return "";
 				}
 				return null;
-			}		
+			}
 	}
-	
+
 	public String getScript(){
 		return originalScript;
 	}
-	
+
 	public String getOutput() throws IOException, DataSourceException, URISyntaxException{
 		if(output != null){
 			return output;
@@ -237,13 +247,13 @@ public class ExampleScript {
 		}
 		String playerOut = playerOutput.toString().trim();
 		String finalOut = finalOutput.toString().trim();
-		
+
 		String out = (playerOut.equals("")?"":playerOut) + (finalOut.equals("")||!playerOut.trim().equals("") ?"":":" + finalOut);
 		if(thrown != null){
 			out += thrown;
 		}
 		return out;
 	}
-	
-	
+
+
 }

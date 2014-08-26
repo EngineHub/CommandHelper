@@ -475,13 +475,13 @@ public class StaticTest {
      * Lexes, compiles, and runs a given MethodScript, using the given player.
      * @param script
      * @param player
-     * @throws ConfigCompileException
+     * @throws Exception
      */
-    public static void Run(String script, MCCommandSender player) throws ConfigCompileException{
+    public static void Run(String script, MCCommandSender player) throws Exception{
         Run(script, player, null, null);
     }
 
-    public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env) throws ConfigCompileException{
+    public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env) throws Exception{
 		InstallFakeServerFrontend();
 		if(env == null){
 			env = StaticTest.env;
@@ -490,10 +490,10 @@ public class StaticTest {
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, done, null);
     }
 
-    public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws ConfigCompileException{
+    public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws Exception{
 		RunCommand(combinedScript, player, command, env);
 	}
-    public static void RunCommand(String combinedScript, MCCommandSender player, String command, Environment env) throws ConfigCompileException{
+    public static void RunCommand(String combinedScript, MCCommandSender player, String command, Environment env) throws Exception{
         InstallFakeServerFrontend();
 		if(env == null){
 			env = StaticTest.env;
@@ -508,7 +508,7 @@ public class StaticTest {
         }
     }
 
-	public static String SRun(String script, MCCommandSender player, Environment env) throws ConfigCompileException{
+	public static String SRun(String script, MCCommandSender player, Environment env) throws Exception{
 		InstallFakeServerFrontend();
         final StringBuffer b = new StringBuffer();
         Run(script, player, new MethodScriptComplete() {
@@ -520,11 +520,11 @@ public class StaticTest {
         }, env);
         return b.toString();
 	}
-    public static String SRun(String script, MCCommandSender player) throws ConfigCompileException{
+    public static String SRun(String script, MCCommandSender player) throws Exception{
 		return SRun(script, player, env);
     }
     //TODO: Fix this
-//    public static void RunVars(List<Variable> vars, String script, MCCommandSender player) throws ConfigCompileException{
+//    public static void RunVars(List<Variable> vars, String script, MCCommandSender player) throws Exception{
 //        Env env = new Env();
 //        env.SetCommandSender(player);
 //        MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));
@@ -536,7 +536,7 @@ public class StaticTest {
 //    }
 
     //Blarg. Dumb thing.
-//    private static void injectAliasCore() throws ConfigCompileException{
+//    private static void injectAliasCore() throws Exception{
 //        PermissionsResolverManager prm = mock(PermissionsResolverManager.class);
 //        CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
 //        AliasCore ac = new AliasCore(new File("plugins/CommandHelper/config.txt"),

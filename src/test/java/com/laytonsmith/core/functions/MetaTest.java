@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 /**
  *
- * 
+ *
  */
 public class MetaTest {
 
@@ -55,7 +55,7 @@ public class MetaTest {
     }
 
     @Test(timeout = 10000)
-    public void testRunas1() throws ConfigCompileException {
+    public void testRunas1() throws Exception {
         String script =
                 "runas('wraithguard02', '/cmd yay')";
         MCPlayer fakePlayer2 = GetOnlinePlayer("wraithguard02", fakeServer);
@@ -65,22 +65,22 @@ public class MetaTest {
         //verify(fakePlayer2).performCommand("cmd yay");
         verify(fakeServer).dispatchCommand(fakePlayer2, "cmd yay");
     }
-    
-    @Test public void testEval() throws ConfigCompileException{
+
+    @Test public void testEval() throws Exception{
         SRun("eval('msg(\\'Hello World!\\')')", fakePlayer);
         verify(fakePlayer).sendMessage("Hello World!");
     }
-    
-    @Test public void testEval2() throws ConfigCompileException{
+
+    @Test public void testEval2() throws Exception{
         SRun("assign(@e, 'msg(\\'Hello World!\\')') eval(@e)", fakePlayer);
         verify(fakePlayer).sendMessage("Hello World!");
     }
     //:( I can't get this to work right, because AlwaysOpPlayer is different than
     //fakePlayer, so I can't get my test to activate when the function is called.
 //    @Test(timeout=10000)
-//    public void testRunas2() throws ConfigCompileException {
-//        final AtomicBoolean bool = new AtomicBoolean(false); 
-//        String script = 
+//    public void testRunas2() throws Exception {
+//        final AtomicBoolean bool = new AtomicBoolean(false);
+//        String script =
 //                "runas(~op, '/cmd yay')";
 //        when(fakeServer.dispatchCommand(fakePlayer, "cmd yay")).thenAnswer(new Answer<Boolean>(){
 //
@@ -89,7 +89,7 @@ public class MetaTest {
 //                bool.set(true);
 //                return true;
 //            }
-//            
+//
 //        });
 //        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), fakePlayer, null, null);
 //        assertTrue(bool.get());

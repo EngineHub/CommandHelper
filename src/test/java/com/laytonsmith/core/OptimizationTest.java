@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.StaticTest;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
@@ -19,39 +20,39 @@ public class OptimizationTest {
 		StaticTest.InstallFakeServerFrontend();
 	}
 
-    public String optimize(String script) throws ConfigCompileException{
+    public String optimize(String script) throws Exception {
         return OptimizationUtilities.optimize(script, null);
     }
 
-    @Test public void testTestFramework() throws ConfigCompileException{
+    @Test public void testTestFramework() throws Exception{
         //This just tests to see that the basic framework works. This shouldn't optimize.
         assertEquals("msg('this is a string','so is this')", optimize("msg(\n 'this is a string',\nso is this\n)"));
         assertEquals("msg('\\'quoted\\'')", optimize("msg( '\\'quoted\\'' )"));
     }
 
-    @Test public void testIfBasic() throws ConfigCompileException{
+    @Test public void testIfBasic() throws Exception{
         assertEquals("msg('hi')", optimize("if(true){ msg('hi') } else { msg('fail') }"));
     }
 
-    @Test public void testIfWithBraces() throws ConfigCompileException{
+    @Test public void testIfWithBraces() throws Exception{
         assertEquals("if(dyn(),msg('hi'),msg('hi'))", optimize("if(dyn()){ msg('hi') } else { msg('hi') }"));
     }
 
-	@Test public void testIfElse() throws ConfigCompileException {
+	@Test public void testIfElse() throws Exception {
 		assertEquals("ifelse(dyn(1),msg(''),dyn(2),msg(''),msg(''))", optimize("if(dyn(1)){ msg('') } else if(dyn(2)){ msg('') } else { msg('') }"));
 	}
 
-	@Test public void testIfElseWithDie() throws ConfigCompileException {
+	@Test public void testIfElseWithDie() throws Exception {
 		assertEquals("ifelse(is_null($pl),die(''),not(ponline(player($pl))),die(concat($pl,'')))",
 				optimize("if(is_null($pl)) {\ndie('') } else if(!ponline(player($pl))){ die($pl.'') }"));
 	}
 
 	// Need to add this back too
-//	@Test public void testNestedIfsWithRemoval() throws ConfigCompileException {
+//	@Test public void testNestedIfsWithRemoval() throws Exception {
 //		assertEquals("p()", optimize("ifelse(1, if(0, msg('')), msg(''))"));
 //	}
 
-    @Test public void testMultipleLinesInBraces() throws ConfigCompileException{
+    @Test public void testMultipleLinesInBraces() throws Exception{
         assertEquals("if(dyn(false),msg('nope'),sconcat(msg('hi'),msg('hi')))", optimize("if(dyn(false)){\n"
                 + "msg('nope')\n"
                 + "} else {\n"
@@ -61,7 +62,7 @@ public class OptimizationTest {
     }
 
 	//TODO: These tests are not intended to be corrected in master, so I'm removing them for now
-//    @Test public void testProcOptimization1() throws ConfigCompileException{
+//    @Test public void testProcOptimization1() throws Exception{
 //        //The proc stays there, but the call to it should be consolidated
 //        assertEquals("sconcat(proc('_add',@a,@b,return(add(@a,@b))),4)", optimize("proc(_add, @a, @b, return(@a + @b)) _add(2, 2)"));
 //    }
@@ -72,34 +73,34 @@ public class OptimizationTest {
 	}
 
 //    @Test(expected=ConfigCompileException.class)
-//    public void testProcOptimization2() throws ConfigCompileException{
+//    public void testProcOptimization2() throws Exception{
 //        optimize("proc(_divide, @a, return(@a / 0)) _divide(1)");
 //    }
 
     @Test
-    public void testProcOptimization3() throws ConfigCompileException{
+    public void testProcOptimization3() throws Exception{
         //Rather, lack of optimization
         assertEquals("sconcat(proc('_nope',msg('Hi')),_nope())", optimize("proc(_nope, msg('Hi')) _nope()"));
     }
 
 //    @Test
-//    public void testProcOptimiztion4() throws ConfigCompileException{
+//    public void testProcOptimiztion4() throws Exception{
 //        //Test embedded procs
 //        assertEquals("sconcat(proc('_outer',sconcat(proc('_inner',@a,return(@a)),'blah')),_inner('huh'))",
 //                optimize("proc(_outer, proc(_inner, @a, return(@a)) _inner('blah')) _inner('huh')"));
 //    }
 
-    @Test public void testProcReturn() throws ConfigCompileException{
+    @Test public void testProcReturn() throws Exception{
         assertEquals("sconcat(proc('_proc',return(array(1))),array_get(_proc(),0))",
                 optimize("proc(_proc, return(array(1))) _proc()[0]"));
     }
 
-	@Test public void testUnreachableCode() throws ConfigCompileException{
+	@Test public void testUnreachableCode() throws Exception{
 		assertEquals("sconcat(assign(@a,0),if(@a,die(),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
 		assertEquals("die()", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
 	}
 
-	@Test public void testUnreachableCodeWithBranchTypeFunction() throws ConfigCompileException{
+	@Test public void testUnreachableCodeWithBranchTypeFunction() throws Exception{
 		assertEquals("if(@var,die(),msg(''))", optimize("if(@var){ die() } else { msg('') }"));
 	}
 
@@ -244,7 +245,7 @@ public class OptimizationTest {
 
 
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
-//    @Test public void testAssign() throws ConfigCompileException{
+//    @Test public void testAssign() throws Exception{
 //        //In this test, there's no way it won't ever be 'hi', so do a replacement (we still need to keep
 //        //the assign, because it does need to go into the variable table for reflective purposes)
 //        assertEquals("sconcat(assign(@a,'hi'),msg('hi'))", optimize("assign(@a, 'hi') msg(@a)"));

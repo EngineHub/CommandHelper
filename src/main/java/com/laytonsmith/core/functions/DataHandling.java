@@ -48,6 +48,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
@@ -2125,10 +2126,9 @@ public class DataHandling {
 		 * @param myProc
 		 * @param children
 		 * @return
-		 * @throws ConfigCompileException
 		 * @throws ConfigRuntimeException
 		 */
-		public static Construct optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public static Construct optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigRuntimeException {
 			if (myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
@@ -3579,6 +3579,13 @@ public class DataHandling {
 				return new CString(b.toString(), t);
 			} catch (ConfigCompileException e) {
 				throw new ConfigRuntimeException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
+			} catch(ConfigCompileGroupException ex){
+				StringBuilder b = new StringBuilder();
+				b.append("Could not compile eval'd code: ");
+				for(ConfigCompileException e : ex.getList()){
+					b.append(e.getMessage()).append("\n");
+				}
+				throw new ConfigRuntimeException(b.toString(), ExceptionType.FormatException, t);
 			} finally {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(oldDynamicScriptMode);
 			}

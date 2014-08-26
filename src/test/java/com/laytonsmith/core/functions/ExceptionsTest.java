@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  *
- * 
+ *
  */
 public class ExceptionsTest {
 
@@ -57,7 +57,7 @@ public class ExceptionsTest {
     }
 
     @Test(timeout = 10000)
-    public void testTryCatch1() throws ConfigCompileException {
+    public void testTryCatch1() throws Exception {
         String script =
                 "try(\n"
                 + "ploc('offlineplayer'),\n"
@@ -75,7 +75,7 @@ public class ExceptionsTest {
     }
 
     @Test
-    public void testTryCatch2() throws ConfigCompileException {
+    public void testTryCatch2() throws Exception {
         String script =
                 "try(\n"
                 + "throw(PlayerOfflineException, This is a message),\n"
@@ -93,7 +93,7 @@ public class ExceptionsTest {
     }
 
     @Test(timeout = 10000)
-    public void testTryCatch3() throws ConfigCompileException {
+    public void testTryCatch3() throws Exception {
         String script =
                 "try(try(\n"
                 + "throw(null, This is a message),\n"

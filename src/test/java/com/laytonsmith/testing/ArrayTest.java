@@ -34,11 +34,11 @@ public class ArrayTest {
         fakePlayer = StaticTest.GetOnlinePlayer();
     }
 
-    @Test public void testAssociativeCreation() throws ConfigCompileException{
+    @Test public void testAssociativeCreation() throws Exception{
         assertEquals("{0: 0, 1: 1}", SRun("array(0: 0, 1: 1)", fakePlayer));
     }
 
-    @Test public void testAssociativeCreation2() throws ConfigCompileException{
+    @Test public void testAssociativeCreation2() throws Exception{
         SRun("assign(@arr, array(0, 1))"
                 + "msg(@arr)"
                 + "array_set(@arr, 2, 2)"
@@ -57,16 +57,16 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("{0: 0, 1: 1, 2: 2, 10: value, key: value}");
     }
 
-    @Test public void testArrayGetWithAssociativeArray() throws ConfigCompileException{
+    @Test public void testArrayGetWithAssociativeArray() throws Exception{
         assertEquals("test", SRun("g(assign(@arr, array()) array_set(@arr, 'val', 'test')) array_get(@arr, 'val')", fakePlayer));
     }
 
     @Test(expected=ConfigRuntimeException.class)
-    public void testAssociativeSlicing() throws ConfigCompileException{
+    public void testAssociativeSlicing() throws Exception{
         SRun("array(0: 0, 1: 1, 2: 2)[1..-1]", fakePlayer);
     }
 
-    @Test public void testAssociativeCopy() throws ConfigCompileException{
+    @Test public void testAssociativeCopy() throws Exception{
         SRun("assign(@arr, array(0: 0, 1: 1))"
                 + "assign(@arr2, @arr[])"
                 + "array_set(@arr2, 0, 1)"
@@ -76,22 +76,22 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("{0: 1, 1: 1}");
     }
 
-    @Test public void testArrayKeyNormalization() throws ConfigCompileException{
+    @Test public void testArrayKeyNormalization() throws Exception{
         assertEquals("{0: 0}", SRun("array(false: 0)", fakePlayer));
         assertEquals("{1: 1}", SRun("array(true: 1)", fakePlayer));
         assertEquals("{: empty}", SRun("array(null: empty)", fakePlayer));
         assertEquals("{2.3: 2.3}", SRun("array(2.3: 2.3)", fakePlayer));
     }
 
-    @Test public void testArrayKeys() throws ConfigCompileException{
+    @Test public void testArrayKeys() throws Exception{
         assertEquals("{0, 1, potato}", SRun("array_keys(array(potato: 5, 1: 44, 0: 'i can count to'))", fakePlayer));
     }
 
-    @Test public void testArrayNormalize() throws ConfigCompileException{
+    @Test public void testArrayNormalize() throws Exception{
         assertEquals("{3, 2, 1}", SRun("array_normalize(array(0: 3, 1: 2, 2: 1))", fakePlayer));
     }
 
-    @Test public void testArrayPushOnAssociativeArray() throws ConfigCompileException{
+    @Test public void testArrayPushOnAssociativeArray() throws Exception{
         SRun("assign(@arr, array(0: 0, 1: 1, potato: potato))"
                 + "msg(@arr)"
                 + "array_push(@arr, tomato)"
@@ -100,14 +100,14 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("{0: 0, 1: 1, 2: tomato, potato: potato}");
     }
 
-    @Test public void testPushingANegativeIndexOnArray() throws ConfigCompileException{
+    @Test public void testPushingANegativeIndexOnArray() throws Exception{
         SRun("assign(@arr, array(0, 1, 2))"
                 + "array_set(@arr, -1, -1)"
                 + "msg(@arr[-1])", fakePlayer);
         verify(fakePlayer).sendMessage("-1");
     }
 
-    @Test public void testAssociativeArraySerialization() throws ConfigCompileException{
+    @Test public void testAssociativeArraySerialization() throws Exception{
         when(fakePlayer.isOp()).thenReturn(true);
         SRun("assign(@arr, array(0: 0, 1: 1, potato: potato))"
                 + "store_value(potato, @arr)"
@@ -115,22 +115,22 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("{0: 0, 1: 1, potato: potato}");
     }
 
-    @Test public void testIsAssociative() throws ConfigCompileException{
+    @Test public void testIsAssociative() throws Exception{
         assertEquals("true", SRun("is_associative(array(1: 1))", fakePlayer));
         assertEquals("false", SRun("is_associative(array(1))", fakePlayer));
     }
 
-    @Test public void testFunctionResultAsAssociativeValue() throws ConfigCompileException{
+    @Test public void testFunctionResultAsAssociativeValue() throws Exception{
         assertEquals("{1: this was concated, 2: this was too}", SRun("array(1: this was concated, 2: this was too)", fakePlayer));
         assertEquals("{1: thiswasconcated}", SRun("array(1: concat('this', was, concated))", fakePlayer));
     }
 
-    @Test public void testDocumentationExample1() throws ConfigCompileException{
+    @Test public void testDocumentationExample1() throws Exception{
         SRun("assign(@arr, array('string key': 'value', 'string key 2': 'value')) msg(@arr['string key'])", fakePlayer);
         verify(fakePlayer).sendMessage("value");
     }
 
-    @Test public void testDocumentationExample2() throws ConfigCompileException{
+    @Test public void testDocumentationExample2() throws Exception{
         SRun("assign(@arr, array(0, 1, 2, 3)) "
                 + "msg(is_associative(@arr))"
                 + "array_set(@arr, 4, 4)"
@@ -148,20 +148,20 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("true");
     }
 
-    @Test public void testDocumentationExample3() throws ConfigCompileException{
+    @Test public void testDocumentationExample3() throws Exception{
         SRun("assign(@arr, array(0, 1: 1, 2, 3: 3, a: 'a'))"
                 + "msg(array_keys(@arr))"
                 , fakePlayer);
         verify(fakePlayer).sendMessage("{0, 1, 2, 3, a}");
     }
 
-    @Test public void testDocumentationExample4() throws ConfigCompileException{
+    @Test public void testDocumentationExample4() throws Exception{
         SRun("msg(array(0: 0, 2: 2, 1))", fakePlayer);
         SRun("assign(@arr, array()) array_set(@arr, 0, 0) array_set(@arr, 2, 2) array_push(@arr, 1)", fakePlayer);
         verify(fakePlayer).sendMessage("{0: 0, 2: 2, 3: 1}");
     }
 
-    @Test public void testDocumentationExample5() throws ConfigCompileException{
+    @Test public void testDocumentationExample5() throws Exception{
         SRun("assign(@arr, array(0, 1: 1, 2, 3: 3, a: 'a'))\n"
                 + "foreach(array_keys(@arr), @key, #array_keys returns {0, 1, 2, 3, a}\n"
                 + "msg(@arr[@key]) #Messages the value\n"
@@ -173,28 +173,28 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("a");
     }
 
-    @Test public void testDocumentationExample6() throws ConfigCompileException{
+    @Test public void testDocumentationExample6() throws Exception{
         SRun("assign(@arr, array(-1: -1, 0, 1, 2: 2)) msg(@arr[-1])", fakePlayer);
         verify(fakePlayer).sendMessage("-1");
     }
 
-    @Test public void testDocumentationExample7() throws ConfigCompileException{
+    @Test public void testDocumentationExample7() throws Exception{
         SRun("assign(@arr, array(-1: -1, 0, 1, 2: 2)) msg(@arr)", fakePlayer);
         verify(fakePlayer).sendMessage("{-1: -1, 0: 0, 1: 1, 2: 2}");
     }
 
-    @Test public void testArraysReference1() throws ConfigCompileException{
+    @Test public void testArraysReference1() throws Exception{
         assertEquals("3", SRun("proc(_test, @array, return(array_size(@array))) _test(array(1, 2, 3))", fakePlayer));
     }
 
-    @Test public void testArraysReturned() throws ConfigCompileException{
+    @Test public void testArraysReturned() throws Exception{
         SRun("proc(_test, return(array(1, 2, 3))) foreach(_test(), @i, msg(@i))", fakePlayer);
         verify(fakePlayer).sendMessage("1");
         verify(fakePlayer).sendMessage("2");
         verify(fakePlayer).sendMessage("3");
     }
 
-    @Test public void testArrayception1() throws ConfigCompileException{
+    @Test public void testArrayception1() throws Exception{
         SRun("assign(@t, array("
                 + "     bla: 1, "
                 + "     tro: array('a', 'b')"
@@ -207,7 +207,7 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("true");
     }
 
-    @Test public void testArrayception2() throws ConfigCompileException{
+    @Test public void testArrayception2() throws Exception{
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("assign(@t, array(bla: 1))"
                 + "array_set(@t, 'tro', array(a, b))"
@@ -224,25 +224,25 @@ public class ArrayTest {
         verify(fakePlayer, times(2)).sendMessage("true");
     }
 
-    @Test public void testArrayNPE1() throws ConfigCompileException{
+    @Test public void testArrayNPE1() throws Exception{
         SRun("assign(@glyphs, array('0': 6, '1': 6,))"
                 + "msg(array_index_exists(@glyphs, '1'))", fakePlayer);
         verify(fakePlayer).sendMessage("true");
     }
 
-    @Test public void testArrayKeys1() throws ConfigCompileException{
+    @Test public void testArrayKeys1() throws Exception{
         SRun("assign(@a, array('1 ': 1, ' 1 ': 3)) msg(@a)", fakePlayer);
         verify(fakePlayer).sendMessage("{ 1 : 3, 1 : 1}");
     }
 
-    @Test public void testArrayAssign1() throws ConfigCompileException{
+    @Test public void testArrayAssign1() throws Exception{
         SRun("assign(@array, array())\n"
                 + "assign(@array[0], 'value')\n"
                 + "msg(@array[0])", fakePlayer);
         verify(fakePlayer).sendMessage("value");
     }
 
-    @Test public void testArrayAssign2() throws ConfigCompileException{
+    @Test public void testArrayAssign2() throws Exception{
         //Essentially, we want to replicate the behavior of java
         String value = "value";
         String[] array = new String[1];
@@ -257,7 +257,7 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage(array[0]);
     }
 
-    @Test public void testArrayAssign3() throws ConfigCompileException{
+    @Test public void testArrayAssign3() throws Exception{
         String value = "value";
         String[][] arrayOut = new String[1][1];
         String[] arrayIn = new String[1];
@@ -275,14 +275,14 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage(arrayOut[0][0]);
     }
 
-    @Test public void testArrayAssign4() throws ConfigCompileException{
+    @Test public void testArrayAssign4() throws Exception{
         SRun("assign(@array, array(outer: array(middle: array(inner: failure))))"
                 + "assign(@array['outer']['middle']['inner'], 'value')\n"
                 + "msg(@array['outer']['middle']['inner'])", fakePlayer);
         verify(fakePlayer).sendMessage("value");
     }
 
-    @Test public void testArrayAssign5() throws ConfigCompileException{
+    @Test public void testArrayAssign5() throws Exception{
         SRun("assign(@array['outer']['middle']['inner'], 'value')\n"
                 + "msg(@array)\n"
                 + "msg(@array['outer']['middle']['inner'])", fakePlayer);
@@ -290,14 +290,14 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("value");
     }
 
-    @Test public void testArrayAssign6() throws ConfigCompileException{
+    @Test public void testArrayAssign6() throws Exception{
         SRun("assign(@array, array(1))\n"
                 + "assign(@array[1], 2)\n"
                 + "msg(@array)", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2}");
     }
 
-    @Test public void testArrayAssign7() throws ConfigCompileException{
+    @Test public void testArrayAssign7() throws Exception{
         SRun("assign(@array, array(1: 1))\n"
                 + "assign(@array[0], array(1))\n"
                 + "assign(@array[0][1], 2)\n"
@@ -305,13 +305,13 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("{0: {1, 2}, 1: 1}");
     }
 
-    @Test public void testInnerArrayIsArray() throws ConfigCompileException{
+    @Test public void testInnerArrayIsArray() throws Exception{
         SRun("assign(@pdata, array(value: array(1)))\n"
                 + "msg(array_size(@pdata[value]))", fakePlayer);
         verify(fakePlayer).sendMessage("1");
     }
 
-    @Test public void testArrayKeysSortOrder() throws ConfigCompileException{
+    @Test public void testArrayKeysSortOrder() throws Exception{
         for(int i = 0; i < 5; i++){
             SRun("assign(@array, array())"
                     + "array_push(@array, array(1))"
@@ -325,7 +325,7 @@ public class ArrayTest {
         }
     }
 
-    @Test public void testArrayKeysSortOrderWithPersistence() throws ConfigCompileException{
+    @Test public void testArrayKeysSortOrderWithPersistence() throws Exception{
         for(int i = 0; i < 5; i++){
             InOrder inOrder = inOrder(fakePlayer);
             when(fakePlayer.isOp()).thenReturn(true);
@@ -343,7 +343,7 @@ public class ArrayTest {
         }
     }
 
-    @Test public void testArrayForeachWithConstructorInitialization() throws ConfigCompileException{
+    @Test public void testArrayForeachWithConstructorInitialization() throws Exception{
         SRun("assign(@pdata, array('some': 'thing', 'is': 67890, 'over': 'there'))"
                 + " msg(@pdata['some'])"
                 + " foreach(@pdata, @thing, msg(@thing))", fakePlayer);
@@ -352,19 +352,19 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("there");
     }
 
-    @Test public void testComplexGetter() throws ConfigCompileException{
+    @Test public void testComplexGetter() throws Exception{
         SRun("assign(@array, array(blah: 'blarg'))"
                 + "msg(@array[to_lower('BLAH')])", fakePlayer);
         verify(fakePlayer).sendMessage("blarg");
     }
 
-    @Test public void testArrayUsageBeforeDefined() throws ConfigCompileException{
+    @Test public void testArrayUsageBeforeDefined() throws Exception{
         SRun("try(@a[1], msg('success')) msg('end')", fakePlayer);
         verify(fakePlayer).sendMessage("success");
         verify(fakePlayer).sendMessage("end");
     }
 
-    @Test public void testDirectSquareBracketUsage() throws ConfigCompileException{
+    @Test public void testDirectSquareBracketUsage() throws Exception{
         SRun("msg(array(0, 1, 2)[0])", fakePlayer);
         verify(fakePlayer).sendMessage("0");
     }

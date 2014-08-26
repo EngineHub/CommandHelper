@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 /**
  *
- * 
+ *
  */
 public class EchoesTest {
 
@@ -83,7 +83,7 @@ public class EchoesTest {
     }
 
     @Test(timeout = 10000)
-    public void testLongStringMsgd1() throws ConfigCompileException {
+    public void testLongStringMsgd1() throws Exception {
         SRun("msg('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')", fakePlayer);
         verify(fakePlayer).sendMessage("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
@@ -101,24 +101,24 @@ public class EchoesTest {
 //        when(fakePlayer.getServer()).thenReturn(fakeServer);
 //        when(fakeServer.getPlayer("wraithguard01")).thenReturn(wraithguard01);
 //        a.exec(Target.UNKNOWN, fakePlayer, C.onstruct("wraithguard02"), C.onstruct("Hello World!"));
-//        verify(wraithguard01).chat("Hello World!");        
+//        verify(wraithguard01).chat("Hello World!");
     }
-    
+
     @Test
-    public void testIndentation() throws ConfigCompileException{
+    public void testIndentation() throws Exception{
         SRun("msg('yay\n yay\n  yay\n   yay')", fakePlayer);
         verify(fakePlayer).sendMessage("yay\n yay\n  yay\n   yay");
     }
-    
+
     @Test
-    public void testColor() throws ConfigCompileException{
+    public void testColor() throws Exception{
         assertEquals(String.format("\u00A7%s", "f"), SRun("color(white)", fakePlayer));
         assertEquals(String.format("\u00A7%s", "6"), SRun("color(gold)", fakePlayer));
         assertEquals(String.format("\u00A7%s", "k"), SRun("color(random)", fakePlayer));
         assertEquals(String.format("\u00A7%s", "m"), SRun("color(strike)", fakePlayer));
         assertEquals(String.format("\u00A7%s", "a"), SRun("color(a)", fakePlayer));
     }
-	
+
 	private static String a = new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
 	@Test public void testColorize1() throws Exception{
 		assertEquals(a + "Hi", SRun("colorize('&aHi')", fakePlayer));

@@ -175,7 +175,21 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param player
 	 */
 	public static void HandleUncaughtException(ConfigCompileException e, String optionalMessage, MCPlayer player){
+		if(optionalMessage != null){
+			DoWarning(optionalMessage);
+		}
 		DoReport(e, player);
+	}
+
+	public static void HandleUncaughtException(ConfigCompileGroupException e, MCPlayer player){
+		for(ConfigCompileException ce : e.getList()){
+			HandleUncaughtException(ce, null, player);
+		}
+	}
+
+	public static void HandleUncaughtException(ConfigCompileGroupException e, String optionalMessage, MCPlayer player){
+		DoWarning(optionalMessage);
+		HandleUncaughtException(e, player);
 	}
 
     /**

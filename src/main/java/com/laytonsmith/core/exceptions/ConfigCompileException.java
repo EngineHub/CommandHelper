@@ -5,10 +5,11 @@ package com.laytonsmith.core.exceptions;
 
 import com.laytonsmith.core.constructs.Target;
 import java.io.File;
+import java.util.Objects;
 
 /**
  *
- * 
+ *
  */
 public class ConfigCompileException extends Exception{
 
@@ -33,12 +34,12 @@ public class ConfigCompileException extends Exception{
     /**
      * This turns a ConfigRuntimeException into a compile time exception. Typically only
      * used during optimization.
-     * @param e 
+     * @param e
      */
     public ConfigCompileException(ConfigRuntimeException e) {
         this(e.getMessage(), e.getTarget(), e);
     }
-    
+
     @Override
     public String getMessage() {
         return message;
@@ -47,11 +48,11 @@ public class ConfigCompileException extends Exception{
     public String getLineNum(){
         return Integer.toString(line_num);
     }
-	
+
 	public int getColumn(){
 		return col;
 	}
-	
+
 	public Target getTarget(){
 		return t;
 	}
@@ -62,7 +63,7 @@ public class ConfigCompileException extends Exception{
             return "Configuration Compile Exception: " + message + " near line " + line_num + ". Please "
                     + "check your code and try again. " + (file!=null?"(" + file.getAbsolutePath() + ")":"");
         } else{
-            return "Configuration Compile Exception: " + message + ". Please check your code and try again. " 
+            return "Configuration Compile Exception: " + message + ". Please check your code and try again. "
                     + (file!=null?"(" + file.getAbsolutePath() + ")":"");
         }
     }
@@ -78,4 +79,44 @@ public class ConfigCompileException extends Exception{
             return null;
         }
     }
+
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 31 * hash + Objects.hashCode(this.message);
+		hash = 31 * hash + this.line_num;
+		hash = 31 * hash + Objects.hashCode(this.file);
+		hash = 31 * hash + this.col;
+		hash = 31 * hash + Objects.hashCode(this.t);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final ConfigCompileException other = (ConfigCompileException) obj;
+		if (!Objects.equals(this.message, other.message)) {
+			return false;
+		}
+		if (this.line_num != other.line_num) {
+			return false;
+		}
+		if (!Objects.equals(this.file, other.file)) {
+			return false;
+		}
+		if (this.col != other.col) {
+			return false;
+		}
+		if (!Objects.equals(this.t, other.t)) {
+			return false;
+		}
+		return true;
+	}
+
+
 }

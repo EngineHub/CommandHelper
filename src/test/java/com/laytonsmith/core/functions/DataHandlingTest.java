@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 /**
  *
- * 
+ *
  */
 public class DataHandlingTest {
 
@@ -60,7 +60,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testFor1() throws ConfigCompileException {
+    public void testFor1() throws Exception {
         String config = "/for = >>>\n"
                 + " assign(@array, array())"
                 + " for(assign(@i, 0), lt(@i, 5), inc(@i),\n"
@@ -73,7 +73,7 @@ public class DataHandlingTest {
     }
 
     @Test(expected = ConfigRuntimeException.class, timeout=10000)
-    public void testFor3() throws ConfigCompileException {
+    public void testFor3() throws Exception {
         String script =
                 "   assign(@array, array())"
                 + " for('nope', lt(@i, 5), inc(@i),\n"
@@ -85,7 +85,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testForeach1() throws ConfigCompileException {
+    public void testForeach1() throws Exception {
         String config = "/for = >>>\n"
                 + " assign(@array, array(1, 2, 3, 4, 5))\n"
                 + " assign(@array2, array())"
@@ -99,7 +99,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testForeach2() throws ConfigCompileException {
+    public void testForeach2() throws Exception {
         String config = "/for = >>>\n"
                 + " assign(@array, array(1, 2, 3, 4, 5))\n"
                 + " assign(@array2, array())"
@@ -114,7 +114,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testForeach3() throws ConfigCompileException {
+    public void testForeach3() throws Exception {
         String config = "/for = >>>\n"
                 + " assign(@array, array(1, 2, 3, 4, 5))\n"
                 + " assign(@array1, array(1, 2, 3, 4, 5))\n"
@@ -130,40 +130,40 @@ public class DataHandlingTest {
         RunCommand(config, fakePlayer, "/for");
         verify(fakePlayer).sendMessage("{1, 2}");
     }
-    
+
     @Test(timeout = 10000)
-    public void testForeachWithArraySlice() throws ConfigCompileException{
+    public void testForeachWithArraySlice() throws Exception{
         SRun("foreach(1..2, @i, msg(@i))", fakePlayer);
         verify(fakePlayer).sendMessage("1");
         verify(fakePlayer).sendMessage("2");
     }
-	
+
 	@Test(timeout = 10000)
 	public void testForeachWithKeys1() throws Exception{
 		SRun("@array = array(1: 'one', 2: 'two') @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
 		verify(fakePlayer).sendMessage("1:one;2:two;");
 	}
-	
+
 	@Test(timeout = 10000)
 	public void testForeachWithKeys2() throws Exception{
 		SRun("@array = array('one': 1, 'two': 2) @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
 		verify(fakePlayer).sendMessage("one:1;two:2;");
 	}
-	
+
 	@Test(timeout = 10000)
 	public void testForeachWithKeys3() throws Exception{
 		SRun("@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}", fakePlayer);
 		verify(fakePlayer).sendMessage("one:1");
 		verify(fakePlayer).sendMessage("two:2");
 	}
-	
+
 	@Test
 	public void testForelse() throws Exception{
 		SRun("forelse(assign(@i, 0), @i < 0, @i++, msg('fail'), msg('pass'))", fakePlayer);
 		verify(fakePlayer).sendMessage("pass");
 		verify(fakePlayer, times(0)).sendMessage("fail");
 	}
-	
+
 	@Test
 	public void testForeachelse() throws Exception{
 		SRun("foreachelse(array(), @val, msg('fail'), msg('pass'))", fakePlayer);
@@ -174,7 +174,7 @@ public class DataHandlingTest {
 	}
 
     @Test(timeout = 10000)
-    public void testCallProcIsProc() throws ConfigCompileException {
+    public void testCallProcIsProc() throws Exception {
         when(fakePlayer.isOp()).thenReturn(true);
         String config = "/for = >>>\n"
                 + " msg(is_proc(_proc))\n"
@@ -194,10 +194,10 @@ public class DataHandlingTest {
      * There is a bug that causes an infinite loop, so we put a 10 second
      * timeout
      *
-     * @throws ConfigCompileException
+     * @throws Exception
      */
     @Test(timeout = 10000)
-    public void testContinue1() throws ConfigCompileException {
+    public void testContinue1() throws Exception {
         String config = "/continue = >>>\n"
                 + " assign(@array, array())"
                 + " for(assign(@i, 0), lt(@i, 5), inc(@i),\n"
@@ -211,7 +211,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testContinue2() throws ConfigCompileException {
+    public void testContinue2() throws Exception {
         String config = "/continue = >>>\n"
                 + " assign(@array, array())"
                 + " for(assign(@i, 0), lt(@i, 5), inc(@i),\n"
@@ -225,7 +225,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testContinue3() throws ConfigCompileException {
+    public void testContinue3() throws Exception {
         String config = "/continue = >>>\n"
                 + " assign(@array, array())"
                 + " for(assign(@i, 0), lt(@i, 5), inc(@i),\n"
@@ -239,7 +239,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testBreak1() throws ConfigCompileException {
+    public void testBreak1() throws Exception {
         String config = "/break = >>>\n"
                 + " assign(@array, array())"
                 + " for(assign(@i, 0), lt(@i, 2), inc(@i),\n"
@@ -256,7 +256,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testBreak2() throws ConfigCompileException {
+    public void testBreak2() throws Exception {
         String config = "/break = >>>\n"
                 + " assign(@array, array())"
                 + " for(assign(@i, 0), lt(@i, 2), inc(@i),\n"
@@ -273,7 +273,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testInclude() throws ConfigCompileException, IOException {
+    public void testInclude() throws Exception, IOException {
         String script =
                 "include('unit_test_inc.ms')";
         //Create the test file
@@ -287,7 +287,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testExportImportIVariable() throws ConfigCompileException {
+    public void testExportImportIVariable() throws Exception {
         when(fakePlayer.isOp()).thenReturn(true);
         String script1 =
                 "assign(@var, 10)"
@@ -298,25 +298,25 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testExportImportStringValue1() throws ConfigCompileException {
+    public void testExportImportStringValue1() throws Exception {
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("export('hi', 20)", fakePlayer);
         SRun("msg(import('hi'))", fakePlayer);
         verify(fakePlayer).sendMessage("20");
-    }    
-    
+    }
+
     @Test
-    public void testExportImportStringValue2() throws ConfigCompileException{
+    public void testExportImportStringValue2() throws Exception{
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("assign(@test, array(1, 2, 3))"
-                + "export('myarray', @test)"             
+                + "export('myarray', @test)"
                 + "msg(@newtest)", fakePlayer);
         SRun("assign(@newtest, import('myarray')) msg(@newtest)", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2, 3}");
     }
-    
+
     @Test
-    public void testExportImportWithProcs1() throws ConfigCompileException{
+    public void testExportImportWithProcs1() throws Exception{
         SRun("proc(_derping," +
                 "   msg(import('borked'))"+
                 "   assign(@var, import('borked'))" +
@@ -329,46 +329,46 @@ public class DataHandlingTest {
         verify(fakePlayer).sendMessage("null");
         verify(fakePlayer, times(3)).sendMessage("{Am, I, borked?}");
     }
-    
+
     @Test
-    public void testExportImportWithProcs2() throws ConfigCompileException{
+    public void testExportImportWithProcs2() throws Exception{
         SRun("assign(@array, array(1, 2))"
                 + "export('myarray', @array)", fakePlayer);
         SRun("proc(_get, return(import('myarray')))"
-                + "msg(_get())", fakePlayer);       
+                + "msg(_get())", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2}");
     }
 
     @Test(timeout = 10000)
-    public void testIsBoolean() throws ConfigCompileException {
+    public void testIsBoolean() throws Exception {
         SRun("msg(is_boolean(1)) msg(is_boolean(true))", fakePlayer);
         verify(fakePlayer).sendMessage("false");
         verify(fakePlayer).sendMessage("true");
     }
 
     @Test(timeout = 10000)
-    public void testIsInteger() throws ConfigCompileException {
+    public void testIsInteger() throws Exception {
         SRun("msg(is_integer(5.0)) msg(is_integer('s')) msg(is_integer(5))", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("false");
         verify(fakePlayer).sendMessage("true");
     }
 
     @Test(timeout = 10000)
-    public void testIsDouble() throws ConfigCompileException {
+    public void testIsDouble() throws Exception {
         SRun("msg(is_double(5)) msg(is_double('5.0')) msg(is_double(5.0))", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("false");
         verify(fakePlayer).sendMessage("true");
     }
 
     @Test(timeout = 10000)
-    public void testIsNull() throws ConfigCompileException {
+    public void testIsNull() throws Exception {
         SRun("msg(is_null('null')) msg(is_null(null))", fakePlayer);
         verify(fakePlayer).sendMessage("false");
         verify(fakePlayer).sendMessage("true");
     }
 
     @Test(timeout = 10000)
-    public void testIsNumeric() throws ConfigCompileException {
+    public void testIsNumeric() throws Exception {
         SRun("msg(is_numeric('s')) "
 		+ " msg(is_numeric(null))"
 		+ " msg(is_numeric(true))"
@@ -379,32 +379,32 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testIsIntegral() throws ConfigCompileException {
+    public void testIsIntegral() throws Exception {
         SRun("msg(is_integral(5.5)) msg(is_integral(5)) msg(is_integral(4.0))", fakePlayer);
         verify(fakePlayer).sendMessage("false");
         verify(fakePlayer, times(2)).sendMessage("true");
     }
 
     @Test(timeout = 10000)
-    public void testDoubleCastToInteger() throws ConfigCompileException {
+    public void testDoubleCastToInteger() throws Exception {
         SRun("msg(integer(4.5))", fakePlayer);
         verify(fakePlayer).sendMessage("4");
     }
 
     @Test(timeout = 10000)
-    public void testClosure1() throws ConfigCompileException {
+    public void testClosure1() throws Exception {
         SRun("assign(@go, closure(console( 'Hello World' ))) msg(@go)", fakePlayer);
         verify(fakePlayer).sendMessage("console('Hello World')");
     }
 
     @Test(timeout = 10000)
-    public void testClosure2() throws ConfigCompileException {
+    public void testClosure2() throws Exception {
         SRun("assign(@go, closure(msg('Hello World')))", fakePlayer);
         verify(fakePlayer, times(0)).sendMessage("Hello World");
     }
 
     @Test(timeout = 10000)
-    public void testClosure3() throws ConfigCompileException {
+    public void testClosure3() throws Exception {
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("assign(@go, closure(msg('Hello' 'World')))\n"
                 + "execute(@go)", fakePlayer);
@@ -412,7 +412,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testClosure4() throws ConfigCompileException {
+    public void testClosure4() throws Exception {
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("assign(@hw, 'Hello World')\n"
                 + "assign(@go, closure(msg(@hw)))\n"
@@ -421,7 +421,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testClosure5() throws ConfigCompileException {
+    public void testClosure5() throws Exception {
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("assign(@hw, 'Nope')\n"
                 + "assign(@go, closure(@hw, msg(@hw)))\n"
@@ -430,7 +430,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testClosure6() throws ConfigCompileException {
+    public void testClosure6() throws Exception {
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("assign(@hw, 'Hello World')\n"
                 + "assign(@go, closure(msg(@hw)))\n"
@@ -439,7 +439,7 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testClosure7() throws ConfigCompileException {
+    public void testClosure7() throws Exception {
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("assign(@go, closure(assign(@hw, 'Hello World'), msg(@hw)))\n"
                 + "execute(@go)", fakePlayer);
@@ -447,14 +447,14 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testClosure8() throws ConfigCompileException {
+    public void testClosure8() throws Exception {
         when(fakePlayer.isOp()).thenReturn(true);
         SRun("execute(Hello, World, closure(msg(@arguments)))", fakePlayer);
         verify(fakePlayer).sendMessage("{Hello, World}");
     }
 
     @Test(timeout = 10000)
-    public void testClosure9() throws ConfigCompileException {
+    public void testClosure9() throws Exception {
         when(fakePlayer.isOp()).thenReturn(true);
         SRun("assign(@a, closure(@array, assign(@array[0], 'Hello World')))\n"
                 + "assign(@value, array())\n"
@@ -462,31 +462,31 @@ public class DataHandlingTest {
                 + "msg(@value)", fakePlayer);
         verify(fakePlayer).sendMessage("{Hello World}");
     }
-    
+
     @Test(timeout=10000)
-    public void testWhile() throws ConfigCompileException{
+    public void testWhile() throws Exception{
         SRun("assign(@i, 2) while(@i > 0, @i-- msg('hi'))", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("hi");
     }
-    
+
     @Test(timeout=10000)
-    public void testDoWhile() throws ConfigCompileException{
+    public void testDoWhile() throws Exception{
         SRun("assign(@i, 2) dowhile(@i-- msg('hi'), @i > 0)", fakePlayer);
-        verify(fakePlayer, times(2)).sendMessage("hi");        
+        verify(fakePlayer, times(2)).sendMessage("hi");
     }
-	
+
 	@Test
 	public void testToRadix() throws Exception {
 		assertEquals("f", SRun("to_radix(15, 16)", null));
 		assertEquals("1111", SRun("to_radix(15, 2)", null));
 	}
-	
+
 	@Test
 	public void testParseInt() throws Exception {
 		assertEquals("15", SRun("parse_int('F', 16)", null));
 		assertEquals("15", SRun("parse_int('1111', 2)", null));
 	}
-	
+
 	@Test
 	public void testClosureReturnsFromExecute() throws Exception {
 		assertEquals("3", SRun("execute(closure(return(3)))", fakePlayer));

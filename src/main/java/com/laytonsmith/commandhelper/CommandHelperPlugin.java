@@ -51,6 +51,7 @@ import com.laytonsmith.core.UpgradeLog;
 import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistence.DataSourceException;
@@ -573,6 +574,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 					}
 				} catch (ConfigCompileException ex) {
 					Static.SendMessage(player, "Your alias could not be added due to a compile error:\n" + MCChatColor.RED + ex.getMessage());
+				} catch (ConfigCompileGroupException e){
+					StringBuilder b = new StringBuilder();
+					b.append("Your alias could not be added due to compile errors:\n").append(MCChatColor.RED);
+					for(ConfigCompileException ex : e.getList()){
+						b.append(ex.getMessage());
+					}
+					Static.SendMessage(player, b.toString());
 				}
 			} else {
 				//Display a help message

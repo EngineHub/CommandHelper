@@ -11,6 +11,7 @@ import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.File;
 import java.io.IOException;
@@ -18,17 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 /**
  *
- * 
+ *
  */
 public class MSLPMaker {
-    
+
     public static void start(String path) throws IOException{
         File start = new File(path);
         if(!start.exists()){
             System.err.println("The specified file does not exist!");
             return;
         }
-        
+
         File output = new File(start.getParentFile(), start.getName() + ".mslp");
         if(output.exists()){
             pl("The file " + output.getName() + " already exists, would you like to overwrite? (Y/N)");
@@ -39,7 +40,7 @@ public class MSLPMaker {
         }
         //First attempt to compile it, and make sure it doesn't fail
         AliasCore.LocalPackage localPackage = new AliasCore.LocalPackage();
-        AliasCore.GetAuxAliases(start, localPackage);      
+        AliasCore.GetAuxAliases(start, localPackage);
         boolean error = false;
         for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSFiles()){
             try{
@@ -47,7 +48,10 @@ public class MSLPMaker {
             } catch(ConfigCompileException e){
                 error = true;
                 ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
-            }
+            } catch(ConfigCompileGroupException ex){
+				error = true;
+				ConfigRuntimeException.HandleUncaughtException(ex, null);
+			}
         }
         List<Script> allScripts = new ArrayList<Script>();
         for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSAFiles()){
@@ -62,14 +66,17 @@ public class MSLPMaker {
                     } catch (ConfigCompileException e) {
                         error = true;
                         ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
-                    }
+                    } catch (ConfigCompileGroupException e){
+						error = true;
+						ConfigRuntimeException.HandleUncaughtException(e, "Compile errors in script. Compilation will attempt to continue, however.", null);
+					}
                 }
             } catch(ConfigCompileException e){
                 error = true;
                 ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file() + " compilation will halt.", null);
             }
         }
-        
+
         if(!error){
             ZipMaker.MakeZip(start, output.getName());
 

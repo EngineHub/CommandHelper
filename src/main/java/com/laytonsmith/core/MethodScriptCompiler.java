@@ -26,6 +26,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.DataHandling;
@@ -42,12 +43,15 @@ import java.util.Arrays;
 import java.util.EmptyStackException;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The MethodScriptCompiler class handles the various stages of compilation and
@@ -898,7 +902,8 @@ public final class MethodScriptCompiler {
 	 * have that exception converted to a ConfigCompileException.
 	 */
 	@SuppressWarnings("UnnecessaryContinue")
-	public static ParseTree compile(List<Token> stream) throws ConfigCompileException {
+	public static ParseTree compile(List<Token> stream) throws ConfigCompileException, ConfigCompileGroupException {
+		Set<ConfigCompileException> compilerErrors = new HashSet<>();
 		if(stream == null || stream.isEmpty()){
 			return null;
 		}
@@ -1044,7 +1049,7 @@ public final class MethodScriptCompiler {
 			if (nextNonWhitespace.type.equals(TType.LABEL)) {
 				//If it's not an atomic identifier it's an error.
 				if(!t.type.isAtomicLit() && t.type != TType.IVARIABLE && t.type != TType.KEYWORD){
-					throw new ConfigCompileException("Invalid label specified", t.getTarget());
+					compilerErrors.add(new ConfigCompileException("Invalid label specified", t.getTarget()));
 				}
 				Construct val;
 				if(t.type == TType.IVARIABLE){
@@ -1122,8 +1127,8 @@ public final class MethodScriptCompiler {
 
 			if (t.type == TType.DEREFERENCE) {
 				//Currently unimplemented, but going ahead and making it strict
-				throw new ConfigCompileException("The '" + t.val() + "' symbol is not currently allowed in raw strings. You must quote all"
-						+ " symbols.", t.target);
+				compilerErrors.add(new ConfigCompileException("The '" + t.val() + "' symbol is not currently allowed in raw strings. You must quote all"
+						+ " symbols.", t.target));
 			}
 
 			if (t.type.equals(TType.FUNC_NAME)) {
@@ -1280,7 +1285,7 @@ public final class MethodScriptCompiler {
 			} else if (t.type == TType.LIT) {
 				Construct c = Static.resolveConstruct(t.val(), t.target);
 				if(c instanceof CString && fileOptions.isStrict()){
-					throw new ConfigCompileException("Bare strings are not allowed in strict mode", t.target);
+					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode", t.target));
 				}
 				tree.addChild(new ParseTree(c, fileOptions));
 				constructCount.peek().incrementAndGet();
@@ -1325,10 +1330,20 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<Procedure>());
 		processKeywords(tree);
-		optimize(tree, procs);
-		link(tree);
-		checkLabels(tree);
-		checkBreaks(tree);
+		optimize(tree, procs, compilerErrors);
+		link(tree, compilerErrors);
+		checkLabels(tree, compilerErrors);
+		checkBreaks(tree, compilerErrors);
+		if(!compilerErrors.isEmpty()){
+			if(compilerErrors.size() == 1){
+				// Just throw the one CCE
+				for(ConfigCompileException e : compilerErrors){
+					throw e;
+				}
+			} else {
+				throw new ConfigCompileGroupException(compilerErrors);
+			}
+		}
 		parents.pop();
 		tree = parents.pop();
 		return tree;
@@ -1340,11 +1355,11 @@ public final class MethodScriptCompiler {
 	 * @param tree
 	 * @throws ConfigCompileException
 	 */
-	private static void checkBreaks(ParseTree tree) throws ConfigCompileException {
-		checkBreaks0(tree, 0, null);
+	private static void checkBreaks(ParseTree tree, Set<ConfigCompileException> compilerExceptions) {
+		checkBreaks0(tree, 0, null, compilerExceptions);
 	}
 
-	private static void checkBreaks0(ParseTree tree, long currentLoops, String lastUnbreakable) throws ConfigCompileException {
+	private static void checkBreaks0(ParseTree tree, long currentLoops, String lastUnbreakable, Set<ConfigCompileException> compilerErrors) {
 		if(!(tree.getData() instanceof CFunction)){
 			//Don't care about these
 			return;
@@ -1352,7 +1367,7 @@ public final class MethodScriptCompiler {
 		if(tree.getData().val().startsWith("_")){
 			//It's a proc. We need to recurse, but not check this "function"
 			for(ParseTree child : tree.getChildren()){
-				checkBreaks0(child, currentLoops, lastUnbreakable);
+				checkBreaks0(child, currentLoops, lastUnbreakable, compilerErrors);
 			}
 			return;
 		}
@@ -1376,11 +1391,11 @@ public final class MethodScriptCompiler {
 					// Throw an exception, as this would break above a loop. Different error messages
 					// are applied to different cases
 					if(currentLoops == 0){
-						throw new ConfigCompileException("The break() function can only break out of loops" + (lastUnbreakable == null ? "." :
-								", but an attempt to break out of a " + lastUnbreakable + " was detected."), tree.getTarget());
+						compilerErrors.add(new ConfigCompileException("The break() function can only break out of loops" + (lastUnbreakable == null ? "." :
+								", but an attempt to break out of a " + lastUnbreakable + " was detected."), tree.getTarget()));
 					} else {
-						throw new ConfigCompileException("Too many breaks"
-								+ " detected. Check your loop nesting, and set the break count to an appropriate value.", tree.getTarget());
+						compilerErrors.add(new ConfigCompileException("Too many breaks"
+								+ " detected. Check your loop nesting, and set the break count to an appropriate value.", tree.getTarget()));
 					}
 				}
 				return;
@@ -1388,7 +1403,7 @@ public final class MethodScriptCompiler {
 		if(func.getClass().getAnnotation(unbreakable.class) != null){
 				// Parse the children like normal, but reset the counter to 0.
 				for(ParseTree child : tree.getChildren()){
-					checkBreaks0(child, 0, func.getName());
+					checkBreaks0(child, 0, func.getName(), compilerErrors);
 				}
 				return;
 		}
@@ -1397,7 +1412,7 @@ public final class MethodScriptCompiler {
 				currentLoops++;
 		}
 		for(ParseTree child : tree.getChildren()){
-			checkBreaks0(child, currentLoops, lastUnbreakable);
+			checkBreaks0(child, currentLoops, lastUnbreakable, compilerErrors);
 		}
 	}
 
@@ -1410,7 +1425,7 @@ public final class MethodScriptCompiler {
 	 * @param tree
 	 * @throws ConfigCompileException
 	 */
-	private static void checkLabels(ParseTree tree) throws ConfigCompileException {
+	private static void checkLabels(ParseTree tree, Set<ConfigCompileException> compilerErrors) throws ConfigCompileException {
 //		for(ParseTree t : tree.getChildren()){
 //			if(t.getData() instanceof CLabel){
 //				if(((CLabel)t.getData()).cVal() instanceof IVariable){
@@ -1429,7 +1444,7 @@ public final class MethodScriptCompiler {
 	 * ignores any missing functions.
 	 * @param tree
 	 */
-	private static void link(ParseTree tree) throws ConfigCompileException{
+	private static void link(ParseTree tree, Set<ConfigCompileException> compilerErrors) {
 		FunctionBase treeFunction = null;
 		try {
 			treeFunction = FunctionList.getFunction(tree.getData());
@@ -1446,13 +1461,17 @@ public final class MethodScriptCompiler {
 			Integer[] numArgs = treeFunction.numArgs();
 			if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) &&
 					!Arrays.asList(numArgs).contains(tree.getChildren().size())) {
-				throw new ConfigCompileException("Incorrect number of arguments passed to "
-						+ tree.getData().val(), tree.getData().getTarget());
+				compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
+						+ tree.getData().val(), tree.getData().getTarget()));
 			}
 			if(treeFunction instanceof Optimizable){
 				Optimizable op = (Optimizable) treeFunction;
 				if(op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)){
-					op.link(tree.getData().getTarget(), tree.getChildren());
+					try {
+						op.link(tree.getData().getTarget(), tree.getChildren());
+					} catch(ConfigCompileException ex){
+						compilerErrors.add(ex);
+					}
 				}
 			}
 		}
@@ -1462,9 +1481,13 @@ public final class MethodScriptCompiler {
 				FunctionBase f = null;
 				if (!child.getData().val().matches("^_[^_].*")) {
 					// This will throw an exception if the function doesn't exist.
-					f = FunctionList.getFunction(child.getData());
+					try {
+						f = FunctionList.getFunction(child.getData());
+					} catch(ConfigCompileException ex){
+						compilerErrors.add(ex);
+					}
 				}
-				link(child);
+				link(child, compilerErrors);
 			}
 		}
 	}
@@ -1479,7 +1502,7 @@ public final class MethodScriptCompiler {
 	 * @param tree
 	 * @return
 	 */
-	private static void optimize(ParseTree tree, Stack<List<Procedure>> procs) throws ConfigCompileException {
+	private static void optimize(ParseTree tree, Stack<List<Procedure>> procs, Set<ConfigCompileException> compilerErrors) {
 		if (tree.isOptimized()) {
 			return; //Don't need to re-run this
 		}
@@ -1496,11 +1519,21 @@ public final class MethodScriptCompiler {
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				ParseTree node = tree.getChildAt(i);
 				if (node.getData().val().equals(__autoconcat__)) {
-					Compiler.__autoconcat__ func = (Compiler.__autoconcat__) FunctionList.getFunction(node.getData());
-					ParseTree tempNode = func.optimizeSpecial(node.getChildren(), false);
-					tree.setData(tempNode.getData());
-					tree.setChildren(tempNode.getChildren());
-					optimize(tree, procs);
+					Compiler.__autoconcat__ func;
+					try {
+						func = (Compiler.__autoconcat__) FunctionList.getFunction(node.getData());
+					} catch (ConfigCompileException ex) {
+						compilerErrors.add(ex);
+						return;
+					}
+					try {
+						ParseTree tempNode = func.optimizeSpecial(node.getChildren(), false);
+						tree.setData(tempNode.getData());
+						tree.setChildren(tempNode.getChildren());
+					} catch (ConfigCompileException ex) {
+						compilerErrors.add(ex);
+					}
+					optimize(tree, procs, compilerErrors);
 					return;
 				}
 			}
@@ -1516,15 +1549,15 @@ public final class MethodScriptCompiler {
 		} catch (ConfigCompileException e) {
 			func = null;
 		}
-		if(func != null){
-			if(func.getClass().getAnnotation(nolinking.class) != null){
+		if (func != null) {
+			if (func.getClass().getAnnotation(nolinking.class) != null) {
 				//It's an unlinking function, so we need to stop at this point
 				return;
 			}
 		}
-		if(cFunction instanceof CIdentifier){
+		if (cFunction instanceof CIdentifier) {
 			//Add the child to the identifier
-			ParseTree c = ((CIdentifier)cFunction).contained();
+			ParseTree c = ((CIdentifier) cFunction).contained();
 			tree.addChild(c);
 			c.getData().setWasIdentifier(true);
 		}
@@ -1566,23 +1599,29 @@ public final class MethodScriptCompiler {
 		//is a branch (branches always use execs, though using execs doesn't strictly
 		//mean you are a branch type function).
 
-		for(int i = 0; i < children.size(); i++){
+		for (int i = 0; i < children.size(); i++) {
 			ParseTree t = children.get(i);
-			if(t.getData() instanceof CFunction){
-				if(t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())){
+			if (t.getData() instanceof CFunction) {
+				if (t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())) {
 					continue;
 				}
-				Function f = (Function)FunctionList.getFunction(t.getData());
-				Set<OptimizationOption> options = NO_OPTIMIZATIONS;
-				if(f instanceof Optimizable){
-					options = ((Optimizable)f).optimizationOptions();
+				Function f;
+				try {
+					f = (Function) FunctionList.getFunction(t.getData());
+				} catch (ConfigCompileException ex) {
+					compilerErrors.add(ex);
+					return;
 				}
-				if(options.contains(OptimizationOption.TERMINAL)){
-					if(children.size() > i + 1){
+				Set<OptimizationOption> options = NO_OPTIMIZATIONS;
+				if (f instanceof Optimizable) {
+					options = ((Optimizable) f).optimizationOptions();
+				}
+				if (options.contains(OptimizationOption.TERMINAL)) {
+					if (children.size() > i + 1) {
 						//First, a compiler warning
 						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
 						//Now, truncate the children
-						for(int j = children.size() - 1; j > i; j--){
+						for (int j = children.size() - 1; j > i; j--) {
 							children.remove(j);
 						}
 						break;
@@ -1594,7 +1633,7 @@ public final class MethodScriptCompiler {
 		boolean hasIVars = false;
 		for (ParseTree node : children) {
 			if (node.getData() instanceof CFunction) {
-				optimize(node, procs);
+				optimize(node, procs, compilerErrors);
 			}
 
 			if (node.getData().isDynamic() && !(node.getData() instanceof IVariable)) {
@@ -1609,7 +1648,7 @@ public final class MethodScriptCompiler {
 		//optimize, so set our optimized variable at this point.
 		tree.setOptimized(true);
 
-		if(func == null) {
+		if (func == null) {
 			//It's a proc call. Let's see if we can optimize it
 			Procedure p = null;
 			//Did you know about this feature in java? I didn't until recently.
@@ -1634,7 +1673,7 @@ public final class MethodScriptCompiler {
 					}//else Nope, couldn't optimize.
 				} catch (ConfigRuntimeException ex) {
 					//Cool. Caught a runtime error at compile time :D
-					throw new ConfigCompileException(ex);
+					compilerErrors.add(new ConfigCompileException(ex));
 				}
 			}
 			//else this procedure isn't listed yet. Maybe a compiler error, maybe not, depends,
@@ -1651,16 +1690,16 @@ public final class MethodScriptCompiler {
 				ParseTree root = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), fileOptions);
 				Script fakeScript = Script.GenerateScript(root, "*");
 				Environment env = null;
-				try{
+				try {
 					env = Static.GenerateStandaloneEnvironment();
-				} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e){
+				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
 					//
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
 			} catch (ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere
-				throw new ConfigCompileException(e);
+				compilerErrors.add(new ConfigCompileException(e));
 			} catch (NullPointerException e) {
 				//Nope, can't optimize.
 				return;
@@ -1671,76 +1710,84 @@ public final class MethodScriptCompiler {
 		//static, so do this first.
 		String oldFunctionName = func.getName();
 		Set<OptimizationOption> options = NO_OPTIMIZATIONS;
-		if(func instanceof Optimizable){
-			options = ((Optimizable)func).optimizationOptions();
+		if (func instanceof Optimizable) {
+			options = ((Optimizable) func).optimizationOptions();
 		}
 		if (options.contains(OptimizationOption.OPTIMIZE_DYNAMIC)) {
-			ParseTree tempNode;
 			try {
-				tempNode = ((Optimizable)func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
-			} catch (ConfigRuntimeException e) {
-				//Turn it into a compile exception, then rethrow
-				throw new ConfigCompileException(e);
-			}
-			if(tempNode == Optimizable.PULL_ME_UP){
-				tempNode = tree.getChildAt(0);
-			}
-			if(tempNode == Optimizable.REMOVE_ME){
-				tree.setData(new CFunction("p", Target.UNKNOWN));
-				tree.removeChildren();
-			} else if (tempNode != null) {
-				tree.setData(tempNode.getData());
-				tree.setOptimized(tempNode.isOptimized());
-				tree.setChildren(tempNode.getChildren());
-				tree.getData().setWasIdentifier(tempNode.getData().wasIdentifier());
-				optimize(tree, procs);
-				tree.setOptimized(true);
-				//Some functions can actually make static the arguments, for instance, by pulling up a hardcoded
-				//array, so if they have reversed this, make note of that now
-				if(tempNode.hasBeenMadeStatic()){
-					fullyStatic = true;
+				ParseTree tempNode;
+				try {
+					tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
+				} catch (ConfigRuntimeException e) {
+					//Turn it into a compile exception, then rethrow
+					throw new ConfigCompileException(e);
 				}
-			} //else it wasn't an optimization, but a compile check
-		}
-		if (!fullyStatic) {
-			return;
-		}
-		//Otherwise, everything is static, or an IVariable and we can proceed.
-		//Note since we could still have IVariables, we have to handle those
-		//specially from here forward
-		if (func.preResolveVariables() && hasIVars) {
-			//Well, this function isn't equipped to deal with IVariables.
-			return;
-		}
-		//It could have optimized by changing the name, in that case, we
-		//don't want to run this now
-		if (tree.getData().getValue().equals(oldFunctionName) &&
-				(options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
-			Construct[] constructs = new Construct[tree.getChildren().size()];
-			for (int i = 0; i < tree.getChildren().size(); i++) {
-				constructs[i] = tree.getChildAt(i).getData();
-			}
-			try {
-				Construct result;
-				if(options.contains(OptimizationOption.CONSTANT_OFFLINE)){
-					result = func.exec(tree.getData().getTarget(), null, constructs);
-				} else {
-					result = ((Optimizable)func).optimize(tree.getData().getTarget(), constructs);
+				if (tempNode == Optimizable.PULL_ME_UP) {
+					tempNode = tree.getChildAt(0);
 				}
-
-				//If the result is null, it was just a check, it can't optimize further.
-				if (result != null) {
-					result.setWasIdentifier(tree.getData().wasIdentifier());
-					tree.setData(result);
+				if (tempNode == Optimizable.REMOVE_ME) {
+					tree.setData(new CFunction("p", Target.UNKNOWN));
 					tree.removeChildren();
-				}
-			} catch (ConfigRuntimeException e) {
-				//Turn this into a ConfigCompileException, then rethrow
-				throw new ConfigCompileException(e);
+				} else if (tempNode != null) {
+					tree.setData(tempNode.getData());
+					tree.setOptimized(tempNode.isOptimized());
+					tree.setChildren(tempNode.getChildren());
+					tree.getData().setWasIdentifier(tempNode.getData().wasIdentifier());
+					optimize(tree, procs, compilerErrors);
+					tree.setOptimized(true);
+					//Some functions can actually make static the arguments, for instance, by pulling up a hardcoded
+					//array, so if they have reversed this, make note of that now
+					if (tempNode.hasBeenMadeStatic()) {
+						fullyStatic = true;
+					}
+				} //else it wasn't an optimization, but a compile check
+			} catch (ConfigCompileException ex) {
+				compilerErrors.add(ex);
 			}
-		}
+			if (!fullyStatic) {
+				return;
+			}
+			//Otherwise, everything is static, or an IVariable and we can proceed.
+			//Note since we could still have IVariables, we have to handle those
+			//specially from here forward
+			if (func.preResolveVariables() && hasIVars) {
+				//Well, this function isn't equipped to deal with IVariables.
+				return;
+			}
+			//It could have optimized by changing the name, in that case, we
+			//don't want to run this now
+			if (tree.getData().getValue().equals(oldFunctionName)
+					&& (options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
+				Construct[] constructs = new Construct[tree.getChildren().size()];
+				for (int i = 0; i < tree.getChildren().size(); i++) {
+					constructs[i] = tree.getChildAt(i).getData();
+				}
+				try {
+					try {
+						Construct result;
+						if (options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
+							result = func.exec(tree.getData().getTarget(), null, constructs);
+						} else {
+							result = ((Optimizable) func).optimize(tree.getData().getTarget(), constructs);
+						}
 
-		//It doesn't know how to optimize. Oh well.
+						//If the result is null, it was just a check, it can't optimize further.
+						if (result != null) {
+							result.setWasIdentifier(tree.getData().wasIdentifier());
+							tree.setData(result);
+							tree.removeChildren();
+						}
+					} catch (ConfigRuntimeException e) {
+						//Turn this into a ConfigCompileException, then rethrow
+						throw new ConfigCompileException(e);
+					}
+				} catch (ConfigCompileException ex) {
+					compilerErrors.add(ex);
+				}
+			}
+
+			//It doesn't know how to optimize. Oh well.
+		}
 	}
 
 	/**
@@ -1782,8 +1829,10 @@ public final class MethodScriptCompiler {
 	 * @param vars Any $vars (may be null)
 	 * @return
 	 * @throws ConfigCompileException
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException This indicates
+	 * that a group of compile errors occurred.
 	 */
-	public static Construct execute(String script, File file, boolean inPureMScript, Environment env, MethodScriptComplete done, Script s, List<Variable> vars) throws ConfigCompileException{
+	public static Construct execute(String script, File file, boolean inPureMScript, Environment env, MethodScriptComplete done, Script s, List<Variable> vars) throws ConfigCompileException, ConfigCompileGroupException{
 		return execute(compile(lex(script, file, inPureMScript)), env, done, s, vars);
 	}
 

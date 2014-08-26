@@ -81,7 +81,7 @@ public class StringHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testSconcat() throws ConfigCompileException {
+    public void testSconcat() throws Exception {
         StringHandling.sconcat a = new StringHandling.sconcat();
         assertEquals("1 2 3 4", SRun("1 2 3 4", null));
         assertEquals("a string", SRun("'a' 'string'", null));
@@ -117,17 +117,17 @@ public class StringHandlingTest {
     }
 
     @Test
-    public void testCC() throws ConfigCompileException{
+    public void testCC() throws Exception{
         assertEquals("Thisshouldbeamess", SRun("cc(This should be a mess)", null));
     }
 
 	@Test
-	public void testSplit1() throws ConfigCompileException{
+	public void testSplit1() throws Exception{
 		assertEquals("{a, b}", SRun("split(',', 'a,b')", null));
 	}
 
 	@Test
-	public void testSplit2() throws ConfigCompileException{
+	public void testSplit2() throws Exception{
 		assertEquals("{a, , b}", SRun("split('.', 'a..b')", null));
 	}
 

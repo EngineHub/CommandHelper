@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 //import org.powermock.modules.junit4.PowerMockRunner;
 /**
  *
- * 
+ *
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(Static.class)
@@ -58,14 +58,14 @@ public class EnchantmentsTest {
     @After
     public void tearDown() {
     }
-    
+
     @Test
     /**
      * This is an interesting test. Because the server implementation has to implement the
      * individual enchantments, they aren't implemented here, so everything returns an empty
      * array. However, the test is more for testing array.clone than the enchantments themselves.
      */
-    public void testGetEnchants() throws ConfigCompileException{
+    public void testGetEnchants() throws Exception{
         SRun("assign(@a, get_enchants(311))\n"
                 + "array_push(@a, 'test')\n"
                 + "assign(@b, get_enchants(311))\n"
