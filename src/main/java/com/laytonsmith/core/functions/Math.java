@@ -490,7 +490,13 @@ public class Math {
 			Script parent, Environment env, Target t,
 			Function func, boolean pre, boolean inc){
 		if(nodes[0].getData() instanceof CFunction){
-				Function f = ((CFunction)nodes[0].getData()).getFunction();
+				Function f;
+				try {
+					f = ((CFunction)nodes[0].getData()).getFunction();
+				} catch (ConfigCompileException ex) {
+					// This can't really happen, as the compiler would have already caught this
+					throw new Error(ex);
+				}
 				if(f.getName().equals(new ArrayHandling.array_get().getName())){
 					//Ok, so, this is it, we're in charge here.
 					long temp;

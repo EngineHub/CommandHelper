@@ -9,10 +9,10 @@ import com.laytonsmith.core.functions.FunctionList;
 
 /**
  *
- * 
+ *
  */
 public class CFunction extends Construct {
-    
+
     public static final long serialVersionUID = 1L;
 	private transient Function function;
 
@@ -24,7 +24,7 @@ public class CFunction extends Construct {
     public String toString() {
         return getValue();
     }
-    
+
     @Override
     public CFunction clone() throws CloneNotSupportedException{
         return (CFunction) super.clone();
@@ -34,29 +34,24 @@ public class CFunction extends Construct {
     public boolean isDynamic() {
         return true;
     }
-	
+
 	/**
 	 * Returns the underlying function for this construct.
-	 * @return 
+	 * @return
 	 */
-	public Function getFunction(){
+	public Function getFunction() throws ConfigCompileException{
 		if(function == null){
-			try {
-				function = (Function)FunctionList.getFunction(val());
-			} catch (ConfigCompileException ex) {
-				//Shouldn't ever get here?
-				throw new Error(ex);
-			}
+			function = (Function)FunctionList.getFunction(val());
 		}
 		return function;
 	}
-	
+
 	/**
 	 * This function should only be called by the compiler.
-	 * @param f 
+	 * @param f
 	 */
 	public void setFunction(FunctionBase f){
 		function = (Function)f;
 	}
-	
+
 }

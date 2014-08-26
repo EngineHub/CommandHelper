@@ -1371,7 +1371,13 @@ public final class MethodScriptCompiler {
 			}
 			return;
 		}
-		Function func = ((CFunction)tree.getData()).getFunction();
+		Function func;
+		try {
+			func = ((CFunction)tree.getData()).getFunction();
+		} catch (ConfigCompileException ex) {
+			compilerErrors.add(ex);
+			return;
+		}
 		if(func.getClass().getAnnotation(nolinking.class) != null){
 			// Don't link here
 			return;
