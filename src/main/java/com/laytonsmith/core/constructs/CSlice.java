@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  *
- * 
+ *
  */
 @typeof("slice")
 public class CSlice extends CArray {
@@ -26,7 +26,7 @@ public class CSlice extends CArray {
         if(split.length > 2){
             throw new ConfigCompileException("Invalid slice notation! (" + slice + ")", t);
         }
-        
+
         String sstart;
         String sfinish;
         if(split.length == 1){
@@ -36,7 +36,7 @@ public class CSlice extends CArray {
             if(slice.trim().startsWith("..")){
                 sstart = "0";
                 sfinish = slice.trim().substring(2);
-            } else { 
+            } else {
             sstart = split[0];
             sfinish = split[1];
             }
@@ -49,7 +49,7 @@ public class CSlice extends CArray {
         }
 		calculateCaches();
     }
-    
+
     public CSlice(long from, long to, Target t){
         super(t);
         this.start = from;
@@ -62,17 +62,17 @@ public class CSlice extends CArray {
 		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
 		return ca.asList();
 	}
-	
+
 	private void calculateCaches(){
 		direction = start < finish?1:start==finish?0:-1;
 		max = Math.abs(finish - start);
 		size = max + 1;
 	}
-    
+
     public long getStart(){
         return start;
     }
-    
+
     public long getFinish(){
         return finish;
     }
@@ -146,5 +146,5 @@ public class CSlice extends CArray {
 			return false;
 		}
 	}
-	
+
 }

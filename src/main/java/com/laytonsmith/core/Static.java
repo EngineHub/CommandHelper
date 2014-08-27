@@ -1287,7 +1287,7 @@ public final class Static {
 		}
 		//Ok, it's not absolute, so we need to see if we're in cmdline mode or not.
 		//If so, we use the root directory, not the target.
-		if (InCmdLine(env)) {
+		if (env != null && InCmdLine(env)) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
 		} else {
 			return new File(t.file().getParent(), arg);

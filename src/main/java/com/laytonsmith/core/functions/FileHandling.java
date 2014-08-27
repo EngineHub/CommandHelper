@@ -14,8 +14,12 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
@@ -27,18 +31,25 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.persistence.DataSourceException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 /**
- * 
+ *
  */
 @core
 public class FileHandling {
@@ -47,7 +58,7 @@ public class FileHandling {
 		return "This class contains methods that help manage files on the file system. Most are restricted with the base-dir setting"
 			+ " in your preferences.";
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class read extends AbstractFunction {
@@ -82,7 +93,7 @@ public class FileHandling {
 				s = s.replaceAll("\n|\r\n", "\n");
 				return new CString(s, t);
 			} catch (Exception ex) {
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find " 
+				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
 					+ location.getAbsolutePath()
 					+ "\nFile " + (location.exists() ? "exists" : "does not exist"), t);
 				throw new ConfigRuntimeException("File could not be read in.",
@@ -118,20 +129,90 @@ public class FileHandling {
 			//Because we do disk IO
 			return true;
 		}
-		
+
 		@Override
 		public LogLevel profileAt() {
 			return LogLevel.DEBUG;
 		}
 	}
-	
+
+	@api
+	@noboilerplate
+	public static class comp_read extends AbstractFunction implements Optimizable {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CNull.NULL;
+		}
+
+		@Override
+		public String getName() {
+			return "comp_read";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {path} Returns the value of a file at compile time only. Unlike read, this runs and is fully resolved"
+					+ " at compile time. This is useful for optimization reasons, if you have a file that is unchanging, this can be"
+					+ " used instead of read(), to prevent a runtime hit each time the code is executed. Otherwise, this method is"
+					+ " equivalent to read().";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.get(0).isDynamic()){
+				throw new ConfigCompileException(getName() + " can only accept hardcoded paths.", t);
+			}
+			Environment env;
+			try {
+				env = Static.GenerateStandaloneEnvironment();
+			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+				throw new ConfigCompileException(ex.getMessage(), t, ex);
+			}
+			String ret = new read().exec(t, env, children.get(0).getData()).val();
+			ParseTree tree = new ParseTree(new CString(ret, t), fileOptions);
+			return tree;
+		}
+
+	}
+
 	@api
 	@noboilerplate
 	public static class async_read extends AbstractFunction{
-		
+
 		RunnableQueue queue = new RunnableQueue("MethodScript-asyncRead");
 		boolean started = false;
-		
+
 		private void startup(){
 			if(!started){
 				queue.invokeLater(null, new Runnable() {
@@ -187,7 +268,7 @@ public class FileHandling {
 
 				@Override
 				public void run() {
-					String returnString = null;					
+					String returnString = null;
 					ConfigRuntimeException exception = null;
 					if(file.contains("@")){
 						try {
@@ -259,9 +340,9 @@ public class FileHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class file_size extends AbstractFunction {
 
@@ -284,7 +365,7 @@ public class FileHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			if(!Security.CheckSecurity(location)){
-				throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'", 
+				throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
 						ExceptionType.SecurityException, t);
 			}
 			return new CInt(location.length(), t);
@@ -309,9 +390,9 @@ public class FileHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class read_gzip_binary extends AbstractFunction {
 
@@ -373,9 +454,9 @@ public class FileHandling {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class read_binary extends AbstractFunction {
 
@@ -438,9 +519,9 @@ public class FileHandling {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	//@api
 	public static class file_parent extends AbstractFunction {
 
@@ -501,9 +582,9 @@ public class FileHandling {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class file_resolve extends AbstractFunction {
 
@@ -552,6 +633,6 @@ public class FileHandling {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }
