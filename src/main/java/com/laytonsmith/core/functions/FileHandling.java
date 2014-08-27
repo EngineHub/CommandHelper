@@ -175,7 +175,7 @@ public class FileHandling {
 			return "string {path} Returns the value of a file at compile time only. Unlike read, this runs and is fully resolved"
 					+ " at compile time. This is useful for optimization reasons, if you have a file that is unchanging, this can be"
 					+ " used instead of read(), to prevent a runtime hit each time the code is executed. Otherwise, this method is"
-					+ " equivalent to read().";
+					+ " equivalent to read(). The path must be fully resolved at compile time.";
 		}
 
 		@Override

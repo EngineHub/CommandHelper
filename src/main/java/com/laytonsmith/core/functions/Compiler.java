@@ -438,7 +438,7 @@ public class Compiler {
 						ParseTree node = new ParseTree(new CFunction(ASSIGN, list.get(k).getTarget()), list.get(k).getFileOptions());
 						node.addChild(list.get(k));
 						node.addChild(list.get(k + 1));
-						node.addChild(new ParseTree(CNull.NULL, list.get(k).getFileOptions()));
+						node.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
 						list.set(k, node);
 						list.remove(k + 1);
 					} else {

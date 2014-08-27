@@ -2,6 +2,8 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.LogLevel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,10 +29,19 @@ public class IVariableList {
 
     public IVariable get(String name, Target t){
         if(!varList.containsKey(name)){
-            this.set(new IVariable(CClassType.AUTO, name, CNull.NULL, t));
+            this.set(new IVariable(CClassType.AUTO, name, CNull.UNDEFINED, t));
         }
-        varList.get(name).setTarget(t);
-        return varList.get(name);
+		IVariable v = varList.get(name);
+
+		// TODO: Once the compiler can handle this, this check should be moved out of here,
+		// and moved into the compiler. In strict mode, it will be a compiler error, in
+		// non-strict mode it will be a compiler warning.
+		// ==, not .equals
+		if(v.ival() == CNull.UNDEFINED){
+			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
+		}
+        v.setTarget(t);
+        return v;
     }
 
 	/**
