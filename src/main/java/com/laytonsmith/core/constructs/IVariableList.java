@@ -27,7 +27,7 @@ public class IVariableList {
         varList.put(v.getName(), v);
     }
 
-    public IVariable get(String name, Target t){
+    public IVariable get(String name, Target t, boolean bypassAssignedCheck){
         if(!varList.containsKey(name)){
             this.set(new IVariable(CClassType.AUTO, name, CNull.UNDEFINED, t));
         }
@@ -37,12 +37,16 @@ public class IVariableList {
 		// and moved into the compiler. In strict mode, it will be a compiler error, in
 		// non-strict mode it will be a compiler warning.
 		// ==, not .equals
-		if(v.ival() == CNull.UNDEFINED){
+		if(v.ival() == CNull.UNDEFINED && !bypassAssignedCheck){
 			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
 		}
         v.setTarget(t);
         return v;
     }
+
+	public IVariable get(String name, Target t){
+		return get(name, t, false);
+	}
 
 	/**
 	 * Returns true if the variable table already has this value defined

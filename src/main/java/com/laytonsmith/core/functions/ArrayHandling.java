@@ -57,7 +57,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_size extends AbstractFunction {
+	public static class array_size extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -107,6 +107,11 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5))"),
 			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
 		}
 
 	}
@@ -584,7 +589,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_contains extends AbstractFunction {
+	public static class array_contains extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -645,10 +650,15 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates finding a string", "array_contains(array('a', 'b', 'c'), 'b')"),
 			};
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
+		}
 	}
 
 	@api
-	public static class array_contains_ic extends AbstractFunction {
+	public static class array_contains_ic extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -708,10 +718,15 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'd')"),
 			};
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
+		}
 	}
 
 	@api
-	public static class array_index_exists extends AbstractFunction {
+	public static class array_index_exists extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -777,6 +792,11 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'a')"),
 				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'c')"),
 			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
 		}
 	}
 
@@ -849,7 +869,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class range extends AbstractFunction {
+	public static class range extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -924,11 +944,16 @@ public class ArrayHandling {
 			};
 		}
 
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
+		}
+
 
 	}
 
 	@api
-	public static class array_keys extends AbstractFunction {
+	public static class array_keys extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -987,10 +1012,15 @@ public class ArrayHandling {
 				new ExampleScript("With associative array", "array_keys(array(one: 'a', two: 'b', three: 'c'))"),
 			};
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
+		}
 	}
 
 	@api
-	public static class array_normalize extends AbstractFunction {
+	public static class array_normalize extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1049,10 +1079,15 @@ public class ArrayHandling {
 				new ExampleScript("Usage with normal array", "array_normalize(array(1, 2, 3))"),
 			};
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
+		}
 	}
 
 	@api
-	public static class array_merge extends AbstractFunction {
+	public static class array_merge extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1127,6 +1162,11 @@ public class ArrayHandling {
 				new ExampleScript("With associative arrays", "array_merge(array(one: 1), array(two: 2), array(three: 3))"),
 				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))"),
 			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
 		}
 	}
 
@@ -1273,7 +1313,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class cslice extends AbstractFunction {
+	public static class cslice extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1323,6 +1363,11 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array(1, 2, 3)[cslice(0, 1)]"),
 			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
 		}
 
 	}
@@ -1682,7 +1727,7 @@ public class ArrayHandling {
 
 	}
 
-	@api public static class array_indexes extends AbstractFunction{
+	@api public static class array_indexes extends AbstractFunction implements Optimizable {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -1736,6 +1781,11 @@ public class ArrayHandling {
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 2))"),
 				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))"),
 			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
 		}
 
 	}
@@ -1856,7 +1906,7 @@ public class ArrayHandling {
 
 	}
 
-	@api public static class array_rand extends AbstractFunction{
+	@api public static class array_rand extends AbstractFunction implements Optimizable {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -1945,10 +1995,15 @@ public class ArrayHandling {
 					"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))", "two"),
 			};
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
+		}
 	}
 
 	@api
-	public static class array_unique extends AbstractFunction{
+	public static class array_unique extends AbstractFunction implements Optimizable {
 
 		private final static equals equals = new equals();
 		private final static BasicLogic.sequals sequals = new BasicLogic.sequals();
@@ -2025,6 +2080,11 @@ public class ArrayHandling {
 				new ExampleScript("No removal of different datatypes", "array_unique(array(1, '1'))"),
 				new ExampleScript("Removal of different datatypes, by setting compareTypes to false", "array_unique(array(1, '1'), false)"),
 			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
 		}
 
 	}

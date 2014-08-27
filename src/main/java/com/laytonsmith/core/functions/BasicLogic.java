@@ -1637,16 +1637,49 @@ public class BasicLogic {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
+			boolean foundFalse = false;
 			while (it.hasNext()) {
 				//Remove hard coded true values, they won't affect the calculation at all
+				//Also walk through the children, and if we find a hardcoded false, discard all the following values.
+				//If we do find a hardcoded false, though we can know ahead of time that this statement as a whole
+				//will be false, we can't remove everything, as the parameters beforehand may have side effects, so
+				//we musn't remove them.
 				ParseTree child = it.next();
-				if (child.isConst() && Static.getBoolean(child.getData()) == true) {
+				if(foundFalse){
 					it.remove();
+					continue;
 				}
+				if (child.isConst()){
+					if(Static.getBoolean(child.getData()) == true){
+						it.remove();
+					} else {
+						foundFalse = true;
+					}
+				}
+			}
+			// TODO: Can't do this yet, because children of side effect free functions may still have side effects that
+			// we need to maintain. However, with complications introduced by code branch functions, we can't process
+			// this yet.
+//			if(foundFalse){
+//				//However, we can remove any functions that have no side effects that come before the false.
+//				it = children.iterator();
+//				while(it.hasNext()){
+//					Construct data = it.next().getData();
+//					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
+//						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
+//							it.remove();
+//						}
+//					}
+//				}
+//			}
+			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
+			// if false is the only remaining condition (which could be) then we can simply return false here.
+			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == false){
+				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
 			if (children.isEmpty()) {
 				//We've removed all the children, so return true, because they were all true.
-				return new ParseTree(CBoolean.TRUE, null);
+				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
 			return null;
 		}
@@ -1738,16 +1771,49 @@ public class BasicLogic {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
+			boolean foundTrue = false;
 			while (it.hasNext()) {
 				//Remove hard coded false values, they won't affect the calculation at all
+				//Also walk through the children, and if we find a hardcoded true, discard all the following values.
+				//If we do find a hardcoded true, though we can know ahead of time that this statement as a whole
+				//will be true, we can't remove everything, as the parameters beforehand may have side effects, so
+				//we musn't remove them.
 				ParseTree child = it.next();
-				if (child.isConst() && Static.getBoolean(child.getData()) == false) {
+				if(foundTrue){
 					it.remove();
+					continue;
 				}
+				if (child.isConst()){
+					if(Static.getBoolean(child.getData()) == false){
+						it.remove();
+					} else {
+						foundTrue = true;
+					}
+				}
+			}
+			// TODO: Can't do this yet, because children of side effect free functions may still have side effects that
+			// we need to maintain. However, with complications introduced by code branch functions, we can't process
+			// this yet.
+//			if(foundTrue){
+//				//However, we can remove any functions that have no side effects that come before the true.
+//				it = children.iterator();
+//				while(it.hasNext()){
+//					Construct data = it.next().getData();
+//					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
+//						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
+//							it.remove();
+//						}
+//					}
+//				}
+//			}
+			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
+			// if true is the only remaining condition (which could be) then we can simply return true here.
+			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == true){
+				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
 			if (children.isEmpty()) {
 				//We've removed all the children, so return false, because they were all false.
-				return new ParseTree(CBoolean.FALSE, null);
+				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
 			return null;
 		}

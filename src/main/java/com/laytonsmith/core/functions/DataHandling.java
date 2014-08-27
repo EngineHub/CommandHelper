@@ -239,7 +239,7 @@ public class DataHandling {
 								+ " same name in the main scope.", t);
 					} else {
 						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
-								+ list.get(name, t).getDefinedTarget() + " but is being redefined", t);
+								+ list.get(name, t, true).getDefinedTarget() + " but is being redefined", t);
 					}
 				}
 				type = ArgumentValidation.getClassType(args[0], t);
@@ -252,7 +252,7 @@ public class DataHandling {
 			}
 			if (args[offset + 0] instanceof IVariable) {
 				if(args.length == 2){
-					type = list.get(name, t).getDefinedType();
+					type = list.get(name, t, true).getDefinedType();
 				}
 				IVariable v = new IVariable(type, name, c, t);
 				list.set(v);
