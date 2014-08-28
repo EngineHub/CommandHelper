@@ -5,6 +5,7 @@ package com.laytonsmith.testing;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -17,10 +18,10 @@ import com.laytonsmith.core.constructs.Variable;
 
 /**
  * This class provides methods for more easily creating different Constructs for testing purposes.
- * 
+ *
  */
 public class C {
-    
+
     //Shortcut to Construct.class
     public static Class Array = CArray.class;
     public static Class Boolean = CBoolean.class;
@@ -31,8 +32,8 @@ public class C {
     public static Class Void = CVoid.class;
     public static Class IVariable = IVariable.class;
     public static Class Variable = Variable.class;
-    
-    
+
+
     public static CArray Array(Construct ... elems){
         return new CArray(Target.UNKNOWN, elems);
     }
@@ -55,7 +56,7 @@ public class C {
         return CVoid.VOID;
     }
     public static IVariable IVariable(String name, Construct val){
-        return new IVariable(name, val, Target.UNKNOWN);
+        return new IVariable(CClassType.AUTO, name, val, Target.UNKNOWN);
     }
     public static Variable Variable(String name, String val){
         return new Variable(name, val, false, false, Target.UNKNOWN);
@@ -63,7 +64,7 @@ public class C {
     /**
      * Returns a construct in the same way that constructs are resolved in scripts.
      * @param val
-     * @return 
+     * @return
      */
     public static Construct onstruct(String val){
         return Static.resolveConstruct(val, Target.UNKNOWN);

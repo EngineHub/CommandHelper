@@ -12,6 +12,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -602,7 +603,7 @@ public class Math {
 				if(v.ival() instanceof CMutablePrimitive){
 					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
-				v = new IVariable(v.getName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else {
@@ -725,7 +726,7 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else {
@@ -849,7 +850,7 @@ public class Math {
 				if(v.ival() instanceof CMutablePrimitive){
 					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
-				v = new IVariable(v.getName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else {
@@ -973,7 +974,7 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else {

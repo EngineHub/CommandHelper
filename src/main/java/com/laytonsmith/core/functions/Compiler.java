@@ -441,6 +441,14 @@ public class Compiler {
 						node.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
 						list.set(k, node);
 						list.remove(k + 1);
+					} else if(list.get(k + 1).getData() instanceof CLabel){
+						ParseTree node = new ParseTree(new CFunction(ASSIGN, list.get(k).getTarget()), list.get(k).getFileOptions());
+						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), list.get(k).getFileOptions());
+						labelNode.addChild(list.get(k));
+						labelNode.addChild(new ParseTree(((CLabel)list.get(k + 1).getData()).cVal(), list.get(k).getFileOptions()));
+						labelNode.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
+						list.set(k, labelNode);
+						list.remove(k + 1);
 					} else {
 						throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
 					}

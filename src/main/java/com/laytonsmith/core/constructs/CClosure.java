@@ -151,7 +151,7 @@ public class CClosure extends Construct {
                     arguments.push(value);
                 }
             }
-            environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", arguments, node.getData().getTarget()));
+            environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, node.getData().getTarget()));
             ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
             List<ParseTree> children = new ArrayList<ParseTree>();
             children.add(node);

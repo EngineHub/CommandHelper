@@ -68,6 +68,7 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.persistence.DataSourceException;
@@ -612,7 +613,7 @@ public final class Interpreter {
 			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));
 			v.setDefault(finalArgument.toString());
 			vars.add(v);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", arguments, Target.UNKNOWN));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, Target.UNKNOWN));
 		}
 		try {
 			ProfilePoint p = this.env.getEnv(GlobalEnv.class).GetProfiler().start("Interpreter Script", LogLevel.ERROR);

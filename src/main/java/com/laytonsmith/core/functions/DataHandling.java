@@ -24,6 +24,7 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.keywords.InKeyword;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
@@ -32,6 +33,7 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.CNull;
@@ -670,10 +672,10 @@ public class DataHandling {
 					}
 					//If the key isn't null, set that in the variable table.
 					if (kkey != null) {
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), c, t));
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getName(), c, t));
 					}
 					//Set the value in the variable table
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(c.val(), t), t));
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getName(), one.get(c.val(), t), t));
 					try {
 						//Execute the code
 						parent.eval(code, env);
@@ -723,9 +725,9 @@ public class DataHandling {
 						//If the item is blacklisted, we skip it.
 						if (!iterator.isBlacklisted(current)) {
 							if (kkey != null) {
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CInt(current, t), t));
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getName(), new CInt(current, t), t));
 							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(current, t), t));
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getName(), one.get(current, t), t));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -840,12 +842,25 @@ public class DataHandling {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
+		private static final String CENTRY = new Compiler.centry().getName();
+		private static final String ASSIGN = new assign().getName();
+		private static final String SCONCAT = new StringHandling.sconcat().getName();
+		private static final String IN = new InKeyword().getKeywordName();
+
+		private boolean isFunction(ParseTree node, String function){
+			return node.getData() instanceof CFunction && node.getData().val().equals(function);
+		}
+
+		private boolean isKeyword(ParseTree node, String keyword){
+			return node.getData() instanceof CKeyword && node.getData().val().equals(keyword);
+		}
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() < 2) {
 				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
 			}
-			if (children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new Compiler.centry().getName())) {
+			if (isFunction(children.get(0), CENTRY)) {
 				// This is what "@key: @value in @array" looks like initially. We'll refactor this so the next segment can take over properly.
 				ParseTree sconcat = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), fileOptions);
 				sconcat.addChild(children.get(0).getChildAt(0));
@@ -889,7 +904,9 @@ public class DataHandling {
 					}
 				}
 				if (key != null && key.getData() instanceof CLabel) {
-					if (!(((CLabel) key.getData()).cVal() instanceof IVariable)) {
+					if (!(((CLabel) key.getData()).cVal() instanceof IVariable)
+							&& !(((CLabel)key.getData()).cVal() instanceof CFunction
+								&& ((CLabel)key.getData()).cVal().val().equals(ASSIGN))) {
 						throw new ConfigCompileException("Expected a variable for key, but \"" + key.getData().val() + "\" was found", t);
 					}
 					key.setData(((CLabel) key.getData()).cVal());

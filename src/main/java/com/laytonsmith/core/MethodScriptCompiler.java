@@ -1230,7 +1230,7 @@ public final class MethodScriptCompiler {
 				//Slice notation handling
 				try {
 					CSlice slice;
-					if (t.type.isSeparator() || (t.type.isWhitespace() && prevNonWhitespace.type.isSeparator())) {
+					if (t.type.isSeparator() || (t.type.isWhitespace() && prevNonWhitespace.type.isSeparator()) || t.type.isKeyword()) {
 						//empty first
 						String value = nextNonWhitespace2.val();
 						i = nextNonWhitespaceIndex2 - 1;
@@ -1239,7 +1239,11 @@ public final class MethodScriptCompiler {
 							i = nextNonWhitespaceIndex3 - 1;
 						}
 						slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
-					} else if (nextNonWhitespace2.type.isSeparator()) {
+						if(t.type.isKeyword()){
+							tree.addChild(new ParseTree(new CKeyword(t.val(), t.getTarget()), fileOptions));
+							constructCount.peek().incrementAndGet();
+						}
+					} else if (nextNonWhitespace2.type.isSeparator() || nextNonWhitespace2.type.isKeyword()) {
 						//empty last
 						Token first = t;
 						String modifier = "";
@@ -1276,6 +1280,7 @@ public final class MethodScriptCompiler {
 					}
 					i++;
 					tree.addChild(new ParseTree(slice, fileOptions));
+					constructCount.peek().incrementAndGet();
 					continue;
 				} catch(ConfigRuntimeException ex){
 					//CSlice can throw CREs, but at this stage, we have to

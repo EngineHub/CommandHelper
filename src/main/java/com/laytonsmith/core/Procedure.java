@@ -178,7 +178,7 @@ public class Procedure implements Cloneable {
         CArray arguments = new CArray(Target.UNKNOWN);
         for (String key : originals.keySet()) {
             Construct c = originals.get(key);
-            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
+            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CClassType.AUTO, key, c, Target.UNKNOWN));
             arguments.push(c);
         }
         Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);
@@ -188,7 +188,7 @@ public class Procedure implements Cloneable {
             if (varIndex.size() > i) {
                 String varname = varIndex.get(i).getName();
 				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(CClassType.AUTO)){
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varname, c, c.getTarget()));
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(), varname, c, c.getTarget()));
 				} else {
 					throw new Exceptions.CastException("Procedure \"" + name + "\" expects a value of type "
 							+ varIndex.get(i).getDefinedType().val() + " in argument " + (i + 1) + ", but"
@@ -196,7 +196,7 @@ public class Procedure implements Cloneable {
 				}
             }
         }
-        env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", arguments, Target.UNKNOWN));
+        env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, Target.UNKNOWN));
 
         try {
 			if(tree.getData() instanceof CFunction

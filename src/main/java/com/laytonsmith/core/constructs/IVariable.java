@@ -23,11 +23,6 @@ public class IVariable extends Construct implements Cloneable {
 		this.definedTarget = t;
     }
 
-	// TODO: Need to comment this out, and see what all breaks, then go fix it.
-    public IVariable(String name, Construct value, Target t) {
-		this(CClassType.AUTO, name, value, t);
-	}
-
     public IVariable(CClassType type, String name, Construct value, Target t) {
         super(name, ConstructType.IVARIABLE, t);
 		if(!type.equals(CClassType.AUTO) && !(value instanceof CNull)){

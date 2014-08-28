@@ -68,7 +68,9 @@ public class CArray extends Construct implements ArrayAccess{
 
 	public CArray(Target t, int initialCapacity, Construct... items) {
 		super("{}", ConstructType.ARRAY, t);
-		if(items != null){
+		if(initialCapacity == -1){
+			associative_mode = true;
+		} else if(items != null){
 			for(Construct item : items){
 				if(item instanceof CEntry){
 					//it's an associative array

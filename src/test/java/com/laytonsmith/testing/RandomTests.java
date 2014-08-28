@@ -17,6 +17,7 @@ import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -183,7 +184,7 @@ public class RandomTests {
 		CString c8 = C.String("").clone();
 		CVoid c9 = C.Void().clone();
 		Command c10 = new Command("/c", Target.UNKNOWN).clone();
-		IVariable c12 = new IVariable("@name", C.Null(), Target.UNKNOWN).clone();
+		IVariable c12 = new IVariable(CClassType.AUTO, "@name", C.Null(), Target.UNKNOWN).clone();
 		Variable c13 = new Variable("$name", "", false, false, Target.UNKNOWN);
 	}
 

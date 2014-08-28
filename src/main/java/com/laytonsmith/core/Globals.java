@@ -14,15 +14,15 @@ import java.util.Map;
  * Provides a global registry for values. This is used by the import/export system.
  */
 public final class Globals {
-    
+
     private Globals(){}
-    
+
     public static Map<String, IVariable> global_ivar = new HashMap<String, IVariable>();
     public static Map<String, Construct> global_construct = new HashMap<String, Construct>();
-    
+
 	/**
 	 * Sets a global variable. The ivar works as both the key and the value.
-	 * @param ivar 
+	 * @param ivar
 	 * @deprecated Use {@link #SetGlobal(java.lang.String, com.laytonsmith.core.constructs.Construct)}
 	 * instead. This method will be removed in future versions.
 	 */
@@ -30,11 +30,11 @@ public final class Globals {
         Map<String, IVariable> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
         vars.put(ivar.getName(), ivar);
     }
-	
+
 	/**
 	 * Gets a global variable. The ivar returned works as both the key and the value.
 	 * @param var
-	 * @return 
+	 * @return
 	 * @deprecated Use {@link #GetGlobalConstruct(java.lang.String)} instead. This method will
 	 * be removed in future versions.
 	 */
@@ -43,12 +43,12 @@ public final class Globals {
         if(vars.containsKey(var.getName())){
             return vars.get(var.getName());
         } else {
-            IVariable v = new IVariable(var.getName(), new CString("", Target.UNKNOWN), Target.UNKNOWN);
+            IVariable v = new IVariable(var.getDefinedType(), var.getName(), new CString("", Target.UNKNOWN), Target.UNKNOWN);
             vars.put(v.getName(), v);
             return v;
         }
     }
-	
+
 	/**
 	 * Sets a variable in the global registry.
 	 * @param name The value name
@@ -62,13 +62,13 @@ public final class Globals {
 			vars.put(name, value);
 		}
     }
-	
+
 	/**
 	 * Returns a value previously stored in the global registry. If the value
 	 * hasn't been set before, CNull is returned. Regardless, a valid Construct
 	 * is always returned, never null.
 	 * @param name The name of the value to return.
-	 * @return 
+	 * @return
 	 */
     public static synchronized Construct GetGlobalConstruct(String name){
         Map<String, Construct> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
@@ -78,7 +78,7 @@ public final class Globals {
             return CNull.NULL;
         }
     }
-    
+
 	/**
 	 * Clears out all the values in the registry.
 	 */

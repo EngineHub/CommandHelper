@@ -19,6 +19,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -237,48 +238,6 @@ public class StringHandling {
 			return new CString(b.toString(), t);
 		}
 
-//        @Override
-//        public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-//            StringBuilder b = new StringBuilder();
-//            boolean centry = false;
-//            Construct key = null;
-//            for (int i = 0; i < nodes.length; i++) {
-//                Construct c = parent.seval(nodes[i], env);
-//                if (i == 0) {
-//                    if (c instanceof CLabel) {
-//                        key = c;
-//                        centry = true;
-//                        break;
-//                    }
-//                }
-//                if (!centry) {
-//                    if (i > 1 || i > 0 && !centry) {
-//                        b.append(" ");
-//                    }
-//                    b.append(c.val());
-//                }
-//            }
-//            if (centry) {
-//                Construct value;
-//                if (nodes.length > 2) {
-//                    //it's a string
-//                    StringBuilder c = new StringBuilder();
-//                    for (int i = 1; i < nodes.length; i++) {
-//                        Construct d = parent.seval(nodes[i], env);
-//                        if (i > 1) {
-//                            c.append(" ");
-//                        }
-//                        c.append(d.val());
-//                    }
-//                    value = new CString(c.toString(), t);
-//                } else {
-//                    value = parent.seval(nodes[1], env);
-//                }
-//                return new CEntry(key, value, t);
-//            } else {
-//                return new CString(b.toString(), t);
-//            }
-//        }
 		@Override
 		public String docs() {
 			return "string {var1, [var2...]} Concatenates any number of arguments together, but puts a space between elements";
@@ -304,6 +263,8 @@ public class StringHandling {
 			return null;
 		}
 
+		public final static String STRING = new DataHandling._string().getName();
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
@@ -318,9 +279,41 @@ public class StringHandling {
 					it.remove();
 				}
 			}
-			//If we don't have any children, remove us as well
+			// We have to turn off constant optimization because sconcat is a strange construct that does have some special
+			// compiler significance, especially if we end up being optimized out. So here, we will check to see if we are fully
+			// constant, and combine the constant values, but taking care not to do so with CKeywords, which are otherwise constant.
+			// We start at 1, because
+			for(int i = 1; i < children.size(); i++){
+				ParseTree child = children.get(i);
+				if(child.isConst() && !(child.getData() instanceof CKeyword)){
+					if(children.get(i - 1).isConst() && !(children.get(i - 1).getData() instanceof CKeyword)){
+						// Combine these two into one, and replace i - 1, and remove i
+						String s1 = children.get(i - 1).getData().val();
+						String s2 = child.getData().val();
+						children.set(i - 1, new ParseTree(new CString(s1 + " " + s2, t), fileOptions));
+						children.remove(i);
+					}
+				}
+			}
+			//If we don't have any children, remove us as well, though we still have to
 			if(children.size() == 1){
-				return children.get(0);
+				ParseTree child = children.get(0);
+				if(child.getData() instanceof CKeyword){
+					return child;
+				} else {
+					// sconcat only returns a string (except in the special case above) so we need to
+					// return the string value if it's not already a string
+					try {
+						if(child.getData().typeof().equals("string")){
+							return child;
+						}
+					} catch(IllegalArgumentException ex){
+						// Ignored, we'll just toString it, because it's an unknown type.
+					}
+					ParseTree node = new ParseTree(new CFunction(STRING, t), fileOptions);
+					node.addChild(child);
+					return node;
+				}
 			}
 			return null;
 		}
@@ -335,7 +328,6 @@ public class StringHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-					OptimizationOption.CONSTANT_OFFLINE,
 					OptimizationOption.CACHE_RETURN,
 					OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
