@@ -12,7 +12,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -49,7 +48,7 @@ public class Math {
 
 	@api
 	@seealso({subtract.class, multiply.class, divide.class})
-	public static class add extends AbstractFunction implements Optimizable{
+	public static class add extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -110,8 +109,7 @@ public class Math {
 				new ExampleScript("Demonstrates adding two numbers together", "msg(add(2, 2))"),
 				new ExampleScript("Demonstrates adding two numbers together, using the operator syntax", "2 + 2"),
 				new ExampleScript("Demonstrates grouping with parenthesis", "(2 + 5) * 2"),
-				new ExampleScript("Demonstrates order of operations", "2 + 5 * 2"),
-			};
+				new ExampleScript("Demonstrates order of operations", "2 + 5 * 2"),};
 		}
 
 		@Override
@@ -123,16 +121,17 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_DYNAMIC,
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.OPTIMIZE_DYNAMIC,
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
 
 	@api
 	@seealso({add.class, multiply.class, divide.class})
-	public static class subtract extends AbstractFunction implements Optimizable{
+	public static class subtract extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -190,22 +189,23 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates basic usage", "subtract(4 - 3)"),
-						new ExampleScript("Demonstrates operator syntax", "12 - 5"),};
+				new ExampleScript("Demonstrates basic usage", "subtract(4 - 3)"),
+				new ExampleScript("Demonstrates operator syntax", "12 - 5"),};
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
 
 	@api
 	@seealso({divide.class, add.class, subtract.class})
-	public static class multiply extends AbstractFunction implements Optimizable{
+	public static class multiply extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -269,23 +269,24 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Functional usage", "multiply(8, 8)"),
-						new ExampleScript("Operator syntax", "8 * 8"),};
+				new ExampleScript("Functional usage", "multiply(8, 8)"),
+				new ExampleScript("Operator syntax", "8 * 8"),};
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_DYNAMIC,
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.OPTIMIZE_DYNAMIC,
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
 
 	@api
 	@seealso({multiply.class, add.class, subtract.class})
-	public static class divide extends AbstractFunction implements Optimizable{
+	public static class divide extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -344,23 +345,24 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Functional usage", "divide(4, 2)"),
-						new ExampleScript("Demonstrates double return", "divide(2, 4)"),
-						new ExampleScript("Operator syntax", "2 / 4"),
-						new ExampleScript("Demonstrates divide by zero error", "@zero = 0;\nmsg(1 / @zero);"),};
+				new ExampleScript("Functional usage", "divide(4, 2)"),
+				new ExampleScript("Demonstrates double return", "divide(2, 4)"),
+				new ExampleScript("Operator syntax", "2 / 4"),
+				new ExampleScript("Demonstrates divide by zero error", "@zero = 0;\nmsg(1 / @zero);"),};
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
 
 	@api
-	public static class mod extends AbstractFunction implements Optimizable{
+	public static class mod extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -407,15 +409,16 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Functional usage", "mod(2, 2)"),
-						new ExampleScript("Operator syntax", "2 % 2"),};
+				new ExampleScript("Functional usage", "mod(2, 2)"),
+				new ExampleScript("Operator syntax", "2 % 2"),};
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -468,15 +471,16 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Functional usage", "pow(2, 4)"),
-						new ExampleScript("Operator syntax", "2 ** 4"),};
+				new ExampleScript("Functional usage", "pow(2, 4)"),
+				new ExampleScript("Operator syntax", "2 ** 4"),};
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -485,81 +489,82 @@ public class Math {
 	 * If we have the case {@code @array[0]++}, we have to increment it as
 	 * though it were a variable, so we have to do that with execs. This method
 	 * consolidates the code to do so.
+	 *
 	 * @return
 	 */
 	protected static Construct doIncrementDecrement(ParseTree[] nodes,
 			Script parent, Environment env, Target t,
-			Function func, boolean pre, boolean inc){
-		if(nodes[0].getData() instanceof CFunction){
-				Function f;
-				try {
-					f = ((CFunction)nodes[0].getData()).getFunction();
-				} catch (ConfigCompileException ex) {
-					// This can't really happen, as the compiler would have already caught this
-					throw new Error(ex);
-				}
-				if(f.getName().equals(new ArrayHandling.array_get().getName())){
-					//Ok, so, this is it, we're in charge here.
-					long temp;
-					long newVal;
+			Function func, boolean pre, boolean inc) {
+		if (nodes[0].getData() instanceof CFunction) {
+			Function f;
+			try {
+				f = ((CFunction) nodes[0].getData()).getFunction();
+			} catch (ConfigCompileException ex) {
+				// This can't really happen, as the compiler would have already caught this
+				throw new Error(ex);
+			}
+			if (f.getName().equals(new ArrayHandling.array_get().getName())) {
+				//Ok, so, this is it, we're in charge here.
+				long temp;
+				long newVal;
 					//First, pull out the current value. We're gonna do this manually though, and we will actually
-					//skip the whole array_get execution.
-					ParseTree eval = nodes[0];
-					Construct array = parent.seval(eval.getChildAt(0), env);
-					Construct index = parent.seval(eval.getChildAt(1), env);
-					Construct cdelta = new CInt(1, t);
-					if(nodes.length == 2){
-						cdelta = parent.seval(nodes[1], env);
-					}
-					long delta = Static.getInt(cdelta, t);
-					//First, error check, then get the old value, and store it in temp.
-					if(!(array instanceof CArray) && !(array instanceof ArrayAccess)){
-						//Let's just evaluate this like normal with array_get, so it will
-						//throw the appropriate exception.
-						new ArrayHandling.array_get().exec(t, env, array, index);
-						throw ConfigRuntimeException.CreateUncatchableException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
-					} else if(!(array instanceof CArray)){
-						//It's an ArrayAccess type, but we can't use that here, so, throw our
-						//own exception.
-						throw new ConfigRuntimeException("Cannot increment/decrement a non-array array"
-								+ " accessed value. (The value passed in was \"" + array.val() + "\")", ExceptionType.CastException, t);
-					} else {
-						//Ok, we're good. Data types should all be correct.
-						CArray myArray = ((CArray)array);
-						Construct value = myArray.get(index, t);
-						if(value instanceof CInt || value instanceof CDouble){
-							temp = Static.getInt(value, t);
-							//Alright, now let's actually perform the increment, and store that in the array.
-
-							if(inc){
-								newVal = temp + delta;
-							} else {
-								newVal = temp - delta;
-							}
-							new ArrayHandling.array_set().exec(t, env, array, index, new CInt(newVal, t));
-						} else {
-							throw new ConfigRuntimeException("Cannot increment/decrement a non numeric value.", ExceptionType.CastException, t);
-						}
-					}
-					long valueToReturn;
-					if(pre){
-						valueToReturn = newVal;
-					} else {
-						valueToReturn = temp;
-					}
-					return new CInt(valueToReturn, t);
+				//skip the whole array_get execution.
+				ParseTree eval = nodes[0];
+				Construct array = parent.seval(eval.getChildAt(0), env);
+				Construct index = parent.seval(eval.getChildAt(1), env);
+				Construct cdelta = new CInt(1, t);
+				if (nodes.length == 2) {
+					cdelta = parent.seval(nodes[1], env);
 				}
+				long delta = Static.getInt(cdelta, t);
+				//First, error check, then get the old value, and store it in temp.
+				if (!(array instanceof CArray) && !(array instanceof ArrayAccess)) {
+						//Let's just evaluate this like normal with array_get, so it will
+					//throw the appropriate exception.
+					new ArrayHandling.array_get().exec(t, env, array, index);
+					throw ConfigRuntimeException.CreateUncatchableException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
+				} else if (!(array instanceof CArray)) {
+						//It's an ArrayAccess type, but we can't use that here, so, throw our
+					//own exception.
+					throw new ConfigRuntimeException("Cannot increment/decrement a non-array array"
+							+ " accessed value. (The value passed in was \"" + array.val() + "\")", ExceptionType.CastException, t);
+				} else {
+					//Ok, we're good. Data types should all be correct.
+					CArray myArray = ((CArray) array);
+					Construct value = myArray.get(index, t);
+					if (value instanceof CInt || value instanceof CDouble) {
+						temp = Static.getInt(value, t);
+						//Alright, now let's actually perform the increment, and store that in the array.
+
+						if (inc) {
+							newVal = temp + delta;
+						} else {
+							newVal = temp - delta;
+						}
+						new ArrayHandling.array_set().exec(t, env, array, index, new CInt(newVal, t));
+					} else {
+						throw new ConfigRuntimeException("Cannot increment/decrement a non numeric value.", ExceptionType.CastException, t);
+					}
+				}
+				long valueToReturn;
+				if (pre) {
+					valueToReturn = newVal;
+				} else {
+					valueToReturn = temp;
+				}
+				return new CInt(valueToReturn, t);
 			}
-			Construct [] args = new Construct[nodes.length];
-			for(int i = 0; i < args.length; i++){
-				args[i] = parent.eval(nodes[i], env);
-			}
-			return func.exec(t, env, args);
+		}
+		Construct[] args = new Construct[nodes.length];
+		for (int i = 0; i < args.length; i++) {
+			args[i] = parent.eval(nodes[i], env);
+		}
+		return func.exec(t, env, args);
 	}
 
 	@api
 	@seealso({dec.class, postdec.class, postinc.class})
-	public static class inc extends AbstractFunction implements Optimizable{
+	public static class inc extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -600,8 +605,8 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
 				}
-				if(v.ival() instanceof CMutablePrimitive){
-					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
+				if (v.ival() instanceof CMutablePrimitive) {
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
 				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
@@ -651,16 +656,16 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates basic usage", "@x = 0;\nmsg(@x);\ninc(@x);\nmsg(@x);"),
-						new ExampleScript("Demonstrates symbolic usage", "@x = 0;\n"
-								+ "msg(@x);\n"
-								+ "(++@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
-								+ "msg(@x);"),};
+				new ExampleScript("Demonstrates basic usage", "@x = 0;\nmsg(@x);\ninc(@x);\nmsg(@x);"),
+				new ExampleScript("Demonstrates symbolic usage", "@x = 0;\n"
+				+ "msg(@x);\n"
+				+ "(++@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
+				+ "msg(@x);"),};
 		}
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if(args[0] instanceof IVariable){
+			if (args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -670,7 +675,7 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_CONSTANT
+					OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
 	}
@@ -693,6 +698,7 @@ public class Math {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return Math.doIncrementDecrement(nodes, parent, env, t, this, false, true);
@@ -717,8 +723,8 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
 				}
-				if(v.ival() instanceof CMutablePrimitive){
-					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
+				if (v.ival() instanceof CMutablePrimitive) {
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
 				Construct oldVal = null;
 				try {
@@ -737,7 +743,6 @@ public class Math {
 				}
 			}
 		}
-
 
 		@Override
 		public String docs() {
@@ -773,7 +778,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if(args[0] instanceof IVariable){
+			if (args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -783,7 +788,7 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_CONSTANT
+					OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
 
@@ -791,22 +796,21 @@ public class Math {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic functional usage", "@a = 5;\n"
-						+ "msg(postinc(@a));\n"
-						+ "msg(@a);"),
+				+ "msg(postinc(@a));\n"
+				+ "msg(@a);"),
 				new ExampleScript("Basic functional usage, with optional value set", "@a = 5;\n"
-						+ "msg(postinc(@a, 6));\n"
-						+ "msg(@a);"),
+				+ "msg(postinc(@a, 6));\n"
+				+ "msg(@a);"),
 				new ExampleScript("Operator syntax", "@a = 5;\n"
-						+ "msg(@a++);\n"
-						+ "msg(@a);"),
-			};
+				+ "msg(@a++);\n"
+				+ "msg(@a);"),};
 		}
 
 	}
 
 	@api
 	@seealso({inc.class, postdec.class, postinc.class})
-	public static class dec extends AbstractFunction implements Optimizable{
+	public static class dec extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -847,8 +851,8 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
 				}
-				if(v.ival() instanceof CMutablePrimitive){
-					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
+				if (v.ival() instanceof CMutablePrimitive) {
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
 				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
@@ -896,7 +900,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if(args[0] instanceof IVariable){
+			if (args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -906,18 +910,18 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_CONSTANT
+					OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates basic usage", "@x = 1;\nmsg(@x);\ndec(@x);\nmsg(@x);"),
-						new ExampleScript("Demonstrates symbolic usage", "@x = 1;\n"
-								+ "msg(@x);\n"
-								+ "(--@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
-								+ "msg(@x);"),};
+				new ExampleScript("Demonstrates basic usage", "@x = 1;\nmsg(@x);\ndec(@x);\nmsg(@x);"),
+				new ExampleScript("Demonstrates symbolic usage", "@x = 1;\n"
+				+ "msg(@x);\n"
+				+ "(--@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
+				+ "msg(@x);"),};
 		}
 
 	}
@@ -965,8 +969,8 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
 				}
-				if(v.ival() instanceof CMutablePrimitive){
-					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
+				if (v.ival() instanceof CMutablePrimitive) {
+					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
 				Construct oldVal = null;
 				try {
@@ -1020,7 +1024,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if(args[0] instanceof IVariable){
+			if (args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -1030,27 +1034,27 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_CONSTANT
+					OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic functional usage", "@a = 5;\n"
-						+ "msg(postdec(@a));\n"
-						+ "msg(@a);"),
+				+ "msg(postdec(@a));\n"
+				+ "msg(@a);"),
 				new ExampleScript("Basic functional usage, with optional value set", "@a = 5;\n"
-						+ "msg(postdec(@a, 6));\n"
-						+ "msg(@a);"),
+				+ "msg(postdec(@a, 6));\n"
+				+ "msg(@a);"),
 				new ExampleScript("Operator syntax", "@a = 5;\n"
-						+ "msg(@a--);\n"
-						+ "msg(@a);"),
-			};
+				+ "msg(@a--);\n"
+				+ "msg(@a);"),};
 		}
 	}
 
 	@api
-	public static class rand extends AbstractFunction {
+	public static class rand extends AbstractFunction implements Optimizable {
 
 		Random r = new Random();
 
@@ -1088,7 +1092,7 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args.length == 0){
+			if (args.length == 0) {
 				return new CDouble(java.lang.Math.random(), t);
 			} else {
 				long min = 0;
@@ -1129,6 +1133,13 @@ public class Math {
 				new ExampleScript("Basic usage, with a range", "rand(50, 100)", ":95"),
 				new ExampleScript("Usage with no parameters", "rand()", ":0.720543709668052")
 			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.NO_SIDE_EFFECTS
+			);
 		}
 
 	}
@@ -1173,9 +1184,9 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CInt){
+			if (args[0] instanceof CInt) {
 				return new CInt(java.lang.Math.abs(Static.getInt(args[0], t)), t);
-			}else{
+			} else {
 				return new CDouble(java.lang.Math.abs(Static.getDouble(args[0], t)), t);
 			}
 		}
@@ -1183,16 +1194,17 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("Demonstrates a positive number", "abs(5)"),
-						new ExampleScript("Demonstrates a negative number", "abs(-5)")
-					};
+				new ExampleScript("Demonstrates a positive number", "abs(5)"),
+				new ExampleScript("Demonstrates a negative number", "abs(-5)")
+			};
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1243,8 +1255,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1295,14 +1308,15 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
 
 	@api
-	public static class sqrt extends AbstractFunction implements Optimizable{
+	public static class sqrt extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1357,8 +1371,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1440,14 +1455,15 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
 
 	@api
-	public static class max extends AbstractFunction implements Optimizable{
+	public static class max extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1523,8 +1539,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1575,8 +1592,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1627,8 +1645,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1679,8 +1698,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1731,8 +1751,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1783,8 +1804,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1835,14 +1857,15 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
 
 	@api
-	public static class to_radians extends AbstractFunction implements Optimizable{
+	public static class to_radians extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1887,14 +1910,15 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
 
 	@api
-	public static class to_degrees extends AbstractFunction implements Optimizable{
+	public static class to_degrees extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1939,8 +1963,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -1995,14 +2020,15 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
 
 	@api
-	public static class round extends AbstractFunction implements Optimizable{
+	public static class round extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -2045,17 +2071,17 @@ public class Math {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			double number = Static.getNumber(args[0], t);
 			int precision = 0;
-			if(args.length > 1){
+			if (args.length > 1) {
 				precision = Static.getInt32(args[1], t);
 			}
-			if(precision < 0){
+			if (precision < 0) {
 				throw new Exceptions.RangeException("precision cannot be less than 0, was " + precision, t);
 			}
 			number = number * java.lang.Math.pow(10, precision);
 			number = java.lang.Math.round(number);
 			number = number / java.lang.Math.pow(10, precision);
-			if(precision == 0){
-				return new CInt((long)number, t);
+			if (precision == 0) {
+				return new CInt((long) number, t);
 			} else {
 				return new CDouble(number, t);
 			}
@@ -2066,15 +2092,15 @@ public class Math {
 			return new ExampleScript[]{
 				new ExampleScript("Rounding up", "round(2.5)"),
 				new ExampleScript("Rounding down", "round(2.229)"),
-				new ExampleScript("Higher precision round", "round(2.229, 2)"),
-			};
+				new ExampleScript("Higher precision round", "round(2.229, 2)"),};
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -2126,7 +2152,7 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String expr = args[0].val().trim();
-			if("".equals(expr)){
+			if ("".equals(expr)) {
 				throw new Exceptions.FormatException("Expression may not be empty", t);
 			}
 			CArray vars = null;
@@ -2142,8 +2168,8 @@ public class Math {
 			String[] varNames;
 			if (vars != null) {
 				int i = 0;
-				da = new double[(int)vars.size()];
-				varNames = new String[(int)vars.size()];
+				da = new double[(int) vars.size()];
+				varNames = new String[(int) vars.size()];
 				for (String key : vars.stringKeySet()) {
 					varNames[i] = key;
 					da[i] = Static.getDouble(vars.get(key, t), t);
@@ -2164,8 +2190,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -2220,8 +2247,9 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 	}
@@ -2247,11 +2275,11 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double val = Static.getDouble(args[0], t);
-			if(val <= 0){
+			if (val <= 0) {
 				throw new Exceptions.RangeException("val was <= 0", t);
 			}
 			double r;
-			if(args.length == 1){
+			if (args.length == 1) {
 				r = java.lang.Math.log(val);
 			} else {// if(args.length == 2){
 				r = java.lang.Math.log(val) / java.lang.Math.log(Static.getDouble(args[1], t));
@@ -2285,7 +2313,10 @@ public class Math {
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.NO_SIDE_EFFECTS
+			);
 		}
 
 		@Override
@@ -2297,9 +2328,9 @@ public class Math {
 				new ExampleScript("log base 10", "logarithm(1000)"),
 				new ExampleScript("log base n", "logarithm(123, 3)"),
 				new ExampleScript("Error condition", "logarithm(0)"),
-				new ExampleScript("Error condition", "logarithm(-1)"),
-			};
+				new ExampleScript("Error condition", "logarithm(-1)"),};
 		}
 
 	}
+
 }

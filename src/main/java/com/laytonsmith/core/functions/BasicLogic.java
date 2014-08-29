@@ -140,6 +140,7 @@ public class BasicLogic {
 		}
 
 		private static final String and = new and().getName();
+		private static final String NOT = new not().getName();
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> args, FileOptions fileOptions) throws ConfigCompileException {
@@ -195,6 +196,16 @@ public class BasicLogic {
 					args.set(1, theirCode);
 				}
 			}
+			// If this is an if/else statement, and the condition is not(*whatever*) we can remove the not, and
+			// reverse the conditions. This is faster than having to run the not as well.
+			if(args.size() == 3){
+				if(args.get(0).getData() instanceof CFunction && args.get(0).getData().val().equals(NOT)){
+					args.set(0, args.get(0).getChildAt(0));
+					ParseTree oldIf = args.get(1);
+					args.set(1, args.get(2));
+					args.set(2, oldIf);
+				}
+			}
 			return null;
 		}
 
@@ -208,7 +219,7 @@ public class BasicLogic {
 
 	}
 
-		@api(environments = {GlobalEnv.class})
+	@api(environments = {GlobalEnv.class})
 	public static class ifelse extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -865,7 +876,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -935,7 +947,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -997,7 +1010,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1062,7 +1076,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1166,7 +1181,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1227,7 +1243,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1240,7 +1257,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class ref_equals extends AbstractFunction {
+	public static class ref_equals extends AbstractFunction implements Optimizable {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -1304,6 +1321,13 @@ public class BasicLogic {
 				+ "msg(ref_equals(@a, @b)) # Again, even though @a == @b and @a === @b, this is false, because they are two different references"),};
 		}
 
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.NO_SIDE_EFFECTS
+			);
+		}
+
 	}
 
 	@api
@@ -1357,7 +1381,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1421,7 +1446,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1485,7 +1511,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1550,7 +1577,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1695,7 +1723,11 @@ public class BasicLogic {
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CONSTANT_OFFLINE);
+			return EnumSet.of(
+					OptimizationOption.OPTIMIZE_DYNAMIC,
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.NO_SIDE_EFFECTS
+			);
 		}
 	}
 
@@ -1829,7 +1861,11 @@ public class BasicLogic {
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CONSTANT_OFFLINE);
+			return EnumSet.of(
+					OptimizationOption.OPTIMIZE_DYNAMIC,
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.NO_SIDE_EFFECTS
+			);
 		}
 	}
 
@@ -1880,7 +1916,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1944,7 +1981,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -1957,7 +1995,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({and.class})
-	public static class nand extends AbstractFunction {
+	public static class nand extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -2014,11 +2052,18 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "nand(true, true)"),};
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.NO_SIDE_EFFECTS
+			);
+		}
 	}
 
 	@api
 	@seealso({or.class})
-	public static class nor extends AbstractFunction {
+	public static class nor extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -2075,6 +2120,13 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "nor(true, false)"),};
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.NO_SIDE_EFFECTS
+			);
+		}
 	}
 
 	@api
@@ -2125,7 +2177,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -2188,7 +2241,8 @@ public class BasicLogic {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
 					OptimizationOption.CACHE_RETURN,
-					OptimizationOption.OPTIMIZE_DYNAMIC
+					OptimizationOption.OPTIMIZE_DYNAMIC,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -2261,7 +2315,8 @@ public class BasicLogic {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
 					OptimizationOption.CACHE_RETURN,
-					OptimizationOption.OPTIMIZE_DYNAMIC
+					OptimizationOption.OPTIMIZE_DYNAMIC,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -2336,7 +2391,8 @@ public class BasicLogic {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
 					OptimizationOption.CACHE_RETURN,
-					OptimizationOption.OPTIMIZE_DYNAMIC
+					OptimizationOption.OPTIMIZE_DYNAMIC,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -2402,7 +2458,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -2462,7 +2519,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -2522,7 +2580,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 
@@ -2584,7 +2643,8 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS
 			);
 		}
 

@@ -5,7 +5,9 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
@@ -17,6 +19,7 @@ import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CSemicolon;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
@@ -144,6 +147,15 @@ public class Compiler {
 		}
 
 		private final static String ASSIGN = new DataHandling.assign().getName();
+		private final static String S = new s().getName();
+		private final static String AUTOCONCAT = new __autoconcat__().getName();
+		private final static String POSTINC = new Math.postinc().getName();
+		private final static String POSTDEC = new Math.postdec().getName();
+		private final static String NEG = new Math.neg().getName();
+		private final static String P = new p().getName();
+		private final static String CENTRY = new centry().getName();
+		private final static String SCONCAT = new StringHandling.sconcat().getName();
+		private final static String CONCAT = new StringHandling.concat().getName();
 
 		/**
 		 * __autoconcat__ has special optimization techniques needed, since it's
@@ -182,7 +194,7 @@ public class Compiler {
 							ParseTree rhs;
 							if (i < list.size() - 3) {
 								//Need to autoconcat
-								ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), lhs.getFileOptions());
+								ParseTree ac = new ParseTree(new CFunction(AUTOCONCAT, Target.UNKNOWN), lhs.getFileOptions());
 								int index = i + 2;
 								ac.addChild(list.get(index));
 								list.remove(index);
@@ -212,11 +224,11 @@ public class Compiler {
 						}
 					}
 					//Simple assignment now
-					ParseTree assign = new ParseTree(new CFunction("assign", node.getTarget()), node.getFileOptions());
+					ParseTree assign = new ParseTree(new CFunction(ASSIGN, node.getTarget()), node.getFileOptions());
 					ParseTree rhs;
 					if (i < list.size() - 3) {
 						//Need to autoconcat
-						ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), lhs.getFileOptions());
+						ParseTree ac = new ParseTree(new CFunction(AUTOCONCAT, Target.UNKNOWN), lhs.getFileOptions());
 						int index = i + 2;
 						//As an incredibly special case, because (@value = !@value) is supported, and
 						//! hasn't been reduced yet, we want to check for that case, and if present, grab
@@ -258,14 +270,15 @@ public class Compiler {
 				if (node.getData() instanceof CSymbol) {
 					inSymbolMode = true;
 				}
-				if (node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isPostfix()) {
+				if (node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isPostfix()
+						&& (i > 0 && !(list.get(i - 1).getData() instanceof CSemicolon))) {
 					if (i - 1 >= 0) {// && list.get(i - 1).getData() instanceof IVariable) {
 						CSymbol sy = (CSymbol) node.getData();
 						ParseTree conversion;
 						if (sy.val().equals("++")) {
-							conversion = new ParseTree(new CFunction("postinc", node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(new CFunction(POSTINC, node.getTarget()), node.getFileOptions());
 						} else {
-							conversion = new ParseTree(new CFunction("postdec", node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(new CFunction(POSTDEC, node.getTarget()), node.getFileOptions());
 						}
 						conversion.addChild(list.get(i - 1));
 						list.set(i - 1, conversion);
@@ -288,9 +301,9 @@ public class Compiler {
 										&& !(list.get(i + 1).getData() instanceof CSymbol)) {
 									if (node.getData().val().equals("-")) {
 										//We have to negate it
-										conversion = new ParseTree(new CFunction("neg", node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(new CFunction(NEG, node.getTarget()), node.getFileOptions());
 									} else {
-										conversion = new ParseTree(new CFunction("p", node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(new CFunction(P, node.getTarget()), node.getFileOptions());
 									}
 								} else {
 									continue;
@@ -459,14 +472,45 @@ public class Compiler {
 			if (list.size() >= 1) {
 				ParseTree node = list.get(0);
 				if (node.getData() instanceof CLabel) {
-					ParseTree value = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), node.getFileOptions());
+					ParseTree value = new ParseTree(new CFunction(AUTOCONCAT, node.getTarget()), node.getFileOptions());
 					for (int i = 1; i < list.size(); i++) {
 						value.addChild(list.get(i));
 					}
-					ParseTree ce = new ParseTree(new CFunction("centry", node.getTarget()), node.getFileOptions());
+					ParseTree ce = new ParseTree(new CFunction(CENTRY, node.getTarget()), node.getFileOptions());
 					ce.addChild(node);
 					ce.addChild(value);
 					return ce;
+				}
+			}
+
+			// Go through and handle semicolons. Each semicolon applies from up to the
+			// previous statement. (Note that some functions are themselves statements.)
+			// However, in strict mode, the semicolons are required, so if the number of
+			// elements is greater than 1, we also need to error out. Otherwise, the statement
+			// should only apply to the previous single statement.
+			int lastStatement = -1;
+			for(int i = 0; i < list.size(); i++){
+				ParseTree item = list.get(i);
+				if(item.getData() instanceof CSemicolon){
+					ParseTree acNode = new ParseTree(new CFunction(SCONCAT, item.getTarget()), item.getFileOptions());
+					ParseTree sNode = new ParseTree(new CFunction(S, item.getTarget()), item.getFileOptions());
+					for(int k = lastStatement + 1; !(list.get(k).getData() instanceof CSemicolon); k++){
+						acNode.addChild(list.get(k));
+						list.remove(k);
+						k--;
+						i--;
+					}
+					if(acNode.numberOfChildren() == 1){
+						// Oh, ok, just pull it back up.
+						acNode = acNode.getChildAt(0);
+					} else if(item.getFileOptions().isStrict()){
+						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Missing semicolon", acNode.getChildAt(0).getTarget());
+					}
+					sNode.addChild(acNode);
+					list.set(i, sNode);
+					lastStatement = i;
+				} else if(item.getData() instanceof CFunction && ((CFunction)item.getData()).getFunction().isStatement(item.getChildren())){
+					lastStatement = i;
 				}
 			}
 
@@ -485,7 +529,7 @@ public class Compiler {
 							list.remove(0);
 							ParseTree child = list.get(0);
 							if (list.size() > 1) {
-								child = new ParseTree(new CFunction("sconcat", Target.UNKNOWN), child.getFileOptions());
+								child = new ParseTree(new CFunction(SCONCAT, Target.UNKNOWN), child.getFileOptions());
 								child.setChildren(list);
 							}
 							try {
@@ -508,9 +552,15 @@ public class Compiler {
 					options = list.get(0).getFileOptions();
 				}
 				if (returnSConcat) {
-					tree = new ParseTree(new CFunction("sconcat", Target.UNKNOWN), options);
+					ParseTree item = list.get(list.size() - 1);
+					if(item.getFileOptions().isStrict()){
+						if(item.getData() instanceof CFunction && !((CFunction)item.getData()).getFunction().isStatement(item.getChildren())){
+							CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Missing semicolon", item.getTarget());
+						}
+					}
+					tree = new ParseTree(new CFunction(SCONCAT, Target.UNKNOWN), options);
 				} else {
-					tree = new ParseTree(new CFunction("concat", Target.UNKNOWN), options);
+					tree = new ParseTree(new CFunction(CONCAT, Target.UNKNOWN), options);
 				}
 				tree.setChildren(list);
 				return tree;
@@ -610,13 +660,21 @@ public class Compiler {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC);
+					OptimizationOption.OPTIMIZE_DYNAMIC
+			);
 		}
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			throw new ConfigCompileException("Unexpected use of braces", t);
 		}
+
+		@Override
+		public boolean isStatement(List<ParseTree> children) {
+			// TODO: In the future, this will not necessarily be a statement, once we add { } as a raw map operator.
+			return true;
+		}
+
 	}
 
 	@api
@@ -743,6 +801,82 @@ public class Compiler {
 			}
 			//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
 			return root;
+		}
+
+	}
+
+	@api
+	@hide("Should not be used directly by user code")
+	public static class s extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Exceptions.ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "s";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "nothing {statement} ";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V0_0_0;
+		}
+
+		@Override
+		public boolean isStatement(List<ParseTree> children) {
+			return true;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		public static final String SCONCAT = new StringHandling.sconcat().getName();
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.get(0).isConst() || children.get(0).getData() instanceof IVariable){
+				throw new ConfigCompileException("Not a statement", t);
+			}
+			// If the statement contains a function with no side effects, then there is no point in this
+			// being a standalone statement, so we will show a compile error.
+			if(children.get(0).getData() instanceof CFunction && !(children.get(0).getData().val().equals(SCONCAT))){
+				Function f = ((CFunction)children.get(0).getData()).getFunction();
+				if(f instanceof Optimizable){
+					if(((Optimizable)f).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
+						throw new ConfigCompileException("Not a statement", t);
+					}
+				}
+			}
+			return null;
 		}
 
 	}

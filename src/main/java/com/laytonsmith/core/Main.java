@@ -16,6 +16,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -45,6 +46,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import jline.console.ConsoleReader;
@@ -409,9 +411,26 @@ public class Main {
 				File source = new File(path);
 				String plain = FileUtil.read(source);
 				Security.setSecurityEnabled(false);
-				String optimized = OptimizationUtilities.optimize(plain, source);
-				System.out.println(optimized);
-				System.exit(0);
+				String optimized;
+				try {
+					try {
+						optimized = OptimizationUtilities.optimize(plain, source);
+						System.out.println(optimized);
+						System.exit(0);
+					} catch(ConfigCompileException ex){
+						throw new ConfigCompileGroupException(new HashSet<>(Arrays.asList(ex)));
+					}
+				} catch(ConfigCompileGroupException ex){
+					if(ex.getList().size() == 1){
+						System.err.println("A compile exception occured in the code:");
+					} else {
+						System.err.println(ex.getList().size() + " compile errors occured in the code:");
+					}
+					for(ConfigCompileException e : ex.getList()){
+						e.printStackTrace(System.err);
+					}
+					System.exit(1);
+				}
 			} else if(mode == cmdlineMode){
 				//We actually can't use the parsedArgs, because there may be cmdline switches in
 				//the arguments that we want to ignore here, but otherwise pass through. parsedArgs

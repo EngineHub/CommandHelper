@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CPreIdentifier;
+import com.laytonsmith.core.constructs.CSemicolon;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
@@ -935,7 +936,7 @@ public final class MethodScriptCompiler {
 		constructCount.push(new AtomicInteger(0));
 		parents.push(tree);
 
-		tree.addChild(new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions));
+		tree.addChild(new ParseTree(new CFunction(__autoconcat__, unknown), fileOptions));
 		parents.push(tree.getChildAt(0));
 		tree = tree.getChildAt(0);
 		constructCount.push(new AtomicInteger(0));
@@ -1017,7 +1018,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__, tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1096,7 +1097,7 @@ public final class MethodScriptCompiler {
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if (!emptyArray) {
-					myIndex = new ParseTree(new CFunction("__autoconcat__", myArray.getTarget()), fileOptions);
+					myIndex = new ParseTree(new CFunction(__autoconcat__, myArray.getTarget()), fileOptions);
 
 					for (int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
@@ -1153,7 +1154,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__, tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1185,7 +1186,7 @@ public final class MethodScriptCompiler {
 				if (constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__, unknown), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1316,6 +1317,46 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 				//right_vars.add(new Variable(t.val(), null, t.line_num));
+			} else if(t.type.equals(TType.SEMICOLON)){
+				tree.addChild(new ParseTree(new CSemicolon(t.getTarget()), fileOptions));
+				constructCount.peek().incrementAndGet();
+//				// Walk through and try to find the last statement, and combine all those
+//				// elements into one.
+//				int startWith = 0;
+//				for(int j = tree.numberOfChildren() - 1; j >= 0; j--){
+//					ParseTree p = tree.getChildAt(j);
+//					try {
+//						if(p.getData() instanceof CFunction
+//								&& ((CFunction)p.getData()).getFunction().isStatement(p.getChildren())
+//						){
+//							// All the children past this point should be combined into a s()
+//							startWith = j + 1;
+//							break;
+//						}
+//					} catch(ConfigCompileException ex){
+//						// Ignored. Extensions cannot add statements.
+//					}
+//				}
+//				ParseTree acNode = new ParseTree(new CFunction(__autoconcat__, t.getTarget()), fileOptions);
+//				for(int k = startWith; k < tree.numberOfChildren(); k++){
+//					acNode.addChild(tree.getChildAt(k));
+//					tree.removeChildAt(k);
+//					k--;
+//					constructCount.peek().decrementAndGet();
+//				}
+//				if(acNode.numberOfChildren() == 0){
+//					// Empty statement, we will warn, but not add this to the tree.
+//					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Empty statement", t.getTarget());
+//				} else {
+//					ParseTree sNode = new ParseTree(new CFunction(S, t.getTarget()), fileOptions);
+//					if(acNode.numberOfChildren() == 1){
+//						// Oh, ok, just pull it back up.
+//						acNode = acNode.getChildAt(0);
+//					}
+//					sNode.addChild(acNode);
+//					tree.addChild(sNode);
+//					constructCount.peek().incrementAndGet();
+//				}
 			}
 
 		}
@@ -1336,6 +1377,13 @@ public final class MethodScriptCompiler {
 		procs.add(new ArrayList<Procedure>());
 		processKeywords(tree);
 		optimize(tree, procs, compilerErrors);
+		if(tree.getFileOptions().isStrict()){
+			// This only happens if there is only one function call in the whole program. This is still an error.
+			if(tree.getData() instanceof CFunction && !(tree.getData().val().equals(Compiler.s.SCONCAT)
+					|| ((CFunction)tree.getData()).getFunction().isStatement(tree.getChildren()))){
+				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Missing semicolon", tree.getTarget());
+			}
+		}
 		link(tree, compilerErrors);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
@@ -1504,6 +1552,8 @@ public final class MethodScriptCompiler {
 	}
 
 	private static final String __autoconcat__ = new Compiler.__autoconcat__().getName();
+	private static final String S = new Compiler.s().getName();
+	private static final String CBRACE = new Compiler.__cbrace__().getName();
 
 	/**
 	 * Recurses down into the tree, attempting to optimize where possible. A few

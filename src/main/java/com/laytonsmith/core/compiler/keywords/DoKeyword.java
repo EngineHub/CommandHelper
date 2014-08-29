@@ -4,6 +4,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CSemicolon;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.DataHandling;
@@ -18,6 +19,7 @@ public class DoKeyword extends Keyword {
 
 	private static final String WHILE = new DataHandling._while().getName();
 	private static final String DOWHILE = new DataHandling._dowhile().getName();
+	private static final String S = new Compiler.s().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -27,6 +29,12 @@ public class DoKeyword extends Keyword {
 		try {
 			ParseTree code = list.get(keywordPosition + 1);
 			ParseTree _while = list.get(keywordPosition + 2);
+			if(list.get(keywordPosition).getFileOptions().isStrict()){
+				// Check for trailing semicolon at end of statement
+				if(list.size() <= keywordPosition + 3 || !(list.get(keywordPosition + 3).getData() instanceof CSemicolon)){
+					throw new ConfigCompileException("Expected semicolon at end of while clause in do/while statement", t);
+				}
+			}
 			this.validateCodeBlock(code, "Missing brace following \"do\" keyword");
 			if(!(_while.getData() instanceof CFunction) || !_while.getData().val().equals(WHILE)){
 				throw new ConfigCompileException("Missing while clause following \"do\" keyword", t);
@@ -44,6 +52,10 @@ public class DoKeyword extends Keyword {
 			throw new ConfigCompileException("Unexpected keyword \"do\"", t);
 		}
 		return keywordPosition;
+	}
+
+	private boolean isFunction(ParseTree node, String function){
+		return node.getData() instanceof CFunction && node.getData().val().equals(function);
 	}
 
 }

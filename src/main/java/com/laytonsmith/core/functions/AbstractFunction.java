@@ -25,6 +25,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.snapins.PackagePermission;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +238,12 @@ public abstract class AbstractFunction implements Function {
 			}
 			c = c.getDeclaringClass();
 		} while(c != null);
+		return false;
+	}
+
+	@Override
+	public boolean isStatement(List<ParseTree> children) {
+		// Most functions are not statements.
 		return false;
 	}
 

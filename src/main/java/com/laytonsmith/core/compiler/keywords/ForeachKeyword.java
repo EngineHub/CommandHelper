@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.functions.StringHandling;
 import java.util.List;
 
 /**
@@ -16,6 +17,7 @@ import java.util.List;
 public class ForeachKeyword extends Keyword {
 
 	private final static String FOREACHELSE = new DataHandling.foreachelse().getName();
+	private final static String SCONCAT = new StringHandling.sconcat().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -46,6 +48,9 @@ public class ForeachKeyword extends Keyword {
 				list.remove(keywordPosition + 1);
 			}
 		}
+		// Because we have special syntax here, we have this autoconcat in position 0. We want to remove that and replace it with sconcat
+		list.get(keywordPosition).getChildAt(0).setData(new CFunction(SCONCAT, t));
+
 		return keywordPosition;
 	}
 

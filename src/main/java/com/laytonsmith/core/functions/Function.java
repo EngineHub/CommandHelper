@@ -90,7 +90,7 @@ public interface Function extends FunctionBase, Documentation {
      * @param nodes
      * @return
      */
-    public Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
+    public Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);
 
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.
@@ -126,6 +126,14 @@ public interface Function extends FunctionBase, Documentation {
 	 * @return
 	 */
 	public String profileMessageS(List<ParseTree> args);
+
+	/**
+	 * Returns true if the function is a statement by itself. That is, in strict mode,
+	 * no semicolon is required. This may vary based on what the children are, so
+	 * they are passed in as well.
+	 * @return
+	 */
+	public boolean isStatement(List<ParseTree> children);
 
     /**
      * In addition to being a function, an object may also be a code branch, that is,

@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  *
- * 
+ *
  */
 public class FileOptions {
 
@@ -19,7 +19,7 @@ public class FileOptions {
 		supressWarnings = parseList(getDefault(parsedOptions, "supresswarnings", ""));
 		description = getDefault(parsedOptions, "description", null);
 	}
-	
+
 	private String getDefault(Map<String, String> map, String key, String defaultIfNone){
 		if(map.containsKey(key)){
 			return map.get(key);
@@ -27,7 +27,7 @@ public class FileOptions {
 			return defaultIfNone;
 		}
 	}
-	
+
 	private boolean parseBoolean(String bool){
 		if(bool.equalsIgnoreCase("false") || bool.equalsIgnoreCase("off")){
 			return false;
@@ -35,7 +35,7 @@ public class FileOptions {
 			return true;
 		}
 	}
-	
+
 	private List<String> parseList(String list){
 		List<String> l = new ArrayList<String>();
 		for(String part : list.split(",")){
@@ -45,15 +45,16 @@ public class FileOptions {
 		}
 		return l;
 	}
-	
+
 	public boolean isStrict(){
-		return strict;
+		return true;
+		//return strict;
 	}
-	
+
 	public boolean isWarningSupressed(String warning){
 		return warning.trim().contains(warning.toLowerCase());
 	}
-	
+
 	public String getDescription(){
 		return description;
 	}
@@ -63,7 +64,7 @@ public class FileOptions {
 		return (strict ? "Strict Mode on" : "") + "\n" +
 			   (supressWarnings.isEmpty() ? "" : "Suppressed Warnings: " + supressWarnings.toString() + "\n") +
 			   (description == null ? "" : "File description: " + description + "\n");
-				
-	}		
-	
+
+	}
+
 }

@@ -1,5 +1,7 @@
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
@@ -97,6 +99,9 @@ public abstract class Keyword {
 		return node.getData() instanceof CFunction && node.getData().val().equals(__CBRACE__);
 	}
 
+	protected static final String S = new com.laytonsmith.core.functions.Compiler.s().getName();
+	protected static final String AUTOCONCAT = new com.laytonsmith.core.functions.Compiler.__autoconcat__().getName();
+
 	/**
 	 * Returns a CNull, if the node is empty, or the first argument
 	 * to the node
@@ -107,7 +112,14 @@ public abstract class Keyword {
 		if(node.getChildren().isEmpty()){
 			return new ParseTree(CNull.NULL, node.getFileOptions());
 		} else {
-			return node.getChildAt(0);
+			ParseTree child = node.getChildAt(0);
+			if(child.getFileOptions().isStrict()){
+				if(!(child.getData() instanceof CFunction && (
+						child.getData().val().equals(S) || child.getData().val().equals(AUTOCONCAT)))){
+					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Missing semicolon", child.getTarget());
+				}
+			}
+			return child;
 		}
 	}
 

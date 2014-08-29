@@ -16,13 +16,16 @@ import java.util.List;
 public class IfKeyword extends Keyword {
 
 	private final static String IFELSE = new BasicLogic.ifelse().getName();
+	private final static String S = new com.laytonsmith.core.functions.Compiler.s().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
 		ParseTree node = list.get(keywordPosition);
 		Target t = node.getTarget();
 		if(list.size() > keywordPosition + 1){
+			boolean foundBraces = false;
 			if(this.isValidCodeBlock(list.get(keywordPosition + 1))){
+				foundBraces = true;
 				// We're using keyword notation, so check for if(@a, @b){ }, as this
 				// is a compile error.
 				if(node.getChildren().size() != 1){
@@ -90,6 +93,13 @@ public class IfKeyword extends Keyword {
 					// Done with the if else chain
 					break;
 				}
+			}
+			if(foundBraces){
+				// If normally returns a value, but in this case, where we are using brace notation, it doesn't.
+				// It's only recommended to use if's return value if it's a tertiary usage anyways.
+				ParseTree newTree = new ParseTree(new CFunction(S, t), list.get(keywordPosition).getFileOptions());
+				newTree.addChild(list.get(keywordPosition));
+				list.set(keywordPosition, newTree);
 			}
 		}
 		return keywordPosition;

@@ -20,6 +20,7 @@ import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -227,15 +228,35 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		private static final String S = new Compiler.s().getName();
+
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < args.length; i++) {
-				if (i > 0) {
+			boolean hasAppended = false;
+			for (ParseTree node : nodes) {
+				if (!hasAppended) {
+					hasAppended = true;
 					b.append(" ");
 				}
-				b.append(args[i] == null?"":args[i].val());
+				if (node != null) {
+					if (node.getData() instanceof CFunction && node.getData().val().equals(S)) {
+						parent.eval(node, env);
+					} else {
+						b.append(parent.seval(node, env));
+					}
+				}
 			}
 			return new CString(b.toString(), t);
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			return CNull.NULL;
 		}
 
 		@Override

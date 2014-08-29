@@ -451,6 +451,11 @@ public class DataHandling {
 		}
 
 		@Override
+		public boolean isStatement(List<ParseTree> children) {
+			return true;
+		}
+
+		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//In for(@i = 0, @i < @x, @i++, ...), the @i++ is more optimally written as ++@i, but
 			//it is commonplace to use postfix operations, so if the condition is in fact that simple,
@@ -590,6 +595,11 @@ public class DataHandling {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public boolean isStatement(List<ParseTree> children) {
+			return true;
 		}
 
 	}
@@ -752,6 +762,11 @@ public class DataHandling {
 		}
 
 		@Override
+		public boolean isStatement(List<ParseTree> children) {
+			return true;
+		}
+
+		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
@@ -862,14 +877,14 @@ public class DataHandling {
 			}
 			if (isFunction(children.get(0), CENTRY)) {
 				// This is what "@key: @value in @array" looks like initially. We'll refactor this so the next segment can take over properly.
-				ParseTree sconcat = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), fileOptions);
+				ParseTree sconcat = new ParseTree(new CFunction(SCONCAT, t), fileOptions);
 				sconcat.addChild(children.get(0).getChildAt(0));
 				for (int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++) {
 					sconcat.addChild(children.get(0).getChildAt(1).getChildAt(i));
 				}
 				children.set(0, sconcat);
 			}
-			if (children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new StringHandling.sconcat().getName())) {
+			if (children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(SCONCAT)) {
 				// We may be looking at a "@value in @array" or "@array as @value" type
 				// structure, so we need to re-arrange this into the standard format.
 				ParseTree array = null;
@@ -1007,6 +1022,11 @@ public class DataHandling {
 				+ ", #else \n"
 				+ "    msg('No values in the array')\n"
 				+ ")"),};
+		}
+
+		@Override
+		public boolean isStatement(List<ParseTree> children) {
+			return true;
 		}
 
 	}
