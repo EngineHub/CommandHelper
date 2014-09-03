@@ -2098,7 +2098,7 @@ public class DataHandling {
 										varNames.add(varName);
 									}
 									while (c instanceof IVariable) {
-										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
+										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t, true).ival();
 									}
 									if (!thisNodeIsAssign) {
 										//This is required because otherwise a default value that's already in the environment
