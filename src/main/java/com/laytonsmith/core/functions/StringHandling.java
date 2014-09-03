@@ -17,13 +17,16 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
+import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -281,30 +284,31 @@ public class StringHandling {
 			}
 			// We have to turn off constant optimization because sconcat is a strange construct that does have some special
 			// compiler significance, especially if we end up being optimized out. So here, we will check to see if we are fully
-			// constant, and combine the constant values, but taking care not to do so with CKeywords, which are otherwise constant.
-			// We start at 1, because
+			// constant, and combine the constant values, but taking care not to do so with CKeywords or CLabels, which are otherwise constant.
+			// We start at 1, because if we only have one child, we want to skip ahead.
 			for(int i = 1; i < children.size(); i++){
 				ParseTree child = children.get(i);
-				if(child.isConst() && !(child.getData() instanceof CKeyword)){
+				if(child.isConst() && !(child.getData() instanceof CKeyword) && !(child.getData() instanceof CLabel)){
 					if(children.get(i - 1).isConst() && !(children.get(i - 1).getData() instanceof CKeyword)){
 						// Combine these two into one, and replace i - 1, and remove i
 						String s1 = children.get(i - 1).getData().val();
 						String s2 = child.getData().val();
 						children.set(i - 1, new ParseTree(new CString(s1 + " " + s2, t), fileOptions));
 						children.remove(i);
+						i--;
 					}
 				}
 			}
-			//If we don't have any children, remove us as well, though we still have to
+			//If we don't have any children, remove us as well, though we still have to check if it's a keword.
 			if(children.size() == 1){
 				ParseTree child = children.get(0);
-				if(child.getData() instanceof CKeyword){
+				if(child.getData() instanceof CKeyword || child.getData() instanceof CLabel){
 					return child;
 				} else {
 					// sconcat only returns a string (except in the special case above) so we need to
 					// return the string value if it's not already a string
 					try {
-						if(child.getData().typeof().equals("string")){
+						if(InstanceofUtil.isInstanceof(child.getData(), "string")){
 							return child;
 						}
 					} catch(IllegalArgumentException ex){

@@ -958,47 +958,7 @@ public final class MethodScriptCompiler {
 			Token prev1 = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
 			Token next1 = i + 1 < stream.size() ? stream.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
 			Token next2 = i + 2 < stream.size() ? stream.get(i + 2) : new Token(TType.UNKNOWN, "", t.target);
-			//Token next3 = i + 3 < stream.size() ? stream.get(i + 3) : new Token(TType.UNKNOWN, "", t.target);
-			Token nextNonWhitespace = new Token(TType.UNKNOWN, "", t.target);
-			int nextNonWhitespaceIndex = -1;
-			Token nextNonWhitespace2 = new Token(TType.UNKNOWN, "", t.target);
-			int nextNonWhitespaceIndex2 = -1;
-			Token nextNonWhitespace3 = new Token(TType.UNKNOWN, "", t.target);
-			int nextNonWhitespaceIndex3 = -1;
-			Token prevNonWhitespace = new Token(TType.UNKNOWN, "", t.target);
-			int prevNonWhitespaceIndex = -1;
-			for(int j = i + 1; j < stream.size(); j++){
-				Token temp = stream.get(j);
-				if(!temp.type.isWhitespace()){
-					nextNonWhitespace = temp;
-					nextNonWhitespaceIndex = j;
-					break;
-				}
-			}
-			for(int j = nextNonWhitespaceIndex + 1; j < stream.size(); j++){
-				Token temp = stream.get(j);
-				if(!temp.type.isWhitespace()){
-					nextNonWhitespace2 = temp;
-					nextNonWhitespaceIndex2 = j;
-					break;
-				}
-			}
-			for(int j = nextNonWhitespaceIndex2 + 1; j < stream.size(); j++){
-				Token temp = stream.get(j);
-				if(!temp.type.isWhitespace()){
-					nextNonWhitespace3 = temp;
-					nextNonWhitespaceIndex3 = j;
-					break;
-				}
-			}
-			for(int j = i - 1; j > 0; j--){
-				Token temp = stream.get(j);
-				if(!temp.type.isWhitespace()){
-					prevNonWhitespace = temp;
-					prevNonWhitespaceIndex = j;
-					break;
-				}
-			}
+			Token next3 = i + 3 < stream.size() ? stream.get(i + 3) : new Token(TType.UNKNOWN, "", t.target);
 
 			// Brace handling
 			if(t.type == TType.LCURLY_BRACKET){
@@ -1046,7 +1006,7 @@ public final class MethodScriptCompiler {
 			}
 
 			//Associative array/label handling
-			if (nextNonWhitespace.type.equals(TType.LABEL)) {
+			if (next1.type.equals(TType.LABEL)) {
 				//If it's not an atomic identifier it's an error.
 				if(!t.type.isAtomicLit() && t.type != TType.IVARIABLE && t.type != TType.KEYWORD){
 					compilerErrors.add(new ConfigCompileException("Invalid label specified", t.getTarget()));
@@ -1054,12 +1014,13 @@ public final class MethodScriptCompiler {
 				Construct val;
 				if(t.type == TType.IVARIABLE){
 					val = new IVariable(t.val(), t.target);
+				} else if(t.type == TType.KEYWORD){
+					val = new CKeyword(t.val(), t.target);
 				} else {
 					val = Static.resolveConstruct(t.val(), t.target);
 				}
 				tree.addChild(new ParseTree(new CLabel(val), fileOptions));
 				constructCount.peek().incrementAndGet();
-				i = nextNonWhitespaceIndex; //Move forward past any whitespace
 				continue;
 			}
 			if(t.type == TType.LABEL && tree.getChildren().size() > 0){
@@ -1069,7 +1030,6 @@ public final class MethodScriptCompiler {
 					//Replace the value in the tree with a label, then continue.
 					tree.removeChildAt(tree.getChildren().size() - 1);
 					tree.addChild(new ParseTree(new CLabel(cc.getData()), fileOptions));
-					constructCount.peek().incrementAndGet();
 					continue;
 				}
 			}
@@ -1080,7 +1040,7 @@ public final class MethodScriptCompiler {
 				continue;
 			} else if (t.type.equals(TType.RSQUARE_BRACKET)) {
 				boolean emptyArray = false;
-				if (prevNonWhitespace.type.equals(TType.LSQUARE_BRACKET)) {
+				if (prev1.type.equals(TType.LSQUARE_BRACKET)) {
 					emptyArray = true;
 				}
 				if (arrayStack.size() == 1) {
@@ -1210,15 +1170,16 @@ public final class MethodScriptCompiler {
 				//actually a control character, instead of whitespace, but this is a
 				//"empty first" slice notation. Compare this to the code below.
 				try{
-					String value = nextNonWhitespace.val();
-					i = nextNonWhitespaceIndex - 1;
-					if(nextNonWhitespace.type == TType.MINUS || nextNonWhitespace.type == TType.PLUS){
-						value = nextNonWhitespace.val() + nextNonWhitespace3.val();
-						i = nextNonWhitespaceIndex2 - 1;
+					CSlice slice;
+					String value = next1.val();
+					if(next1.type == TType.MINUS || next1.type == TType.PLUS){
+						value = next1.val() + next2.val();
+						i++;
 					}
-					CSlice slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
-					tree.addChild(new ParseTree(slice, fileOptions));
+					slice = new CSlice(".." + value, t.getTarget());
 					i++;
+					tree.addChild(new ParseTree(slice, fileOptions));
+					constructCount.peek().incrementAndGet();
 					continue;
 				} catch(ConfigRuntimeException ex){
 					//CSlice can throw CREs, but at this stage, we have to
@@ -1226,56 +1187,54 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException(ex);
 				}
 			}
-			if (nextNonWhitespace.type.equals(TType.SLICE)) {
+			if (next1.type.equals(TType.SLICE)) {
 				//Slice notation handling
 				try {
 					CSlice slice;
-					if (t.type.isSeparator() || (t.type.isWhitespace() && prevNonWhitespace.type.isSeparator()) || t.type.isKeyword()) {
+					if (t.type.isSeparator() || (t.type.isWhitespace() && prev1.type.isSeparator()) || t.type.isKeyword()) {
 						//empty first
-						String value = nextNonWhitespace2.val();
-						i = nextNonWhitespaceIndex2 - 1;
-						if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
-							value = nextNonWhitespace2.val() + nextNonWhitespace3.val();
-							i = nextNonWhitespaceIndex3 - 1;
+						String value = next2.val();
+						i++;
+						if(next2.type == TType.MINUS || next2.type == TType.PLUS){
+							value = next2.val() + next3.val();
+							i++;
 						}
-						slice = new CSlice(".." + value, nextNonWhitespace.getTarget());
+						slice = new CSlice(".." + value, next1.getTarget());
 						if(t.type.isKeyword()){
 							tree.addChild(new ParseTree(new CKeyword(t.val(), t.getTarget()), fileOptions));
 							constructCount.peek().incrementAndGet();
 						}
-					} else if (nextNonWhitespace2.type.isSeparator() || nextNonWhitespace2.type.isKeyword()) {
+					} else if (next2.type.isSeparator() || next2.type.isKeyword()) {
 						//empty last
 						Token first = t;
 						String modifier = "";
-						if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
+						if(prev1.type == TType.MINUS || prev1.type == TType.PLUS){
 							//The negative would have already been inserted into the tree
-							modifier = prevNonWhitespace.val();
+							modifier = prev1.val();
 							tree.removeChildAt(tree.getChildren().size() - 1);
 						}
 						slice = new CSlice(modifier + first.value + "..", first.target);
-						i = nextNonWhitespaceIndex2 - 2;
 					} else {
 						//both are provided
 						String modifier1 = "";
-						if(prevNonWhitespace.type == TType.MINUS || prevNonWhitespace.type == TType.PLUS){
+						if(prev1.type == TType.MINUS || prev1.type == TType.PLUS){
 							//It's a negative, incorporate that here, and remove the
 							//minus from the tree
-							modifier1 = prevNonWhitespace.val();
+							modifier1 = prev1.val();
 							tree.removeChildAt(tree.getChildren().size() - 1);
 						}
 						Token first = t;
 						if(first.type.isWhitespace()){
-							first = prevNonWhitespace;
+							first = prev1;
 						}
-						Token second = nextNonWhitespace2;
-						i = nextNonWhitespaceIndex2 - 1;
+						Token second = next2;
+						i++;
 						String modifier2 = "";
-						if(nextNonWhitespace2.type == TType.MINUS || nextNonWhitespace2.type == TType.PLUS){
-							modifier2 = nextNonWhitespace2.val();
-							second = nextNonWhitespace3;
-							i = nextNonWhitespaceIndex3 - 1;
+						if(next2.type == TType.MINUS || next2.type == TType.PLUS){
+							modifier2 = next2.val();
+							second = next3;
+							i++;
 						}
-
 						slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target);
 					}
 					i++;

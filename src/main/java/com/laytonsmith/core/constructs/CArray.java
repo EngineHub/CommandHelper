@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A class that represents a dynamic array.
@@ -47,11 +45,11 @@ public class CArray extends Construct implements ArrayAccess{
 	private boolean valueDirty = true;
 
 	public CArray(Target t) {
-		this(t, -1, (Construct[]) null);
+		this(t, 0, (Construct[]) null);
 	}
 
 	public CArray(Target t, Construct... items) {
-		this(t, -1, items);
+		this(t, 0, items);
 	}
 
 	public CArray(Target t, int initialCapacity) {
@@ -59,7 +57,7 @@ public class CArray extends Construct implements ArrayAccess{
 	}
 
 	public CArray(Target t, Collection<Construct> items) {
-		this(t, -1, getArray(items));
+		this(t, 0, getArray(items));
 	}
 
 	public CArray(Target t, int initialCapacity, Collection<Construct> items) {

@@ -519,7 +519,7 @@ public class BasicLogic {
 					if (i + 1 < c.size()) {
 						c2 = c.get(i + 1);
 					}
-					if ("case".equals(c1.getData().val())) {
+					if(CKeyword.isKeyword(c1, "case")) {
 						//If this is a case AND the next one is
 						//a label, this is a case.
 						if (c2 != null && c2.getData() instanceof CLabel) {
@@ -554,7 +554,7 @@ public class BasicLogic {
 							continue;
 						}
 					}
-					if (c1.getData() instanceof CLabel && "default".equals(c1.getData().val())) {
+					if (c1.getData() instanceof CLabel && CKeyword.isKeyword(((CLabel)c1.getData()).cVal(), "default")) {
 						//Default case
 						if (lastCodeBlock.size() > 0) {
 							//Ok, need to push some stuff on to the new children
