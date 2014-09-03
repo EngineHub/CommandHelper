@@ -64,8 +64,8 @@ public class Procedure implements Cloneable {
             this.originals.put(var.getName(), var.ival());
         }
         this.tree = tree;
-        if (!this.name.matches("^_[^_].*")) {
-            throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, t);
+        if (!this.name.matches("^_[^_][a-zA-Z_]+[a-zA-Z_0-9]*")) {
+            throw new ConfigRuntimeException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits, but must start with a letter.", ExceptionType.FormatException, t);
         }
         //Let's look through the tree now, and see if this is possibly constant or not.
         //If it is, it may or may not help us during compilation, but if it's not,

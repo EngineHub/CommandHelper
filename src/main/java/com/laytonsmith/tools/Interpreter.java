@@ -798,7 +798,7 @@ public final class Interpreter {
 		}
 
 		private static int runnableID = 0;
-		private static List<Integer> runnableList = new ArrayList<Integer>();
+		private static final List<Integer> runnableList = new ArrayList<>();
 
 		@Override
 		public int SetFutureRunnable(DaemonManager dm, final long ms, final Runnable r) {

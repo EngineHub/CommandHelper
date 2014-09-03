@@ -2146,6 +2146,9 @@ public class DataHandling {
 		 * @throws ConfigRuntimeException
 		 */
 		public static Construct optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigRuntimeException {
+			if(children.get(0).isDynamic()){
+				throw new ConfigRuntimeException("Dynamically named procs are not allowed", ExceptionType.InvalidProcedureException, t);
+			}
 			if (myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
