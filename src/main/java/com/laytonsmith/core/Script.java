@@ -720,7 +720,7 @@ public class Script {
             }
             if (last_token.type.equals(TType.COMMAND)) {
                 if (!(t.type.equals(TType.VARIABLE) || t.type.equals(TType.LSQUARE_BRACKET) || t.type.equals(TType.FINAL_VAR)
-                        || t.type.equals(TType.LIT))) {
+                        || t.type.equals(TType.LIT) || t.type.equals(TType.STRING))) {
                     throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.target);
                 }
             }
