@@ -201,6 +201,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         } else if (s.startsWith("[")) {
             //It's an array
             JSONArray array = (JSONArray) JSONValue.parse(s);
+			if(array == null){
+				throw new MarshalException();
+			}
             CArray carray = new CArray(t);
             for (int i = 0; i < array.size(); i++) {
                 carray.push(convertJSON(array.get(i), t));
