@@ -69,8 +69,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.activation.CommandMap;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.activation.MailcapCommandMap;
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -895,6 +897,13 @@ public class Web {
 				try {
 					tr.connect(host, mailPort, mailUser, mailPassword);
 					message.saveChanges();
+					MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
+//					mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
+//					mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
+//					mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
+					mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
+					mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
+					CommandMap.setDefaultCommandMap(mc);
 					tr.sendMessage(message, message.getAllRecipients());
 				} finally {
 					tr.close();
