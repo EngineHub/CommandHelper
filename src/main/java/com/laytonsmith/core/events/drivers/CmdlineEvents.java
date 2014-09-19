@@ -12,6 +12,8 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
@@ -20,6 +22,7 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -214,6 +217,63 @@ public class CmdlineEvents {
 
 
 
+		}
+
+	}
+
+	@api
+	public static class shutdown extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "shutdown";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fired the process is being shut down. This is not guaranteed to run, because some"
+					+ " cases may cause the process to die unexpectedly. Code within the event handler should"
+					+ " take as little time as possible, as the process may force an exit if the handler"
+					+ " takes too long."
+					+ " {}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			return Collections.EMPTY_MAP;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.SHUTDOWN;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public boolean addCounter() {
+			return false;
 		}
 
 	}

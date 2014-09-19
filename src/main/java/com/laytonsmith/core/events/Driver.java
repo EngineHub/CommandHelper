@@ -113,6 +113,7 @@ public enum Driver {
 	 * Cmdline events
 	 */
 	CMDLINE_PROMPT_INPUT,
+	SHUTDOWN,
 
 	/**
 	 * Extension events, used by events fired from the extension system.
