@@ -15,6 +15,9 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -64,19 +67,24 @@ public class ExecutionQueue {
 
 				@Override
 				public void run() {
-					StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), 0, new Runnable() {
+					try {
+						StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
 
-						@Override
-						public void run() {
-							try {
-								c.execute();
-							} catch(ConfigRuntimeException ex){
-								ConfigRuntimeException.HandleUncaughtException(ex, environment);
-							} catch(ProgramFlowManipulationException ex){
-								// Ignored
+							@Override
+							public Object call() throws Exception {
+								try {
+									c.execute();
+								} catch(ConfigRuntimeException ex){
+									ConfigRuntimeException.HandleUncaughtException(ex, environment);
+								} catch(ProgramFlowManipulationException ex){
+									// Ignored
+								}
+								return null;
 							}
-						}
-					});
+						});
+					} catch (Exception ex) {
+						Logger.getLogger(ExecutionQueue.class.getName()).log(Level.SEVERE, null, ex);
+					}
 				}
 			});
 
@@ -139,19 +147,24 @@ public class ExecutionQueue {
 
 				@Override
 				public void run() {
-					StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), 0, new Runnable() {
+					try {
+						StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
 
-						@Override
-						public void run() {
-							try {
-								c.execute();
-							} catch(ConfigRuntimeException ex){
-								ConfigRuntimeException.HandleUncaughtException(ex, environment);
-							} catch(ProgramFlowManipulationException ex){
-								// Ignored
+							@Override
+							public Object call() throws Exception {
+								try {
+									c.execute();
+								} catch(ConfigRuntimeException ex){
+									ConfigRuntimeException.HandleUncaughtException(ex, environment);
+								} catch(ProgramFlowManipulationException ex){
+									// Ignored
+								}
+								return null;
 							}
-						}
-					});
+						});
+					} catch (Exception ex) {
+						Logger.getLogger(ExecutionQueue.class.getName()).log(Level.SEVERE, null, ex);
+					}
 				}
 			});
 

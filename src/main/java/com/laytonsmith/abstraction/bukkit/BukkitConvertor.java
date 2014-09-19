@@ -268,69 +268,20 @@ public class BukkitConvertor extends AbstractConvertor {
 		return Material.getMaterial(id).toString();
 	}
 
-	private static int runnableID = 0;
-	private static final List<Integer> runnableList = new ArrayList<>();
-	private final RunnableQueue queue = new RunnableQueue("BukkitTasks-userland");
-
 	@Override
-	public int SetFutureRunnable(DaemonManager dm, final long ms, final Runnable r) {
-		final int id = ++runnableID;
-		Runnable m = new Runnable() {
+	protected void triggerRunnable(final Runnable r) {
+		try {
+			runOnMainThreadAndWait(new Callable<Object>() {
 
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(ms);
-				} catch (InterruptedException ex) {
-					java.util.logging.Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
-				}
-				if (runnableList.contains(id)) {
+				@Override
+				public Object call() throws Exception {
 					r.run();
+					return null;
 				}
-			}
-		};
-		runnableList.add(id);
-		queue.invokeLater(dm, m);
-		return id;
-	}
-
-	@Override
-	public void ClearAllRunnables() {
-		runnableList.clear();
-	}
-
-	@Override
-	public void ClearFutureRunnable(int id) {
-		runnableList.remove(id);
-	}
-
-	@Override
-	public int SetFutureRepeater(DaemonManager dm, final long ms, final long initialDelay, final Runnable r) {
-		final int id = runnableID++;
-		Runnable m = new Runnable() {
-
-			@Override
-			@SuppressWarnings("SleepWhileInLoop")
-			public void run() {
-				try {
-					Thread.sleep(initialDelay);
-				} catch (InterruptedException ex) {
-					java.util.logging.Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
-				}
-				while (runnableList.contains(id)) {
-					r.run();
-					try {
-						Thread.sleep(ms);
-					} catch (InterruptedException ex) {
-						java.util.logging.Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
-			}
-		};
-
-		runnableList.add(id);
-		queue.invokeLater(dm, m);
-		return id;
+			});
+		} catch (InterruptedException | ExecutionException ex) {
+			java.util.logging.Logger.getLogger(BukkitConvertor.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 //    /**

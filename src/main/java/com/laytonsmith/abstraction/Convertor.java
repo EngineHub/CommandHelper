@@ -57,15 +57,32 @@ public interface Convertor {
      * A future runnable is run on a server accessible thread at roughly the time specified in the future.
      * This is no guarantee however, as the particular server implementation may make this hard to do. The
      * value returned is
+	 * @param dm
+	 * @param ms
      * @param r
      * @return
      */
     public int SetFutureRunnable(DaemonManager dm, long ms, Runnable r);
 
+	/**
+	 * Clears all future runnables, but does not interrupt existing ones.
+	 */
     public void ClearAllRunnables();
 
+	/**
+	 * Clears a future runnable task by id.
+	 * @param id
+	 */
     public void ClearFutureRunnable(int id);
 
+	/**
+	 * Adds a future repeater
+	 * @param dm
+	 * @param ms
+	 * @param initialDelay
+	 * @param r
+	 * @return
+	 */
     public int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r);
 
     public MCEntity GetCorrectEntity(MCEntity e);

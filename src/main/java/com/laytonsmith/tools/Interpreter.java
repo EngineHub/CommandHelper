@@ -797,69 +797,6 @@ public final class Interpreter {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
-		private static int runnableID = 0;
-		private static final List<Integer> runnableList = new ArrayList<>();
-
-		@Override
-		public int SetFutureRunnable(DaemonManager dm, final long ms, final Runnable r) {
-			final int id = ++runnableID;
-			Runnable m = new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(ms);
-					} catch (InterruptedException ex) {
-						Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
-					}
-					if (runnableList.contains(id)) {
-						r.run();
-					}
-				}
-			};
-			runnableList.add(id);
-			queue.invokeLater(dm, m);
-			return id;
-		}
-
-		@Override
-		public void ClearAllRunnables() {
-			runnableList.clear();
-		}
-
-		@Override
-		public void ClearFutureRunnable(int id) {
-			runnableList.remove(id);
-		}
-
-		@Override
-		public int SetFutureRepeater(DaemonManager dm, final long ms, final long initialDelay, final Runnable r) {
-			final int id = runnableID++;
-			Runnable m = new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(initialDelay);
-					} catch (InterruptedException ex) {
-						Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
-					}
-					while (runnableList.contains(id)) {
-						r.run();
-						try {
-							Thread.sleep(ms);
-						} catch (InterruptedException ex) {
-							Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
-						}
-					}
-				}
-			};
-
-			runnableList.add(id);
-			queue.invokeLater(dm, m);
-			return id;
-		}
-
 		@Override
 		public MCEntity GetCorrectEntity(MCEntity e) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
