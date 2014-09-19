@@ -197,12 +197,16 @@ public abstract class AbstractConvertor implements Convertor{
 					}
 				}
 			}, initialDelay, interval);
-			dm.activateThread(null);
+			if(dm != null){
+				dm.activateThread(null);
+			}
 		}
 
 		public void unregister(){
 			timer.cancel();
-			dm.deactivateThread(null);
+			if(dm != null){
+				dm.deactivateThread(null);
+			}
 		}
 
 		public int getId(){
