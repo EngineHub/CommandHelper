@@ -1294,6 +1294,7 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<Procedure>());
 		processKeywords(tree);
+		optimizeAutoconcats(tree, compilerErrors);
 		optimize(tree, procs, compilerErrors);
 		link(tree, compilerErrors);
 		checkLabels(tree, compilerErrors);
@@ -1383,6 +1384,31 @@ public final class MethodScriptCompiler {
 		}
 		for(ParseTree child : tree.getChildren()){
 			checkBreaks0(child, currentLoops, lastUnbreakable, compilerErrors);
+		}
+	}
+
+	/**
+	 * Optimizing __autoconcat__ out should happen early, and should happen regardless
+	 * of whether or not optimizations are on or off. So this is broken off into a separate
+	 * optimization procedure, so that the intricacies of the normal optimizations don't
+	 * apply to __autoconcat__.
+	 * @param root
+	 * @param compilerExceptions
+	 */
+	private static void optimizeAutoconcats(ParseTree root, Set<ConfigCompileException> compilerExceptions){
+		for(ParseTree child : root.getChildren()){
+			if(child.hasChildren()){
+				optimizeAutoconcats(child, compilerExceptions);
+			}
+		}
+		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__)){
+			try {
+				ParseTree ret = ((Compiler.__autoconcat__)((CFunction)root.getData()).getFunction()).optimizeDynamic(root.getTarget(), root.getChildren(), root.getFileOptions());
+				root.setData(ret.getData());
+				root.setChildren(ret.getChildren());
+			} catch (ConfigCompileException ex) {
+				compilerExceptions.add(ex);
+			}
 		}
 	}
 
@@ -1531,7 +1557,24 @@ public final class MethodScriptCompiler {
 			tree.addChild(c);
 			c.getData().setWasIdentifier(true);
 		}
+
 		List<ParseTree> children = tree.getChildren();
+		if(func instanceof Optimizable && ((Optimizable)func).optimizationOptions().contains(OptimizationOption.PRIORITY_OPTIMIZATION)){
+			// This is a priority optimization function, meaning it needs to be optimized before its children are.
+			// This is required when optimization of the children could cause different internal behavior, for instance
+			// if this function is expecting the precense of soem code element, but the child gets optimized out, this
+			// would cause an error, even though the user did in fact provide code in that section.
+			try {
+				((Optimizable)func).optimizeDynamic(tree.getTarget(), children, fileOptions);
+			} catch (ConfigCompileException ex){
+				// If an error occurs, we will skip the rest of this element
+				compilerErrors.add(ex);
+				return;
+			} catch (ConfigRuntimeException ex) {
+				compilerErrors.add(new ConfigCompileException(ex));
+				return;
+			}
+		}
 		//Loop through the children, and if any of them are functions that are terminal, truncate.
 		//To explain this further, consider the following:
 		//For the code: concat(die(), msg('')), this diagram shows the abstract syntax tree:
