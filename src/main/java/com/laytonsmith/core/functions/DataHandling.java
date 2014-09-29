@@ -2300,7 +2300,10 @@ public class DataHandling {
 			String location = arg.val();
 			File file = Static.GetFileFromArgument(location, env, t, null);
 			ParseTree include = IncludeCache.get(file, t);
-			parent.eval(include.getChildAt(0), env);
+			if(include != null){
+				// It could be an empty file
+				parent.eval(include.getChildAt(0), env);
+			}
 			return CVoid.VOID;
 		}
 
