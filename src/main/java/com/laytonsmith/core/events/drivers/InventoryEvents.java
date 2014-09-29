@@ -81,6 +81,7 @@ public class InventoryEvents {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
+				Prefilters.match(prefilter, "action", e.getAction().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "player", e.getWhoClicked().getName(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "clicktype", e.getClickType().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "slottype", e.getSlotType().name(), PrefilterType.MACRO);
