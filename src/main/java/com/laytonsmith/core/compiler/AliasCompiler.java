@@ -14,8 +14,12 @@ import java.util.regex.Pattern;
 public class AliasCompiler {
 
 	public static void main(String [] args) throws Exception {
-		List<AliasToken> list = new AliasLexer("~hi/-there:'/cu' [$var='hi\\''] = hi", null).parse();
+		List<AliasToken> list = new AliasLexer("/c /* = */ = /** hi */ code", null).parse();
 		System.out.println(list);
+	}
+
+	public static List<AliasToken> lex(String script, File file) throws ConfigCompileException{
+		return new AliasLexer(script, file).parse();
 	}
 
 	private static class AliasLexer {
@@ -67,6 +71,7 @@ public class AliasCompiler {
 			Target singleQuoteStart = Target.UNKNOWN;
 			Target doubleQuoteStart = Target.UNKNOWN;
 			Target multilineCommentStart = Target.UNKNOWN;
+			Target optionalVariableStart = Target.UNKNOWN;
 			for(int i = 0; i < script.length(); i++){
 				// Need up to a 3 lookahead
 				col++;
@@ -114,6 +119,12 @@ public class AliasCompiler {
 							i++;
 							continue;
 						}
+					}
+					if(inDocBlockComment || inAliasCode){
+						buf.append(c);
+						continue;
+					} else {
+						continue;
 					}
 				}
 				if(inQuote){
@@ -294,7 +305,7 @@ public class AliasCompiler {
 					continue;
 				}
 
-				if(c == '$'){
+				if(c == '$' && buf.length() == 0){
 					inVariable = true;
 				}
 
@@ -304,6 +315,7 @@ public class AliasCompiler {
 					}
 					endToken();
 					inOptionalVariable = true;
+					optionalVariableStart = t;
 					buf.append('[');
 					buffer(AliasTokenType.OPTIONAL_START, t);
 					continue;
@@ -348,6 +360,9 @@ public class AliasCompiler {
 			if(inMultilineComment){
 				throw new ConfigCompileException("Unended block comment", multilineCommentStart);
 			}
+			if(inOptionalVariable){
+				throw new ConfigCompileException("Unended optional variable", optionalVariableStart);
+			}
 
 			endToken();
 		}
@@ -366,13 +381,17 @@ public class AliasCompiler {
 			}
 		}
 
-		private final Pattern LIT_PATTERN = Pattern.compile("([^a-zA-Z0-9-_/])");
+		private final Pattern LIT_PATTERN = Pattern.compile("([\\[\\]=:\\$])");
 
 		private void endToken() throws ConfigCompileException {
 			if(buf.length() == 0){
 				return;
 			}
 			if(inVariable){
+				String var = buf.toString();
+				if(!var.matches("^\\$[a-zA-Z0-9_]*$")){
+					throw new ConfigCompileException("Invalid variable name", t);
+				}
 				buffer(AliasTokenType.VARIABLE, t);
 				inVariable = false;
 				return;

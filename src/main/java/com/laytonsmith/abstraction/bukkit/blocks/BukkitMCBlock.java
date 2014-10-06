@@ -201,7 +201,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	
 	@Override
 	public boolean isBlockPowered() {
-		return b.isBlockPowered();
+		return b.isBlockIndirectlyPowered() || b.isBlockPowered();
 	}
 
 	@Override

@@ -1273,9 +1273,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "boolean {locationArray} Returns whether or not a block is being supplied with power."
-					+ " Be aware that this interprets 'powered' differently than a human would. For example,"
-					+ " using this on a piston next to a redstone block will return false.";
+			return "boolean {locationArray} Returns whether or not a block is being supplied with power.";
 		}
 
 		@Override

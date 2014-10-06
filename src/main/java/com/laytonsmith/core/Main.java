@@ -14,6 +14,7 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.compiler.AliasCompiler;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
