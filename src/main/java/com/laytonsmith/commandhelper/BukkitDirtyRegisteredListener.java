@@ -1,7 +1,10 @@
 
 
-package com.laytonsmith.core;
+package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.core.AliasCore;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.lang.reflect.Field;
 import java.util.Comparator;
@@ -306,4 +309,20 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 //            Debug.DoLog(event.getType(), 1, "--------------------------------------------------------------\n");
 //        }
     }
+
+	/**
+	 * Sets up CommandHelper to play-dirty, if the user has specified as such
+	 */
+	public static void PlayDirty() {
+		if (Prefs.PlayDirty()) {
+			try {
+				//Set up our "proxy"
+				BukkitDirtyRegisteredListener.Repopulate();
+			} catch (NoSuchMethodException ex) {
+				Logger.getLogger(Static.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (NoSuchFieldException | ClassCastException | IllegalArgumentException | IllegalAccessException ex) {
+				Static.getLogger().log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
+			}
+		} //else play nice :(
+	}
 }

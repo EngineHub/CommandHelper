@@ -25,7 +25,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
 import com.laytonsmith.core.AliasCore;
-import com.laytonsmith.core.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
@@ -111,7 +110,7 @@ public class CommandHelperListener implements Listener {
         }
         
         if (Implementation.GetServerType() == Implementation.Type.BUKKIT) {
-            WorldGuardPlugin wgp = Static.getWorldGuardPlugin(Target.UNKNOWN);
+            WorldGuardPlugin wgp = SKHandler.getWorldGuardPlugin(Target.UNKNOWN);
             //This will cancel the command if the player isn't supposed to run it in this region
             if(wgp != null){
                 WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);
@@ -120,7 +119,7 @@ public class CommandHelperListener implements Listener {
         }
         String cmd = event.getMessage();        
         MCPlayer player = new BukkitMCPlayer(event.getPlayer());
-        Static.PlayDirty();
+        BukkitDirtyRegisteredListener.PlayDirty();
         if (cmd.equals("/.") || cmd.equals("/repeat")) {
             return;
         }

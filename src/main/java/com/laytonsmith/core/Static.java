@@ -18,7 +18,6 @@ import com.laytonsmith.abstraction.MCVehicle;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlugin;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
@@ -46,8 +45,6 @@ import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -383,30 +380,6 @@ public final class Static {
 		return profilingLogFileHandle;
 	}
 
-	public static WorldEditPlugin getWorldEditPlugin(Target t) {
-		if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
-			throw new ConfigRuntimeException("Trying to use WorldEdit on non-bukkit server.", ExceptionType.InvalidPluginException, t);
-		}
-		if (CommandHelperPlugin.wep == null) {
-			MCPlugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
-			if (pwep != null && pwep.isEnabled() && pwep.isInstanceOf(WorldEditPlugin.class) && pwep instanceof BukkitMCPlugin) {
-				CommandHelperPlugin.wep = (WorldEditPlugin) ((BukkitMCPlugin) pwep).getHandle();
-			}
-		}
-		return CommandHelperPlugin.wep;
-	}
-
-	public static WorldGuardPlugin getWorldGuardPlugin(Target t) {
-		if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
-			throw new ConfigRuntimeException("Trying to use WorldGuard on non-bukkit server.", ExceptionType.InvalidPluginException, t);
-		}
-		MCPlugin pwgp = getServer().getPluginManager().getPlugin("WorldGuard");
-		if (pwgp != null && pwgp.isEnabled() && pwgp.isInstanceOf(WorldGuardPlugin.class) && pwgp instanceof BukkitMCPlugin) {
-			return (WorldGuardPlugin) ((BukkitMCPlugin) pwgp).getHandle();
-		}
-		return null;
-	}
-
 	public static void checkPlugin(String name, Target t) throws ConfigRuntimeException {
 		if (Static.getServer().getPluginManager().getPlugin(name) == null) {
 			throw new ConfigRuntimeException("Needed plugin " + name + " not found!",
@@ -684,7 +657,7 @@ public final class Static {
 				try {
 					m = Static.getServer().getPlayer(player);
 				} catch (Exception e) {
-					//Apparently bukkit can occasionally throw exceptions here, so instead of rethrowing
+					//Apparently the server can occasionally throw exceptions here, so instead of rethrowing
 					//a NPE or whatever, we'll assume that the player just isn't online, and
 					//throw a CRE instead.
 				}
@@ -976,7 +949,7 @@ public final class Static {
 					break;
 			}
 			if (show && printScreen) {
-				Static.getLogger().log(lev, color + message + TermColors.reset());
+				Static.getLogger().log(lev, "{0}{1}{2}", new Object[]{color, message, TermColors.reset()});
 			}
 		}
 		String timestamp = DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
@@ -988,27 +961,7 @@ public final class Static {
 		f.flush();
 	}
 
-	/**
-	 * Sets up CommandHelper to play-dirty, if the user has specified as such
-	 */
-	public static void PlayDirty() {
-		if (Prefs.PlayDirty()) {
-			try {
-				//Set up our "proxy"
-				BukkitDirtyRegisteredListener.Repopulate();
-			} catch (NoSuchMethodException ex) {
-				Logger.getLogger(Static.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (NoSuchFieldException ex) {
-				AliasCore.logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-			} catch (ClassCastException ex) {
-				AliasCore.logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-			} catch (IllegalArgumentException ex) {
-				AliasCore.logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-			} catch (IllegalAccessException ex) {
-				AliasCore.logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-			}
-		} //else play nice :(
-	}
+	
 
 	public static boolean hasCHPermission(String functionName, Environment env) {
 		//The * label completely overrides everything

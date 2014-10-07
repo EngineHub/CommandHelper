@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
-import com.laytonsmith.core.BukkitDirtyRegisteredListener;
+import com.laytonsmith.commandhelper.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;

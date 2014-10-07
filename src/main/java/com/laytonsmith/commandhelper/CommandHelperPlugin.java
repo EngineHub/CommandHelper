@@ -385,7 +385,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			Static.HostnameCache(p);
 		}
 
-		Static.PlayDirty();
+		BukkitDirtyRegisteredListener.PlayDirty();
 		registerEvent(playerListener);
 
 		//interpreter events
