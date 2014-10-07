@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -58,7 +59,17 @@ public class SQL {
 	}
 
 	@api
+	@seealso({unsafe_query.class, query_async.class})
 	public static class query extends AbstractFunction implements Optimizable{
+
+		private final boolean doWarn;
+		public query(){
+			this(true);
+		}
+
+		protected query(boolean doWarn){
+			this.doWarn = doWarn;
+		}
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -279,11 +290,13 @@ public class SQL {
 			Construct queryData = children.get(1).getData();
 			if(queryData instanceof CFunction){
 				//If it's a concat or sconcat, warn them that this is bad
-				if("sconcat".equals(queryData.val()) || "concat".equals(queryData.val())){
+				if(doWarn && ("sconcat".equals(queryData.val()) || "concat".equals(queryData.val()))){
 					CHLog.GetLogger().w(CHLog.Tags.COMPILER, "Use of concatenated query detected! This"
 							+ " is very bad practice, and could lead to SQL injection vulnerabilities"
 							+ " in your code. It is highly recommended that you use prepared queries,"
-							+ " which ensure that your parameters are properly escaped.", t);
+							+ " which ensure that your parameters are properly escaped. If you really"
+							+ " must use concatenation, and you promise you know what you're doing, you"
+							+ " can use " + new unsafe_query().getName() + "() to supress this warning.", t);
 				}
 			} else if(queryData instanceof CString){
 				//It's a hard coded query, so we can double check parameter lengths and other things
@@ -353,6 +366,39 @@ public class SQL {
 	}
 
 	@api
+	@seealso(query.class)
+	public static class unsafe_query extends query {
+
+		public unsafe_query() {
+			super(false);
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {profile, query, [parameters...]} Executes a query, just like the {{function|query}} function, however,"
+					+ " no validation is done to ensure that SQL injections might occur (essentially allowing for concatenation directly"
+					+ " in the query). Otherwise, functions exactly the same as query().";
+		}
+
+		@Override
+		public String getName() {
+			return "unsafe_query";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return null;
+		}
+
+	}
+
+	@api
+	@seealso(query.class)
 	public static class query_async extends AbstractFunction {
 
 		RunnableQueue queue = null;
