@@ -675,6 +675,9 @@ public class Compiler {
 			if(children.size() != 1){
 				throw new ConfigCompileException(getName() + " can only take one parameter", t);
 			}
+			if(!(children.get(0).getData() instanceof CString)){
+				throw new ConfigCompileException("Only hardcoded strings may be passed into " + getName(), t);
+			}
 			String value = children.get(0).getData().val();
 
 			StringBuilder b = new StringBuilder();
