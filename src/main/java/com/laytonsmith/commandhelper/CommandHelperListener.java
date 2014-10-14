@@ -113,8 +113,12 @@ public class CommandHelperListener implements Listener {
             WorldGuardPlugin wgp = SKHandler.getWorldGuardPlugin(Target.UNKNOWN);
             //This will cancel the command if the player isn't supposed to run it in this region
             if(wgp != null){
-                WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);
-                wgpl.onPlayerCommandPreprocess(event);
+				try {
+					WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);
+					wgpl.onPlayerCommandPreprocess(event);
+				} catch(NoClassDefFoundError ex){
+					// Ignored, for now
+				}
             }
         }
         String cmd = event.getMessage();        
