@@ -117,11 +117,6 @@ public class StringHandlingTest {
         assertCEquals(C.onstruct("test   123"), a.exec(Target.UNKNOWN, null, C.onstruct("test   123")));
     }
 
-    @Test
-    public void testCC() throws Exception{
-        assertEquals("Thisshouldbeamess", SRun("cc(This should be a mess)", null));
-    }
-
 	@Test
 	public void testSplit1() throws Exception{
 		assertEquals("{a, b}", SRun("split(',', 'a,b')", null));

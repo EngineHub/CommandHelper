@@ -96,7 +96,7 @@ public class OptimizationTest {
     }
 
 	@Test public void testUnreachableCode() throws Exception{
-		assertEquals("sconcat(assign(@a,0),if(@a,die(),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
+		assertEquals("sconcat(assign(@a,0),if(@a,string(die()),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
 		assertEquals("die()", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
 	}
 
