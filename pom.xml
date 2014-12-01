@@ -128,13 +128,13 @@
 			<id>bukkit-repo</id>
 			<url>http://repo.bukkit.org/content/groups/public/</url>
 		</repository>
-		<repository>
+		<!--<repository>
 			<id>bukkit-maven</id>
 			<url>http://repo.bukkit.org/content/repositories/releases/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
-		</repository>
+		</repository>-->
 
 		<!-- Other repositories -->
 		<repository>
@@ -179,9 +179,9 @@
 
 		<!-- Bukkit -->
 		<dependency>
-			<groupId>org.bukkit</groupId>
+			<groupId>com.sk89q.spigot</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.7.9-R0.3-SNAPSHOT</version>
+			<version>1.8-R0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- CraftBukkit Dependency for experimental features
