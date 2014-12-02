@@ -119,9 +119,9 @@ public class BukkitMCServer implements MCServer {
     public boolean dispatchCommand(MCCommandSender sender, String command){
 		CommandSender cs;
 		if(sender instanceof BukkitMCPlayer){
-			cs = ((BukkitMCPlayer)sender).p;
+			cs = (CommandSender)((MCPlayer)sender).getHandle();
 		} else {
-			cs = ((BukkitMCCommandSender)sender).c;
+			cs = (CommandSender)((MCCommandSender)sender).getHandle();
 		}
         return s.dispatchCommand(cs, command);
     }

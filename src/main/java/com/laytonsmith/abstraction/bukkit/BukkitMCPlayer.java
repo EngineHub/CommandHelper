@@ -417,9 +417,15 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			Map/*<String, n.m.s.OpListEntry>*/ d = (Map)ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
 			if(value){
 				/*n.m.s.OpListEntry*/ Class nmsOpListEntry = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "OpListEntry").loadClass();
-				/*net.minecraft.util.com.mojang.authlib.GameProfile*/ Class nmucmaGameProfile = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
+				Class nmsGameProfile;
+				try {
+					/*net.minecraft.util.com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
+				} catch (ClassNotFoundException eee){
+					// Probably 1.8
+					/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
+				}
 				Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
-				Object opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmucmaGameProfile, int.class}, new Object[]{gameProfile, 4});
+				Object opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
 				d.put(p.getUniqueId().toString(), opListEntry);
 			} else {
 				d.remove(p.getUniqueId().toString());
