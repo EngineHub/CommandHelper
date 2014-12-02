@@ -346,26 +346,6 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		}
 		((Creature) le).setTarget(target == null ? null : ((BukkitMCLivingEntity) target).asLivingEntity());
 	}
-
-	@Override
-	public String getCustomName() {
-		return le.getCustomName();
-	}
-
-	@Override
-	public boolean isCustomNameVisible() {
-		return le.isCustomNameVisible();
-	}
-
-	@Override
-	public void setCustomName(String name) {
-		le.setCustomName(name);
-	}
-
-	@Override
-	public void setCustomNameVisible(boolean visible) {
-		le.setCustomNameVisible(visible);
-	}
 	
 	@Override
 	public void kill(){

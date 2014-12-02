@@ -24,7 +24,6 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
     public void damage(double amount, MCEntity source);
 	public boolean getCanPickupItems();
 	public boolean getRemoveWhenFarAway();
-	public String getCustomName();
 	public MCEntityEquipment getEquipment();
     public double getEyeHeight();
     public double getEyeHeight(boolean ignoreSneaking);
@@ -44,13 +43,10 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
     public int getMaximumNoDamageTicks();
     public int getNoDamageTicks();
     public int getRemainingAir();
-	public boolean isCustomNameVisible();
 	public boolean isLeashed();
 	public void resetMaxHealth();
 	public void setCanPickupItems(boolean pickup);
 	public void setRemoveWhenFarAway(boolean remove);
-	public void setCustomName(String name);
-	public void setCustomNameVisible(boolean visible);
     public void setHealth(double health);
     public void setLastDamage(double damage);
     public void setLeashHolder(MCEntity holder);
@@ -60,6 +56,7 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
     public void setNoDamageTicks(int ticks);
     public void setRemainingAir(int ticks);
 	public void setTarget(MCLivingEntity target, Target t);
+
 	/**
 	 * Kills the entity. In some cases, this will be equivalent to setHealth(0), but
 	 * may not be, so this method should be used instead.

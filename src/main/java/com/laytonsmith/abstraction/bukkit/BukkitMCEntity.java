@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCEntity;
@@ -30,46 +28,47 @@ import org.bukkit.util.Vector;
 
 /**
  *
- * 
+ *
  */
 public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
-    Entity e;
-    public BukkitMCEntity(Entity e) {
-    	super(e);
-        this.e = e;
-    }
+	Entity e;
+
+	public BukkitMCEntity(Entity e) {
+		super(e);
+		this.e = e;
+	}
 
 	@Override
-    public boolean eject() {
+	public boolean eject() {
 		return e.eject();
 	}
 
 	@Override
-    public void fireEntityDamageEvent(MCDamageCause dc) {
-        EntityDamageEvent ede = new EntityDamageEvent(e, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001);
-        CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
-    }
+	public void fireEntityDamageEvent(MCDamageCause dc) {
+		EntityDamageEvent ede = new EntityDamageEvent(e, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001);
+		CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
+	}
 
 	@Override
-    public int getEntityId(){
-        return e.getEntityId();
-    }
+	public int getEntityId() {
+		return e.getEntityId();
+	}
 
 	@Override
-    public float getFallDistance() {
+	public float getFallDistance() {
 		return e.getFallDistance();
 	}
 
 	@Override
-    public int getFireTicks() {
+	public int getFireTicks() {
 		return e.getFireTicks();
 	}
 
-    @Override
-    public Entity getHandle(){
-        return e;
-    }
+	@Override
+	public Entity getHandle() {
+		return e;
+	}
 
 	@Override
 	public MCEntityDamageEvent getLastDamageCause() {
@@ -84,20 +83,20 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		return new BukkitEntityEvents.BukkitMCEntityDamageEvent(ldc);
 	}
 
-    public MCLivingEntity getLivingEntity() {
-        if(e instanceof LivingEntity){
-            return new BukkitMCLivingEntity((LivingEntity)e);
-        }
-        return null;
-    }
+	public MCLivingEntity getLivingEntity() {
+		if (e instanceof LivingEntity) {
+			return new BukkitMCLivingEntity((LivingEntity) e);
+		}
+		return null;
+	}
 
 	@Override
-    public MCLocation getLocation() {
-        if(e.getLocation() == null){
-            return null;
-        }
-        return new BukkitMCLocation(e.getLocation());
-    }
+	public MCLocation getLocation() {
+		if (e.getLocation() == null) {
+			return null;
+		}
+		return new BukkitMCLocation(e.getLocation());
+	}
 
 	@Override
 	public int getMaxFireTicks() {
@@ -109,7 +108,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		List<Entity> lst = e.getNearbyEntities(x, y, z);
 		List<MCEntity> retn = new ArrayList<MCEntity>();
 
-		for(Entity e : lst) {
+		for (Entity e : lst) {
 			retn.add(BukkitConvertor.BukkitGetCorrectEntity(e));
 		}
 
@@ -154,11 +153,11 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public MCWorld getWorld() {
-        if (e == null || e.getWorld() == null) {
-            return null;
-        }
-        return new BukkitMCWorld(e.getWorld());
-    }
+		if (e == null || e.getWorld() == null) {
+			return null;
+		}
+		return new BukkitMCWorld(e.getWorld());
+	}
 
 	@Override
 	public boolean isDead() {
@@ -174,19 +173,19 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public boolean isInsideVehicle() {
 		return e.isInsideVehicle();
 	}
-	
+
 	@Override
 	public boolean isOnGround() {
 		return e.isOnGround();
 	}
 
 	public boolean isLivingEntity() {
-        return e instanceof LivingEntity;
-    }
+		return e instanceof LivingEntity;
+	}
 
 	public boolean isTameable() {
-        return e instanceof Tameable;
-    }
+		return e instanceof Tameable;
+	}
 
 	@Override
 	public boolean leaveVehicle() {
@@ -215,12 +214,12 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public void setLastDamageCause(MCEntityDamageEvent event) {
-		e.setLastDamageCause((EntityDamageEvent)event._GetObject());
+		e.setLastDamageCause((EntityDamageEvent) event._GetObject());
 	}
 
 	@Override
 	public boolean setPassenger(MCEntity passenger) {
-		return e.setPassenger((Entity)passenger.getHandle());
+		return e.setPassenger((Entity) passenger.getHandle());
 	}
 
 	@Override
@@ -236,27 +235,48 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public boolean teleport(MCEntity destination) {
-	    Entity ent = ((BukkitMCEntity)destination).getHandle();
+		Entity ent = ((BukkitMCEntity) destination).getHandle();
 		return e.teleport(ent.getLocation());
 	}
 
 	@Override
 	public boolean teleport(MCEntity destination, MCTeleportCause cause) {
-		return e.teleport(((BukkitMCEntity)destination).getHandle(), TeleportCause.valueOf(cause.name()));
+		return e.teleport(((BukkitMCEntity) destination).getHandle(), TeleportCause.valueOf(cause.name()));
 	}
 
 	@Override
 	public boolean teleport(MCLocation location) {
-		return e.teleport(((BukkitMCLocation)location).asLocation());
+		return e.teleport(((BukkitMCLocation) location).asLocation());
 	}
 
 	@Override
 	public boolean teleport(MCLocation location, MCTeleportCause cause) {
-		return e.teleport(((BukkitMCLocation)location).asLocation(), TeleportCause.valueOf(cause.name()));
+		return e.teleport(((BukkitMCLocation) location).asLocation(), TeleportCause.valueOf(cause.name()));
+	}
+
+	@Override
+	public String getCustomName() {
+		return e.getCustomName();
+	}
+
+	@Override
+	public boolean isCustomNameVisible() {
+		return e.isCustomNameVisible();
+	}
+
+	@Override
+	public void setCustomName(String name) {
+		e.setCustomName(name);
+	}
+
+	@Override
+	public void setCustomNameVisible(boolean visible) {
+		e.setCustomNameVisible(visible);
 	}
 
 	/**
 	 * This only works with craftbukkit
+	 *
 	 * @return
 	 */
 	@Override

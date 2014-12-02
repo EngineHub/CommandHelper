@@ -88,4 +88,12 @@ public interface MCEntity extends MCMetadatable {
 	public boolean teleport(MCLocation location);
 
 	public boolean teleport(MCLocation location, MCTeleportCause cause);
+
+	public void setCustomName(String name);
+	
+	public String getCustomName();
+
+	public void setCustomNameVisible(boolean visible);
+
+	public boolean isCustomNameVisible();
 }
