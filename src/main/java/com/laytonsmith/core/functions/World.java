@@ -10,7 +10,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.Velocity;
+import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCGameRule;
@@ -1076,7 +1076,7 @@ public class World {
 				double y = Double.valueOf(vect.get(1, t).val());
 				double z = Double.valueOf(vect.get(2, t).val());
 
-				Velocity v = new Velocity(x, y, z);
+				MVector3D v = new MVector3D(x, y, z);
 
 				block.setVelocity(v);
 			}
@@ -1624,7 +1624,7 @@ public class World {
 
 			MCLocation shifted_from = from;
 
-			Velocity velocity = to.toVector().subtract(from.toVector()).normalize();
+			MVector3D velocity = to.toVector().subtract(from.toVector()).normalize();
 
 			for (int i = 0; i < distance; i++) {
 				shifted_from = shifted_from.add(velocity);

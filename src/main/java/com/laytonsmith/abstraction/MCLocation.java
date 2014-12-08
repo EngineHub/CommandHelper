@@ -22,12 +22,15 @@ public interface MCLocation extends AbstractionObject{
 	public MCChunk getChunk();
     public MCBlock getBlock();
 	public MCLocation add(MCLocation vec);
-	public MCLocation add(Velocity vec);
+
+	public MCLocation add(MVector3D vec);
 	public MCLocation add(double x, double y, double z);
 	public MCLocation multiply(double m);
-	public Velocity toVector();
+
+	public MVector3D toVector();
 	public MCLocation subtract(MCLocation vec);
-	public MCLocation subtract(Velocity vec);
+
+	public MCLocation subtract(MVector3D vec);
 	public MCLocation subtract(double x, double y, double z);
 
 	public void setX(double x);
@@ -36,8 +39,8 @@ public interface MCLocation extends AbstractionObject{
     public void setPitch(float p);
     public void setYaw(float y);
 	public void breakBlock();
-	
-	public Velocity getDirection();
+
+	public MVector3D getDirection();
 
     public MCLocation clone();
 }

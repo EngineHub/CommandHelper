@@ -443,7 +443,9 @@ public class EntityEvents {
 					mapEvent.put("player", CNull.NULL);
 				}
 				mapEvent.put("location", ObjectGenerator.GetGenerator().location(projectile.getLocation()));
-				mapEvent.put("velocity", ObjectGenerator.GetGenerator().velocity(projectile.getVelocity(), Target.UNKNOWN));
+				CArray velocity = ObjectGenerator.GetGenerator().vector(projectile.getVelocity(), Target.UNKNOWN);
+				velocity.set("magnitude", new CDouble(projectile.getVelocity().length(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("velocity", velocity);
 				return mapEvent;
 			} else {
 				throw new EventException("Cannot convert event to ProjectileLaunchEvent");
@@ -455,7 +457,7 @@ public class EntityEvents {
 			if (event instanceof MCProjectileLaunchEvent) {
 				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
 				if (key.equals("velocity")) {
-					projectileLaunchEvent.getEntity().setVelocity(ObjectGenerator.GetGenerator().velocity(value, Target.UNKNOWN));
+					projectileLaunchEvent.getEntity().setVelocity(ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN));
 					return true;
 				}
 			}

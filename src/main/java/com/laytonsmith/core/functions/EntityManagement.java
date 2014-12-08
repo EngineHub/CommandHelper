@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAgeable;
+import com.laytonsmith.abstraction.MCArmorStand;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -24,7 +25,7 @@ import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCTNT;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.Velocity;
+import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
@@ -54,6 +55,7 @@ import com.laytonsmith.abstraction.entities.MCWitherSkull;
 import com.laytonsmith.abstraction.entities.MCWolf;
 import com.laytonsmith.abstraction.entities.MCZombie;
 import com.laytonsmith.abstraction.enums.MCArt;
+import com.laytonsmith.abstraction.enums.MCBodyPart;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -379,7 +381,8 @@ public class EntityManagement {
 				Construct... args) throws ConfigRuntimeException {
 
 			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
-			CArray va = ObjectGenerator.GetGenerator().velocity(e.getVelocity(), t);
+			CArray va = ObjectGenerator.GetGenerator().vector(e.getVelocity(), t);
+			va.set("magnitude", new CDouble(e.getVelocity().length(), t), t);
 			return va;
 		}
 
@@ -412,7 +415,7 @@ public class EntityManagement {
 				Construct... args) throws ConfigRuntimeException {
 
 			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
-			e.setVelocity(ObjectGenerator.GetGenerator().velocity(args[1], t));
+			e.setVelocity(ObjectGenerator.GetGenerator().vector(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -926,7 +929,7 @@ public class EntityManagement {
 
 				return new CInt(projectile.getEntityId(), t);
 			} else {
-				Velocity velocity = to.toVector().subtract(from.toVector()).normalize();
+				MVector3D velocity = to.toVector().subtract(from.toVector()).normalize();
 
 				if (shooter_id > 0) {
 					shifted_from = from.add(velocity);
@@ -1139,10 +1142,15 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			Map<MCEquipmentSlot, MCItemStack> eq = le.getEquipment().getAllEquipment();
+			MCEntityEquipment eq = le.getEquipment();
+			if (eq == null) {
+				throw new ConfigRuntimeException("Entities of type \"" + le.getType() + "\" do not have equipment.",
+						ExceptionType.BadEntityTypeException, t);
+			}
+			Map<MCEquipmentSlot, MCItemStack> eqmap = le.getEquipment().getAllEquipment();
 			CArray ret = CArray.GetAssociativeArray(t);
-			for (MCEquipmentSlot key : eq.keySet()) {
-				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eq.get(key), t), t);
+			for (MCEquipmentSlot key : eqmap.keySet()) {
+				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eqmap.get(key), t), t);
 			}
 			return ret;
 		}
@@ -1154,7 +1162,8 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "equipmentArray {entityID} Returns an associative array showing the equipment this entity is wearing.";
+			return "equipmentArray {entityID} Returns an associative array showing the equipment this mob is wearing."
+					+ " This does not work on most \"dumb\" entities, only mobs (entities with AI).";
 		}
 
 		@Override
@@ -1173,7 +1182,12 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntityEquipment ee = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
+			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCEntityEquipment ee = le.getEquipment();
+			if (ee == null) {
+				throw new ConfigRuntimeException("Entities of type \"" + le.getType() + "\" do not have equipment.",
+						ExceptionType.BadEntityTypeException, t);
+			}
 			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
 			if (args[1] instanceof CNull) {
 				ee.clearEquipment();
@@ -1202,7 +1216,9 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityID, array} Takes an associative array with keys representing equipment slots and values"
-					+ " of itemArrays, the same used by set_pinv. The equipment slots are: "
+					+ " of itemArrays, the same used by set_pinv. This does not work on most \"dumb\" entities,"
+					+ " only mobs (entities with AI). Unless a mod, plugin, or future update changes vanilla functionality,"
+					+ " only humanoid mobs will render their equipment slots. The equipment slots are: "
 					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
 		}
 
@@ -2259,6 +2275,7 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			String docs = getBundledDocs();
+			docs = docs.replace("%BODY_PART%", "pose" + StringUtils.Join(MCBodyPart.humanoidParts(), ", pose", ", or pose", " or pose"));
 			docs = docs.replace("%HORSE_COLOR%", StringUtils.Join(MCHorseColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%HORSE_STYLE%", StringUtils.Join(MCHorsePattern.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%HORSE_VARIANT%", StringUtils.Join(MCHorseVariant.values(), ", ", ", or ", " or "));
@@ -2293,6 +2310,20 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
 					break;
+				case ARMOR_STAND:
+					MCArmorStand stand = (MCArmorStand) entity;
+					specArray.set(entity_spec.KEY_ARMORSTAND_ARMS, CBoolean.get(stand.hasArms()), t);
+					specArray.set(entity_spec.KEY_ARMORSTAND_BASEPLATE, CBoolean.get(stand.hasBasePlate()), t);
+					specArray.set(entity_spec.KEY_ARMORSTAND_GRAVITY, CBoolean.get(stand.hasGravity()), t);
+					specArray.set(entity_spec.KEY_ARMORSTAND_SMALLSIZE, CBoolean.get(stand.isSmall()), t);
+					specArray.set(entity_spec.KEY_ARMORSTAND_VISIBLE, CBoolean.get(stand.isVisible()), t);
+					CArray poses = CArray.GetAssociativeArray(t);
+					Map<MCBodyPart, MVector3D> poseMap = stand.getAllPoses();
+					for (MCBodyPart key : poseMap.keySet()) {
+						poses.set("pose" + key.name(), ObjectGenerator.GetGenerator().vector(poseMap.get(key), t), t);
+					}
+					specArray.set(entity_spec.KEY_ARMORSTAND_POSES, poses, t);
+					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t);
@@ -2323,7 +2354,7 @@ public class EntityManagement {
 				case FIREBALL:
 				case SMALL_FIREBALL:
 					MCFireball ball = (MCFireball) entity;
-					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().velocity(ball.getDirection(), t), t);
+					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().vector(ball.getDirection(), t), t);
 					break;
 				case FISHING_HOOK:
 					MCFishHook hook = (MCFishHook) entity;
@@ -2419,7 +2450,7 @@ public class EntityManagement {
 				case WITHER_SKULL:
 					MCWitherSkull skull = (MCWitherSkull) entity;
 					specArray.set(entity_spec.KEY_WITHER_SKULL_CHARGED, CBoolean.get(skull.isCharged()), t);
-					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().velocity(skull.getDirection(), t), t);
+					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().vector(skull.getDirection(), t), t);
 					break;
 				case WOLF:
 					MCWolf wolf = (MCWolf) entity;
@@ -2439,6 +2470,12 @@ public class EntityManagement {
 		//used to ensure that the indexes are the same in entity_spec(), set_entity_spec(), and in the documentation.
 		private static final String KEY_ARROW_CRITICAL = "critical";
 		private static final String KEY_ARROW_KNOCKBACK = "knockback";
+		private static final String KEY_ARMORSTAND_ARMS = "arms";
+		private static final String KEY_ARMORSTAND_BASEPLATE = "baseplate";
+		private static final String KEY_ARMORSTAND_GRAVITY = "gravity";
+		private static final String KEY_ARMORSTAND_POSES = "poses";
+		private static final String KEY_ARMORSTAND_SMALLSIZE = "small";
+		private static final String KEY_ARMORSTAND_VISIBLE = "visible";
 		private static final String KEY_CREEPER_POWERED = "powered";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
@@ -2496,13 +2533,18 @@ public class EntityManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.IndexOverflowException, ExceptionType.IndexOverflowException, ExceptionType.RangeException, ExceptionType.FormatException};
+			return new ExceptionType[]{
+					ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.IndexOverflowException,
+					ExceptionType.IndexOverflowException, ExceptionType.RangeException, ExceptionType.FormatException
+			};
 		}
 
 		@Override
 		public String docs() {
-			return "void {entityID, specArray} Sets the data in the specArray to the given entity. The specArray must follow the same format than in entity_spec()."
-							+ " All indexes in the specArray are optional.";
+			return "void {entityID, specArray} Sets the data in the specArray to the given entity."
+					+ " The specArray must follow the same format as entity_spec()."
+					+ " See the documentation for that function for info on available options."
+					+ " All indices in the specArray are optional.";
 		}
 
 		private static void throwException(String index, Target t) throws ConfigRuntimeException {
@@ -2533,6 +2575,48 @@ public class EntityManagement {
 								break;
 							default:
 								throwException(index, t);
+						}
+					}
+					break;
+				case ARMOR_STAND:
+					MCArmorStand stand = (MCArmorStand) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ARMORSTAND_ARMS:
+								stand.setHasArms(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_ARMORSTAND_BASEPLATE:
+								stand.setHasBasePlate(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_ARMORSTAND_GRAVITY:
+								stand.setHasGravity(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_ARMORSTAND_SMALLSIZE:
+								stand.setSmall(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_ARMORSTAND_VISIBLE:
+								stand.setVisible(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_ARMORSTAND_POSES:
+								Map<MCBodyPart, MVector3D> poseMap = stand.getAllPoses();
+								if (specArray.get(index, t) instanceof CArray) {
+									CArray poseArray = (CArray) specArray.get(index, t);
+									for (MCBodyPart key : poseMap.keySet()) {
+										try {
+											poseMap.put(key, ObjectGenerator.GetGenerator().vector(poseMap.get(key),
+													poseArray.get("pose" + key.name(), t), t));
+										} catch (ConfigRuntimeException cre) {
+											// Ignore, this just means the user didn't modify a body part
+										}
+									}
+								}
+								if (specArray.get(index, t) instanceof CNull) {
+									for (MCBodyPart key : poseMap.keySet()) {
+										poseMap.put(key, new MVector3D());
+									}
+								}
+								stand.setAllPoses(poseMap);
+								break;
 						}
 					}
 					break;
@@ -2605,7 +2689,7 @@ public class EntityManagement {
 					for (String index : specArray.stringKeySet()) {
 						switch (index.toLowerCase()) {
 							case entity_spec.KEY_FIREBALL_DIRECTION:
-								ball.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index, t), t));
+								ball.setDirection(ObjectGenerator.GetGenerator().vector(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2907,7 +2991,7 @@ public class EntityManagement {
 								skull.setCharged(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case entity_spec.KEY_FIREBALL_DIRECTION:
-								skull.setDirection(ObjectGenerator.GetGenerator().velocity(specArray.get(index, t), t));
+								skull.setDirection(ObjectGenerator.GetGenerator().vector(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
