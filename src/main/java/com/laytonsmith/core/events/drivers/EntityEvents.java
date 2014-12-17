@@ -819,11 +819,13 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{clicked: the type of entity being clicked | x: <expression> | y: <expression> | z: <expression> }"
-					+ " Fires when a player right clicks an entity. Only cancels Armor Stand interactions."
+			return "{clicked: the type of entity being clicked | x: <expression> offset of clicked location"
+					+ " from entity location on the x axis. | y: <expression> | z: <expression> }"
+					+ " Fires when a player right clicks an entity. This event is like player_interact_entity but also"
+					+ " has the click position, and when cancelled only cancels interactions with Armor Stand entities."
 					+ " {player: the player clicking | clicked | id: the id of the entity"
 					+ " | data: if a player is clicked, this will contain their name"
-					+ " | position: relative location of the click on the entity}"
+					+ " | position: offset of clicked location from entity location in an xyz array.}"
 					+ " {}"
 					+ " {player|clicked|id|data}";
 		}
