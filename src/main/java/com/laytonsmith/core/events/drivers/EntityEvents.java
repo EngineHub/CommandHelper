@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -836,9 +837,10 @@ public class EntityEvents {
 			if(event instanceof MCPlayerInteractAtEntityEvent){
 				MCPlayerInteractAtEntityEvent e = (MCPlayerInteractAtEntityEvent) event;
 				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
-				Prefilters.match(prefilter, "x", e.getClickedPosition().x, Prefilters.PrefilterType.EXPRESSION);
-				Prefilters.match(prefilter, "y", e.getClickedPosition().y, Prefilters.PrefilterType.EXPRESSION);
-				Prefilters.match(prefilter, "z", e.getClickedPosition().z, Prefilters.PrefilterType.EXPRESSION);
+				MVector3D position = e.getClickedPosition();
+				Prefilters.match(prefilter, "x", position.x, Prefilters.PrefilterType.EXPRESSION);
+				Prefilters.match(prefilter, "y", position.y, Prefilters.PrefilterType.EXPRESSION);
+				Prefilters.match(prefilter, "z", position.z, Prefilters.PrefilterType.EXPRESSION);
 				return true;
 			}
 			return false;
