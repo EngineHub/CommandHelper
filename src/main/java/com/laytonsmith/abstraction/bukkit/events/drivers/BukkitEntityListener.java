@@ -22,6 +22,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
@@ -37,12 +38,19 @@ public class BukkitEntityListener implements Listener{
 		EventUtils.TriggerExternal(cse);
 		EventUtils.TriggerListener(Driver.CREATURE_SPAWN, "creature_spawn", cse);
 	}
-	
+
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onClickEnt(PlayerInteractEntityEvent event) {
 		BukkitEntityEvents.BukkitMCPlayerInteractEntityEvent piee = new BukkitEntityEvents.BukkitMCPlayerInteractEntityEvent(event);
 		EventUtils.TriggerExternal(piee);
 		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_ENTITY, "player_interact_entity", piee);
+	}
+
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void onClickEnt(PlayerInteractAtEntityEvent event) {
+		BukkitEntityEvents.BukkitMCPlayerInteractAtEntityEvent piaee = new BukkitEntityEvents.BukkitMCPlayerInteractAtEntityEvent(event);
+		EventUtils.TriggerExternal(piaee);
+		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_AT_ENTITY, "player_interact_at_entity", piaee);
 	}
 	
     @EventHandler(priority=EventPriority.LOWEST)
