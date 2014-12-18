@@ -21,7 +21,7 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.Velocity;
+import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -245,8 +245,6 @@ public class ObjectGenerator {
      * new formats currently
      *
      * @param i
-     * @param line_num
-     * @param f
      * @return
      */
     public MCItemStack item(Construct i, Target t) {
@@ -744,57 +742,72 @@ public class ObjectGenerator {
 		}
 	}
 
-	public CArray velocity(Velocity v, Target t) {
-		double x,y,z,mag;
-		x = y = z = mag = 0;
+    public CArray vector(MVector3D v, Target t) {
+        double x,y,z;
+		x = y = z = 0;
 		if (v != null) {
 			x = v.x;
 			y = v.y;
 			z = v.z;
-			mag = v.magnitude;
 		}
 		CArray ret = CArray.GetAssociativeArray(t);
-		ret.set("magnitude", new CDouble(mag, t), t);
-		ret.set("x", new CDouble(x, t), t);
+        ret.set("x", new CDouble(x, t), t);
 		ret.set("y", new CDouble(y, t), t);
 		ret.set("z", new CDouble(z, t), t);
 		return ret;
 	}
 
-	public Velocity velocity(Construct c, Target t) {
-		CArray va;
-		double x, y, z, mag;
-		x = y = z = mag = 0;
-		if (c instanceof CArray) {
-			va = (CArray) c;
+    /**
+     * Creates a new 3D vector from the given construct
+     * @param c A CNull or CArray to build the vector from
+     * @param t
+     * @return
+     */
+    public MVector3D vector(Construct c, Target t) {
+        return vector(new MVector3D(), c, t);
+    }
+
+    /**
+     * Modifies an existing vector using a given
+     * @param v
+     * @param c
+     * @param t
+     * @return
+     */
+    public MVector3D vector(MVector3D v, Construct c, Target t) {
+        if (c instanceof CArray) {
+			CArray va = (CArray) c;
 			if (va.containsKey("x")) {
-				x = Static.getDouble(va.get("x", t), t);
+				v.x = Static.getDouble(va.get("x", t), t);
 			}
 			if (va.containsKey("y")) {
-				y = Static.getDouble(va.get("y", t), t);
+				v.y = Static.getDouble(va.get("y", t), t);
 			}
 			if (va.containsKey("z")) {
-				z = Static.getDouble(va.get("z", t), t);
+				v.z = Static.getDouble(va.get("z", t), t);
 			}
 			if (!va.containsKey("x") && !va.containsKey("y") && !va.containsKey("z")) {
 				switch ((int) va.size()) {
 				case 4:
-					z = Static.getDouble(va.get(3, t), t);
-					y = Static.getDouble(va.get(2, t), t);
-					x = Static.getDouble(va.get(1, t), t);
+					v.z = Static.getDouble(va.get(3, t), t);
+                    v.y = Static.getDouble(va.get(2, t), t);
+                    v.x = Static.getDouble(va.get(1, t), t);
 					break;
 				case 3:
-					z = Static.getDouble(va.get(2, t), t);
+                    v.z = Static.getDouble(va.get(2, t), t);
 				case 2:
-					y = Static.getDouble(va.get(1, t), t);
+                    v.y = Static.getDouble(va.get(1, t), t);
 				case 1:
-					x = Static.getDouble(va.get(0, t), t);
+                    v.x = Static.getDouble(va.get(0, t), t);
 				}
 			}
-			return new Velocity(mag, x, y, z);
-		} else {
-			throw new Exceptions.FormatException("Expected an array but recieved " + c, t);
+            // TODO next commit add this feature
+//        } else if (c instanceof CNull) {
+//            v.multiply(0);
+        } else {
+			throw new Exceptions.FormatException("Expected an array but received " + c, t);
 		}
+        return v;
 	}
 
 	public CArray enchants(Map<MCEnchantment, Integer> map, Target t) {

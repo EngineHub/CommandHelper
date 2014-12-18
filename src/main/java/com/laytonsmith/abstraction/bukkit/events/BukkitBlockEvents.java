@@ -7,7 +7,7 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.Velocity;
+import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
@@ -380,13 +380,13 @@ public class BukkitBlockEvents {
 		}
 
 		@Override
-		public Velocity getVelocity() {
+		public MVector3D getVelocity() {
 			Vector v = bde.getVelocity();
-			return new Velocity(v.length(), v.getX(), v.getY(), v.getZ());
+			return new MVector3D(v.getX(), v.getY(), v.getZ());
 		}
 
 		@Override
-		public void setVelocity(Velocity vel) {
+		public void setVelocity(MVector3D vel) {
 			Vector v = new Vector(vel.x, vel.y, vel.z);
 			bde.setVelocity(v);
 		}

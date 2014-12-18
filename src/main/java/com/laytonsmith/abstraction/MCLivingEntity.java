@@ -24,6 +24,11 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
     public void damage(double amount, MCEntity source);
 	public boolean getCanPickupItems();
 	public boolean getRemoveWhenFarAway();
+
+	/**
+	 * With the addition of ArmorStands, this can be null. At the time of this writing,
+	 * ArmorStands are the only LivingEntity with such a limitation, and a workaround has been added.
+	 */
 	public MCEntityEquipment getEquipment();
     public double getEyeHeight();
     public double getEyeHeight(boolean ignoreSneaking);

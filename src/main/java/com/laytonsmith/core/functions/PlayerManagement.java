@@ -12,7 +12,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.Velocity;
+import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
@@ -3502,8 +3502,8 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			CArray vector = CArray.GetAssociativeArray(t);
-			Velocity velocity = p.getVelocity();
-			vector.set("magnitude", new CDouble(velocity.magnitude, t), t);
+			MVector3D velocity = p.getVelocity();
+			vector.set("magnitude", new CDouble(velocity.length(), t), t);
 			vector.set("x", new CDouble(velocity.x, t), t);
 			vector.set("y", new CDouble(velocity.y, t), t);
 			vector.set("z", new CDouble(velocity.z, t), t);
@@ -3573,11 +3573,12 @@ public class PlayerManagement {
 				default:
 					throw new RuntimeException();
 			}
-			Velocity v = new Velocity(x, y, z);
-			if (v.magnitude > 10) {
+			MVector3D v = new MVector3D(x, y, z);
+			// TODO: consider removing this and updating the switch above
+			if (v.length() > 10) {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
 						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
-						+ " (It was " + v.magnitude + ")", t);
+								+ " (It was " + v.length() + ")", t);
 				return CBoolean.FALSE;
 			}
 			p.setVelocity(v);

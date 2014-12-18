@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -27,6 +28,7 @@ import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractAtEntityEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
@@ -443,7 +445,9 @@ public class EntityEvents {
 					mapEvent.put("player", CNull.NULL);
 				}
 				mapEvent.put("location", ObjectGenerator.GetGenerator().location(projectile.getLocation()));
-				mapEvent.put("velocity", ObjectGenerator.GetGenerator().velocity(projectile.getVelocity(), Target.UNKNOWN));
+				CArray velocity = ObjectGenerator.GetGenerator().vector(projectile.getVelocity(), Target.UNKNOWN);
+				velocity.set("magnitude", new CDouble(projectile.getVelocity().length(), Target.UNKNOWN), Target.UNKNOWN);
+				mapEvent.put("velocity", velocity);
 				return mapEvent;
 			} else {
 				throw new EventException("Cannot convert event to ProjectileLaunchEvent");
@@ -455,7 +459,7 @@ public class EntityEvents {
 			if (event instanceof MCProjectileLaunchEvent) {
 				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
 				if (key.equals("velocity")) {
-					projectileLaunchEvent.getEntity().setVelocity(ObjectGenerator.GetGenerator().velocity(value, Target.UNKNOWN));
+					projectileLaunchEvent.getEntity().setVelocity(ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN));
 					return true;
 				}
 			}
@@ -742,6 +746,7 @@ public class EntityEvents {
 		public String docs() {
 			return "{clicked: the type of entity being clicked}"
 				+ " Fires when a player right clicks an entity. Note, not all entities are clickable."
+				+ " Interactions with Armor Stands do not trigger this event."
 				+ " {player: the player clicking | clicked | id: the id of the entity"
 				+ " | data: if a player is clicked, this will contain their name}"
 				+ " {}"
@@ -783,7 +788,7 @@ public class EntityEvents {
 
 				return map;
 			} else {
-				throw new EventException("Cannot convert e to MCPlayerDropItemEvent");
+				throw new EventException("Cannot convert e to MCPlayerInteractEntityEvent");
 			}
 		}
 
@@ -795,6 +800,88 @@ public class EntityEvents {
 		@Override
 		public boolean modifyEvent(String key, Construct value,
 				BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	public static class player_interact_at_entity extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "player_interact_at_entity";
+		}
+
+		@Override
+		public String docs() {
+			return "{clicked: the type of entity being clicked | x: <expression> offset of clicked location"
+					+ " from entity location on the x axis. | y: <expression> | z: <expression> }"
+					+ " Fires when a player right clicks an entity. This event is like player_interact_entity but also"
+					+ " has the click position, and when cancelled only cancels interactions with Armor Stand entities."
+					+ " {player: the player clicking | clicked | id: the id of the entity"
+					+ " | data: if a player is clicked, this will contain their name"
+					+ " | position: offset of clicked location from entity location in an xyz array.}"
+					+ " {}"
+					+ " {player|clicked|id|data}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+				throws PrefilterNonMatchException {
+			if(event instanceof MCPlayerInteractAtEntityEvent){
+				MCPlayerInteractAtEntityEvent e = (MCPlayerInteractAtEntityEvent) event;
+				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
+				MVector3D position = e.getClickedPosition();
+				Prefilters.match(prefilter, "x", position.x, Prefilters.PrefilterType.EXPRESSION);
+				Prefilters.match(prefilter, "y", position.y, Prefilters.PrefilterType.EXPRESSION);
+				Prefilters.match(prefilter, "z", position.z, Prefilters.PrefilterType.EXPRESSION);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if (e instanceof MCPlayerInteractAtEntityEvent) {
+				MCPlayerInteractAtEntityEvent event = (MCPlayerInteractAtEntityEvent) e;
+				Map<String, Construct> map = evaluate_helper(e);
+
+				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
+				map.put("id", new CInt(event.getEntity().getEntityId(),Target.UNKNOWN));
+				map.put("position", ObjectGenerator.GetGenerator().vector(event.getClickedPosition(), Target.UNKNOWN));
+
+				String data = "";
+				if(event.getEntity() instanceof MCPlayer) {
+					data = ((MCPlayer)event.getEntity()).getName();
+				}
+				map.put("data",  new CString(data, Target.UNKNOWN));
+
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to MCPlayerInteractAtEntityEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_INTERACT_AT_ENTITY;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 

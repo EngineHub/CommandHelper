@@ -4,7 +4,7 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.Velocity;
+import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import org.bukkit.Location;
@@ -134,7 +134,7 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-	public MCLocation add(Velocity vec) {
+	public MCLocation add(MVector3D vec) {
 		return new BukkitMCLocation(l.add(new Vector(vec.x, vec.y, vec.z)));
 	}
 
@@ -149,8 +149,8 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-	public Velocity toVector() {
-		return new Velocity(l.getX(), l.getY(), l.getZ());
+	public MVector3D toVector() {
+		return new MVector3D(l.getX(), l.getY(), l.getZ());
 	}
 
 	@Override
@@ -159,7 +159,7 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-	public MCLocation subtract(Velocity vec) {
+	public MCLocation subtract(MVector3D vec) {
 		return new BukkitMCLocation(l.subtract(new Vector(vec.x, vec.y, vec.z)));
 	}
 
@@ -198,8 +198,8 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-	public Velocity getDirection() {
-		return new Velocity(1, l.getDirection().getX(), l.getDirection().getY(), l.getDirection().getZ());
+	public MVector3D getDirection() {
+		return new MVector3D(l.getDirection().getX(), l.getDirection().getY(), l.getDirection().getZ());
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -38,7 +39,6 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -938,7 +938,9 @@ public class BlockEvents {
 
 			map.put("item", ObjectGenerator.GetGenerator().item(event.getItem(), Target.UNKNOWN));
 
-			map.put("velocity", ObjectGenerator.GetGenerator().velocity(event.getVelocity(), Target.UNKNOWN));
+            CArray velocity = ObjectGenerator.GetGenerator().vector(event.getVelocity(), Target.UNKNOWN);
+            velocity.set("magnitude", new CDouble(event.getVelocity().length(), Target.UNKNOWN), Target.UNKNOWN);
+			map.put("velocity", velocity);
 
 			CArray location = ObjectGenerator.GetGenerator()
 					.location(StaticLayer.GetLocation(blk.getWorld(), blk.getX(), blk.getY(), blk.getZ()));
@@ -955,7 +957,7 @@ public class BlockEvents {
 					return true;
 				}
 				if ("velocity".equals(key)) {
-					((MCBlockDispenseEvent) event).setVelocity(ObjectGenerator.GetGenerator().velocity(value, Target.UNKNOWN));
+					((MCBlockDispenseEvent) event).setVelocity(ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN));
 					return true;
 				}
 			}
