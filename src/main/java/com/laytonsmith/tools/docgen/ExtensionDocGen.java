@@ -2,6 +2,7 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
@@ -38,6 +39,7 @@ public class ExtensionDocGen {
 		customDiscovery.setClassDiscoveryCache(cache);
 		URL url = new URL("jar:" + inputExtension.toURI().toURL() + "!/");
 		customDiscovery.addDiscoveryLocation(url);
+		customDiscovery.setDefaultClassLoader(ExtensionDocGen.class.getClassLoader());
 		StringBuilder fdocs = new StringBuilder();
 		DynamicClassLoader classloader = new DynamicClassLoader();
 		classloader.addJar(url);
@@ -78,12 +80,12 @@ public class ExtensionDocGen {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();
 				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
-			} catch (NoSuchMethodException exception) {
-			} catch (SecurityException exception) {
-			} catch (InstantiationException exception) {
-			} catch (IllegalAccessException exception) {
-			} catch (IllegalArgumentException exception) {
-			} catch (InvocationTargetException exception) {
+			} catch (NoSuchMethodException 
+					| SecurityException
+					| InstantiationException
+					| IllegalAccessException
+					| IllegalArgumentException
+					| InvocationTargetException exception) {
 			}
 			for (Class<Function> cf : entry.getValue()) {
 				Function f = cf.newInstance();
@@ -97,7 +99,7 @@ public class ExtensionDocGen {
 			}
 		}
 		//events
-		HashMap<Class, ArrayList<Class<Event>>> eventMap = new HashMap<Class, ArrayList<Class<Event>>>();
+		HashMap<Class, ArrayList<Class<Event>>> eventMap = new HashMap<>();
 		for (Class<Event> ce : customDiscovery.loadClassesWithAnnotationThatExtend(api.class, Event.class, classloader, true)) {
 			Class enclosing = ce.getEnclosingClass();
 			if (eventMap.containsKey(enclosing)) {
@@ -107,7 +109,7 @@ public class ExtensionDocGen {
 				eventMap.get(enclosing).add(ce);
 			}
 		}
-		ArrayList<Entry<Class, ArrayList<Class<Event>>>> eventEntryList = new ArrayList<Entry<Class, ArrayList<Class<Event>>>>(eventMap.entrySet());
+		ArrayList<Entry<Class, ArrayList<Class<Event>>>> eventEntryList = new ArrayList<>(eventMap.entrySet());
 		Collections.sort(eventEntryList, new Comparator<Entry<Class, ArrayList<Class<Event>>>>() {
 			@Override
 			public int compare(Entry<Class, ArrayList<Class<Event>>> o1, Entry<Class, ArrayList<Class<Event>>> o2) {
@@ -133,12 +135,12 @@ public class ExtensionDocGen {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();
 				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
-			} catch (NoSuchMethodException exception) {
-			} catch (SecurityException exception) {
-			} catch (InstantiationException exception) {
-			} catch (IllegalAccessException exception) {
-			} catch (IllegalArgumentException exception) {
-			} catch (InvocationTargetException exception) {
+			} catch (NoSuchMethodException 
+					| SecurityException
+					| InstantiationException
+					| IllegalAccessException
+					| IllegalArgumentException
+					| InvocationTargetException exception) {
 			}
 			for (Class<Event> ce : entry.getValue()) {
 				Event e = ce.newInstance();

@@ -348,6 +348,8 @@ public class ClassDiscovery {
 			} else {
 				throw new RuntimeException("Unknown url type: " + rootLocation);
 			}
+		} catch(Exception e){
+			e.printStackTrace();;
 		} finally {
 			if(debug){
 				System.out.println("Scans finished for " + rootLocation + ", taking " + (System.currentTimeMillis() - start) + " ms.");
