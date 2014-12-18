@@ -14,8 +14,8 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.sk89q.worldedit.expression.Expression;
-import com.sk89q.worldedit.expression.ExpressionException;
+import com.sk89q.worldedit.internal.expression.Expression;
+import com.sk89q.worldedit.internal.expression.ExpressionException;
 import java.util.Map;
 
 /**
