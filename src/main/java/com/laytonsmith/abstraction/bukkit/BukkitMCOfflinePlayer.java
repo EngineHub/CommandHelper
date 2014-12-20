@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -75,6 +76,7 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 
 	@Override
 	public MCLocation getBedSpawnLocation() {
-        return new BukkitMCLocation(op.getBedSpawnLocation());
+		Location loc = op.getBedSpawnLocation();
+		return loc == null ? null : new BukkitMCLocation(loc);
     }
 }
