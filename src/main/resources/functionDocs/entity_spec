@@ -82,6 +82,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SLIME_SIZE%: The size of the magma cube.
 |-
+| MINECART
+|
+* %KEY_MINECART_BLOCK%: The material name of the block being displayed.
+* %KEY_MINECART_OFFSET%: The offset of the block being displayed.
+|-
 | MINECART_COMMAND
 | 
 * %KEY_MINECART_COMMAND_COMMAND%: The command that the command minecart will run when activated.
