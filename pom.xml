@@ -125,8 +125,8 @@
 
 		<!-- Repository for Bukkit -->
 		<repository>
-			<id>bukkit-repo</id>
-			<url>http://repo.bukkit.org/content/groups/public/</url>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/</url>
 		</repository>
 		<!--<repository>
 			<id>bukkit-maven</id>
@@ -185,7 +185,7 @@
 
 		<!-- Bukkit -->
 		<dependency>
-			<groupId>com.sk89q.spigot</groupId>
+			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
 			<version>1.8-R0.1-SNAPSHOT</version>
 		</dependency>
