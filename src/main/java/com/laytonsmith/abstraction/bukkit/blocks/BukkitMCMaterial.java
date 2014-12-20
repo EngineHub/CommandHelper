@@ -88,4 +88,9 @@ public class BukkitMCMaterial implements MCMaterial {
 	public boolean isTransparent() {
 		return m.isTransparent();
 	}
+
+	@Override
+	public Material getHandle() {
+		return m;
+	}
 }

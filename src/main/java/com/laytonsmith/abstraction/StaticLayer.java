@@ -60,13 +60,29 @@ public final class StaticLayer {
         return GetLocation(w, x, y, z, 0, 0);
     }
 
-    public static MCItemStack GetItemStack(int type, int qty) {
-        return convertor.GetItemStack(type, qty);
-    }
-    
-    public static MCItemStack GetItemStack(int type, int data, int qty){
-        return convertor.GetItemStack(type, data, qty);
-    }
+	public static MCItemStack GetItemStack(int type, int qty) {
+		return convertor.GetItemStack(type, qty);
+	}
+
+	public static MCItemStack GetItemStack(int type, int data, int qty){
+		return convertor.GetItemStack(type, data, qty);
+	}
+
+	public static MCItemStack GetItemStack(String type, int qty) {
+		return convertor.GetItemStack(type, qty);
+	}
+
+	public static MCItemStack GetItemStack(String type, int data, int qty){
+		return convertor.GetItemStack(type, data, qty);
+	}
+
+	public static MCItemStack GetItemStack(MCMaterial type, int qty) {
+		return convertor.GetItemStack(type, qty);
+	}
+
+	public static MCItemStack GetItemStack(MCMaterial type, int data, int qty){
+		return convertor.GetItemStack(type, data, qty);
+	}
     
     public static MCServer GetServer(){
         return convertor.GetServer();

@@ -222,7 +222,7 @@ public class ObjectGenerator {
             //Use the durability
             data = is.getDurability();
         }
-        int qty = is.getAmount();
+
         CArray enchants = new CArray(t);
         for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
             CArray enchObj = CArray.GetAssociativeArray(t);
@@ -232,10 +232,11 @@ public class ObjectGenerator {
         }
 		Construct meta = itemMeta(is, t);
         CArray ret = CArray.GetAssociativeArray(t);
-        ret.set("type", Integer.toString(type));
-        ret.set("data", Integer.toString(data));
-        ret.set("qty", Integer.toString(qty));
-        ret.set("enchants", enchants, t);
+		ret.set("name", new CString(is.getType().getName(), t), t);
+		ret.set("type", new CInt(type, t), t);
+		ret.set("data", new CInt(data, t), t);
+		ret.set("qty", new CInt(is.getAmount(), t), t);
+		ret.set("enchants", enchants, t);
 		ret.set("meta", meta, t);
         return ret;
     }
@@ -255,46 +256,34 @@ public class ObjectGenerator {
             throw new ConfigRuntimeException("Expected an array!", ExceptionType.FormatException, t);
         }
         CArray item = (CArray) i;
-        int type = 0;
-        int data = 0;
-        int qty = 1;
+		MCMaterial mat = null;
+		int data = 0, qty = 1;
         Map<MCEnchantment, Integer> enchants = new HashMap<MCEnchantment, Integer>();
 		MCItemMeta meta = null;
 
-        if (item.containsKey("type")) {
-            try {
-                if (item.get("type", t).val().contains(":")) {
-                    //We're using the combo addressing method
-                    String[] split = item.get("type", t).val().split(":");
-                    item.set("type", split[0]);
-                    item.set("data", split[1]);
-                }
-                type = Integer.parseInt(item.get("type", t).val());
-            } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Could not get item information from given information (" + item.get("type", t).val() + ")", ExceptionType.FormatException, t, e);
-            }
-        } else {
-            throw new ConfigRuntimeException("Could not find item type!", ExceptionType.FormatException, t);
-        }
-        if (item.containsKey("data")) {
-            try {
-                data = Integer.parseInt(item.get("data", t).val());
-            } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Could not get item data from given information (" + item.get("data", t).val() + ")", ExceptionType.FormatException, t, e);
-            }
-        }
-        if (item.containsKey("qty")) {
-            //This is the qty
-            String sqty = "notanumber";
-            if (item.containsKey("qty")) {
-                sqty = item.get("qty", t).val();
-            }
-            try {
-                qty = Integer.parseInt(sqty);
-            } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Could not get qty from given information (" + sqty + ")", ExceptionType.FormatException, t, e);
-            }
-        }
+		if (item.containsKey("name")) {
+			mat = StaticLayer.GetConvertor().GetMaterial(item.get("name", t).val());
+		} else if (item.containsKey("type")) {
+			if (item.get("type", t).val().contains(":")) {
+				//We're using the combo addressing method
+				String[] split = item.get("type", t).val().split(":");
+				item.set("type", split[0]);
+				item.set("data", split[1]);
+			}
+			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(item.get("type", t), t));
+		} else {
+			throw new ConfigRuntimeException("Could not find item type!", ExceptionType.FormatException, t);
+		}
+		if (mat == null) {
+			throw new ConfigRuntimeException("A material type could not be found based on the given id.",
+					ExceptionType.NotFoundException, t);
+		}
+		if (item.containsKey("data")) {
+			data = Static.getInt32(item.get("data", t), t);
+		}
+		if (item.containsKey("qty")) {
+			qty = Static.getInt32(item.get("qty", t), t);
+		}
 
         if (item.containsKey("enchants")) {
             CArray enchantArray = null;
@@ -338,11 +327,9 @@ public class ObjectGenerator {
             }
         }
 		if (item.containsKey("meta")) {
-			meta = itemMeta(item.get("meta", t), type, t);
+			meta = itemMeta(item.get("meta", t), mat, t);
 		}
-        MCItemStack ret = StaticLayer.GetItemStack(type, qty);
-        ret.setData(data);
-        ret.setDurability((short) data);
+		MCItemStack ret = StaticLayer.GetItemStack(mat, data, qty);
 		if (meta != null) {
 			ret.setItemMeta(meta);
 		}
@@ -471,8 +458,8 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	public MCItemMeta itemMeta(Construct c, int i, Target t) {
-		MCItemMeta meta = Static.getServer().getItemFactory().getItemMeta(StaticLayer.GetConvertor().getMaterial(i));
+	public MCItemMeta itemMeta(Construct c, MCMaterial mat, Target t) {
+		MCItemMeta meta = Static.getServer().getItemFactory().getItemMeta(mat);
 		if (c instanceof CNull) {
 			return meta;
 		}
