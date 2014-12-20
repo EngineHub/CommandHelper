@@ -70,9 +70,11 @@ import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Enderman;
+import org.bukkit.entity.Endermite;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Giant;
+import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.LivingEntity;
@@ -82,6 +84,7 @@ import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Silverfish;
 import org.bukkit.entity.Skeleton;
@@ -468,6 +471,16 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				case HORSE:
 					mobType = Horse.class;
 					break;
+				case ENDERMITE:
+					mobType = Endermite.class;
+					break;
+				case GUARDIAN:
+					mobType = Guardian.class;
+					break;
+				case RABBIT:
+					mobType = Rabbit.class;
+					break;
+
 			}
         } catch (IllegalArgumentException e) {
             throw new ConfigRuntimeException("No mob of type " + name + " exists",

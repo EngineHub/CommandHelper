@@ -2395,6 +2395,11 @@ public class EntityManagement {
 					MCSlime cube = (MCSlime) entity;
 					specArray.set(entity_spec.KEY_SLIME_SIZE, new CInt(cube.getSize(), t), t);
 					break;
+				case MINECART:
+					MCMinecart minecart = (MCMinecart) entity;
+					specArray.set(entity_spec.KEY_MINECART_BLOCK, new CString(minecart.getDisplayBlock().getMaterial().getName(), t), t);
+					specArray.set(entity_spec.KEY_MINECART_OFFSET, new CInt(minecart.getDisplayBlockOffset(), t), t);
+					break;
 				case MINECART_COMMAND:
 					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
 					specArray.set(entity_spec.KEY_MINECART_COMMAND_COMMAND, new CString(commandminecart.getCommand(), t), t);
@@ -2498,6 +2503,8 @@ public class EntityManagement {
 		private static final String KEY_ITEM_FRAME_ITEM = "item";
 		private static final String KEY_ITEM_FRAME_ROTATION = "rotation";
 		private static final String KEY_LIGHTNING_EFFECT = "effect";
+		private static final String KEY_MINECART_BLOCK = "block";
+		private static final String KEY_MINECART_OFFSET = "offset";
 		private static final String KEY_MINECART_COMMAND_COMMAND = "command";
 		private static final String KEY_MINECART_COMMAND_CUSTOMNAME = "customname";
 		private static final String KEY_OCELOT_TYPE = "type";
@@ -2811,6 +2818,21 @@ public class EntityManagement {
 						switch (index.toLowerCase()) {
 							case entity_spec.KEY_SLIME_SIZE:
 								cube.setSize(Static.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case MINECART:
+					MCMinecart minecart = (MCMinecart) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_MINECART_BLOCK:
+								minecart.setDisplayBlock(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								break;
+							case entity_spec.KEY_MINECART_OFFSET:
+								minecart.setDisplayBlockOffset(Static.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
