@@ -26,6 +26,7 @@ import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
+import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractAtEntityEvent;
@@ -71,6 +72,71 @@ public class EntityEvents {
     }
 
 	@api
+	public static class item_despawn extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_despawn";
+		}
+
+		@Override
+		public String docs() {
+			return "{item: <item match> the item id and data value to check}"
+					+ " Fires when an item entity is removed from the world because it has existed for 5 minutes."
+					+ " Cancelling the event will allow the item to exist for 5 more minutes."
+					+ " {location: where the item is | id: the item's entityID | item: the itemstack of the entity}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCItemDespawnEvent) {
+				Prefilters.match(prefilter, "item", Static.ParseItemNotation(
+						((MCItemDespawnEvent) e).getEntity().getItemStack()), PrefilterType.ITEM_MATCH);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCItemDespawnEvent) {
+				Target t = Target.UNKNOWN;
+				MCItemDespawnEvent event = (MCItemDespawnEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
+				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCItemDespawnEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_DESPAWN;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value,
+								   BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
 	public static class item_spawn extends AbstractEvent {
 
 		@Override
@@ -108,7 +174,7 @@ public class EntityEvents {
 				Target t = Target.UNKNOWN;
 				MCItemSpawnEvent event = (MCItemSpawnEvent) e;
 				Map<String, Construct> ret = evaluate_helper(event);
-				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation()));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
 				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
 				return ret;
