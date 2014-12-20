@@ -563,7 +563,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public MCLocation getBedSpawnLocation() {
-	    return new BukkitMCLocation(p.getBedSpawnLocation());
+		Location loc = p.getBedSpawnLocation();
+		return loc == null ? null : new BukkitMCLocation(loc);
 	}
 
 	@Override

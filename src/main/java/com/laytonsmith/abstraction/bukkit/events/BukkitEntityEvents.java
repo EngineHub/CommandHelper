@@ -42,6 +42,7 @@ import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
+import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractAtEntityEvent;
@@ -68,6 +69,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -86,6 +88,29 @@ import org.bukkit.util.Vector;
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
+
+	public static class BukkitMCItemDespawnEvent implements MCItemDespawnEvent {
+
+		ItemDespawnEvent ide;
+		public BukkitMCItemDespawnEvent(ItemDespawnEvent event) {
+			ide = event;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return ide;
+		}
+
+		@Override
+		public MCItem getEntity() {
+			return new BukkitMCItem(ide.getEntity());
+		}
+
+		@Override
+		public MCLocation getLocation() {
+			return new BukkitMCLocation(ide.getLocation());
+		}
+	}
 	
 	public static class BukkitMCItemSpawnEvent implements MCItemSpawnEvent {
 

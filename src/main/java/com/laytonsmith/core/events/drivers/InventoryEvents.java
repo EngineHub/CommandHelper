@@ -62,7 +62,7 @@ public class InventoryEvents {
 					+ StringUtils.Join(MCSlotType.values(), ", ", ", or ")
 					+ " | clicktype: <macro> One of " + StringUtils.Join(MCClickType.values(), ", ", ", or ")
 					+ " | action: <macro> One of " + StringUtils.Join(MCInventoryAction.values(), ", ", ", or ")
-					+ " | slotitem: <item match> }"
+					+ " | slotitem: <item match> | player: <macro>}"
 					+ " Fired when a player clicks a slot in any inventory. "
 					+ " {player: The player who clicked | viewers: everyone looking in this inventory"
 					+ " | leftclick: true/false if this was a left click | keyboardclick: true/false if a key was pressed"

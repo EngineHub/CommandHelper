@@ -126,7 +126,7 @@
 		<!-- Repository for Bukkit -->
 		<repository>
 			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/</url>
+			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
 		</repository>
 		<!--<repository>
 			<id>bukkit-maven</id>
