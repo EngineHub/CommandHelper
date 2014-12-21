@@ -36,6 +36,7 @@ import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
 import com.laytonsmith.abstraction.entities.MCEnderman;
 import com.laytonsmith.abstraction.entities.MCFishHook;
+import com.laytonsmith.abstraction.entities.MCGuardian;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
@@ -2360,6 +2361,10 @@ public class EntityManagement {
 					MCFishHook hook = (MCFishHook) entity;
 					specArray.set(entity_spec.KEY_FISHING_HOOK_CHANCE, new CDouble(hook.getBiteChance(), t), t);
 					break;
+				case GUARDIAN:
+					MCGuardian guardian = (MCGuardian) entity;
+					specArray.set(entity_spec.KEY_GUARDIAN_ELDER, CBoolean.get(guardian.isElder()), t);
+					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
 					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(horse.getColor().name(), t), t);
@@ -2490,6 +2495,7 @@ public class EntityManagement {
 		private static final String KEY_FALLING_BLOCK_DROPITEM = "dropitem";
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
 		private static final String KEY_FISHING_HOOK_CHANCE = "chance";
+		private static final String KEY_GUARDIAN_ELDER = "elder";
 		private static final String KEY_HORSE_COLOR = "color";
 		private static final String KEY_HORSE_STYLE = "style";
 		private static final String KEY_HORSE_VARIANT = "variant";
@@ -2714,6 +2720,17 @@ public class EntityManagement {
 									throw new ConfigRuntimeException("The chance must be between 0.0 and 1.0", ExceptionType.RangeException, t);
 								}
 								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case GUARDIAN:
+					MCGuardian guardian = (MCGuardian) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_GUARDIAN_ELDER:
+								guardian.setElder(Static.getBoolean(specArray.get(index, t)));
 							default:
 								throwException(index, t);
 						}

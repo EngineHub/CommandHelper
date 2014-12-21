@@ -53,6 +53,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_FISHING_HOOK_CHANCE%: The chance of a fish biting (between 0.0 and 1.0, 0.0: no chance, 1.0: instant catch).
 |-
+| GUARDIAN
+|
+* %KEY_GUARDIAN_ELDER%: Whether the guardian is an elder guardian.
+|-
 | HORSE
 | 
 * %KEY_HORSE_ARMOR%: An item pertaining to the armor a horse has put on.
