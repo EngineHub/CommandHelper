@@ -1248,15 +1248,19 @@ public class PlayerEvents {
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when a player dies."
-                    + "{player: The player that died | drops: An array of the dropped items"
-                    + "| xp: The xp that will be dropped | cause: The cause of death | death_message: The"
-					+ " death message | keep_level | new_level: the player's level when they respawn"
-					+ "| killer: The name of the killer, if a player killed them, otherwise, null}"
-                    + "{xp|drops: An array of item objects, or null. The items to be dropped"
-					+ " are replaced with the given items, not added to|death_message: the death message,"
-					+ " or null to remove it entirely|keep_level: if true, the player will not lose"
-					+ " their xp and levels|new_level}"
-                    + "{player | drops | death_message}";
+                    + "{player: The player that died |"
+					+ " drops: An array of the items that will be dropped, or null |"
+                    + " xp: The amount of experience that will be dropped |"
+					+ " cause: The cause of death |"
+					+ " death_message: The death message, or null if absent |"
+					+ " keep_inventory: If the player will keep their inventory |"
+					+ " keep_level: If the player will keep their experience and their level |"
+					+ " new_exp: The player's experience when they will respawn |"
+					+ " new_level: The player's level when they will respawn |"
+					+ " new_total_exp: The player's total experience when they will respawn |"
+					+ " killer: The name of the killer if a player killed them, otherwise null}"
+                    + "{xp | drops: The items will be replaced by the given items | death_message | keep_inventory | keep_level | new_exp | new_level | new_total_exp}"
+                    + "{}";
         }
 
 		@Override
@@ -1288,8 +1292,11 @@ public class PlayerEvents {
 				Map<String, Construct> map = super.evaluate(e);
 				map.putAll(evaluate_helper(e));
 				map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
+				map.put("keep_inventory", CBoolean.get(event.getKeepInventory()));
 				map.put("keep_level", CBoolean.get(event.getKeepLevel()));
+				map.put("new_exp", new CInt(event.getNewExp(), Target.UNKNOWN));
 				map.put("new_level", new CInt(event.getNewLevel(), Target.UNKNOWN));
+				map.put("new_total_exp", new CInt(event.getNewTotalExp(), Target.UNKNOWN));
 				if(event.getKiller() instanceof MCPlayer){
 					map.put("killer", new CString(((MCPlayer)event.getKiller()).getName(), Target.UNKNOWN));
 				} else {
@@ -1306,7 +1313,7 @@ public class PlayerEvents {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
             String splayer = manual.get("player", Target.UNKNOWN).val();
-            List<MCItemStack> list = new ArrayList<MCItemStack>();
+            List<MCItemStack> list = new ArrayList<>();
             String deathMessage = manual.get("death_message", Target.UNKNOWN).val();
             CArray clist = (CArray)manual.get("drops", Target.UNKNOWN);
             for(String key : clist.stringKeySet()){
@@ -1319,27 +1326,36 @@ public class PlayerEvents {
 
         //Given the paramters, change the underlying event
 		@Override
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if (super.modifyEvent(key, value, event)) {
-				return true;
-			} else if (event instanceof MCPlayerDeathEvent) {
-                MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
-                if(key.equals("death_message")){
-                    e.setDeathMessage(value.nval());
-                    return true;
-                }
-				if (key.equals("keep_level")) {
-					e.setKeepLevel(Static.getBoolean(value));
-					return true;
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCPlayerDeathEvent) {
+				MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
+				switch (key) {
+					case "death_message":
+						e.setDeathMessage(value.nval());
+						return true;
+					case "keep_inventory":
+						e.setKeepInventory(Static.getBoolean(value));
+						return true;
+					case "keep_level":
+						e.setKeepLevel(Static.getBoolean(value));
+						return true;
+					case "new_exp":
+						e.setNewExp(Static.getInt32(value, Target.UNKNOWN));
+						return true;
+					case "new_level":
+						e.setNewLevel(Static.getInt32(value, Target.UNKNOWN));
+						return true;
+					case "new_total_exp":
+						e.setNewTotalExp(Static.getInt32(value, Target.UNKNOWN));
+						return true;
+					default:
+						return super.modifyEvent(key, value, event);
 				}
-				if (key.equals("new_level")) {
-					e.setNewLevel(Static.getInt32(value, Target.UNKNOWN));
-					return true;
-				}
-            }
-            return false;
-        }
-    }
+			} else {
+				return false;
+			}
+		}
+	}
 
     @api
     public static class player_quit extends AbstractEvent {

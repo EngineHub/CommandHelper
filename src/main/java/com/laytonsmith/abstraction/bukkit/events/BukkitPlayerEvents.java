@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.Implementation;
@@ -655,6 +653,16 @@ public class BukkitPlayerEvents {
         public void setDeathMessage(String nval) {
             pde.setDeathMessage(nval);
         }
+
+		@Override
+		public boolean getKeepInventory() {
+			return pde.getKeepInventory();
+		}
+
+		@Override
+		public void setKeepInventory(boolean keepInventory) {
+			pde.setKeepInventory(keepInventory);
+		}
 
 		@Override
 		public boolean getKeepLevel() {

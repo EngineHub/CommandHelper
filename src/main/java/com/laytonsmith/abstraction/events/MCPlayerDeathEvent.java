@@ -19,6 +19,10 @@ public interface MCPlayerDeathEvent extends MCEntityDeathEvent {
 	public boolean getKeepLevel();
 	
 	public void setKeepLevel(boolean keepLevel);
+
+	public boolean getKeepInventory();
+	
+	public void setKeepInventory(boolean keepLevel);
 	
 	public int getNewExp();
 	
