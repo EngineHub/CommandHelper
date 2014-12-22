@@ -35,7 +35,7 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.persistence.DataSourceException;
-import com.sk89q.worldguard.bukkit.WorldGuardPlayerListener;
+import com.sk89q.worldguard.bukkit.listener.WorldGuardPlayerListener;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.util.List;
 import java.util.logging.Level;
