@@ -836,7 +836,11 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCMaterial GetMaterial(String name) {
-		return new BukkitMCMaterial(Material.valueOf(name));
+		Material match = Material.matchMaterial(name);
+		if (match == null) {
+			return null;
+		}
+		return new BukkitMCMaterial(match);
 	}
 
 	@Override

@@ -58,7 +58,8 @@ public class InventoryManagement {
                     + " of what slot is selected. If there is no item at the slot specified, null is returned."
                     + " ---- If all slots are requested, an associative array of item objects is returned, and if"
                     + " only one item is requested, just that single item object is returned. An item object"
-                    + " consists of the following associative array(type: The id of the item, data: The data value of the item,"
+                    + " consists of the following associative array(name: the string id of the item,"
+					+ " type: The numeric id of the item, data: The data value of the item,"
                     + " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
                     + " of enchant objects, with 0 or more associative arrays which look like:"
                     + " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
@@ -723,9 +724,9 @@ public class InventoryManagement {
 
 			MCItemMeta meta;
 			if (m != null) {
-				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getType(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getType(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = p.getInventory().addItem(is);
@@ -892,9 +893,9 @@ public class InventoryManagement {
 
 			MCItemMeta meta;
 			if (m != null) {
-				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getType(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getType(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = p.getEnderChest().addItem(is);
@@ -1704,9 +1705,9 @@ public class InventoryManagement {
 
 			MCItemMeta meta;
 			if (m != null) {
-				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getType(), t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getTypeId(), t);
+				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getType(), t);
 			}
 			is.setItemMeta(meta);
 			Map<Integer, MCItemStack> h = inventory.addItem(is);
