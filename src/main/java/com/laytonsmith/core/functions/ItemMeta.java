@@ -169,7 +169,7 @@ public class ItemMeta {
 			if (is == null) {
 				throw new Exceptions.CastException("There is no item at slot " + slot, t);
 			}
-			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getTypeId(), t));
+			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t));
 			return CVoid.VOID;
 		}
 

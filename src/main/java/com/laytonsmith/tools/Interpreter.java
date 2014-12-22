@@ -778,6 +778,31 @@ public final class Interpreter {
 		}
 
 		@Override
+		public MCItemStack GetItemStack(int type, int data, int qty) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCItemStack GetItemStack(MCMaterial type, int qty) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCItemStack GetItemStack(String type, int qty) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCItemStack GetItemStack(String type, int data, int qty) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
 		public void Startup(CommandHelperPlugin chp) {
 
 		}
@@ -789,11 +814,6 @@ public final class Interpreter {
 
 		@Override
 		public String LookupMaterialName(int id) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public MCItemStack GetItemStack(int type, int data, int qty) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
