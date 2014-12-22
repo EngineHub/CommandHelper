@@ -93,4 +93,21 @@ public class BukkitMCMaterial implements MCMaterial {
 	public Material getHandle() {
 		return m;
 	}
+
+	@Override
+	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+	public boolean equals(Object obj) {
+		return m.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return m.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return m.toString();
+	}
+
 }
