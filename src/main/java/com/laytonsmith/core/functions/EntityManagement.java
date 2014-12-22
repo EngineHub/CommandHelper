@@ -68,6 +68,7 @@ import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -3260,6 +3261,45 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityId, amount, [sourceEntityId]} Damage an entity. If given,"
 					+ " the source entity will be attributed as the damager.";
+		}
+	}
+
+	@api
+	public static class entity_fall_distance extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "entity_fall_distance";
+		}
+
+		@Override
+		public String docs() {
+			return "double {entityID} Returns the distance the entity has fallen.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CDouble(Static.getEntity(args[0], t).getFallDistance(), t);
+		}
+	}
+
+	@api
+	public static class set_entity_fall_distance extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_entity_fall_distance";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityID, double} Sets the distance the entity has fallen.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.getEntity(args[0], t).setFallDistance(ArgumentValidation.getDouble32(args[1], t));
+			return CVoid.VOID;
 		}
 	}
 }
