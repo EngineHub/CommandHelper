@@ -37,15 +37,23 @@ public interface Convertor {
 
     public MCServer GetServer();
 
-    public MCItemStack GetItemStack(int type, int qty);
+	public MCItemStack GetItemStack(int type, int qty);
+
+	public MCItemStack GetItemStack(int type, int data, int qty);
+
+	public MCItemStack GetItemStack(MCMaterial type, int qty);
+
+	public MCItemStack GetItemStack(MCMaterial type, int data, int qty);
+
+	public MCItemStack GetItemStack(String type, int qty);
+
+	public MCItemStack GetItemStack(String type, int data, int qty);
 
     public void Startup(CommandHelperPlugin chp);
 
     public int LookupItemId(String materialName);
 
     public String LookupMaterialName(int id);
-
-    public MCItemStack GetItemStack(int type, int data, int qty);
 
 	public MCMaterial getMaterial(int id);
 

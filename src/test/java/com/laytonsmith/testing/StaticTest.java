@@ -109,7 +109,7 @@ public class StaticTest {
     /**
      * Tests the boilerplate functions in a Function. While all functions should conform to
      * at least this, it is useful to also use the more strict TestBoilerplate function.
-     * @param f
+     * @param ff
      */
     public static void TestBoilerplate(FunctionBase ff, String name) throws Exception {
         if(!(ff instanceof Function)){
@@ -618,7 +618,7 @@ public class StaticTest {
     }
 
     @convert(type=Implementation.Type.TEST)
-    public static class TestConvertor extends AbstractConvertor{
+    public static class TestConvertor extends AbstractConvertor {
 
         private static MCServer fakeServer;
 		private RunnableQueue queue = new RunnableQueue("TestConvertorRunnableQueue");
@@ -651,12 +651,6 @@ public class StaticTest {
         }
 
 		@Override
-        public MCItemStack GetItemStack(int type, int qty) {
-            Convertor c = new BukkitConvertor();
-            return c.GetItemStack(type, qty);
-        }
-
-		@Override
         public void Startup(CommandHelperPlugin chp) {
             //Nothing.
         }
@@ -672,10 +666,40 @@ public class StaticTest {
         }
 
 		@Override
-        public MCItemStack GetItemStack(int type, int data, int qty) {
-            Convertor c = new BukkitConvertor();
-            return c.GetItemStack(type, data, qty);
-        }
+		public MCItemStack GetItemStack(int type, int qty) {
+			Convertor c = new BukkitConvertor();
+			return c.GetItemStack(type, qty);
+		}
+
+		@Override
+		public MCItemStack GetItemStack(int type, int data, int qty) {
+			Convertor c = new BukkitConvertor();
+			return c.GetItemStack(type, data, qty);
+		}
+
+		@Override
+		public MCItemStack GetItemStack(MCMaterial type, int qty) {
+			Convertor c = new BukkitConvertor();
+			return c.GetItemStack(type, qty);
+		}
+
+		@Override
+		public MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
+			Convertor c = new BukkitConvertor();
+			return c.GetItemStack(type, data, qty);
+		}
+
+		@Override
+		public MCItemStack GetItemStack(String type, int qty) {
+			Convertor c = new BukkitConvertor();
+			return c.GetItemStack(type, qty);
+		}
+
+		@Override
+		public MCItemStack GetItemStack(String type, int data, int qty) {
+			Convertor c = new BukkitConvertor();
+			return c.GetItemStack(type, data, qty);
+		}
 
 		@Override
         public int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {

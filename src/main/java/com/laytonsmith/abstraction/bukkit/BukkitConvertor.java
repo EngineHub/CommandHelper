@@ -228,7 +228,33 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCItemStack GetItemStack(int type, int data, int qty) {
-		return new BukkitMCItemStack(new ItemStack(type, qty, (short) 0, (byte) data));
+		return new BukkitMCItemStack(new ItemStack(type, qty, (short) data));
+	}
+
+	@Override
+	public MCItemStack GetItemStack(MCMaterial type, int qty) {
+		return new BukkitMCItemStack(new ItemStack(((BukkitMCMaterial) type).getHandle(), qty));
+	}
+
+	@Override
+	public MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
+		return new BukkitMCItemStack(new ItemStack(((BukkitMCMaterial) type).getHandle(), qty, (short) data));
+	}
+
+	public MCItemStack GetItemStack(String type, int qty) {
+		Material mat = Material.matchMaterial(type);
+		if (mat == null) {
+			return null;
+		}
+		return new BukkitMCItemStack(new ItemStack(mat, qty));
+	}
+
+	public MCItemStack GetItemStack(String type, int data, int qty) {
+		Material mat = Material.matchMaterial(type);
+		if (mat == null) {
+			return null;
+		}
+		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
 	}
 
 	@Override
