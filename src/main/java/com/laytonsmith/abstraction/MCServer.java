@@ -67,6 +67,7 @@ public interface MCServer extends AbstractionObject{
 	public void clearRecipes();
 	public void resetRecipes();
 
+	public void savePlayers();
 
 	public void shutdown();
 

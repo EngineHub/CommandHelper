@@ -462,6 +462,11 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
+	public void savePlayers() {
+		s.savePlayers();
+	}
+
+	@Override
 	public void shutdown() {
 		s.shutdown();
 	}
