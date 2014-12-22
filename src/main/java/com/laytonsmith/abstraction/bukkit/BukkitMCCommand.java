@@ -1,6 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -9,9 +11,11 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents.BukkitMCComman
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -233,10 +237,19 @@ public class BukkitMCCommand implements MCCommand {
 			for (String arg : args) {
 				cargs.push(new CString(arg, t));
 			}
+
+			CClosure closure = Commands.onCommand.get(cmd.getName().toLowerCase());
+			CommandHelperEnvironment cEnv = closure.getEnv().getEnv(CommandHelperEnvironment.class);
+			cEnv.SetCommandSender(sender);
+			cEnv.SetCommand("/" + label + StringUtils.Join(args, " "));
+			if (sender instanceof MCBlockCommandSender) {
+				cEnv.SetBlockCommandSender((MCBlockCommandSender) sender);
+			}
+
 			try {
-				Commands.onCommand.get(cmd.getName().toLowerCase()).execute(new Construct[]{
-					new CString(label, t), new CString(sender.getName(), t), cargs,
-					new CArray(t) // reserved for an obgen style command array
+				closure.execute(new Construct[]{
+						new CString(label, t), new CString(sender.getName(), t), cargs,
+						new CArray(t) // reserved for an obgen style command array
 				});
 			} catch (FunctionReturnException e) {
 				Construct fret = e.getReturn();

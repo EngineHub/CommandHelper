@@ -5,6 +5,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
@@ -123,7 +124,7 @@ public class CClosure extends Construct {
 	 * (other than a LoopManipulationException) within the closure
 	 * @throws FunctionReturnException If the closure has a return() call in it.
      */
-    public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException {
+    public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException, CancelCommandException {
 		if(node == null){
 			return;
 		}
@@ -173,6 +174,8 @@ public class CClosure extends Construct {
 				}
 				// Now rethrow it
 				throw ex;
+			} catch (CancelCommandException e){
+				// die()
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
 			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){

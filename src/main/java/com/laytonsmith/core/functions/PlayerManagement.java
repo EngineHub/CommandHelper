@@ -4489,4 +4489,49 @@ public class PlayerManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
+
+	@api
+	public static class save_players extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.getServer().savePlayers();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "save_players";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "void {} Saves current players to disk.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 }
