@@ -9,7 +9,6 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents.BukkitMCCommandTabCompleteEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
@@ -17,7 +16,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
-import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -241,7 +239,6 @@ public class BukkitMCCommand implements MCCommand {
 			}
 
 			CClosure closure = Commands.onCommand.get(cmd.getName().toLowerCase());
-			closure.getEnv().getEnv(GlobalEnv.class).SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
 			CommandHelperEnvironment cEnv = closure.getEnv().getEnv(CommandHelperEnvironment.class);
 			cEnv.SetCommandSender(sender);
 			cEnv.SetCommand("/" + label + StringUtils.Join(args, " "));
