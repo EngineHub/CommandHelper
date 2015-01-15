@@ -287,8 +287,8 @@ public class Web {
 						settings.setComplexParameters(mparams);
 					} else {
 						settings.setRawParameter(csettings.get("params", t).val());
-						if(settings.getMethod() != HTTPMethod.POST){
-							throw new Exceptions.FormatException("You must set the method to POST to use raw params.", t);
+						if(settings.getMethod() != HTTPMethod.POST && settings.getMethod() != HTTPMethod.PUT){
+							throw new Exceptions.FormatException("You must set the method to POST or PUT to use raw params.", t);
 						}
 					}
 				}
