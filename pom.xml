@@ -552,7 +552,6 @@
 							<artifactSet>
 								<includes>
 									<include>com.sk89q:worldedit:jar:*</include>
-									<include>com.sk89q:worldguard:jar:*</include>
 									<include>org.perf4j:perf4j:jar:*</include>
 									<include>log4j:log4j:jar:*</include>
 									<include>org.yaml:snakeyaml:jar:*</include>
@@ -691,42 +690,11 @@
 									<artifact>com.sk89q:worldedit:jar:*</artifact>
 									<includes>
 										<!-- Permissions Items -->
-										<include>com/sk89q/bukkit/migration/**</include>
 										<include>com/sk89q/wepif/**</include>
 										<include>com/sk89q/util/**</include>
 										<include>com/sk89q/worldedit/Vector.*</include>
 										<!-- Expression Parser -->
-										<include>com/sk89q/worldedit/expression/**</include>
-										<!-- General Requirements -->
-										<include>com/sk89q/worldedit/bukkit/BukkitCommandSender.*</include>
-										<include>com/sk89q/worldedit/LocalPlayer.*</include>
-										<include>com/sk89q/worldedit/MaxChangedBlocksException.*</include>
-										<include>com/sk89q/worldedit/WorldEditException.*</include>
-										<include>com/sk89q/worldedit/WorldEditException.*</include>
-										<include>com/sk89q/worldedit/EmptyClipboardException.*</include>
-										<include>com/sk89q/worldedit/BlockVector.*</include>
-										<include>com/sk89q/worldedit/data/DataException.*</include>
-									</includes>
-									<excludes>
-										<exclude>com/sk89q/jchronic/**</exclude>
-										<exclude>com/google/**</exclude>
-									</excludes>
-								</filter>
-								<filter>
-									<artifact>com.sk89q:worldguard:jar:*</artifact>
-									<excludes></excludes>
-									<includes>
-										<include>com/sk89q/worldguard/protection/flags/InvalidFlagFormat.*</include>
-										<include>com/sk89q/worldguard/protection/regions/ProtectedRegion.*</include>
-										<include>com/sk89q/worldguard/protection/regions/GlobalProtectedRegion.*</include>
-										<include>com/sk89q/worldguard/protection/regions/ProtectedCuboidRegion.*</include>
-										<include>com/sk89q/worldguard/protection/flags/Flag.*</include>
-										<include>com/sk89q/worldguard/protection/regions/ProtectedPolygonalRegion.*</include>
-										<include>com/sk89q/worldguard/protection/flags/RegionGroupFlag.*</include>
-										<include>com/sk89q/worldguard/protection/regions/ProtectedPolygonalRegion.*</include>
-										<include>com/sk89q/worldguard/protection/flags/EnumFlag.*</include>
-										<include>com/sk89q/worldguard/protection/regions/ProtectedRegion$CircularInheritanceException*</include>
-										<include>com/sk89q/worldguard/protection/databases/ProtectionDatabaseException.*</include>
+										<include>com/sk89q/worldedit/internal/expression/**</include>
 									</includes>
 								</filter>
 								<!-- Profiler -->

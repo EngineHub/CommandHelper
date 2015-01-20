@@ -421,6 +421,7 @@ public class AliasCore {
 						MethodScriptFileLocations.getDefault().getConfigDirectory(),
 						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
 						new TaskManager());
+				gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
 			} catch (Profiles.InvalidProfileException ex) {
 				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;

@@ -248,8 +248,8 @@ public class BukkitMCCommand implements MCCommand {
 
 			try {
 				closure.execute(new Construct[]{
-						new CString(label, t), new CString(sender.getName(), t), cargs,
-						new CArray(t) // reserved for an obgen style command array
+					new CString(label, t), new CString(sender.getName(), t), cargs,
+					new CArray(t) // reserved for an obgen style command array
 				});
 			} catch (FunctionReturnException e) {
 				Construct fret = e.getReturn();
