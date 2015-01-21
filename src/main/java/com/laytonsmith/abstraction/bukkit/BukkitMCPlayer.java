@@ -448,11 +448,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void setTotalExperience(int total)
 	{
-		if (total < 0)
-		{
-			throw new ConfigRuntimeException("Experience can't be negative", Exceptions.ExceptionType.RangeException, null);
-		}
-
         p.setExp(0);
         p.setLevel(0);
         p.setTotalExperience(0);
