@@ -659,8 +659,9 @@ public class PlayerEvents {
 					+ "'result' to KICK_BANNED, KICK_WHITELIST, KICK_OTHER, or KICK_FULL. "
                     + "The default for 'result' is ALLOWED. When setting 'result', you "
                     + "can specify the kick message by modifying 'kickmsg'. "
-                    + "{player: The player's name | kickmsg: The default kick message | "
-                    + "ip: the player's IP address | result: the default response to their logging in}"
+                    + "{player: The player's name | uuid: The player's unique id | "
+					+ "kickmsg: The default kick message | ip: the player's IP address | "
+					+ "result: the default response to their logging in}"
                     + "{kickmsg|result}"
                     + "{player|kickmsg|ip|result}";
 		}
@@ -693,6 +694,7 @@ public class PlayerEvents {
                 Map<String, Construct> map = evaluate_helper(e);
 
                 map.put("player", new CString(event.getName(), Target.UNKNOWN));
+				map.put("uuid", new CString(event.getUniqueId(), Target.UNKNOWN));
                 map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
 				//TODO: The event.getResult needs to be enum'd
                 map.put("result", new CString(event.getResult(), Target.UNKNOWN));
