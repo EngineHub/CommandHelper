@@ -46,6 +46,10 @@ public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable{
 
 	@Override
     public void setOwner(MCAnimalTamer at) {
-        t.setOwner(((BukkitMCAnimalTamer)at).at);
+        if (at == null) {
+            t.setOwner(null);
+        } else {
+            t.setOwner(((BukkitMCAnimalTamer) at).at);
+        }
     }
 }
