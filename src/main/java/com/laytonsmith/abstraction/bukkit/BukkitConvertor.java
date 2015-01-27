@@ -208,6 +208,8 @@ public class BukkitConvertor extends AbstractConvertor {
 			} catch (NullPointerException ee) {
 				return null;
 			}
+		} catch(NullPointerException e) {
+			return null;
 		}
 	}
 
