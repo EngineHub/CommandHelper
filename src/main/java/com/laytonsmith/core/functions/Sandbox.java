@@ -249,7 +249,7 @@ public class Sandbox {
                 levelArray = (CArray) args[3 - offset];
             }
             for (String key : enchantArray.stringKeySet()) {
-                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()).toUpperCase());
+                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
                 if (e == null) {
                     throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
                 }

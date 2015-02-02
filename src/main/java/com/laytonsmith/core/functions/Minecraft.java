@@ -454,7 +454,11 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getName();
+			String player = null;
+			MCPlayer mcPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (mcPlayer != null) {
+				player = mcPlayer.getName();
+			}
 			Construct entityID = null;
 			if (args.length == 2) {
 				if (args[0] instanceof CNull) {

@@ -39,48 +39,48 @@ public class Enchantments {
 	 * @return
 	 */
 	public static String ConvertName(String wikiVersion) {
-		String lc = wikiVersion.toLowerCase().trim();
-		if (lc.equals("protection")) {
+		String lc = wikiVersion.toUpperCase().trim();
+		if (lc.equals("PROTECTION")) {
 			return "PROTECTION_ENVIRONMENTAL";
-		} else if (lc.equals("fire protection")) {
+		} else if (lc.equals("FIRE PROTECTION")) {
 			return "PROTECTION_FIRE";
-		} else if (lc.equals("feather falling")) {
+		} else if (lc.equals("FEATHER FALLING")) {
 			return "PROTECTION_FALL";
-		} else if (lc.equals("blast protection")) {
+		} else if (lc.equals("BLAST PROTECTION")) {
 			return "PROTECTION_EXPLOSIONS";
-		} else if (lc.equals("projectile protection")) {
+		} else if (lc.equals("PROJECTILE PROTECTION")) {
 			return "PROTECTION_PROJECTILE";
-		} else if (lc.equals("respiration")) {
+		} else if (lc.equals("RESPIRATION")) {
 			return "OXYGEN";
-		} else if (lc.equals("aqua affinity")) {
+		} else if (lc.equals("AQUA AFFINITY")) {
 			return "WATER_WORKER";
-		} else if (lc.equals("sharpness")) {
+		} else if (lc.equals("SHARPNESS")) {
 			return "DAMAGE_ALL";
-		} else if (lc.equals("smite")) {
+		} else if (lc.equals("SMITE")) {
 			return "DAMAGE_UNDEAD";
-		} else if (lc.equals("bane of arthropods")) {
+		} else if (lc.equals("BANE OF ARTHROPODS")) {
 			return "DAMAGE_ARTHROPODS";
-		} else if (lc.equals("knockback")) {
+		} else if (lc.equals("KNOCKBACK")) {
 			return "KNOCKBACK";
-		} else if (lc.equals("fire aspect")) {
+		} else if (lc.equals("FIRE ASPECT")) {
 			return "FIRE_ASPECT";
-		} else if (lc.equals("looting")) {
+		} else if (lc.equals("LOOTING")) {
 			return "LOOT_BONUS_MOBS";
-		} else if (lc.equals("efficiency")) {
+		} else if (lc.equals("EFFICIENCY")) {
 			return "DIG_SPEED";
-		} else if (lc.equals("silk touch")) {
+		} else if (lc.equals("SILK TOUCH")) {
 			return "SILK_TOUCH";
-		} else if (lc.equals("unbreaking")) {
+		} else if (lc.equals("UNBREAKING")) {
 			return "DURABILITY";
-		} else if (lc.equals("fortune")) {
+		} else if (lc.equals("FORTUNE")) {
 			return "LOOT_BONUS_BLOCKS";
-		} else if (lc.equals("power")){
+		} else if (lc.equals("POWER")){
 			return "ARROW_DAMAGE";
-		} else if(lc.equals("punch")){
+		} else if(lc.equals("PUNCH")){
 			return "ARROW_KNOCKBACK";
-		} else if(lc.equals("flame")){
+		} else if(lc.equals("FLAME")){
 			return "ARROW_FIRE";
-		} else if(lc.equals("infinity")){
+		} else if(lc.equals("INFINITY")){
 			return "ARROW_INFINITE";
 		} else {
 			return wikiVersion;
@@ -225,6 +225,9 @@ public class Enchantments {
 				offset = 0;
 			}
 			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
+			if (is == null) {
+				throw new Exceptions.CastException("There is no item at slot " + args[1 - offset], t);
+			}
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
 //            } else {
@@ -245,7 +248,7 @@ public class Enchantments {
 				levelArray = (CArray) args[3 - offset];
 			}
 			for (String key : enchantArray.stringKeySet()) {
-				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()).toUpperCase());
+				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
 				if (e == null) {
 					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
 				}
@@ -314,6 +317,9 @@ public class Enchantments {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
+			if (is == null) {
+				throw new Exceptions.CastException("There is no item at slot " + args[1 - offset], t);
+			}
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
 //            } else {
@@ -332,7 +338,11 @@ public class Enchantments {
 				enchantArray = (CArray) args[2 - offset];
 			}
 			for (String key : enchantArray.stringKeySet()) {
-				MCEnchantment e = StaticLayer.GetEnchantmentByName(enchantArray.get(key, t).val().toUpperCase());
+				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
+				if (e == null) {
+					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid"
+							+ " enchantment type", ExceptionType.EnchantmentException, t);
+				}
 				is.removeEnchantment(e);
 			}
 			return CVoid.VOID;
@@ -389,6 +399,9 @@ public class Enchantments {
 				slot = args[0];
 			}
 			MCItemStack is = m.getItemAt(slot instanceof CNull?null:Static.getInt32(slot, t));
+			if (is == null) {
+				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+			}
 //            if(slot instanceof CNull){
 //                is = m.getItemInHand();
 //            } else {
@@ -452,12 +465,13 @@ public class Enchantments {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				String name = Enchantments.ConvertName(args[0].val().toUpperCase());
+				String name = Enchantments.ConvertName(args[0].val());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
 				return CBoolean.get(e.canEnchantItem(is));
 			} catch (NullPointerException e) {
-				throw new ConfigRuntimeException(args[0].val() + " is not a known enchantment type.", ExceptionType.EnchantmentException, t);
+				throw new ConfigRuntimeException(args[0].val().toUpperCase() + " is not a known enchantment type.",
+						ExceptionType.EnchantmentException, t);
 			}
 		}
 	}
@@ -503,9 +517,14 @@ public class Enchantments {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String name = Enchantments.ConvertName(args[0].val().toUpperCase());
-			MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
-			return new CInt(e.getMaxLevel(), t);
+			try {
+				String name = Enchantments.ConvertName(args[0].val());
+				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
+				return new CInt(e.getMaxLevel(), t);
+			} catch (NullPointerException e) {
+				throw new ConfigRuntimeException(args[0].val().toUpperCase() + " is not a known enchantment type.",
+						ExceptionType.EnchantmentException, t);
+			}
 		}
 	}
 

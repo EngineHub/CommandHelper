@@ -1815,7 +1815,8 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException,
+					ExceptionType.RangeException};
 		}
 
 		@Override
@@ -1846,6 +1847,9 @@ public class PlayerManagement {
 				xp = Static.getInt32(args[1], t);
 			} else {
 				xp = Static.getInt32(args[0], t);
+			}
+			if(xp < 0) {
+				throw new ConfigRuntimeException("Experience can't be negative", ExceptionType.RangeException, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setTotalExperience(xp);

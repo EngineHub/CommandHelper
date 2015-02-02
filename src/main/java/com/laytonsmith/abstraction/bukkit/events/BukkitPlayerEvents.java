@@ -368,6 +368,11 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
+		public String getUniqueId() {
+			return event.getPlayer().getUniqueId().toString();
+		}
+
+		@Override
 		public String getKickMessage() {
 			return event.getKickMessage();
 		}
