@@ -98,7 +98,7 @@ public final class HTTPResponse {
 	public List<String> getHeaders(String key) {
 		List<String> list = new ArrayList<String>();
 		for (HTTPHeader header : headers) {
-			if ((header.getHeader() == null && key == null) || (header.getHeader() != null && header.getHeader().equals(key))) {
+			if ((header.getHeader() == null && key == null) || (header.getHeader() != null && header.getHeader().equalsIgnoreCase(key))) {
 				list.add(header.getValue());
 			}
 		}

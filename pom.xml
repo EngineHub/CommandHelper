@@ -571,9 +571,14 @@
 									<include>javax.mail:mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
 									<include>postgresql:postgresql:jar:*</include>
+									<include>net.milkbowl.vault:VaultAPI:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
+<!--								<relocation>
+									<pattern>net.milkbowl.vault</pattern>
+									<shadedPattern>com.laytonsmith.libs.net.milkbowl.vault</shadedPattern>
+								</relocation>-->
 								<relocation>
 									<pattern>org.perf4j</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.perf4j</shadedPattern>
@@ -672,6 +677,12 @@
 								</relocation>
 							</relocations>
 							<filters>
+								<filter>
+									<artifact>net.milkbowl.vault:VaultAPI:jar:*</artifact>
+									<includes>
+										<include>net/milkbowl/vault/**</include>
+									</includes>
+								</filter>
 								<filter>
 									<artifact>org.xerial:sqlite-jdbc:jar:*</artifact>
 									<includes>
