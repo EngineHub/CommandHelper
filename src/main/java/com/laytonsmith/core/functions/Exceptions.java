@@ -258,7 +258,12 @@ public class Exceptions {
 		/**
 		 * Thrown if an SQL related exception occurs.
 		 */
-		SQLException("Thrown if an SQL related exception occurs.", CHVersion.V3_3_1)
+		SQLException("Thrown if an SQL related exception occurs.", CHVersion.V3_3_1),
+
+		/**
+		 * Thrown if an argument was illegal in the given context.
+		 */
+		IllegalArgumentException("Thrown if an argument was illegal in the given context.", CHVersion.V3_3_1)
 
 		;
 		
