@@ -17,6 +17,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -3038,6 +3039,7 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_pflying.class})
 	public static class set_pflight extends AbstractFunction {
 
 		@Override
@@ -4539,6 +4541,7 @@ public class PlayerManagement {
 		}
 	}
 	@api
+	@seealso({set_pflight.class})
 	public static class set_pflying extends AbstractFunction {
 
 		@Override
@@ -4553,7 +4556,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], flight} Sets whether or not this player is flying. Requires player to have the ability to fly.";
+			return "void {[player], flight} Sets whether or not this player is flying." +
+			"Requires player to have the ability to fly, which is set with set_pflight().";
 		}
 
 		@Override
@@ -4583,16 +4587,14 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(!p.getAllowFlight()) {
-				throw new ConfigRuntimeException("Player must have the ability to fly.",
+				throw new ConfigRuntimeException("Player must have the ability to fly. Set with set_pflight()",
 						ExceptionType.IllegalArgumentException, t);
 			}
-			// Workaround which moves the player slightly off the ground without actually changing their position.
+			// Workaround which sets the player's velocity to a null vector.
 			// This is needed in order for the player to enter flight mode whilst standing on the ground.
-			if(flight) {
-				double x = 0.0;
-				double y = 0.001;
-				double z = 0.0;
-				MVector3D v = new MVector3D(x, y, z);
+			if(flight
+			&& p.isOnGround()) {
+				MVector3D v = new MVector3D(0.0, 0.0, 0.0);
 				p.setVelocity(v);
 			}
 			p.setFlying(flight);
