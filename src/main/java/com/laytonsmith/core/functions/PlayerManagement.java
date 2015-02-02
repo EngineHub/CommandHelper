@@ -4538,4 +4538,72 @@ public class PlayerManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
+	@api
+	public static class set_pflying extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_pflying";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], flight} Sets whether or not this player is flying. Requires player to have the ability to fly.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.IllegalArgumentException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			boolean flight;
+			if (args.length == 1) {
+				flight = Static.getBoolean(args[0]);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				flight = Static.getBoolean(args[1]);
+			}
+			Static.AssertPlayerNonNull(p, t);
+			if(!p.getAllowFlight()) {
+				throw new ConfigRuntimeException("Player must have the ability to fly.",
+						ExceptionType.IllegalArgumentException, t);
+			}
+			// Workaround which moves the player slightly off the ground without actually changing their position.
+			// This is needed in order for the player to enter flight mode whilst standing on the ground.
+			if(flight) {
+				double x = 0.0;
+				double y = 0.001;
+				double z = 0.0;
+				MVector3D v = new MVector3D(x, y, z);
+				p.setVelocity(v);
+			}
+			p.setFlying(flight);
+			// We only want to set whether the player is flying; not whether the player can fly.
+			p.setAllowFlight(true);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 }
