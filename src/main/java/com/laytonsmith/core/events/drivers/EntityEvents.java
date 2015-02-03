@@ -1342,7 +1342,8 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> the type of entity | block: <math match> the blockID of the portal}"
+			return "{type: <macro> the type of entity | block: <math match> the blockID of the portal"
+					+ " world: <macro> the world in which the portal was entered }"
 					+ " Fires when an entity touches a portal block."
 					+ " {id: the entityID of the entity | location: the location of the block touched | type | block}"
 					+ " {}"
@@ -1356,6 +1357,7 @@ public class EntityEvents {
 				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "block", event.getLocation().getBlock().getTypeId(), PrefilterType.MATH_MATCH);
+				Prefilters.match(prefilter, "world", event.getLocation().getWorld().getName(), PrefilterType.MACRO);
 				return true;
 			}
 			return false;
