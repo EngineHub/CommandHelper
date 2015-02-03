@@ -4590,11 +4590,12 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("Player must have the ability to fly. Set with set_pflight()",
 						ExceptionType.IllegalArgumentException, t);
 			}
-			// Workaround which sets the player's velocity to a null vector.
 			// This is needed in order for the player to enter flight mode whilst standing on the ground.
 			if(flight
 			&& p.isOnGround()) {
-				MVector3D v = new MVector3D(0.0, 0.0, 0.0);
+				MVector3D v = p.getVelocity();
+				// 0.08 was chosen as it does not change the player's position, whereas higher values do.
+				v.y += 0.08;
 				p.setVelocity(v);
 			}
 			p.setFlying(flight);
