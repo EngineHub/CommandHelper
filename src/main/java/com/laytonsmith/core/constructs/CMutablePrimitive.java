@@ -121,7 +121,7 @@ public class CMutablePrimitive extends CArray implements Sizable {
 	}
 
 	@Override
-	protected String getString(Set<CArray> arrays) {
+	protected String getString(Set<CArray> arrays, Target t) {
 		return value.val();
 	}
 

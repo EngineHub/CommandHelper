@@ -467,7 +467,7 @@ public class CArray extends Construct implements ArrayAccess{
     @Override
     public String val() {
 		if(valueDirty){
-			mutVal = getString(new HashSet<CArray>());
+			mutVal = getString(new HashSet<CArray>(), this.getTarget());
 			valueDirty = false;
 		}
         return mutVal;
@@ -486,12 +486,12 @@ public class CArray extends Construct implements ArrayAccess{
 	 * @param arrays The values accounted for so far
 	 * @return
 	 */
-	protected String getString(Set<CArray> arrays){
+	protected String getString(Set<CArray> arrays, Target t){
 		StringBuilder b = new StringBuilder();
 		b.append("{");
 		if (!inAssociativeMode()) {
 			for (int i = 0; i < this.size(); i++) {
-				Mixed value = this.get(i, Target.UNKNOWN);
+				Mixed value = this.get(i, t);
 				String v;
 				if(value instanceof CArray){
 					if(arrays.contains((CArray)value)){
@@ -499,7 +499,7 @@ public class CArray extends Construct implements ArrayAccess{
 						v = "*recursion*";
 					} else {
 						arrays.add(((CArray)value));
-						v = ((CArray)value).getString(arrays);
+						v = ((CArray)value).getString(arrays, t);
 					}
 				} else {
 					v = value.val();
@@ -517,16 +517,16 @@ public class CArray extends Construct implements ArrayAccess{
 				}
 				first = false;
 				String v;
-				if(this.get(key, Target.UNKNOWN) == null){
+				if(this.get(key, t) == null){
 					v = "null";
 				} else {
-					Mixed value = this.get(key, Target.UNKNOWN);
+					Mixed value = this.get(key, t);
 					if(value instanceof CArray){
 						if(arrays.contains(((CArray)value))){
 							v = "*recursion*";
 						} else {
 							arrays.add(((CArray)value));
-							v = ((CArray)value).getString(arrays);
+							v = ((CArray)value).getString(arrays, t);
 						}
 					} else {
 						v = value.val();
@@ -683,6 +683,16 @@ public class CArray extends Construct implements ArrayAccess{
 
     private Comparator<String> comparator = new Comparator<String>(){
 
+		private int normalize(int value){
+			if(value < 0){
+				return -1;
+			} else if(value > 0){
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+
 		@Override
         public int compare(String o1, String o2) {
 			// Null checks!
@@ -693,12 +703,19 @@ public class CArray extends Construct implements ArrayAccess{
 			} else if (o1 != null && o2 == null) {
 				return 1;
 			}
-
+			assert o1 != null;
+			assert o2 != null;
+			// This fixes a bug where occasionally (I can't totally figure out the pattern) a value
+			// would be missing from the list. I think this is ok in all cases, except that it may
+			// change the order of certain associative array's key display, however, this has never
+			// been a guaranteed property of the arrays.
+			return normalize(o1.compareTo(o2));
+			/*
             //Due to a dumb behavior in Double.parseDouble,
             //we need to check to see if there are non-digit characters in
             //the keys, and if so, do a string comparison.
             if(o1.matches(".*[^0-9\\.]+.*") || o2.matches(".*[^0-9\\.]+.*")){
-                return o1.compareTo(o2);
+                return normalize(o1.compareTo(o2));
             }
             try{
                 int i1 = Integer.parseInt(o1);
@@ -713,9 +730,9 @@ public class CArray extends Construct implements ArrayAccess{
                     return new Double(d1).compareTo(new Double(d2));
                 } catch(NumberFormatException ee){
                     //Just do a string comparison
-                    return o1.compareTo(o2);
+                    return normalize(o1.compareTo(o2));
                 }
-            }
+            }*/
         }
 
     };

@@ -93,7 +93,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	protected String getString(Set<CArray> arrays) {
+	protected String getString(Set<CArray> arrays, Target t) {
 		//We don't need to consider arrays, because we can't
 		//get stuck in an infinite loop.
 		return val();
