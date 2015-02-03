@@ -4556,8 +4556,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], flight} Sets whether or not this player is flying." +
-			"Requires player to have the ability to fly, which is set with set_pflight().";
+			return "void {[player], flight} Sets whether or not this player is flying."
+					+ "Requires player to have the ability to fly, which is set with set_pflight().";
 		}
 
 		@Override
