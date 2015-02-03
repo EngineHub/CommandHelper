@@ -54,7 +54,7 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("{0, 1}");
         verify(fakePlayer, times(2)).sendMessage("{0, 1, 2}");
         verify(fakePlayer).sendMessage("{0: 0, 1: 1, 2: 2, key: value}");
-        verify(fakePlayer).sendMessage("{0: 0, 1: 1, 2: 2, 10: value, key: value}");
+        verify(fakePlayer).sendMessage("{0: 0, 1: 1, 10: value, 2: 2, key: value}");
     }
 
     @Test public void testArrayGetWithAssociativeArray() throws Exception{
