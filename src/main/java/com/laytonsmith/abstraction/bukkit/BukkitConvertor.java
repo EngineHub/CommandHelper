@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.ConvertorHelper;
 import com.laytonsmith.abstraction.Implementation;
@@ -71,20 +70,17 @@ import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.tools.Interpreter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import org.apache.log4j.Logger;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -149,12 +145,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
@@ -617,6 +615,9 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
+		if (im instanceof BannerMeta) {
+
+		}
 		if (im instanceof BookMeta) {
 			return new BukkitMCBookMeta((BookMeta) im);
 		}
@@ -631,6 +632,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if (im instanceof LeatherArmorMeta) {
 			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
+		}
+		if (im instanceof MapMeta) {
+
 		}
 		if (im instanceof PotionMeta) {
 			return new BukkitMCPotionMeta((PotionMeta) im);

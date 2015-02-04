@@ -6,18 +6,15 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
+import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFireworkType;
-import java.util.List;
-import java.util.Map;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
-import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 
 /**
@@ -25,6 +22,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
  *
  */
 public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
+
 	private FireworkEffect.Builder builder;
 	private int strength;
 	public BukkitMCFireworkBuilder(){
@@ -69,6 +67,11 @@ public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 	}
 
 	@Override
+	public MCFireworkEffect build() {
+		return new BukkitMCFireworkEffect(builder.build());
+	}
+
+	@Override
 	public int launch(MCLocation l) {
 		FireworkEffect fe = builder.build();
 		Location ll = ((BukkitMCLocation)l).asLocation();
@@ -88,6 +91,5 @@ public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 		m.addEffect(fem);
 		m.setPower(strength);
 	}
-
 
 }

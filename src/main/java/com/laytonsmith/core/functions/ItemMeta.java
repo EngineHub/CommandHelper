@@ -39,6 +39,8 @@ public class ItemMeta {
 			+ "<li>Leather Armor - color (color array (see Example))</li>"
 			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"
 			+ "<li>Potions - potions (array of potion arrays), main(int, the id of the main effect)</li>"
+			+ "<li>Fireworks - strength (int, fly time), effects (normal array of associative firework"
+			+ " effect arrays with keys trail, flicker, shape, colors, and fadecolors)</li>"
 			+ "</ul>";
 	
 	@api(environments={CommandHelperEnvironment.class})

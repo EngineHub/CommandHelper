@@ -18,22 +18,26 @@ public interface MCFireworkBuilder {
 	 * @return
 	 */
 	MCFireworkBuilder setFlicker(boolean flicker);
+
 	/**
 	 * Sets whether or not this firework has a trail
 	 */
 	MCFireworkBuilder setTrail(boolean trail);
+
 	/**
 	 * Adds a primary color
 	 * @param color
 	 * @return
 	 */
 	MCFireworkBuilder addColor(MCColor color);
+
 	/**
 	 * Adds a secondary color
 	 * @param color
 	 * @return
 	 */
 	MCFireworkBuilder addFadeColor(MCColor color);
+
 	/**
 	 * Sets the launch strength of the firework
 	 * @param i
@@ -47,6 +51,7 @@ public interface MCFireworkBuilder {
 	 * @return
 	 */
 	MCFireworkBuilder setType(MCFireworkType type);
+
 	/**
 	 * Launches the firework from the specified location, upward.
 	 * @param l
@@ -60,5 +65,7 @@ public interface MCFireworkBuilder {
 	 * @return
 	 */
 	void createFireworkMeta(MCFireworkMeta meta);
+
+	MCFireworkEffect build();
 
 }
