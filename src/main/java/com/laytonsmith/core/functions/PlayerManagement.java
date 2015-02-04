@@ -17,6 +17,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -3038,6 +3039,7 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_pflying.class})
 	public static class set_pflight extends AbstractFunction {
 
 		@Override
@@ -4535,6 +4537,75 @@ public class PlayerManagement {
 
 		@Override
 		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	@api
+	@seealso({set_pflight.class})
+	public static class set_pflying extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_pflying";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], flight} Sets whether or not this player is flying."
+					+ "Requires player to have the ability to fly, which is set with set_pflight().";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.IllegalArgumentException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			boolean flight;
+			if (args.length == 1) {
+				flight = Static.getBoolean(args[0]);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				flight = Static.getBoolean(args[1]);
+			}
+			Static.AssertPlayerNonNull(p, t);
+			if(!p.getAllowFlight()) {
+				throw new ConfigRuntimeException("Player must have the ability to fly. Set with set_pflight()",
+						ExceptionType.IllegalArgumentException, t);
+			}
+			// This is needed in order for the player to enter flight mode whilst standing on the ground.
+			if(flight
+			&& p.isOnGround()) {
+				MVector3D v = p.getVelocity();
+				// 0.08 was chosen as it does not change the player's position, whereas higher values do.
+				v.y += 0.08;
+				p.setVelocity(v);
+			}
+			p.setFlying(flight);
+			// We only want to set whether the player is flying; not whether the player can fly.
+			p.setAllowFlight(true);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 	}
