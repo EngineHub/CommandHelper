@@ -68,6 +68,11 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
+	public double getTemperature() {
+		return b.getTemperature();
+	}
+
+	@Override
     public MCBlockState getState() {
         if(b.getState() == null){
             return null;
