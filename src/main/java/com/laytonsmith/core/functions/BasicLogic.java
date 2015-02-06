@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -898,8 +899,10 @@ public class BasicLogic {
 					+ " two values are not only equal, but also the same type. So, while"
 					+ " equals('1', 1) returns true, sequals('1', 1) returns false, because"
 					+ " the first one is a string, and the second one is an int. More often"
-					+ " than not, you want to use plain equals(). Operator syntax is also"
-					+ " supportd: @a === @b";
+					+ " than not, you want to use plain equals(). In addition, type juggling is"
+					+ " explicitely not performed on strings. Thus '2' !== '2.0', despite those"
+					+ " being ==. Operator syntax is also"
+					+ " supported: @a === @b";
 		}
 
 		@Override
@@ -925,6 +928,11 @@ public class BasicLogic {
 		@Override
 		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[1].getClass().equals(args[0].getClass())) {
+				if(args[0] instanceof CString && args[1] instanceof CString){
+					// Check for actual string equality, so we don't do type massaging
+					// for numeric strings. Thus '2' !== '2.0'
+					return CBoolean.get(args[0].val().equals(args[1].val()));
+				}
 				return new equals().exec(t, environment, args);
 			} else {
 				return CBoolean.FALSE;
