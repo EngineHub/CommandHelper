@@ -1824,11 +1824,11 @@ public class World {
 		public Construct exec(Target target, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world = null;
-			if(player != null) { world = player.getWorld(); }
+			if(player != null) {
+				world = player.getWorld();
+			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], world, target);
-			double temp;
-			temp = loc.getBlock().getTemperature();
-			return new CDouble(temp, target);
+			return new CDouble(loc.getBlock().getTemperature(), target);
 		}
 
 		@Override
