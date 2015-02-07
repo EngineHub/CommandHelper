@@ -9,5 +9,6 @@ public enum MCTeleportCause {
 	ENDER_PEARL,
 	NETHER_PORTAL,
 	PLUGIN,
+	SPECTATE,
 	UNKNOWN
 }

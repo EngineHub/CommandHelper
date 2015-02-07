@@ -15,5 +15,4 @@ public enum MCWorldType {
     LARGE_BIOMES,
 	AMPLIFIED,
 	CUSTOMIZED,
-	DEBUG_ALL_BLOCK_STATES;
 }
