@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
+import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
@@ -1467,6 +1468,73 @@ public class EntityEvents {
 		@Override
 		public Driver driver() {
 			return Driver.ENTITY_CHANGE_BLOCK;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class entity_interact extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "entity_interact";
+		}
+
+		@Override
+		public String docs() {
+			return "{type: <string match> the entity type | block: <item match> The block id }"
+					+ " Fires when a non-player entity physically interacts with and triggers a block."
+					+ " (eg. pressure plates, redstone ore, farmland, tripwire, and wooden button)"
+					+ " {entity: the ID of the entity that interacted with the block"
+					+ " | block: the block ID with which the entity interacted "
+					+ " | location: the location of the interaction}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCEntityInteractEvent) {
+				MCEntityInteractEvent event = (MCEntityInteractEvent) e;
+				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "block", event.getBlock().getTypeId(), PrefilterType.ITEM_MATCH);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCEntityInteractEvent) {
+				MCEntityInteractEvent event = (MCEntityInteractEvent) e;
+				Target t = Target.UNKNOWN;
+				Map<String, Construct> ret = evaluate_helper(event);
+				ret.put("entity", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("block", new CInt(event.getBlock().getTypeId(), t));
+				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityInteractEvent");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_INTERACT;
 		}
 
 		@Override

@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
@@ -155,6 +156,13 @@ public class BukkitEntityListener implements Listener{
 		BukkitEntityEvents.BukkitMCEntityChangeBlockEvent ecbe = new BukkitEntityEvents.BukkitMCEntityChangeBlockEvent(event);
 		EventUtils.TriggerExternal(ecbe);
 		EventUtils.TriggerListener(Driver.ENTITY_CHANGE_BLOCK, "entity_change_block", ecbe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onInteract(EntityInteractEvent event) {
+		BukkitEntityEvents.BukkitMCEntityInteractEvent eie = new BukkitEntityEvents.BukkitMCEntityInteractEvent(event);
+		EventUtils.TriggerExternal(eie);
+		EventUtils.TriggerListener(Driver.ENTITY_INTERACT, "entity_interact", eie);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)

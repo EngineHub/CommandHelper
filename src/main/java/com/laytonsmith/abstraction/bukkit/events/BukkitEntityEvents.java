@@ -40,6 +40,7 @@ import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
+import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
@@ -67,6 +68,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
@@ -677,6 +679,41 @@ public class BukkitEntityEvents {
 		@Override
 		public Object _GetObject() {
 			return ecb;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCEntityInteractEvent implements MCEntityInteractEvent {
+
+		EntityInteractEvent eie;
+
+		public BukkitMCEntityInteractEvent(EntityInteractEvent event) {
+			eie = event;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return eie;
+		}
+
+		@Override
+		public MCEntity getEntity() {
+			return BukkitConvertor.BukkitGetCorrectEntity(eie.getEntity());
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(eie.getBlock());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return eie.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancelled) {
+			eie.setCancelled(cancelled);
 		}
 	}
 
