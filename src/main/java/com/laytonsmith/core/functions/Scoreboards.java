@@ -721,7 +721,7 @@ public class Scoreboards {
 			if (args[1].val().length() > 16) {
 				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
 			}
-			team.addPlayer(Static.getServer().getOfflinePlayer(args[1].val()));
+			team.addPlayer(Static.GetUser(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -755,7 +755,7 @@ public class Scoreboards {
 			if (team == null) {
 				throw new ScoreboardException("No team by that name exists.", t);
 			}
-			return CBoolean.get(team.removePlayer(Static.getServer().getOfflinePlayer(args[1].val())));
+			return CBoolean.get(team.removePlayer(Static.GetUser(args[1], t)));
 		}
 
 		@Override
