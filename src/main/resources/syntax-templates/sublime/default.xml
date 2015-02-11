@@ -29,7 +29,7 @@
 			</dict>
 			<dict>
 				<key>begin</key>
-				<string>(?&lt;=[^\\]|)(['"])</string>
+				<string>(?&lt;=[^\\]|)(["])</string>
 				<key>captures</key>
 				<dict>
 					<key>1</key>
@@ -43,7 +43,25 @@
 				<key>contentName</key>
 				<string>string.quoted.single.MScript</string>
 				<key>end</key>
-				<string>(?&lt;=[^\\]|[\\][\\]|[^\\'])(['"])</string>
+				<string>(?&lt;=[^\\]|[\\][\\]|[^\\']|^)(["])</string>
+			</dict>
+			<dict>
+				<key>begin</key>
+				<string>(?&lt;=[^\\]|)(['])</string>
+				<key>captures</key>
+				<dict>
+					<key>1</key>
+					<dict>
+						<key>name</key>
+						<string>string.quoted.single.MScript</string>
+					</dict>
+				</dict>
+				<key>comment</key>
+				<string>Quoted String</string>
+				<key>contentName</key>
+				<string>string.quoted.single.MScript</string>
+				<key>end</key>
+				<string>(?&lt;=[^\\]|[\\][\\]|[^\\']|^)(['])</string>
 			</dict>
 			<dict>
 				<key>comment</key>
