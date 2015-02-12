@@ -18,7 +18,6 @@
  */
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
@@ -30,13 +29,10 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UserManager;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.persistence.DataSourceException;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardPlayerListener;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -104,22 +100,10 @@ public class CommandHelperListener implements Listener {
             return;
         }
         MCPlayerCommandEvent mpce = new BukkitPlayerEvents.BukkitMCPlayerCommandEvent(event);
+		EventUtils.TriggerExternal(mpce);
         EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce);
         if(mpce.isCancelled()){
             return;
-        }
-        
-        if (Implementation.GetServerType() == Implementation.Type.BUKKIT) {
-            WorldGuardPlugin wgp = SKHandler.getWorldGuardPlugin(Target.UNKNOWN);
-            //This will cancel the command if the player isn't supposed to run it in this region
-            if(wgp != null){
-				try {
-					WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);
-					wgpl.onPlayerCommandPreprocess(event);
-				} catch(NoClassDefFoundError ex){
-					// Ignored, for now
-				}
-            }
         }
         String cmd = event.getMessage();        
         MCPlayer player = new BukkitMCPlayer(event.getPlayer());
