@@ -138,6 +138,62 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class puuid extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCOfflinePlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (args.length == 1) {
+				try {
+					pl = Static.GetPlayer(args[0], t);
+				} catch (ConfigRuntimeException cre) {
+					pl = Static.GetUser(args[0], t);
+				}
+			}
+			if (pl == null) {
+				throw new ConfigRuntimeException("No matching player could be found.",
+						ExceptionType.PlayerOfflineException, t);
+			}
+			return new CString(pl.getUniqueID().toString(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "puuid";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "UUID {[player]} Returns the uuid of the current player or the specified player.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class all_players extends AbstractFunction {
 
 		@Override

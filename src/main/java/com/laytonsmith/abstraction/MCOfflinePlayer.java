@@ -1,6 +1,8 @@
 
 package com.laytonsmith.abstraction;
 
+import java.util.UUID;
+
 /**
  *
  * 
@@ -73,4 +75,6 @@ public interface MCOfflinePlayer extends MCAnimalTamer{
      * @return Bed Spawn Location if bed exists, otherwise null.
      */
 	public MCLocation getBedSpawnLocation();
+
+	public UUID getUniqueID();
 }
