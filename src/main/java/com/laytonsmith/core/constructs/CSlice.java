@@ -6,6 +6,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Exceptions;
+import java.util.AbstractSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -116,6 +118,43 @@ public class CSlice extends CArray {
 			throw new ConfigRuntimeException("Index out of bounds. Index: " + i + " Size: " + max, Exceptions.ExceptionType.RangeException, t);
 		}
 		return new CInt(start + (direction * i), t);
+	}
+
+	@Override
+	public Set<Construct> keySet() {
+		// To keep our memory footprint down, we create a "fake" keyset here, which doesn't
+		// require actually creating an entire Set. Removing items from the set isn't supported,
+		// but all iteration options are.
+		return new AbstractSet<Construct>() {
+
+			@Override
+			public Iterator<Construct> iterator() {
+				return new Iterator<Construct>() {
+
+					int index = 0;
+
+					@Override
+					public boolean hasNext() {
+						return index < size;
+					}
+
+					@Override
+					public Construct next() {
+						return new CInt(index++, Target.UNKNOWN);
+					}
+
+					@Override
+					public void remove() {
+						throw new UnsupportedOperationException("Not supported yet.");
+					}
+				};
+			}
+
+			@Override
+			public int size() {
+				return (int) CSlice.this.size();
+			}
+		};
 	}
 
 	@Override
