@@ -589,6 +589,7 @@ public class ArrayHandling {
 	}
 
 	@api
+	@seealso({array_index_exists.class})
 	public static class array_contains extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -605,8 +606,8 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
-				for (int i = 0; i < ca.size(); i++) {
-					if (new equals().exec(t, env, ca.get(i, t), args[1]).getBoolean()) {
+				for(Construct key : ca.keySet()){
+					if(new equals().exec(t, env, ca.get(key, t), args[1]).getBoolean()){
 						return CBoolean.TRUE;
 					}
 				}
@@ -623,7 +624,8 @@ public class ArrayHandling {
 
 		@Override
 		public String docs() {
-			return "boolean {array, testValue} Checks to see if testValue is in array.";
+			return "boolean {array, testValue} Checks to see if testValue is in array. For associative arrays, only the values are searched,"
+					+ " the keys are ignored. If you need to check for the existance of a particular key, use array_index_exists().";
 		}
 
 		@Override
@@ -648,6 +650,7 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates not finding a value", "array_contains(array(0, 1, 2), 5)"),
 				new ExampleScript("Demonstrates finding a value listed multiple times", "array_contains(array(1, 1, 1), 1)"),
 				new ExampleScript("Demonstrates finding a string", "array_contains(array('a', 'b', 'c'), 'b')"),
+				new ExampleScript("Demonstrates finding a value in an associative array", "array_contains(array('a': 1, 'b': 2), 2)")
 			};
 		}
 
