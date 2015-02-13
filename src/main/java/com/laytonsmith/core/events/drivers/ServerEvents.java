@@ -204,8 +204,14 @@ public class ServerEvents {
 				if ("completions".equals(key)) {
 					if (value instanceof CArray) {
 						e.getCompletions().clear();
-						for (Construct val : ((CArray) value).asList()) {
-							e.getCompletions().add(val.val());
+						if (((CArray) value).inAssociativeMode()) {
+							for (Construct k : ((CArray) value).keySet()) {
+								e.getCompletions().add(((CArray) value).get(k, Target.UNKNOWN).val());
+							}
+						} else {
+							for (Construct v : ((CArray) value).asList()) {
+								e.getCompletions().add(v.val());
+							}
 						}
 						return true;
 					}
