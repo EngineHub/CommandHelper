@@ -24,6 +24,8 @@ public interface MCBlock extends MCMetadatable {
 
 	public void setTypeAndData(int type, byte data, boolean physics);
 
+	public double getTemperature();
+
     public MCBlockState getState();
 
     public MCMaterial getType();

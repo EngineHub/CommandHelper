@@ -1801,4 +1801,54 @@ public class World {
 		}
 
 	}
+
+	@api
+	public static class get_temperature extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target target, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world = null;
+			if(player != null) {
+				world = player.getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], world, target);
+			return new CDouble(loc.getBlock().getTemperature(), target);
+		}
+
+		@Override
+		public String getName() {
+			return "get_temperature";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {locationArray} Returns the current temperature of the location given.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
 }
