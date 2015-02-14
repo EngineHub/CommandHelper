@@ -265,7 +265,7 @@ public class Script {
         CurrentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
         if (m.getCType() == ConstructType.FUNCTION) {
                 env.getEnv(GlobalEnv.class).SetScript(this);
-                if (m.val().matches("^_[^_].*")) {
+                if (m.val().charAt(0) == '_' && m.val().charAt(1) != '_') {
                     //Not really a function, so we can't put it in Function.
                     Procedure p = getProc(m.val());
                     if (p == null) {
