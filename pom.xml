@@ -203,13 +203,6 @@
 			<version>1.4.5-R0.3-SNAPSHOT</version>
 		</dependency>-->
 
-		<!-- WorldGuard for some of the sk functions -->
-		<dependency>
-			<groupId>com.sk89q</groupId>
-			<artifactId>worldguard</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
-		</dependency>
-
 		<!-- Used for economy stuff -->
 		<dependency>
 			<groupId>net.milkbowl.vault</groupId>
