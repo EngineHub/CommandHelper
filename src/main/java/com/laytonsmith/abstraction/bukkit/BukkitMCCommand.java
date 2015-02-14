@@ -216,8 +216,14 @@ public class BukkitMCCommand implements MCCommand {
 				Construct fret = e.getReturn();
 				if (fret instanceof CArray) {
 					List<String> ret = new ArrayList<String>();
-					for (Construct key : ((CArray) fret).asList()) {
-						ret.add(key.val());
+					if (((CArray) fret).inAssociativeMode()) {
+						for (Construct key : ((CArray) fret).keySet()) {
+							ret.add(((CArray) fret).get(key, Target.UNKNOWN).val());
+						}
+					} else {
+						for (Construct value : ((CArray) fret).asList()) {
+							ret.add(value.val());
+						}
 					}
 					return ret;
 				}

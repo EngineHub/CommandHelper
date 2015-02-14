@@ -2349,8 +2349,14 @@ public class PlayerEvents {
 				if ("completions".equals(key)) {
 					if (value instanceof CArray) {
 						e.getTabCompletions().clear();
-						for (Construct val : ((CArray) value).asList()) {
-							e.getTabCompletions().add(val.val());
+						if (((CArray) value).inAssociativeMode()) {
+							for (Construct k : ((CArray) value).keySet()) {
+								e.getTabCompletions().add(((CArray) value).get(k, Target.UNKNOWN).val());
+							}
+						} else {
+							for (Construct v : ((CArray) value).asList()) {
+								e.getTabCompletions().add(v.val());
+							}
 						}
 						return true;
 					}
