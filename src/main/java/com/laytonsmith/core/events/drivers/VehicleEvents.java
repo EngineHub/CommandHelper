@@ -333,7 +333,6 @@ public class VehicleEvents {
 				thresholdList.add(i);
 			}
 			if (thread == null) {
-				thresholdList.clear();
 				thresholdList.add(1);
 				thread = new Thread(new Runnable() {
 					@Override
@@ -353,6 +352,8 @@ public class VehicleEvents {
 							}
 
 							for (final MCVehicle v : vehicles) {
+								final MCLocation current = ((MCEntity) v).asyncGetLocation();
+								Point3D currentPoint = new Point3D(current.getX(), current.getY(), current.getZ());
 								//We need to loop through all the thresholds
 								//and see if any of the points meet them. If so,
 								//we know we need to fire the event. If none of them
@@ -360,10 +361,9 @@ public class VehicleEvents {
 								//one matches though, we can't quit the loop, because
 								//we have to set all the thresholds.
 								thresholdLoop:
-								for (Integer i : thresholdList) {
+								for (final Integer i : thresholdList) {
 									if (thresholds.containsKey(i) && thresholds.get(i).containsKey(v.getEntityId())) {
 										final MCLocation last = thresholds.get(i).get(v.getEntityId());
-										final MCLocation current = ((MCEntity) v).asyncGetLocation();
 										if (!v.getWorld().getName().equals(last.getWorld().getName())) {
 											//They moved worlds. simply put their new location in here, then
 											//continue.
@@ -371,7 +371,6 @@ public class VehicleEvents {
 											continue thresholdLoop;
 										}
 										Point3D lastPoint = new Point3D(last.getX(), last.getY(), last.getZ());
-										Point3D currentPoint = new Point3D(current.getX(), current.getY(), current.getZ());
 										double distance = lastPoint.distance(currentPoint);
 										if (distance > i) {
 											//We've met the threshold.
@@ -381,6 +380,11 @@ public class VehicleEvents {
 											//THIS from location. Other binds will be expecting other from locations.
 											final MCVehicleMoveEvent fakeEvent = new MCVehicleMoveEvent() {
 												boolean cancelled = false;
+
+												@Override
+												public int getThreshold() {
+													return i;
+												}
 
 												@Override
 												public MCLocation getFrom() {
@@ -437,8 +441,7 @@ public class VehicleEvents {
 									} else {
 										//If there is no location here, just put the current location in there.
 										if (!thresholds.containsKey(i)) {
-											Map<Integer, MCLocation> map = new HashMap<Integer, MCLocation>();
-											thresholds.put(i, map);
+											thresholds.put(i, new HashMap<Integer, MCLocation>());
 										}
 										thresholds.get(i).put(v.getEntityId(), v.asyncGetLocation());
 									}
@@ -459,6 +462,7 @@ public class VehicleEvents {
 				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 					@Override
 					public void run() {
+						thresholdList.clear();
 						thread = null;
 					}
 				});
@@ -511,14 +515,10 @@ public class VehicleEvents {
 					return false;
 				}
 
-				if (prefilter.containsKey("threshold")) {
-					Point3D from = new Point3D(event.getFrom().getX(), event.getFrom().getY(), event.getFrom().getZ());
-					Point3D to = new Point3D(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ());
-					double distance = from.distance(to);
-					double pDistance = Static.getNumber(prefilter.get("threshold"), Target.UNKNOWN);
-					if (pDistance > distance) {
-						return false;
-					}
+				if(prefilter.containsKey("threshold")) {
+					Prefilters.match(prefilter, "threshold", event.getThreshold(), PrefilterType.MATH_MATCH);
+				} else if(event.getThreshold() != 1) {
+					return false;
 				}
 				if (prefilter.containsKey("from")) {
 					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getVehicle().getVehicle().getWorld(), Target.UNKNOWN);
