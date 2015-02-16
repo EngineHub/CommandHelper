@@ -12,16 +12,21 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.laytonsmith.abstraction.MCCommandMap.*;
 
 /**
  *
@@ -324,6 +329,105 @@ public class Commands {
 					+ " The closure can return true false (treated as true by default). Returning false will display"
 					+ " The usage message if it is set. The closure is passed the following information in this order:"
 					+ " alias used, name of the sender, array of arguments used, array of command info.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class get_commandmap extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[0];
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target target, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCCommandMap map = Static.getServer().getCommandMap();
+			Collection<MCCommand> commands = map.getCommands();
+			CArray ca = new CArray(target);
+			for(MCCommand name : commands) {
+				ca.push(new CString(name.toString(), target));
+			}
+			return ca;
+		}
+
+		@Override
+		public String getName() {
+			return "get_commandmap";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Attempts to display the servers command map. This does not include"
+					+ " CommandHelper aliases, as they are not registered commands.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class clear_commands extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[0];
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCCommandMap map = Static.getServer().getCommandMap();
+			map.clearCommands();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "clear_commands";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "void {} Attempts to clear all registered commands on the server. Note that this probably has some special"
+					+ " limitations, but they are a bit unclear as to what commands can and cannot be unregistered.";
 		}
 
 		@Override
