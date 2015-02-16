@@ -12,6 +12,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -338,7 +339,7 @@ public class Commands {
 	}
 
 	@api
-	public static class get_commandmap extends AbstractFunction {
+	public static class get_commands extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -356,19 +357,36 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target target, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			Collection<MCCommand> commands = map.getCommands();
-			CArray ca = new CArray(target);
-			for(MCCommand name : commands) {
-				ca.push(new CString(name.toString(), target));
+			CArray ret = CArray.GetAssociativeArray(t);
+			for(MCCommand command : commands) {
+				CArray ca = CArray.GetAssociativeArray(t);
+				ca.set("name", new CString(command.getName(), t), t);
+				ca.set("description", new CString(command.getDescription(), t), t);
+				Construct permission;
+				if (command.getPermission() == null) {
+					permission = CNull.NULL;
+				} else {
+					permission = new CString(command.getPermission(), t);
+				}
+				ca.set("permission", permission, t);
+				ca.set("nopermmsg", new CString(command.getPermissionMessage(), t), t);
+				ca.set("usage", new CString(command.getUsage(), t), t);
+				CArray aliases = new CArray(t);
+				for (String a : command.getAliases()) {
+					aliases.push(new CString(a, t));
+				}
+				ca.set("aliases", aliases, t);
+				ret.set(command.getName(), ca, t);
 			}
-			return ca;
+			return ret;
 		}
 
 		@Override
 		public String getName() {
-			return "get_commandmap";
+			return "get_commands";
 		}
 
 		@Override
@@ -378,8 +396,8 @@ public class Commands {
 
 		@Override
 		public String docs() {
-			return "array {} Attempts to display the servers command map. This does not include"
-					+ " CommandHelper aliases, as they are not registered commands.";
+			return "array {} Returns an array of command arrays in the format register_command expects."
+					+ " This does not include CommandHelper aliases, as they are not registered commands.";
 		}
 
 		@Override
