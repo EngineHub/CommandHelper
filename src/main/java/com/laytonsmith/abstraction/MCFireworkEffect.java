@@ -4,7 +4,7 @@ import com.laytonsmith.abstraction.enums.MCFireworkType;
 
 import java.util.List;
 
-public interface MCFireworkEffect {
+public interface MCFireworkEffect extends AbstractionObject {
 
 	List<MCColor> getColors();
 

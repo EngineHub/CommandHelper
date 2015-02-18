@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -349,44 +350,33 @@ public class ObjectGenerator {
 				lore = CNull.NULL;
 			}
 
-			if(meta instanceof MCFireworkMeta){
+			enchants = enchants(meta.getEnchants(), t);
+			ma.set("display", display, t);
+			ma.set("lore", lore, t);
+			ma.set("enchants", enchants, t);
+			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
+
+			if (meta instanceof MCFireworkMeta) {
 				MCFireworkMeta mcfm = (MCFireworkMeta) meta;
 				ma.set("strength", new CInt(mcfm.getStrength(), t), t);
 				if (mcfm.hasEffects()) {
 					firework = new CArray(t);
 					for (MCFireworkEffect eff : mcfm.getEffects()) {
-						CArray cf = CArray.GetAssociativeArray(t);
-						cf.set("flicker", CBoolean.get(eff.hasFlicker()), t);
-						cf.set("trail", CBoolean.get(eff.hasTrail()), t);
-						MCFireworkType type = eff.getShape();
-						if (type != null) {
-							cf.set("shape", new CString(eff.getShape().name(), t), t);
-						} else {
-							cf.set("shape	", CNull.NULL, t);
-						}
-						CArray colors = new CArray(t);
-						for (MCColor c : eff.getColors()) {
-							colors.push(ObjectGenerator.GetGenerator().color(c, t));
-						}
-						cf.set("colors", colors, t);
-						CArray fadeColors = new CArray(t);
-						for (MCColor c : eff.getFadeColors()) {
-							fadeColors.push(ObjectGenerator.GetGenerator().color(c, t));
-						}
-						cf.set("fadecolors", fadeColors, t);
-						((CArray) firework).push(cf);
+						((CArray) firework).push(fireworkEffect(eff, t));
 					}
 				} else {
 					firework = CNull.NULL;
 				}
 				ma.set("effects", firework, t);
 			}
-
-			enchants = enchants(meta.getEnchants(), t);
-			ma.set("display", display, t);
-			ma.set("lore", lore, t);
-			ma.set("enchants", enchants, t);
-			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
+			if (meta instanceof MCFireworkEffectMeta) {
+				MCFireworkEffectMeta fem = (MCFireworkEffectMeta) meta;
+				firework = new CArray(t);
+				if (fem.hasEffect()) {
+					((CArray) firework).push(fireworkEffect(fem.getEffect(), t));
+				}
+				ma.set("effects", firework, t);
+			}
 			if (meta instanceof MCLeatherArmorMeta) {
 				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
@@ -484,89 +474,6 @@ public class ObjectGenerator {
 						throw new Exceptions.FormatException("Lore was expected to be an array or a string.", t);
 					}
 				}
-
-				if (meta instanceof MCFireworkMeta) {
-					MCFireworkMeta fmeta = (MCFireworkMeta) meta;
-					if (ma.containsKey("strength")) {
-						fmeta.setStrength(Static.getInt32(ma.get("strength", t), t));
-					}
-					if (ma.containsKey("effects")) {
-						Construct effi = ma.get("effects", t);
-						if (effi instanceof CNull) {
-							// do nothing
-						} else if (effi instanceof CArray) {
-							CArray effd = (CArray) effi;
-							for (Construct effc : effd.asList()) {
-								MCFireworkBuilder builder = StaticLayer.GetConvertor().GetFireworkBuilder();
-								CArray eff = Static.getArray(effc, t);
-								if (eff.containsKey("flicker")) {
-									builder.setFlicker(Static.getBoolean(eff.get("flicker", t)));
-								}
-								if (eff.containsKey("trail")) {
-									builder.setTrail(Static.getBoolean(eff.get("trail", t)));
-								}
-								if (eff.containsKey("shape") && !(eff.get("shape", t) instanceof CNull)) {
-									try {
-										builder.setType(MCFireworkType.valueOf(eff.get("shape", t).val()));
-									} catch(IllegalArgumentException ex){
-										throw new Exceptions.FormatException(ex.getMessage(), t, ex);
-									}
-								}
-								if (eff.containsKey("colors")) {
-									Construct colors = eff.get("colors", t);
-									CArray ccolors;
-									if(colors instanceof CString){
-										ccolors = new CArray(t, colors);
-									} else if(colors instanceof CArray){
-										ccolors = (CArray) colors;
-									} else {
-										throw new Exceptions.FormatException("Expecting an array or string for colors parameter, but found " + colors.typeof(), t);
-									}
-									for (Construct color : ccolors.asList()) {
-										MCColor mccolor;
-										if(color instanceof CString){
-											mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-										} else if(color instanceof CArray){
-											mccolor = color((CArray)color, t);
-										} else {
-											throw new Exceptions.FormatException("Expecting individual color to be an array or string, but found " + color.typeof(), t);
-										}
-										builder.addColor(mccolor);
-									}
-									if(ccolors.isEmpty()){
-										builder.addColor(MCColor.WHITE);
-									}
-								}
-								if (eff.containsKey("fadecolors")) {
-									Construct colors = eff.get("fadecolors", t);
-									CArray ccolors;
-									if (colors instanceof CString) {
-										ccolors = new CArray(t, colors);
-									} else if(colors instanceof CArray){
-										ccolors = (CArray) colors;
-									} else {
-										throw new Exceptions.FormatException("Expecting an array or string for fade parameter, but found " + colors.typeof(), t);
-									}
-									for (Construct color : ccolors.asList()) {
-										MCColor mccolor;
-										if (color instanceof CString) {
-											mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-										} else if(color instanceof CArray) {
-											mccolor = color((CArray)color, t);
-										} else {
-											throw new Exceptions.FormatException("Expecting individual color to be an array or string, but found " + color.typeof(), t);
-										}
-										builder.addFadeColor(mccolor);
-									}
-								}
-								fmeta.addEffect(builder.build());
-							}
-						} else {
-							throw new Exceptions.FormatException("Fireworkseffect was expected to be an array.", t);
-						}
-					}
-				}
-
 				if (ma.containsKey("enchants")) {
 					Construct enchants = ma.get("enchants", t);
 					if (enchants instanceof CArray) {
@@ -579,6 +486,52 @@ public class ObjectGenerator {
 				}
 				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
 					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
+				}
+
+				if (meta instanceof MCFireworkMeta) {
+					MCFireworkMeta fmeta = (MCFireworkMeta) meta;
+					if (ma.containsKey("firework")) {
+						CHLog.GetLogger().i(CHLog.Tags.DEPRECATION, "The firework format"
+								+ " {firework: {strength: s, color: c, type:}} is deprecated."
+								+ " Please update to {strength: s, effects: {{color: c, shape: sh},"
+								+ " {color: c, shape: sh}}}.", t);
+						if (Static.getArray(ma.get("firework", t), t).containsKey("strength")) {
+							fmeta.setStrength(Static.getInt32(ma.get("strength", t), t));
+						}
+						fmeta.addEffect(fireworkEffect(ma.get("firework", t), t));
+					} else {
+						if (ma.containsKey("strength")) {
+							fmeta.setStrength(Static.getInt32(ma.get("strength", t), t));
+						}
+						if (ma.containsKey("effects")) {
+							Construct effi = ma.get("effects", t);
+							if (effi instanceof CNull) {
+								// do nothing
+								// TODO: change this for modification update
+							} else if (effi instanceof CArray) {
+								for (Construct key : ((CArray) effi).keySet()) {
+									fmeta.addEffect(fireworkEffect(((CArray) effi).get(key, t), t));
+								}
+							} else {
+								throw new Exceptions.FormatException("effects was expected to be an array.", t);
+							}
+						}
+					}
+				}
+				if (meta instanceof MCFireworkEffectMeta) {
+					if (ma.containsKey("effects")) {
+						Construct effi = ma.get("effects", t);
+						if (effi instanceof CNull) {
+							// do nothing
+							// TODO: change this for modification update
+						} else if (effi instanceof CArray) {
+							if (((CArray) effi).size() >= 1) {
+								((MCFireworkEffectMeta) meta).setEffect(fireworkEffect(((CArray) effi).get(0, t), t));
+							}
+						} else {
+							throw new Exceptions.FormatException("effects was expected to be an array.", t);
+						}
+					}
 				}
 				if (meta instanceof MCLeatherArmorMeta) {
 					if (ma.containsKey("color")) {
@@ -659,7 +612,7 @@ public class ObjectGenerator {
 						((MCPotionMeta) meta).setMainEffect(Static.getInt32(ma.get("main", t), t));
 					}
 				}
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new Exceptions.FormatException("Could not get ItemMeta from the given information.", t, ex);
 			}
 		} else {
@@ -1069,5 +1022,94 @@ public class ObjectGenerator {
 	 */
 	public MCMetadataValue metadataValue(Object value, MCPlugin plugin) {
 		return StaticLayer.GetMetadataValue(value, plugin);
+	}
+
+	public CArray fireworkEffect(MCFireworkEffect eff, Target t) {
+		CArray cf = CArray.GetAssociativeArray(t);
+		cf.set("flicker", CBoolean.get(eff.hasFlicker()), t);
+		cf.set("trail", CBoolean.get(eff.hasTrail()), t);
+		MCFireworkType type = eff.getShape();
+		if (type != null) {
+			cf.set("shape", new CString(eff.getShape().name(), t), t);
+		} else {
+			cf.set("shape	", CNull.NULL, t);
+		}
+		CArray colors = new CArray(t);
+		for (MCColor c : eff.getColors()) {
+			colors.push(ObjectGenerator.GetGenerator().color(c, t));
+		}
+		cf.set("colors", colors, t);
+		CArray fadeColors = new CArray(t);
+		for (MCColor c : eff.getFadeColors()) {
+			fadeColors.push(ObjectGenerator.GetGenerator().color(c, t));
+		}
+		cf.set("fadecolors", fadeColors, t);
+		return cf;
+	}
+
+	public MCFireworkEffect fireworkEffect(Construct effc, Target t) {
+		MCFireworkBuilder builder = StaticLayer.GetConvertor().GetFireworkBuilder();
+		CArray eff = Static.getArray(effc, t);
+		if (eff.containsKey("flicker")) {
+			builder.setFlicker(Static.getBoolean(eff.get("flicker", t)));
+		}
+		if (eff.containsKey("trail")) {
+			builder.setTrail(Static.getBoolean(eff.get("trail", t)));
+		}
+		if (eff.containsKey("shape") && !(eff.get("shape", t) instanceof CNull)) {
+			try {
+				builder.setType(MCFireworkType.valueOf(eff.get("shape", t).val()));
+			} catch (IllegalArgumentException ex) {
+				throw new Exceptions.FormatException(ex.getMessage(), t, ex);
+			}
+		}
+		if (eff.containsKey("colors")) {
+			Construct colors = eff.get("colors", t);
+			CArray ccolors;
+			if (colors instanceof CString) {
+				ccolors = new CArray(t, colors);
+			} else if (colors instanceof CArray) {
+				ccolors = (CArray) colors;
+			} else {
+				throw new Exceptions.FormatException("Expecting an array or string for colors parameter, but found " + colors.typeof(), t);
+			}
+			for (Construct color : ccolors.asList()) {
+				MCColor mccolor;
+				if (color instanceof CString) {
+					mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
+				} else if (color instanceof CArray) {
+					mccolor = color((CArray) color, t);
+				} else {
+					throw new Exceptions.FormatException("Expecting individual color to be an array or string, but found " + color.typeof(), t);
+				}
+				builder.addColor(mccolor);
+			}
+			if (ccolors.isEmpty()) {
+				builder.addColor(MCColor.WHITE);
+			}
+		}
+		if (eff.containsKey("fadecolors")) {
+			Construct colors = eff.get("fadecolors", t);
+			CArray ccolors;
+			if (colors instanceof CString) {
+				ccolors = new CArray(t, colors);
+			} else if (colors instanceof CArray) {
+				ccolors = (CArray) colors;
+			} else {
+				throw new Exceptions.FormatException("Expecting an array or string for fade parameter, but found " + colors.typeof(), t);
+			}
+			for (Construct color : ccolors.asList()) {
+				MCColor mccolor;
+				if (color instanceof CString) {
+					mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
+				} else if (color instanceof CArray) {
+					mccolor = color((CArray) color, t);
+				} else {
+					throw new Exceptions.FormatException("Expecting individual color to be an array or string, but found " + color.typeof(), t);
+				}
+				builder.addFadeColor(mccolor);
+			}
+		}
+		return builder.build();
 	}
 }

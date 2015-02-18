@@ -625,7 +625,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCEnchantmentStorageMeta((EnchantmentStorageMeta) im);
 		}
 		if (im instanceof FireworkEffectMeta) {
-
+			return new BukkitMCFireworkEffectMeta((FireworkEffectMeta) im);
 		}
 		if (im instanceof FireworkMeta) {
 			return new BukkitMCFireworkMeta((FireworkMeta) im);

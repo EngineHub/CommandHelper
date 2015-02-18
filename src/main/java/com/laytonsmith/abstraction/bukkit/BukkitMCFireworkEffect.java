@@ -53,4 +53,9 @@ public class BukkitMCFireworkEffect implements MCFireworkEffect {
 	public boolean hasTrail() {
 		return effect.hasTrail();
 	}
+
+	@Override
+	public Object getHandle() {
+		return effect;
+	}
 }
