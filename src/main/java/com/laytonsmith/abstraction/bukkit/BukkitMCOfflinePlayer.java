@@ -9,6 +9,8 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
 /**
  *
  * 
@@ -79,4 +81,9 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 		Location loc = op.getBedSpawnLocation();
 		return loc == null ? null : new BukkitMCLocation(loc);
     }
+
+	@Override
+	public UUID getUniqueID() {
+		return op.getUniqueId();
+	}
 }

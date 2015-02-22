@@ -29,15 +29,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
+import java.util.UUID;
+
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -188,12 +188,22 @@ public class BukkitMCServer implements MCServer {
     }
 
 	@Override
-    public MCPlayer getPlayer(String name) {
-        if(s.getPlayer(name) == null){
-            return null;
-        }
-        return new BukkitMCPlayer(s.getPlayer(name));
-    }
+	public MCPlayer getPlayer(String name) {
+		Player p = s.getPlayer(name);
+		if (p == null) {
+			return null;
+		}
+		return new BukkitMCPlayer(p);
+	}
+
+	@Override
+	public MCPlayer getPlayer(UUID uuid) {
+		Player p = s.getPlayer(uuid);
+		if (p == null) {
+			return null;
+		}
+		return new BukkitMCPlayer(p);
+	}
 
 	@Override
     public MCWorld getWorld(String name) {
@@ -241,9 +251,14 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
-    public MCOfflinePlayer getOfflinePlayer(String player) {
-        return new BukkitMCOfflinePlayer(s.getOfflinePlayer(player));
-    }
+	public MCOfflinePlayer getOfflinePlayer(String player) {
+		return new BukkitMCOfflinePlayer(s.getOfflinePlayer(player));
+	}
+
+	@Override
+	public MCOfflinePlayer getOfflinePlayer(UUID uuid) {
+		return new BukkitMCOfflinePlayer(s.getOfflinePlayer(uuid));
+	}
 
 	@Override
 	public MCOfflinePlayer[] getOfflinePlayers() {

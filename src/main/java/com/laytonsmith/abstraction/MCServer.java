@@ -5,6 +5,8 @@ import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+
 import net.milkbowl.vault.economy.Economy;
 
 
@@ -17,8 +19,12 @@ public interface MCServer extends AbstractionObject{
     public Collection<MCPlayer> getOnlinePlayers();
     public boolean dispatchCommand(MCCommandSender cs, String string) throws MCCommandException;
     public MCPluginManager getPluginManager();
-    public MCPlayer getPlayer(String name);
-    public MCWorld getWorld(String name);
+
+	public MCPlayer getPlayer(String name);
+
+	public MCPlayer getPlayer(UUID uuid);
+
+	public MCWorld getWorld(String name);
     public List<MCWorld> getWorlds();
     public void broadcastMessage(String message);
 	public void broadcastMessage(String message, String permission);
@@ -29,7 +35,23 @@ public interface MCServer extends AbstractionObject{
 	public MCInventory createInventory(MCInventoryHolder owner, int size, String title);
 	public MCInventory createInventory(MCInventoryHolder owner, int size);
 
-    public MCOfflinePlayer getOfflinePlayer(String player);
+	/**
+	 * Provides access to local user data associated with a name.
+	 * Depending on the implementation, a web lookup with the official API may or may not be performed.
+	 *
+	 * @param player The name to lookup
+	 * @return An object containing any info that can be accessed regardless of a connected player.
+	 */
+	public MCOfflinePlayer getOfflinePlayer(String player);
+
+	/**
+	 * Provides access to local user data associated with a UUID.
+	 * Depending on the implementation, a web lookup with the official API may or may not be performed.
+	 *
+	 * @param uuid The UUID to lookup
+	 * @return An object containing any info that can be accessed regardless of a connected player.
+	 */
+	public MCOfflinePlayer getOfflinePlayer(UUID uuid);
 	public MCOfflinePlayer[] getOfflinePlayers();
 
     /* Boring information get methods -.- */

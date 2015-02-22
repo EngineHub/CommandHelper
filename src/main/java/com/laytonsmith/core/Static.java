@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCMetadatable;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCServer;
@@ -45,6 +46,7 @@ import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -61,6 +63,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class contains several static methods to get various objects that really
@@ -479,7 +483,7 @@ public final class Static {
 	 * This function sends a message to the player. If the player is not online,
 	 * a CRE is thrown.
 	 *
-	 * @param p
+	 * @param m
 	 * @param msg
 	 */
 	public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
@@ -554,8 +558,6 @@ public final class Static {
 	 * @param functionName
 	 * @param notation
 	 * @param qty
-	 * @param line_num
-	 * @param f
 	 * @throws ConfigRuntimeException FormatException if the notation is
 	 * invalid.
 	 * @return
@@ -611,10 +613,74 @@ public final class Static {
 	}
 
 	private static Map<String, MCCommandSender> injectedPlayers = new HashMap<String, MCCommandSender>();
+	private static final Pattern DASHLESS_PATTERN = Pattern.compile("^([A-Fa-f0-9]{8})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{12})$");
 
 	/**
-	 * Returns the player specified by name. Injected players also are returned
-	 * in this list.
+	 * Based on https://github.com/sk89q/SquirrelID
+	 *
+	 * @param subject
+	 * @param t
+	 * @return
+	 */
+	public static UUID GetUUID(String subject, Target t) {
+		try {
+			if (subject.length() == 36) {
+				return UUID.fromString(subject);
+			}
+			if (subject.length() == 32) {
+				Matcher matcher = DASHLESS_PATTERN.matcher(subject);
+				if (!matcher.matches()) {
+					throw new IllegalArgumentException("Invalid UUID format.");
+				}
+				return UUID.fromString(matcher.replaceAll("$1-$2-$3-$4-$5"));
+			} else {
+				throw new ConfigRuntimeException("A UUID is expected to be 32 or 36 characters,"
+						+ " but the given string was " + subject.length() + " characters.",
+						ExceptionType.LengthException, t);
+			}
+		} catch (IllegalArgumentException iae) {
+			throw new ConfigRuntimeException("A UUID length string was given, but was not a valid UUID.",
+					ExceptionType.IllegalArgumentException, t);
+		}
+	}
+
+	public static MCOfflinePlayer GetUser(Construct search, Target t) {
+		return GetUser(search.val(), t);
+	}
+
+	/**
+	 * Provides a user object containing info that doesn't require an online player.
+	 * If provided a string between 1 and 16 characters, the lookup will be name-based.
+	 * If provided a string that is 32 or 36 characters, the lookup will be uuid-based.
+	 *
+	 * @param search The text to be searched, can be between 1 and 16 characters, or 32 or 36 characters
+	 * @param t
+	 * @return
+	 */
+	public static MCOfflinePlayer GetUser(String search, Target t) {
+		MCOfflinePlayer ofp;
+		if (search.length() > 0 && search.length() <= 16) {
+			ofp = getServer().getOfflinePlayer(search);
+		} else {
+			try {
+				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
+			} catch (ConfigRuntimeException cre) {
+				if (cre.getExceptionType().equals(ExceptionType.LengthException)) {
+					throw new ConfigRuntimeException("The given string was the wrong size to identify a player."
+							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(),
+							ExceptionType.LengthException, t);
+				} else {
+					throw cre;
+				}
+			}
+		}
+		return ofp;
+	}
+
+	/**
+	 * Returns the player specified by name. Injected players also are returned in this list.
+	 * If provided a string between 1 and 16 characters, the lookup will be name-based.
+	 * If provided a string that is 32 or 36 characters, the lookup will be uuid-based.
 	 *
 	 * @param player
 	 * @param t
@@ -622,22 +688,40 @@ public final class Static {
 	 * @throws ConfigRuntimeException
 	 */
 	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
-		MCCommandSender m = GetCommandSender(player, t);
+		MCCommandSender m;
+		if (player.length() > 0 && player.length() <= 16) {
+			m = GetCommandSender(player, t);
+		} else {
+			try {
+				m = getServer().getPlayer(GetUUID(player, t));
+			} catch (ConfigRuntimeException cre) {
+				if (cre.getExceptionType().equals(ExceptionType.LengthException)) {
+					throw new ConfigRuntimeException("The given string was the wrong size to identify a player."
+							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(),
+							ExceptionType.LengthException, t);
+				} else {
+					throw cre;
+				}
+			}
+		}
 		if (m == null) {
-			throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
+			throw new ConfigRuntimeException("The specified player (" + player + ") is not online",
+					ExceptionType.PlayerOfflineException, t);
 		}
 		if (!(m instanceof MCPlayer)) {
-			throw new ConfigRuntimeException("Expecting a player name, but \"" + player + "\" was found.", ExceptionType.PlayerOfflineException, t);
+			throw new ConfigRuntimeException("Expecting a player name, but \"" + player + "\" was found.",
+					ExceptionType.PlayerOfflineException, t);
 		}
 		MCPlayer p = (MCPlayer) m;
 		if (!p.isOnline()) {
-			throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
+			throw new ConfigRuntimeException("The specified player (" + player + ") is not online",
+					ExceptionType.PlayerOfflineException, t);
 		}
 		return p;
 	}
 
 	/**
-	 * Returns the specified command sender. Players are suppored, as is the
+	 * Returns the specified command sender. Players are supported, as is the
 	 * special ~console user. The special ~console user will always return a
 	 * user.
 	 *
@@ -651,7 +735,7 @@ public final class Static {
 		if (injectedPlayers.containsKey(player)) {
 			m = injectedPlayers.get(player);
 		} else {
-			if ("~console".equals(player)) {
+			if (consoleName.equals(player)) {
 				m = Static.getServer().getConsole();
 			} else {
 				try {

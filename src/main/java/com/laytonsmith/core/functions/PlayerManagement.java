@@ -139,6 +139,62 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class puuid extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCOfflinePlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (args.length == 1) {
+				try {
+					pl = Static.GetPlayer(args[0], t);
+				} catch (ConfigRuntimeException cre) {
+					pl = Static.GetUser(args[0], t);
+				}
+			}
+			if (pl == null) {
+				throw new ConfigRuntimeException("No matching player could be found.",
+						ExceptionType.PlayerOfflineException, t);
+			}
+			return new CString(pl.getUniqueID().toString(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "puuid";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "UUID {[player]} Returns the uuid of the current player or the specified player.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class all_players extends AbstractFunction {
 
 		@Override
@@ -2258,7 +2314,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "boolean {player} Returns whether or not this player is whitelisted. Note that"
-					+ " this will work with offline players, but the name must be exact.";
+					+ " this will work with offline players, but the name must be exact." + uuidwarning;
 		}
 
 		@Override
@@ -2283,7 +2339,7 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
 			boolean ret;
 			if (pl == null) {
 				ret = false;
@@ -2310,7 +2366,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player. Note that"
-					+ " this will work with offline players, but the name must be exact.";
+					+ " this will work with offline players, but the name must be exact." + uuidwarning;
 		}
 
 		@Override
@@ -2335,12 +2391,20 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
 			boolean whitelist = Static.getBoolean(args[1]);
 			pl.setWhitelisted(whitelist);
 			return CVoid.VOID;
 		}
 	}
+
+	static final String uuidwarning = " NOTICE: This function accepts UUIDs in place of player names,"
+			+ " however due to lack of API from Mojang, some server software is not able to"
+			+ " correctly associate a uuid with a player if the player has not recently been online."
+			+ " As such, it may not always be possible to ban or whitelist a player by UUID."
+			+ " Servers known to have this problem are Bukkit and Spigot. Furthermore,"
+			+ " although this API functions, due to the limitations of the vanilla ban/whitelist"
+			+ " system, it is recommended to use a 3rd party system or write your own.";
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pbanned extends AbstractFunction {
@@ -2361,7 +2425,7 @@ public class PlayerManagement {
 					+ " this will work with offline players, but the name must be exact. At this"
 					+ " time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead.";
+					+ " plugin instead." + uuidwarning;
 		}
 
 		@Override
@@ -2386,7 +2450,7 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
 			return CBoolean.get(pl.isBanned());
 		}
 	}
@@ -2410,7 +2474,7 @@ public class PlayerManagement {
 					+ " this will work with offline players, but the name must be exact. At this"
 					+ " time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead.";
+					+ " plugin instead." + uuidwarning;
 		}
 
 		@Override
@@ -2435,7 +2499,7 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
 			boolean ban = Static.getBoolean(args[1]);
 			pl.setBanned(ban);
 			return CVoid.VOID;
@@ -3965,7 +4029,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
-				player = Static.getServer().getOfflinePlayer(args[0].val());
+				player = Static.GetUser(args[0].val(), t);
 			}
 			MCLocation loc = player.getBedSpawnLocation();
 			if (loc == null) {
@@ -4285,10 +4349,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCServer s = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
-			MCOfflinePlayer offp = s.getOfflinePlayer(args[0].val());
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCOfflinePlayer offp = Static.GetUser(args[0].val(), t);
 			return CBoolean.get(offp.hasPlayedBefore());
 		}
 
@@ -4347,9 +4409,9 @@ public class PlayerManagement {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if (args.length == 1) {
-				op = cs.getServer().getOfflinePlayer(args[0].val());
+				op = Static.GetUser(args[0].val(), t);
 			} else {
-				op = cs.getServer().getOfflinePlayer(cs.getName());
+				op = Static.GetUser(cs.getName(), t);
 			}
 			return new CInt(op.getFirstPlayed(), t);
 		}
@@ -4409,9 +4471,9 @@ public class PlayerManagement {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if (args.length == 1) {
-				op = cs.getServer().getOfflinePlayer(args[0].val());
+				op = Static.GetUser(args[0].val(), t);
 			} else {
-				op = cs.getServer().getOfflinePlayer(cs.getName());
+				op = Static.GetUser(cs.getName(), t);
 			}
 			return new CInt(op.getLastPlayed(), t);
 		}
