@@ -1153,6 +1153,22 @@ public class Environment {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
 			MCBlock b = l.getBlock();
+			if(args.length == 2) {
+				switch(args[1].val()) {
+					case "solid":
+						return CBoolean.get(b.isSolid());
+					case "flammable":
+						return CBoolean.get(b.isFlammable());
+					case "transparent":
+						return CBoolean.get(b.isTransparent());
+					case "occluding":
+						return CBoolean.get(b.isOccluding());
+					case "burnable":
+						return CBoolean.get(b.isBurnable());
+					default:
+						throw new ConfigRuntimeException("Invalid argument for block info", ExceptionType.FormatException, t);
+				}
+			}
 			CArray array = new CArray(t);
 			array.set("solid", CBoolean.get(b.isSolid()), t);
 			array.set("flammable", CBoolean.get(b.isFlammable()), t);
@@ -1160,7 +1176,6 @@ public class Environment {
 			array.set("occluding", CBoolean.get(b.isOccluding()), t);
 			array.set("burnable", CBoolean.get(b.isBurnable()), t);
 			return array;
-			//return CBoolean.get(l.getBlock().isSolid());
 		}
 
 		@Override
@@ -1170,12 +1185,13 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1,2};
 		}
 
 		@Override
 		public String docs() {
-			return "array {locationArray} Returns an associative array with various information about a block ---- <ul>"
+			return "mixed {locationArray, [index]} Returns an associative array with various information about a block."
+					+ " If an index is specified, it will return a boolean. ---- <ul>"
 					+ " <li>solid: If a block is solid (i.e. dirt or stone, as opposed to a torch or water)</li>"
 					+ " <li>flammable: Indicates if a block can catch fire</li>"
 					+ " <li>transparent: Indicates if light can pass through</li>"
