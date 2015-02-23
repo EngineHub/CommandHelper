@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import net.milkbowl.vault.economy.Economy;
-
 
 /**
  *
@@ -75,8 +73,6 @@ public interface MCServer extends AbstractionObject{
 
 	public MCScoreboard getMainScoreboard();
 	public MCScoreboard getNewScoreboard();
-
-    public Economy getEconomy();
 
     public void runasConsole(String cmd);
 	public MCMessenger getMessenger();

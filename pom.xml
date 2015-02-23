@@ -163,12 +163,6 @@
 			<id>Java.Net</id>
 			<url>http://download.java.net/maven/2/</url>
 		</repository>
-		
-		<!-- Vault Repo -->
-		<repository>
-			<id>vault-repo</id>
-			<url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
-		</repository>
 	</repositories>
 	<dependencies>
 		<!-- Please update the Compatibility docs page whenever
@@ -194,21 +188,6 @@
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
 			<version>1.8-R0.1-SNAPSHOT</version>
-		</dependency>
-
-		<!-- CraftBukkit Dependency for experimental features
-		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>craftbukkit</artifactId>
-			<version>1.4.5-R0.3-SNAPSHOT</version>
-		</dependency>-->
-
-		<!-- Used for economy stuff -->
-		<dependency>
-			<groupId>net.milkbowl.vault</groupId>
-			<artifactId>VaultAPI</artifactId>
-			<version>1.4</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
@@ -570,14 +549,9 @@
 									<include>javax.mail:mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
 									<include>postgresql:postgresql:jar:*</include>
-									<include>net.milkbowl.vault:VaultAPI:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
-<!--								<relocation>
-									<pattern>net.milkbowl.vault</pattern>
-									<shadedPattern>com.laytonsmith.libs.net.milkbowl.vault</shadedPattern>
-								</relocation>-->
 								<relocation>
 									<pattern>org.perf4j</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.perf4j</shadedPattern>
@@ -676,12 +650,6 @@
 								</relocation>
 							</relocations>
 							<filters>
-								<filter>
-									<artifact>net.milkbowl.vault:VaultAPI:jar:*</artifact>
-									<includes>
-										<include>net/milkbowl/vault/**</include>
-									</includes>
-								</filter>
 								<filter>
 									<artifact>org.xerial:sqlite-jdbc:jar:*</artifact>
 									<includes>

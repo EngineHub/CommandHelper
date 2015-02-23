@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -43,7 +42,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.Recipe;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
  *
@@ -358,21 +356,6 @@ public class BukkitMCServer implements MCServer {
             list.add(getOfflinePlayer(p.getName()));
         }
         return list;
-    }
-
-	@Override
-    public Economy getEconomy() {
-        try{
-            @SuppressWarnings("unchecked")
-			RegisteredServiceProvider<Economy> economyProvider = (RegisteredServiceProvider<Economy>)
-                    s.getServicesManager().getRegistration(Class.forName("net.milkbowl.vault.economy.Economy"));
-            if (economyProvider != null) {
-                return economyProvider.getProvider();
-            }
-        } catch(ClassNotFoundException e){
-            //Ignored, it means they don't have Vault installed.
-        }
-        return null;
     }
 
 	@Override
