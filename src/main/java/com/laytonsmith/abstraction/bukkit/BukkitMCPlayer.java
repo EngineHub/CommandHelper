@@ -28,6 +28,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Note;
@@ -560,6 +562,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public MCLocation getBedSpawnLocation() {
 		Location loc = p.getBedSpawnLocation();
 		return loc == null ? null : new BukkitMCLocation(loc);
+	}
+
+	@Override
+	public UUID getUniqueID() {
+		return p.getUniqueId();
 	}
 
 	@Override

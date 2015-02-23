@@ -20,7 +20,6 @@ import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.extensions.ExtensionManager;
-import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.packetjumper.PacketJumper;
@@ -532,13 +531,6 @@ public class AliasCore {
 					+ " check the location and try loading the plugin again.");
 		} catch (Throwable t) {
 			t.printStackTrace();
-		}
-
-		if (!Economy.setupEconomy()) {
-			if (Prefs.DebugMode()) {
-				logger.log(Level.WARNING, "[CommandHelper]: Economy could not be initialized. No further"
-						+ " errors will occur, unless you try to use an Economy function.");
-			}
 		}
 
 		ProfilePoint postReloadAliases = parent.profiler.start("Extension manager post reload aliases", LogLevel.VERBOSE);
