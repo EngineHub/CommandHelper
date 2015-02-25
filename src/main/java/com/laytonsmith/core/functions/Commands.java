@@ -59,7 +59,7 @@ public class Commands {
 			MCServer s = Static.getServer();
 			MCCommand cmd = s.getCommandMap().getCommand(args[0].val());
 			if (cmd == null) {
-				throw new ConfigRuntimeException("Command not found did you forget to register it?",
+				throw new ConfigRuntimeException("Command not found, did you forget to register it?",
 						ExceptionType.NotFoundException, t);
 			}
 			customExec(t, environment, cmd, args[1]);
@@ -181,11 +181,11 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
-			MCCommand cmd = map.getCommand(args[0].val());
+			MCCommand cmd = map.getCommand(args[0].val().toLowerCase());
 			boolean isnew = false;
 			if (cmd == null) {
 				isnew = true;
-				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val());
+				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val().toLowerCase());
 			}
 			if (args[1] instanceof CArray) {
 				CArray ops = (CArray) args[1];

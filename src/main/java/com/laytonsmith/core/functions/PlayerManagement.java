@@ -185,7 +185,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "UUID {[player]} Returns the uuid of the current player or the specified player.";
+			return "UUID {[player]} Returns the uuid of the current player or the specified player."
+					+ " This will attempt to find an offline player, but if that also fails,"
+					+ " a PlayerOfflineException will be thrown.";
 		}
 
 		@Override
