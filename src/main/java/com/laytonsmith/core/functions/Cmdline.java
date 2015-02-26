@@ -1337,7 +1337,7 @@ public class Cmdline {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return null;
+			return new ExceptionType[]{ExceptionType.ShellException};
 		}
 
 		@Override
@@ -1358,13 +1358,17 @@ public class Cmdline {
 			} else {
 				root = t.file().getParentFile();
 			}
-			try {
-				String ret = root.getCanonicalPath();
-				return new CString(ret, t);
-			} catch (IOException ex) {
-				//This shouldn't happen, because the current working directory will only be
-				//set programmatically.
-				throw new RuntimeException(ex);
+			if(root == null){
+				throw new ConfigRuntimeException("Running in interpreted mode. pwd() is not available.", ExceptionType.ShellException, t);
+			} else {
+				try {
+					String ret = root.getCanonicalPath();
+					return new CString(ret, t);
+				} catch (IOException ex) {
+					//This shouldn't happen, because the current working directory will only be
+					//set programmatically.
+					throw new RuntimeException(ex);
+				}
 			}
 		}
 
@@ -1382,7 +1386,8 @@ public class Cmdline {
 		public String docs() {
 			return "string {} Returns the path to the current working directory. This is available outside cmdline mode, but"
 					+ " is probably only useful for debugging, meta, or informational purposes when not in cmdline interpreter mode,"
-					+ " as the current working directory is known simply by knowing what file this is running from.";
+					+ " as the current working directory is known simply by knowing what file this is running from. When run from"
+					+ " a context where there is no working directory, a ShellException is thrown.";
 		}
 
 		@Override
