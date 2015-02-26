@@ -615,6 +615,9 @@ public class DataHandling {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			if(nodes.length < 3){
+				throw new ConfigRuntimeException("Insufficient arguments passed to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+			}
 			ParseTree array = nodes[0];
 			ParseTree key = null;
 			int offset = 0;
