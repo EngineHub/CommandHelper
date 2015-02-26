@@ -1620,6 +1620,9 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args.length < 2){
+				throw new ConfigRuntimeException(getName() + " must have 2 arguments at minimum", ExceptionType.InsufficientArgumentsException, t);
+			}
 			CResource m = (CResource) args[0];
 			StringBuffer buf = ResourceManager.GetResource(m, StringBuffer.class, t);
 			for(int i = 1; i < args.length; i++){
