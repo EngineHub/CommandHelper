@@ -184,6 +184,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		if(s == null){
 			return CNull.NULL;
 		}
+		if("".equals(s.trim())){
+			throw new MarshalException();
+		}
         if (s.startsWith("{")) {
             //Object
             JSONObject obj = (JSONObject) JSONValue.parse(s);
