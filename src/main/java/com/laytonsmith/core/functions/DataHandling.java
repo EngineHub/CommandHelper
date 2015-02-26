@@ -665,7 +665,7 @@ public class DataHandling {
 				int continues = 0;
 				for (Construct c : keySet) {
 					if (continues > 0) {
-							//If continues is greater than 0, continue in the loop,
+						//If continues is greater than 0, continue in the loop,
 						//however many times necessary to make it 0.
 						continues--;
 						continue;
@@ -688,7 +688,10 @@ public class DataHandling {
 						}
 						return CVoid.VOID;
 					} catch (LoopContinueException e) {
-						continues += e.getTimes();
+						// In associative arrays, (unlike with normal arrays) we need to decrement it by one, because the nature of
+						// the normal array is such that the counter is handled manually by our code. Because we are letting java
+						// handle our code though, this run actually counts as one run.
+						continues += e.getTimes() - 1;
 					}
 				}
 				return CVoid.VOID;
