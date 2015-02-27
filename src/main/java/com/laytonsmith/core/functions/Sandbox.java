@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -377,6 +378,30 @@ public class Sandbox {
         }
     }
 
+	private static String GenerateMooSaying(String text){
+			String [] saying = text.split("\r\n|\n|\n\r");
+			int longest = 0;
+			for(String s : saying){
+				longest = java.lang.Math.max(longest, s.length());
+			}
+			String divider = "";
+			for(int i = 0; i < longest + 4; i++){
+				divider += "-";
+			}
+			String[] lines = new String[saying.length];
+			for(int i = 0; i < saying.length; i++){
+				int spaces = longest - saying[i].length();
+				String sSpaces = "";
+				for(int j = 0; j < spaces; j++){
+					sSpaces += " ";
+				}
+				lines[i] = "| " + saying[i] + sSpaces + " |";
+			}
+			return divider + "\n"
+				+ StringUtils.Join(lines, "\n") + "\n"
+				+ divider + "\n";
+	}
+
 	@api
 	@hide("This is an easter egg.")
 	public static class moo extends DummyFunction {
@@ -389,14 +414,7 @@ public class Sandbox {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String saying = args[0].val();
-			String divider = "";
-			for(int i = 0; i < saying.length() + 4; i++){
-				divider += "-";
-			}
-			return new CString(divider + "\n"
-				+ "| " + saying + " |\n"
-				+ divider + "\n"
+			return new CString(GenerateMooSaying(args[0].val())
 				+ " \\   ^__^\n"
 				+ "  \\  (oo)\\_______\n"
 				+ "     (__)\\       )\\/\\\n"
@@ -417,15 +435,8 @@ public class Sandbox {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String saying = args[0].val();
-			String divider = "";
-			for(int i = 0; i < saying.length() + 4; i++){
-				divider += "-";
-			}
 			return new CString(
-				  "                     " + divider + "\n"
-				+ "                     | " + saying + " |\n"
-				+ "                     " + divider + "\n"
+					GenerateMooSaying(args[0].val())
 				+ "              ^__^   /\n"
 				+ "      _______/(oo)  /\n"
 				+ " /\\/(        /(__)\n"
@@ -446,12 +457,12 @@ public class Sandbox {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CString( "      .-*)) `*-.\n" +
-								"     /*  ((*   *'.\n" +
-								"    |   *))  *   *\\\n" +
-								"    | *  ((*   *  /\n" +
-								"     \\  *))  *  .'\n" +
-								"      '-.((*_.-'", t);
+			return new CString( "  .-*)) `*-.\n" +
+								" /*  ((*   *'.\n" +
+								"|   *))  *   *\\\n" +
+								"| *  ((*   *  /\n" +
+								" \\  *))  *  .'\n" +
+								"  '-.((*_.-'", t);
 		}
 
 	}
