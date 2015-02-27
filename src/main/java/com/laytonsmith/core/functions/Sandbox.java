@@ -434,4 +434,25 @@ public class Sandbox {
 		}
 
 	}
+
+	@api
+	@hide("This is an easter egg.")
+	public static class upupdowndownleftrightleftrightbastart extends DummyFunction {
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CString( "      .-*)) `*-.\n" +
+								"     /*  ((*   *'.\n" +
+								"    |   *))  *   *\\\n" +
+								"    | *  ((*   *  /\n" +
+								"     \\  *))  *  .'\n" +
+								"      '-.((*_.-'", t);
+		}
+
+	}
 }
