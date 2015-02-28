@@ -836,7 +836,7 @@ public class Minecraft {
 			}
 
 			if (index < -1 || index > 12) {
-				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 11 (inclusive)",
+				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 12 (inclusive)",
 						ExceptionType.RangeException, t);
 			}
 
