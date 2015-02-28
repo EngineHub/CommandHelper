@@ -773,51 +773,6 @@ public class BukkitPlayerEvents {
         }
     }
 
-	@abstraction(type=Implementation.Type.BUKKIT)
-    public static class BukkitMCPlayerMovedEvent implements MCPlayerMoveEvent {
-		BukkitMCLocation from;
-		BukkitMCLocation to;
-		BukkitMCPlayer player;
-		boolean cancelled = false;
-
-		public BukkitMCPlayerMovedEvent(Player p, Location from, Location to){
-			this.player = new BukkitMCPlayer(p);
-			this.from = new BukkitMCLocation(from);
-			this.to = new BukkitMCLocation(to);
-		}
-
-		@Override
-		public MCLocation getFrom() {
-			return from;
-		}
-
-		@Override
-		public MCLocation getTo() {
-			return to;
-		}
-
-		@Override
-		public MCPlayer getPlayer() {
-			return player;
-		}
-
-		@Override
-		public Object _GetObject() {
-			return null;
-		}
-
-		@Override
-		public void setCancelled(boolean state) {
-			cancelled = state;
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return cancelled;
-		}
-
-	}
-
 	public static class BukkitMCPlayerFishEvent extends BukkitMCPlayerEvent
 	implements MCPlayerFishEvent {
 		PlayerFishEvent e;
