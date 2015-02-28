@@ -288,8 +288,8 @@ public class BukkitMCServer implements MCServer {
     }
 
 	@Override
-    public String getIP() {
-        return s.getIP();
+    public String getIp() {
+        return s.getIp();
     }
 
 	@Override

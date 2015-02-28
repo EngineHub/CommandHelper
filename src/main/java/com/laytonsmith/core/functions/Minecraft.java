@@ -801,7 +801,7 @@ public class Minecraft {
 					+ "Max player limit; returns the player limit.</li><li>8 - Operators; An array of operators on the server.</li>"
 					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li>"
 					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li>"
-					+ "<li>11 - Server port; Get the game port that the server runs on</li></ul>";
+					+ "<li>11 - Server port; Get the game port that the server runs on</li></ul>"
 					+ "<li>12 - Server IP; Get the IP that the server runs on</li></ul>";
 		}
 
@@ -914,8 +914,8 @@ public class Minecraft {
 				retVals.add(new CInt(server.getPort(), t));
 			}
 			if (index == 12 || index == -1) {
-				//Server IP
-				retVals.add(new CString(server.getIP(), t));
+				//Server Ip
+				retVals.add(new CString(server.getIp(), t));
 			}
 
 			if (retVals.size() == 1) {
