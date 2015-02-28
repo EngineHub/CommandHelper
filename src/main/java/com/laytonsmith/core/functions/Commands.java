@@ -395,7 +395,7 @@ public class Commands {
 		@Override
 		public String docs() {
 			return "array {} Returns an array of command arrays in the format register_command expects."
-					+ " This does not include CommandHelper aliases, as they are not registered commands.";
+					+ " This does not include " + Implementation.GetServerType().getBranding() + " aliases, as they are not registered commands.";
 		}
 
 		@Override
