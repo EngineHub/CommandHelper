@@ -427,9 +427,10 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "void {[player], entityID} Tames the entity specified to the player. Wolves and ocelots are supported. Offline players"
-					+ " are supported, but this means that partial matches are NOT supported. You must type the players name exactly. Setting"
-					+ " the player to null will untame the mob. If the entity doesn't exist, nothing happens.";
+			return "void {[player], entityID} Tames any tameable mob to the specified player. Offline players are"
+					+ " supported, but this means that partial matches are NOT supported. You must type the players"
+					+ " name exactly. Setting the player to null will untame the mob. If the entity doesn't exist,"
+					+ " nothing happens.";
 		}
 
 		@Override

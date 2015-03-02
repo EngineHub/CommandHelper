@@ -148,8 +148,11 @@ public class ServerEvents {
 		@Override
 		public String docs() {
 			return "{}"
-					+ " This will fire if a tab completer has not been set, or if the set tab completer doesn't return an array."
-					+ " {command | alias | completions | args | sender}"
+					+ " This will fire if a tab completer has not been set for a command registered with"
+					+ " register_command(), or if the set tab completer doesn't return an array."
+					+ " {command: The command name that was registered. | alias: The alias the player entered to run"
+					+ " the command. | args: The given arguments after the alias. | completions: The available"
+					+ " completions for the last argument. | sender: The player that ran the command. }"
 					+ " {completions}"
 					+ " {}";
 		}

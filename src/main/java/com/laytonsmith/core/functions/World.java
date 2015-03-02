@@ -1600,7 +1600,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {location_from, location_to, distance} Shift from one location to another, by defined distance.";
+			return "locationArray {location_from, location_to, distance} Returns a location that is the specified"
+					+ " distance from the first location along a vector to the second location. Distance must be an"
+					+ " integer greater than 0.";
 		}
 
 		@Override

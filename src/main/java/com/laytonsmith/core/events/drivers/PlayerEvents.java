@@ -2144,8 +2144,9 @@ public class PlayerEvents {
 		public String docs() {
 			return "{state: <macro> Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
 					+ " | player: <macro> The player who is fishing | world: <string match>}"
-					+ " Fires when a player casts or reels a fishing rod {player | world | state | chance | xp"
-					+ " | hook: the fishhook entity | caught: the id of the snared entity, can be a fish item}"
+					+ " Fires when a player casts or reels a fishing rod."
+					+ " {player | world | state | chance | xp | hook: the fishhook entity id"
+					+ " | caught: the id of the snared entity, can be a fish item}"
 					+ " {chance: the chance of catching a fish from pulling the bobber at random"
 					+ " | xp: the exp the player will get from catching a fish}"
 					+ " {}";
@@ -2385,7 +2386,7 @@ public class PlayerEvents {
 			return "{player: <macro>}"
 					+ " Fired when a player's experience changes naturally."
 					+ " {player | amount}"
-					+ " {amount: the amount of exp the player will recieve}"
+					+ " {amount: an integer of the amount of exp that will be added to the player's total exp}"
 					+ " {}";
 		}
 

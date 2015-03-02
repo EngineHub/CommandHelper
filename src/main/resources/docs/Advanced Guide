@@ -149,8 +149,8 @@ You can actually reload these sub-modules individually if you want, by passing p
 modes, whitelist, or by default, blacklist. In blacklist mode, all modules get reloaded except the modules that are 
 blacklisted, which aren't reloaded. In whitelist mode, only the specified modules are reloaded. You use the underlined 
 letter to refer to that specific module. For instance, if you want to reload everything but leave the exported variables 
-and execution queue alone, you can run <code>/reloadaliases -ge</code>. If you ONLY want to reload preferences, you can 
-run <code>/reloadaliases --whitelist -p</code>. Note that reloading individual modules isn't normally encouraged, 
+and execution queue alone, you can run <code>/reloadaliases -ge</code>. If you ONLY want to reload tasks, you can
+run <code>/reloadaliases --whitelist -t</code>. Note that reloading individual modules isn't normally encouraged,
 because it can put your server in an inconsistent and unreproducable state if you aren't careful. Running 
 <code>/reloadaliases</code> by itself (which reloads everything) is recommended. You can also run 
 <code>/reloadaliases -h</code> for the usage instructions and long options list.
