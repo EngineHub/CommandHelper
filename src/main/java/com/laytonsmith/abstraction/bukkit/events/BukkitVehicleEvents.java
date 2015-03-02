@@ -142,9 +142,9 @@ public class BukkitVehicleEvents {
 		}
 
 		@Override
-		public MCVehicle getVehicle() {
+		public MCEntity getVehicle() {
 			if (ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
-				return (MCVehicle) BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
+				return BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
 			}
 			return null;
 		}

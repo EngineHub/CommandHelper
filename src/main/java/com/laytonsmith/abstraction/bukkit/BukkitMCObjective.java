@@ -72,7 +72,11 @@ public class BukkitMCObjective implements MCObjective {
 
 	@Override
 	public void setDisplaySlot(MCDisplaySlot slot) {
-		o.setDisplaySlot(BukkitMCDisplaySlot.getConvertor().getConcreteEnum(slot));
+		if (slot == null) {
+			o.setDisplaySlot(null);
+		} else {
+			o.setDisplaySlot(BukkitMCDisplaySlot.getConvertor().getConcreteEnum(slot));
+		}
 	}
 
 	@Override
