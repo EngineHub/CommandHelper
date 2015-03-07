@@ -33,7 +33,6 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.sk89q.util.StringUtil;
 
 /**
  *
@@ -537,7 +536,7 @@ public class Environment {
 		public String docs() {
 			return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
 					+ " The location array's y value is ignored. ----"
-					+ " Biome may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
+					+ " Biome may be one of the following: " + StringUtils.Join(MCBiomeType.values(), ", ", ", or ");
 		}
 
 		@Override
@@ -612,7 +611,7 @@ public class Environment {
 		public String docs() {
 			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location array's"
 					+ " y value is ignored. ---- The value returned"
-					+ " may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
+					+ " may be one of the following: " + StringUtils.Join(MCBiomeType.values(), ", ", ", or ");
 		}
 
 		@Override

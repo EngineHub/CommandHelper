@@ -43,7 +43,6 @@ import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
-import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
@@ -57,8 +56,18 @@ import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
-import com.sk89q.wepif.PermissionsResolverManager;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import org.bukkit.Server;
+import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.mcstats.Metrics;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,18 +80,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Server;
-import org.bukkit.command.BlockCommandSender;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.Metrics;
 
 /**
  * Entry point for the plugin.
@@ -96,13 +93,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public static MCServer myServer;
 	public static SimpleVersion version;
 	public static CommandHelperPlugin self;
-	public static WorldEditPlugin wep;
 	public static ExecutorService hostnameLookupThreadPool;
 	public static ConcurrentHashMap<String, String> hostnameLookupCache;
 	private static int hostnameThreadPoolID = 0;
 	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
-	public PermissionsResolver permissionsResolver;
 	public PersistenceNetwork persistenceNetwork;
 	public boolean firstLoad = true;
 	public long interpreterUnlockedUntil = 0;
@@ -347,12 +342,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 		version = new SimpleVersion(getDescription().getVersion());
-		PermissionsResolverManager.initialize(this);
-		permissionsResolver = new CommandHelperPermissionsResolver(PermissionsResolverManager.getInstance());
-		Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
-		if (pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin) {
-			wep = (WorldEditPlugin) pwep;
-		}
 
 		String script_name = Prefs.ScriptName();
 		String main_file = Prefs.MainFile();
@@ -362,10 +351,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 			//System.out.flush();
 			System.out.println("\n\n\n" + Static.Logo());
 		}
-		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
-				script_name), CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
-				CommandHelperFileLocations.getDefault().getPreferencesFile(), new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
-				main_file), permissionsResolver, this);
+		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), script_name),
+				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
+				CommandHelperFileLocations.getDefault().getPreferencesFile(),
+				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), main_file), this);
 		ac.reload(null, null);
 
 		//Clear out our hostname cache
@@ -417,7 +406,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		ExtensionManager.Cleanup();
 
 		ac = null;
-		wep = null;
 	}
 
 	public void stopExecutionQueue() {
@@ -453,8 +441,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		String cmdName = cmd.getName().toLowerCase();
-		if ((sender.isOp() || (sender instanceof Player && (permissionsResolver.hasPermission(((Player) sender).getName(), "commandhelper.reloadaliases")
-				|| permissionsResolver.hasPermission(((Player) sender).getName(), "ch.reloadaliases"))))
+		if ((sender.isOp() || (sender instanceof Player && (sender.hasPermission("commandhelper.reloadaliases")
+				|| sender.hasPermission("ch.reloadaliases"))))
 				&& (cmdName.equals("reloadaliases") || cmdName.equals("reloadalias") || cmdName.equals("recompile"))) {
 			MCPlayer player = null;
 			if (sender instanceof Player) {
@@ -527,7 +515,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 * Runs commands.
 	 *
 	 * @param player
-	 * @param split
+	 * @param cmd
+	 * @param args
 	 * @return
 	 */
 	private boolean runCommand(final MCPlayer player, String cmd, String[] args) throws DataSourceException, ReadOnlyException, IOException {
@@ -539,8 +528,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 		UserManager um = UserManager.GetUserManager(player.getName());
 		// Repeat command
 		if (cmd.equals("repeat")) {
-			if (player.isOp() || permissionsResolver.hasPermission(player.getName(), "commandhelper.repeat")
-					|| permissionsResolver.hasPermission(player.getName(), "ch.repeat")) {
+			if (player.isOp() || player.hasPermission("commandhelper.repeat")
+					|| player.hasPermission("ch.repeat")) {
 				//Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
 				//an infinite loop though, because the preprocessor won't try to fire off a repeat command
 				commandRunning.remove(player);
@@ -559,7 +548,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 			// Save alias
 		} else if (cmd.equalsIgnoreCase("alias")) {
-			if (!permissionsResolver.hasPermission(player.getName(), "commandhelper.useralias") && !permissionsResolver.hasPermission(player.getName(), "ch.useralias")) {
+			if (!player.hasPermission("commandhelper.useralias") && !player.hasPermission("ch.useralias")) {
 				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the alias command");
 				commandRunning.remove(player);
 				return true;
@@ -594,7 +583,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			return true;
 			//View all aliases for this user
 		} else if (cmd.equalsIgnoreCase("viewalias")) {
-			if (!permissionsResolver.hasPermission(player.getName(), "commandhelper.useralias") && !permissionsResolver.hasPermission(player.getName(), "ch.useralias")) {
+			if (!player.hasPermission("commandhelper.useralias") && !player.hasPermission("ch.useralias")) {
 				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the viewalias command");
 				commandRunning.remove(player);
 				return true;
@@ -610,7 +599,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			return true;
 			// Delete alias
 		} else if (cmd.equalsIgnoreCase("delalias")) {
-			if (!permissionsResolver.hasPermission(player.getName(), "commandhelper.useralias") && !permissionsResolver.hasPermission(player.getName(), "ch.useralias")) {
+			if (!player.hasPermission("commandhelper.useralias") && !player.hasPermission("ch.useralias")) {
 				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the delalias command");
 				commandRunning.remove(player);
 				return true;
@@ -637,7 +626,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			return true;
 
 		} else if (cmd.equalsIgnoreCase("interpreter")) {
-			if (permissionsResolver.hasPermission(player.getName(), "commandhelper.interpreter")) {
+			if (player.hasPermission("commandhelper.interpreter")) {
 				if (Prefs.EnableInterpreter()) {
 					if(Prefs.InterpreterTimeout() != 0){
 						if(interpreterUnlockedUntil < System.currentTimeMillis()){

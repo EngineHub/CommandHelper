@@ -149,8 +149,7 @@ public class CommandHelperInterpreterListener implements Listener {
         interpreterMode.remove(p.getName());
 		GlobalEnv gEnv;
 		try {
-			gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler,
-					plugin.persistenceNetwork, plugin.permissionsResolver,
+			gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
 					CommandHelperFileLocations.getDefault().getConfigDirectory(),
 					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
 					new TaskManager());

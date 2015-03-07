@@ -22,22 +22,23 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
-import java.lang.reflect.InvocationTargetException;
-import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Note;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.lang.reflect.InvocationTargetException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  *
@@ -249,6 +250,36 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public boolean isOp() {
         return p.isOp();
     }
+
+	@Override
+	public boolean hasPermission(String perm) {
+		return p.hasPermission(perm);
+	}
+
+	@Override
+	public boolean isPermissionSet(String perm) {
+		return p.isPermissionSet(perm);
+	}
+
+	@Override
+	public List<String> getGroups() {
+		// As in https://github.com/sk89q/WorldEdit/blob/master/
+		// worldedit-bukkit/src/main/java/com/sk89q/wepif/DinnerPermsResolver.java#L112-L126
+		List<String> groupNames = new ArrayList<String>();
+		for (PermissionAttachmentInfo permAttach : p.getEffectivePermissions()) {
+			String perm = permAttach.getPermission();
+			if (!(perm.startsWith(Static.groupPrefix) && permAttach.getValue())) {
+				continue;
+			}
+			groupNames.add(perm.substring(Static.groupPrefix.length(), perm.length()));
+		}
+		return groupNames;
+	}
+
+	@Override
+	public boolean inGroup(String groupName) {
+		return getGroups().contains(groupName);
+	}
 
 	@Override
 	public void setOp(boolean bln) {

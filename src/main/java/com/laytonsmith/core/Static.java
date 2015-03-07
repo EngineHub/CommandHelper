@@ -90,6 +90,20 @@ public final class Static {
 	private static final String blockPrefix = "#"; // Chosen over @ because that does special things when used by the block
 
 	/**
+	 * In case the API being used doesn't support permission groups, a permission node in the format
+	 * <code>String permission = groupPrefix + groupName;</code>
+	 * can be assigned to players to declare their permission group.
+	 *
+	 * Third party APIs may provide better access.
+	 */
+	public static final String groupPrefix = "group.";
+
+	/**
+	 * The label representing unrestricted access.
+	 */
+	public static final String GLOBAL_PERMISSION = "*";
+
+	/**
 	 * Returns a CArray object from a given construct, throwing a common error
 	 * message if not.
 	 *
@@ -1049,36 +1063,40 @@ public final class Static {
 
 	public static boolean hasCHPermission(String functionName, Environment env) {
 		//The * label completely overrides everything
-		if (PermissionsResolver.GLOBAL_PERMISSION.equals(env.getEnv(GlobalEnv.class).GetLabel())) {
+		if (GLOBAL_PERMISSION.equals(env.getEnv(GlobalEnv.class).GetLabel())) {
 			return true;
 		}
 		MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 		MCCommandSender commandSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 		String label = env.getEnv(GlobalEnv.class).GetLabel();
 		boolean perm = false;
-		PermissionsResolver perms = env.getEnv(GlobalEnv.class).GetPermissionsResolver();
-		if (perms != null) {
-			if (commandSender instanceof MCPlayer) {
-				perm = perms.hasPermission(player.getName(), "ch.func.use." + functionName, player.getWorld().getName())
-						|| perms.hasPermission(player.getName(), "commandhelper.func.use." + functionName, player.getWorld().getName());
+		if (label != null && GLOBAL_PERMISSION.equals(label)) {
+			perm = true;
+		}
+		if (commandSender != null) {
+			if (commandSender.isOp()) {
+				perm = true;
+			} else if (commandSender instanceof MCPlayer) {
+				perm = player.hasPermission("ch.func.use." + functionName)
+						|| player.hasPermission("commandhelper.func.use." + functionName);
 				if (label != null && label.startsWith("~")) {
-					String[] groups = env.getEnv(GlobalEnv.class).GetLabel().substring(1).split("/");
+					String[] groups = label.substring(1).split("/");
 					for (String group : groups) {
-						if (perms.inGroup(env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName(), group)) {
+						if (player.inGroup(group)) {
 							perm = true;
 							break;
 						}
 					}
 				} else {
-					if (env.getEnv(GlobalEnv.class).GetLabel() != null) {
-						if (env.getEnv(GlobalEnv.class).GetLabel().contains(".")) {
+					if (label != null) {
+						if (label.contains(".")) {
                             //We are using a non-standard permission. Don't automatically
 							//add CH's prefix
-							if (perms.hasPermission(player.getName(), label, player.getWorld().getName())) {
+							if (player.hasPermission(label)) {
 								perm = true;
 							}
-						} else if ((perms.hasPermission(player.getName(), "ch.alias." + label, player.getWorld().getName()))
-								|| perms.hasPermission(player.getName(), "commandhelper.alias." + label, player.getWorld().getName())) {
+						} else if ((player.hasPermission("ch.alias." + label))
+								|| player.hasPermission("commandhelper.alias." + label)) {
 							perm = true;
 						}
 					}
@@ -1087,13 +1105,6 @@ public final class Static {
 				perm = true;
 			}
 		} else {
-			perm = true;
-		}
-		if (label != null && PermissionsResolver.GLOBAL_PERMISSION.equals(label)) {
-			perm = true;
-		}
-		if (commandSender == null
-				|| commandSender.isOp()) {
 			perm = true;
 		}
 		return perm;
@@ -1237,21 +1248,6 @@ public final class Static {
 	 * @throws URISyntaxException
 	 */
 	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
-		return GenerateStandaloneEnvironment(new PermissionsResolver.PermissiveResolver());
-	}
-
-	/**
-	 * Generates a new environment, using the permissions resolver given. It is
-	 * assumed that the jar has a folder next to it with the name of the
-	 * platform, and that folder is the root.
-	 *
-	 * @param permissionsResolver
-	 * @return
-	 * @throws IOException
-	 * @throws DataSourceException
-	 * @throws URISyntaxException
-	 */
-	public static Environment GenerateStandaloneEnvironment(PermissionsResolver permissionsResolver) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File jarLocation;
 		if (Static.class.getProtectionDomain().getCodeSource().getLocation() != null) {
 			jarLocation = new File(Static.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
@@ -1265,10 +1261,9 @@ public final class Static {
 		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace("\\", "/")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
-				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, permissionsResolver, platformFolder,
-				new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
-				new TaskManager());
-		gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
+				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
+				new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()), new TaskManager());
+		gEnv.SetLabel(GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}
 

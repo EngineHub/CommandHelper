@@ -4,16 +4,19 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.testing.C;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -115,39 +118,47 @@ public class PrefiltersTest {
     @Test public void testExpressionMatch(){
         Map<String, Construct> map = new HashMap<String, Construct>();
         map.put("x", C.String("(x > 4)"));
-        try {
-            Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
-        } catch (PrefilterNonMatchException e) {
-            fail("Expected a match here");
-        }
-        try {
-            Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
-            fail("Did not expect a match here");
-        } catch (PrefilterNonMatchException e) {
-        }
-        
-        map.put("x", C.String("(x == 5)"));
-        try {
-            Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
-        } catch (PrefilterNonMatchException e) {
-            fail("Expected a match here");
-        }
-        try {
-            Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
-            fail("Did not expect a match here");
-        } catch (PrefilterNonMatchException e) {
-        }
-        
-        map.put("x", C.String("(2 + 3)"));
-        try {
-            Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
-        } catch (PrefilterNonMatchException e) {
-            fail("Expected a match here");
-        }
-        try {
-            Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
-            fail("Did not expect a match here");
-        } catch (PrefilterNonMatchException e) {
-        }
-    }
+		try {
+			try {
+				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
+			} catch (PrefilterNonMatchException e) {
+				fail("Expected a match here");
+			}
+			try {
+				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
+				fail("Did not expect a match here");
+			} catch (PrefilterNonMatchException e) {
+			}
+
+			map.put("x", C.String("(x == 5)"));
+			try {
+				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
+			} catch (PrefilterNonMatchException e) {
+				fail("Expected a match here");
+			}
+			try {
+				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
+				fail("Did not expect a match here");
+			} catch (PrefilterNonMatchException e) {
+			}
+
+			map.put("x", C.String("(2 + 3)"));
+			try {
+				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
+			} catch (PrefilterNonMatchException e) {
+				fail("Expected a match here");
+			}
+			try {
+				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
+				fail("Did not expect a match here");
+			} catch (PrefilterNonMatchException e) {
+			}
+		} catch (ConfigRuntimeException e) {
+			if (e.getCause() instanceof ClassNotFoundException) {
+				// Nothing we can do during testing
+			} else {
+				fail("Test may be incorrectly formatted: " + e.getCause().getMessage());
+			}
+		}
+	}
 }
