@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -14,8 +15,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.sk89q.worldedit.internal.expression.Expression;
-import com.sk89q.worldedit.internal.expression.ExpressionException;
+
 import java.util.Map;
 
 /**
@@ -58,7 +58,8 @@ public final class Prefilters {
         REGEX,
         /**
          * An expression allows for more complex numerical matching. Similar to a regex,
-         * but designed for numerical values.
+         * but designed for numerical values. This requires WorldEdit in plugins, lib,
+		 * or in the server root to function.
          */
         EXPRESSION,
         /**
@@ -187,21 +188,38 @@ public final class Prefilters {
             if(exp.contains("<") || exp.contains(">") || exp.contains("==")){
                 inequalityMode = true;
             }
-            try{
-                double val = Expression.compile(exp).evaluate();
-                if(inequalityMode){
-                    if(val == 0){
-                        throw new PrefilterNonMatchException();
-                    }
-                } else {
-                    if(val != Static.getDouble(dvalue, Target.UNKNOWN)){
-                        throw new PrefilterNonMatchException();
-                    }
-                }
-            } catch(ExpressionException e){
-                throw new ConfigRuntimeException("Your expression is invalidly formatted", 
-                        ExceptionType.FormatException, expression.getTarget());
-            }
+			String eClass = "com.sk89q.worldedit.internal.expression.Expression";
+			String errClass = "com.sk89q.worldedit.internal.expression.ExpressionException";
+			Class eClazz, errClazz;
+			try {
+				eClazz = Class.forName(eClass);
+				errClazz = Class.forName(errClass);
+			} catch (ClassNotFoundException cnf) {
+				throw new ConfigRuntimeException("You are missing a required dependency: " + eClass,
+						ExceptionType.PluginInternalException, expression.getTarget(), cnf);
+			}
+			try {
+				Object e = ReflectionUtils.invokeMethod(eClazz, null, "compile",
+						new Class[]{String.class}, new Object[]{exp});
+				double val = (double) ReflectionUtils.invokeMethod(eClazz, e, "evaluate");
+				if (inequalityMode) {
+					if (val == 0) {
+						throw new PrefilterNonMatchException();
+					}
+				} else {
+					if (val != Static.getDouble(dvalue, Target.UNKNOWN)) {
+						throw new PrefilterNonMatchException();
+					}
+				}
+			} catch (ReflectionUtils.ReflectionException rex) {
+				if (rex.getCause().getClass().isAssignableFrom(errClazz)) {
+					throw new ConfigRuntimeException("Your expression was invalidly formatted",
+							ExceptionType.PluginInternalException, expression.getTarget(), rex.getCause());
+				} else {
+					throw new ConfigRuntimeException(rex.getMessage(), ExceptionType.PluginInternalException,
+							expression.getTarget(), rex.getCause());
+				}
+			}
         } else {
             throw new ConfigRuntimeException("Prefilter expecting expression type, and \"" 
                     + expression.val() + "\" does not follow expression format. "

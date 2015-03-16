@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -30,7 +31,7 @@ import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.MemoryDataSource;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
-import com.sk89q.util.StringUtil;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -72,7 +73,6 @@ public class AliasCore {
 	private List<Script> scripts;
 	static final Logger logger = Logger.getLogger("Minecraft");
 	private Set<String> echoCommand = new HashSet<String>();
-	private PermissionsResolver perms;
 	public List<File> autoIncludes;
 	public static CommandHelperPlugin parent;
 
@@ -87,11 +87,10 @@ public class AliasCore {
 	 * @param maxCommands How many commands an alias may contain. Since aliases
 	 * can be used like a macro, this can help prevent command spamming.
 	 */
-	public AliasCore(File aliasConfig, File auxAliases, File prefFile, File mainFile, PermissionsResolver perms, CommandHelperPlugin parent) {
+	public AliasCore(File aliasConfig, File auxAliases, File prefFile, File mainFile, CommandHelperPlugin parent) {
 		this.aliasConfig = aliasConfig;
 		this.auxAliases = auxAliases;
 		this.prefFile = prefFile;
-		this.perms = perms;
 		AliasCore.parent = parent;
 		this.mainFile = mainFile;
 	}
@@ -114,8 +113,7 @@ public class AliasCore {
 
 		GlobalEnv gEnv;
 		try {
-			gEnv = new GlobalEnv(parent.executionQueue, parent.profiler,
-					parent.persistenceNetwork, parent.permissionsResolver,
+			gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
 					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
 					new TaskManager());
@@ -273,7 +271,7 @@ public class AliasCore {
 					+ "however, there is no more information at this point. Check your script, but also report this "
 					+ "as a bug in CommandHelper. Also, it's possible that some commands will no longer work. As a temporary "
 					+ "workaround, restart the server, and avoid doing whatever it is you did to make this happen.\nThe error is as follows: "
-					+ e.toString() + "\n" + TermColors.reset() + "Stack Trace:\n" + StringUtil.joinString(Arrays.asList(e.getStackTrace()), "\n", 0));
+					+ e.toString() + "\n" + TermColors.reset() + "Stack Trace:\n" + StringUtils.Join(Arrays.asList(e.getStackTrace()), "\n"));
 		}
 		return match;
 	}
@@ -416,11 +414,11 @@ public class AliasCore {
 			}
 			GlobalEnv gEnv;
 			try {
-				gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork, parent.permissionsResolver,
+				gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 						MethodScriptFileLocations.getDefault().getConfigDirectory(),
 						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
 						new TaskManager());
-				gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
+				gEnv.SetLabel(Static.GLOBAL_PERMISSION);
 			} catch (Profiles.InvalidProfileException ex) {
 				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;

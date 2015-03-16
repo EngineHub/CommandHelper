@@ -5,12 +5,11 @@ package com.laytonsmith.core.events;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
-import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.PermissionsResolver;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -23,6 +22,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.profiler.ProfilePoint;
+
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -92,7 +92,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				if(label == null){
 					//Set the permission to global if it's null, since that means
 					//it wasn't set, and so we aren't in a secured environment anyways.
-					label = PermissionsResolver.GLOBAL_PERMISSION;
+					label = Static.GLOBAL_PERMISSION;
 				}
 				env.getEnv(GlobalEnv.class).SetLabel(label);
 				MethodScriptCompiler.execute(tree, env, null, null);

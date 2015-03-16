@@ -170,18 +170,6 @@
 			You can check to see if all dependencies are up to date or not by
 			running: mvn versions:display-dependency-updates
 		-->
-		<!-- Required component -->
-		<dependency>
-			<groupId>com.sk89q</groupId>
-			<artifactId>worldedit</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.spout</groupId>
-					<artifactId>spoutapi</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<!-- Bukkit -->
 		<dependency>
@@ -478,7 +466,7 @@
 							<!--<mainClass>com.laytonsmith.core.MainSandbox</mainClass>-->
 						</manifest>
 						<manifestEntries>
-							<Class-Path>WorldEdit.jar CommandHelper/WorldEdit.jar lib/WorldEdit.jar ../lib/WorldEdit.jar ../WorldEdit.jar ../craftbukkit-0.0.1-SNAPSHOT.jar ../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
+							<Class-Path>WorldEdit.jar CommandHelper/WorldEdit.jar lib/WorldEdit.jar ../lib/WorldEdit.jar ../WorldEdit.jar ../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -529,7 +517,6 @@
 							-->
 							<artifactSet>
 								<includes>
-									<include>com.sk89q:worldedit:jar:*</include>
 									<include>org.perf4j:perf4j:jar:*</include>
 									<include>log4j:log4j:jar:*</include>
 									<include>org.yaml:snakeyaml:jar:*</include>
@@ -662,17 +649,6 @@
 									<artifact>org.apache.commons:commons-io:jar:*</artifact>
 									<includes>
 										<include>org/apache/commons/io/**</include>
-									</includes>
-								</filter>
-								<filter>
-									<artifact>com.sk89q:worldedit:jar:*</artifact>
-									<includes>
-										<!-- Permissions Items -->
-										<include>com/sk89q/wepif/**</include>
-										<include>com/sk89q/util/**</include>
-										<include>com/sk89q/worldedit/Vector.*</include>
-										<!-- Expression Parser -->
-										<include>com/sk89q/worldedit/internal/expression/**</include>
 									</includes>
 								</filter>
 								<!-- Profiler -->

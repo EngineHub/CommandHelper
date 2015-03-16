@@ -159,14 +159,13 @@ public class Script {
         }
         if (p instanceof MCPlayer) {
             if (CurrentEnv.getEnv(GlobalEnv.class).GetLabel() != null) {
-                PermissionsResolver perms = CurrentEnv.getEnv(GlobalEnv.class).GetPermissionsResolver();
                 String[] groups = CurrentEnv.getEnv(GlobalEnv.class).GetLabel().split("/");
                 for (String group : groups) {
-                    if (group.startsWith("-") && perms.inGroup(((MCPlayer)p).getName(), group.substring(1))) {
+                    if (group.startsWith("-") && ((MCPlayer)p).inGroup(group.substring(1))) {
                         //negative permission
                         throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
                                 Target.UNKNOWN);
-                    } else if (perms.inGroup(((MCPlayer)p).getName(), group)) {
+                    } else if (((MCPlayer)p).inGroup(group)) {
                         //They do have permission.
                         break;
                     }

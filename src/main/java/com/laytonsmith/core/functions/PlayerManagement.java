@@ -752,25 +752,18 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer m = null;
+			MCCommandSender sender = null;
 			if (args.length == 0) {
-				if (p instanceof MCPlayer) {
-					m = (MCPlayer) p;
-				}
+				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			} else {
-				m = Static.GetPlayer(args[0], t);
+				sender = Static.GetCommandSender(args[0].val(), t);
 			}
 
-			Static.AssertPlayerNonNull(m, t);
-
-			String[] sa = env.getEnv(GlobalEnv.class).GetPermissionsResolver().getGroups(m.getName());
-			Construct[] ca = new Construct[sa.length];
-			for (int i = 0; i < sa.length; i++) {
-				ca[i] = new CString(sa[i], t);
+			CArray ret = new CArray(t);
+			for (String group : sender.getGroups()) {
+				ret.push(new CString(group, t));
 			}
-			CArray a = new CArray(t, ca);
-			return a;
+			return ret;
 		}
 
 		@Override
@@ -945,12 +938,10 @@ public class PlayerManagement {
 			}
 			if (index == 9 || index == -1) {
 				//MCPlayer groups
-				String[] sa = env.getEnv(GlobalEnv.class).GetPermissionsResolver().getGroups(p.getName());
-				Construct[] ca = new Construct[sa.length];
-				for (int i = 0; i < sa.length; i++) {
-					ca[i] = new CString(sa[i], t);
+				CArray a = new CArray(t);
+				for (String group : p.getGroups()) {
+					a.push(new CString(group, t));
 				}
-				CArray a = new CArray(t, ca);
 				retVals.add(a);
 			}
 			if (index == 10 || index == -1) {

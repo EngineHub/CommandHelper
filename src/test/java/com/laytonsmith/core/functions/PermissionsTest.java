@@ -3,16 +3,17 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.testing.StaticTest;
-import java.io.File;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+
+import java.io.File;
+
 import static org.mockito.Mockito.mock;
 //import static org.powermock.api.mockito.PowerMockito.*;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -30,7 +31,6 @@ import static org.mockito.Mockito.mock;
 public class PermissionsTest {
     MCServer fakeServer;
     MCPlayer fakePlayer;
-	PermissionsResolver fakePerms;
     com.laytonsmith.core.environments.Environment env;
 
     public PermissionsTest() {
@@ -52,9 +52,8 @@ public class PermissionsTest {
 //        when(fakeWorld.getName()).thenReturn("world");
 //        when(fakePlayer.getWorld()).thenReturn(fakeWorld);
         fakeServer = StaticTest.GetFakeServer();
-		fakePerms = mock(PermissionsResolver.class);
-        env = Static.GenerateStandaloneEnvironment(fakePerms);
-        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);        
+		env = Static.GenerateStandaloneEnvironment();
+		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     @After
