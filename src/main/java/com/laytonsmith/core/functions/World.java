@@ -1665,7 +1665,7 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {location_from, location_to} Calculate yaw from one location to another.";
+			return "double {location_from, location_to} Calculate yaw from one location to another on the X-Z plane. The rotation is measured in degrees (0-359.99...) relative to the (x=0,z=1) vector, which points south.";
 		}
 
 		@Override
@@ -1683,17 +1683,16 @@ public class World {
 
 			MCLocation subtract = to.subtract(from);
 			double dX = subtract.getX();
-			double dY = subtract.getY();
 			double dZ = subtract.getZ();
 
-			double distanceXZ = java.lang.Math.sqrt(dX * dX + dZ * dZ);
+			double yaw = java.lang.Math.atan(dX/dZ) * 180 / java.lang.Math.PI; // In degrees [-90:90].
+            if(dZ < 0) { // Bottom circle kwadrant.
+                yaw += 180;
+            } else if(dX < 0) { // Top left half kwadrant.
+                yaw += 360;
+            }
 
-			double yaw = java.lang.Math.toDegrees(java.lang.Math.acos(dX / distanceXZ));
-			if (dZ < 0.0) {
-				yaw += java.lang.Math.abs(180 - yaw) * 2;
-			}
-
-			return new CDouble(yaw - 90, t);
+			return new CDouble(yaw, t);
 		}
 	}
 
