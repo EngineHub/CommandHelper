@@ -1726,7 +1726,7 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {location_from, location_to} Calculate pitch from one location to another.";
+			return "double {location_from, location_to} Calculate pitch from one location to another.";
 		}
 
 		@Override
@@ -1748,9 +1748,8 @@ public class World {
 			double dZ = subtract.getZ();
 
 			double distanceXZ = java.lang.Math.sqrt(dX * dX + dZ * dZ);
-			double distanceY = java.lang.Math.sqrt(distanceXZ * distanceXZ + dY * dY);
 
-			double pitch = java.lang.Math.toDegrees(java.lang.Math.acos(dY / distanceY)) - 90;
+			double pitch = java.lang.Math.atan(dY/distanceXZ) * 180 / java.lang.Math.PI;
 
 			return new CDouble(pitch, t);
 		}
