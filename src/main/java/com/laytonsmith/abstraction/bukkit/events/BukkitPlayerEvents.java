@@ -13,16 +13,16 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
-import com.laytonsmith.abstraction.bukkit.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
@@ -33,43 +33,16 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
-import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
-import com.laytonsmith.abstraction.events.MCExpChangeEvent;
-import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
-import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
-import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
-import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
-import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
-import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
-import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
-import com.laytonsmith.abstraction.events.MCPlayerEvent;
-import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
-import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
-import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
-import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
-import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
-import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
-import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
-import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
-import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
-import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.TravelAgent;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -98,6 +71,11 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  *
@@ -627,10 +605,10 @@ public class BukkitPlayerEvents {
     		implements MCPlayerDeathEvent {
         PlayerDeathEvent pde;
 
-        public BukkitMCPlayerDeathEvent(PlayerDeathEvent event) {
-        	super(event);
-            pde = event;
-        }
+		public BukkitMCPlayerDeathEvent(Event event) {
+			super(event);
+			pde = (PlayerDeathEvent) event;
+		}
 
         public static BukkitMCPlayerDeathEvent _instantiate(MCPlayer entity, List<MCItemStack> listOfDrops,
                 int droppedExp, String deathMessage){

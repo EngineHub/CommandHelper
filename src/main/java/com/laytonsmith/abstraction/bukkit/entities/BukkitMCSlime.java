@@ -1,8 +1,8 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.entities.MCSlime;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Slime;
 
 /**
@@ -11,7 +11,7 @@ import org.bukkit.entity.Slime;
  */
 public class BukkitMCSlime extends BukkitMCLivingEntity implements MCSlime {
 
-	public BukkitMCSlime(Slime slime) {
+	public BukkitMCSlime(Entity slime) {
 		super(slime);
 	}
 

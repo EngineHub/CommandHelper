@@ -1,10 +1,10 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.bukkit.BukkitMCAgeable;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
 
 /**
@@ -13,7 +13,7 @@ import org.bukkit.entity.Villager;
  */
 public class BukkitMCVillager extends BukkitMCAgeable implements MCVillager {
 
-	public BukkitMCVillager(Villager villager) {
+	public BukkitMCVillager(Entity villager) {
 		super(villager);
 	}
 

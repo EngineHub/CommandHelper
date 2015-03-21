@@ -5,9 +5,9 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
 import com.laytonsmith.abstraction.events.MCStructureGrowEvent;
@@ -15,8 +15,6 @@ import com.laytonsmith.abstraction.events.MCWorldEvent;
 import com.laytonsmith.abstraction.events.MCWorldLoadEvent;
 import com.laytonsmith.abstraction.events.MCWorldSaveEvent;
 import com.laytonsmith.abstraction.events.MCWorldUnloadEvent;
-import java.util.ArrayList;
-import java.util.List;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.world.StructureGrowEvent;
@@ -24,6 +22,9 @@ import org.bukkit.event.world.WorldEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *

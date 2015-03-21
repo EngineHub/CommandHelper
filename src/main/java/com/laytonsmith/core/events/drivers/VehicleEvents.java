@@ -39,6 +39,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -100,7 +101,7 @@ public class VehicleEvents {
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CInt(e.getVehicle().getEntityId(), t));
 				ret.put("passenger", new CInt(e.getEntity().getEntityId(), t));
-				if (e.getEntity().getType() == MCEntityType.PLAYER) {
+				if (e.getEntity().getType().getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
 					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
 				} else {
 					ret.put("player", CNull.NULL);
@@ -171,7 +172,7 @@ public class VehicleEvents {
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CInt(e.getVehicle().getEntityId(), t));
 				ret.put("passenger", new CInt(e.getEntity().getEntityId(), t));
-				if (e.getEntity().getType() == MCEntityType.PLAYER) {
+				if (e.getEntity().getType().getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
 					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
 				} else {
 					ret.put("player", CNull.NULL);
@@ -585,7 +586,7 @@ public class VehicleEvents {
 					ret.put("passengertype", new CString(passengertype.name(), t));
 					ret.put("passenger", new CInt(passenger.getEntityId(), t));
 
-					if (passengertype == MCEntityType.PLAYER) {
+					if (passengertype.getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
 						ret.put("player", new CString(((MCPlayer) e.getVehicle().getPassenger()).getName(), t));
 					} else {
 						ret.put("player", CNull.NULL);

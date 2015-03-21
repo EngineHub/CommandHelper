@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction.bukkit.entities;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.entities.MCEnderDragonPart;
 import org.bukkit.entity.EnderDragonPart;
+import org.bukkit.entity.Entity;
 
 /**
  *
@@ -10,7 +11,7 @@ import org.bukkit.entity.EnderDragonPart;
  */
 public class BukkitMCEnderDragonPart extends BukkitMCComplexEntityPart implements MCEnderDragonPart {
 
-	public BukkitMCEnderDragonPart(EnderDragonPart part) {
+	public BukkitMCEnderDragonPart(Entity part) {
 		super(part);
 	}
 

@@ -1,7 +1,8 @@
 
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCExperienceOrb;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 
 /**
@@ -11,10 +12,10 @@ import org.bukkit.entity.ExperienceOrb;
 public class BukkitMCExperienceOrb extends BukkitMCEntity implements MCExperienceOrb {
 
 	ExperienceOrb eo;
-	
-	public BukkitMCExperienceOrb(ExperienceOrb eo){
+
+	public BukkitMCExperienceOrb(Entity eo) {
 		super(eo);
-		this.eo = eo;
+		this.eo = (ExperienceOrb) eo;
 	}
 	
 	@Override

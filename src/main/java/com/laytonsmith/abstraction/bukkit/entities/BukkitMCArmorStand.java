@@ -1,12 +1,15 @@
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCArmorStand;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MVector3D;
+import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
@@ -19,9 +22,9 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	ArmorStand as;
 	ArmorStandEquipmentProxy ase;
 
-	public BukkitMCArmorStand(ArmorStand le) {
-		super(le);
-		as = le;
+	public BukkitMCArmorStand(Entity le) {
+		super((LivingEntity) le);
+		as = (ArmorStand) le;
 		ase = new ArmorStandEquipmentProxy(as);
 	}
 

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
@@ -11,6 +12,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -124,19 +126,33 @@ public class Weather {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			boolean b = Static.getBoolean(args[0]);
 			MCWorld w = null;
+			int duration = -1;
 			if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
 				w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
+			if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCBlockCommandSender) {
+				w = env.getEnv(CommandHelperEnvironment.class).GetBlockCommandSender().getBlock().getWorld();
+			}
 			if (args.length == 2) {
+				if (args[1] instanceof CString) {
+					w = Static.getServer().getWorld(args[1].val());
+				} else if (args[1] instanceof CInt) {
+					duration = Static.getInt32(args[1], t);
+				} else {
+					throw new ConfigRuntimeException("", ExceptionType.FormatException, t);
+				}
+			}
+			if (args.length == 3) {
 				w = Static.getServer().getWorld(args[1].val());
+				duration = Static.getInt32(args[2], t);
 			}
 			if (w != null) {
 				w.setStorm(b);
+				if (duration > 0) {
+					w.setWeatherDuration(duration);
+				}
 			} else {
 				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
-			}
-			if (args.length == 3) {
-				w.setWeatherDuration(Static.getInt32(args[2], t));
 			}
 			return CVoid.VOID;
 		}
@@ -144,12 +160,15 @@ public class Weather {
 		@Override
 		public String docs() {
 			return "void {isStorming, [world], [int]} Creates a (rain) storm if isStorming is true, stops a storm if"
-					+ " isStorming is false. The third argument allows setting how long this weather setting will last.";
+					+ " isStorming is false. The second argument can be a world name or the duration in ticks of the"
+					+ " given weather setting. The third argument allows specifying both a world and a duration."
+					+ " The second param is required to be the world if the function is run from console.";
 		}
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+					ExceptionType.InvalidWorldException};
 		}
 
 		@Override

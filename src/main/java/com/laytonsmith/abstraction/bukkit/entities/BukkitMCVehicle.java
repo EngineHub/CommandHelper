@@ -1,4 +1,4 @@
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCVehicle;
 import org.bukkit.entity.Entity;

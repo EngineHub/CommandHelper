@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.bukkit.BukkitMCTameable;
 import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import org.bukkit.entity.Entity;

@@ -1,7 +1,8 @@
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCFireball;
 import com.laytonsmith.abstraction.MVector3D;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.util.Vector;
 
@@ -12,9 +13,10 @@ import org.bukkit.util.Vector;
 public class BukkitMCFireball extends BukkitMCProjectile implements MCFireball {
 
 	Fireball f;
-	public BukkitMCFireball(Fireball be) {
+
+	public BukkitMCFireball(Entity be) {
 		super(be);
-		f = be;
+		f = (Fireball) be;
 	}
 
 	@Override

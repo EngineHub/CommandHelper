@@ -5,10 +5,10 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCTameable;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.annotations.abstractionenum;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 
 /**
@@ -18,9 +18,10 @@ import org.bukkit.entity.Horse;
 public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 
 	Horse h;
-	public BukkitMCHorse(Horse t) {
+
+	public BukkitMCHorse(Entity t) {
 		super(t);
-		this.h = t;
+		this.h = (Horse) t;
 	}
 	
 	@Override

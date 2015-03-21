@@ -4,11 +4,16 @@ import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCConsoleCommandEvent;
 import com.laytonsmith.abstraction.events.MCPluginIncomingMessageEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
+import org.bukkit.command.Command;
+import org.bukkit.entity.Player;
+import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.event.server.ServerListPingEvent;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,10 +21,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.bukkit.command.Command;
-import org.bukkit.entity.Player;
-import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.event.server.ServerListPingEvent;
 
 /**
  *

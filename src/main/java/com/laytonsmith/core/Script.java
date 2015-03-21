@@ -45,6 +45,7 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -415,7 +416,7 @@ public class Script {
 					//Server might not be available in this platform, so let's be sure to ignore those exceptions
 					String modVersion = "Unsupported platform";
 					try{
-						modVersion = StaticLayer.GetConvertor().GetServer().getModVersion();
+						modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
 					} catch(Exception ex){
 						modVersion = Implementation.GetServerType().name();
 					}

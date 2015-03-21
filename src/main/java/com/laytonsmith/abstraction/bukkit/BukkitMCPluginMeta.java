@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPluginMeta;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;

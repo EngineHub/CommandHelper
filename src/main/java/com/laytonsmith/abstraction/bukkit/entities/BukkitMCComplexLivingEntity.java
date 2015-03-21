@@ -1,13 +1,14 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.entities.MCComplexEntityPart;
 import com.laytonsmith.abstraction.entities.MCComplexLivingEntity;
-import java.util.HashSet;
-import java.util.Set;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
+import org.bukkit.entity.Entity;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -15,7 +16,7 @@ import org.bukkit.entity.ComplexLivingEntity;
  */
 public class BukkitMCComplexLivingEntity extends BukkitMCLivingEntity implements MCComplexLivingEntity {
 
-	public BukkitMCComplexLivingEntity(ComplexLivingEntity complex) {
+	public BukkitMCComplexLivingEntity(Entity complex) {
 		super(complex);
 	}
 

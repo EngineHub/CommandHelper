@@ -1,8 +1,9 @@
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockProjectileSource;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
@@ -12,9 +13,10 @@ import org.bukkit.projectiles.ProjectileSource;
 public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	
 	Projectile proj;
-	public BukkitMCProjectile(Projectile e) {
+
+	public BukkitMCProjectile(Entity e) {
 		super(e);
-		this.proj = e;
+		this.proj = (Projectile) e;
 	}
 	
 	@Override

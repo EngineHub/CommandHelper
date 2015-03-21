@@ -1,9 +1,8 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import org.bukkit.entity.WitherSkull;
-
-import com.laytonsmith.abstraction.bukkit.BukkitMCFireball;
 import com.laytonsmith.abstraction.entities.MCWitherSkull;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.WitherSkull;
 
 /**
  *
@@ -13,9 +12,9 @@ public class BukkitMCWitherSkull extends BukkitMCFireball implements MCWitherSku
 
 	private final WitherSkull _skull;
 
-	public BukkitMCWitherSkull(WitherSkull skull) {
+	public BukkitMCWitherSkull(Entity skull) {
 		super(skull);
-		_skull = skull;
+		_skull = (WitherSkull) skull;
 	}
 
 	@Override

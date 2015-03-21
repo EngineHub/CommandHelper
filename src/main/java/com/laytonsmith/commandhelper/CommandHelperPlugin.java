@@ -22,6 +22,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.SimpleVersion;
@@ -35,8 +36,10 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
@@ -62,14 +65,22 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.plugin.EventExecutor;
+import org.bukkit.plugin.RegisteredListener;
+import org.bukkit.plugin.TimedRegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mcstats.Metrics;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -275,6 +286,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		System.out.println("[CommandHelper] Running initial class discovery,"
 				+ " this will probably take a few seconds...");
 		myServer = StaticLayer.GetServer();
+		BukkitMCEntityType.build();
 
 		System.out.println("[CommandHelper] Loading extensions in the background...");
 
@@ -375,11 +387,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		BukkitDirtyRegisteredListener.PlayDirty();
-		registerEvent(playerListener);
+		registerEvents(playerListener);
 
 		//interpreter events
-		registerEvent(interpreterListener);
-		registerEvent(serverListener);
+		registerEvents(interpreterListener);
+		registerEvents(serverListener);
 
 		//Script events
 		StaticLayer.Startup(this);
@@ -415,12 +427,57 @@ public class CommandHelperPlugin extends JavaPlugin {
 	}
 
 	/**
-	 * Register an event.
+	 * Register all events in a Listener class.
 	 *
 	 * @param listener
 	 */
-	public void registerEvent(Listener listener) {
+	public void registerEvents(Listener listener) {
 		getServer().getPluginManager().registerEvents(listener, this);
+	}
+
+	/*
+	 * This method is based on Bukkit's JavaPluginLoader:createRegisteredListeners
+	 * Part of this code would be run normally using the other register method
+	 */
+	public void registerEventsDynamic(Listener listener) {
+		for (final java.lang.reflect.Method method : listener.getClass().getMethods()) {
+			EventIdentifier identifier = method.getAnnotation(EventIdentifier.class);
+			if (identifier == null || !identifier.event().existsInCurrent()) {
+				continue;
+			}
+			Class<? extends Event> eventClass = null;
+			try {
+				eventClass = (Class<? extends Event>) Class.forName(identifier.className());
+			} catch (ClassNotFoundException | ClassCastException e) {
+				CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
+								+ " because the class " + identifier.className() + " could not be found."
+								+ " This problem is not expected to occur, so please report it on the bug tracker if it does.",
+						Target.UNKNOWN);
+				continue;
+			}
+			HandlerList handler = (HandlerList) ReflectionUtils.invokeMethod(eventClass, null, "getHandlerList");
+			final Class<? extends Event> finalEventClass = eventClass;
+			EventExecutor executor = new EventExecutor() {
+				@Override
+				public void execute(Listener listener, Event event) throws EventException {
+					try {
+						if (!finalEventClass.isAssignableFrom(event.getClass())) {
+							return;
+						}
+						method.invoke(listener, event);
+					} catch (InvocationTargetException ex) {
+						throw new EventException(ex.getCause());
+					} catch (Throwable t) {
+						throw new EventException(t);
+					}
+				}
+			};
+			if (this.getServer().getPluginManager().useTimings()) {
+				handler.register(new TimedRegisteredListener(listener, executor, EventPriority.valueOf(identifier.priority()), this, false));
+			} else {
+				handler.register(new RegisteredListener(listener, executor, EventPriority.valueOf(identifier.priority()), this, false));
+			}
+		}
 	}
 
 	@Override

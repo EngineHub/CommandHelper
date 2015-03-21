@@ -1,16 +1,18 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.bukkit.BukkitMCVehicle;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Vehicle;
 
 public class BukkitMCBoat extends BukkitMCVehicle
 		implements MCBoat {
 
 	Boat b;
-	public BukkitMCBoat(Boat e) {
-		super(e);
-		this.b = e;
+
+	public BukkitMCBoat(Entity e) {
+		super((Vehicle) e);
+		this.b = (Boat) e;
 	}
 
 	@Override

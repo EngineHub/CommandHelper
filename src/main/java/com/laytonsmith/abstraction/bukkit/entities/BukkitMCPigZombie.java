@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.PigZombie;
 
 /**
@@ -10,7 +11,7 @@ import org.bukkit.entity.PigZombie;
  */
 public class BukkitMCPigZombie extends BukkitMCZombie implements MCPigZombie {
 
-	public BukkitMCPigZombie(PigZombie zombie) {
+	public BukkitMCPigZombie(Entity zombie) {
 		super(zombie);
 	}
 

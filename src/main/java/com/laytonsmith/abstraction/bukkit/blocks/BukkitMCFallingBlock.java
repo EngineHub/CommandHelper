@@ -3,7 +3,7 @@ package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import org.bukkit.entity.FallingBlock;
 
 /**

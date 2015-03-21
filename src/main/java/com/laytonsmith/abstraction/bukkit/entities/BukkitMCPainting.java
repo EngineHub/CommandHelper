@@ -1,8 +1,9 @@
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCPainting;
 import com.laytonsmith.abstraction.enums.MCArt;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCArt;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Painting;
 
 /**
@@ -11,10 +12,10 @@ import org.bukkit.entity.Painting;
 public class BukkitMCPainting extends BukkitMCHanging implements MCPainting {
 	
 	Painting p;
-	
-	public BukkitMCPainting(Painting painting){
+
+	public BukkitMCPainting(Entity painting) {
 		super(painting);
-		this.p = painting;
+		this.p = (Painting) painting;
 	}
 
 	@Override

@@ -52,6 +52,7 @@ import com.laytonsmith.core.events.drivers.ServerEvents;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -794,15 +795,18 @@ public class Minecraft {
 					+ "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
 					+ " will be returned. ---- Otherwise if value is not specified (or is -1), it returns an array of"
 					+ " information with the following pieces of information in the specified index: "
-					+ "<ul><li>0 - Server name; the name of the server in server.properties. "
-					+ "</li><li>1 - API version; The bukkit api version that is implemented in this build.</li><li>2 - Bukkit version; The version of craftbukkit your using.  "
-					+ "</li><li>3 - Allow flight; If true, minecrafts inbuild anti fly check is enabled.</li><li>4 - Allow nether; is true, nether is enabled"
-					+ "</li><li>5 - Allow end; if true, end is enabled"
-					+ "</li><li>6 - World container; The path to the world container.</li><li>7 - "
-					+ "Max player limit; returns the player limit.</li><li>8 - Operators; An array of operators on the server.</li>"
+					+ "<ul><li>0 - Server name; the name of the server in server.properties.</li>"
+					+ "<li>1 - API version; The version of the plugin API this server is implementing.</li>"
+					+ "<li>2 - Server version; The bare version string of the server implementation.</li>"
+					+ "<li>3 - Allow flight; If true, Minecraft's inbuilt anti fly check is enabled.</li>"
+					+ "<li>4 - Allow nether; is true, the Nether dimension is enabled</li>"
+					+ "<li>5 - Allow end; if true, the End is enabled</li>"
+					+ "<li>6 - World container; The path to the world container.</li>"
+					+ "<li>7 - Max player limit; returns the player limit.</li>"
+					+ "<li>8 - Operators; An array of operators on the server.</li>"
 					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li>"
 					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li>"
-					+ "<li>11 - Server port; Get the game port that the server runs on</li></ul>"
+					+ "<li>11 - Server port; Get the game port that the server runs on</li>"
 					+ "<li>12 - Server IP; Get the IP that the server runs on</li></ul>";
 		}
 
@@ -850,12 +854,12 @@ public class Minecraft {
 			}
 
 			if (index == 1 || index == -1) {
-				//Server Version
-				retVals.add(new CString(server.getVersion(), t));
+				// API Version
+				retVals.add(new CString(server.getAPIVersion(), t));
 			}
 			if (index == 2 || index == -1) {
-				//Bukkit Version
-				retVals.add(new CString(server.getModVersion(), t));
+				// Server Version
+				retVals.add(new CString(server.getServerVersion(), t));
 			}
 			if (index == 3 || index == -1) {
 				//Allow flight
@@ -1125,7 +1129,13 @@ public class Minecraft {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			MCEntityType type = MCEntityType.valueOf(args[1].val().toUpperCase());
+			MCEntityType type;
+			try {
+				type = MCEntityType.valueOf(args[1].val().toUpperCase());
+			} catch (IllegalArgumentException iae) {
+				throw new ConfigRuntimeException("Not a registered entity type: " + args[1].val(),
+						ExceptionType.BadEntityException, t);
+			}
 			if(location.getBlock().getState() instanceof MCCreatureSpawner){
 				((MCCreatureSpawner)location.getBlock().getState()).setSpawnedType(type);
 				return CVoid.VOID;
@@ -1148,7 +1158,7 @@ public class Minecraft {
 		public String docs() {
 			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
 					+ " or if the type is invalid, a FormatException is thrown. The type may be one of either "
-					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ");
+					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ");
 		}
 
 		@Override

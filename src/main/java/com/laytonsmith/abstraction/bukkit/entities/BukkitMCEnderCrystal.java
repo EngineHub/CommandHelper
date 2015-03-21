@@ -1,8 +1,9 @@
 
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCEnderCrystal;
 import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.Entity;
 
 /**
  *
@@ -11,9 +12,10 @@ import org.bukkit.entity.EnderCrystal;
 public class BukkitMCEnderCrystal extends BukkitMCEntity implements MCEnderCrystal{
 	
 	EnderCrystal ec;
-	public BukkitMCEnderCrystal(EnderCrystal ec){
+
+	public BukkitMCEnderCrystal(Entity ec) {
 		super(ec);
-		this.ec = ec;
+		this.ec = (EnderCrystal) ec;
 	}
 	
 	

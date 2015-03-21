@@ -1,4 +1,4 @@
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -6,17 +6,21 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MVector3D;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import com.laytonsmith.core.Static;
 import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -25,6 +29,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  *
@@ -132,7 +140,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public MCEntityType getType() {
-		return BukkitMCEntityType.getConvertor().getAbstractedEnum(e.getType());
+		return BukkitMCEntityType.valueOfConcrete(e.getType());
 	}
 
 	@Override
@@ -256,21 +264,49 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public String getCustomName() {
+		if (Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
+			if (e instanceof LivingEntity) {
+				return ((LivingEntity) e).getCustomName();
+			} else {
+				throw new IllegalArgumentException("This can only be used on LivingEntities prior to MC1.8.");
+			}
+		}
 		return e.getCustomName();
 	}
 
 	@Override
 	public boolean isCustomNameVisible() {
+		if (Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
+			if (e instanceof LivingEntity) {
+				return ((LivingEntity) e).isCustomNameVisible();
+			} else {
+				throw new IllegalArgumentException("This can only be used on LivingEntities prior to MC1.8.");
+			}
+		}
 		return e.isCustomNameVisible();
 	}
 
 	@Override
 	public void setCustomName(String name) {
+		if (Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
+			if (e instanceof LivingEntity) {
+				((LivingEntity) e).setCustomName(name);
+			} else {
+				throw new IllegalArgumentException("This can only be used on LivingEntities prior to MC1.8.");
+			}
+		}
 		e.setCustomName(name);
 	}
 
 	@Override
 	public void setCustomNameVisible(boolean visible) {
+		if (Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
+			if (e instanceof LivingEntity) {
+				((LivingEntity) e).setCustomNameVisible(visible);
+			} else {
+				throw new IllegalArgumentException("This can only be used on LivingEntities prior to MC1.8.");
+			}
+		}
 		e.setCustomNameVisible(visible);
 	}
 

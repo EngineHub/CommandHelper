@@ -3,8 +3,8 @@ package com.laytonsmith.abstraction.bukkit.entities;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCProjectile;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BukkitMCThrownPotion extends BukkitMCProjectile implements MCThrownPotion {
 
-	public BukkitMCThrownPotion(ThrownPotion potion) {
+	public BukkitMCThrownPotion(Entity potion) {
 		super(potion);
 	}
 

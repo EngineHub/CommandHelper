@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;
+
 import java.util.List;
 
 /**
@@ -51,6 +52,8 @@ public interface MCWorld extends MCMetadatable {
     public MCEntity spawn(MCLocation l, Class mobType);
 
 	public MCEntity spawn(MCLocation l, MCEntityType entType);
+
+	public MCEntity spawn(MCLocation l, MCEntityType.MCVanillaEntityType entityType);
 
 	public boolean generateTree(MCLocation l, MCTreeType treeType);
 

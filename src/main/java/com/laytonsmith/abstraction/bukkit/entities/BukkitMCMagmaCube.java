@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.entities.MCMagmaCube;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.MagmaCube;
 
 /**
@@ -10,7 +11,7 @@ import org.bukkit.entity.MagmaCube;
  */
 public class BukkitMCMagmaCube extends BukkitMCSlime implements MCMagmaCube {
 
-	public BukkitMCMagmaCube(MagmaCube cube) {
+	public BukkitMCMagmaCube(Entity cube) {
 		super(cube);
 	}
 

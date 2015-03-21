@@ -8,21 +8,25 @@ import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
-import java.util.HashSet;
-import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class BukkitMCScoreboard implements MCScoreboard {
 
 	Scoreboard s;
 	public BukkitMCScoreboard(Scoreboard sb) {
 		s = sb;
+	}
+
+	public Scoreboard _scoreboard() {
+		return s;
 	}
 
 	@Override

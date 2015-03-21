@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Entity;
 

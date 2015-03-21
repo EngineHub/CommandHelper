@@ -2,9 +2,9 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.entities.MCCreeper;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Entity;
 
 /**
  *
@@ -12,10 +12,10 @@ import org.bukkit.entity.Creeper;
  */
 public class BukkitMCCreeper extends BukkitMCLivingEntity implements MCCreeper {
 	Creeper creeper;
-	
-	public BukkitMCCreeper(Creeper c) {
+
+	public BukkitMCCreeper(Entity c) {
 		super(c);
-		creeper = c;
+		creeper = (Creeper) c;
 	}
 	
 	public BukkitMCCreeper(AbstractionObject ao) {

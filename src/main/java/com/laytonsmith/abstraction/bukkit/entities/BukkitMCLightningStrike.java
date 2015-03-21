@@ -1,7 +1,8 @@
 
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCLightningStrike;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LightningStrike;
 
 /**
@@ -11,10 +12,10 @@ import org.bukkit.entity.LightningStrike;
 public class BukkitMCLightningStrike extends BukkitMCEntity implements MCLightningStrike{
 
 	LightningStrike ls;
-	
-	public BukkitMCLightningStrike(LightningStrike ls){
+
+	public BukkitMCLightningStrike(Entity ls) {
 		super(ls);
-		this.ls = ls;
+		this.ls = (LightningStrike) ls;
 	}
 	
 	@Override
