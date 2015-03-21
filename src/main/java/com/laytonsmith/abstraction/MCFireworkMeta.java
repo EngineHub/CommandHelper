@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.enums.MCFireworkType;
 import java.util.List;
 
 public interface MCFireworkMeta extends MCItemMeta {
@@ -8,14 +7,20 @@ public interface MCFireworkMeta extends MCItemMeta {
 	int getStrength();
 	void setStrength(int strength);
 
-	boolean getFlicker();
+	void addEffect(MCFireworkEffect effect);
+	void addEffects(MCFireworkEffect... effects);
 
-	boolean getTrail();
+	void clearEffects();
 
-	List<MCColor> getColors();
+	MCFireworkMeta clone();
 
-	List<MCColor> getFadeColors();
+	List<MCFireworkEffect> getEffects();
 
-	MCFireworkType getType();
+	// Seems like we could just .size() the above...
+	int getEffectsSize();
+
+	boolean hasEffects();
+
+	void removeEffect(int index);
 
 }

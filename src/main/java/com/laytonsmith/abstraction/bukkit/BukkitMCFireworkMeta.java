@@ -1,14 +1,12 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCFireworkMeta;
-import com.laytonsmith.abstraction.enums.MCFireworkType;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFireworkType;
-import java.util.ArrayList;
-import java.util.List;
-import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.inventory.meta.FireworkMeta;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BukkitMCFireworkMeta extends BukkitMCItemMeta implements MCFireworkMeta {
 
@@ -34,58 +32,48 @@ public class BukkitMCFireworkMeta extends BukkitMCItemMeta implements MCFirework
 	}
 
 	@Override
-	public boolean getFlicker() {
-		for(FireworkEffect effect : fm.getEffects()){
-			if(effect.hasFlicker()){
-				return true;
-			}
-		}
-		return false;
+	public void addEffect(MCFireworkEffect effect) {
+		fm.addEffect(((BukkitMCFireworkEffect) effect).getEffect());
 	}
 
 	@Override
-	public boolean getTrail() {
-		for(FireworkEffect effect : fm.getEffects()){
-			if(effect.hasTrail()){
-				return true;
-			}
+	public void addEffects(MCFireworkEffect... effects) {
+		for (MCFireworkEffect e : effects) {
+			fm.addEffect(((BukkitMCFireworkEffect) e).getEffect());
 		}
-		return false;
 	}
 
 	@Override
-	public List<MCColor> getColors() {
-		for(FireworkEffect effect : fm.getEffects()){
-			List<Color> colors = effect.getColors();
-			List<MCColor> c = new ArrayList<>();
-			for(Color cc : colors){
-				c.add(BukkitMCColor.GetMCColor(cc));
-			}
-			return c;
-		}
-		return new ArrayList<>();
+	public void clearEffects() {
+		fm.clearEffects();
 	}
 
 	@Override
-	public List<MCColor> getFadeColors() {
-		for(FireworkEffect effect : fm.getEffects()){
-			List<Color> colors = effect.getFadeColors();
-			List<MCColor> c = new ArrayList<>();
-			for(Color cc : colors){
-				c.add(BukkitMCColor.GetMCColor(cc));
-			}
-			return c;
-		}
-		return new ArrayList<>();
+	public MCFireworkMeta clone() {
+		return new BukkitMCFireworkMeta(fm.clone());
 	}
 
 	@Override
-	public MCFireworkType getType() {
-		for(FireworkEffect effect : fm.getEffects()){
-			return BukkitMCFireworkType.getConvertor().getAbstractedEnum(effect.getType());
+	public List<MCFireworkEffect> getEffects() {
+		List<MCFireworkEffect> ret = new ArrayList<>();
+		for (FireworkEffect e : fm.getEffects()) {
+			ret.add(new BukkitMCFireworkEffect(e));
 		}
-		// This is the default type
-		return null;
+		return ret;
 	}
 
+	@Override
+	public int getEffectsSize() {
+		return fm.getEffectsSize();
+	}
+
+	@Override
+	public boolean hasEffects() {
+		return fm.hasEffects();
+	}
+
+	@Override
+	public void removeEffect(int index) {
+		fm.removeEffect(index);
+	}
 }

@@ -15,6 +15,11 @@ public class BukkitMCFirework extends BukkitMCEntity implements MCFirework {
 	}
 
 	@Override
+	public void detonate() {
+		f.detonate();
+	}
+
+	@Override
 	public MCFireworkMeta getFireWorkMeta() {
 		return new BukkitMCFireworkMeta(f.getFireworkMeta());
 	}

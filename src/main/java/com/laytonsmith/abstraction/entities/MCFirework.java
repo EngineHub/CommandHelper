@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCFireworkMeta;
 
 public interface MCFirework extends MCEntity {
 
+	public void detonate();
 	public MCFireworkMeta getFireWorkMeta();
 	public void setFireWorkMeta(MCFireworkMeta fm);
 }
