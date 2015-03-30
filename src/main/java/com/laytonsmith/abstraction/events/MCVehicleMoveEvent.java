@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCLocation;
  * @author MariuszT
  */
 public interface MCVehicleMoveEvent extends MCVehicleEvent {
+	public int getThreshold();
 
 	public MCLocation getFrom();
 

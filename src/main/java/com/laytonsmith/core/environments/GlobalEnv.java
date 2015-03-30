@@ -4,8 +4,8 @@ import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
-import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Procedure;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
@@ -14,9 +14,9 @@ import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.PersistenceNetwork;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +43,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private Profiler profiler = null;
 	//This is changed reflectively in a test, please don't rename.
 	private PersistenceNetwork persistenceNetwork = null;
-	private PermissionsResolver permissionsResolver = null;
 	private final Map<String, Boolean> flags = new HashMap<>();
 	private final Map<String, Object> custom = new HashMap<>();
 	private Script script = null;
@@ -65,23 +64,20 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param queue The ExecutionQueue object to use
 	 * @param profiler The Profiler to use
 	 * @param network The pre-configured PersistenecNetwork object to use
-	 * @param resolver The PermissionsResolver to use
 	 * @param root The root working directory to use
 	 * @param profiles The SQL SQLProfiles object to use
 	 * @param taskManager The TaskManager object to use
 	 */
-	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network, PermissionsResolver resolver,
-			File root, Profiles profiles, TaskManager taskManager) {
+	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network,
+					 File root, Profiles profiles, TaskManager taskManager) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
 		Static.AssertNonNull(profiler, "Profiler cannot be null");
 		Static.AssertNonNull(network, "PersistenceNetwork cannot be null");
-		Static.AssertNonNull(resolver, "PermissionsResolver cannot be null");
 		Static.AssertNonNull(root, "Root file cannot be null");
 		Static.AssertNonNull(taskManager, "TaskManager cannot be null");
 		this.executionQueue = queue;
 		this.profiler = profiler;
 		this.persistenceNetwork = network;
-		this.permissionsResolver = resolver;
 		this.root = new MutableObject(root);
 		if (this.executionQueue instanceof MethodScriptExecutionQueue) {
 			((MethodScriptExecutionQueue) executionQueue).setEnvironment(this);
@@ -100,10 +96,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	public PersistenceNetwork GetPersistenceNetwork() {
 		return persistenceNetwork;
-	}
-
-	public PermissionsResolver GetPermissionsResolver() {
-		return permissionsResolver;
 	}
 
 	public TaskManager GetTaskManager(){

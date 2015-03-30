@@ -142,9 +142,9 @@ public class BukkitVehicleEvents {
 		}
 
 		@Override
-		public MCVehicle getVehicle() {
+		public MCEntity getVehicle() {
 			if (ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
-				return (MCVehicle) BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
+				return BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
 			}
 			return null;
 		}
@@ -155,48 +155,4 @@ public class BukkitVehicleEvents {
 		}
 	}
 
-	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCVehicleMoveEvent implements MCVehicleMoveEvent {
-
-		BukkitMCLocation from;
-		BukkitMCLocation to;
-		BukkitMCVehicle vehicle;
-		boolean cancelled = false;
-
-		public BukkitMCVehicleMoveEvent(Vehicle vehicle, Location from, Location to) {
-			this.vehicle = new BukkitMCVehicle(vehicle);
-			this.from = new BukkitMCLocation(from);
-			this.to = new BukkitMCLocation(to);
-		}
-
-		@Override
-		public MCLocation getFrom() {
-			return from;
-		}
-
-		@Override
-		public MCLocation getTo() {
-			return to;
-		}
-
-		@Override
-		public MCVehicle getVehicle() {
-			return vehicle;
-		}
-
-		@Override
-		public Object _GetObject() {
-			return null;
-		}
-
-		@Override
-		public void setCancelled(boolean state) {
-			cancelled = state;
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return cancelled;
-		}
-	}
 }

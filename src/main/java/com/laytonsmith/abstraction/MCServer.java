@@ -56,7 +56,8 @@ public interface MCServer extends AbstractionObject{
     public String getServerName();
     public String getModVersion();
     public String getVersion();
-	public int getPort();
+    public int getPort();
+    public String getIp();
     public Boolean getAllowEnd();
     public Boolean getAllowFlight();
     public Boolean getAllowNether();

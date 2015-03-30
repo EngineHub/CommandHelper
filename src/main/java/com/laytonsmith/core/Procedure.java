@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
@@ -22,7 +23,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.sk89q.util.StringUtil;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -144,8 +145,8 @@ public class Procedure implements Cloneable {
 
     @Override
     public String toString() {
-        return name + "(" + StringUtil.joinString(varList.keySet(), ", ", 0) + ")";
-    }
+		return name + "(" + StringUtils.Join(varList.keySet(), ", ") + ")";
+	}
 
     /**
      * Convenience wrapper around executing a procedure if the parameters are in

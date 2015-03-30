@@ -13,7 +13,6 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -31,16 +30,17 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
-import static com.laytonsmith.testing.StaticTest.Run;
-import static com.laytonsmith.testing.StaticTest.SRun;
-import com.sk89q.worldedit.internal.expression.Expression;
-import com.sk89q.worldedit.internal.expression.ExpressionException;
+import org.bukkit.entity.Player;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -51,14 +51,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.entity.Player;
+
+import static com.laytonsmith.testing.StaticTest.Run;
+import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.Before;
-import org.junit.Test;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  *
@@ -267,10 +265,25 @@ public class RandomTests {
 	}
 
 	@Test
-	public void expressionTester() throws ExpressionException {
+	public void expressionTester() throws ConfigRuntimeException {
 		//verify basic usage works
-		Expression e = Expression.compile("(x + 2) * y", "x", "y");
-		assertEquals(16, e.evaluate(2, 4), 0.00001);
+		String eClass = "com.sk89q.worldedit.internal.expression.Expression";
+		try {
+			Class clazz = Class.forName(eClass);
+			Object e = ReflectionUtils.invokeMethod(clazz, null, "compile",
+					new Class[] { String.class, String.class, String.class },
+					new Object[] { "(x + 2) * y", "x", "y" });
+			double d = (double) ReflectionUtils.invokeMethod(clazz, e, "evaluate",
+					new Class[] { double.class, double.class }, new Object[] { 2, 4 });
+			assertEquals(16, d, 0.00001);
+		} catch (ClassNotFoundException cnf) {
+			/* Not much we can really do about this during testing.
+			throw new ConfigRuntimeException("You are missing a required dependency: " + eClass,
+					ExceptionType.PluginInternalException, Target.UNKNOWN);*/
+		} catch (ReflectionUtils.ReflectionException rex) {
+			throw new ConfigRuntimeException("Your expression was invalidly formatted",
+					ExceptionType.PluginInternalException, Target.UNKNOWN, rex.getCause());
+		}
 	}
 
 	@Test
@@ -294,7 +307,7 @@ public class RandomTests {
 	@Test
 	public void testGetValues() throws Exception {
 		try{
-			Environment env = Static.GenerateStandaloneEnvironment(new PermissionsResolver.PermissiveResolver());
+			Environment env = Static.GenerateStandaloneEnvironment();
 			GlobalEnv g = env.getEnv(GlobalEnv.class);
 			ConnectionMixinFactory.ConnectionMixinOptions options;
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();

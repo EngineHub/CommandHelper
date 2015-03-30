@@ -427,9 +427,10 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "void {[player], entityID} Tames the entity specified to the player. Wolves and ocelots are supported. Offline players"
-					+ " are supported, but this means that partial matches are NOT supported. You must type the players name exactly. Setting"
-					+ " the player to null will untame the mob. If the entity doesn't exist, nothing happens.";
+			return "void {[player], entityID} Tames any tameable mob to the specified player. Offline players are"
+					+ " supported, but this means that partial matches are NOT supported. You must type the players"
+					+ " name exactly. Setting the player to null will untame the mob. If the entity doesn't exist,"
+					+ " nothing happens.";
 		}
 
 		@Override
@@ -801,7 +802,8 @@ public class Minecraft {
 					+ "Max player limit; returns the player limit.</li><li>8 - Operators; An array of operators on the server.</li>"
 					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li>"
 					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li>"
-					+ "<li>11 - Server port; Get the game port that the server runs on</li></ul>";
+					+ "<li>11 - Server port; Get the game port that the server runs on</li></ul>"
+					+ "<li>12 - Server IP; Get the IP that the server runs on</li></ul>";
 		}
 
 		@Override
@@ -834,12 +836,12 @@ public class Minecraft {
 				index = Static.getInt32(args[0], t);
 			}
 
-			if (index < -1 || index > 11) {
-				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 11 (inclusive)",
+			if (index < -1 || index > 12) {
+				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 12 (inclusive)",
 						ExceptionType.RangeException, t);
 			}
 
-			assert index >= -1 && index <= 11; // Is this needed? Above statement should cause this to never be true. - entityreborn
+			assert index >= -1 && index <= 12; // Is this needed? Above statement should cause this to never be true. - entityreborn
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 
 			if (index == 0 || index == -1) {
@@ -911,6 +913,10 @@ public class Minecraft {
 			if (index == 11 || index == -1) {
 				//Server port
 				retVals.add(new CInt(server.getPort(), t));
+			}
+			if (index == 12 || index == -1) {
+				//Server Ip
+				retVals.add(new CString(server.getIp(), t));
 			}
 
 			if (retVals.size() == 1) {

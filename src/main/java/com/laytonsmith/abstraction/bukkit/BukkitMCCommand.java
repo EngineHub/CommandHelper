@@ -16,8 +16,10 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.functions.Commands;
 import java.util.ArrayList;
@@ -262,6 +264,9 @@ public class BukkitMCCommand implements MCCommand {
 				if (fret instanceof CBoolean) {
 					return ((CBoolean) fret).getBoolean();
 				}
+			} catch (ConfigRuntimeException cre) {
+				cre.setEnv(closure.getEnv());
+				ConfigRuntimeException.HandleUncaughtException(cre, closure.getEnv());
 			}
 			return true;
 		} else {

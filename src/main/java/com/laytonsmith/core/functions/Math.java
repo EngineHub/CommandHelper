@@ -1,18 +1,17 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -27,8 +26,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
-import com.sk89q.worldedit.internal.expression.Expression;
-import com.sk89q.worldedit.internal.expression.ExpressionException;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -2100,7 +2098,8 @@ public class Math {
 					+ " This function will allow you to evaluate a mathematical expression as a string, using"
 					+ " common mathematical notation. For example, (2 + 3) * 4 would return 20. Variables can"
 					+ " also be included, and their values given as an associative array. expr('(x + y) * z',"
-					+ " array(x: 2, y: 3, z: 4)) would be the same thing as the above example.";
+					+ " array(x: 2, y: 3, z: 4)) would be the same thing as the above example."
+					+ " This function requires WorldEdit in plugins, lib, or the server root in order to run.";
 		}
 
 		@Override
@@ -2153,11 +2152,36 @@ public class Math {
 				da = new double[0];
 				varNames = new String[0];
 			}
-			try {
+			/*try {
 				Expression e = Expression.compile(expr, varNames);
 				return new CDouble(e.evaluate(da), t);
 			} catch (ExpressionException ex) {
 				throw new ConfigRuntimeException("Your expression was invalidly formatted", ExceptionType.PluginInternalException, t, ex);
+			}*/
+			String eClass = "com.sk89q.worldedit.internal.expression.Expression";
+			String errClass = "com.sk89q.worldedit.internal.expression.ExpressionException";
+			Class eClazz, errClazz;
+			try {
+				eClazz = Class.forName(eClass);
+				errClazz = Class.forName(errClass);
+			} catch (ClassNotFoundException cnf) {
+				throw new ConfigRuntimeException("You are missing a required dependency: " + eClass,
+						ExceptionType.PluginInternalException, t);
+			}
+			try {
+				Object e = ReflectionUtils.invokeMethod(eClazz, null, "compile",
+						new Class[]{String.class, String[].class}, new Object[]{expr, varNames});
+				Object d = ReflectionUtils.invokeMethod(eClazz, e, "evaluate",
+						new Class[]{double[].class}, new Object[]{da});
+				return new CDouble((double) d, t);
+			} catch (ReflectionUtils.ReflectionException rex) {
+				if (rex.getCause().getClass().isAssignableFrom(errClazz)) {
+					throw new ConfigRuntimeException("Your expression was invalidly formatted",
+							ExceptionType.PluginInternalException, args[0].getTarget(), rex.getCause());
+				} else {
+					throw new ConfigRuntimeException(rex.getMessage(), ExceptionType.PluginInternalException,
+							args[0].getTarget(), rex.getCause());
+				}
 			}
 		}
 

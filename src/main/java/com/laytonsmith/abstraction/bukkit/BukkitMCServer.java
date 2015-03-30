@@ -288,6 +288,11 @@ public class BukkitMCServer implements MCServer {
     }
 
 	@Override
+    public String getIp() {
+        return s.getIp();
+    }
+
+	@Override
     public Boolean getAllowEnd() {
         return s.getAllowEnd();
     }

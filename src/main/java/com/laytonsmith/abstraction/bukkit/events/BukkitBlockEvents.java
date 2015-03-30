@@ -37,6 +37,9 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -376,7 +379,13 @@ public class BukkitBlockEvents {
 
 		@Override
 		public void setItem(MCItemStack item) {
-			bde.setItem(((BukkitMCItemStack) item).asItemStack());
+			if (item == null || item.getType().getName() == "AIR") {
+				throw new ConfigRuntimeException("Due to Bukkit's handling of this event, the item cannot be set to null."
+						+ " Until they change this, workaround by cancelling the event and manipulating the block"
+						+ " using inventory functions.", ExceptionType.IllegalArgumentException, Target.UNKNOWN);
+			} else {
+				bde.setItem(((BukkitMCItemStack) item).asItemStack());
+			}
 		}
 
 		@Override

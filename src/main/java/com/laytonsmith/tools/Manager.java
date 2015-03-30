@@ -26,7 +26,6 @@ import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
-import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
@@ -84,7 +83,7 @@ public class Manager {
 		CHLog.initialize(chDirectory);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
-				new PermissionsResolver.PermissiveResolver(), chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
+				chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
 				new TaskManager());
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());

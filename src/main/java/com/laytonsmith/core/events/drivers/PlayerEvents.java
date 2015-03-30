@@ -1871,15 +1871,11 @@ public class PlayerEvents {
 
 		/*
 		 * TODO:
-		 * 1. Add player prefilter
-		 * 2. See if the same event can be fired with different from fields, so that
+		 * 1. See if the same event can be fired with different from fields, so that
 		 * one move only causes one "chain" of handlers to be fired.
-		 * 3. Add both region points and named WG region support in the prefilters.
-		 * (The sk_ functiosn can probably be used directly)
-		 * 4. Figure out why the cancel() isn't working.
-		 * 5. Tie this in to player teleport events. Probably set a prefilter that determines
+		 * 2. Tie this into player teleport events. Probably set a prefilter that determines
 		 * whether or not a teleport should count as a movement or not.
-		 * 6. Remember to change also vehicle_move and entity_change_block, if needed.
+		 * 3. Remember to change also vehicle_move, if needed.
 		 */
 
 		private static Thread thread = null;
@@ -1894,7 +1890,6 @@ public class PlayerEvents {
 				thresholdList.add(i);
 			}
 			if(thread == null){
-				thresholdList.clear();
 				thresholdList.add(1);
 				thread = new Thread(new Runnable() {
 
@@ -1906,16 +1901,17 @@ public class PlayerEvents {
 								return;
 							}
 							for(final MCPlayer p : Static.getServer().getOnlinePlayers()){
+								final MCLocation current = p.asyncGetLocation();
+								Point3D currentPoint = new Point3D(current.getX(), current.getY(), current.getZ());
 								//We need to loop through all the thresholds
 								//and see if any of the points meet them. If so,
 								//we know we need to fire the event. If none of them
 								//match, carry on with the next player. As soon as
 								//one matches though, we can't quit the loop, because
 								//we have to set all the thresholds.
-								thresholdLoop: for(Integer i : thresholdList){
+								thresholdLoop: for(final Integer i : thresholdList){
 									if(thresholds.containsKey(i) && thresholds.get(i).containsKey(p.getName())){
 										final MCLocation last = thresholds.get(i).get(p.getName());
-										final MCLocation current = p.asyncGetLocation();
 										if(!p.getWorld().getName().equals(last.getWorld().getName())){
 											//They moved worlds. simply put their new location in here, then
 											//continue.
@@ -1923,7 +1919,6 @@ public class PlayerEvents {
 											continue thresholdLoop;
 										}
 										Point3D lastPoint = new Point3D(last.getX(), last.getY(), last.getZ());
-										Point3D currentPoint = new Point3D(current.getX(), current.getY(), current.getZ());
 										double distance = lastPoint.distance(currentPoint);
 										if(distance > i){
 											//We've met the threshold.
@@ -1936,6 +1931,11 @@ public class PlayerEvents {
 												@Override
 												public MCPlayer getPlayer() {
 													return p;
+												}
+
+												@Override
+												public int getThreshold() {
+													return i;
 												}
 
 												@Override
@@ -1989,8 +1989,7 @@ public class PlayerEvents {
 									} else {
 										//If there is no location here, just put the current location in there.
 										if(!thresholds.containsKey(i)){
-											Map<String, MCLocation> map = new HashMap<String, MCLocation>();
-											thresholds.put(i, map);
+											thresholds.put(i, new HashMap<String, MCLocation>());
 										}
 										thresholds.get(i).put(p.getName(), p.asyncGetLocation());
 									}
@@ -2012,6 +2011,7 @@ public class PlayerEvents {
 
 					@Override
 					public void run() {
+						thresholdList.clear();
 						thread = null;
 					}
 				});
@@ -2077,14 +2077,10 @@ public class PlayerEvents {
 				if(!event.getFrom().getWorld().getName().equals(event.getTo().getWorld().getName())){
 					return false;
 				}
-				if(prefilter.containsKey("threshold")){
-					Point3D from = new Point3D(event.getFrom().getX(), event.getFrom().getY(), event.getFrom().getZ());
-					Point3D to = new Point3D(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ());
-					double distance = from.distance(to);
-					double pDistance = Static.getNumber(prefilter.get("threshold"), Target.UNKNOWN);
-					if(pDistance > distance){
-						return false;
-					}
+				if(prefilter.containsKey("threshold")) {
+					Prefilters.match(prefilter, "threshold", event.getThreshold(), PrefilterType.MATH_MATCH);
+				} else if(event.getThreshold() != 1) {
+					return false;
 				}
 				Prefilters.match(prefilter, "from", event.getFrom(), PrefilterType.LOCATION_MATCH);
 				Prefilters.match(prefilter, "to", event.getTo(), PrefilterType.LOCATION_MATCH);
@@ -2148,8 +2144,9 @@ public class PlayerEvents {
 		public String docs() {
 			return "{state: <macro> Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
 					+ " | player: <macro> The player who is fishing | world: <string match>}"
-					+ " Fires when a player casts or reels a fishing rod {player | world | state | chance | xp"
-					+ " | hook: the fishhook entity | caught: the id of the snared entity, can be a fish item}"
+					+ " Fires when a player casts or reels a fishing rod."
+					+ " {player | world | state | chance | xp | hook: the fishhook entity id"
+					+ " | caught: the id of the snared entity, can be a fish item}"
 					+ " {chance: the chance of catching a fish from pulling the bobber at random"
 					+ " | xp: the exp the player will get from catching a fish}"
 					+ " {}";
@@ -2389,7 +2386,7 @@ public class PlayerEvents {
 			return "{player: <macro>}"
 					+ " Fired when a player's experience changes naturally."
 					+ " {player | amount}"
-					+ " {amount: the amount of exp the player will recieve}"
+					+ " {amount: an integer of the amount of exp that will be added to the player's total exp}"
 					+ " {}";
 		}
 

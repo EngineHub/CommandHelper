@@ -12,13 +12,17 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +63,7 @@ public class Commands {
 			MCServer s = Static.getServer();
 			MCCommand cmd = s.getCommandMap().getCommand(args[0].val());
 			if (cmd == null) {
-				throw new ConfigRuntimeException("Command not found did you forget to register it?",
+				throw new ConfigRuntimeException("Command not found, did you forget to register it?",
 						ExceptionType.NotFoundException, t);
 			}
 			customExec(t, environment, cmd, args[1]);
@@ -181,11 +185,11 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
-			MCCommand cmd = map.getCommand(args[0].val());
+			MCCommand cmd = map.getCommand(args[0].val().toLowerCase());
 			boolean isnew = false;
 			if (cmd == null) {
 				isnew = true;
-				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val());
+				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val().toLowerCase());
 			}
 			if (args[1] instanceof CArray) {
 				CArray ops = (CArray) args[1];
@@ -324,6 +328,122 @@ public class Commands {
 					+ " The closure can return true false (treated as true by default). Returning false will display"
 					+ " The usage message if it is set. The closure is passed the following information in this order:"
 					+ " alias used, name of the sender, array of arguments used, array of command info.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class get_commands extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[0];
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCCommandMap map = Static.getServer().getCommandMap();
+			Collection<MCCommand> commands = map.getCommands();
+			CArray ret = CArray.GetAssociativeArray(t);
+			for(MCCommand command : commands) {
+				CArray ca = CArray.GetAssociativeArray(t);
+				ca.set("name", new CString(command.getName(), t), t);
+				ca.set("description", new CString(command.getDescription(), t), t);
+				Construct permission;
+				if (command.getPermission() == null) {
+					permission = CNull.NULL;
+				} else {
+					permission = new CString(command.getPermission(), t);
+				}
+				ca.set("permission", permission, t);
+				ca.set("nopermmsg", new CString(command.getPermissionMessage(), t), t);
+				ca.set("usage", new CString(command.getUsage(), t), t);
+				CArray aliases = new CArray(t);
+				for (String a : command.getAliases()) {
+					aliases.push(new CString(a, t));
+				}
+				ca.set("aliases", aliases, t);
+				ret.set(command.getName(), ca, t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_commands";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns an array of command arrays in the format register_command expects."
+					+ " This does not include " + Implementation.GetServerType().getBranding() + " aliases, as they are not registered commands.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class clear_commands extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[0];
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCCommandMap map = Static.getServer().getCommandMap();
+			map.clearCommands();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "clear_commands";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "void {} Attempts to clear all registered commands on the server. Note that this probably has some special"
+					+ " limitations, but they are a bit unclear as to what commands can and cannot be unregistered.";
 		}
 
 		@Override

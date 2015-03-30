@@ -7,17 +7,20 @@ import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.PermissionsResolver;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.persistence.DataSourceException;
+import org.bukkit.Server;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -26,9 +29,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import org.bukkit.Server;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 
 /**
  * An example script is a self contained script that runs itself, and returns
@@ -182,7 +182,7 @@ public class ExampleScript {
 
 	private class FakeCore extends AliasCore{
 		public FakeCore(){
-			super(null, null, null, null, new PermissionsResolver.PermissiveResolver(), null);
+			super(null, null, null, null, null);
 			this.autoIncludes = new ArrayList<File>();
 		}
 	}
@@ -222,7 +222,7 @@ public class ExampleScript {
 		if(output != null){
 			return output;
 		}
-		Script s = Script.GenerateScript(script, PermissionsResolver.GLOBAL_PERMISSION);
+		Script s = Script.GenerateScript(script, Static.GLOBAL_PERMISSION);
 		Environment env;
 		try {
 			env = Static.GenerateStandaloneEnvironment();
