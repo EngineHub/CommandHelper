@@ -1613,6 +1613,69 @@ public class DataHandling {
 	}
 
 	@api
+	public static class is_number extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "is_number";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {item} Returns whether or not the given item is an integer or a double. Note that numeric strings can usually be used as integers and doubles,"
+					+ " however this function checks the actual datatype of the item. If you just want to see if an item can be used as a number,"
+					+ " use is_integral() or is_numeric() instead.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0] instanceof CInt || args[0] instanceof CDouble);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
+			);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_number(1)"),
+				new ExampleScript("True condition", "is_number(1.0)"),
+				new ExampleScript("False condition", "is_number('1')"),
+				new ExampleScript("False condition", "is_number('1.0')")};
+		}
+	}
+
+	@api
 	public static class is_double extends AbstractFunction implements Optimizable {
 
 		@Override

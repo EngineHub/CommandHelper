@@ -545,13 +545,6 @@ public final class Static {
 	}
 
 	/**
-	 * Returns whether or not this location appears to be a url.
-	 */
-	public static boolean ApparentURL(String toCheck) {
-		return false;
-	}
-
-	/**
 	 * Returns an item stack from the given item notation. Defaulting to the
 	 * specified qty, this will throw an exception if the notation is invalid.
 	 *
