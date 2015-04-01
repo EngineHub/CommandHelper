@@ -1,6 +1,6 @@
 
 
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
@@ -14,6 +14,10 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
+import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCWeather;
@@ -26,6 +30,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Note;
 import org.bukkit.Server;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachmentInfo;
@@ -48,10 +53,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
     Player p;
 
-	public BukkitMCPlayer(Player player) {
-        super(player);
-        this.p = player;
-    }
+	public BukkitMCPlayer(Entity player) {
+		super(player);
+		this.p = (Player) player;
+	}
 
 	public Player _Player() {
         return p;
@@ -359,8 +364,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
     public void setCompassTarget(MCLocation l) {
-        p.setCompassTarget(((BukkitMCLocation)l).l);
-    }
+		p.setCompassTarget(((BukkitMCLocation) l)._Location());
+	}
 
 	@Override
     public void setDisplayName(String name) {
@@ -633,6 +638,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setScoreboard(MCScoreboard board) {
-		p.setScoreboard(((BukkitMCScoreboard) board).s);
+		p.setScoreboard(((BukkitMCScoreboard) board)._scoreboard());
 	}
 }

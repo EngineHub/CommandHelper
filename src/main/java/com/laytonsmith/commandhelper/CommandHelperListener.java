@@ -19,7 +19,7 @@
 package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
@@ -33,9 +33,6 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.persistence.DataSourceException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -44,6 +41,10 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Event listener for Hey0's server mod.

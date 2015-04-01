@@ -1,7 +1,10 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
@@ -29,6 +32,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -155,16 +159,28 @@ public class Reflection {
 			} else if("enum".equalsIgnoreCase(param)){
 				CArray a = new CArray(t);
 				Set<Class<Enum>> enums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
+				Set<Class<DynamicEnum>> dEnums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class);
 				if(args.length == 1){
 					//No name provided
 					for(Class<Enum> e : enums){
 						a.push(new CString(e.getAnnotation(MEnum.class).value(), t));
+					}
+					for (Class<DynamicEnum> d : dEnums) {
+						a.push(new CString(d.getAnnotation(MDynamicEnum.class).value(), t));
 					}
 				} else if(args.length == 2){
 					String enumName = args[1].val();
 					for(Class<Enum> e : enums){
 						if(e.getAnnotation(MEnum.class).value().equals(enumName)){
 							for(Enum ee : e.getEnumConstants()){
+								a.push(new CString(ee.name(), t));
+							}
+							break;
+						}
+					}
+					for (Class<DynamicEnum> d : dEnums) {
+						if (d.getAnnotation(MDynamicEnum.class).value().equals(enumName)) {
+							for (DynamicEnum ee : (DynamicEnum[]) ReflectionUtils.invokeMethod(d, null, "values")) {
 								a.push(new CString(ee.name(), t));
 							}
 							break;

@@ -1,6 +1,7 @@
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.entities.MCPig;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Pig;
 
 /**
@@ -10,9 +11,10 @@ import org.bukkit.entity.Pig;
 public class BukkitMCPig extends BukkitMCAgeable implements MCPig {
 
 	Pig p;
-	public BukkitMCPig(Pig be) {
+
+	public BukkitMCPig(Entity be) {
 		super(be);
-		p = be;
+		p = (Pig) be;
 	}
 
 	@Override

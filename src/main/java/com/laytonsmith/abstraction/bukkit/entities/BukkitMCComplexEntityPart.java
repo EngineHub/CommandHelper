@@ -1,10 +1,10 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.entities.MCComplexEntityPart;
 import com.laytonsmith.abstraction.entities.MCComplexLivingEntity;
 import org.bukkit.entity.ComplexEntityPart;
+import org.bukkit.entity.Entity;
 
 /**
  *
@@ -12,7 +12,7 @@ import org.bukkit.entity.ComplexEntityPart;
  */
 public class BukkitMCComplexEntityPart extends BukkitMCEntity implements MCComplexEntityPart {
 
-	public BukkitMCComplexEntityPart(ComplexEntityPart part) {
+	public BukkitMCComplexEntityPart(Entity part) {
 		super(part);
 	}
 

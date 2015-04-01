@@ -1,10 +1,11 @@
 
 
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCTameable;
+import com.laytonsmith.abstraction.bukkit.BukkitMCAnimalTamer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
@@ -17,9 +18,9 @@ public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable{
 
     Tameable t;
     public BukkitMCTameable(Entity t){
-        super((LivingEntity) t);
-        this.t = (Tameable)t;
-    }
+		super(t);
+		this.t = (Tameable) t;
+	}
     
     public BukkitMCTameable(AbstractionObject a){
         super((LivingEntity)a.getHandle());
@@ -49,7 +50,7 @@ public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable{
         if (at == null) {
             t.setOwner(null);
         } else {
-            t.setOwner(((BukkitMCAnimalTamer) at).at);
-        }
+			t.setOwner(((BukkitMCAnimalTamer) at)._tamer());
+		}
     }
 }

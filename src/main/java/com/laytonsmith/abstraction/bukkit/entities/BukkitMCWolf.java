@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.bukkit.BukkitMCTameable;
 import com.laytonsmith.abstraction.entities.MCWolf;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import org.bukkit.DyeColor;

@@ -1,16 +1,17 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.entities.MCEnderSignal;
 import org.bukkit.entity.EnderSignal;
+import org.bukkit.entity.Entity;
 
 public class BukkitMCEnderSignal extends BukkitMCEntity implements
 		MCEnderSignal {
 
 	EnderSignal es;
-	public BukkitMCEnderSignal(EnderSignal e) {
+
+	public BukkitMCEnderSignal(Entity e) {
 		super(e);
-		this.es = e;
+		this.es = (EnderSignal) e;
 	}
 
 }

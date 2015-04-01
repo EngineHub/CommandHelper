@@ -12,12 +12,12 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCraftingInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantment;
-import com.laytonsmith.abstraction.bukkit.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
@@ -36,12 +36,6 @@ import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Event.Result;
@@ -56,6 +50,13 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -454,7 +455,7 @@ public class BukkitInventoryEvents {
 		
 		@Override
 		public MCPlayer getPlayer() {
-			return new com.laytonsmith.abstraction.bukkit.BukkitMCPlayer(ih.getPlayer());
+			return new BukkitMCPlayer(ih.getPlayer());
 		}
 
 		@Override

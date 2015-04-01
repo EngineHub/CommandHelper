@@ -1,4 +1,4 @@
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCHanging;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;

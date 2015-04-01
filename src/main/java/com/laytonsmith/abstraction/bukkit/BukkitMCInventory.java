@@ -5,20 +5,22 @@ import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHLog.Tags;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Exceptions;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *

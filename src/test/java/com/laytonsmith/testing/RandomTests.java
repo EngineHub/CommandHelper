@@ -9,7 +9,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;

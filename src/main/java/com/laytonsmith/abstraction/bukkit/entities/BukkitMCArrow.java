@@ -1,9 +1,9 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import org.bukkit.entity.Arrow;
-
 import com.laytonsmith.abstraction.entities.MCArrow;
-import com.laytonsmith.abstraction.bukkit.BukkitMCProjectile;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Projectile;
 
 /**
  *
@@ -13,9 +13,9 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 
 	private final Arrow _arrow;
 
-	public BukkitMCArrow(Arrow arrow) {
-		super(arrow);
-		_arrow = arrow;
+	public BukkitMCArrow(Entity arrow) {
+		super((Projectile) arrow);
+		_arrow = (Arrow) arrow;
 	}
 
 	@Override

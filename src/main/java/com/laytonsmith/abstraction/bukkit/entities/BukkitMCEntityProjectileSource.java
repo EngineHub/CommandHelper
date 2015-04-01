@@ -5,7 +5,6 @@ import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;

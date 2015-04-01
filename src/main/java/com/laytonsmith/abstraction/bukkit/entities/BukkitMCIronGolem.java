@@ -1,8 +1,8 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.entities.MCIronGolem;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.IronGolem;
 
 /**
@@ -11,7 +11,7 @@ import org.bukkit.entity.IronGolem;
  */
 public class BukkitMCIronGolem extends BukkitMCLivingEntity implements MCIronGolem {
 
-	public BukkitMCIronGolem(IronGolem golem) {
+	public BukkitMCIronGolem(Entity golem) {
 		super(golem);
 	}
 

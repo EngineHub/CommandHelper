@@ -13,16 +13,16 @@ import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
-import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
-import com.laytonsmith.abstraction.bukkit.BukkitMCHanging;
-import com.laytonsmith.abstraction.bukkit.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
-import com.laytonsmith.abstraction.bukkit.BukkitMCProjectile;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHanging;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCProjectile;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -53,15 +53,12 @@ import com.laytonsmith.abstraction.events.MCPotionSplashEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.abstraction;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -85,6 +82,11 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  *
  * @author EntityReborn
@@ -94,8 +96,9 @@ public class BukkitEntityEvents {
 	public static class BukkitMCItemDespawnEvent implements MCItemDespawnEvent {
 
 		ItemDespawnEvent ide;
-		public BukkitMCItemDespawnEvent(ItemDespawnEvent event) {
-			ide = event;
+
+		public BukkitMCItemDespawnEvent(Event event) {
+			ide = (ItemDespawnEvent) event;
 		}
 
 		@Override
@@ -117,8 +120,9 @@ public class BukkitEntityEvents {
 	public static class BukkitMCItemSpawnEvent implements MCItemSpawnEvent {
 
 		ItemSpawnEvent ise;
-		public BukkitMCItemSpawnEvent(ItemSpawnEvent event) {
-			ise = event;
+
+		public BukkitMCItemSpawnEvent(Event event) {
+			ise = (ItemSpawnEvent) event;
 		}
 		
 		@Override
@@ -140,8 +144,9 @@ public class BukkitEntityEvents {
 	public static class BukkitMCEntityExplodeEvent implements MCEntityExplodeEvent {
 
 		EntityExplodeEvent e;
-		public BukkitMCEntityExplodeEvent(EntityExplodeEvent event) {
-			e = event;
+
+		public BukkitMCEntityExplodeEvent(Event event) {
+			e = (EntityExplodeEvent) event;
 		}
 		
 		@Override
@@ -194,8 +199,9 @@ public class BukkitEntityEvents {
 	public static class BukkitMCProjectileHitEvent implements MCProjectileHitEvent {
 		
 		ProjectileHitEvent phe;
-		public BukkitMCProjectileHitEvent(ProjectileHitEvent event) {
-			phe = event;
+
+		public BukkitMCProjectileHitEvent(Event event) {
+			phe = (ProjectileHitEvent) event;
 		}
 
 		@Override
@@ -210,7 +216,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEntityType getEntityType() {
-			return BukkitMCEntityType.getConvertor().getAbstractedEnum(phe.getEntityType());
+			return BukkitMCEntityType.valueOfConcrete(phe.getEntityType());
 		}
 		
 		public static BukkitMCProjectileHitEvent _instantiate(MCProjectile p) {
@@ -226,8 +232,8 @@ public class BukkitEntityEvents {
 
 		ProjectileLaunchEvent ple;
 
-		public BukkitMCProjectileLaunchEvent(ProjectileLaunchEvent event) {
-			ple = event;
+		public BukkitMCProjectileLaunchEvent(Event event) {
+			ple = (ProjectileLaunchEvent) event;
 		}
 
 		@Override
@@ -242,7 +248,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEntityType getEntityType() {
-			return BukkitMCEntityType.getConvertor().getAbstractedEnum(ple.getEntityType());
+			return BukkitMCEntityType.valueOfConcrete(ple.getEntityType());
 		}
 	}
 
@@ -251,9 +257,10 @@ public class BukkitEntityEvents {
 			implements MCPotionSplashEvent {
 		
 		PotionSplashEvent pse;
-		public BukkitMCPotionSplashEvent(PotionSplashEvent event) {
+
+		public BukkitMCPotionSplashEvent(Event event) {
 			super(event);
-			pse = event;
+			pse = (PotionSplashEvent) event;
 		}
 
 		@Override
@@ -286,8 +293,9 @@ public class BukkitEntityEvents {
 	public static class BukkitMCEntityDeathEvent implements MCEntityDeathEvent {
 
 		EntityDeathEvent e;
-		public BukkitMCEntityDeathEvent(EntityDeathEvent e) {
-			this.e = e;
+
+		public BukkitMCEntityDeathEvent(Event e) {
+			this.e = (EntityDeathEvent) e;
 		}
 
 		@Override
@@ -338,8 +346,9 @@ public class BukkitEntityEvents {
 	public static class BukkitMCCreatureSpawnEvent implements MCCreatureSpawnEvent {
 
 		CreatureSpawnEvent e;
-		public BukkitMCCreatureSpawnEvent(CreatureSpawnEvent event) {
-			this.e = event;
+
+		public BukkitMCCreatureSpawnEvent(Event event) {
+			this.e = ((CreatureSpawnEvent) event);
 		}
 		
 		@Override
@@ -374,8 +383,9 @@ public class BukkitEntityEvents {
 	public static class BukkitMCPlayerInteractEntityEvent implements MCPlayerInteractEntityEvent {
 
 		PlayerInteractEntityEvent e;
-		public BukkitMCPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
-			this.e = event;
+
+		public BukkitMCPlayerInteractEntityEvent(Event event) {
+			this.e = (PlayerInteractEntityEvent) event;
 		}
 
 		@Override
@@ -408,9 +418,10 @@ public class BukkitEntityEvents {
 	public static class BukkitMCPlayerInteractAtEntityEvent extends BukkitMCPlayerInteractEntityEvent implements MCPlayerInteractAtEntityEvent {
 
 		PlayerInteractAtEntityEvent e;
-		public BukkitMCPlayerInteractAtEntityEvent(PlayerInteractAtEntityEvent event) {
+
+		public BukkitMCPlayerInteractAtEntityEvent(Event event) {
 			super(event);
-			this.e = event;
+			this.e = (PlayerInteractAtEntityEvent) event;
 		}
 
 		@Override
@@ -423,10 +434,10 @@ public class BukkitEntityEvents {
     @abstraction(type = Implementation.Type.BUKKIT)
     public static class BukkitMCPlayerDropItemEvent implements MCPlayerDropItemEvent {
         PlayerDropItemEvent e;
-        
-        public BukkitMCPlayerDropItemEvent(PlayerDropItemEvent e) {
-            this.e = e;
-        }
+
+		public BukkitMCPlayerDropItemEvent(Event e) {
+			this.e = (PlayerDropItemEvent) e;
+		}
         
 		@Override
         public MCItem getItemDrop() {
@@ -467,9 +478,9 @@ public class BukkitEntityEvents {
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerPickupItemEvent implements MCPlayerPickupItemEvent {
 		PlayerPickupItemEvent e;
-		
-		public BukkitMCPlayerPickupItemEvent(PlayerPickupItemEvent e) {
-			this.e = e;
+
+		public BukkitMCPlayerPickupItemEvent(Event e) {
+			this.e = (PlayerPickupItemEvent) e;
 		}
 		@Override
 		public int getRemaining() {
@@ -521,9 +532,9 @@ public class BukkitEntityEvents {
 
         EntityDamageEvent event;
 
-        public BukkitMCEntityDamageEvent(EntityDamageEvent e) {
-            event = e;
-        }
+		public BukkitMCEntityDamageEvent(Event e) {
+			event = (EntityDamageEvent) e;
+		}
 
 		@Override
         public Object _GetObject() {
@@ -556,10 +567,10 @@ public class BukkitEntityEvents {
 
         EntityDamageByEntityEvent event;
 
-        public BukkitMCEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
-        	super(e);
-            event = e;
-        }
+		public BukkitMCEntityDamageByEntityEvent(Event e) {
+			super(e);
+			event = (EntityDamageByEntityEvent) e;
+		}
 
 		@Override
         public MCEntity getDamager() {
@@ -572,9 +583,9 @@ public class BukkitEntityEvents {
 
         EntityTargetEvent pie;
 
-        public BukkitMCTargetEvent(EntityTargetEvent e) {
-            pie = e;
-        }
+		public BukkitMCTargetEvent(Event e) {
+			pie = (EntityTargetEvent) e;
+		}
 
         public static BukkitMCTargetEvent _instantiate(Entity entity, LivingEntity target, EntityTargetEvent.TargetReason reason) {
             return new BukkitMCTargetEvent(new EntityTargetEvent(( (BukkitMCEntity) entity ).getHandle(),
@@ -618,8 +629,9 @@ public class BukkitEntityEvents {
 	public static class BukkitMCEntityEnterPortalEvent implements MCEntityEnterPortalEvent {
 	
 		EntityPortalEnterEvent epe;
-		public BukkitMCEntityEnterPortalEvent(EntityPortalEnterEvent event) {
-			epe = event;
+
+		public BukkitMCEntityEnterPortalEvent(Event event) {
+			epe = (EntityPortalEnterEvent) event;
 		}
 		
 		@Override
@@ -642,8 +654,8 @@ public class BukkitEntityEvents {
 
 		EntityChangeBlockEvent ecb;
 
-		public BukkitMCEntityChangeBlockEvent(EntityChangeBlockEvent event) {
-			ecb = event;
+		public BukkitMCEntityChangeBlockEvent(Event event) {
+			ecb = (EntityChangeBlockEvent) event;
 		}
 
 		@Override
@@ -687,8 +699,8 @@ public class BukkitEntityEvents {
 
 		EntityInteractEvent eie;
 
-		public BukkitMCEntityInteractEvent(EntityInteractEvent event) {
-			eie = event;
+		public BukkitMCEntityInteractEvent(Event event) {
+			eie = (EntityInteractEvent) event;
 		}
 
 		@Override
@@ -722,8 +734,8 @@ public class BukkitEntityEvents {
 
 		HangingBreakEvent hbe;
 
-		public BukkitMCHangingBreakEvent(HangingBreakEvent event) {
-			hbe = event;
+		public BukkitMCHangingBreakEvent(Event event) {
+			hbe = (HangingBreakEvent) event;
 		}
 
 		@Override

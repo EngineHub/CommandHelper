@@ -2,8 +2,8 @@ package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
-import com.laytonsmith.abstraction.bukkit.BukkitMCVehicle;
 import com.laytonsmith.abstraction.entities.MCMinecart;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.material.MaterialData;
 
@@ -11,9 +11,10 @@ public class BukkitMCMinecart extends BukkitMCVehicle
 		implements MCMinecart {
 
 	Minecart m;
-	public BukkitMCMinecart(Minecart e) {
+
+	public BukkitMCMinecart(Entity e) {
 		super(e);
-		this.m = e;
+		this.m = (Minecart) e;
 	}
 
 	@Override

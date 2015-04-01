@@ -1,8 +1,10 @@
 
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 
 /**
@@ -12,10 +14,10 @@ import org.bukkit.entity.Item;
 public class BukkitMCItem extends BukkitMCEntity implements MCItem{
 	
 	Item i;
-	
-	public BukkitMCItem(Item i){
+
+	public BukkitMCItem(Entity i) {
 		super(i);
-		this.i = i;
+		this.i = (Item) i;
 	}
 	
 	@Override

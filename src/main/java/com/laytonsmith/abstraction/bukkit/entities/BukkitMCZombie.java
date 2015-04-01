@@ -1,8 +1,8 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.entities.MCZombie;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Zombie;
 
 /**
@@ -11,7 +11,7 @@ import org.bukkit.entity.Zombie;
  */
 public class BukkitMCZombie extends BukkitMCLivingEntity implements MCZombie {
 
-	public BukkitMCZombie(Zombie zombie) {
+	public BukkitMCZombie(Entity zombie) {
 		super(zombie);
 	}
 

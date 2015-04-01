@@ -1,12 +1,16 @@
-package com.laytonsmith.abstraction.bukkit;
+package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
+import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 
@@ -18,10 +22,10 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
     
     HumanEntity he;
 
-    public BukkitMCHumanEntity(HumanEntity humanEntity) {
-        super(humanEntity);
-        he = humanEntity;
-    }
+	public BukkitMCHumanEntity(Entity humanEntity) {
+		super(humanEntity);
+		he = (HumanEntity) humanEntity;
+	}
 	
 	public HumanEntity asHumanEntity() {
 		return he;

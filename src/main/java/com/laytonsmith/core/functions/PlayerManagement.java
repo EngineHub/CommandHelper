@@ -11,8 +11,8 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.MVector3D;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
@@ -43,6 +43,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -159,18 +160,23 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (args.length == 1) {
+			boolean dashless = false;
+			if (args.length >= 1) {
 				try {
 					pl = Static.GetPlayer(args[0], t);
 				} catch (ConfigRuntimeException cre) {
 					pl = Static.GetUser(args[0], t);
 				}
 			}
+			if (args.length == 2) {
+				dashless = Static.getBoolean(args[1]);
+			}
 			if (pl == null) {
 				throw new ConfigRuntimeException("No matching player could be found.",
 						ExceptionType.PlayerOfflineException, t);
 			}
-			return new CString(pl.getUniqueID().toString(), t);
+			String uuid = pl.getUniqueID().toString();
+			return new CString(dashless ? uuid.replace("-", "") : uuid, t);
 		}
 
 		@Override
@@ -180,12 +186,12 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0, 1};
+			return new Integer[]{0, 1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "UUID {[player]} Returns the uuid of the current player or the specified player."
+			return "UUID {[player], [dashless]} Returns the uuid of the current player or the specified player."
 					+ " This will attempt to find an offline player, but if that also fails,"
 					+ " a PlayerOfflineException will be thrown.";
 		}

@@ -24,8 +24,8 @@ import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCTNT;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.MVector3D;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
@@ -86,6 +86,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -918,7 +919,7 @@ public class EntityManagement {
 				if (shooter_id > 0 && to == null) {
 					projectile_shoot = MCProjectileType.FIREBALL;
 				} else {
-					entity_shoot = MCEntityType.FIREBALL;
+					entity_shoot = MCEntityType.valueOfVanillaType(MCEntityType.MCVanillaEntityType.FIREBALL);
 				}
 			}
 
@@ -969,7 +970,7 @@ public class EntityManagement {
 					+ " If provide three arguments, with target (entityID, player name or location array), entity will"
 					+ " shoot to target location. Last, fourth argument, is double and specifies the speed"
 					+ " of projectile. Returns the EntityID of the entity. Valid entities types: "
-					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ", " or ");
+					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ", " or ");
 		}
 	}
 
@@ -1069,7 +1070,7 @@ public class EntityManagement {
 			return "array {location array, distance, [type] | location array, distance, [arrayTypes]} Returns an array of"
 					+ " all entities within the given radius. Set type argument to filter entities to a specific type. You"
 					+ " can pass an array of types. Valid types (case doesn't matter): "
-					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ", " or ");
+					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ", " or ");
 		}
 
 		@Override
@@ -1373,10 +1374,13 @@ public class EntityManagement {
 	public static class get_mob_name extends EntityGetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			return new CString(le.getCustomName(), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity le = Static.getEntity(Static.getInt32(args[0], t), t);
+			try {
+				return new CString(le.getCustomName(), t);
+			} catch (IllegalArgumentException e) {
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+			}
 		}
 
 		@Override
@@ -1394,10 +1398,13 @@ public class EntityManagement {
 	public static class set_mob_name extends EntitySetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
-			le.setCustomName(args[1].val());
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity le = Static.getEntity(Static.getInt32(args[0], t), t);
+			try {
+				le.setCustomName(args[1].val());
+			} catch (IllegalArgumentException e) {
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+			}
 			return CVoid.VOID;
 		}
 
@@ -1424,8 +1431,7 @@ public class EntityManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			int qty = 1;
 			CArray ret = new CArray(t);
@@ -1456,7 +1462,7 @@ public class EntityManagement {
 				throw new Exceptions.FormatException("Unknown entitytype: " + args[0].val(), t);
 			}
 			for (int i = 0; i < qty; i++) {
-				switch (entType) {
+				switch (entType.getAbstracted()) {
 					case DROPPED_ITEM:
 						CArray c = new CArray(t);
 						c.set("type", new CInt(1, t), t);
@@ -1747,7 +1753,11 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getLivingEntity(Static.getInt32(args[0], t), t).isCustomNameVisible());
+			try {
+				return CBoolean.get(Static.getEntity(Static.getInt32(args[0], t), t).isCustomNameVisible());
+			} catch (IllegalArgumentException e) {
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+			}
 		}
 
 		@Override
@@ -1768,7 +1778,11 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(Static.getInt32(args[0], t), t).setCustomNameVisible(Static.getBoolean(args[1]));
+			try {
+				Static.getEntity(Static.getInt32(args[0], t), t).setCustomNameVisible(Static.getBoolean(args[1]));
+			} catch (IllegalArgumentException e) {
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+			}
 			return CVoid.VOID;
 		}
 
@@ -1959,7 +1973,7 @@ public class EntityManagement {
 				}
 			}
 			if(p == null){
-				p = (MCPainting)loc.getWorld().spawn(loc, MCEntityType.PAINTING);
+				p = (MCPainting) loc.getWorld().spawn(loc, MCEntityType.MCVanillaEntityType.PAINTING);
 			}
 			boolean worked = p.setArt(art);
 			if(!worked){
@@ -2306,7 +2320,7 @@ public class EntityManagement {
 			MCEntity entity = Static.getEntity(id, t);
 			CArray specArray = new CArray(t);
 
-			switch (entity.getType()) {
+			switch (entity.getType().getAbstracted()) {
 				case ARROW:
 					MCArrow arrow = (MCArrow) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
@@ -2571,7 +2585,7 @@ public class EntityManagement {
 			MCEntity entity = Static.getEntity(id, t);
 			CArray specArray = Static.getArray(args[1], t);
 
-			switch (entity.getType()) {
+			switch (entity.getType().getAbstracted()) {
 				case ARROW:
 					MCArrow arrow = (MCArrow) entity;
 					for (String index : specArray.stringKeySet()) {

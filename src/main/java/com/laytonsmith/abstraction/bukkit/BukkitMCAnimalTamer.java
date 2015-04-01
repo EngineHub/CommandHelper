@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.HumanEntity;
@@ -33,6 +34,10 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
     public Object getHandle(){
         return at;
     }
+
+	public AnimalTamer _tamer() {
+		return at;
+	}
 
     public MCOfflinePlayer getOfflinePlayer() {
         if(at instanceof OfflinePlayer){

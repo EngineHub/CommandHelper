@@ -1,15 +1,17 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.minecart.CommandMinecart;
 
 public class BukkitMCCommandMinecart extends BukkitMCMinecart
 		implements MCCommandMinecart {
 
 	CommandMinecart cm;
-	public BukkitMCCommandMinecart(CommandMinecart e) {
+
+	public BukkitMCCommandMinecart(Entity e) {
 		super(e);
-		this.cm = e;
+		this.cm = (CommandMinecart) e;
 	}
 
 	@Override

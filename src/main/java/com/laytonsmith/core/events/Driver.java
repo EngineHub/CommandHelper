@@ -1,5 +1,8 @@
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.core.Static;
+
 /**
  * This class is an enum class that represents all the types of events that CH is aware of. The
  * reason an enum is required, is because events can more easily be sorted and found this way.
@@ -68,7 +71,7 @@ public enum Driver {
 	PLAYER_FISH,
 	PLAYER_INTERACT,
 	PLAYER_INTERACT_ENTITY,
-	PLAYER_INTERACT_AT_ENTITY,
+	PLAYER_INTERACT_AT_ENTITY(MCVersion.MC1_8),
 	PLAYER_JOIN,
 	PLAYER_KICK,
 	PLAYER_LOGIN,
@@ -122,4 +125,18 @@ public enum Driver {
 	 * Extension events, used by events fired from the extension system.
 	 */
 	EXTENSION;
+
+	MCVersion version;
+
+	Driver() {
+		version = MCVersion.MC1_0;
+	}
+
+	Driver(MCVersion added) {
+		version = added;
+	}
+
+	public boolean existsInCurrent() {
+		return Static.getServer().getMinecraftVersion().ordinal() >= version.ordinal();
+	}
 }
