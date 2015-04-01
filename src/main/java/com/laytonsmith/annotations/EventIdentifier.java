@@ -16,7 +16,5 @@ public @interface EventIdentifier {
 
 	String className();
 
-	String priority();
-
 	Driver event();
 }

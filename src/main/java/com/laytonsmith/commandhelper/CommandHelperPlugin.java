@@ -67,6 +67,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -442,8 +443,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void registerEventsDynamic(Listener listener) {
 		for (final java.lang.reflect.Method method : listener.getClass().getMethods()) {
 			EventIdentifier identifier = method.getAnnotation(EventIdentifier.class);
+			EventHandler defaultHandler = method.getAnnotation(EventHandler.class);
+			EventPriority priority = EventPriority.LOWEST;
 			if (identifier == null || !identifier.event().existsInCurrent()) {
 				continue;
+			}
+			if (defaultHandler != null) {
+				priority = defaultHandler.priority();
 			}
 			Class<? extends Event> eventClass = null;
 			try {
@@ -473,9 +479,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 				}
 			};
 			if (this.getServer().getPluginManager().useTimings()) {
-				handler.register(new TimedRegisteredListener(listener, executor, EventPriority.valueOf(identifier.priority()), this, false));
+				handler.register(new TimedRegisteredListener(listener, executor, priority, this, false));
 			} else {
-				handler.register(new RegisteredListener(listener, executor, EventPriority.valueOf(identifier.priority()), this, false));
+				handler.register(new RegisteredListener(listener, executor, priority, this, false));
 			}
 		}
 	}

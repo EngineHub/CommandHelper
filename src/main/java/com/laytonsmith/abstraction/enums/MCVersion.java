@@ -1,11 +1,13 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.PureUtilities.Version;
+
 /**
  * Created by jb_aero on 3/17/2015.
  * <p/>
  * This may require unforeseen changes later to support fossil versions, but odds are support will not be requested.
  */
-public enum MCVersion {
+public enum MCVersion implements Version {
 	/**
 	 * Baseline, highly unlikely anyone is running something before this
 	 */
@@ -44,5 +46,53 @@ public enum MCVersion {
 
 	public MCVersion getMajorVersion() {
 		return majorVersion == null ? this : majorVersion;
+	}
+
+	@Override
+	public int getMajor() {
+		return Integer.valueOf(name().split("_")[0].substring(2));
+	}
+
+	@Override
+	public int getMinor() {
+		return Integer.valueOf(name().split("_")[1]);
+	}
+
+	@Override
+	public int getSupplemental() {
+		String[] parts = name().split("_");
+		return parts.length < 3 ? 0 : Integer.valueOf(parts[2]);
+	}
+
+	@Override
+	public boolean lt(Version other) {
+		if (other instanceof MCVersion) {
+			return this.ordinal() < ((MCVersion) other).ordinal();
+		}
+		return false;
+	}
+
+	@Override
+	public boolean lte(Version other) {
+		if (other instanceof MCVersion) {
+			return !(this.ordinal() < ((MCVersion) other).ordinal());
+		}
+		return false;
+	}
+
+	@Override
+	public boolean gt(Version other) {
+		if (other instanceof MCVersion) {
+			return this.ordinal() > ((MCVersion) other).ordinal();
+		}
+		return false;
+	}
+
+	@Override
+	public boolean gte(Version other) {
+		if (other instanceof MCVersion) {
+			return !(this.ordinal() < ((MCVersion) other).ordinal());
+		}
+		return false;
 	}
 }
