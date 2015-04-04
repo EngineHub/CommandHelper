@@ -461,7 +461,33 @@ public class CommandHelperPlugin extends JavaPlugin {
 						Target.UNKNOWN);
 				continue;
 			}
-			HandlerList handler = (HandlerList) ReflectionUtils.invokeMethod(eventClass, null, "getHandlerList");
+			HandlerList handler;
+			try {
+				handler = (HandlerList) ReflectionUtils.invokeMethod(eventClass, null, "getHandlerList");
+			} catch (ReflectionUtils.ReflectionException ref) {
+				Class eventSuperClass = eventClass.getSuperclass();
+				if (eventSuperClass != null) {
+					try {
+						handler = (HandlerList) ReflectionUtils.invokeMethod(eventSuperClass, null, "getHandlerList");
+					} catch (ReflectionUtils.ReflectionException refInner) {
+						CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
+										+ " because the handler for class " + identifier.className()
+										+ " could not be found. An attempt has already been made to find the"
+										+ " correct handler, but" + eventSuperClass.getName()
+										+ " did not have it either. Please report this on the bug tracker.",
+								Target.UNKNOWN);
+						continue;
+					}
+				} else {
+					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
+									+ " because the handler for class " + identifier.className()
+									+ " could not be found. An attempt has already been made to find the"
+									+ " correct handler, but no superclass could be found."
+									+ " Please report this on the bug tracker.",
+							Target.UNKNOWN);
+					continue;
+				}
+			}
 			final Class<? extends Event> finalEventClass = eventClass;
 			EventExecutor executor = new EventExecutor() {
 				@Override
