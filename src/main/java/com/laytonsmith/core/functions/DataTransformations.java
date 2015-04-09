@@ -25,6 +25,7 @@ import javax.xml.xpath.XPathExpressionException;
 import org.xml.sax.SAXException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
@@ -224,7 +225,7 @@ public class DataTransformations {
 			Exception cause = null;
 			try {
 				ret = yaml.load(data);
-			} catch(ScannerException ex){
+			} catch(ScannerException | ParserException ex){
 				cause = ex;
 			}
 			if(!(ret instanceof Map)){
