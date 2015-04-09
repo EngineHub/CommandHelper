@@ -6,7 +6,7 @@
   '.msa'
   '.ms'
 ]
-patterns: [
+'patterns': [
   {
     'captures':
       '1':
