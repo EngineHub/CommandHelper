@@ -1686,13 +1686,13 @@ public class World {
 			double dZ = subtract.getZ();
 
 			double yaw = java.lang.Math.atan(dX/dZ) * 180 / java.lang.Math.PI; // In degrees [-90:90].
-            if(dZ < 0) { // Bottom circle kwadrant.
+            if(dZ < 0) { // Bottom circle quadrant.
                 yaw += 180;
-            } else if(dX < 0) { // Top left half kwadrant.
+            } else if(dX < 0) { // Top left half quadrant.
                 yaw += 360;
             }
 
-			return new CDouble(yaw, t);
+			return new CDouble(360 - yaw, t);
 		}
 	}
 
