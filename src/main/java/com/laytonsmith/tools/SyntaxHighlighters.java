@@ -58,6 +58,9 @@ public class SyntaxHighlighters {
         if("nano".equals(type)){
             return template("/syntax-templates/nano/default.txt");
         }
+        if("atom".equals(type)){
+            return template("/syntax-templates/atom/default.cson");
+        }
 		if("sublime".equals(type)){
 			return template("/syntax-templates/sublime/default.xml");
 		}
