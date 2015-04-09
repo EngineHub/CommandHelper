@@ -792,6 +792,9 @@ public class InventoryManagement {
                 p = Static.GetPlayer(args[0], t);
                 is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
             }
+            if(is == null) {
+                throw new ConfigRuntimeException("ItemID can not be null.", ExceptionType.NullPointerException, t);
+            }
             int total = is.getAmount();
             int remaining = is.getAmount();
 			Static.AssertPlayerNonNull(p, t);
