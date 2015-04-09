@@ -58,6 +58,9 @@ public class SyntaxHighlighters {
         if("nano".equals(type)){
             return template("/syntax-templates/nano/default.txt");
         }
+        if("atom".equals(type)){
+            return template("/syntax-templates/atom/default.cson");
+        }
 		if("sublime".equals(type)){
 			return template("/syntax-templates/sublime/default.xml");
 		}
@@ -82,7 +85,9 @@ public class SyntaxHighlighters {
                 + "\t\t(Create directories and files as needed)\n"
                 + "\tnano - Use type\"nano\". Only the default theme is available.\n"
 				+ "\tSublime Text - Use type \"sublime\". Only the default theme is available.\n"
-				+ "\t\tTo install: Place in Sublime Text's ./SublimeText/data/Packages/User folder."
+				+ "\t\tTo install: Place in Sublime Text's ./SublimeText/data/Packages/User folder.\n"
+        + "\tAtom - Use type \"atom\". Only the default theme is available.\n"
+        + "\t\tTo install: Install package language-mscript from the Atom package manager."
                 + "\n\n"
                 + "Know how to write a syntax highlighter file for your favorite text editor? Let me know, and we\n"
                 + "can work to get it included in CommandHelper!";
