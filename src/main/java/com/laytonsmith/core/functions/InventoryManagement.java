@@ -792,9 +792,6 @@ public class InventoryManagement {
                 p = Static.GetPlayer(args[0], t);
                 is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
             }
-            if(is == null) {
-                throw new ConfigRuntimeException("ItemID can not be null.", ExceptionType.NullPointerException, t);
-            }
             int total = is.getAmount();
             int remaining = is.getAmount();
 			Static.AssertPlayerNonNull(p, t);
@@ -821,7 +818,13 @@ public class InventoryManagement {
         }
 
         private boolean match(MCItemStack is, MCItemStack iis){
-            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
+            if(is.getData() == null && iis.getData() == null) {
+                return is.getTypeId() == iis.getTypeId();
+            } else if(is.getData() == null || iis.getData() == null) {
+                return false;
+            } else {
+                return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
+            }
         }
 
 		@Override
