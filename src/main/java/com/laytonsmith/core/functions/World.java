@@ -1749,7 +1749,7 @@ public class World {
 
 			double distanceXZ = java.lang.Math.sqrt(dX * dX + dZ * dZ);
 
-			double pitch = java.lang.Math.atan(dY/distanceXZ) * 180 / java.lang.Math.PI;
+			double pitch = java.lang.Math.atan(dY/distanceXZ) * -180 / java.lang.Math.PI;
 
 			return new CDouble(pitch, t);
 		}
