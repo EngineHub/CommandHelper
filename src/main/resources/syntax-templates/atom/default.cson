@@ -1,4 +1,4 @@
-'scope': 'source.mscript'
+'scopeName': 'source.mscript'
 'name': 'CommandHelper - MScript'
 'fileTypes': [
   'ms'
