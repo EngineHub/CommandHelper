@@ -8,9 +8,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -144,21 +142,12 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				if (index instanceof CSlice) {
-					if (ca.inAssociativeMode()) {
-						if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
-							//Special exception, we want to clone the whole array
-							CArray na = CArray.GetAssociativeArray(t);
-							for (Construct key : ca.keySet()) {
-								try {
-									na.set(key, ca.get(key, t).clone(), t);
-								} catch (CloneNotSupportedException ex) {
-									na.set(key, ca.get(key, t), t);
-								}
-							}
-							return na;
-						}
-						throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, t);
+						
+					// Deep clone the array if the "index" is the initial one.
+					if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
+						return ca.deepClone(t);
 					}
+					
 					//It's a range
 					long start = ((CSlice) index).getStart();
 					long finish = ((CSlice) index).getFinish();
