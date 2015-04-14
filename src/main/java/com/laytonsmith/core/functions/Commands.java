@@ -255,7 +255,8 @@ public class Commands {
 					+ " It is meant to return an array of completions, but if not the tab_complete_command event"
 					+ " will be fired, and the completions of that event will be sent to the user. Both executor"
 					+ " and tabcompleter closures are passed the following information in this order:"
-					+ " alias used, name of the sender, array of arguments used, array of command info.";
+					+ " alias used, name of the sender, array of arguments used, array of command info."
+					+ " Note: the ivariable name @arguments is reserved, use @args instead for these closures.";
 		}
 
 		@Override
