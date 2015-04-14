@@ -570,6 +570,24 @@ public class CArray extends Construct implements ArrayAccess{
         clone.regenValue(new HashSet<CArray>());
         return clone;
     }
+	
+	public CArray deepClone(Target t) {
+		return deepClone(this, t);
+	}
+	
+	private static CArray deepClone(CArray array, Target t) {
+		CArray clone = new CArray(t, (int) array.size());
+		clone.associative_mode = array.associative_mode;
+		for (Iterator<Construct> it = array.keySet().iterator(); it.hasNext();) {
+			Construct key = it.next();
+			Construct value = array.get(key, t);
+			if(value instanceof CArray) {
+				value = deepClone((CArray) value, t);
+			}
+			clone.set(key, value, t);
+		}
+		return clone;
+	}
 
     private String normalizeConstruct(Construct c){
         if(c instanceof CArray){
