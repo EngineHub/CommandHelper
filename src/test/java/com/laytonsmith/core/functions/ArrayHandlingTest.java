@@ -10,7 +10,6 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
@@ -306,4 +305,20 @@ public class ArrayHandlingTest {
 	@Test public void testArrayUnique4() throws Exception {
 		assertEquals("{1, 1}", SRun("array_unique(array(1, '1', 1), true)", fakePlayer));
 	}
+	
+	@Test public void testArrayGetClone() throws Exception {
+		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]);", fakePlayer);
+		verify(fakePlayer).sendMessage("value");
+	}
+	
+	@Test public void testArrayGetCloneRefCouples() throws Exception {
+		Run("@a = array('Meow'); @b = array(@a, @a, array(@a)); @c = @b[]; msg((ref_equals(@b[0], @b[1]) && ref_equals(@b[0], @b[2][0])));", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+	
+	@Test public void testArrayGetCloneRecursiveArray() throws Exception {
+		Run("@a = array(); @b = array(); @a[0] = @b; @b[0] = @a; @c = @a[]; msg((ref_equals(@c[0], @c[0][0][0]) && ref_equals(@c, @c[0][0])));", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+	
 }
