@@ -572,17 +572,25 @@ public class CArray extends Construct implements ArrayAccess{
     }
 	
 	public CArray deepClone(Target t) {
-		return deepClone(this, t);
+		CArray clone = deepClone(this, t, new ArrayList<CArray[]>());
+		return clone;
 	}
 	
-	private static CArray deepClone(CArray array, Target t) {
+	private static CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
 		CArray clone = new CArray(t, (int) array.size());
 		clone.associative_mode = array.associative_mode;
 		for (Iterator<Construct> it = array.keySet().iterator(); it.hasNext();) {
 			Construct key = it.next();
 			Construct value = array.get(key, t);
 			if(value instanceof CArray) {
-				value = deepClone((CArray) value, t);
+				for(CArray[] refCouple : cloneRefs) {
+					if(refCouple[0] == array) {
+						value = refCouple[1];
+						break;
+					}
+					cloneRefs.add(new CArray[] {array, clone});
+					value = deepClone((CArray) value, t, cloneRefs);
+				}
 			}
 			clone.set(key, value, t);
 		}
