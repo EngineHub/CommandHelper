@@ -2248,12 +2248,21 @@ public class ArrayHandling {
 			return CHVersion.V3_3_1;
 		}
 
-//		@Override
-//		public ExampleScript[] examples() throws ConfigCompileException {
-//			return new ExampleScript[]{
-//				new ExampleScript("", "")
-//			};
-//		}
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates that the array is cloned.",
+						"@array = array(1, 2, 3, 4)\n" +
+						"@deepClone = array_deep_clone(@array)\n" +
+						"@deepClone[1] = 'newValue'\n" +
+						"msg(@array)\nmsg(@deepClone)"),
+				new ExampleScript("Demonstrated that arrays within the array are also cloned by a deep clone.",
+						"@array = array(array('value'))\n" +
+						"@deepClone = array_deep_clone(@array)\n" +
+						"@deepClone[0][0] = 'newValue'\n" +
+						"msg(@array)\nmsg(@deepClone)")
+			};
+		}
 
 	}
 	
@@ -2311,12 +2320,21 @@ public class ArrayHandling {
 			return CHVersion.V3_3_1;
 		}
 
-//		@Override
-//		public ExampleScript[] examples() throws ConfigCompileException {
-//			return new ExampleScript[]{
-//				new ExampleScript("", "")
-//			};
-//		}
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates that the array is cloned.",
+						"@array = array(1, 2, 3, 4)\n" +
+						"@shallowClone = array_shallow_clone(@array)\n" +
+						"@shallowClone[1] = 'newValue'\n" +
+						"msg(@array)\nmsg(@shallowClone)"),
+				new ExampleScript("Demonstrated that arrays within the array are not cloned by a shallow clone.",
+						"@array = array(array('value'))\n" +
+						"@shallowClone = array_shallow_clone(@array)\n" +
+						"@shallowClone[0][0] = 'newValue'\n" +
+						"msg(@array)\nmsg(@shallowClone)")
+			};
+		}
 
 	}
 }
