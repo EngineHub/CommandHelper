@@ -146,6 +146,8 @@ public class ArrayHandling {
 					// Deep clone the array if the "index" is the initial one.
 					if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
 						return ca.deepClone(t);
+					} else if(ca.inAssociativeMode()) {
+						throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, t);
 					}
 					
 					//It's a range
