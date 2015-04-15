@@ -307,12 +307,13 @@ public class ArrayHandlingTest {
 	}
 	
 	@Test public void testArrayGetClone() throws Exception {
-		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]);", fakePlayer);
+		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
 		verify(fakePlayer).sendMessage("value");
+		verify(fakePlayer).sendMessage("changedValue");
 	}
 	
 	@Test public void testArrayGetCloneRefCouples() throws Exception {
-		Run("@a = array('Meow'); @b = array(@a, @a, array(@a)); @c = @b[]; msg((ref_equals(@b[0], @b[1]) && ref_equals(@b[0], @b[2][0])));", fakePlayer);
+		Run("@a = array('Meow'); @b = array(@a, @a, array(@a)); @c = @b[]; msg((ref_equals(@c[0], @c[1]) && ref_equals(@c[0], @c[2][0])));", fakePlayer);
 		verify(fakePlayer).sendMessage("true");
 	}
 	
