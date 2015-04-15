@@ -306,9 +306,23 @@ public class ArrayHandlingTest {
 		assertEquals("{1, 1}", SRun("array_unique(array(1, '1', 1), true)", fakePlayer));
 	}
 	
-	@Test public void testArrayGetClone() throws Exception {
+	@Test public void testArrayGetClone() throws Exception { // This is expected to be a deep clone.
 		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
 		verify(fakePlayer).sendMessage("value");
+		verify(fakePlayer).sendMessage("changedValue");
+	}
+	
+	@Test public void testArrayDeepClone() throws Exception {
+		Run("@a = array(array(array('value'))); @b = array_deep_clone(@a); @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
+		verify(fakePlayer).sendMessage("value");
+		verify(fakePlayer).sendMessage("changedValue");
+	}
+	
+	@Test public void testArrayShallowClone() throws Exception {
+		Run("@a = array(array('value')); @b = array_shallow_clone(@a); @b[0][0] = 'changedValue'; msg(equals(@a[0][0], @b[0][0]));"
+				+ "msg(ref_equals(@a, @b)); msg(@a[0][0])", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+		verify(fakePlayer).sendMessage("false");
 		verify(fakePlayer).sendMessage("changedValue");
 	}
 	
