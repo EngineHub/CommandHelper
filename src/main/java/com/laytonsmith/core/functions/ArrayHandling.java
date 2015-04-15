@@ -2196,56 +2196,125 @@ public class ArrayHandling {
 
 	}
 
-//	@api
-//	public static class array_deep_clone extends AbstractFunction {
-//
-//		@Override
-//		public ExceptionType[] thrown() {
-//			return new ExceptionType[]{ExceptionType.CastException};
-//		}
-//
-//		@Override
-//		public boolean isRestricted() {
-//			return false;
-//		}
-//
-//		@Override
-//		public Boolean runAsync() {
-//			return null;
-//		}
-//
-//		@Override
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			throw new UnsupportedOperationException("TODO: Not supported yet.");
-//		}
-//
-//		@Override
-//		public String getName() {
-//			return "array_deep_clone";
-//		}
-//
-//		@Override
-//		public Integer[] numArgs() {
-//			return new Integer[]{1};
-//		}
-//
-//		@Override
-//		public String docs() {
-//			return "array {array} Performs a deep clone on an array (as opposed to a shallow clone). This is useful"
-//					+ " for multidimensional arrays. See the examples for more info.";
-//		}
-//
-//		@Override
-//		public Version since() {
-//			return CHVersion.V3_3_1;
-//		}
-//
+	@api
+	public static class array_deep_clone extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args.length != 1) {
+				throw new ConfigRuntimeException("Expecting exactly one argument", ExceptionType.InsufficientArgumentsException, t);
+			}
+			if(!(args[0] instanceof CArray)) {
+				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
+			}
+			return ((CArray) args[0]).deepClone(t);
+		}
+
+		@Override
+		public String getName() {
+			return "array_deep_clone";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array} Performs a deep clone on an array (as opposed to a shallow clone). This is useful"
+					+ " for multidimensional arrays. See the examples for more info.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
 //		@Override
 //		public ExampleScript[] examples() throws ConfigCompileException {
 //			return new ExampleScript[]{
 //				new ExampleScript("", "")
 //			};
 //		}
-//
-//	}
+
+	}
+	
+	@api
+	public static class array_shallow_clone extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args.length != 1) {
+				throw new ConfigRuntimeException("Expecting exactly one argument", ExceptionType.InsufficientArgumentsException, t);
+			}
+			if(!(args[0] instanceof CArray)) {
+				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
+			}
+			CArray array = (CArray) args[0];
+			CArray shallowClone = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t));
+			for(Construct key : array.keySet()) {
+				shallowClone.set(key, array.get(key, t), t);
+			}
+			return shallowClone;
+		}
+
+		@Override
+		public String getName() {
+			return "array_shallow_clone";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array} Performs a shallow clone on an array (as opposed to a deep clone). See the examples for more info.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+//		@Override
+//		public ExampleScript[] examples() throws ConfigCompileException {
+//			return new ExampleScript[]{
+//				new ExampleScript("", "")
+//			};
+//		}
+
+	}
 }

@@ -177,7 +177,7 @@ public class StringHandlingTest {
 		}
 
 		//A few advanced usages
-		assertEquals("004.000", SRun("sprintf('%07.3f', 4)", null));
+		assertEquals("004,000", SRun("sprintf('%07.3f', 4)", null));
 
 		long s = System.currentTimeMillis();
 		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("sprintf('%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
