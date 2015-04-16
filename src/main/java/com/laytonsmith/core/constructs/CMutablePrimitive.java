@@ -7,6 +7,7 @@ import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  *
@@ -121,7 +122,7 @@ public class CMutablePrimitive extends CArray implements Sizable {
 	}
 
 	@Override
-	protected String getString(Set<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t) {
 		return value.val();
 	}
 

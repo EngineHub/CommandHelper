@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.Stack;
 import java.util.TreeMap;
 
 /**
@@ -467,7 +468,7 @@ public class CArray extends Construct implements ArrayAccess{
     @Override
     public String val() {
 		if(valueDirty){
-			mutVal = getString(new HashSet<CArray>(), this.getTarget());
+			mutVal = getString(new Stack<CArray>(), this.getTarget());
 			valueDirty = false;
 		}
         return mutVal;
@@ -484,9 +485,10 @@ public class CArray extends Construct implements ArrayAccess{
 	 * to prevent recursion. Subclasses may override this method
 	 * if a more efficient or concise string can be generated.
 	 * @param arrays The values accounted for so far
+	 * @param t
 	 * @return
 	 */
-	protected String getString(Set<CArray> arrays, Target t){
+	protected String getString(Stack<CArray> arrays, Target t){
 		StringBuilder b = new StringBuilder();
 		b.append("{");
 		if (!inAssociativeMode()) {
@@ -500,6 +502,7 @@ public class CArray extends Construct implements ArrayAccess{
 					} else {
 						arrays.add(((CArray)value));
 						v = ((CArray)value).getString(arrays, t);
+						arrays.pop();
 					}
 				} else {
 					v = value.val();

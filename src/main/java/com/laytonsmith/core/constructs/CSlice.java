@@ -10,6 +10,7 @@ import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  *
@@ -95,7 +96,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	protected String getString(Set<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t) {
 		//We don't need to consider arrays, because we can't
 		//get stuck in an infinite loop.
 		return val();
