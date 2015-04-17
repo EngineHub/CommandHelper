@@ -1488,6 +1488,8 @@ public class StringHandling {
 		}
 
 	}
+	// TODO: Add a sprintf_local function, which will allow for the locale to be changed, and change sprintf to simply call sprintf_locale with
+	// the default locale.
 
 	@api
 	public static class string_get_bytes extends AbstractFunction {

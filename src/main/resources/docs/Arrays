@@ -30,7 +30,7 @@ msg(@array) #Sends {2, 2}
 msg(@array2) #Sends the original values: {1, 2}
 %%
 
-===array_set using assign() (or <nowiki>==</nowiki>)===
+===array_set using assign() (or <nowiki>=</nowiki>)===
 As of 3.3.0, it is possible to set the value of an array directly, with {{function|assign}}.
 
 %%CODE|

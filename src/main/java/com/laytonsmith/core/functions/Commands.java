@@ -137,7 +137,7 @@ public class Commands {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
-				throw new ConfigRuntimeException("Command not found did you forget to register it?",
+				throw new ConfigRuntimeException("Command not found, did you forget to register it?",
 						ExceptionType.NotFoundException, t);
 			}
 			return CBoolean.get(map.unregister(cmd));
