@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.Stack;
 import java.util.TreeMap;
 
 /**
@@ -467,7 +468,7 @@ public class CArray extends Construct implements ArrayAccess{
     @Override
     public String val() {
 		if(valueDirty){
-			mutVal = getString(new HashSet<CArray>(), this.getTarget());
+			mutVal = getString(new Stack<CArray>(), this.getTarget());
 			valueDirty = false;
 		}
         return mutVal;
@@ -484,9 +485,10 @@ public class CArray extends Construct implements ArrayAccess{
 	 * to prevent recursion. Subclasses may override this method
 	 * if a more efficient or concise string can be generated.
 	 * @param arrays The values accounted for so far
+	 * @param t
 	 * @return
 	 */
-	protected String getString(Set<CArray> arrays, Target t){
+	protected String getString(Stack<CArray> arrays, Target t){
 		StringBuilder b = new StringBuilder();
 		b.append("{");
 		if (!inAssociativeMode()) {
@@ -500,6 +502,7 @@ public class CArray extends Construct implements ArrayAccess{
 					} else {
 						arrays.add(((CArray)value));
 						v = ((CArray)value).getString(arrays, t);
+						arrays.pop();
 					}
 				} else {
 					v = value.val();
@@ -570,6 +573,36 @@ public class CArray extends Construct implements ArrayAccess{
         clone.regenValue(new HashSet<CArray>());
         return clone;
     }
+	
+	public CArray deepClone(Target t) {
+		CArray clone = deepClone(this, t, new ArrayList<CArray[]>());
+		return clone;
+	}
+	
+	private static CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
+		
+		// Return the clone reference if this array has been cloned before (both clones will have the same reference).
+		for(CArray[] refCouple : cloneRefs) {
+			if(refCouple[0] == array) {
+				return refCouple[1];
+			}
+		}
+		
+		// Create the clone to put array in and add it to the cloneRefs list.
+		CArray clone = new CArray(t, (int) array.size());
+		clone.associative_mode = array.associative_mode;
+		cloneRefs.add(new CArray[] {array, clone});
+		
+		// Iterate over the array, recursively calling this method to perform a deep clone.
+		for (Construct key : array.keySet()) {
+			Construct value = array.get(key, t);
+			if(value instanceof CArray) {
+				value = deepClone((CArray) value, t, cloneRefs);
+			}
+			clone.set(key, value, t);
+		}
+		return clone;
+	}
 
     private String normalizeConstruct(Construct c){
         if(c instanceof CArray){

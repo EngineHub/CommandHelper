@@ -8,9 +8,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -144,21 +142,14 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				if (index instanceof CSlice) {
-					if (ca.inAssociativeMode()) {
-						if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
-							//Special exception, we want to clone the whole array
-							CArray na = CArray.GetAssociativeArray(t);
-							for (Construct key : ca.keySet()) {
-								try {
-									na.set(key, ca.get(key, t).clone(), t);
-								} catch (CloneNotSupportedException ex) {
-									na.set(key, ca.get(key, t), t);
-								}
-							}
-							return na;
-						}
+						
+					// Deep clone the array if the "index" is the initial one.
+					if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
+						return ca.deepClone(t);
+					} else if(ca.inAssociativeMode()) {
 						throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, t);
 					}
+					
 					//It's a range
 					long start = ((CSlice) index).getStart();
 					long finish = ((CSlice) index).getFinish();
@@ -2207,56 +2198,143 @@ public class ArrayHandling {
 
 	}
 
-//	@api
-//	public static class array_deep_clone extends AbstractFunction {
-//
-//		@Override
-//		public ExceptionType[] thrown() {
-//			return new ExceptionType[]{ExceptionType.CastException};
-//		}
-//
-//		@Override
-//		public boolean isRestricted() {
-//			return false;
-//		}
-//
-//		@Override
-//		public Boolean runAsync() {
-//			return null;
-//		}
-//
-//		@Override
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			throw new UnsupportedOperationException("TODO: Not supported yet.");
-//		}
-//
-//		@Override
-//		public String getName() {
-//			return "array_deep_clone";
-//		}
-//
-//		@Override
-//		public Integer[] numArgs() {
-//			return new Integer[]{1};
-//		}
-//
-//		@Override
-//		public String docs() {
-//			return "array {array} Performs a deep clone on an array (as opposed to a shallow clone). This is useful"
-//					+ " for multidimensional arrays. See the examples for more info.";
-//		}
-//
-//		@Override
-//		public Version since() {
-//			return CHVersion.V3_3_1;
-//		}
-//
-//		@Override
-//		public ExampleScript[] examples() throws ConfigCompileException {
-//			return new ExampleScript[]{
-//				new ExampleScript("", "")
-//			};
-//		}
-//
-//	}
+	@api
+	public static class array_deep_clone extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args.length != 1) {
+				throw new ConfigRuntimeException("Expecting exactly one argument", ExceptionType.InsufficientArgumentsException, t);
+			}
+			if(!(args[0] instanceof CArray)) {
+				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
+			}
+			return ((CArray) args[0]).deepClone(t);
+		}
+
+		@Override
+		public String getName() {
+			return "array_deep_clone";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array} Performs a deep clone on an array (as opposed to a shallow clone). This is useful"
+					+ " for multidimensional arrays. See the examples for more info.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates that the array is cloned.",
+						"@array = array(1, 2, 3, 4)\n" +
+						"@deepClone = array_deep_clone(@array)\n" +
+						"@deepClone[1] = 'newValue'\n" +
+						"msg(@array)\nmsg(@deepClone)"),
+				new ExampleScript("Demonstrated that arrays within the array are also cloned by a deep clone.",
+						"@array = array(array('value'))\n" +
+						"@deepClone = array_deep_clone(@array)\n" +
+						"@deepClone[0][0] = 'newValue'\n" +
+						"msg(@array)\nmsg(@deepClone)")
+			};
+		}
+
+	}
+	
+	@api
+	public static class array_shallow_clone extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args.length != 1) {
+				throw new ConfigRuntimeException("Expecting exactly one argument", ExceptionType.InsufficientArgumentsException, t);
+			}
+			if(!(args[0] instanceof CArray)) {
+				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
+			}
+			CArray array = (CArray) args[0];
+			CArray shallowClone = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t));
+			for(Construct key : array.keySet()) {
+				shallowClone.set(key, array.get(key, t), t);
+			}
+			return shallowClone;
+		}
+
+		@Override
+		public String getName() {
+			return "array_shallow_clone";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array} Performs a shallow clone on an array (as opposed to a deep clone). See the examples for more info.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates that the array is cloned.",
+						"@array = array(1, 2, 3, 4)\n" +
+						"@shallowClone = array_shallow_clone(@array)\n" +
+						"@shallowClone[1] = 'newValue'\n" +
+						"msg(@array)\nmsg(@shallowClone)"),
+				new ExampleScript("Demonstrated that arrays within the array are not cloned by a shallow clone.",
+						"@array = array(array('value'))\n" +
+						"@shallowClone = array_shallow_clone(@array)\n" +
+						"@shallowClone[0][0] = 'newValue'\n" +
+						"msg(@array)\nmsg(@shallowClone)")
+			};
+		}
+
+	}
 }

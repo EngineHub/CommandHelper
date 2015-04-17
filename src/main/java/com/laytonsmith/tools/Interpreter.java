@@ -208,6 +208,7 @@ public final class Interpreter {
 
 		} else {
 			final ConsoleReader reader = new ConsoleReader();
+			reader.setExpandEvents(false);
 			//Get a list of all the function names. This will be provided to the auto completer.
 			Set<FunctionBase> functions = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA);
 			List<String> names = new ArrayList<>();

@@ -10,7 +10,6 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
@@ -306,4 +305,35 @@ public class ArrayHandlingTest {
 	@Test public void testArrayUnique4() throws Exception {
 		assertEquals("{1, 1}", SRun("array_unique(array(1, '1', 1), true)", fakePlayer));
 	}
+	
+	@Test public void testArrayGetClone() throws Exception { // This is expected to be a deep clone.
+		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
+		verify(fakePlayer).sendMessage("value");
+		verify(fakePlayer).sendMessage("changedValue");
+	}
+	
+	@Test public void testArrayDeepClone() throws Exception {
+		Run("@a = array(array(array('value'))); @b = array_deep_clone(@a); @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
+		verify(fakePlayer).sendMessage("value");
+		verify(fakePlayer).sendMessage("changedValue");
+	}
+	
+	@Test public void testArrayShallowClone() throws Exception {
+		Run("@a = array(array('value')); @b = array_shallow_clone(@a); @b[0][0] = 'changedValue'; msg(equals(@a[0][0], @b[0][0]));"
+				+ "msg(ref_equals(@a, @b)); msg(@a[0][0])", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+		verify(fakePlayer).sendMessage("false");
+		verify(fakePlayer).sendMessage("changedValue");
+	}
+	
+	@Test public void testArrayGetCloneRefCouples() throws Exception {
+		Run("@a = array('Meow'); @b = array(@a, @a, array(@a)); @c = @b[]; msg((ref_equals(@c[0], @c[1]) && ref_equals(@c[0], @c[2][0])));", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+	
+	@Test public void testArrayGetCloneRecursiveArray() throws Exception {
+		Run("@a = array(); @b = array(); @a[0] = @b; @b[0] = @a; @c = @a[]; msg((ref_equals(@c[0], @c[0][0][0]) && ref_equals(@c, @c[0][0])));", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+	
 }

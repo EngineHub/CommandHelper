@@ -435,5 +435,17 @@ public class ArrayTest {
 				+ "msg(@a[0])", fakePlayer);
 		verify(fakePlayer).sendMessage("0");
 	}
+	
+	@Test
+	public void testArrayRecursionToString() throws Exception {
+		SRun("@a = array(); @b = array(@a); @a[] = @b; msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{{{*recursion*}}}");
+	}
+	
+	@Test
+	public void testArraySiblingsToString() throws Exception {
+		SRun("@a = array(); @b = array(); @a[] = @b; @a[] = @b; msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{{}, {}}");
+	}
 
 }
