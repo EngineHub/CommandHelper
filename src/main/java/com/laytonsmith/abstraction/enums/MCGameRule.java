@@ -11,13 +11,19 @@ import com.laytonsmith.annotations.MEnum;
 public enum MCGameRule {
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
 	DODAYLIGHTCYCLE("doDaylightCycle"),
+	DOENTITYDROPS("doEntityDrops"),
 	DOFIRETICK("doFireTick"),
 	DOMOBLOOT("doMobLoot"),
 	DOMOBSPAWNING("doMobSpawning"),
 	DOTILEDROPS("doTileDrops"),
 	KEEPINVENTORY("keepInventory"),
+	LOGADMINCOMMANDS("logAdminCommands"),
 	MOBGRIEFING("mobGriefing"),
-	NATURALREGENERATION("naturalRegeneration");
+	NATURALREGENERATION("naturalRegeneration"),
+	RANDOMTICKSPEED("randomTickSpeed"),
+	REDUCEDDEBUGINFO("reducedDebugInfo"),
+	SENDCOMMANDFEEDBACK("sendCommandFeedback"),
+	SHOWDEATHMESSAGES("showDeathMessages");
 
 	private final String gameRule;
 
