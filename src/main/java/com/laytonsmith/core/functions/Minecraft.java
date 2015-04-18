@@ -54,10 +54,13 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -807,7 +810,11 @@ public class Minecraft {
 					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li>"
 					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li>"
 					+ "<li>11 - Server port; Get the game port that the server runs on</li>"
-					+ "<li>12 - Server IP; Get the IP that the server runs on</li></ul>";
+					+ "<li>12 - Server IP; Get the IP that the server runs on</li>"
+					+ "<li>13 - Uptime; The number of milliseconds the server has been running</li>"
+					+ "<li>14 - gcmax; The maximum amount of memory that the Java virtual machine will attempt to use</li>"
+					+ "<li>15 - gctotal; The total amount of memory in the Java virtual machine</li>"
+					+ "<li>16 - gcfree; The amount of free memory in the Java Virtual Machine</li></ul>";
 		}
 
 		@Override
@@ -921,6 +928,23 @@ public class Minecraft {
 			if (index == 12 || index == -1) {
 				//Server Ip
 				retVals.add(new CString(server.getIp(), t));
+			}
+			if (index == 13 || index == -1) {
+				//Uptime
+				double uptime = (double)(new GregorianCalendar().getTimeInMillis() - ManagementFactory.getRuntimeMXBean().getStartTime());
+				retVals.add(new CDouble(uptime, t));
+			}
+			if (index == 14 || index == -1) {
+				//gcmax
+				retVals.add(new CInt((Runtime.getRuntime().maxMemory() / 1024 / 1024), t));
+			}
+			if (index == 15 || index == -1) {
+				//gctotal
+				retVals.add(new CInt((Runtime.getRuntime().totalMemory() / 1024 / 1024), t));
+			}
+			if (index == 16 || index == -1) {
+				//gcfree
+				retVals.add(new CInt((Runtime.getRuntime().freeMemory() / 1024 / 1024), t));
 			}
 
 			if (retVals.size() == 1) {
