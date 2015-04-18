@@ -812,9 +812,9 @@ public class Minecraft {
 					+ "<li>11 - Server port; Get the game port that the server runs on</li>"
 					+ "<li>12 - Server IP; Get the IP that the server runs on</li>"
 					+ "<li>13 - Uptime; The number of milliseconds the server has been running</li>"
-					+ "<li>14 - gcmax; The maximum amount of memory that the Java virtual machine will attempt to use</li>"
-					+ "<li>15 - gctotal; The total amount of memory in the Java virtual machine</li>"
-					+ "<li>16 - gcfree; The amount of free memory in the Java Virtual Machine</li></ul>";
+					+ "<li>14 - gcmax; The maximum amount of memory that the Java virtual machine will attempt to use, in bytes</li>"
+					+ "<li>15 - gctotal; The total amount of memory in the Java virtual machine, in bytes</li>"
+					+ "<li>16 - gcfree; The amount of free memory in the Java Virtual Machine, in bytes</li></ul>";
 		}
 
 		@Override
@@ -936,15 +936,15 @@ public class Minecraft {
 			}
 			if (index == 14 || index == -1) {
 				//gcmax
-				retVals.add(new CInt((Runtime.getRuntime().maxMemory() / 1024 / 1024), t));
+				retVals.add(new CInt((Runtime.getRuntime().maxMemory()), t));
 			}
 			if (index == 15 || index == -1) {
 				//gctotal
-				retVals.add(new CInt((Runtime.getRuntime().totalMemory() / 1024 / 1024), t));
+				retVals.add(new CInt((Runtime.getRuntime().totalMemory()), t));
 			}
 			if (index == 16 || index == -1) {
 				//gcfree
-				retVals.add(new CInt((Runtime.getRuntime().freeMemory() / 1024 / 1024), t));
+				retVals.add(new CInt((Runtime.getRuntime().freeMemory()), t));
 			}
 
 			if (retVals.size() == 1) {
