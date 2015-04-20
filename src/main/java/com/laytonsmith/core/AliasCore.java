@@ -75,6 +75,7 @@ public class AliasCore {
 	private Set<String> echoCommand = new HashSet<String>();
 	public List<File> autoIncludes;
 	public static CommandHelperPlugin parent;
+	private GlobalEnv globalEnv = null;
 
 	/**
 	 * This constructor accepts the configuration settings for the plugin, and
@@ -110,22 +111,22 @@ public class AliasCore {
 	 * @return
 	 */
 	public boolean alias(String command, final MCCommandSender player, List<Script> playerCommands) {
-
-		GlobalEnv gEnv;
-		try {
-			gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
-					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
-					new TaskManager());
-		} catch (IOException ex) {
-			Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-			return false;
-		} catch (Profiles.InvalidProfileException ex) {
-			throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), Target.UNKNOWN);
+		if(this.globalEnv == null) {
+			try {
+				this.globalEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
+						MethodScriptFileLocations.getDefault().getConfigDirectory(),
+						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
+						new TaskManager());
+			} catch (IOException ex) {
+				Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+				return false;
+			} catch (Profiles.InvalidProfileException ex) {
+				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), Target.UNKNOWN);
+			}
 		}
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(player);
-		Environment env = Environment.createEnvironment(gEnv, cEnv);
+		Environment env = Environment.createEnvironment(this.globalEnv, cEnv);
 
 		if (player instanceof MCBlockCommandSender) {
 			cEnv.SetBlockCommandSender((MCBlockCommandSender) player);
@@ -833,4 +834,12 @@ public class AliasCore {
 			}
 		}
 	}
+	
+//	/**
+//	 * getGlobalEnv method.
+//	 * @return GlobalEnv - The global environment of this AliasCore.
+//	 */
+//	public GlobalEnv getGlobalEnv() {
+//		return this.globalEnv;
+//	}
 }
