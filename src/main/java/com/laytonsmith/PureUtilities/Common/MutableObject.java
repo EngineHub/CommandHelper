@@ -37,7 +37,7 @@ public final class MutableObject<T> {
 	 * @return
 	 */
 	public T getObject(){
-		return obj;
+		return this.obj;
 	}
 
 	@Override
