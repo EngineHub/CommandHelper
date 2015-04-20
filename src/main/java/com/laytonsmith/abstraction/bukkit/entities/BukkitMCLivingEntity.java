@@ -263,7 +263,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		List<MCEffect> effects = new ArrayList<MCEffect>();
 		for(PotionEffect pe : le.getActivePotionEffects()){
 			MCEffect e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), 
-					(int)(Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient());
+					(int)(Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient(), pe.hasParticles());
 			effects.add(e);
 		}
 		return effects;
