@@ -216,31 +216,22 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 				le.addPotionEffect(pe, true);
 			}
 		} catch(NullPointerException e){
-			//
 			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE,
 					"Bukkit appears to have derped. This is a problem with Bukkit, not CommandHelper. The effect should have still been applied.", e);
 		}
-//        EntityPlayer ep = ((CraftPlayer) p).getHandle();
-//        MobEffect me = new MobEffect(potionID, seconds * 20, strength);
-//        //ep.addEffect(me);
-//        //ep.b(me);
-//
-//        Class epc = EntityLiving.class;
-//        try {
-//            Method meth = epc.getDeclaredMethod("b", net.minecraft.server.MobEffect.class);
-//            //ep.d(new MobEffect(effect, seconds * 20, strength));
-//            //Call it reflectively, because it's deobfuscated in newer versions of CB
-//            meth.invoke(ep, me);
-//        } catch (Exception e) {
-//            try {
-//                //Look for the addEffect version
-//                Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
-//                //ep.addEffect(me);
-//                meth.invoke(ep, me);
-//            } catch (Exception ex) {
-//                Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
+	}
+
+	public void addEffect(int potionID, int strength, int seconds, boolean ambient, boolean particles, Target t) {
+		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000),
+				strength, ambient, particles);
+		try{
+			if(le != null){
+				le.addPotionEffect(pe, true);
+			}
+		} catch(NullPointerException e){
+			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE,
+					"Bukkit appears to have derped. This is a problem with Bukkit, not CommandHelper. The effect should have still been applied.", e);
+		}
 	}
 	
 	@Override
