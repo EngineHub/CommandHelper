@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+<<<<<<< HEAD
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCColor;
@@ -22,20 +23,18 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+=======
+import com.laytonsmith.abstraction.*;
+>>>>>>> Expose item_flags meta value
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
+import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -349,7 +348,7 @@ public class ObjectGenerator {
     }
 
 	public Construct itemMeta(MCItemStack is, Target t) {
-		Construct ret, display, lore, color, title, author, pages, owner, stored, firework;
+		Construct ret, display, lore, color, title, author, pages, owner, stored, firework, item_flags;
 		CArray enchants, effects;
 		if (!is.hasItemMeta()) {
 			ret = CNull.NULL;
@@ -399,10 +398,12 @@ public class ObjectGenerator {
 			ma.set("firework", firework, t);
 
 			enchants = enchants(meta.getEnchants(), t);
+			item_flags = item_flags(meta.getItemFlags(), t);
 			ma.set("display", display, t);
 			ma.set("lore", lore, t);
 			ma.set("enchants", enchants, t);
 			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
+			ma.set("item_flags", item_flags, t);
 			if (meta instanceof MCLeatherArmorMeta) {
 				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
@@ -574,6 +575,21 @@ public class ObjectGenerator {
 				}
 				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
 					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
+				}
+				if (ma.containsKey("item_flags")) {
+					Construct ia = ma.get("item_flags", t);
+					if (ia instanceof CNull) {
+						List<MCItemFlag> existingFlags = meta.getItemFlags();
+						meta.removeItemFlags(existingFlags.toArray(new MCItemFlag[existingFlags.size()]));
+					} else if (ia instanceof CArray) {
+						List<MCItemFlag> existingFlags = meta.getItemFlags();
+						meta.removeItemFlags(existingFlags.toArray(new MCItemFlag[existingFlags.size()]));
+						CArray la = (CArray) ia;
+						List<MCItemFlag> itemFlags = item_flags(la, t);
+						meta.addItemFlags(itemFlags.toArray(new MCItemFlag[itemFlags.size()]));
+					} else {
+						throw new Exceptions.FormatException("Item flags was expected to be an array.", t);
+					}
 				}
 				if (meta instanceof MCLeatherArmorMeta) {
 					if (ma.containsKey("color")) {
@@ -1078,6 +1094,32 @@ public class ObjectGenerator {
 		} else {
 			throw new ConfigRuntimeException("Expected array but recieved " + c, ExceptionType.CastException, t);
 		}
+	}
+
+	public CArray item_flags(List<MCItemFlag> flagList, Target t) {
+		CArray ia = new CArray(t);
+		for (MCItemFlag flag : flagList) {
+			ia.push(new CString(flag.name(), t));
+		}
+		return ia;
+	}
+
+	public List<MCItemFlag> item_flags(CArray ea, Target t) {
+		List<MCItemFlag> ret = new ArrayList<MCItemFlag>();
+		for (Construct flag : ea.asList()) {
+			if (flag instanceof CString) {
+				MCItemFlag itemFlag;
+				try {
+					itemFlag = MCItemFlag.valueOf(flag.val().toUpperCase());
+				} catch (IllegalArgumentException iae) {
+					throw new Exceptions.FormatException("Item flag '" + flag.val() + "' is invalid.", t);
+				}
+				ret.add(itemFlag);
+			} else {
+				throw new Exceptions.FormatException("Item flag not found.", t);
+			}
+		}
+		return ret;
 	}
 
 	/**

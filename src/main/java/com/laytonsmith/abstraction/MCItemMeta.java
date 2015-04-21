@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCItemFlag;
+
 import java.util.List;
 import java.util.Map;
 
@@ -91,4 +93,33 @@ public interface MCItemMeta extends AbstractionObject {
     int getRepairCost();
     
     void setRepairCost(int cost);
+
+    /**
+     * Set itemflags which should be ignored when rendering a ItemStack in the Client. This Method does silently ignore double set itemFlags.
+     *
+     * @param itemFlags The hideflags which shouldn't be rendered
+     */
+    void addItemFlags(MCItemFlag... itemFlags);
+
+    /**
+     * Gets the itemflags that are set
+     *
+     * @return a list of itemflags that are set
+     */
+    List<MCItemFlag> getItemFlags();
+
+    /**
+     * Check if the specified flag is present on this item.
+     *
+     * @param itemFlag The flag to check
+     * @return if it is present
+     */
+    boolean hasItemFlag(MCItemFlag itemFlag);
+
+    /**
+     * Remove specific set of itemFlags. This tells the Client it should render it again. This Method does silently ignore double removed itemFlags.
+     *
+     * @param itemFlags Hideflags which should be removed
+     */
+    void removeItemFlags(MCItemFlag... itemFlags);
 }
