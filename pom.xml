@@ -850,6 +850,27 @@
 					</reportPlugins>
 				</configuration>
 			</plugin>
+
+			<!-- Code formatting -->
+			<plugin>
+				<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+				<artifactId>maven-java-formatter-plugin</artifactId>
+				<version>0.4</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>format</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<lineEnding>LF</lineEnding>
+					<overrideConfigCompilerVersion>true</overrideConfigCompilerVersion>
+					<compilerSource>1.6</compilerSource>
+					<compilerCompliance>1.6</compilerCompliance>
+					<compilerTargetPlatform>1.6</compilerTargetPlatform>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
