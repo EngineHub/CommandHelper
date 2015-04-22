@@ -13,9 +13,12 @@ public class MVector3D {
 	private double z;
 
 	/**
-	 * Privatized; use MVector3D.ZERO instead.
+	 * Zero constructor.
+	 *
+	 * @deprecated use MVector3D.ZERO instead
 	 */
-	private MVector3D() {
+	@Deprecated
+	public MVector3D() {
 		this(0, 0, 0);
 	}
 
