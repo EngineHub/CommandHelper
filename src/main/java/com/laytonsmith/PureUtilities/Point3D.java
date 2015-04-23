@@ -78,6 +78,16 @@ public class Point3D {
     }
 
 	/**
+	 * Returns a point of this point added to another point.
+	 *
+	 * @param other the other vector
+	 * @return the translated point
+	 */
+	public Point3D translate(Point3D other) {
+		return new Point3D(x + other.x, y + other.y, z + other.z);
+	}
+
+	/**
 	 * Gets the distance squared between this point and another.
 	 *
 	 * @param other the other point
