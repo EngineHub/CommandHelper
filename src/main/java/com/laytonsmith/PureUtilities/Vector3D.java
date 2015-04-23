@@ -1,16 +1,20 @@
 package com.laytonsmith.PureUtilities;
 
 /**
- * Represents a point in space and defined as having a distance and a direction.
+ * Represents both a point in 3D space and a vector representing a direction and magnitude.
  * 
  */
-public class Vector3D {
+public class Vector3D extends Point3D {
 
-	public static Vector3D ZERO = new Vector3D();
-
-	private double x;
-	private double y;
-	private double z;
+	/**
+	 * Copy constructor.
+	 *
+	 * @param other the other point
+	 */
+	public Vector3D(Point3D other)
+	{
+		super(other);
+	}
 
 	/**
 	 * Zero constructor.
@@ -19,65 +23,97 @@ public class Vector3D {
 	 */
 	@Deprecated
 	public Vector3D() {
-		this(0, 0, 0);
+		super();
 	}
 
+	/**
+	 * Initializes the X and Y values. Z is initialized to 0.
+	 *
+	 */
 	public Vector3D(double x, double y) {
-		this(x, y, 0);
+		super(x, y);
 	}
 
+	/**
+	 * Initializes the X, Y, and Z values.
+	 *
+	 * @param x the x value
+	 * @param y the y value
+	 * @param z the z value
+	 */
 	public Vector3D(double x, double y, double z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		super(x, y, z);
 	}
 
-	public double X() {
-		return x;
+	/**
+	 * Returns a new vector of this vector added to another.
+	 * While functionally similar to <code>translate()</code>, this method will
+	 * return a Vector3D whereas <code>translate()</code> returns a Point3D.
+	 *
+	 * @param other the other vector
+	 * @return a new vector
+	 */
+	public Vector3D add(Vector3D other) {
+		return new Vector3D(x + other.x, y + other.y, z + other.z);
 	}
 
-	public double Y() {
-		return y;
+	/**
+	 * Returns a new vector of this vector multiplied by another.
+	 *
+	 * @param other the other vector
+	 * @return a new vector
+	 */
+	public Vector3D subtract(Vector3D other) {
+		return new Vector3D(x - other.x, y - other.y, z - other.z);
 	}
 
-	public double Z() {
-		return z;
+	/**
+	 * Returns a new vector of this vector multiplied by another.
+	 *
+	 * @param other the other vector
+	 * @return a new vector
+	 */
+	public Vector3D multiply(Vector3D other) {
+		return new Vector3D(x * other.x, y * other.y, z * other.z);
 	}
 
-	public Vector3D add(Vector3D vec) {
-		this.x += vec.x;
-		this.y += vec.y;
-		this.z += vec.z;
-		return this;
-	}
-
-	public Vector3D multiply(Vector3D vec) {
-		this.x *= vec.x;
-		this.y *= vec.y;
-		this.z *= vec.z;
-		return this;
-	}
-
+	/**
+	 * Returns a new vector of this vector multiplied by a value.
+	 * @param m the value to multiply by
+	 * @return a new vector
+	 */
 	public Vector3D multiply(double m) {
-		this.x *= m;
-		this.y *= m;
-		this.z *= m;
-		return this;
+		return new Vector3D(x * m, y * m, z * m);
 	}
 
+	/**
+	 * Returns a new vector of this vector multiplied by another.
+	 *
+	 * @param other the other vector
+	 * @return a new vector
+	 */
+	public Vector3D divide(Vector3D other) {
+		return new Vector3D(x / other.x, y / other.y, z / other.z);
+	}
+
+	/**
+	 * Returns a new vector of this vector multiplied by a value.
+	 * @param m the value to multiply by
+	 * @return a new vector
+	 */
+	public Vector3D divide(double m) {
+		return new Vector3D(x / m, y / m, z / m);
+	}
+
+	/**
+	 * Returns a new vector that is a normalized version of this vector.
+	 * The new vector will have the same direction, but a magnitude of one.
+	 *
+	 * @return a new vector
+	 */
 	public Vector3D normalize() {
 		double length = length();
-		this.x /= length;
-		this.y /= length;
-		this.z /= length;
-		return this;
-	}
-
-	public Vector3D subtract(Vector3D vec) {
-		this.x -= vec.x;
-		this.y -= vec.y;
-		this.z -= vec.z;
-		return this;
+		return new Vector3D(x /= length, y /= length, z /= length);
 	}
 
 	/**
@@ -105,23 +141,19 @@ public class Vector3D {
 	}
 
 	/**
-	 * Gets the distance between this vector and another vector
+	 * Gets the magnitude (length) squared of this vector.
 	 *
-	 * @param vec the other vector
-	 * @return the distance between the two vectors
+	 * @return the magnitude squared
 	 */
-	public double distance(Vector3D vec) {
-		double xx = x - vec.x;
-		double yy = y - vec.y;
-		double zz = z - vec.z;
-
-		return Math.sqrt(xx * xx + yy + yy + zz + zz);
-	}
-
 	public double lengthSquared() {
 		return x * x + y * y + z * z;
 	}
 
+	/**
+	 * Gets the magnitude (length) of this vector.
+	 *
+	 * @return the magnitude
+	 */
 	public double length() {
 		return Math.sqrt(lengthSquared());
 	}
