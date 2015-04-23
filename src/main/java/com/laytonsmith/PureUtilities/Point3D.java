@@ -16,6 +16,18 @@ public class Point3D {
     protected double z;
 
 	/**
+	 * Copy constructor.
+	 *
+	 * @param other the other point
+	 */
+	public Point3D(Point3D other)
+	{
+		this.x = other.x;
+		this.y = other.y;
+		this.z = other.z;
+	}
+
+	/**
 	 * Initializes the X, Y, and Z values to 0.
 	 * Since Point3Ds are immutable, it is recommended to use Point3D.ZERO instead.
 	 *
@@ -30,6 +42,7 @@ public class Point3D {
 
 	/**
 	 * Initializes the X and Y values. Z is initialized to 0.
+	 *
 	 */
 	public Point3D(double x, double y) {
 		this.x = x;
