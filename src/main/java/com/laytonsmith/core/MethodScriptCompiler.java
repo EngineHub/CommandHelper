@@ -740,6 +740,8 @@ public final class MethodScriptCompiler {
 					t.type = TType.VARIABLE;
 				} else if (t.val().matches("\\@[a-zA-Z0-9_]+")) {
 					t.type = TType.IVARIABLE;
+				} else if (t.val().matches("\\@.*[^a-zA-Z0-9_]+.*") || "@".equals(t.val())){
+					throw new ConfigCompileException("IVariables must match the regex: @[a-zA-Z0-9_]+", target);
 				} else if (t.val().equals("$")) {
 					t.type = TType.FINAL_VAR;
 				} else if(keywords.contains(t.val())){
