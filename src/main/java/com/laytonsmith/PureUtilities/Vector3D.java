@@ -6,6 +6,8 @@ package com.laytonsmith.PureUtilities;
  */
 public class Vector3D extends Point3D {
 
+	public static Vector3D ZERO = new Vector3D();
+
 	/**
 	 * Copy constructor.
 	 *
