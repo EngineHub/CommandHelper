@@ -108,7 +108,9 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 			return ambient;
 		}
 
-		public boolean hasParticles() { return particles; }
+		public boolean hasParticles() {
+			return particles;
+		}
 
 	}
 }

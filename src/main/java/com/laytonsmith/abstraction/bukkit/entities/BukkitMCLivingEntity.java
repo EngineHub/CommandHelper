@@ -221,6 +221,16 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		}
 	}
 
+	/**
+	 * This calls the 5-param constructor for PotionEffect to disable particles entirely
+	 * @param potionID - ID of the potion
+	 * @param strength - potion strength
+	 * @param seconds - duration of the potion in seconds
+	 * @param ambient - make particles less noticable
+	 * @param particles - enable or disable particles entirely
+	 * @param t - target
+	 */
+	@Override
 	public void addEffect(int potionID, int strength, int seconds, boolean ambient, boolean particles, Target t) {
 		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000),
 				strength, ambient, particles);

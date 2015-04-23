@@ -848,6 +848,7 @@ public class ObjectGenerator {
 				CArray effect = (CArray) ea.get(key, t);
 				int potionID = 0, strength = 0, seconds = 30;
 				boolean ambient = false;
+				boolean particles = true;
 				if (effect.containsKey("id")) {
 					potionID = Static.getInt32(effect.get("id", t), t);
 				} else {
@@ -862,7 +863,14 @@ public class ObjectGenerator {
 				if (effect.containsKey("ambient")) {
 					ambient = Static.getBoolean(effect.get("ambient", t));
 				}
-				ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient));
+				if (effect.containsKey("particles")) {
+					particles = Static.getBoolean(effect.get("particles", t));
+				}
+				if (particles) {
+					ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient));
+				} else {
+					ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient, particles));
+				}
 			} else {
 				throw new Exceptions.FormatException("Expected a potion array at index" + key, t);
 			}
