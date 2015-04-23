@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -1393,7 +1394,14 @@ public class PlayerManagement {
 			MCLocation l = toSet.getLocation().clone();
 			l.setPitch(pitch);
 			l.setYaw(yaw);
+			MCEntity vehicle = null;
+			if(toSet.isInsideVehicle()) {
+				vehicle = toSet.getVehicle();
+			}
 			toSet.teleport(l);
+			if(vehicle != null) {
+				vehicle.setPassenger(toSet);
+			}
 			return CVoid.VOID;
 		}
 	}
