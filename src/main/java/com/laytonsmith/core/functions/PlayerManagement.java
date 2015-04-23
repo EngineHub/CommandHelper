@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -867,9 +868,11 @@ public class PlayerManagement {
 				player = args[0].val();
 				index = Static.getInt32(args[1], t);
 			}
-
+			if(player == null) {
+				throw new ConfigRuntimeException(this.getName() + " has to be called from a player or with a player name as argument.", ExceptionType.InsufficientArgumentsException, t);
+			}
 			MCPlayer p = Static.GetPlayer(player, t);
-
+			
 			Static.AssertPlayerNonNull(p, t);
 			int maxIndex = 20;
 			if (index < -1 || index > maxIndex) {
@@ -1391,7 +1394,14 @@ public class PlayerManagement {
 			MCLocation l = toSet.getLocation().clone();
 			l.setPitch(pitch);
 			l.setYaw(yaw);
+			MCEntity vehicle = null;
+			if(toSet.isInsideVehicle()) {
+				vehicle = toSet.getVehicle();
+			}
 			toSet.teleport(l);
+			if(vehicle != null) {
+				vehicle.setPassenger(toSet);
+			}
 			return CVoid.VOID;
 		}
 	}

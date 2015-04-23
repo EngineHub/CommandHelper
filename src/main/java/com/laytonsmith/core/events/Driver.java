@@ -108,6 +108,13 @@ public enum Driver {
 	VEHICLE_MOVE,
 
 	/**
+	 * Weather events
+	 */
+	LIGHTNING_STRIKE,
+	THUNDER_CHANGE,
+	WEATHER_CHANGE,
+
+	/**
 	 * World events
 	 */
 	TREE_GROW,
