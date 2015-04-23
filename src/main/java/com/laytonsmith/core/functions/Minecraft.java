@@ -931,7 +931,7 @@ public class Minecraft {
 			}
 			if (index == 13 || index == -1) {
 				//Uptime
-				double uptime = (double)(new GregorianCalendar().getTimeInMillis() - ManagementFactory.getRuntimeMXBean().getStartTime());
+				double uptime = (double)(System.currentTimeMillis() - ManagementFactory.getRuntimeMXBean().getStartTime());
 				retVals.add(new CDouble(uptime, t));
 			}
 			if (index == 14 || index == -1) {
