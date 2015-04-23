@@ -11,7 +11,7 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MVector3D;
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
@@ -3571,7 +3571,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			CArray vector = CArray.GetAssociativeArray(t);
-			MVector3D velocity = p.getVelocity();
+			Vector3D velocity = p.getVelocity();
 			vector.set("magnitude", new CDouble(velocity.length(), t), t);
 			vector.set("x", new CDouble(velocity.x, t), t);
 			vector.set("y", new CDouble(velocity.y, t), t);
@@ -3642,7 +3642,7 @@ public class PlayerManagement {
 				default:
 					throw new RuntimeException();
 			}
-			MVector3D v = new MVector3D(x, y, z);
+			Vector3D v = new Vector3D(x, y, z);
 			// TODO: consider removing this and updating the switch above
 			if (v.length() > 10) {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
@@ -4655,7 +4655,7 @@ public class PlayerManagement {
 			// This is needed in order for the player to enter flight mode whilst standing on the ground.
 			if(flight
 			&& p.isOnGround()) {
-				MVector3D v = p.getVelocity();
+				Vector3D v = p.getVelocity();
 				// 0.08 was chosen as it does not change the player's position, whereas higher values do.
 				v.y += 0.08;
 				p.setVelocity(v);

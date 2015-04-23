@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -51,9 +52,9 @@ public interface MCEntity extends MCMetadatable {
 
 	public MCEntity getVehicle();
 
-	public MVector3D getVelocity();
+	public Vector3D getVelocity();
 
-	public void setVelocity(MVector3D v);
+	public void setVelocity(Vector3D v);
 
 	public MCWorld getWorld();
 

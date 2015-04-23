@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEnchantment;
@@ -21,7 +22,6 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -735,7 +735,7 @@ public class ObjectGenerator {
 	 * @param vector the Vector
 	 * @return the vector array
 	 */
-	public CArray vector(MVector3D vector) {
+	public CArray vector(Vector3D vector) {
 		return vector(vector, Target.UNKNOWN);
 	}
 
@@ -747,7 +747,7 @@ public class ObjectGenerator {
 	 * @return the vector array
 	 */
 	@Deprecated
-	public CArray vector(MVector3D vector, Target t) {
+	public CArray vector(Vector3D vector, Target t) {
 		CArray ca = CArray.GetAssociativeArray(t);
 		//Integral keys first
 		ca.set(0, new CDouble(vector.X(), t), t);
@@ -777,13 +777,13 @@ public class ObjectGenerator {
 	 * @param t the target
 	 * @return the Vector
 	 */
-	public MVector3D vector(Construct c, Target t) {
-		return vector(MVector3D.ZERO, c, t);
+	public Vector3D vector(Construct c, Target t) {
+		return vector(Vector3D.ZERO, c, t);
 	}
 
     /**
      * Modifies an existing vector using a given vector object.
-	 * Because MVector3D is immutable, this method does not actually modify the existing vector,
+	 * Because Vector3D is immutable, this method does not actually modify the existing vector,
 	 * but creates a new one.
 	 *
      * @param v the original vector
@@ -791,7 +791,7 @@ public class ObjectGenerator {
      * @param t the target
      * @return the Vector
      */
-    public MVector3D vector(MVector3D v, Construct c, Target t) {
+    public Vector3D vector(Vector3D v, Construct c, Target t) {
 		if(c instanceof CArray) {
 			CArray va = (CArray) c;
 			double x = v.X();
@@ -823,7 +823,7 @@ public class ObjectGenerator {
 				z = Static.getNumber(va.get("z", t), t);
 			}
 
-			return new MVector3D(x, y, z);
+			return new Vector3D(x, y, z);
 		} else
 		if(c instanceof CNull) {
 			// fulfilling the todo?

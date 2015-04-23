@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MVector3D;
+import com.laytonsmith.PureUtilities.Vector3D;
 
 public interface MCPlayerInteractAtEntityEvent extends MCPlayerInteractEntityEvent {
-	public MVector3D getClickedPosition();
+	public Vector3D getClickedPosition();
 }

@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
 
 import java.util.Map;
@@ -10,13 +11,13 @@ public interface MCArmorStand {
 	 *
 	 * @return A map of body part keys and angle vector values
 	 */
-	public Map<MCBodyPart, MVector3D> getAllPoses();
+	public Map<MCBodyPart, Vector3D> getAllPoses();
 
 	/**
 	 * Set all poses at once.
 	 * @param posemap A map of body part keys and angle vector values
 	 */
-	public void setAllPoses(Map<MCBodyPart, MVector3D> posemap);
+	public void setAllPoses(Map<MCBodyPart, Vector3D> posemap);
 
 	/**
 	 * Returns the item the armor stand is
@@ -105,7 +106,7 @@ public interface MCArmorStand {
 	 *
 	 * @return the current pose
 	 */
-	MVector3D getBodyPose();
+	Vector3D getBodyPose();
 
 	/**
 	 * Sets the armor stand's body's
@@ -114,7 +115,7 @@ public interface MCArmorStand {
 	 *
 	 * @param pose the current pose
 	 */
-	void setBodyPose(MVector3D pose);
+	void setBodyPose(Vector3D pose);
 
 	/**
 	 * Returns the armor stand's left arm's
@@ -123,7 +124,7 @@ public interface MCArmorStand {
 	 *
 	 * @return the current pose
 	 */
-	MVector3D getLeftArmPose();
+	Vector3D getLeftArmPose();
 
 	/**
 	 * Sets the armor stand's left arm's
@@ -132,7 +133,7 @@ public interface MCArmorStand {
 	 *
 	 * @param pose the current pose
 	 */
-	void setLeftArmPose(MVector3D pose);
+	void setLeftArmPose(Vector3D pose);
 
 	/**
 	 * Returns the armor stand's right arm's
@@ -141,7 +142,7 @@ public interface MCArmorStand {
 	 *
 	 * @return the current pose
 	 */
-	MVector3D getRightArmPose();
+	Vector3D getRightArmPose();
 
 	/**
 	 * Sets the armor stand's right arm's
@@ -150,7 +151,7 @@ public interface MCArmorStand {
 	 *
 	 * @param pose the current pose
 	 */
-	void setRightArmPose(MVector3D pose);
+	void setRightArmPose(Vector3D pose);
 
 	/**
 	 * Returns the armor stand's left leg's
@@ -159,7 +160,7 @@ public interface MCArmorStand {
 	 *
 	 * @return the current pose
 	 */
-	MVector3D getLeftLegPose();
+	Vector3D getLeftLegPose();
 
 	/**
 	 * Sets the armor stand's left leg's
@@ -168,7 +169,7 @@ public interface MCArmorStand {
 	 *
 	 * @param pose the current pose
 	 */
-	void setLeftLegPose(MVector3D pose);
+	void setLeftLegPose(Vector3D pose);
 
 	/**
 	 * Returns the armor stand's right leg's
@@ -177,7 +178,7 @@ public interface MCArmorStand {
 	 *
 	 * @return the current pose
 	 */
-	MVector3D getRightLegPose();
+	Vector3D getRightLegPose();
 
 	/**
 	 * Sets the armor stand's right leg's
@@ -186,7 +187,7 @@ public interface MCArmorStand {
 	 *
 	 * @param pose the current pose
 	 */
-	void setRightLegPose(MVector3D pose);
+	void setRightLegPose(Vector3D pose);
 
 	/**
 	 * Returns the armor stand's head's
@@ -195,7 +196,7 @@ public interface MCArmorStand {
 	 *
 	 * @return the current pose
 	 */
-	MVector3D getHeadPose();
+	Vector3D getHeadPose();
 
 	/**
 	 * Sets the armor stand's head's
@@ -204,7 +205,7 @@ public interface MCArmorStand {
 	 *
 	 * @param pose the current pose
 	 */
-	void setHeadPose(MVector3D pose);
+	void setHeadPose(Vector3D pose);
 
 	/**
 	 * Returns whether the armor stand has

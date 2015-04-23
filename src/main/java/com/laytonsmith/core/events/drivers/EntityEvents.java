@@ -1,6 +1,7 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCHanging;
@@ -11,7 +12,6 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -904,7 +904,7 @@ public class EntityEvents {
 			if(event instanceof MCPlayerInteractAtEntityEvent){
 				MCPlayerInteractAtEntityEvent e = (MCPlayerInteractAtEntityEvent) event;
 				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
-				MVector3D position = e.getClickedPosition();
+				Vector3D position = e.getClickedPosition();
 				Prefilters.match(prefilter, "x", position.x, Prefilters.PrefilterType.EXPRESSION);
 				Prefilters.match(prefilter, "y", position.y, Prefilters.PrefilterType.EXPRESSION);
 				Prefilters.match(prefilter, "z", position.z, Prefilters.PrefilterType.EXPRESSION);
