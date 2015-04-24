@@ -403,7 +403,7 @@ public class ObjectGenerator {
 			ma.set("lore", lore, t);
 			ma.set("enchants", enchants, t);
 			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
-			ma.set("item_flags", item_flags, t);
+			ma.set("flags", item_flags, t);
 			if (meta instanceof MCLeatherArmorMeta) {
 				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
@@ -576,8 +576,8 @@ public class ObjectGenerator {
 				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
 					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
 				}
-				if (ma.containsKey("item_flags")) {
-					Construct ia = ma.get("item_flags", t);
+				if (ma.containsKey("flags")) {
+					Construct ia = ma.get("flags", t);
 					if (ia instanceof CNull) {
 						List<MCItemFlag> existingFlags = meta.getItemFlags();
 						meta.removeItemFlags(existingFlags.toArray(new MCItemFlag[existingFlags.size()]));
