@@ -1,7 +1,8 @@
 
-package com.laytonsmith.abstraction.blocks;
+package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 
 /**
  *
