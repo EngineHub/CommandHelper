@@ -2,7 +2,7 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
