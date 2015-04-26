@@ -696,6 +696,11 @@ public final class Static {
 	 */
 	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
 		MCCommandSender m;
+
+		if (player == null) {
+			throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
+		}
+
 		if (player.length() > 0 && player.length() <= 16) {
 			m = GetCommandSender(player, t);
 		} else {

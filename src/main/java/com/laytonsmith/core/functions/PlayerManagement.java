@@ -868,9 +868,6 @@ public class PlayerManagement {
 				player = args[0].val();
 				index = Static.getInt32(args[1], t);
 			}
-			if(player == null) {
-				throw new ConfigRuntimeException(this.getName() + " has to be called from a player or with a player name as argument.", ExceptionType.InsufficientArgumentsException, t);
-			}
 			MCPlayer p = Static.GetPlayer(player, t);
 			
 			Static.AssertPlayerNonNull(p, t);
