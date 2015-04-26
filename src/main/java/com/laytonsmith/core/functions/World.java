@@ -11,7 +11,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.MVector3D;
-import com.laytonsmith.abstraction.blocks.MCFallingBlock;
+import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;

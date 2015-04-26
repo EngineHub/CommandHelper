@@ -1,9 +1,10 @@
 
-package com.laytonsmith.abstraction.bukkit.blocks;
+package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.blocks.MCFallingBlock;
+import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 
 /**
@@ -13,9 +14,9 @@ import org.bukkit.entity.FallingBlock;
 public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlock {
 	FallingBlock f;
 	
-	public BukkitMCFallingBlock(FallingBlock f) {
-		super(f);
-		this.f = f;
+	public BukkitMCFallingBlock(Entity e) {
+		super(e);
+		this.f = (FallingBlock) e;
 	}
 	
 	@Override
