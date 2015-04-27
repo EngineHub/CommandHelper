@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 
@@ -15,8 +16,11 @@ public class IVariable extends Construct implements Cloneable {
 	final private CClassType type;
 	final private Target definedTarget;
 
-    public IVariable(String name, Target t) {
+    public IVariable(String name, Target t) throws ConfigCompileException {
         super(name, ConstructType.IVARIABLE, t);
+		if(!name.matches("@[a-zA-Z0-9_]+")){
+			throw new ConfigCompileException("IVariables must match the regex: @[a-zA-Z0-9_]+", t);
+		}
         this.var_value = new CString("", t);
         this.name = name;
 		this.type = CClassType.AUTO;

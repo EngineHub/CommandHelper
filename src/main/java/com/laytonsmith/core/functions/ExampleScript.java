@@ -75,6 +75,7 @@ public class ExampleScript {
 	 * @param description
 	 * @param script
 	 * @param output
+	 * @throws ConfigCompileException
 	 */
 	public ExampleScript(String description, String script, String output) throws ConfigCompileException{
 		this(description, script, output, false);

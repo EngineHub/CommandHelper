@@ -130,6 +130,9 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if(args.length == 0) {
+				throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
+			}
 			Construct index = new CSlice(0, -1, t);
 			Construct defaultConstruct = null;
 			if (args.length >= 2) {
@@ -300,6 +303,9 @@ public class ArrayHandling {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+			if(args.length == 0) {
+				throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
+			}
 			if (args[0] instanceof ArrayAccess) {
 				ArrayAccess aa = (ArrayAccess) args[0];
 				if (!aa.canBeAssociative()) {
@@ -435,10 +441,10 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if(args.length < 2) {
+				throw new ConfigRuntimeException("At least 2 arguments must be provided to array_push", ExceptionType.InsufficientArgumentsException, t);
+			}
 			if (args[0] instanceof CArray) {
-				if (args.length < 2) {
-					throw new ConfigRuntimeException("At least 2 arguments must be provided to array_push", ExceptionType.InsufficientArgumentsException, t);
-				}
 				CArray array = (CArray)args[0];
 				int initialSize = (int)array.size();
 				for (int i = 1; i < args.length; i++) {
