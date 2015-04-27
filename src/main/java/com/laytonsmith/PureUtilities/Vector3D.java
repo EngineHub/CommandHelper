@@ -2,19 +2,18 @@ package com.laytonsmith.PureUtilities;
 
 /**
  * Represents both a point in 3D space and a vector representing a direction and magnitude.
- * 
  */
-public class Vector3D extends Point3D {
+public class Vector3D extends Point3D
+{
 
-	public static Vector3D ZERO = new Vector3D();
+	public static final Vector3D ZERO = new Vector3D();
 
 	/**
 	 * Copy constructor.
 	 *
 	 * @param other the other point
 	 */
-	public Vector3D(Point3D other)
-	{
+	public Vector3D(Point3D other) {
 		super(other);
 	}
 
@@ -30,7 +29,6 @@ public class Vector3D extends Point3D {
 
 	/**
 	 * Initializes the X and Y values. Z is initialized to 0.
-	 *
 	 */
 	public Vector3D(double x, double y) {
 		super(x, y);
@@ -81,6 +79,7 @@ public class Vector3D extends Point3D {
 
 	/**
 	 * Returns a new vector of this vector multiplied by a value.
+	 *
 	 * @param m the value to multiply by
 	 * @return a new vector
 	 */
@@ -100,6 +99,7 @@ public class Vector3D extends Point3D {
 
 	/**
 	 * Returns a new vector of this vector multiplied by a value.
+	 *
 	 * @param m the value to multiply by
 	 * @return a new vector
 	 */
@@ -115,7 +115,7 @@ public class Vector3D extends Point3D {
 	 */
 	public Vector3D normalize() {
 		double length = length();
-		return new Vector3D(x /= length, y /= length, z /= length);
+		return new Vector3D(x / length, y / length, z / length);
 	}
 
 	/**

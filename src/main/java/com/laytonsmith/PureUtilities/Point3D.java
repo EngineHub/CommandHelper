@@ -2,26 +2,25 @@ package com.laytonsmith.PureUtilities;
 
 /**
  * Represents a point in 3D space.
- *
  */
-public class Point3D {
+public class Point3D
+{
 
 	/**
 	 * A Point3D located at [0, 0, 0] (zero)
 	 */
-	public static Point3D ZERO = new Point3D();
+	public static final Point3D ZERO = new Point3D();
 
-    protected double x;
-    protected double y;
-    protected double z;
+	protected final double x;
+	protected final double y;
+	protected final double z;
 
 	/**
 	 * Copy constructor.
 	 *
 	 * @param other the other point
 	 */
-	public Point3D(Point3D other)
-	{
+	public Point3D(Point3D other) {
 		this.x = other.x;
 		this.y = other.y;
 		this.z = other.z;
@@ -35,14 +34,13 @@ public class Point3D {
 	 */
 	@Deprecated
 	public Point3D() {
-        this.x = 0;
+		this.x = 0;
+		this.y = 0;
 		this.z = 0;
-		this.z = 0;
-    }
+	}
 
 	/**
 	 * Initializes the X and Y values. Z is initialized to 0.
-	 *
 	 */
 	public Point3D(double x, double y) {
 		this.x = x;
@@ -58,10 +56,10 @@ public class Point3D {
 	 * @param z the z value
 	 */
 	public Point3D(double x, double y, double z) {
-        this.x = x;
+		this.x = x;
 		this.y = y;
 		this.z = z;
-    }
+	}
 
 	/**
 	 * Gets the X value of this point.
@@ -69,8 +67,8 @@ public class Point3D {
 	 * @return the x value
 	 */
 	public double X() {
-        return x;
-    }
+		return x;
+	}
 
 	/**
 	 * Gets the Y value of this point.
@@ -78,8 +76,8 @@ public class Point3D {
 	 * @return the y value
 	 */
 	public double Y() {
-        return y;
-    }
+		return y;
+	}
 
 	/**
 	 * Gets the Z value of this point.
@@ -87,8 +85,8 @@ public class Point3D {
 	 * @return the z value
 	 */
 	public double Z() {
-        return z;
-    }
+		return z;
+	}
 
 	/**
 	 * Returns a point of this point added to another point.
@@ -122,6 +120,6 @@ public class Point3D {
 	 * @return the distance
 	 */
 	public double distance(Point3D other) {
-        return Math.sqrt(distanceSquared(other));
-    }
+		return Math.sqrt(distanceSquared(other));
+	}
 }
