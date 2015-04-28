@@ -395,7 +395,7 @@ public class ReflectionUtils {
 		}
 		Method m;
 		try {
-			m = c.getClass().getMethod(methodName, params);
+			m = c.getMethod(methodName, params);
 		} catch (NoSuchMethodException ex) {
 			return false;
 		} catch (SecurityException ex) {
