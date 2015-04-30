@@ -237,7 +237,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public void setVelocity(Vector3D velocity) {
-		Vector v = new Vector(velocity.x, velocity.y, velocity.z);
+		Vector v = new Vector(velocity.X(), velocity.Y(), velocity.Z());
 		e.setVelocity(v);
 	}
 

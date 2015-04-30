@@ -135,7 +135,7 @@ public class BukkitMCLocation implements MCLocation {
 
 	@Override
 	public MCLocation add(Vector3D vec) {
-		return new BukkitMCLocation(l.add(new Vector(vec.x, vec.y, vec.z)));
+		return new BukkitMCLocation(l.add(new Vector(vec.X(), vec.Y(), vec.Z())));
 	}
 
 	@Override
@@ -160,7 +160,7 @@ public class BukkitMCLocation implements MCLocation {
 
 	@Override
 	public MCLocation subtract(Vector3D vec) {
-		return new BukkitMCLocation(l.subtract(new Vector(vec.x, vec.y, vec.z)));
+		return new BukkitMCLocation(l.subtract(new Vector(vec.X(), vec.Y(), vec.Z())));
 	}
 
 	@Override

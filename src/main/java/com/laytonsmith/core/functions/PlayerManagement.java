@@ -3580,9 +3580,9 @@ public class PlayerManagement {
 			CArray vector = CArray.GetAssociativeArray(t);
 			Vector3D velocity = p.getVelocity();
 			vector.set("magnitude", new CDouble(velocity.length(), t), t);
-			vector.set("x", new CDouble(velocity.x, t), t);
-			vector.set("y", new CDouble(velocity.y, t), t);
-			vector.set("z", new CDouble(velocity.z, t), t);
+			vector.set("x", new CDouble(velocity.X(), t), t);
+			vector.set("y", new CDouble(velocity.Y(), t), t);
+			vector.set("z", new CDouble(velocity.Z(), t), t);
 			return vector;
 		}
 
@@ -4664,8 +4664,8 @@ public class PlayerManagement {
 			&& p.isOnGround()) {
 				Vector3D v = p.getVelocity();
 				// 0.08 was chosen as it does not change the player's position, whereas higher values do.
-				v.y += 0.08;
-				p.setVelocity(v);
+				Vector3D newV = v.add(new Vector3D(v.X(), v.Y() + 0.08, v.Z()));
+				p.setVelocity(newV);
 			}
 			p.setFlying(flight);
 			// We only want to set whether the player is flying; not whether the player can fly.

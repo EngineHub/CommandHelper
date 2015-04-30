@@ -43,7 +43,7 @@ public class BukkitMCBlockProjectileSource implements MCBlockProjectileSource {
 	public MCProjectile launchProjectile(MCProjectileType projectile, Vector3D init) {
 		EntityType et = EntityType.valueOf(projectile.name());
 		Class<? extends Entity> c = et.getEntityClass();
-		Vector vector = new Vector(init.x, init.y, init.z);
+		Vector vector = new Vector(init.X(), init.Y(), init.Z());
 		Projectile proj = bps.launchProjectile(c.asSubclass(Projectile.class), vector);
 
 		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj);

@@ -153,7 +153,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setBodyPose(Vector3D pose) {
-		as.setBodyPose(new EulerAngle(pose.x, pose.y, pose.z));
+		as.setBodyPose(new EulerAngle(pose.X(), pose.Y(), pose.Z()));
 	}
 
 	@Override
@@ -164,7 +164,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setLeftArmPose(Vector3D pose) {
-		as.setLeftArmPose(new EulerAngle(pose.x, pose.y, pose.z));
+		as.setLeftArmPose(new EulerAngle(pose.X(), pose.Y(), pose.Z()));
 	}
 
 	@Override
@@ -175,7 +175,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setRightArmPose(Vector3D pose) {
-		as.setRightArmPose(new EulerAngle(pose.x, pose.y, pose.z));
+		as.setRightArmPose(new EulerAngle(pose.X(), pose.Y(), pose.Z()));
 	}
 
 	@Override
@@ -186,7 +186,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setLeftLegPose(Vector3D pose) {
-		as.setLeftLegPose(new EulerAngle(pose.x, pose.y, pose.z));
+		as.setLeftLegPose(new EulerAngle(pose.X(), pose.Y(), pose.Z()));
 	}
 
 	@Override
@@ -197,7 +197,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setRightLegPose(Vector3D pose) {
-		as.setRightLegPose(new EulerAngle(pose.x, pose.y, pose.z));
+		as.setRightLegPose(new EulerAngle(pose.X(), pose.Y(), pose.Z()));
 	}
 
 	@Override
@@ -208,7 +208,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setHeadPose(Vector3D pose) {
-		as.setHeadPose(new EulerAngle(pose.x, pose.y, pose.z));
+		as.setHeadPose(new EulerAngle(pose.X(), pose.Y(), pose.Z()));
 	}
 
 	@Override

@@ -905,9 +905,9 @@ public class EntityEvents {
 				MCPlayerInteractAtEntityEvent e = (MCPlayerInteractAtEntityEvent) event;
 				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
 				Vector3D position = e.getClickedPosition();
-				Prefilters.match(prefilter, "x", position.x, Prefilters.PrefilterType.EXPRESSION);
-				Prefilters.match(prefilter, "y", position.y, Prefilters.PrefilterType.EXPRESSION);
-				Prefilters.match(prefilter, "z", position.z, Prefilters.PrefilterType.EXPRESSION);
+				Prefilters.match(prefilter, "x", position.X(), Prefilters.PrefilterType.EXPRESSION);
+				Prefilters.match(prefilter, "y", position.Y(), Prefilters.PrefilterType.EXPRESSION);
+				Prefilters.match(prefilter, "z", position.Z(), Prefilters.PrefilterType.EXPRESSION);
 				return true;
 			}
 			return false;

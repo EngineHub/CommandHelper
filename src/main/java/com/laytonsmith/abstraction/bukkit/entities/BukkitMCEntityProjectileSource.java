@@ -47,7 +47,7 @@ public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MC
 	public MCProjectile launchProjectile(MCProjectileType projectile, Vector3D init) {
 		EntityType et = EntityType.valueOf(projectile.name());
 		Class<? extends Entity> c = et.getEntityClass();
-		Vector vector = new Vector(init.x, init.y, init.z);
+		Vector vector = new Vector(init.X(), init.Y(), init.Z());
 		Projectile proj = eps.launchProjectile(c.asSubclass(Projectile.class), vector);
 
 		MCEntity mcproj = BukkitConvertor.BukkitGetCorrectEntity(proj);

@@ -396,7 +396,7 @@ public class BukkitBlockEvents {
 
 		@Override
 		public void setVelocity(Vector3D vel) {
-			Vector v = new Vector(vel.x, vel.y, vel.z);
+			Vector v = new Vector(vel.X(), vel.Y(), vel.Z());
 			bde.setVelocity(v);
 		}
 

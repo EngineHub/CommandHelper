@@ -26,7 +26,7 @@ public class BukkitMCFireball extends BukkitMCProjectile implements MCFireball {
 
 	@Override
 	public void setDirection(Vector3D vector) {
-		f.setDirection(new Vector(vector.x, vector.y, vector.z));
+		f.setDirection(new Vector(vector.X(), vector.Y(), vector.Z()));
 	}
 
 }
