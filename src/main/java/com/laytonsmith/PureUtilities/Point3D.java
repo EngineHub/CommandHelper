@@ -9,11 +9,11 @@ public class Point3D
 	/**
 	 * A Point3D located at [0, 0, 0] (zero)
 	 */
-	public static final Point3D ZERO = new Point3D();
+	public static final Point3D ZERO = new Point3D(0, 0, 0);
 
-	protected final double x;
-	protected final double y;
-	protected final double z;
+	public double x;
+	public double y;
+	public double z;
 
 	/**
 	 * Copy constructor.
