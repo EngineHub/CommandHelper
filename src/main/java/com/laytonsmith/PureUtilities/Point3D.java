@@ -9,7 +9,7 @@ public class Point3D
 	/**
 	 * A Point3D located at [0, 0, 0] (zero)
 	 */
-	public static final Point3D ZERO = new Point3D();
+	public static final Point3D ZERO = new Point3D(0, 0, 0);
 
 	protected final double x;
 	protected final double y;
@@ -24,19 +24,6 @@ public class Point3D
 		this.x = other.x;
 		this.y = other.y;
 		this.z = other.z;
-	}
-
-	/**
-	 * Initializes the X, Y, and Z values to 0.
-	 * Since Point3Ds are immutable, it is recommended to use Point3D.ZERO instead.
-	 *
-	 * @deprecated please use Point3D.ZERO instead
-	 */
-	@Deprecated
-	public Point3D() {
-		this.x = 0;
-		this.y = 0;
-		this.z = 0;
 	}
 
 	/**
