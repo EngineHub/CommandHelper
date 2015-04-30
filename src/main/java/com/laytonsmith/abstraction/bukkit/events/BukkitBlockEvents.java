@@ -2,12 +2,12 @@
 
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
@@ -389,13 +389,13 @@ public class BukkitBlockEvents {
 		}
 
 		@Override
-		public MVector3D getVelocity() {
+		public Vector3D getVelocity() {
 			Vector v = bde.getVelocity();
-			return new MVector3D(v.getX(), v.getY(), v.getZ());
+			return new Vector3D(v.getX(), v.getY(), v.getZ());
 		}
 
 		@Override
-		public void setVelocity(MVector3D vel) {
+		public void setVelocity(Vector3D vel) {
 			Vector v = new Vector(vel.x, vel.y, vel.z);
 			bde.setVelocity(v);
 		}

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAgeable;
 import com.laytonsmith.abstraction.MCArmorStand;
@@ -24,7 +25,6 @@ import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCTNT;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
@@ -932,7 +932,7 @@ public class EntityManagement {
 
 				return new CInt(projectile.getEntityId(), t);
 			} else {
-				MVector3D velocity = to.toVector().subtract(from.toVector()).normalize();
+				Vector3D velocity = to.toVector().subtract(from.toVector()).normalize();
 
 				if (shooter_id > 0) {
 					shifted_from = from.add(velocity);
@@ -2334,7 +2334,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARMORSTAND_SMALLSIZE, CBoolean.get(stand.isSmall()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_VISIBLE, CBoolean.get(stand.isVisible()), t);
 					CArray poses = CArray.GetAssociativeArray(t);
-					Map<MCBodyPart, MVector3D> poseMap = stand.getAllPoses();
+					Map<MCBodyPart, Vector3D> poseMap = stand.getAllPoses();
 					for (MCBodyPart key : poseMap.keySet()) {
 						poses.set("pose" + key.name(), ObjectGenerator.GetGenerator().vector(poseMap.get(key), t), t);
 					}
@@ -2626,7 +2626,7 @@ public class EntityManagement {
 								stand.setVisible(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case entity_spec.KEY_ARMORSTAND_POSES:
-								Map<MCBodyPart, MVector3D> poseMap = stand.getAllPoses();
+								Map<MCBodyPart, Vector3D> poseMap = stand.getAllPoses();
 								if (specArray.get(index, t) instanceof CArray) {
 									CArray poseArray = (CArray) specArray.get(index, t);
 									for (MCBodyPart key : poseMap.keySet()) {
@@ -2640,7 +2640,7 @@ public class EntityManagement {
 								}
 								if (specArray.get(index, t) instanceof CNull) {
 									for (MCBodyPart key : poseMap.keySet()) {
-										poseMap.put(key, new MVector3D());
+										poseMap.put(key, new Vector3D());
 									}
 								}
 								stand.setAllPoses(poseMap);

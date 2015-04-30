@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCHanging;
@@ -9,7 +10,6 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
@@ -425,9 +425,9 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public MVector3D getClickedPosition() {
+		public Vector3D getClickedPosition() {
 			Vector v = e.getClickedPosition();
-			return new MVector3D(v.getX(), v.getY(), v.getZ());
+			return new Vector3D(v.getX(), v.getY(), v.getZ());
 		}
 	}
 	

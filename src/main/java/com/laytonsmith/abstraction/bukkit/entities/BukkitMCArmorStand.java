@@ -1,9 +1,9 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCArmorStand;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
@@ -40,8 +40,8 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	}
 
 	@Override
-	public Map<MCBodyPart, MVector3D> getAllPoses() {
-		Map<MCBodyPart, MVector3D> slots = new EnumMap<MCBodyPart, MVector3D>(MCBodyPart.class);
+	public Map<MCBodyPart, Vector3D> getAllPoses() {
+		Map<MCBodyPart, Vector3D> slots = new EnumMap<MCBodyPart, Vector3D>(MCBodyPart.class);
 		for (MCBodyPart key : MCBodyPart.values()) {
 			switch (key) {
 				case Head:
@@ -68,8 +68,8 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	}
 
 	@Override
-	public void setAllPoses(Map<MCBodyPart, MVector3D> posemap) {
-		MVector3D pose = null;
+	public void setAllPoses(Map<MCBodyPart, Vector3D> posemap) {
+		Vector3D pose = null;
 		for (MCBodyPart key : posemap.keySet()) {
 			pose = posemap.get(key);
 			switch (key) {
@@ -146,68 +146,68 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	}
 
 	@Override
-	public MVector3D getBodyPose() {
+	public Vector3D getBodyPose() {
 		EulerAngle pose = as.getBodyPose();
-		return new MVector3D(pose.getX(), pose.getY(), pose.getZ());
+		return new Vector3D(pose.getX(), pose.getY(), pose.getZ());
 	}
 
 	@Override
-	public void setBodyPose(MVector3D pose) {
+	public void setBodyPose(Vector3D pose) {
 		as.setBodyPose(new EulerAngle(pose.x, pose.y, pose.z));
 	}
 
 	@Override
-	public MVector3D getLeftArmPose() {
+	public Vector3D getLeftArmPose() {
 		EulerAngle pose = as.getLeftArmPose();
-		return new MVector3D(pose.getX(), pose.getY(), pose.getZ());
+		return new Vector3D(pose.getX(), pose.getY(), pose.getZ());
 	}
 
 	@Override
-	public void setLeftArmPose(MVector3D pose) {
+	public void setLeftArmPose(Vector3D pose) {
 		as.setLeftArmPose(new EulerAngle(pose.x, pose.y, pose.z));
 	}
 
 	@Override
-	public MVector3D getRightArmPose() {
+	public Vector3D getRightArmPose() {
 		EulerAngle pose = as.getRightArmPose();
-		return new MVector3D(pose.getX(), pose.getY(), pose.getZ());
+		return new Vector3D(pose.getX(), pose.getY(), pose.getZ());
 	}
 
 	@Override
-	public void setRightArmPose(MVector3D pose) {
+	public void setRightArmPose(Vector3D pose) {
 		as.setRightArmPose(new EulerAngle(pose.x, pose.y, pose.z));
 	}
 
 	@Override
-	public MVector3D getLeftLegPose() {
+	public Vector3D getLeftLegPose() {
 		EulerAngle pose = as.getLeftLegPose();
-		return new MVector3D(pose.getX(), pose.getY(), pose.getZ());
+		return new Vector3D(pose.getX(), pose.getY(), pose.getZ());
 	}
 
 	@Override
-	public void setLeftLegPose(MVector3D pose) {
+	public void setLeftLegPose(Vector3D pose) {
 		as.setLeftLegPose(new EulerAngle(pose.x, pose.y, pose.z));
 	}
 
 	@Override
-	public MVector3D getRightLegPose() {
+	public Vector3D getRightLegPose() {
 		EulerAngle pose = as.getRightLegPose();
-		return new MVector3D(pose.getX(), pose.getY(), pose.getZ());
+		return new Vector3D(pose.getX(), pose.getY(), pose.getZ());
 	}
 
 	@Override
-	public void setRightLegPose(MVector3D pose) {
+	public void setRightLegPose(Vector3D pose) {
 		as.setRightLegPose(new EulerAngle(pose.x, pose.y, pose.z));
 	}
 
 	@Override
-	public MVector3D getHeadPose() {
+	public Vector3D getHeadPose() {
 		EulerAngle pose = as.getHeadPose();
-		return new MVector3D(pose.getX(), pose.getY(), pose.getZ());
+		return new Vector3D(pose.getX(), pose.getY(), pose.getZ());
 	}
 
 	@Override
-	public void setHeadPose(MVector3D pose) {
+	public void setHeadPose(Vector3D pose) {
 		as.setHeadPose(new EulerAngle(pose.x, pose.y, pose.z));
 	}
 

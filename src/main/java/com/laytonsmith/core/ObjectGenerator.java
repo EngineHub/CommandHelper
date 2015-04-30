@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEnchantment;
@@ -21,7 +22,6 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -729,72 +729,108 @@ public class ObjectGenerator {
 		}
 	}
 
-    public CArray vector(MVector3D v, Target t) {
-        double x,y,z;
-		x = y = z = 0;
-		if (v != null) {
-			x = v.x;
-			y = v.y;
-			z = v.z;
-		}
-		CArray ret = CArray.GetAssociativeArray(t);
-        ret.set("x", new CDouble(x, t), t);
-		ret.set("y", new CDouble(y, t), t);
-		ret.set("z", new CDouble(z, t), t);
-		return ret;
+	/**
+	 * Gets a vector object, given a Vector.
+	 *
+	 * @param vector the Vector
+	 * @return the vector array
+	 */
+	public CArray vector(Vector3D vector) {
+		return vector(vector, Target.UNKNOWN);
+	}
+
+	/**
+	 * Gets a vector object, given a Vector and a Target.
+	 *
+	 * @param vector the Vector
+	 * @param t the Target
+	 * @return the vector array
+	 */
+	@Deprecated
+	public CArray vector(Vector3D vector, Target t) {
+		CArray ca = CArray.GetAssociativeArray(t);
+		//Integral keys first
+		ca.set(0, new CDouble(vector.X(), t), t);
+		ca.set(1, new CDouble(vector.Y(), t), t);
+		ca.set(2, new CDouble(vector.Z(), t), t);
+		//Then string keys
+		ca.set("x", new CDouble(vector.X(), t), t);
+		ca.set("y", new CDouble(vector.Y(), t), t);
+		ca.set("z", new CDouble(vector.Z(), t), t);
+		return ca;
+	}
+
+	/**
+	 * Gets a Vector, given a vector object.
+	 *
+	 * A vector has three parts: the X, Y, and Z.
+	 * If the vector object is missing the Z part, then we will assume it is zero.
+	 * If the vector object is missing the X and/or Y part, then we will assume it is not a vector.
+	 *
+	 * Furthermore, the string keys ("x", "y" and "z") take precedence over the integral ones.
+	 * For example, in a case of <code>array(0, 1, 2, x: 3, y: 4, z: 5)</code>, the
+	 * resultant Vector will be of the value <code>Vector(3, 4, 5)</code>.
+	 *
+	 * For consistency, the method will accept any Construct, but it requires a CArray.
+	 *
+	 * @param c the vector array
+	 * @param t the target
+	 * @return the Vector
+	 */
+	public Vector3D vector(Construct c, Target t) {
+		return vector(Vector3D.ZERO, c, t);
 	}
 
     /**
-     * Creates a new 3D vector from the given construct
-     * @param c A CNull or CArray to build the vector from
-     * @param t
-     * @return
+     * Modifies an existing vector using a given vector object.
+	 * Because Vector3D is immutable, this method does not actually modify the existing vector,
+	 * but creates a new one.
+	 *
+     * @param v the original vector
+     * @param c the vector array
+     * @param t the target
+     * @return the Vector
      */
-    public MVector3D vector(Construct c, Target t) {
-        return vector(new MVector3D(), c, t);
-    }
-
-    /**
-     * Modifies an existing vector using a given
-     * @param v
-     * @param c
-     * @param t
-     * @return
-     */
-    public MVector3D vector(MVector3D v, Construct c, Target t) {
-        if (c instanceof CArray) {
+    public Vector3D vector(Vector3D v, Construct c, Target t) {
+		if(c instanceof CArray) {
 			CArray va = (CArray) c;
-			if (va.containsKey("x")) {
-				v.x = Static.getDouble(va.get("x", t), t);
-			}
-			if (va.containsKey("y")) {
-				v.y = Static.getDouble(va.get("y", t), t);
-			}
-			if (va.containsKey("z")) {
-				v.z = Static.getDouble(va.get("z", t), t);
-			}
-			if (!va.containsKey("x") && !va.containsKey("y") && !va.containsKey("z")) {
-				switch ((int) va.size()) {
-				case 4:
-					v.z = Static.getDouble(va.get(3, t), t);
-                    v.y = Static.getDouble(va.get(2, t), t);
-                    v.x = Static.getDouble(va.get(1, t), t);
-					break;
-				case 3:
-                    v.z = Static.getDouble(va.get(2, t), t);
-				case 2:
-                    v.y = Static.getDouble(va.get(1, t), t);
-				case 1:
-                    v.x = Static.getDouble(va.get(0, t), t);
+			double x = v.X();
+			double y = v.Y();
+			double z = v.Z();
+
+			if(!va.isAssociative()) {
+				if(va.size() == 3) { // 3rd dimension vector
+					x = Static.getNumber(va.get(0, t), t);
+					y = Static.getNumber(va.get(1, t), t);
+					z = Static.getNumber(va.get(2, t), t);
+				} else
+				if(va.size() == 2) { // 2nd dimension vector
+					x = Static.getNumber(va.get(0, t), t);
+					y = Static.getNumber(va.get(1, t), t);
+					z = 0;
+				} else {
+					throw new ConfigRuntimeException("Expecting a Vector array, but the array did not meet the format specifications", ExceptionType.FormatException, t);
 				}
 			}
-            // TODO next commit add this feature
-//        } else if (c instanceof CNull) {
-//            v.multiply(0);
-        } else {
-			throw new Exceptions.FormatException("Expected an array but received " + c, t);
+
+			if(va.containsKey("x")) {
+				x = Static.getNumber(va.get("x", t), t);
+			}
+			if(va.containsKey("y")) {
+				y = Static.getNumber(va.get("y", t), t);
+			}
+			if(va.containsKey("z")) {
+				z = Static.getNumber(va.get("z", t), t);
+			}
+
+			return new Vector3D(x, y, z);
+		} else
+		if(c instanceof CNull) {
+			// fulfilling the todo?
+			return v;
+		} else {
+			throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, t);
 		}
-        return v;
 	}
 
 	public CArray enchants(Map<MCEnchantment, Integer> map, Target t) {

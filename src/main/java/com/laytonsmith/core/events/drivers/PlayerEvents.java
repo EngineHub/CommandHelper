@@ -1,7 +1,7 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Geometry.Point3D;
+import com.laytonsmith.PureUtilities.Point3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;

@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 
 /**
@@ -23,14 +24,14 @@ public interface MCLocation extends AbstractionObject{
     public MCBlock getBlock();
 	public MCLocation add(MCLocation vec);
 
-	public MCLocation add(MVector3D vec);
+	public MCLocation add(Vector3D vec);
 	public MCLocation add(double x, double y, double z);
 	public MCLocation multiply(double m);
 
-	public MVector3D toVector();
+	public Vector3D toVector();
 	public MCLocation subtract(MCLocation vec);
 
-	public MCLocation subtract(MVector3D vec);
+	public MCLocation subtract(Vector3D vec);
 	public MCLocation subtract(double x, double y, double z);
 
 	public void setX(double x);
@@ -40,7 +41,7 @@ public interface MCLocation extends AbstractionObject{
     public void setYaw(float y);
 	public void breakBlock();
 
-	public MVector3D getDirection();
+	public Vector3D getDirection();
 
     public MCLocation clone();
 }
