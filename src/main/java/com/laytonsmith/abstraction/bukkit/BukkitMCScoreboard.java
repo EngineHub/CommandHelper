@@ -73,13 +73,11 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public Set<String> getEntries() {
 		if(ReflectionUtils.hasMethod(s.getClass(), "getEntries", null)){
-			// This is the newer method, just call the method and return it.
-			return (Set<String>) ReflectionUtils.invokeMethod(s, "getEntries");
+			return s.getEntries();
 		} else {
 			// Old style, where we have to build it from the list of players
 			Set<String> ret = new HashSet<>();
-			for (OfflinePlayer o : s.getPlayers()) {
-				// Deprecated usage, but required.
+			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(s, "getPlayers")) {
 				ret.add(o.getName());
 			}
 			return ret;
@@ -99,8 +97,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	public Set<MCScore> getScores(String entry) {
 		Set<MCScore> ret = new HashSet<>();
 		if(ReflectionUtils.hasMethod(s.getClass(), "getScores", null, String.class)){
-			// New style
-			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", entry)) {
+			for (Score o : s.getScores(entry)) {
 				ret.add(new BukkitMCScore(o));
 			}
 		} else {
@@ -144,8 +141,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public void resetScores(String entry) {
 		if(ReflectionUtils.hasMethod(s.getClass(), "resetScores", null, String.class)){
-			// New style
-			ReflectionUtils.invokeMethod(s, "resetScores", entry);
+			s.resetScores(entry);
 		} else {
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			ReflectionUtils.invokeMethod(s, "resetScores", player);

@@ -24,7 +24,7 @@ public class BukkitMCTeam implements MCTeam {
 		} else {
 			// Bukkit method
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
-			t.addPlayer(player);
+			ReflectionUtils.invokeMethod(t, "addPlayer", player);
 		}
 	}
 
@@ -58,7 +58,7 @@ public class BukkitMCTeam implements MCTeam {
 			}
 		} else {
 			// Bukkit method
-			for (OfflinePlayer o : t.getPlayers()) {
+			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
 				ret.add(o.getName());
 			}
 		}
@@ -93,7 +93,7 @@ public class BukkitMCTeam implements MCTeam {
 		} else {
 			// Bukkit method
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
-			return t.hasPlayer(player);
+			return (boolean) ReflectionUtils.invokeMethod(t, "hasPlayer", player);
 		}
 	}
 
@@ -105,7 +105,7 @@ public class BukkitMCTeam implements MCTeam {
 		} else {
 			// Bukkit method
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
-			return t.removePlayer(player);
+			return (boolean) ReflectionUtils.invokeMethod(t, "removePlayer", player);
 		}
 	}
 
