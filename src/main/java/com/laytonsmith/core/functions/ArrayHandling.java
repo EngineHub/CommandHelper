@@ -2343,4 +2343,73 @@ public class ArrayHandling {
 		}
 
 	}
+
+	@api
+	public static class array_iterate extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray array = Static.getArray(args[0], t);
+			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			for(Construct key : array.keySet()){
+				closure.execute(key, array.get(key, t));
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "array_iterate";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {array, closure} Iterates across an array, calling the closure for each value of the array. The closure"
+					+ " should accept two arguments, the key and the value."
+					+ " This method can be used in some code to increase readability, to increase re-usability, or keep variables"
+					+ " created in a loop in an isolated scope. Note that this runs at approximately the same speed as a for loop,"
+					+ " which is slower than a foreach loop.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic use with normal arrays", "@array = array(1, 2, 3);\n"
+						+ "array_iterate(@array, closure(@key, @value){\n"
+						+ "\tmsg(@value);\n"
+						+ "});"),
+				new ExampleScript("Use with associative arrays", "@array = array(one: 1, two: 2, three: 3);\n"
+						+ "array_iterate(@array, closure(@key, @value){\n"
+						+ "\tmsg(\"@key: @value\");\n"
+						+ "});")
+			};
+		}
+
+
+	}
 }
