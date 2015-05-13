@@ -400,4 +400,15 @@ public class ArrayHandlingTest {
 		verify(fakePlayer).sendMessage("false");
 	}
 
+	@Test public void testArrayMap() throws Exception {
+		Run("@areaOfSquare = closure(@sideLength){\n"
+						+ "\treturn(@sideLength * @sideLength);\n"
+						+ "};\n"
+						+ "// A collection of square sides\n"
+						+ "@squares = array(1, 4, 8);\n"
+						+ "@areas = array_map(@squares, @areaOfSquare);\n"
+						+ "msg(@areas);", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 16, 64}");
+	}
+
 }

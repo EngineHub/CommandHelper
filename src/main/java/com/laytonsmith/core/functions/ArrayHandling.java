@@ -2827,4 +2827,79 @@ public class ArrayHandling {
 		}
 
 	}
+
+	@api
+	public static class array_map extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IllegalArgumentException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray array = Static.getArray(args[0], t);
+			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			CArray newArray = (array.isAssociative()?CArray.GetAssociativeArray(t):new CArray(t, (int)array.size()));
+
+			for(Construct c : array.keySet()){
+				boolean hasReturn = false;
+				try {
+					closure.execute(array.get(c, t));
+				} catch(FunctionReturnException ex){
+					hasReturn = true;
+					newArray.set(c, ex.getReturn(), t);
+				}
+				if(!hasReturn){
+					throw new ConfigRuntimeException("The closure passed to " + getName() + " must return a value.", ExceptionType.IllegalArgumentException, t);
+				}
+			}
+
+			return newArray;
+		}
+
+		@Override
+		public String getName() {
+			return "array_map";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array, closure} Calls the closure on each element of an array, and returns an array that contains the results.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "@areaOfSquare = closure(@sideLength){\n"
+						+ "\treturn(@sideLength ** 2);\n"
+						+ "};\n"
+						+ "// A collection of square sides\n"
+						+ "@squares = array(1, 4, 8);\n"
+						+ "@areas = array_map(@squares, @areaOfSquare);\n"
+						+ "msg(@areas);")
+			};
+		}
+
+	}
 }
