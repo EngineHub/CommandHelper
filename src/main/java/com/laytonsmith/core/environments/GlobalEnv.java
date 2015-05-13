@@ -181,10 +181,26 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		} else {
 			clone.procs = new HashMap<>();
 		}
-		if (iVariableList != null) {
+		if (cloneVars && iVariableList != null) {
 			clone.iVariableList = (IVariableList) iVariableList.clone();
+		} else if(!cloneVars){
+			clone.iVariableList = new IVariableList();
 		}
 		return clone;
+	}
+
+	private boolean cloneVars = true;
+	/**
+	 * Determines whether or not, when cloning this environment, the variable list should be cloned
+	 * as well.
+	 * @param set
+	 */
+	public void setCloneVars(boolean set){
+		this.cloneVars = set;
+	}
+
+	public boolean getCloneVars(){
+		return this.cloneVars;
 	}
 
 	/**

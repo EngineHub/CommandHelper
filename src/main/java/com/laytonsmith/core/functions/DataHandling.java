@@ -30,6 +30,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CIClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
@@ -3008,7 +3009,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
+		public Version since() {
 			return CHVersion.V3_3_0;
 		}
 
@@ -3027,6 +3028,93 @@ public class DataHandling {
 						+ "\tmsg('Hello World!');"
 						+ "});")
 			};
+		}
+
+	}
+
+	@api
+	@unbreakable
+	@nolinking
+	public static class iclosure extends closure {
+
+		@Override
+		public String getName() {
+			return "iclosure";
+		}
+
+		@Override
+		public String docs() {
+			return "iclosure {[varNames...,] code} Returns a scope isolated closure on the provided code. An iclosure is"
+					+ " a datatype that represents some code as code, not the results of some"
+					+ " code after it is run. Code placed in an iclosure can be used as"
+					+ " a string, or executed by other functions using the execute() function."
+					+ " If a closure is \"to string'd\" it will not necessarily look like"
+					+ " the original code, but will be functionally equivalent. The current environment"
+					+ " is \"snapshotted\" and stored with the closure, however, this information is"
+					+ " only stored in memory, it isn't retained during a serialization operation. Additionally,"
+					+ " the variable table of the parent scope is not retained, thus making this closure \"isolated\""
+					+ " from the parent code."
+					+ " Also, the special variable @arguments is automatically created for you, and contains"
+					+ " an array of all the arguments passed to the closure, much like procedures."
+					+ " See the wiki article on [[CommandHelper/Staged/Closures|closures]] for more details"
+					+ " and examples.";
+		}
+
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			if (nodes.length == 0) {
+				//Empty closure, do nothing.
+				return new CClosure(null, env, CClassType.AUTO, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+			}
+			// Handle the closure type first thing
+			CClassType returnType = CClassType.AUTO;
+			if(nodes[0].getData() instanceof CClassType){
+				returnType = (CClassType) nodes[0].getData();
+				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
+				for(int i = 1; i < nodes.length; i++){
+					newNodes[i - 1] = nodes[i];
+				}
+				nodes = newNodes;
+			}
+			String[] names = new String[nodes.length - 1];
+			Construct[] defaults = new Construct[nodes.length - 1];
+			CClassType[] types = new CClassType[nodes.length - 1];
+			// We clone the enviornment at this point, because we don't want the values
+			// that are assigned here to overwrite values in the main scope.
+			Environment myEnv;
+			try {
+				myEnv = env.clone();
+			} catch (CloneNotSupportedException ex) {
+				myEnv = env;
+			}
+			for (int i = 0; i < nodes.length - 1; i++) {
+				ParseTree node = nodes[i];
+				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
+				List<ParseTree> children = new ArrayList<>();
+				children.add(node);
+				newNode.setChildren(children);
+				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel());
+				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
+				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
+				if (!(ret instanceof IVariable)) {
+					throw new ConfigRuntimeException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
+				}
+				names[i] = ((IVariable) ret).getName();
+				try {
+					defaults[i] = ((IVariable) ret).ival().clone();
+					types[i] = ((IVariable)ret).getDefinedType();
+				} catch (CloneNotSupportedException ex) {
+					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+			CIClosure closure = new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
+			return closure;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 
 	}

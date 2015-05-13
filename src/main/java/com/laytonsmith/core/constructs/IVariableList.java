@@ -82,10 +82,19 @@ public class IVariableList {
         return clone;
     }
 
-    //only the reflection package should be accessing this
+    /**
+	 * only the reflection package should be accessing this
+	 */
     public Set<String> keySet() {
         return varList.keySet();
     }
+
+	/**
+	 * Clears the IVariableList of all variables.
+	 */
+	public void clear() {
+		varList.clear();
+	}
 
 
 }

@@ -26,12 +26,12 @@ import java.util.logging.Logger;
 public class CClosure extends Construct {
 
     public static final long serialVersionUID = 1L;
-    private ParseTree node;
-    private final Environment env;
-    private final String[] names;
-    private final Construct[] defaults;
-	private final CClassType[] types;
-	private final CClassType returnType;
+    protected ParseTree node;
+    protected final Environment env;
+    protected final String[] names;
+    protected final Construct[] defaults;
+	protected final CClassType[] types;
+	protected final CClassType returnType;
 
     public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Construct[] defaults, CClassType[] types, Target t) {
         super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
