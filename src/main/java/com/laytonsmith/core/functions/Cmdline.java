@@ -948,13 +948,13 @@ public class Cmdline {
 					}
 				}
 				if(options.containsKey("stdout") && !(options.get("stdout", t) instanceof CNull)){
-					stdout = Static.getObject(options.get("stdout", t), t, "closure", CClosure.class);
+					stdout = Static.getObject(options.get("stdout", t), t, CClosure.class);
 				}
 				if(options.containsKey("stderr") && !(options.get("stderr", t) instanceof CNull)){
-					stderr = Static.getObject(options.get("stderr", t), t, "closure", CClosure.class);
+					stderr = Static.getObject(options.get("stderr", t), t, CClosure.class);
 				}
 				if(options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)){
-					exit = Static.getObject(options.get("exit", t), t, "closure", CClosure.class);
+					exit = Static.getObject(options.get("exit", t), t, CClosure.class);
 				}
 				if(options.containsKey("subshell")){
 					subshell = Static.getBoolean(options.get("subshell", t));

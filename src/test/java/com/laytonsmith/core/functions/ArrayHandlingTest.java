@@ -335,5 +335,69 @@ public class ArrayHandlingTest {
 		Run("@a = array(); @b = array(); @a[0] = @b; @b[0] = @a; @c = @a[]; msg((ref_equals(@c[0], @c[0][0][0]) && ref_equals(@c, @c[0][0])));", fakePlayer);
 		verify(fakePlayer).sendMessage("true");
 	}
-	
+
+	@Test public void testArrayIterate() throws Exception {
+		Run("@a = array(1, 2, 3); array_iterate(@a, closure(@k, @v){ msg(@v); });", fakePlayer);
+		verify(fakePlayer).sendMessage("1");
+		verify(fakePlayer).sendMessage("2");
+		verify(fakePlayer).sendMessage("3");
+	}
+
+	@Test public void testArrayIterateAssociative() throws Exception {
+		Run("@a = array(a: 1, b: 2, c: 3); array_iterate(@a, closure(@k, @v){ msg(\"@k: @v\"); });", fakePlayer);
+		verify(fakePlayer).sendMessage("a: 1");
+		verify(fakePlayer).sendMessage("b: 2");
+		verify(fakePlayer).sendMessage("c: 3");
+	}
+
+	@Test public void testArrayReduce() throws Exception {
+		Run("msg(array_reduce(array(1, 2, 3), closure(@soFar, @next){ return(@soFar + @next); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("6");
+	}
+
+	@Test public void testArrayReduce2() throws Exception {
+		Run("msg(array_reduce(array('a', 'b', 'c'), closure(@soFar, @next){ return(@soFar . @next); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("abc");
+	}
+
+	@Test public void testArrayReduceRight() throws Exception {
+		Run("msg(array_reduce_right(array(1, 2, 3), closure(@soFar, @next){ return(@soFar + @next); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("6");
+	}
+
+	@Test public void testArrayReduceRight2() throws Exception {
+		Run("msg(array_reduce_right(array('a', 'b', 'c'), closure(@soFar, @next){ return(@soFar . @next); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("cba");
+	}
+
+	@Test public void testArrayEvery1() throws Exception {
+		Run("msg(array_every(array(1, 1, 1), closure(@value){ return(@value == 1); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+
+	@Test public void testArrayEvery2() throws Exception {
+		Run("msg(array_every(array(1, 1, 2), closure(@value){ return(@value == 1); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("false");
+	}
+
+	@Test public void testArrayEvery3() throws Exception {
+		Run("msg(array_every(array(), closure(@value){ return(@value == 1); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+
+	@Test public void testArraySome1() throws Exception {
+		Run("msg(array_some (array(1, 1, 2), closure(@value){ return(@value == 1); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+
+	@Test public void testArraySome2() throws Exception {
+		Run("msg(array_some (array(2, 2, 2), closure(@value){ return(@value == 1); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("false");
+	}
+
+	@Test public void testArraySome3() throws Exception {
+		Run("msg(array_some (array(), closure(@value){ return(@value == 1); }));", fakePlayer);
+		verify(fakePlayer).sendMessage("false");
+	}
+
 }

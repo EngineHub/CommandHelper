@@ -1624,7 +1624,7 @@ public class ArrayHandling {
 			startup();
 			final CArray array = Static.getArray(args[0], t);
 			final CString sortType = new CString(args.length > 2?args[1].val():CArray.SortType.REGULAR.name(), t);
-			final CClosure callback = Static.getObject((args.length==2?args[1]:args[2]), t, "closure", CClosure.class);
+			final CClosure callback = Static.getObject((args.length==2?args[1]:args[2]), t, CClosure.class);
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
@@ -2484,7 +2484,7 @@ public class ArrayHandling {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IllegalArgumentException};
 		}
 
 		@Override
@@ -2577,7 +2577,7 @@ public class ArrayHandling {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IllegalArgumentException};
 		}
 
 		@Override
@@ -2661,6 +2661,168 @@ public class ArrayHandling {
 						+ "\treturn(@soFar . @next);\n"
 						+ "});\n"
 						+ "msg(@string);")
+			};
+		}
+
+	}
+
+	@api
+	public static class array_every extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray array = Static.getArray(args[0], t);
+			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			for(Construct c : array.keySet()){
+				boolean hasReturn = false;
+				try {
+					closure.execute(array.get(c, t));
+				} catch(FunctionReturnException ex){
+					hasReturn = true;
+					boolean ret = Static.getBoolean(ex.getReturn());
+					if(ret == false){
+						return CBoolean.FALSE;
+					}
+				}
+				if(!hasReturn){
+					throw new ConfigRuntimeException("The closure passed to " + getName() + " must return a boolean.", ExceptionType.IllegalArgumentException, t);
+				}
+			}
+			return CBoolean.TRUE;
+		}
+
+		@Override
+		public String getName() {
+			return "array_every";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {array, closure} Returns true if every value in the array meets some test, which the closure"
+					+ " should return true or false about. Not all values will necessarily be checked, once a value is"
+					+ " determined to fail the check, execution is stopped, and false is returned. The closure will be"
+					+ " passed each value in the array, one at a time, and must return a boolean.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "@array = array(1, 3, 5);\n"
+						+ "@arrayIsAllOdds = array_every(@array, closure(@value){\n"
+						+ "\treturn(@value % 2 == 1);\n"
+						+ "});\n"
+						+ "msg(@arrayIsAllOdds);"),
+				new ExampleScript("Basic usage, with false condition", "@array = array(1, 3, 4);\n"
+						+ "@arrayIsAllOdds = array_every(@array, closure(@value){\n"
+						+ "\treturn(@value % 2 == 1);\n"
+						+ "});\n"
+						+ "msg(@arrayIsAllOdds);")
+			};
+		}
+
+	}
+
+	@api
+	public static class array_some extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray array = Static.getArray(args[0], t);
+			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			for(Construct c : array.keySet()){
+				boolean hasReturn = false;
+				try {
+					closure.execute(array.get(c, t));
+				} catch(FunctionReturnException ex){
+					hasReturn = true;
+					boolean ret = Static.getBoolean(ex.getReturn());
+					if(ret == true){
+						return CBoolean.TRUE;
+					}
+				}
+				if(!hasReturn){
+					throw new ConfigRuntimeException("The closure passed to " + getName() + " must return a boolean.", ExceptionType.IllegalArgumentException, t);
+				}
+			}
+			return CBoolean.FALSE;
+		}
+
+		@Override
+		public String getName() {
+			return "array_some";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {array, closure} Returns true if any value in the array meets some test, which the closure"
+					+ " should return true or false about. Not all values will necessarily be checked, once a value is"
+					+ " determined to pass the check, execution is stopped, and true is returned. The closure will be"
+					+ " passed each value in the array, one at a time, and must return a boolean.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "@array = array(2, 4, 8);\n"
+						+ "@arrayHasOdds = array_every(@array, closure(@value){\n"
+						+ "\treturn(@value % 2 == 1);\n"
+						+ "});\n"
+						+ "msg(@arrayHasOdds);"),
+				new ExampleScript("Basic usage, with false condition", "@array = array(2, 3, 4);\n"
+						+ "@arrayHasOdds = array_every(@array, closure(@value){\n"
+						+ "\treturn(@value % 2 == 1);\n"
+						+ "});\n"
+						+ "msg(@arrayHasOdds);")
 			};
 		}
 

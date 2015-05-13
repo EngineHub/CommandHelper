@@ -117,26 +117,6 @@ public final class Static {
 
 	/**
 	 * Works like the other get* methods, but works in a more generic way for
-	 * other types of Constructs.
-	 *
-	 * @param <T> The type expected.
-	 * @param construct The generic object
-	 * @param t Code target
-	 * @param expectedClassName The expected class type, for use in the error
-	 * message if the construct is the wrong type.
-	 * @param clazz The type expected.
-	 * @return The properly cast object.
-	 * @deprecated Use
-	 * {@link #getObject(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target, java.lang.Class)}
-	 * instead, as that gets the expected class name automatically.
-	 */
-	@Deprecated
-	public static <T extends Construct> T getObject(Construct construct, Target t, String expectedClassName, Class<T> clazz) {
-		return ArgumentValidation.getObject(construct, t, expectedClassName, clazz);
-	}
-
-	/**
-	 * Works like the other get* methods, but works in a more generic way for
 	 * other types of Constructs. It also assumes that the class specified is
 	 * tagged with a typeof annotation, thereby preventing the need for the
 	 * expectedClassName like the deprecated version uses.
