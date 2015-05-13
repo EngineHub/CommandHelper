@@ -98,15 +98,15 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public Set<MCScore> getScores(String entry) {
 		Set<MCScore> ret = new HashSet<>();
-		if(ReflectionUtils.hasMethod(s.getClass(), "getScores", null, OfflinePlayer.class)){
-			// Old style, we have to build the list of offline players ourselves
-			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
-			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", player)) {
+		if(ReflectionUtils.hasMethod(s.getClass(), "getScores", null, String.class)){
+			// New style
+			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", entry)) {
 				ret.add(new BukkitMCScore(o));
 			}
 		} else {
-			// New style
-			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", entry)) {
+			// Old style, we have to build the list of offline players ourselves
+			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
+			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", player)) {
 				ret.add(new BukkitMCScore(o));
 			}
 		}
