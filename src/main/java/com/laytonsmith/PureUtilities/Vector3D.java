@@ -6,7 +6,10 @@ package com.laytonsmith.PureUtilities;
 public class Vector3D extends Point3D
 {
 
-	public static final Vector3D ZERO = new Vector3D();
+	/**
+	 * A Vector3D with x, y and z initialized at 0.
+	 */
+	public static final Vector3D ZERO = new Vector3D(0, 0, 0);
 
 	/**
 	 * Copy constructor.
@@ -18,20 +21,10 @@ public class Vector3D extends Point3D
 	}
 
 	/**
-	 * Zero constructor.
-	 *
-	 * @deprecated use Vector3D.ZERO instead
-	 */
-	@Deprecated
-	public Vector3D() {
-		super();
-	}
-
-	/**
 	 * Initializes the X and Y values. Z is initialized to 0.
 	 */
 	public Vector3D(double x, double y) {
-		super(x, y);
+		super(x, y, 0);
 	}
 
 	/**

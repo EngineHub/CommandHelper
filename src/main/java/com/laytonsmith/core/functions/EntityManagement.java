@@ -2640,7 +2640,7 @@ public class EntityManagement {
 								}
 								if (specArray.get(index, t) instanceof CNull) {
 									for (MCBodyPart key : poseMap.keySet()) {
-										poseMap.put(key, new Vector3D());
+										poseMap.put(key, Vector3D.ZERO);
 									}
 								}
 								stand.setAllPoses(poseMap);
