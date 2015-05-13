@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -31,6 +32,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.DataHandling.array;
@@ -1850,6 +1852,66 @@ public class ArrayHandling {
 	}
 
 	@api
+	public static class array_last_index extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray ca = (CArray)new array_indexes().exec(t, environment, args);
+			if(ca.isEmpty()){
+				return CNull.NULL;
+			} else {
+				return ca.get(ca.size() - 1, t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "array_last_index";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {array, value} Finds the index in the array where value occurs last. If"
+					+ " the value is not found, returns null. That is to say, if the value is contained in an"
+					+ " array (even multiple times) the index of the last element is returned.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_last_index(@array, 2))"),
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_last_index(@array, 5))"),
+			};
+		}
+
+	}
+
+	@api
 	public static class array_reverse extends AbstractFunction{
 
 		@Override
@@ -2367,7 +2429,11 @@ public class ArrayHandling {
 			CArray array = Static.getArray(args[0], t);
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
 			for(Construct key : array.keySet()){
-				closure.execute(key, array.get(key, t));
+				try {
+					closure.execute(key, array.get(key, t));
+				} catch(ProgramFlowManipulationException ex){
+					// Ignored
+				}
 			}
 			return CVoid.VOID;
 		}
@@ -2388,7 +2454,7 @@ public class ArrayHandling {
 					+ " should accept two arguments, the key and the value."
 					+ " This method can be used in some code to increase readability, to increase re-usability, or keep variables"
 					+ " created in a loop in an isolated scope. Note that this runs at approximately the same speed as a for loop,"
-					+ " which is slower than a foreach loop.";
+					+ " which is slower than a foreach loop. Any values returned from the closure are silently ignored.";
 		}
 
 		@Override
@@ -2410,6 +2476,193 @@ public class ArrayHandling {
 			};
 		}
 
+
+	}
+
+	@api
+	public static class array_reduce extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray array = Static.getArray(args[0], t);
+			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			if(array.isEmpty()){
+				return CNull.NULL;
+			}
+			if(array.size() == 1){
+				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
+				// whether or not it is associative or normal.
+				return array.get(array.keySet().toArray(new Construct[0])[0], t);
+			}
+			List<Construct> keys = new ArrayList<>(array.keySet());
+			Construct lastValue = array.get(keys.get(0), t);
+			for(int i = 1; i < keys.size(); ++i){
+				boolean hadReturn = false;
+				try {
+					closure.execute(lastValue, array.get(keys.get(i), t));
+				} catch(FunctionReturnException ex){
+					lastValue = ex.getReturn();
+					if(lastValue instanceof CVoid){
+						throw new ConfigRuntimeException("The closure passed to " + getName() + " cannot return void.", ExceptionType.IllegalArgumentException, t);
+					}
+					hadReturn = true;
+				}
+				if(!hadReturn){
+					throw new ConfigRuntimeException("The closure passed to " + getName() + " must return a value, but one was not returned.", ExceptionType.IllegalArgumentException, t);
+				}
+			}
+			return lastValue;
+		}
+
+		@Override
+		public String getName() {
+			return "array_reduce";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {array, closure} Reduces an array to a single value. This is useful for, for instance, summing the"
+					+ " values of an array. The previously calculated value, then the next value of the array are sent"
+					+ " to the closure, which is expected to return a value, based on the two values, which will be sent"
+					+ " again to the closure as the new calculated value. If the array is empty, null is returned, and if"
+					+ " the array has exactly one value in it, only that value is returned. Associative arrays are supported,"
+					+ " but the order is based on the key order, which may not be as expected. The keys of the array are ignored.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Summing the values of an array", "@array = array(1, 2, 4, 8);\n"
+						+ "@sum = array_reduce(@array, closure(@soFar, @next){\n"
+						+ "\treturn(@soFar + @next);\n"
+						+ "});\n"
+						+ "msg(@sum);"),
+				new ExampleScript("Combining the strings in an array", "@array = array('a', 'b', 'c');\n"
+						+ "@string = array_reduce(@array, closure(@soFar, @next){\n"
+						+ "\treturn(@soFar . @next);\n"
+						+ "});\n"
+						+ "msg(@string);")
+			};
+		}
+
+	}
+
+	@api
+	public static class array_reduce_right extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray array = Static.getArray(args[0], t);
+			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			if(array.isEmpty()){
+				return CNull.NULL;
+			}
+			if(array.size() == 1){
+				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
+				// whether or not it is associative or normal.
+				return array.get(array.keySet().toArray(new Construct[0])[0], t);
+			}
+			List<Construct> keys = new ArrayList<>(array.keySet());
+			Construct lastValue = array.get(keys.get(keys.size() - 1), t);
+			for(int i = keys.size() - 2; i >= 0; --i){
+				boolean hadReturn = false;
+				try {
+					closure.execute(lastValue, array.get(keys.get(i), t));
+				} catch(FunctionReturnException ex){
+					lastValue = ex.getReturn();
+					if(lastValue instanceof CVoid){
+						throw new ConfigRuntimeException("The closure passed to " + getName() + " cannot return void.", ExceptionType.IllegalArgumentException, t);
+					}
+					hadReturn = true;
+				}
+				if(!hadReturn){
+					throw new ConfigRuntimeException("The closure passed to " + getName() + " must return a value, but one was not returned.", ExceptionType.IllegalArgumentException, t);
+				}
+			}
+			return lastValue;
+		}
+
+		@Override
+		public String getName() {
+			return "array_reduce_right";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {array, closure} Reduces an array to a single value. This works in reverse of"
+					+ " array_reduce. This is useful for, for instance, summing the"
+					+ " values of an array. The previously calculated value, then the previous value of the array are sent"
+					+ " to the closure, which is expected to return a value, based on the two values, which will be sent"
+					+ " again to the closure as the new calculated value. If the array is empty, null is returned, and if"
+					+ " the array has exactly one value in it, only that value is returned. Associative arrays are supported,"
+					+ " but the order is based on the key order, which may not be as expected. The keys of the array are ignored.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Summing the values of an array", "@array = array(1, 2, 4, 8);\n"
+						+ "@sum = array_reduce_right(@array, closure(@soFar, @next){\n"
+						+ "\treturn(@soFar + @next);\n"
+						+ "});\n"
+						+ "msg(@sum);"),
+				new ExampleScript("Combining the strings in an array", "@array = array('a', 'b', 'c');\n"
+						+ "@string = array_reduce_right(@array, closure(@soFar, @next){\n"
+						+ "\treturn(@soFar . @next);\n"
+						+ "});\n"
+						+ "msg(@string);")
+			};
+		}
 
 	}
 }
