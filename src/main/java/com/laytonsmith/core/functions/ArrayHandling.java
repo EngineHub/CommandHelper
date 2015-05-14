@@ -2435,7 +2435,7 @@ public class ArrayHandling {
 					// Ignored
 				}
 			}
-			return CVoid.VOID;
+			return array;
 		}
 
 		@Override
@@ -2450,11 +2450,12 @@ public class ArrayHandling {
 
 		@Override
 		public String docs() {
-			return "void {array, closure} Iterates across an array, calling the closure for each value of the array. The closure"
+			return "array {array, closure} Iterates across an array, calling the closure for each value of the array. The closure"
 					+ " should accept two arguments, the key and the value."
 					+ " This method can be used in some code to increase readability, to increase re-usability, or keep variables"
 					+ " created in a loop in an isolated scope. Note that this runs at approximately the same speed as a for loop,"
-					+ " which is slower than a foreach loop. Any values returned from the closure are silently ignored.";
+					+ " which is slower than a foreach loop. Any values returned from the closure are silently ignored. Returns a"
+					+ " reference to the original array.";
 		}
 
 		@Override
