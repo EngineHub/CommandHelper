@@ -30,7 +30,6 @@ public class CommandHelperServerListener implements Listener{
     public void onServerCommand(ServerCommandEvent event){
 		//Run this first, so external events can intercept it.
 		BukkitMiscEvents.BukkitMCConsoleCommandEvent cce = new BukkitMiscEvents.BukkitMCConsoleCommandEvent(event);
-		EventUtils.TriggerExternal(cce);
         MCCommandSender player = new BukkitMCCommandSender(event.getSender());
         if(event.getSender() instanceof ConsoleCommandSender){
             //Need the more specific subtype for player()

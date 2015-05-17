@@ -25,15 +25,9 @@ import org.bukkit.event.server.ServerListPingEvent;
  */
 public class BukkitServerListener implements Listener{
 
-	//@EventHandler(priority= EventPriority.LOWEST)
-	public void onServerCommandEvent(ServerCommandEvent e){
-
-	}
-
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onPing(ServerListPingEvent event) {
 		BukkitMiscEvents.BukkitMCServerPingEvent pe = new BukkitMiscEvents.BukkitMCServerPingEvent(event);
-		EventUtils.TriggerExternal(pe);
 		EventUtils.TriggerListener(Driver.SERVER_PING, "server_ping", pe);
 	}
 
