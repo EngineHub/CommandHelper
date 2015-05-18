@@ -286,64 +286,6 @@ public final class EventUtils {
 	}
 
 	/**
-	 *
-	 * @param mce
-	 * @deprecated Use {@link #TriggerListener(com.laytonsmith.core.events.Driver, java.lang.String, com.laytonsmith.core.events.BindableEvent)} instead
-	 */
-	@Deprecated
-	public static void TriggerExternal(BindableEvent mce) {
-		for (Method m : ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(event.class)) {
-			Class<?>[] params = m.getParameterTypes();
-			if (params.length != 1 || !BindableEvent.class.isAssignableFrom(params[0])) {
-				Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE,
-						"An event handler annotated with @{0} may only contain one parameter, which extends {1}",
-						new Object[]{event.class.getSimpleName(), BindableEvent.class.getName()});
-			} else {
-				try {
-					Object instance = null;
-
-					if ((m.getModifiers() & Modifier.STATIC) == 0) {
-						//It's not static, so we need an instance. Ideally we could skip
-						//this step, but it's harder to enforce that across jars.
-						//We could emit a warning, but the end user wouldn't know what
-						//to do with that. However, if this step fails (no no-arg constructors
-						//exist) we will be forced to fail.
-						//
-						// TODO: We could preprocess, as we are for lifecycles, and emit errors.
-						try {
-							instance = m.getDeclaringClass().newInstance();
-						} catch (InstantiationException | IllegalAccessException e) {
-							throw new RuntimeException("Could not instantiate the superclass " + m.getDeclaringClass().getName()
-									+ ". There is no no-arg constructor present. Ideally however, the method " + m.getName()
-									+ " would simply be static, which would decrease overhead in general. "
-									+ " Note to the end user: This error is not a CommandHelper error,"
-									+ " it is an error in the extension that provides the event handler for"
-									+ " " + mce.getClass().getName() + ", and should be reported to the extension"
-									+ " author.", e);
-						}
-					}
-
-					m.invoke(instance, mce);
-				} catch (IllegalAccessException ex) {
-					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE,
-							"Illegal Access Exception while triggering"
-							+ " an external event:", ex.getCause());
-				} catch (IllegalArgumentException ex) {
-					// If we do this, console gets spammed for hooks that don't apply for
-					// the event being fired. Need to check if mce is instance of params[0].
-
-					//Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (InvocationTargetException ex) {
-					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE,
-							"Invocation Target Exception while triggering"
-							+ " an external event:", ex.getCause());
-				}
-			}
-
-		}
-	}
-
-	/**
 	 * Verifies that the event name given is a valid event name. If not, an
 	 * IllegalArgumentException is thrown.
 	 *
