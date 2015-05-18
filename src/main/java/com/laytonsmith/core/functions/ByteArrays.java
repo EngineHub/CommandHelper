@@ -3,8 +3,10 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
@@ -17,6 +19,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.UnsupportedEncodingException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteOrder;
 
 /**
  * 
@@ -536,6 +539,105 @@ public class ByteArrays {
 					+ " strings written in this manner are compatible with ba_get_string. The encoding may be set, but defaults to UTF-8.";
 		}
 		
+	}
+
+	@api
+	@seealso({ba_is_little_endian.class})
+	public static class ba_set_little_endian extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = Static.getByteArray(args[0], t);
+			boolean setLittle = Static.getBoolean(args[1]);
+			ba.setOrder(setLittle ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "ba_set_little_endian";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {byte_array, setLittleEndian} Sets the byte order that the specified byte array will use"
+					+ " for all future gets/sets. By default, a byte array is Big Endian. If setLittleEndian is true,"
+					+ " the byte array will be set to little endian, otherwise it will be set to big endian.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	@seealso({ba_set_little_endian.class})
+	public static class ba_is_little_endian extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = Static.getByteArray(args[0], t);
+			return CBoolean.get(ba.getOrder() == ByteOrder.LITTLE_ENDIAN);
+		}
+
+		@Override
+		public String getName() {
+			return "ba_is_little_endian";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {byte_array} Returns true if this byte array is little endian. By default, byte arrays are big endian,"
+					+ " but this may be changed with ba_set_little_endian.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
 	}
 	
 	private static CByteArray getBA(Construct [] args, Target t){

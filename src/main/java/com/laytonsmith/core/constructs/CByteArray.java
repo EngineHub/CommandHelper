@@ -9,6 +9,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -71,6 +72,14 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 	@Override
 	public boolean isDynamic() {
 		return true;
+	}
+
+	public void setOrder(ByteOrder bo){
+		data.order(bo);
+	}
+
+	public ByteOrder getOrder(){
+		return data.order();
 	}
 
 	private void checkSize(int need, Integer pos){
