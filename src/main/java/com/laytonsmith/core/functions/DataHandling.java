@@ -3578,7 +3578,7 @@ public class DataHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{2};
 		}
 
 		@Override
