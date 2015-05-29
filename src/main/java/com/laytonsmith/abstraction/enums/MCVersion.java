@@ -32,6 +32,7 @@ public enum MCVersion implements Version {
 	MC1_7_10(MC1_7),
 	MC1_8,
 	MC1_8_3(MC1_8),
+	MC1_8_6(MC1_8),
 	MC1_9;
 
 	private MCVersion majorVersion;
