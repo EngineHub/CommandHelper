@@ -26,14 +26,12 @@ public class BukkitVehicleListener implements Listener{
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onEnter(VehicleEnterEvent event) {
 		BukkitMCVehicleEnterEvent vee = new BukkitMCVehicleEnterEvent(event);
-		EventUtils.TriggerExternal(vee);
 		EventUtils.TriggerListener(Driver.VEHICLE_ENTER, "vehicle_enter", vee);
 	}
 	
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onExit(VehicleExitEvent event) {
 		BukkitMCVehicleExitEvent vee = new BukkitMCVehicleExitEvent(event);
-		EventUtils.TriggerExternal(vee);
 		EventUtils.TriggerListener(Driver.VEHICLE_LEAVE, "vehicle_leave", vee);
 	}
 	
@@ -43,7 +41,6 @@ public class BukkitVehicleListener implements Listener{
 			return;
 		}
 		BukkitMCVehicleBlockCollideEvent vbc = new BukkitMCVehicleBlockCollideEvent(event);
-		EventUtils.TriggerExternal(vbc);
 		EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vbc);
 	}
 
@@ -51,7 +48,6 @@ public class BukkitVehicleListener implements Listener{
 	public void onEntityCollide(VehicleEntityCollisionEvent event) {
 		if (event.getVehicle().getPassenger() != event.getEntity()) {
 			BukkitMCVehicleEntityCollideEvent vec = new BukkitMCVehicleEntityCollideEvent(event);
-			EventUtils.TriggerExternal(vec);
 			EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vec);
 		}
 	}
