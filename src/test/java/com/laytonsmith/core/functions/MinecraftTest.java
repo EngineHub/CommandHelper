@@ -1,7 +1,10 @@
 package com.laytonsmith.core.functions;
 
+import static org.junit.Assert.assertEquals;
+
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -67,5 +70,14 @@ public class MinecraftTest {
 //        verify(fakePlayer).sendMessage("true");
         
     }
-    
+
+    @Test
+    public void testGetMCVersion() {
+        assertEquals(MCVersion.match(new String[]{"1", "8"}), MCVersion.MC1_8);
+        assertEquals(MCVersion.match(new String[]{"1", "8", "0"}), MCVersion.MC1_8);
+        assertEquals(MCVersion.match(new String[]{"1", "8", "6"}), MCVersion.MC1_8_6);
+        assertEquals(MCVersion.match(new String[]{"1", "8", "7"}), MCVersion.MC1_8_X);
+        assertEquals(MCVersion.match(new String[]{"2", "10", "20"}), MCVersion.MC2_X);
+        assertEquals(MCVersion.match(new String[]{"3", "1", "4"}), MCVersion.MCX_X);
+    }
 }
