@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.enums;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 
 /**
@@ -14,54 +15,100 @@ public enum MCVersion implements Version {
 	MC1_0,
 	MC1_1,
 	MC1_2,
-	MC1_2_5(MC1_2),
+	MC1_2_5,
 	MC1_3,
-	MC1_3_2(MC1_3),
+	MC1_3_2,
 	MC1_4,
-	MC1_4_2(MC1_4),
-	MC1_4_5(MC1_4),
+	MC1_4_2,
+	MC1_4_5,
 	// below this point, Bukkit begins package versioning
-	MC1_4_7(MC1_4),
+	MC1_4_7,
 	MC1_5,
-	MC1_5_2(MC1_5),
+	MC1_5_2,
 	MC1_6,
-	MC1_6_2(MC1_6),
-	MC1_6_4(MC1_6),
+	MC1_6_2,
+	MC1_6_4,
 	MC1_7,
-	MC1_7_2(MC1_7),
-	MC1_7_10(MC1_7),
+	MC1_7_2,
+	MC1_7_10,
 	MC1_8,
-	MC1_8_3(MC1_8),
-	MC1_9;
+	MC1_8_3,
+	MC1_8_6,
+	MC1_8_X,
+	MC1_9,
+	MC1_9_X,
+	MC1_X,
+	MC2_X,
+	MCX_X;
 
-	private MCVersion majorVersion;
-
-	private MCVersion() {
-		this(null);
-	}
-
-	private MCVersion(MCVersion majorVersion) {
-		this.majorVersion = majorVersion;
-	}
-
-	public MCVersion getMajorVersion() {
-		return majorVersion == null ? this : majorVersion;
+	public static MCVersion match(String[] source) {
+		String[] parts = new String[Math.min(3, source.length)];
+		for (int i = 0; i < parts.length; i++) {
+			parts[i] = source[i];
+		}
+		String attempt = "MC" + StringUtils.Join(parts, "_");
+		try {
+			return valueOf(attempt);
+		} catch (IllegalArgumentException iae) {
+			if (parts.length == 3) {
+				parts[2] = "0".equals(parts[2]) ? null : "X";
+				attempt = "MC" + StringUtils.Join(parts[2] == null ? new String[]{parts[0], parts[1]} : parts, "_");
+				try {
+					return valueOf(attempt);
+				} catch (IllegalArgumentException iae2) {
+					parts[1] = "X";
+					attempt = "MC" + StringUtils.Join(new String[]{parts[0], parts[1]}, "_");
+					try {
+						return valueOf(attempt);
+					} catch (IllegalArgumentException iae3) {
+						return MCX_X;
+					}
+				}
+			}
+			if (parts.length == 2) {
+				parts[1] = "X";
+				attempt = "MC" + StringUtils.Join(parts, "_");
+				try {
+					return valueOf(attempt);
+				} catch (IllegalArgumentException iae2) {
+					return MCX_X;
+				}
+			}
+			return MCX_X;
+		}
 	}
 
 	@Override
 	public int getMajor() {
-		return Integer.valueOf(name().split("_")[0].substring(2));
+		String form = name().split("_")[0].substring(2);
+		if ("X".equals(form)) {
+			return -1;
+		}
+		return Integer.valueOf(form);
 	}
 
 	@Override
 	public int getMinor() {
-		return Integer.valueOf(name().split("_")[1]);
+		String form = name().split("_")[1];
+		if ("X".equals(form)) {
+			return -1;
+		}
+		return Integer.valueOf(form);
 	}
 
 	@Override
 	public int getSupplemental() {
 		String[] parts = name().split("_");
-		return parts.length < 3 ? 0 : Integer.valueOf(parts[2]);
+		if (parts.length > 2) {
+			if ("X".equals(parts[2])) {
+				return -1;
+			}
+			return Integer.valueOf(parts[2]);
+		}
+		if (getMinor() == -1) {
+			return -1;
+		}
+		return Integer.valueOf(parts[2]);
 	}
 
 	@Override
