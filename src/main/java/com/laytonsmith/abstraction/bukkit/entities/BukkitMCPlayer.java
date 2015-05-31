@@ -463,7 +463,13 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 					/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
 				}
 				Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
-				Object opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
+				Object opListEntry;
+				try {
+					opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
+				} catch (ReflectionUtils.ReflectionException e) {
+					// Probably 1.8.6
+					opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
+				}
 				d.put(p.getUniqueId().toString(), opListEntry);
 			} else {
 				d.remove(p.getUniqueId().toString());
