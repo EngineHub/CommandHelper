@@ -1,6 +1,5 @@
 package com.laytonsmith.core;
 
-<<<<<<< HEAD
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCColor;
@@ -23,9 +22,6 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-=======
-import com.laytonsmith.abstraction.*;
->>>>>>> Expose item_flags meta value
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
