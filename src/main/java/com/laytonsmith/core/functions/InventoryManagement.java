@@ -62,7 +62,8 @@ public class InventoryManagement {
 					+ " type: The numeric id of the item, data: The data value of the item,"
                     + " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
                     + " of enchant objects, with 0 or more associative arrays which look like:"
-                    + " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
+                    + " array(etype: The type of enchantment, elevel: The strength of the enchantment)),"
+                    + " flags: An array of item flags (like HIDE_ATTRIBUTES, HIDE_DESTROYS, etc.) or an empty array";
         }
 
 		@Override
@@ -1131,7 +1132,8 @@ public class InventoryManagement {
 					+ " consists of the following associative array(type: The id of the item, data: The data value of the item,"
 					+ " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
 					+ " of enchant objects, with 0 or more associative arrays which look like:"
-					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
+					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))"
+          + " flags: An array of item flags (like HIDE_ATTRIBUTES, HIDE_DESTROYS, etc.) or an empty array";
 		}
 
 		@Override
@@ -1520,7 +1522,8 @@ public class InventoryManagement {
 					+ " consists of the following associative array(type: The id of the item, data: The data value of the item,"
 					+ " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
 					+ " of enchant objects, with 0 or more associative arrays which look like:"
-					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
+					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))"
+          + " flags: An array of item flags (like HIDE_ATTRIBUTES, HIDE_DESTROYS, etc.) or an empty array";
 		}
 
 		@Override
