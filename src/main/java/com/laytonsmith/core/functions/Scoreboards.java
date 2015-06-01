@@ -392,8 +392,8 @@ public class Scoreboards {
 				ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
 				to.set("options", ops, t);
 				CArray pl = new CArray(t);
-				for (MCOfflinePlayer ofp : team.getPlayers()) {
-					pl.push(new CString(ofp.getName(), t));
+				for (String entry : team.getEntries()) {
+					pl.push(new CString(entry, t));
 				}
 				to.set("players", pl, t);
 				ret.push(to);
@@ -721,7 +721,7 @@ public class Scoreboards {
 			if (args[1].val().length() > 16) {
 				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
 			}
-			team.addPlayer(Static.GetUser(args[1], t));
+			team.addEntry(args[1].val());
 			return CVoid.VOID;
 		}
 
@@ -755,7 +755,7 @@ public class Scoreboards {
 			if (team == null) {
 				throw new ScoreboardException("No team by that name exists.", t);
 			}
-			return CBoolean.get(team.removePlayer(Static.GetUser(args[1], t)));
+			return CBoolean.get(team.removeEntry(args[1].val()));
 		}
 
 		@Override
