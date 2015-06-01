@@ -805,11 +805,7 @@ public class EntityManagement {
 			if (seconds == 0) {
 				return CBoolean.get(mob.removeEffect(effect));
 			} else {
-				if (particles) {
-					mob.addEffect(effect, strength, seconds, ambient, t);
-				} else {
-					mob.addEffect(effect, strength, seconds, ambient, particles, t);
-				}
+				mob.addEffect(effect, strength, seconds, ambient, particles, t);
 				return CBoolean.TRUE;
 			}
 		}

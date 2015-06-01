@@ -866,11 +866,7 @@ public class ObjectGenerator {
 				if (effect.containsKey("particles")) {
 					particles = Static.getBoolean(effect.get("particles", t));
 				}
-				if (particles) {
-					ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient));
-				} else {
-					ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient, particles));
-				}
+				ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient, particles));
 			} else {
 				throw new Exceptions.FormatException("Expected a potion array at index" + key, t);
 			}

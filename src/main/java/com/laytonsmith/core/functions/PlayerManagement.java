@@ -2106,11 +2106,7 @@ public class PlayerManagement {
 			if (seconds == 0) {
 				return CBoolean.get(m.removeEffect(effect));
 			} else {
-				if (particles) {
-					m.addEffect(effect, strength, seconds, ambient, t);
-				} else {
-					m.addEffect(effect, strength, seconds, ambient, particles, t);
-				}
+				m.addEffect(effect, strength, seconds, ambient, particles, t);
 				return CBoolean.TRUE;
 			}
 		}
