@@ -2096,7 +2096,7 @@ public class PlayerManagement {
 			if (args.length >= 4) {
 				seconds = Static.getInt32(args[3], t);
 			}
-			if (args.length == 5) {
+			if (args.length >= 5) {
 				ambient = Static.getBoolean(args[4]);
 			}
 			if (args.length == 6) {
