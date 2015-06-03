@@ -46,8 +46,7 @@ public class BukkitMCObjective implements MCObjective {
 	@Override
 	public MCScore getScore(String entry) {
 		if(ReflectionUtils.hasMethod(o.getClass(), "getScore", null, String.class)){
-			// New style
-			return new BukkitMCScore((Score) ReflectionUtils.invokeMethod(o, "getScore", entry));
+			return new BukkitMCScore(o.getScore(entry));
 		} else {
 			// Old style
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);

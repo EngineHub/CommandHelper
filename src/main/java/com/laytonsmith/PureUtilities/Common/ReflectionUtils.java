@@ -390,9 +390,6 @@ public class ReflectionUtils {
 	 * code, this will be thrown.
 	 */
 	public static boolean hasMethod(Class<?> c, String methodName, Class returnType, Class ... params) throws ReflectionException {
-		if(returnType == null){
-			returnType = Object.class;
-		}
 		Method m;
 		try {
 			m = c.getMethod(methodName, params);
@@ -401,7 +398,10 @@ public class ReflectionUtils {
 		} catch (SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
-		return returnType.isAssignableFrom(m.getReturnType());
+		if(returnType != null){
+			return returnType.isAssignableFrom(m.getReturnType());
+		}
+		return true;
 	}
 
 

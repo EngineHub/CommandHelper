@@ -32,14 +32,12 @@ public class BukkitInventoryListener implements Listener{
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onInvClick(InventoryClickEvent event) {
 		BukkitMCInventoryClickEvent ice = new BukkitInventoryEvents.BukkitMCInventoryClickEvent(event);
-		EventUtils.TriggerExternal(ice);
 		EventUtils.TriggerListener(Driver.INVENTORY_CLICK, "inventory_click", ice);
 	}
 
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onInvDrag(InventoryDragEvent event) {
 		BukkitMCInventoryDragEvent ide = new BukkitInventoryEvents.BukkitMCInventoryDragEvent(event);
-		EventUtils.TriggerExternal(ide);
 		EventUtils.TriggerListener(Driver.INVENTORY_DRAG, "inventory_drag", ide);
 	}
 	
@@ -60,28 +58,24 @@ public class BukkitInventoryListener implements Listener{
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onItemEnchant(EnchantItemEvent event) {
 		BukkitMCEnchantItemEvent eie = new BukkitInventoryEvents.BukkitMCEnchantItemEvent(event);
-		EventUtils.TriggerExternal(eie);
 		EventUtils.TriggerListener(Driver.ITEM_ENCHANT, "item_enchant", eie);
 	}
 	
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onPreEnchant(PrepareItemEnchantEvent event) {
 		BukkitMCPrepareItemEnchantEvent pie = new BukkitInventoryEvents.BukkitMCPrepareItemEnchantEvent(event);
-		EventUtils.TriggerExternal(pie);
 		EventUtils.TriggerListener(Driver.ITEM_PRE_ENCHANT, "item_pre_enchant", pie);
 	}
 	
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onItemHeld(PlayerItemHeldEvent event) {
 		BukkitMCItemHeldEvent ih = new BukkitInventoryEvents.BukkitMCItemHeldEvent(event);
-		EventUtils.TriggerExternal(ih);
 		EventUtils.TriggerListener(Driver.ITEM_HELD, "item_held", ih);
 	}
 	
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onPreCraft(PrepareItemCraftEvent event) {
 		BukkitMCPrepareItemCraftEvent pc = new BukkitInventoryEvents.BukkitMCPrepareItemCraftEvent(event);
-		EventUtils.TriggerExternal(pc);
 		EventUtils.TriggerListener(Driver.ITEM_PRE_CRAFT, "item_pre_craft", pc);
 	}
 }
