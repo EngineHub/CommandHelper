@@ -847,12 +847,11 @@ public class Minecraft {
 				index = Static.getInt32(args[0], t);
 			}
 
-			if (index < -1 || index > 12) {
-				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 12 (inclusive)",
+			if (index < -1 || index > 16) {
+				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 16 (inclusive)",
 						ExceptionType.RangeException, t);
 			}
 
-			assert index >= -1 && index <= 12; // Is this needed? Above statement should cause this to never be true. - entityreborn
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 
 			if (index == 0 || index == -1) {
