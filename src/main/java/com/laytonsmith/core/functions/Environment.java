@@ -778,12 +778,12 @@ public class Environment {
 
 		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double x = 0;
-			double y = 0;
-			double z = 0;
+			double x;
+			double y;
+			double z;
 			float size = 3;
 			MCWorld w = null;
-			MCPlayer m = null;
+			MCPlayer m;
 			boolean safe = false;
 
 			if (args.length >= 3) {
@@ -854,9 +854,9 @@ public class Environment {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCInstrument i = null;
 			MCNote n = null;
-			MCLocation l = null;
-			int instrumentOffset = 0;
-			int noteOffset = 0;
+			MCLocation l;
+			int instrumentOffset;
+			int noteOffset;
 			if (args.length == 2) {
 				Static.AssertPlayerNonNull(p, t);
 				instrumentOffset = 0;

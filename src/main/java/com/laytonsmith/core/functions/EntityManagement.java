@@ -821,7 +821,7 @@ public class EntityManagement {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
 			MCLivingEntity shooter = null;
-			MCLivingEntity target = null;
+			MCLivingEntity target;
 
 			int shooter_id = 0;
 			int target_id = 0;
@@ -829,7 +829,7 @@ public class EntityManagement {
 			MCLocation from = null;
 			MCLocation to = null;
 
-			MCLocation shifted_from = null;
+			MCLocation shifted_from;
 
 			MCEntityType entity_shoot = null;
 			MCProjectileType projectile_shoot = null;

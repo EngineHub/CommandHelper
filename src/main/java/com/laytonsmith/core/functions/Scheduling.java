@@ -302,10 +302,10 @@ public class Scheduling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "set_interval(1000, closure(){\n"
+				new ExampleScript("Basic usage", "set_interval(1000, closure() {\n"
 						+ "\tmsg('Hello World!');\n"
 						+ "});", "<Would message the user \"Hello World!\" every second>"),
-				new ExampleScript("Usage with initial delay", "set_interval(1000, 5000, closure(){\n"
+				new ExampleScript("Usage with initial delay", "set_interval(1000, 5000, closure() {\n"
 						+ "\tmsg('Hello World!');\n"
 						+ "});", "<Would message the user \"Hello World!\" every second, however there would be an initial delay of 5 seconds>")
 			};
@@ -389,7 +389,7 @@ public class Scheduling {
 
 				@Override
 				public void run() {
-					if(isRunning.get()){
+					if(isRunning.get()) {
 						new clear_task().exec(t, environment, new CInt(ret.get(), t));
 						environment.getEnv(GlobalEnv.class).SetInterrupt(true);
 						taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.KILLED);
@@ -408,7 +408,7 @@ public class Scheduling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "set_timeout(10000, closure(){\n"
+				new ExampleScript("Basic usage", "set_timeout(10000, closure() {\n"
 						+ "\tmsg('Hello World!');\n"
 						+ "});", "<Would wait 5 seconds, then message the user \"Hello World!\">")
 			};
@@ -475,13 +475,13 @@ public class Scheduling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Use from within an interval", "set_interval(1000, closure(){\n"
-						+ "\tif(rand(0, 10) == 9){\n"
+				new ExampleScript("Use from within an interval", "set_interval(1000, closure() {\n"
+						+ "\tif(rand(0, 10) == 9) {\n"
 						+ "\t\tclear_task();\n"
 						+ "\t}\n"
 						+ "\tmsg('Hello World!');\n"
 						+ "});", "<Messages the user until the random number generator produces a 9, at which point the interval is stopped>"),
-				new ExampleScript("Using the id returned from set_timeout", "@id = set_timeout(5000, closure(){\n"
+				new ExampleScript("Using the id returned from set_timeout", "@id = set_timeout(5000, closure() {\n"
 						+ "\tmsg('Hello World!');\n"
 						+ "});\n"
 						+ "clear_task(@id);", "<Nothing happens, as the timeout is cancelled before it runs>")
@@ -511,9 +511,9 @@ public class Scheduling {
 				@Override
 				public String generate(String... args) {
 					String [] timezones = new String[0];
-					try{
+					try {
 						timezones = TimeZone.getAvailableIDs();
-					} catch(NullPointerException e){
+					} catch(NullPointerException e) {
 						//This is due to a JDK bug. As you can see, the code above
 						//should never NPE due to our mistake, so it would only occur
 						//during an internal error. The solution that worked for me is here:
@@ -558,13 +558,13 @@ public class Scheduling {
 				now = new Date(Static.getInt(args[1], t));
 			}
 			TimeZone timezone = TimeZone.getDefault();
-			if(args.length >= 3){
+			if(args.length >= 3) {
 				timezone = TimeZone.getTimeZone(args[2].val());
 			}
 			SimpleDateFormat dateFormat;
-			try{
+			try {
 				dateFormat = new SimpleDateFormat(args[0].toString());
-			} catch(IllegalArgumentException ex){
+			} catch(IllegalArgumentException ex) {
 				throw new Exceptions.FormatException(ex.getMessage(), t);
 			}
 			dateFormat.setTimeZone(timezone);
@@ -612,11 +612,11 @@ public class Scheduling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			SimpleDateFormat dateFormat;
-			try{
+			try {
 				dateFormat = new SimpleDateFormat(args[0].toString());
 				Date d = dateFormat.parse(args[1].val());
 				return new CInt(d.getTime(), t);
-			} catch(IllegalArgumentException | ParseException ex){
+			} catch(IllegalArgumentException | ParseException ex) {
 				throw new Exceptions.FormatException(ex.getMessage(), t);
 			}
 		}
@@ -673,9 +673,9 @@ public class Scheduling {
 		 * @return
 		 * @param jobID The job ID
 		 */
-		public static boolean stopJob(int jobID){
-			synchronized(cronJobs){
-				if(cronJobs.containsKey(jobID)){
+		public static boolean stopJob(int jobID) {
+			synchronized(cronJobs) {
+				if(cronJobs.containsKey(jobID)) {
 					cronJobs.remove(jobID);
 					return true;
 				} else {
@@ -702,18 +702,18 @@ public class Scheduling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			//First things first, check the format of the arguments.
-			if(!(args[0] instanceof CString)){
+			if(!(args[0] instanceof CString)) {
 				throw new Exceptions.CastException("Expected string for argument 1 in " + getName(), t);
 			}
-			if(!(args[1] instanceof CClosure)){
+			if(!(args[1] instanceof CClosure)) {
 				throw new Exceptions.CastException("Expected closure for argument 2 in " + getName(), t);
 			}
 			CronFormat format = validateFormat(args[0].val(), t);
 			format.job = ((CClosure)args[1]);
 			//At this point, the format is complete. We need to start up the cron thread if it's not running, and
 			//then register this job, as well as inform clear_task of this id.
-			synchronized(cronThreadLock){
-				if(cronThread == null){
+			synchronized(cronThreadLock) {
+				if(cronThread == null) {
 					final DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 					final MutableObject<Boolean> stopCron = new MutableObject<>(false);
 					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
@@ -722,10 +722,10 @@ public class Scheduling {
 						public void run() {
 							cronThread = null;
 							stopCron.setObject(true);
-							synchronized(cronJobs){
+							synchronized(cronJobs) {
 								cronJobs.clear();
 							}
-							synchronized(cronThreadLock){
+							synchronized(cronThreadLock) {
 								cronThreadLock.notifyAll();
 							}
 						}
@@ -735,24 +735,24 @@ public class Scheduling {
 						@Override
 						public void run() {
 							long lastMinute = 0;
-							while(!stopCron.getObject()){
+							while(!stopCron.getObject()) {
 								//We want to check to make sure that we only run once per minute, even though the
 								//checks happen every second. This ensures that we have a fast enough sampling
 								//period, while ensuring that we don't repeat tasks within the same minute.
-								if((System.currentTimeMillis() / 1000 / 60) > lastMinute){
+								if((System.currentTimeMillis() / 1000 / 60) > lastMinute) {
 									//Set the lastMinute value to now
 									lastMinute = System.currentTimeMillis() / 1000 / 60;
 									//Activate
-									synchronized(cronJobs){
+									synchronized(cronJobs) {
 										Calendar c = Calendar.getInstance();
-										for(final CronFormat f : cronJobs.values()){
+										for(final CronFormat f : cronJobs.values()) {
 											//Check to see if it is currently time to run each job
 											if(f.min.contains(c.get(Calendar.MINUTE))
 													&& f.hour.contains(c.get(Calendar.HOUR_OF_DAY))
 													&& f.day.contains(c.get(Calendar.DAY_OF_MONTH))
 													&& f.month.contains(c.get(Calendar.MONTH) + 1)
 													&& f.dayOfWeek.contains(c.get(Calendar.DAY_OF_WEEK) - 1)
-													){
+													) {
 												//All the fields match, so let's trigger this job
 												StaticLayer.GetConvertor().runOnMainThreadLater(dm, new Runnable() {
 
@@ -760,7 +760,7 @@ public class Scheduling {
 													public void run() {
 														try {
 															f.job.execute();
-														} catch(ConfigRuntimeException ex){
+														} catch(ConfigRuntimeException ex) {
 															ConfigRuntimeException.HandleUncaughtException(ex, f.job.getEnv());
 														}
 													}
@@ -769,7 +769,7 @@ public class Scheduling {
 										}
 									}
 								} //else continue, we'll wait another second.
-								synchronized(cronThreadLock){
+								synchronized(cronThreadLock) {
 									try {
 										cronThreadLock.wait(1000);
 									} catch (InterruptedException ex) {
@@ -785,7 +785,7 @@ public class Scheduling {
 				}
 			}
 			int jobID = jobIDs.getAndIncrement();
-			synchronized(cronJobs){
+			synchronized(cronJobs) {
 				cronJobs.put(jobID, format);
 				format.job.getEnv().getEnv(GlobalEnv.class).SetCustom("cron-task-id", jobID);
 			}
@@ -845,7 +845,7 @@ public class Scheduling {
 			HOURS.put("noon", 12);
 		}
 
-		private CronFormat validateFormat(String format, Target t){
+		private CronFormat validateFormat(String format, Target t) {
 			//Now we need to look at the format of the cron task, and convert it to a standardized format.
 			//Our goal here is to remove all ranges, predefined names, including @hourly and January.
 			format = format.trim();
@@ -855,28 +855,28 @@ public class Scheduling {
 			format = format.replaceAll("( )+", " ");
 			//Lowercase everything
 			format = format.toLowerCase();
-			if("@yearly".equals(format) || "@annually".equals(format)){
+			if("@yearly".equals(format) || "@annually".equals(format)) {
 				format = "0 0 1 1 *";
 			}
-			if("@monthly".equals(format)){
+			if("@monthly".equals(format)) {
 				format = "0 0 1 * *";
 			}
-			if("@weekly".equals(format)){
+			if("@weekly".equals(format)) {
 				format = "0 0 * * 0";
 			}
-			if("@daily".equals(format)){
+			if("@daily".equals(format)) {
 				format = "0 0 * * *";
 			}
-			if("@hourly".equals(format)){
+			if("@hourly".equals(format)) {
 				format = "0 * * * *";
 			}
 			//Check for invalid characters
-			if(format.matches("[^a-z0-9\\*\\-,@/]")){
+			if(format.matches("[^a-z0-9\\*\\-,@/]")) {
 				throw new Exceptions.FormatException("Invalid characters found in format for " + getName() + ": \"" + format + "\". Check your format and try again.", t);
 			}
 			//Now split into the segments.
 			String[] sformat = format.split(" ");
-			if(sformat.length != 5){
+			if(sformat.length != 5) {
 				throw new Exceptions.FormatException("Expected 5 segments in " + getName() + ", but " + StringUtils.PluralTemplateHelper(sformat.length, "%d was", "%d were") + " found.", t);
 			}
 			String min = sformat[0];
@@ -886,13 +886,13 @@ public class Scheduling {
 			String dayOfWeek = sformat[4];
 
 			//Now replace the special shortcut names
-			for(String key : MONTHS.keySet()){
+			for(String key : MONTHS.keySet()) {
 				month = month.replace(key, Integer.toString(MONTHS.get(key)));
 			}
-			for(String key : DAYS.keySet()){
+			for(String key : DAYS.keySet()) {
 				dayOfWeek = dayOfWeek.replace(key, Integer.toString(DAYS.get(key)));
 			}
-			for(String key : HOURS.keySet()){
+			for(String key : HOURS.keySet()) {
 				hour = hour.replace(key, Integer.toString(HOURS.get(key)));
 			}
 			//Split on commas
@@ -905,39 +905,39 @@ public class Scheduling {
 			List<List<String>> segments = Arrays.asList(minList, hourList, dayList, monthList, dayOfWeekList);
 			//Now go through each and pull out any ranges. At this point, everything
 			//is numbers or *
-			for(int i = 0; i < segments.size(); i++){
+			for(int i = 0; i < segments.size(); i++) {
 				List<String> segment = segments.get(i);
 				Iterator<String> it = segment.iterator();
 				List<String> addAll = new ArrayList<String>();
 				Range range = RANGES.get(i);
-				while(it.hasNext()){
+				while(it.hasNext()) {
 					String part = it.next();
 					Matcher rangeMatcher = RANGE.matcher(part);
-					if(rangeMatcher.find()){
+					if(rangeMatcher.find()) {
 						it.remove();
 						Integer minRange = Integer.parseInt(rangeMatcher.group(1));
 						Integer maxRange = Integer.parseInt(rangeMatcher.group(2));
 						Range r = new Range(minRange, maxRange);
-						if(!r.isAscending()){
+						if(!r.isAscending()) {
 							throw new Exceptions.FormatException("Ranges must be min to max, and not the same value in format for " + getName(), t);
 						}
 						List<Integer> rr = r.getRange();
-						for(int j = 0; j < rr.size(); j++){
+						for(int j = 0; j < rr.size(); j++) {
 							addAll.add(Integer.toString(rr.get(j)));
 						}
 						continue;
 					}
 					Matcher everyMatcher = EVERY.matcher(part);
-					if(everyMatcher.find()){
+					if(everyMatcher.find()) {
 						it.remove();
 						Integer every = Integer.parseInt(everyMatcher.group(1));
-						for(int j = range.getMin(); j <= range.getMax(); j+=every){
+						for(int j = range.getMin(); j <= range.getMax(); j+=every) {
 							addAll.add(Integer.toString(j));
 						}
 					}
-					if("*".equals(part)){
+					if("*".equals(part)) {
 						it.remove();
-						for(int j = range.getMin(); j <= range.getMax(); j++){
+						for(int j = range.getMin(); j <= range.getMax(); j++) {
 							addAll.add(Integer.toString(j));
 						}
 					}
@@ -947,28 +947,28 @@ public class Scheduling {
 			}
 			//Everything is ints now, so parse it into a CronFormat object.
 			CronFormat f = new CronFormat();
-			for(int i = 0; i < 5; i++){
+			for(int i = 0; i < 5; i++) {
 				List<Integer> list = new ArrayList<Integer>();
 				List<String> segment = segments.get(i);
 				Range range = RANGES.get(i);
-				for(String s : segment){
-					try{
+				for(String s : segment) {
+					try {
 						list.add(Integer.parseInt(s));
-					} catch (NumberFormatException ex){
+					} catch (NumberFormatException ex) {
 						//Any unexpected strings would show up here. The expected string values would have already
 						//been replaced with a number, so this should work if there are no errors.
 						throw new Exceptions.FormatException("Unknown string passed in format for " + getName() + " \"" + s + "\"", t);
 					}
 				}
 				Collections.sort(list);
-				if(!range.contains(list.get(0))){
+				if(!range.contains(list.get(0))) {
 					throw new Exceptions.FormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(0), t);
 				}
-				if(!range.contains(list.get(list.size() - 1))){
+				if(!range.contains(list.get(list.size() - 1))) {
 					throw new Exceptions.FormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(list.size() - 1), t);
 				}
 				Set<Integer> set = new TreeSet<Integer>(list);
-				switch(i){
+				switch(i) {
 					case 0:
 						f.min = set;
 						break;
@@ -1032,8 +1032,8 @@ public class Scheduling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.get(0).isConst()){
-				if(children.get(0).getData() instanceof CString){
+			if(children.get(0).isConst()) {
+				if(children.get(0).getData() instanceof CString) {
 					validateFormat(children.get(0).getData().val(), t);
 				}
 			}
@@ -1063,13 +1063,13 @@ public class Scheduling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Integer id = (Integer)environment.getEnv(GlobalEnv.class).GetCustom("cron-task-id");
-			if(args.length == 1){
+			if(args.length == 1) {
 				id = (int)Static.getInt(args[0], t);
 			}
-			if(id == null){
+			if(id == null) {
 				throw new Exceptions.RangeException("No task ID provided, and not running from within a cron task.", t);
 			}
-			if(!set_cron.stopJob(id)){
+			if(!set_cron.stopJob(id)) {
 				throw new Exceptions.RangeException("Task ID invalid", t);
 			}
 			return CVoid.VOID;

@@ -40,50 +40,51 @@ public class Enchantments {
 	 */
 	public static String ConvertName(String wikiVersion) {
 		String lc = wikiVersion.toUpperCase().trim();
-		if (lc.equals("PROTECTION")) {
-			return "PROTECTION_ENVIRONMENTAL";
-		} else if (lc.equals("FIRE PROTECTION")) {
-			return "PROTECTION_FIRE";
-		} else if (lc.equals("FEATHER FALLING")) {
-			return "PROTECTION_FALL";
-		} else if (lc.equals("BLAST PROTECTION")) {
-			return "PROTECTION_EXPLOSIONS";
-		} else if (lc.equals("PROJECTILE PROTECTION")) {
-			return "PROTECTION_PROJECTILE";
-		} else if (lc.equals("RESPIRATION")) {
-			return "OXYGEN";
-		} else if (lc.equals("AQUA AFFINITY")) {
-			return "WATER_WORKER";
-		} else if (lc.equals("SHARPNESS")) {
-			return "DAMAGE_ALL";
-		} else if (lc.equals("SMITE")) {
-			return "DAMAGE_UNDEAD";
-		} else if (lc.equals("BANE OF ARTHROPODS")) {
-			return "DAMAGE_ARTHROPODS";
-		} else if (lc.equals("KNOCKBACK")) {
-			return "KNOCKBACK";
-		} else if (lc.equals("FIRE ASPECT")) {
-			return "FIRE_ASPECT";
-		} else if (lc.equals("LOOTING")) {
-			return "LOOT_BONUS_MOBS";
-		} else if (lc.equals("EFFICIENCY")) {
-			return "DIG_SPEED";
-		} else if (lc.equals("SILK TOUCH")) {
-			return "SILK_TOUCH";
-		} else if (lc.equals("UNBREAKING")) {
-			return "DURABILITY";
-		} else if (lc.equals("FORTUNE")) {
-			return "LOOT_BONUS_BLOCKS";
-		} else if (lc.equals("POWER")){
-			return "ARROW_DAMAGE";
-		} else if(lc.equals("PUNCH")){
-			return "ARROW_KNOCKBACK";
-		} else if(lc.equals("FLAME")){
-			return "ARROW_FIRE";
-		} else if(lc.equals("INFINITY")){
-			return "ARROW_INFINITE";
-		} else {
-			return wikiVersion;
+		switch (lc) {
+			case "PROTECTION":
+				return "PROTECTION_ENVIRONMENTAL";
+			case "FIRE PROTECTION":
+				return "PROTECTION_FIRE";
+			case "FEATHER FALLING":
+				return "PROTECTION_FALL";
+			case "BLAST PROTECTION":
+				return "PROTECTION_EXPLOSIONS";
+			case "PROJECTILE PROTECTION":
+				return "PROTECTION_PROJECTILE";
+			case "RESPIRATION":
+				return "OXYGEN";
+			case "AQUA AFFINITY":
+				return "WATER_WORKER";
+			case "SHARPNESS":
+				return "DAMAGE_ALL";
+			case "SMITE":
+				return "DAMAGE_UNDEAD";
+			case "BANE OF ARTHROPODS":
+				return "DAMAGE_ARTHROPODS";
+			case "KNOCKBACK":
+				return "KNOCKBACK";
+			case "FIRE ASPECT":
+				return "FIRE_ASPECT";
+			case "LOOTING":
+				return "LOOT_BONUS_MOBS";
+			case "EFFICIENCY":
+				return "DIG_SPEED";
+			case "SILK TOUCH":
+				return "SILK_TOUCH";
+			case "UNBREAKING":
+				return "DURABILITY";
+			case "FORTUNE":
+				return "LOOT_BONUS_BLOCKS";
+			case "POWER":
+				return "ARROW_DAMAGE";
+			case "PUNCH":
+				return "ARROW_KNOCKBACK";
+			case "FLAME":
+				return "ARROW_FIRE";
+			case "INFINITY":
+				return "ARROW_INFINITE";
+			default:
+				return wikiVersion;
 		}
 	}
 

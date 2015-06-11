@@ -57,10 +57,8 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +87,7 @@ public class Minecraft {
 			Enumeration e = p1.propertyNames();
 			while (e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				DataValueLookup.put(name, new CString(p1.getProperty(name).toString(), Target.UNKNOWN));
+				DataValueLookup.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
 			}
 		} catch (IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
@@ -101,7 +99,7 @@ public class Minecraft {
 			Enumeration e = p2.propertyNames();
 			while (e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				DataNameLookup.put(name, new CString(p2.getProperty(name).toString(), Target.UNKNOWN));
+				DataNameLookup.put(name, new CString(p2.getProperty(name), Target.UNKNOWN));
 			}
 		} catch (IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
@@ -233,7 +231,7 @@ public class Minecraft {
 						i = Integer.parseInt(split[0]);
 						i2 = Integer.parseInt(split[1]);
 					} catch (NumberFormatException e) {
-					} catch (ArrayIndexOutOfBoundsException e){
+					} catch (ArrayIndexOutOfBoundsException e) {
 						throw new Exceptions.FormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
@@ -410,7 +408,7 @@ public class Minecraft {
 			}
 			try{
 				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
-			} catch(IllegalArgumentException e){
+			} catch(IllegalArgumentException e) {
 				throw new ConfigRuntimeException("Invalid mob name: " + mob, ExceptionType.FormatException, t);
 			}
 		}
@@ -464,7 +462,7 @@ public class Minecraft {
 			if (mcPlayer != null) {
 				player = mcPlayer.getName();
 			}
-			Construct entityID = null;
+			Construct entityID;
 			if (args.length == 2) {
 				if (args[0] instanceof CNull) {
 					player = null;
@@ -596,10 +594,8 @@ public class Minecraft {
 			boolean ret;
 			if (e == null) {
 				ret = false;
-			} else if (e instanceof MCTameable) {
-				ret = true;
-			} else {
-				ret = false;
+			} else  {
+				ret = e instanceof MCTameable;
 			}
 			return CBoolean.get(ret);
 		}
@@ -1090,12 +1086,12 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(p != null){
+			if(p != null) {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
 
-			if(location.getBlock().getState() instanceof MCCreatureSpawner){
+			if(location.getBlock().getState() instanceof MCCreatureSpawner) {
 				String type = ((MCCreatureSpawner)location.getBlock().getState()).getSpawnedType().name();
 				return new CString(type, t);
 			} else {
@@ -1148,7 +1144,7 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(p != null){
+			if(p != null) {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -1159,7 +1155,7 @@ public class Minecraft {
 				throw new ConfigRuntimeException("Not a registered entity type: " + args[1].val(),
 						ExceptionType.BadEntityException, t);
 			}
-			if(location.getBlock().getState() instanceof MCCreatureSpawner){
+			if(location.getBlock().getState() instanceof MCCreatureSpawner) {
 				((MCCreatureSpawner)location.getBlock().getState()).setSpawnedType(type);
 				return CVoid.VOID;
 			} else {
@@ -1213,12 +1209,12 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld w = null;
-			if(p != null){
+			if(p != null) {
 				w = p.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			CArray options = new CArray(t);
-			if(args.length == 2){
+			if(args.length == 2) {
 				options = Static.getArray(args[1], t);
 			}
 			int strength = 2;
@@ -1229,28 +1225,28 @@ public class Minecraft {
 			Set<MCColor> fade = new HashSet<MCColor>();
 			MCFireworkType type = MCFireworkType.BALL;
 
-			if(options.containsKey("strength")){
+			if(options.containsKey("strength")) {
 				strength = Static.getInt32(options.get("strength", t), t);
 				if (strength < 0 || strength > 128) {
 					throw new ConfigRuntimeException("Strength must be between 0 and 128", ExceptionType.RangeException, t);
 				}
 			}
-			if(options.containsKey("flicker")){
+			if(options.containsKey("flicker")) {
 				flicker = Static.getBoolean(options.get("flicker", t));
 			}
-			if(options.containsKey("trail")){
+			if(options.containsKey("trail")) {
 				trail = Static.getBoolean(options.get("trail", t));
 			}
-			if(options.containsKey("colors")){
+			if(options.containsKey("colors")) {
 				colors = parseColors(options.get("colors", t), t);
 			}
-			if(options.containsKey("fade")){
+			if(options.containsKey("fade")) {
 				fade = parseColors(options.get("fade", t), t);
 			}
-			if(options.containsKey("type")){
+			if(options.containsKey("type")) {
 				try{
 					type = MCFireworkType.valueOf(options.get("type", t).val().toUpperCase());
-				} catch(IllegalArgumentException e){
+				} catch(IllegalArgumentException e) {
 					throw new Exceptions.FormatException("Invalid type: " + options.get("type", t).val(), t);
 				}
 			}
@@ -1260,45 +1256,45 @@ public class Minecraft {
 			fw.setFlicker(flicker);
 			fw.setTrail(trail);
 			fw.setType(type);
-			for(MCColor color : colors){
+			for(MCColor color : colors) {
 				fw.addColor(color);
 			}
 
-			for(MCColor color : fade){
+			for(MCColor color : fade) {
 				fw.addFadeColor(color);
 			}
 
 			return new CInt(fw.launch(loc), t);
 		}
 
-		private Set<MCColor> parseColors(Construct c, Target t){
+		private Set<MCColor> parseColors(Construct c, Target t) {
 			Set<MCColor> colors = new HashSet<MCColor>();
-			if(c instanceof CArray){
+			if(c instanceof CArray) {
 				CArray ca = ((CArray)c);
 				if(ca.size() == 3
 						&& ca.get(0, t) instanceof CInt
 						&& ca.get(1, t) instanceof CInt
 						&& ca.get(2, t) instanceof CInt
-						){
+						) {
 					//It's a single custom color
 					colors.add(parseColor(ca, t));
 				} else {
-					for(String key : ca.stringKeySet()){
+					for(String key : ca.stringKeySet()) {
 						Construct val = ca.get(key, t);
-						if(val instanceof CArray){
+						if(val instanceof CArray) {
 							colors.add(parseColor(((CArray)val), t));
-						} else if(val instanceof CString){
+						} else if(val instanceof CString) {
 							colors.addAll(parseColor(((CString)val), t));
 						}
 					}
 				}
-			} else if(c instanceof CString){
+			} else if(c instanceof CString) {
 				colors.addAll(parseColor(((CString)c), t));
 			}
 			return colors;
 		}
 
-		private MCColor parseColor(CArray ca, Target t){
+		private MCColor parseColor(CArray ca, Target t) {
 			return StaticLayer.GetConvertor().GetColor(
 							Static.getInt32(ca.get(0, t), t),
 							Static.getInt32(ca.get(1, t), t),
@@ -1306,10 +1302,10 @@ public class Minecraft {
 						);
 		}
 
-		private List<MCColor> parseColor(CString cs, Target t){
+		private List<MCColor> parseColor(CString cs, Target t) {
 			String split[] = cs.val().split("\\|");
 			List<MCColor> colors = new ArrayList<>();
-			for(String s : split){
+			for(String s : split) {
 				 colors.add(StaticLayer.GetConvertor().GetColor(s, t));
 			}
 			return colors;
@@ -1339,8 +1335,8 @@ public class Minecraft {
 				return "";
 			}
 			List<String> names = new ArrayList<String>();
-			for(Field f : c.getFields()){
-				if(f.getType() == MCColor.class){
+			for(Field f : c.getFields()) {
+				if(f.getType() == MCColor.class) {
 					names.add(f.getName());
 				}
 			}
@@ -1800,18 +1796,18 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(p != null){
+			if(p != null) {
 				world = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], world, t);
 			boolean add = true;
-			if(args.length > 1){
+			if(args.length > 1) {
 				add = Static.getBoolean(args[1]);
 			}
 
 			Map<MCLocation, Boolean> redstoneMonitors = ServerEvents.getRedstoneMonitors();
 
-			if(add){
+			if(add) {
 				redstoneMonitors.put(location, location.getBlock().isBlockPowered());
 			} else {
 				redstoneMonitors.remove(location);

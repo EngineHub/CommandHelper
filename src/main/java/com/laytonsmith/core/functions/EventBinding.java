@@ -641,8 +641,8 @@ public class EventBinding {
 						params.add(ca.get(i, t).val());
 					}
 				} else {
-					for (int i = 0; i < args.length; i++) {
-						params.add(args[i].val());
+					for (Construct arg : args) {
+						params.add(arg.val());
 					}
 				}
 			}

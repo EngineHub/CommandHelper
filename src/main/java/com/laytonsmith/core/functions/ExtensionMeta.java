@@ -85,7 +85,7 @@ public class ExtensionMeta {
 					+ " or from different versions."
 					+ " This is useful for shared code in environments where an extension may or may not"
 					+ " be available, or an older version of " + Implementation.GetServerType().getBranding()
-					+ ". if(function_exists('my_extension_function')){ my_extension_function() } can"
+					+ ". if(function_exists('my_extension_function')) { my_extension_function() } can"
 					+ " then be used to selectively \"bypass\" the compiler restrictions that would normally cause a fatal"
 					+ " compile error, since that function is missing. Therefore, you can wrap extension related code"
 					+ " around extension specific blocks, and make that code portable to other installations that"
@@ -119,7 +119,7 @@ public class ExtensionMeta {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Wrapping a block of code that uses extension functions",
-						"if(function_exists('my_function')){\n"
+						"if(function_exists('my_function')) {\n"
 						+ "\tmy_function()\n"
 						+ "}\n", "<No errors will occur if the extension that contains my_function() isn't loaded>")
 			};

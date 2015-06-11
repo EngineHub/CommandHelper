@@ -269,7 +269,7 @@ public class Exceptions {
 		
 		private String docs;
 		private CHVersion since;
-		private ExceptionType(String docs, CHVersion since){
+		private ExceptionType(String docs, CHVersion since) {
 			this.docs = docs;
 			this.since = since;
 		}
@@ -500,7 +500,7 @@ public class Exceptions {
 				if (!(args[0] instanceof CNull)) {
 					c = ExceptionType.valueOf(args[0].val());
 				}
-				if(c == null){
+				if(c == null) {
 					throw ConfigRuntimeException.CreateUncatchableException(args[1].val(), t);
 				} else {
 					throw new ConfigRuntimeException(args[1].val(), c, t);
@@ -532,10 +532,10 @@ public class Exceptions {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CClosure){
+			if(args[0] instanceof CClosure) {
 				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
-				if(old == null){
+				if(old == null) {
 					return CNull.NULL;
 				} else {
 					return old;
@@ -579,7 +579,7 @@ public class Exceptions {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "set_uncaught_exception_handler(closure(@ex){\n"
+				new ExampleScript("Basic usage", "set_uncaught_exception_handler(closure(@ex) {\n"
 						+ "\tmsg('Exception caught!');\n"
 						+ "\tmsg(@ex);\n"
 						+ "\treturn(true);\n"

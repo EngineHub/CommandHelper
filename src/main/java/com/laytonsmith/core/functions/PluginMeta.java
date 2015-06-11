@@ -24,7 +24,7 @@ import java.util.Set;
  * 
  */
 public class PluginMeta {
-	public static String docs(){
+	public static String docs() {
 		return "This class contains the functions use to communicate with other plugins and the server in general.";
 	}
 	
@@ -51,7 +51,7 @@ public class PluginMeta {
 			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
-			if(args.length == 3){
+			if(args.length == 3) {
 				offset = 1;
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -109,7 +109,7 @@ public class PluginMeta {
 
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
-			if(args.length == 3){
+			if(args.length == 3) {
 				offset = 1;
 				p = Static.GetPlayer(args[0], t);
 			}

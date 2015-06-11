@@ -483,12 +483,19 @@ public class Math {
 	 * If we have the case {@code @array[0]++}, we have to increment it as
 	 * though it were a variable, so we have to do that with execs. This method
 	 * consolidates the code to do so.
+	 * @param nodes
+	 * @param parent
+	 * @param env
+	 * @param t
+	 * @param func
+	 * @param pre
+	 * @param inc
 	 * @return
 	 */
 	protected static Construct doIncrementDecrement(ParseTree[] nodes,
 			Script parent, Environment env, Target t,
-			Function func, boolean pre, boolean inc){
-		if(nodes[0].getData() instanceof CFunction){
+			Function func, boolean pre, boolean inc) {
+		if(nodes[0].getData() instanceof CFunction) {
 				Function f;
 				try {
 					f = ((CFunction)nodes[0].getData()).getFunction();
@@ -496,7 +503,7 @@ public class Math {
 					// This can't really happen, as the compiler would have already caught this
 					throw new Error(ex);
 				}
-				if(f.getName().equals(new ArrayHandling.array_get().getName())){
+				if(f.getName().equals(new ArrayHandling.array_get().getName())) {
 					//Ok, so, this is it, we're in charge here.
 					long temp;
 					long newVal;
@@ -506,17 +513,17 @@ public class Math {
 					Construct array = parent.seval(eval.getChildAt(0), env);
 					Construct index = parent.seval(eval.getChildAt(1), env);
 					Construct cdelta = new CInt(1, t);
-					if(nodes.length == 2){
+					if(nodes.length == 2) {
 						cdelta = parent.seval(nodes[1], env);
 					}
 					long delta = Static.getInt(cdelta, t);
 					//First, error check, then get the old value, and store it in temp.
-					if(!(array instanceof CArray) && !(array instanceof ArrayAccess)){
+					if(!(array instanceof CArray) && !(array instanceof ArrayAccess)) {
 						//Let's just evaluate this like normal with array_get, so it will
 						//throw the appropriate exception.
 						new ArrayHandling.array_get().exec(t, env, array, index);
 						throw ConfigRuntimeException.CreateUncatchableException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
-					} else if(!(array instanceof CArray)){
+					} else if(!(array instanceof CArray)) {
 						//It's an ArrayAccess type, but we can't use that here, so, throw our
 						//own exception.
 						throw new ConfigRuntimeException("Cannot increment/decrement a non-array array"
@@ -525,11 +532,11 @@ public class Math {
 						//Ok, we're good. Data types should all be correct.
 						CArray myArray = ((CArray)array);
 						Construct value = myArray.get(index, t);
-						if(value instanceof CInt || value instanceof CDouble){
+						if(value instanceof CInt || value instanceof CDouble) {
 							temp = Static.getInt(value, t);
 							//Alright, now let's actually perform the increment, and store that in the array.
 
-							if(inc){
+							if(inc) {
 								newVal = temp + delta;
 							} else {
 								newVal = temp - delta;
@@ -540,7 +547,7 @@ public class Math {
 						}
 					}
 					long valueToReturn;
-					if(pre){
+					if(pre) {
 						valueToReturn = newVal;
 					} else {
 						valueToReturn = temp;
@@ -549,7 +556,7 @@ public class Math {
 				}
 			}
 			Construct [] args = new Construct[nodes.length];
-			for(int i = 0; i < args.length; i++){
+			for(int i = 0; i < args.length; i++) {
 				args[i] = parent.eval(nodes[i], env);
 			}
 			return func.exec(t, env, args);
@@ -598,7 +605,7 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
 				}
-				if(v.ival() instanceof CMutablePrimitive){
+				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
 				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
@@ -658,7 +665,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if(args[0] instanceof IVariable){
+			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -715,7 +722,7 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
 				}
-				if(v.ival() instanceof CMutablePrimitive){
+				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
 				Construct oldVal = null;
@@ -771,7 +778,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if(args[0] instanceof IVariable){
+			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -845,7 +852,7 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
 				}
-				if(v.ival() instanceof CMutablePrimitive){
+				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
 				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
@@ -894,7 +901,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if(args[0] instanceof IVariable){
+			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -963,7 +970,7 @@ public class Math {
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
 				}
-				if(v.ival() instanceof CMutablePrimitive){
+				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
 				Construct oldVal = null;
@@ -1018,7 +1025,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if(args[0] instanceof IVariable){
+			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -1086,12 +1093,13 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args.length == 0){
+			if(args.length == 0) {
 				return new CDouble(java.lang.Math.random(), t);
 			} else {
-				long min = 0;
-				long max = 0;
+				long min;
+				long max;
 				if (args.length == 1) {
+					min = 0;
 					max = Static.getInt(args[0], t);
 				} else {
 					min = Static.getInt(args[0], t);
@@ -1171,7 +1179,7 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CInt){
+			if (args[0] instanceof CInt) {
 				return new CInt(java.lang.Math.abs(Static.getInt(args[0], t)), t);
 			}else{
 				return new CDouble(java.lang.Math.abs(Static.getDouble(args[0], t)), t);
@@ -2043,16 +2051,16 @@ public class Math {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			double number = Static.getNumber(args[0], t);
 			int precision = 0;
-			if(args.length > 1){
+			if(args.length > 1) {
 				precision = Static.getInt32(args[1], t);
 			}
-			if(precision < 0){
+			if(precision < 0) {
 				throw new Exceptions.RangeException("precision cannot be less than 0, was " + precision, t);
 			}
 			number = number * java.lang.Math.pow(10, precision);
 			number = java.lang.Math.round(number);
 			number = number / java.lang.Math.pow(10, precision);
-			if(precision == 0){
+			if(precision == 0) {
 				return new CInt((long)number, t);
 			} else {
 				return new CDouble(number, t);
@@ -2125,7 +2133,7 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String expr = args[0].val().trim();
-			if("".equals(expr)){
+			if("".equals(expr)) {
 				throw new Exceptions.FormatException("Expression may not be empty", t);
 			}
 			CArray vars = null;
@@ -2271,13 +2279,13 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double val = Static.getDouble(args[0], t);
-			if(val <= 0){
+			if(val <= 0) {
 				throw new Exceptions.RangeException("val was <= 0", t);
 			}
 			double r;
-			if(args.length == 1){
+			if(args.length == 1) {
 				r = java.lang.Math.log(val);
-			} else {// if(args.length == 2){
+			} else {// if(args.length == 2) {
 				r = java.lang.Math.log(val) / java.lang.Math.log(Static.getDouble(args[1], t));
 			}
 			return new CDouble(r, t);

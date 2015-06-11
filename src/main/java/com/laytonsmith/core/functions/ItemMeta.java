@@ -28,7 +28,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
  * 
  */
 public class ItemMeta {
-	public static String docs(){
+	public static String docs() {
 		return "These functions manipulate an item's meta data. The items are modified in a player's inventory.";
 	}
 	
@@ -64,7 +64,7 @@ public class ItemMeta {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCItemStack is;
 			Construct slot;
-			if(args.length == 2){
+			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				slot = args[1];
 			} else {
@@ -152,7 +152,7 @@ public class ItemMeta {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Construct slot, meta;
 			MCItemStack is;
-			if(args.length == 3){
+			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
 				slot = args[1];
 				meta = args[2];
@@ -245,7 +245,7 @@ public class ItemMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
-			if(args.length == 2){
+			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				slot = Static.getInt32(args[1], t);
 			} else {
@@ -257,7 +257,7 @@ public class ItemMeta {
 				throw new Exceptions.CastException("There is no item at slot " + slot, t);
 			}
 			MCItemMeta im = is.getItemMeta();
-			if(im instanceof MCLeatherArmorMeta){
+			if(im instanceof MCLeatherArmorMeta) {
 				return ObjectGenerator.GetGenerator().color(((MCLeatherArmorMeta)im).getColor(), t);
 			} else {
 				throw new Exceptions.CastException("The item at slot " + slot + " is not leather armor.", t);
@@ -311,7 +311,7 @@ public class ItemMeta {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			CArray color;
-			if(args.length == 3){
+			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
 				slot = Static.getInt32(args[1], t);
 				if (args[2] instanceof CArray) {
@@ -333,7 +333,7 @@ public class ItemMeta {
 				throw new Exceptions.CastException("There is no item at slot " + slot, t);
 			}
 			MCItemMeta im = is.getItemMeta();
-			if(im instanceof MCLeatherArmorMeta){
+			if(im instanceof MCLeatherArmorMeta) {
 				((MCLeatherArmorMeta)im).setColor(ObjectGenerator.GetGenerator().color(color, t));
 				is.setItemMeta(im);
 			} else {
@@ -389,7 +389,7 @@ public class ItemMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
-			if(args.length == 2){
+			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				slot = Static.getInt32(args[1], t);
 			} else {

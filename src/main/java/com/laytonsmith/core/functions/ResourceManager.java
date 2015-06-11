@@ -24,7 +24,7 @@ import org.xml.sax.SAXException;
  */
 @core
 public class ResourceManager {
-	public static String docs(){
+	public static String docs() {
 		return "This class contains functions for resource management. This entire class of functions WILL"
 				+ " be deprecated at some point in the future, so don't rely too heavily on it.";
 	}
@@ -33,17 +33,17 @@ public class ResourceManager {
 		XML_DOCUMENT(XMLDocument.class),
 		STRING_BUILDER(StringBuffer.class);
 		private final Class<?> type;
-		private ResourceTypes(Class<?> type){
+		private ResourceTypes(Class<?> type) {
 			this.type = type;
 		}
 		
-		public Class<?> getType(){
+		public Class<?> getType() {
 			return type;
 		}
 		
-		public static ResourceTypes getResourceByType(Class<?> type){
-			for(ResourceTypes c : values()){
-				if(c.getType() == type){
+		public static ResourceTypes getResourceByType(Class<?> type) {
+			for(ResourceTypes c : values()) {
+				if(c.getType() == type) {
 					return c;
 				}
 			}
@@ -71,8 +71,8 @@ public class ResourceManager {
 	 * @param t
 	 * @return 
 	 */
-	public static <T> T GetResource(CResource<?> resource, Class<T> type, Target t){
-		if(type.isAssignableFrom(resource.getResource().getClass())){
+	public static <T> T GetResource(CResource<?> resource, Class<T> type, Target t) {
+		if(type.isAssignableFrom(resource.getResource().getClass())) {
 			return (T) resource.getResource();
 		} else {
 			throw new Exceptions.CastException("Unexpected resource type. Expected resource of type "
@@ -105,17 +105,17 @@ public class ResourceManager {
 			Construct data = null;
 			try{
 				type = ResourceTypes.valueOf(args[0].val());
-			} catch(IllegalArgumentException e){
+			} catch(IllegalArgumentException e) {
 				throw new Exceptions.FormatException(e.getMessage(), t);
 			}
-			if(args.length > 1){
+			if(args.length > 1) {
 				data = args[1];
 			}
 			CResource<?> resource;
-			switch(type){
+			switch(type) {
 				case XML_DOCUMENT:
 					try {
-						if(data == null){
+						if(data == null) {
 							throw new ConfigRuntimeException("data cannot be empty", ExceptionType.NullPointerException, t);
 						}
 						resource = new CResource<XMLDocument>(new XMLDocument(data.val()), t);
@@ -186,9 +186,9 @@ public class ResourceManager {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CResource){
+			if(args[0] instanceof CResource) {
 				CResource<?> resource = (CResource<?>) args[0];
-				if(resources.containsKey(resource.getId())){
+				if(resources.containsKey(resource.getId())) {
 					resources.remove(resource.getId());
 					return CVoid.VOID;
 				} else {

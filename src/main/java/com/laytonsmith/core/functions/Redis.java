@@ -18,7 +18,7 @@ package com.laytonsmith.core.functions;
  *
  */
 public class Redis {
-	public static String docs(){
+	public static String docs() {
 		return "This class of functions provides hooks into a redis system.";
 	}
 	
@@ -36,17 +36,17 @@ public class Redis {
 //		 * 
 //		 * Only the public methods are supported.
 //		 */
-//		private static void BuildFunctionList(){
-//			if(functionList != null){
+//		private static void BuildFunctionList() {
+//			if(functionList != null) {
 //				return;
 //			}
-//			for(Method m : Jedis.class.getMethods()){
-//				if(m.getReturnType() == Object.class){
+//			for(Method m : Jedis.class.getMethods()) {
+//				if(m.getReturnType() == Object.class) {
 //					//Generic returns aren't supported
 //					continue;
 //				}
 //				
-//				for(Class c : m.getParameterTypes()){
+//				for(Class c : m.getParameterTypes()) {
 //					c
 //				}
 //				functionList.add(m);

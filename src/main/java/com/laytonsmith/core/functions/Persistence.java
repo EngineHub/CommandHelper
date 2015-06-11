@@ -109,7 +109,7 @@ public class Persistence {
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Storing: " + key + " -> " + value, t);
 			try {
 				env.getEnv(GlobalEnv.class).GetPersistenceNetwork().set(env.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + key).split("\\."), value);
-			} catch(IllegalArgumentException e){
+			} catch(IllegalArgumentException e) {
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			} catch (Exception ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
@@ -176,7 +176,7 @@ public class Persistence {
 					obj = env.getEnv(GlobalEnv.class).GetPersistenceNetwork().get(("storage." + namespace).split("\\."));
 				} catch (DataSourceException ex) {
 					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
-				} catch(IllegalArgumentException e){
+				} catch(IllegalArgumentException e) {
 					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 				}
 				if (obj == null) {
@@ -265,7 +265,7 @@ public class Persistence {
 				list = p.getNamespace(keyChain.toArray(new String[keyChain.size()]));
 			} catch (DataSourceException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
-			} catch(IllegalArgumentException e){
+			} catch(IllegalArgumentException e) {
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
 			CArray ca = new CArray(t);
@@ -338,7 +338,7 @@ public class Persistence {
 				return CBoolean.get(env.getEnv(GlobalEnv.class).GetPersistenceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")));
 			} catch (DataSourceException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
-			} catch(IllegalArgumentException e){
+			} catch(IllegalArgumentException e) {
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
 		}
@@ -394,13 +394,9 @@ public class Persistence {
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
 				environment.getEnv(GlobalEnv.class).GetPersistenceNetwork().clearKey(environment.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + namespace).split("\\."));
-			} catch (DataSourceException ex) {
+			} catch (DataSourceException | ReadOnlyException | IOException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
-			} catch (ReadOnlyException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
-			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
-			} catch(IllegalArgumentException e){
+			} catch(IllegalArgumentException e) {
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
 			return CVoid.VOID;

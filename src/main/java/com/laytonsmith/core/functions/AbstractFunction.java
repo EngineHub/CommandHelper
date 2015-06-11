@@ -46,6 +46,7 @@ public abstract class AbstractFunction implements Function {
 	 *
 	 * @param t
 	 * @param env
+	 * @param parent
 	 * @param nodes
 	 * @return
 	 */
@@ -83,6 +84,7 @@ public abstract class AbstractFunction implements Function {
 	 * @param t
 	 * @param args
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
 	public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 		return null;
@@ -97,7 +99,9 @@ public abstract class AbstractFunction implements Function {
 	 *
 	 * @param t
 	 * @param children
+	 * @param fileOptions
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
 	public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 		return null;
@@ -148,7 +152,7 @@ public abstract class AbstractFunction implements Function {
 			if (ccc instanceof CArray) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
-				b.append("<arrayNotShown size:" + ((CArray)ccc).size() + ">");
+				b.append("<arrayNotShown size:").append(((CArray)ccc).size()).append(">");
 			} else if (ccc instanceof CClosure) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");

@@ -121,7 +121,7 @@ public class Federation {
 //							try(
 //								PrintWriter out = new PrintWriter(s.getOutputStream(), true);
 //								BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream(), "UTF-8"));
-//							){
+//							) {
 //								// As always, first the version we're talking in.
 //								out.println(FederationVersion.V1_0_0.getVersionString());
 //								// Then the hello
@@ -214,18 +214,18 @@ public class Federation {
 //				+ "\thost: 'localhost',\n"
 //				+ "\tserver_name: 'myServer2',\n"
 //				+ "\tpassword: 'server2password'\n"
-//				+ "), closure(){\n"
+//				+ "), closure() {\n"
 //				+ "return(all_players())\n"
-//				+ "}, closure(@remoteReturn, @timeoutError, @exception){\n"
-//				+ "\tif(@exception){\n"
+//				+ "}, closure(@remoteReturn, @timeoutError, @exception) {\n"
+//				+ "\tif(@exception) {\n"
 //				+ "\t\tthrow(@exception);\n"
 //				+ "\t}\n"
-//				+ "\tif(@timeoutError){\n"
+//				+ "\tif(@timeoutError) {\n"
 //				+ "\t\tmsg('A timeout error occured.');\n"
 //				+ "\t\treturn();\n"
 //				+ "\t}\n"
 //				+ "\t// else the remoteReturn value is usable\n"
-//				+ "\tif(@remoteReturn !== null){\n"
+//				+ "\tif(@remoteReturn !== null) {\n"
 //				+ "\t\tmsg(@remoteReturn);\n"
 //				+ "\t}"
 //				+ "}",
