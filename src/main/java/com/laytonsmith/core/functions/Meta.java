@@ -862,4 +862,49 @@ public class Meta {
 		}
 		
 	}
+
+	@api
+	public static class noop extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "noop";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[...]} An operation that does nothing. Any arguments passed in are ignored entirely.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
 }
