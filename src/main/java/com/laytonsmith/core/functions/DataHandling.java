@@ -3025,7 +3025,7 @@ public class DataHandling {
 						+ "\tmsg('Hello World!');\n"
 						+ "};"),
 				new ExampleScript("Executes a closure", "execute(closure(){\n"
-						+ "\tmsg('Hello World!');"
+						+ "\tmsg('Hello World!');\n"
 						+ "});")
 			};
 		}
@@ -3051,10 +3051,10 @@ public class DataHandling {
 					+ " If a closure is \"to string'd\" it will not necessarily look like"
 					+ " the original code, but will be functionally equivalent. The current environment"
 					+ " is \"snapshotted\" and stored with the closure, however, this information is"
-					+ " only stored in memory, it isn't retained during a serialization operation. Additionally,"
+					+ " only stored in memory, it isn't retained during a serialization operation. However,"
 					+ " the variable table of the parent scope is not retained, thus making this closure \"isolated\""
 					+ " from the parent code."
-					+ " Also, the special variable @arguments is automatically created for you, and contains"
+					+ " The special variable @arguments is automatically created for you, and contains"
 					+ " an array of all the arguments passed to the closure, much like procedures."
 					+ " See the wiki article on [[CommandHelper/Staged/Closures|closures]] for more details"
 					+ " and examples.";
@@ -3115,6 +3115,28 @@ public class DataHandling {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Creates an iclosure", "iclosure(){\n"
+						+ "\tmsg('Hello World!');\n"
+						+ "};"),
+				new ExampleScript("Executes an iclosure", "execute(iclosure(){\n"
+						+ "\tmsg('Hello World!');\n"
+						+ "});"),
+				new ExampleScript("Shows scoping", "@a = \'variable\';\n"
+						+ "msg('Outside of iclosure: '.reflect_pull('varlist'));\n"
+						+ "// Note that this is an iclosure\n"
+						+ "execute('val1', iclosure(@b){\n"
+						+ "\tmsg('Inside of iclosure: '.reflect_pull('varlist'));\n"
+						+ "});\n"
+						+ "// Note that this is a regular closure\n"
+						+ "execute('val2', closure(@c){\n"
+						+ "\tmsg('Insider of closure: '.reflect_pull('varlist'));\n"
+						+ "});")
+			};
 		}
 
 	}
@@ -3670,7 +3692,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "string {arg} Returns a string value of the typeof a value. For instance 'array' is returned"
+			return "ClassType {arg} Returns a string value of the typeof a value. For instance 'array' is returned"
 					+ " for typeof(array()). This is a generic replacement for the is_* series of functions.";
 		}
 
