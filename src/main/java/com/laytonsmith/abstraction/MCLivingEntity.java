@@ -13,6 +13,7 @@ import java.util.List;
 public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	public void addEffect(int potionID, int strength, int seconds, boolean ambient, Target t);
+	public void addEffect(int potionID, int strength, int seconds, boolean ambient, boolean particles, Target t);
 	public boolean removeEffect(int potionID);
 	/**
 	 * Returns the maximum effect id, inclusive.
@@ -74,11 +75,21 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 		private int strength;
 		private int secondsRemaining;
 		private boolean ambient;
+		private boolean particles;
 		public MCEffect(int potionID, int strength, int secondsRemaining, boolean ambient){
 			this.potionID = potionID;
 			this.strength = strength;
 			this.secondsRemaining = secondsRemaining;
 			this.ambient = ambient;
+			this.particles = true;
+		}
+
+		public MCEffect(int potionID, int strength, int secondsRemaining, boolean ambient, boolean particles){
+			this.potionID = potionID;
+			this.strength = strength;
+			this.secondsRemaining = secondsRemaining;
+			this.ambient = ambient;
+			this.particles = particles;
 		}
 
 		public int getPotionID() {
@@ -95,6 +106,10 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 		
 		public boolean isAmbient() {
 			return ambient;
+		}
+
+		public boolean hasParticles() {
+			return particles;
 		}
 
 	}
