@@ -34,7 +34,7 @@ import java.util.concurrent.Callable;
  */
 @core
 public class Threading {
-	public static String docs(){
+	public static String docs() {
 		return "This experimental and private API is subject to removal, or incompatible changes, and should not"
 				+ " be yet heavily relied on in normal development.";
 	}
@@ -62,7 +62,7 @@ public class Threading {
 		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			if(!(args[1] instanceof CClosure)){
+			if(!(args[1] instanceof CClosure)) {
 				throw new Exceptions.CastException("Expected closure for arg 2", t);
 			}
 			final CClosure closure = (CClosure) args[1];
@@ -74,15 +74,15 @@ public class Threading {
 					dm.activateThread(Thread.currentThread());
 					try {
 						closure.execute();
-					} catch(FunctionReturnException ex){
+					} catch(FunctionReturnException ex) {
 						// Do nothing
-					} catch(LoopManipulationException ex){
+					} catch(LoopManipulationException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
 								+ " operation was triggered inside the closure.", t), environment);
-					} catch(ConfigRuntimeException ex){
+					} catch(ConfigRuntimeException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, environment);
-					} catch(CancelCommandException ex){
-						if(ex.getMessage() != null){
+					} catch(CancelCommandException ex) {
+						if(ex.getMessage() != null) {
 							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
 					} finally {
@@ -123,7 +123,7 @@ public class Threading {
 			String new_thread = this.getName();
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "msg(" + get_current_thread + "());\n"
-						+ new_thread + "('myThread', closure(){\n"
+						+ new_thread + "('myThread', closure() {\n"
 						+ "\tsleep(5); // Sleep here, to allow the main thread to get well past us, for demonstration purposes\n"
 						+ "\tmsg(" + get_current_thread + "());\n"
 						+ "});\n"
@@ -217,9 +217,9 @@ public class Threading {
 				public void run() {
 					try {
 						closure.execute();
-					} catch(ConfigRuntimeException e){
+					} catch(ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch(ProgramFlowManipulationException e){
+					} catch(ProgramFlowManipulationException e) {
 						// Ignored
 					}
 				}
@@ -282,9 +282,9 @@ public class Threading {
 					public Object call() throws Exception {
 						try {
 							closure.execute();
-						} catch(FunctionReturnException e){
+						} catch(FunctionReturnException e) {
 							return e.getReturn();
-						} catch(ConfigRuntimeException | ProgramFlowManipulationException e){
+						} catch(ConfigRuntimeException | ProgramFlowManipulationException e) {
 							return e;
 						}
 						return CNull.NULL;
@@ -295,7 +295,7 @@ public class Threading {
 			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
-			if(ret instanceof RuntimeException){
+			if(ret instanceof RuntimeException) {
 				throw (RuntimeException)ret;
 			} else {
 				return (Construct) ret;

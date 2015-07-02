@@ -24,7 +24,7 @@ import org.perf4j.StopWatch;
  */
 public class Performance {
     public static boolean PERFORMANCE_LOGGING = false;
-    public static String docs(){
+    public static String docs() {
         return "This class provides functions for hooking into CommandHelper's powerful Performance measuring. To use the functions, you must have"
                 + " allow-profiling option set to true in your preferences file.";
     }
@@ -80,7 +80,7 @@ public class Performance {
 
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            if(!Prefs.AllowProfiling()){
+            if(!Prefs.AllowProfiling()) {
                 throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, t);
             }
             PERFORMANCE_LOGGING = Static.getBoolean(args[0]);

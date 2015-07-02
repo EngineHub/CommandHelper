@@ -3841,8 +3841,8 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			for (int i = 0; i < args.length; i++) {
-				args[i].val();
+			for (Construct arg : args) {
+				arg.val();
 			}
 			return CVoid.VOID;
 		}

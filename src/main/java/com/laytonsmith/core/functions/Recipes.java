@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class Recipes {
 	
-	public static String docs(){
+	public static String docs() {
         return "This class of functions allows recipes to be managed.";
     }
 	

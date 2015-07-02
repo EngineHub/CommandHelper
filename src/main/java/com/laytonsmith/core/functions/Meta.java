@@ -119,7 +119,7 @@ public class Meta {
 				if (Prefs.DebugMode()) {
 					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
 				}
-				if(cmd.equalsIgnoreCase("interpreter-on")){
+				if(cmd.equalsIgnoreCase("interpreter-on")) {
 					//This isn't allowed for security reasons.
 					throw new ConfigRuntimeException("/interpreter-on cannot be run from runas for security reasons.", ExceptionType.FormatException, t);
 				}
@@ -207,7 +207,7 @@ public class Meta {
 			//If the command sender is null, then just try to run() this. It's unclear to me what
 			//would cause this for sure, but just in case. Regardless, this allows us to consolidate the error checking
 			//into the run function
-			if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() == null){
+			if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() == null) {
 				return new run().exec(t, env, args);
 			}
 			//Store their current op status
@@ -280,7 +280,7 @@ public class Meta {
 			try {
 				p.setTempOp(value);
 			} catch (Exception e) {
-				if(Prefs.UseSudoFallback()){
+				if(Prefs.UseSudoFallback()) {
 					p.setOp(value);
 				} else {
 					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
@@ -338,12 +338,12 @@ public class Meta {
 					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
 				}
 			}
-			if(cmd.equalsIgnoreCase("interpreter-on")){
+			if(cmd.equalsIgnoreCase("interpreter-on")) {
 				throw new Exceptions.FormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
 			}
 			try{
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
-			} catch(Exception ex){
+			} catch(Exception ex) {
 				throw new ConfigRuntimeException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
 						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
@@ -659,7 +659,7 @@ public class Meta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			String cmd = args[1].val();
-			if(!cmd.startsWith("/")){
+			if(!cmd.startsWith("/")) {
 				throw new Exceptions.FormatException("Command must begin with a /", t);
 			}
 			cmd = cmd.substring(1);
@@ -716,7 +716,7 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCBlockCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetBlockCommandSender();
-			if(cs != null){
+			if(cs != null) {
 				MCLocation l = (cs.getBlock().getLocation());
 				return ObjectGenerator.GetGenerator().location(l);
 			}
@@ -825,12 +825,12 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CString s;
-			if(args[0] instanceof CString){
+			if(args[0] instanceof CString) {
 				s = (CString)args[0];
 			} else {
 				s = new CString(args[0].val(), t);
 			}
-			if(is_alias.exec(t, environment, s).getBoolean()){
+			if(is_alias.exec(t, environment, s).getBoolean()) {
 				call_alias.exec(t, environment, s);
 			} else {
 				run.exec(t, environment, s);
@@ -851,7 +851,7 @@ public class Meta {
 		@Override
 		public String docs() {
 			return "void {cmd} Runs a command regardless of whether or not it is an alias or a builtin command. Essentially,"
-					+ " this works like checking if(is_alias(@cmd)){ call_alias(@cmd) } else { run(@cmd) }. Be careful with"
+					+ " this works like checking if(is_alias(@cmd)) { call_alias(@cmd) } else { run(@cmd) }. Be careful with"
 					+ " this command, as like call_alias(), you could accidentally create infinite loops. The command must"
 					+ " start with a / or this will throw a FormatException.";
 		}

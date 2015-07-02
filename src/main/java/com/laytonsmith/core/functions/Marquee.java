@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * 
  */
 public class Marquee {
-	public static String docs(){
+	public static String docs() {
 		return "This class provides methods for making a text \"marquee\", like a stock ticker. Because this is a threading operation, and could be potentially"
 				+ " resource intensive, the heavy lifting has been implemented natively.";
 	}
@@ -54,7 +54,7 @@ public class Marquee {
 			final int delayTime;
 			final CClosure callback;
 			int offset = -1;
-			if(args.length == 5){
+			if(args.length == 5) {
 				offset = 0;
 				marqueeName = args[0].val();
 			} else {
@@ -63,7 +63,7 @@ public class Marquee {
 			text = args[1 + offset].val();
 			stringWidth = Static.getInt32(args[2 + offset], t);
 			delayTime = Static.getInt32(args[3 + offset], t);
-			if(args[4 + offset] instanceof CClosure){
+			if(args[4 + offset] instanceof CClosure) {
 				callback = ((CClosure)args[4 + offset]);
 			} else {
 				throw new Exceptions.CastException("Expected argument " + (4 + offset + 1) + " to be a closure, but was not.", t);
@@ -73,7 +73,7 @@ public class Marquee {
 				@Override
 				public void stringPortion(final String portion, com.laytonsmith.PureUtilities.Marquee m) {
 					try{
-						StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>(){
+						StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
 
 							@Override
 							public Object call() throws Exception {
@@ -81,7 +81,7 @@ public class Marquee {
 									return null;
 							}
 						});
-					} catch(Exception e){
+					} catch(Exception e) {
 						//We don't want this to affect our code, so just log it,
 						//but we also want to stop this marquee
 						String message = "An error occured while running " + (marqueeName==null?"an unnamed marquee":"the " + marqueeName + " marquee")
@@ -99,7 +99,7 @@ public class Marquee {
 					m.stop();
 				}
 			});
-			if(marqueeName != null){
+			if(marqueeName != null) {
 				marqeeMap.put(marqueeName, m);
 			}
 			return CVoid.VOID;
@@ -154,7 +154,7 @@ public class Marquee {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String marqueeName = args[0].val();
-			if(marqeeMap.containsKey(marqueeName)){
+			if(marqeeMap.containsKey(marqueeName)) {
 				marqeeMap.get(marqueeName).stop();
 			}
 			return CVoid.VOID;

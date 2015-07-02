@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.StaticLayer;
@@ -23,7 +22,7 @@ import java.util.logging.Logger;
  *
  */
 public class ExecutionQueue {
-	public static String docs(){
+	public static String docs() {
 		return "An execution queue is a queue of closures, which are"
 			+ " queued up to be run in sequence by the engine."
 			+ " Unlike set_timeout and set_interval, there is no"
@@ -55,11 +54,11 @@ public class ExecutionQueue {
 		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0] instanceof CClosure)){
+			if(!(args[0] instanceof CClosure)) {
 				throw new ConfigRuntimeException("Parameter 1 to " + getName() + " must be a closure.", ExceptionType.CastException, t);
 			}
 			c = ((CClosure)args[0]);
-			if(args.length == 2){
+			if(args.length == 2) {
 				queue = args[1].nval();
 			}
 
@@ -74,9 +73,9 @@ public class ExecutionQueue {
 							public Object call() throws Exception {
 								try {
 									c.execute();
-								} catch(ConfigRuntimeException ex){
+								} catch(ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, environment);
-								} catch(ProgramFlowManipulationException ex){
+								} catch(ProgramFlowManipulationException ex) {
 									// Ignored
 								}
 								return null;
@@ -135,11 +134,11 @@ public class ExecutionQueue {
 		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0] instanceof CClosure)){
+			if(!(args[0] instanceof CClosure)) {
 				throw new ConfigRuntimeException("Parameter 1 to " + getName() + " must be a closure.", ExceptionType.CastException, t);
 			}
 			c = ((CClosure)args[0]);
-			if(args.length == 2){
+			if(args.length == 2) {
 				queue = args[1].nval();
 			}
 
@@ -154,9 +153,9 @@ public class ExecutionQueue {
 							public Object call() throws Exception {
 								try {
 									c.execute();
-								} catch(ConfigRuntimeException ex){
+								} catch(ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, environment);
-								} catch(ProgramFlowManipulationException ex){
+								} catch(ProgramFlowManipulationException ex) {
 									// Ignored
 								}
 								return null;
@@ -214,7 +213,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 1){
+			if(args.length == 1) {
 				queue = args[0].nval();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().remove(queue);
@@ -264,7 +263,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 1){
+			if(args.length == 1) {
 				queue = args[0].nval();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().removeFront(queue);
@@ -315,7 +314,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 1){
+			if(args.length == 1) {
 				queue = args[0].nval();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().clear(queue);
@@ -366,7 +365,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 1){
+			if(args.length == 1) {
 				queue = args[0].nval();
 			}
 			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetExecutionQueue().isRunning(queue));
@@ -415,7 +414,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 2){
+			if(args.length == 2) {
 				queue = args[1].nval();
 			}
 			final long delay = Static.getInt(args[0], t);
@@ -477,7 +476,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 2){
+			if(args.length == 2) {
 				queue = args[1].nval();
 			}
 			final long delay = Static.getInt(args[0], t);

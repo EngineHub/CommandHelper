@@ -17,7 +17,6 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -164,8 +163,8 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < args.length; i++) {
-				b.append(args[i].val());
+			for (Construct arg : args) {
+				b.append(arg.val());
 			}
 			return new CString(b.toString(), t);
 		}
@@ -273,12 +272,12 @@ public class StringHandling {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			//Remove empty g or p children
 			Iterator<ParseTree> it = children.iterator();
-			while(it.hasNext()){
+			while(it.hasNext()) {
 				ParseTree n = it.next();
 				if(n.getData() instanceof CFunction &&
 						(g.equals(n.getData().val())
 							|| p.equals(n.getData().val()))
-						&& !n.hasChildren()){
+						&& !n.hasChildren()) {
 					it.remove();
 				}
 			}
@@ -286,10 +285,10 @@ public class StringHandling {
 			// compiler significance, especially if we end up being optimized out. So here, we will check to see if we are fully
 			// constant, and combine the constant values, but taking care not to do so with CKeywords or CLabels, which are otherwise constant.
 			// We start at 1, because if we only have one child, we want to skip ahead.
-			for(int i = 1; i < children.size(); i++){
+			for(int i = 1; i < children.size(); i++) {
 				ParseTree child = children.get(i);
-				if(child.isConst() && !(child.getData() instanceof CKeyword) && !(child.getData() instanceof CLabel)){
-					if(children.get(i - 1).isConst() && !(children.get(i - 1).getData() instanceof CKeyword)){
+				if(child.isConst() && !(child.getData() instanceof CKeyword) && !(child.getData() instanceof CLabel)) {
+					if(children.get(i - 1).isConst() && !(children.get(i - 1).getData() instanceof CKeyword)) {
 						// Combine these two into one, and replace i - 1, and remove i
 						String s1 = children.get(i - 1).getData().val();
 						String s2 = child.getData().val();
@@ -300,18 +299,18 @@ public class StringHandling {
 				}
 			}
 			//If we don't have any children, remove us as well, though we still have to check if it's a keword.
-			if(children.size() == 1){
+			if(children.size() == 1) {
 				ParseTree child = children.get(0);
-				if(child.getData() instanceof CKeyword || child.getData() instanceof CLabel){
+				if(child.getData() instanceof CKeyword || child.getData() instanceof CLabel) {
 					return child;
 				} else {
 					// sconcat only returns a string (except in the special case above) so we need to
 					// return the string value if it's not already a string
 					try {
-						if(InstanceofUtil.isInstanceof(child.getData(), "string")){
+						if(InstanceofUtil.isInstanceof(child.getData(), "string")) {
 							return child;
 						}
-					} catch(IllegalArgumentException ex){
+					} catch(IllegalArgumentException ex) {
 						// Ignored, we'll just toString it, because it's an unknown type.
 					}
 					ParseTree node = new ParseTree(new CFunction(STRING, t), fileOptions);
@@ -415,11 +414,11 @@ public class StringHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String string = args[0].val();
 			boolean useAdvanced = false;
-			if(args.length >= 2){
+			if(args.length >= 2) {
 				useAdvanced = Static.getBoolean(args[1]);
 			}
 			List<Construct> a = new ArrayList<>();
-			if(!useAdvanced){
+			if(!useAdvanced) {
 				String[] sa = string.split(" ");
 				for (String s : sa) {
 					if (!s.trim().isEmpty()) {
@@ -427,7 +426,7 @@ public class StringHandling {
 					}
 				}
 			} else {
-				for(String s : StringUtils.ArgParser(string)){
+				for(String s : StringUtils.ArgParser(string)) {
 					a.add(new CString(s.trim(), t));
 				}
 			}
@@ -1024,13 +1023,13 @@ public class StringHandling {
 			String split = args[0].val();
 			String string = args[1].val();
 			int limit = Integer.MAX_VALUE;
-			if(args.length >= 3){
+			if(args.length >= 3) {
 				limit = Static.getInt32(args[2], t);
 			}
 			int sp = 0;
-			if(split.length() == 0){
+			if(split.length() == 0) {
 				//Empty string, so special case.
-				for(int i = 0; i < string.length(); i++){
+				for(int i = 0; i < string.length(); i++) {
 					array.push(new CString(string.charAt(i), t));
 				}
 				return array;
@@ -1101,7 +1100,7 @@ public class StringHandling {
 			List<FormatString> parsed;
 			try{
 				parsed = parse(formatString, t);
-			} catch(IllegalFormatException e){
+			} catch(IllegalFormatException e) {
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			}
 			if (requiredArgs(parsed) != args.length - 1) {
@@ -1290,20 +1289,20 @@ public class StringHandling {
 				ParseTree me = new ParseTree(new CFunction(getName(), t), children.get(0).getFileOptions());
 				me.setChildren(children);
 				me.setOptimized(true); //After this run, we will be, anyways.
-				if(children.size() == 2 && children.get(1).getData() instanceof CFunction && ((CFunction)children.get(1).getData()).getFunction().getName().equals(new DataHandling.array().getName())){
+				if(children.size() == 2 && children.get(1).getData() instanceof CFunction && ((CFunction)children.get(1).getData()).getFunction().getName().equals(new DataHandling.array().getName())) {
 					//Normally we can't do anything with a hardcoded array, it's considered dynamic. But in this case, we can at least pull up the arguments,
 					//because the array's size is constant, even if the arguments in it aren't.
 					ParseTree array = children.get(1);
 					children.remove(1);
 					boolean allIndexesStatic = true;
-					for(int i = 0; i < array.numberOfChildren(); i++){
+					for(int i = 0; i < array.numberOfChildren(); i++) {
 						ParseTree child = array.getChildAt(i);
-						if(child.isDynamic()){
+						if(child.isDynamic()) {
 							allIndexesStatic = false;
 						}
 						children.add(child);
 					}
-					if(allIndexesStatic){
+					if(allIndexesStatic) {
 						me.hasBeenMadeStatic(true);
 					}
 				}
@@ -1315,10 +1314,10 @@ public class StringHandling {
 								+ " expects " + requiredArgs(parsed) + " argument, but " + (children.size() - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
 					}
 					//If the arguments are constant, we can actually check them too
-					for(int i = 1; i < children.size(); i++){
+					for(int i = 1; i < children.size(); i++) {
 						//We skip the dynamic ones, but the constant ones we can know for sure
 						//if they are convertable or not.
-						if(children.get(i).isConst()){
+						if(children.get(i).isConst()) {
 							convertArgument(children.get(i).getData(), parsed.get(i - 1).getExpectedType(), i + 1, t);
 						}
 					}
@@ -1345,15 +1344,10 @@ public class StringHandling {
 				for (Class c : Formatter.class.getDeclaredClasses()) {
 					if (c.getSimpleName().equals("FormatString")) {
 						tFormatString = c;
-						continue;
-					}
-					if (c.getSimpleName().equals("FixedString")) {
+					} else if (c.getSimpleName().equals("FixedString")) {
 						tFixedString = c;
-						continue;
-					}
-					if (c.getSimpleName().equals("FormatSpecifier")) {
+					} else if (c.getSimpleName().equals("FormatSpecifier")) {
 						tFormatSpecifier = c;
-						continue;
 					}
 				}
 				FormatString = tFormatString;
@@ -1375,7 +1369,7 @@ public class StringHandling {
 				if (ref.getClass() == FixedString) {
 					return null;
 				} else if (ref.getClass() == FormatSpecifier) {
-					if(((Boolean)ReflectionUtils.get(FormatSpecifier, ref, "dt"))){
+					if(((Boolean)ReflectionUtils.get(FormatSpecifier, ref, "dt"))) {
 						return 't';
 					}
 					return ((Character) ReflectionUtils.get(FormatSpecifier, ref, "c"));
@@ -1384,11 +1378,11 @@ public class StringHandling {
 				}
 			}
 
-			public int getArgIndex(){
+			public int getArgIndex() {
 				return ((Integer)ReflectionUtils.get(FormatSpecifier, ref, "index"));
 			}
 
-			public boolean isFixed(){
+			public boolean isFixed() {
 				return getExpectedType() == '%' || getExpectedType() == 'n';
 			}
 		}
@@ -1398,8 +1392,8 @@ public class StringHandling {
 			Object parse;
 			try{
 				parse = ReflectionUtils.invokeMethod(Formatter.class, new Formatter(), "parse", new Class[]{String.class}, new Object[]{format});
-			} catch(ReflectionException e){
-				if(e.getCause() instanceof InvocationTargetException){
+			} catch(ReflectionException e) {
+				if(e.getCause() instanceof InvocationTargetException) {
 					Throwable th = e.getCause().getCause();
 					throw new ConfigRuntimeException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), ExceptionType.FormatException, t);
 				} else {
@@ -1417,15 +1411,15 @@ public class StringHandling {
 			return list;
 		}
 
-		private int requiredArgs(List<FormatString> list){
+		private int requiredArgs(List<FormatString> list) {
 			Set<Integer> knownIndexes = new HashSet<Integer>();
 			int count = 0;
-			for(FormatString s : list){
-				if(s.isFixed()){
+			for(FormatString s : list) {
+				if(s.isFixed()) {
 					continue;
 				}
 				int index = s.getArgIndex();
-				if(index == 0){
+				if(index == 0) {
 					count++;
 				} else {
 					knownIndexes.add(index);
@@ -1513,7 +1507,7 @@ public class StringHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String val = args[0].val();
 			String encoding = "UTF-8";
-			if(args.length == 2){
+			if(args.length == 2) {
 				encoding = args[1].val();
 			}
 			try {
@@ -1569,7 +1563,7 @@ public class StringHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = Static.getByteArray(args[0], t);
 			String encoding = "UTF-8";
-			if(args.length == 2){
+			if(args.length == 2) {
 				encoding = args[1].val();
 			}
 			try {
@@ -1622,12 +1616,12 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args.length < 2){
+			if(args.length < 2) {
 				throw new ConfigRuntimeException(getName() + " must have 2 arguments at minimum", ExceptionType.InsufficientArgumentsException, t);
 			}
 			CResource m = (CResource) args[0];
 			StringBuffer buf = ResourceManager.GetResource(m, StringBuffer.class, t);
-			for(int i = 1; i < args.length; i++){
+			for(int i = 1; i < args.length; i++) {
 				buf.append(args[i].val());
 			}
 			return CVoid.VOID;
@@ -1712,7 +1706,7 @@ public class StringHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try{
 				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
-			} catch(IllegalArgumentException ex){
+			} catch(IllegalArgumentException ex) {
 				throw new Exceptions.RangeException("Code point out of range: " + args[0].val(), t);
 			}
 		}
@@ -1775,7 +1769,7 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0].val().toCharArray().length == 0){
+			if(args[0].val().toCharArray().length == 0) {
 				throw new Exceptions.RangeException("Empty string cannot be converted to unicode.", t);
 			}
 			int i = Character.codePointAt(args[0].val().toCharArray(), 0);

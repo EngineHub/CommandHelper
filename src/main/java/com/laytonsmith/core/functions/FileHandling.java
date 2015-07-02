@@ -45,7 +45,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -54,7 +53,7 @@ import java.util.zip.GZIPInputStream;
 @core
 public class FileHandling {
 
-	public static String docs(){
+	public static String docs() {
 		return "This class contains methods that help manage files on the file system. Most are restricted with the base-dir setting"
 			+ " in your preferences.";
 	}
@@ -80,7 +79,7 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(!Static.InCmdLine(env)){
+			if(!Static.InCmdLine(env)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
@@ -190,7 +189,7 @@ public class FileHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.get(0).isDynamic()){
+			if(children.get(0).isDynamic()) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded paths.", t);
 			}
 			Environment env;
@@ -213,8 +212,8 @@ public class FileHandling {
 		RunnableQueue queue = new RunnableQueue("MethodScript-asyncRead");
 		boolean started = false;
 
-		private void startup(){
-			if(!started){
+		private void startup() {
+			if(!started) {
 				queue.invokeLater(null, new Runnable() {
 
 					@Override
@@ -254,13 +253,13 @@ public class FileHandling {
 			startup();
 			final String file = args[0].val();
 			final CClosure callback;
-			if(!(args[1] instanceof CClosure)){
+			if(!(args[1] instanceof CClosure)) {
 				throw new ConfigRuntimeException("Expected paramter 2 of " + getName() + " to be a closure!", ExceptionType.CastException, t);
 			} else {
 				callback = ((CClosure)args[1]);
 			}
-			if(!Static.InCmdLine(environment)){
-				if(!Security.CheckSecurity(file)){
+			if(!Static.InCmdLine(environment)) {
+				if(!Security.CheckSecurity(file)) {
 					throw new ConfigRuntimeException("You do not have permission to access the file '" + file + "'", ExceptionType.SecurityException, t);
 				}
 			}
@@ -270,7 +269,7 @@ public class FileHandling {
 				public void run() {
 					String returnString = null;
 					ConfigRuntimeException exception = null;
-					if(file.contains("@")){
+					if(file.contains("@")) {
 						try {
 							//It's an SCP transfer
 							returnString = SSHWrapper.SCPReadString(file);
@@ -287,13 +286,13 @@ public class FileHandling {
 						}
 					}
 					final Construct cret;
-					if(returnString == null){
+					if(returnString == null) {
 						cret = CNull.NULL;
 					} else {
 						cret = new CString(returnString, t);
 					}
 					final Construct cex;
-					if(exception == null){
+					if(exception == null) {
 						cex = CNull.NULL;
 					} else {
 						cex = ObjectGenerator.GetGenerator().exception(exception, t);
@@ -329,7 +328,7 @@ public class FileHandling {
 				+ " (This is not applicable for remote files)"
 				+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n."
 				+ " This method will immediately return, and asynchronously read in the file, and finally send the contents"
-				+ " to the callback once the task completes. The callback should have the following signature: closure(@contents, @exception){ &lt;code&gt; }."
+				+ " to the callback once the task completes. The callback should have the following signature: closure(@contents, @exception) { &lt;code&gt; }."
 				+ " If @contents is null, that indicates that an exception occured, and @exception will not be null, but instead have an"
 				+ " exeption array. Otherwise, @contents will contain the file's contents, and @exception will be null. This method is useful"
 				+ " to use in two cases, either you need a remote file via SCP, or a local file is big enough that you notice a delay when"
@@ -364,7 +363,7 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
-			if(!Security.CheckSecurity(location)){
+			if(!Security.CheckSecurity(location)) {
 				throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
 						ExceptionType.SecurityException, t);
 			}
@@ -414,7 +413,7 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(!Static.InCmdLine(env)){
+			if(!Static.InCmdLine(env)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
@@ -478,7 +477,7 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(!Static.InCmdLine(env)){
+			if(!Static.InCmdLine(env)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
@@ -547,12 +546,12 @@ public class FileHandling {
 			String path = args[0].val().trim().replace("\\", "/");
 			//Remove duplicate /
 			path = path.replaceAll("(/)(?=.*?/)", path);
-			if("/".equals(path) || path.matches("[a-zA-Z]:/")){
+			if("/".equals(path) || path.matches("[a-zA-Z]:/")) {
 				//This is the root path, return null.
 				return CNull.NULL;
 			}
 			//If the path ends with /, take it off
-			while(path.endsWith("/")){
+			while(path.endsWith("/")) {
 				path = path.substring(0, path.length() - 2);
 			}
 			return new CString(path.substring(0, path.length() - path.lastIndexOf("/")), t);

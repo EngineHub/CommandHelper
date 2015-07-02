@@ -729,7 +729,6 @@ public class World {
 			if (w == null) {
 				throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
 			}
-			long time = 0;
 			String stime = (args.length == 1 ? args[0] : args[1]).val().toLowerCase();
 			if (TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))) {
 				stime = TimeLookup.get(stime.replaceAll("[^a-z]", "")).val();
@@ -767,7 +766,7 @@ public class World {
 			} catch (NumberFormatException e) {
 				throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
 			}
-			time = Long.parseLong(stime);
+			Long time = Long.parseLong(stime);
 			w.setTime(time);
 			return CVoid.VOID;
 		}

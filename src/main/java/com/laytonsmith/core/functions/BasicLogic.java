@@ -782,8 +782,7 @@ public class BasicLogic {
 			}
 			if(Static.anyNulls(args)){
 				boolean equals = true;
-				for(int i = 0; i < args.length; i++){
-					Construct c = args[i];
+				for (Construct c : args) {
 					if(!(c instanceof CNull)){
 						equals = false;
 					}

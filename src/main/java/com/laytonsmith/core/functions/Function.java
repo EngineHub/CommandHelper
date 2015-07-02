@@ -67,8 +67,8 @@ public interface Function extends FunctionBase, Documentation {
      * will only be one of the atomic Constructs. If a code tree is needed instead of a resolved construct,
      * the function should indicate so, and {@code execs} will be called instead. If exec is needed,
      * execs should return CVoid.
-     * @param line_num The line that this function call is being run from
-     * @param f The file that this function call is being run from
+	 * @param t
+	 * @param environment
      * @param args An array of evaluated Constructs
      * @return
      * @throws CancelCommandException
@@ -87,6 +87,7 @@ public interface Function extends FunctionBase, Documentation {
      * this gets called instead of exec. If execs is needed, exec should return CVoid.
      * @param t
      * @param env
+	 * @param parent
      * @param nodes
      * @return
      */
@@ -95,6 +96,7 @@ public interface Function extends FunctionBase, Documentation {
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
 	public ExampleScript[] examples() throws ConfigCompileException;
 
@@ -115,6 +117,7 @@ public interface Function extends FunctionBase, Documentation {
 	/**
 	 * Returns the message to use when this function gets profiled, if
 	 * useSpecialExec returns false.
+	 * @param args
 	 * @return
 	 */
 	public String profileMessage(Construct ... args);
@@ -142,6 +145,7 @@ public interface Function extends FunctionBase, Documentation {
 		 * eliminate some of the branches, due to const conditions. The current "self" ParseTree is passed
 		 * in, which is the function's ParseTree wrapper, and from there, the children can be selected. The
 		 * list of children returned should reference equal (==, not just .equals()) the children passed in.
+		 * @param self
 		 * @return
 		 */
         public List<ParseTree> getBranches(ParseTree self);

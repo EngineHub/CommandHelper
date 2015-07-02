@@ -229,7 +229,7 @@ public class Sandbox {
                 m = Static.GetPlayer(args[0].val(), t);
                 offset = 0;
             }
-            MCItemStack is = null;
+            MCItemStack is;
             if (args[1 - offset] instanceof CNull) {
                 is = m.getItemInHand();
             } else {

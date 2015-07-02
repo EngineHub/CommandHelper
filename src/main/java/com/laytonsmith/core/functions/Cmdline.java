@@ -622,9 +622,9 @@ public class Cmdline {
 			}
 
 			String prompt = args[0].val();
-			Character cha = new Character((char)0);
+			Character cha = '0';
 			if(mask){
-				cha = new Character('*');
+				cha = '*';
 			}
 			jline.console.ConsoleReader reader = null;
 			try {

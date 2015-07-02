@@ -119,9 +119,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CInt(ba.getByte(pos), t);
-			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
-			} catch(BufferUnderflowException e){
+			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			}
 		}
@@ -141,11 +139,9 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			try{
+			try {
 				return new CString(ba.getChar(pos), t);
-			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
-			} catch(BufferUnderflowException e){
+			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			}
 		}
@@ -165,11 +161,9 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			try{
+			try {
 				return new CInt(ba.getShort(pos), t);
-			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
-			} catch(BufferUnderflowException e){
+			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			}
 		}
@@ -189,11 +183,9 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			try{
+			try {
 				return new CInt(ba.getInt(pos), t);
-			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
-			} catch(BufferUnderflowException e){
+			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			}
 		}
@@ -215,9 +207,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CInt(ba.getLong(pos), t);
-			} catch (IndexOutOfBoundsException e) {
-				throw new Exceptions.RangeException(e.getMessage(), t);
-			} catch (BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			}
 		}
@@ -239,9 +229,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CDouble(ba.getFloat(pos), t);
-			} catch (IndexOutOfBoundsException e) {
-				throw new Exceptions.RangeException(e.getMessage(), t);
-			} catch (BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			}
 		}
@@ -263,9 +251,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CDouble(ba.getDouble(pos), t);
-			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
-			} catch(BufferUnderflowException e){
+			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			}
 		}
@@ -296,9 +282,7 @@ public class ByteArrays {
 			}
 			try {
 				return ba.getBytes(size, pos);
-			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
-			} catch(BufferUnderflowException e){
+			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			}
 		}
@@ -322,13 +306,9 @@ public class ByteArrays {
 			if(args.length == 3){
 				encoding = args[2].nval();
 			}
-			try{
+			try {
 				return new CString(ba.readUTF8String(pos, encoding), t);
-			} catch(UnsupportedEncodingException e){
-				throw new Exceptions.FormatException(e.getMessage(), t);
-			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
-			} catch(BufferUnderflowException e){
+			} catch(UnsupportedEncodingException | IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new Exceptions.RangeException(e.getMessage(), t);
 			} catch(NegativeArraySizeException e){
 				throw new Exceptions.FormatException("Invalid data", t);

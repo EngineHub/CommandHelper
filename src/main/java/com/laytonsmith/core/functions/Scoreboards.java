@@ -2,7 +2,6 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCObjective;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
@@ -46,9 +45,9 @@ public class Scoreboards {
 
 	static {
 		if (!isBoard(MAIN)) {
-			try{
+			try {
 				addBoard(MAIN, Static.getServer().getMainScoreboard(), Target.UNKNOWN);
-			} catch(NotInitializedYetException e){
+			} catch(NotInitializedYetException e) {
 				//This should only happen during testing or from the shell (or some other cases) so just log
 				//it and continue on.
 				e.printStackTrace(System.err);

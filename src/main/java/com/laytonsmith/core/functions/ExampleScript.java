@@ -60,6 +60,7 @@ public class ExampleScript {
 	 * script itself.
 	 * @param description
 	 * @param script
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
 	public ExampleScript(String description, String script) throws ConfigCompileException{
 		this(description, script, null, false);
@@ -87,15 +88,15 @@ public class ExampleScript {
 		try{
 			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Examples"), true));
 			this.output = output;
-		} catch(ConfigCompileException e){
-			if(intentionalCompileError){
+		} catch(ConfigCompileException e) {
+			if(intentionalCompileError) {
 				this.output = "Causes compile error: " + e.getMessage();
 			}
-		} catch(ConfigCompileGroupException ex){
-			if(intentionalCompileError){
+		} catch(ConfigCompileGroupException ex) {
+			if(intentionalCompileError) {
 				StringBuilder b = new StringBuilder();
 				b.append("Causes compile errors:\n");
-				for(ConfigCompileException e : ex.getList()){
+				for(ConfigCompileException e : ex.getList()) {
 					b.append(e.getMessage()).append("\n");
 				}
 				this.output = b.toString();
@@ -107,22 +108,22 @@ public class ExampleScript {
 
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				if(method.getName().equals("getName") || method.getName().equals("getDisplayName")){
+				if(method.getName().equals("getName") || method.getName().equals("getDisplayName")) {
 					return "Player";
 				}
-				if(method.getName().equals("getServer")){
+				if(method.getName().equals("getServer")) {
 					return fakeServer;
 				}
-				if(method.getName().equals("sendMessage")){
+				if(method.getName().equals("sendMessage")) {
 					playerOutput.append(args[0].toString()).append("\n");
 				}
-				if(method.getName().equals("isOnline")){
+				if(method.getName().equals("isOnline")) {
 					return true;
 				}
 				return genericReturn(method.getReturnType());
 			}
 		});
-		if(!init){
+		if(!init) {
 			init = true;
 			fakeServer = (MCServer)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{MCServer.class}, new InvocationHandler() {
 
@@ -144,7 +145,7 @@ public class ExampleScript {
 				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					System.out.println(method.getReturnType().getSimpleName() + " " + method.getName());
-					if(method.getName().equals("getPluginManager")){
+					if(method.getName().equals("getPluginManager")) {
 						return bukkitPluginManager;
 					}
 					return genericReturn(method.getReturnType());
@@ -155,7 +156,7 @@ public class ExampleScript {
 				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					System.out.println(method.getReturnType().getSimpleName() + " " + method.getName());
-					if(method.getName().equals("getServer")){
+					if(method.getName().equals("getServer")) {
 						return bukkitServer;
 					}
 					return genericReturn(method.getReturnType());
@@ -177,50 +178,50 @@ public class ExampleScript {
 		return description;
 	}
 
-	public boolean isAutomatic(){
+	public boolean isAutomatic() {
 		return output == null;
 	}
 
 	private class FakeCore extends AliasCore{
-		public FakeCore(){
+		public FakeCore() {
 			super(null, null, null, null, null);
 			this.autoIncludes = new ArrayList<File>();
 		}
 	}
 
-	private Object genericReturn(Class r){
-			if(r.isPrimitive()){
-				if(r == int.class){
+	private Object genericReturn(Class r) {
+			if(r.isPrimitive()) {
+				if(r == int.class) {
 					return 0;
-				} else if(r == byte.class){
+				} else if(r == byte.class) {
 					return (byte)0;
-				} else if(r == double.class){
+				} else if(r == double.class) {
 					return 0.0;
-				} else if(r == float.class){
+				} else if(r == float.class) {
 					return 0.0f;
-				} else if(r == char.class){
+				} else if(r == char.class) {
 					return '\0';
-				} else if(r == short.class){
+				} else if(r == short.class) {
 					return (short)0;
-				} else if(r == boolean.class){
+				} else if(r == boolean.class) {
 					return false;
 				} else { //long
 					return 0L;
 				}
 			} else {
-				if(r == String.class){
+				if(r == String.class) {
 					return "";
 				}
 				return null;
 			}
 	}
 
-	public String getScript(){
+	public String getScript() {
 		return originalScript;
 	}
 
 	public String getOutput() throws IOException, DataSourceException, URISyntaxException{
-		if(output != null){
+		if(output != null) {
 			return output;
 		}
 		Script s = Script.GenerateScript(script, Static.GLOBAL_PERMISSION);
@@ -238,19 +239,19 @@ public class ExampleScript {
 
 				@Override
 				public void done(String output) {
-					if(output != null){
+					if(output != null) {
 						finalOutput.append(output);
 					}
 				}
 			});
-		} catch(ConfigRuntimeException e){
+		} catch(ConfigRuntimeException e) {
 			thrown = "\n(Throws " + e.getExceptionType().name() + ": " + e.getMessage() + ")";
 		}
 		String playerOut = playerOutput.toString().trim();
 		String finalOut = finalOutput.toString().trim();
 
 		String out = (playerOut.equals("")?"":playerOut) + (finalOut.equals("")||!playerOut.trim().equals("") ?"":":" + finalOut);
-		if(thrown != null){
+		if(thrown != null) {
 			out += thrown;
 		}
 		return out;

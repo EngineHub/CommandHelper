@@ -153,9 +153,10 @@ public class Compiler {
 		 * this is ok, since it's really a compiler mechanism more than a
 		 * function.
 		 *
-		 * @param t
 		 * @param list
+		 * @param returnSConcat
 		 * @return
+		 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 		 */
 		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
 			//If any of our nodes are CSymbols, we have different behavior
@@ -186,19 +187,14 @@ public class Compiler {
 								int index = i + 2;
 								ac.addChild(list.get(index));
 								list.remove(index);
-								while (true) {
-									if (list.size() > index && list.get(index).getData() instanceof CSymbol) {
-										//Add the next two children, (the symbol then the item)
-										//and continue.
-										ac.addChild(list.get(index));
-										ac.addChild(list.get(index + 1));
-										list.remove(index);
-										list.remove(index);
-										continue;
-									} else {
-										break;
-									}
+								while (list.size() > index && list.get(index).getData() instanceof CSymbol) {
+									//Add the next two children, (the symbol then the item).
+									ac.addChild(list.get(index));
+									ac.addChild(list.get(index + 1));
+									list.remove(index);
+									list.remove(index);
 								}
+								
 								//Set this subset into the correct slot, the rest of the
 								//code will grab it correctly that way.
 								list.add(i + 2, ac);
@@ -227,18 +223,12 @@ public class Compiler {
 						}
 						ac.addChild(list.get(index));
 						list.remove(index);
-						while (true) {
-							if (list.size() > index && list.get(index).getData() instanceof CSymbol) {
-								//Add the next two children, (the symbol then the item)
-								//and continue.
-								ac.addChild(list.get(index));
-								ac.addChild(list.get(index + 1));
-								list.remove(index);
-								list.remove(index);
-								continue;
-							} else {
-								break;
-							}
+						while (list.size() > index && list.get(index).getData() instanceof CSymbol) {
+							//Add the next two children, (the symbol then the item).
+							ac.addChild(list.get(index));
+							ac.addChild(list.get(index + 1));
+							list.remove(index);
+							list.remove(index);
 						}
 						//Set this subset into the correct slot, the rest of the
 						//code will grab it correctly that way.
