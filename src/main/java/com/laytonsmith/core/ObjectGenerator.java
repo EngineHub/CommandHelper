@@ -394,7 +394,7 @@ public class ObjectGenerator {
 			ma.set("firework", firework, t);
 
 			enchants = enchants(meta.getEnchants(), t);
-			item_flags = item_flags(meta.getItemFlags(), t);
+			item_flags = itemFlags(meta.getItemFlags(), t);
 			ma.set("display", display, t);
 			ma.set("lore", lore, t);
 			ma.set("enchants", enchants, t);
@@ -581,7 +581,7 @@ public class ObjectGenerator {
 						List<MCItemFlag> existingFlags = meta.getItemFlags();
 						meta.removeItemFlags(existingFlags.toArray(new MCItemFlag[existingFlags.size()]));
 						CArray la = (CArray) ia;
-						List<MCItemFlag> itemFlags = item_flags(la, t);
+						List<MCItemFlag> itemFlags = itemFlags(la, t);
 						meta.addItemFlags(itemFlags.toArray(new MCItemFlag[itemFlags.size()]));
 					} else {
 						throw new Exceptions.FormatException("Item flags was expected to be an array.", t);
@@ -1092,7 +1092,7 @@ public class ObjectGenerator {
 		}
 	}
 
-	public CArray item_flags(List<MCItemFlag> flagList, Target t) {
+	public CArray itemFlags(List<MCItemFlag> flagList, Target t) {
 		CArray ia = new CArray(t);
 		for (MCItemFlag flag : flagList) {
 			ia.push(new CString(flag.name(), t));
@@ -1100,7 +1100,7 @@ public class ObjectGenerator {
 		return ia;
 	}
 
-	public List<MCItemFlag> item_flags(CArray ea, Target t) {
+	public List<MCItemFlag> itemFlags(CArray ea, Target t) {
 		List<MCItemFlag> ret = new ArrayList<MCItemFlag>();
 		for (Construct flag : ea.asList()) {
 			if (flag instanceof CString) {
