@@ -291,7 +291,7 @@ public class BukkitMCServer implements MCServer {
 	public MCVersion getMinecraftVersion() {
 		if (version == null) {
 			int temp = s.getBukkitVersion().indexOf('-');
-			version = MCVersion.match(s.getBukkitVersion().substring(0, temp).split("."));
+			version = MCVersion.match(s.getBukkitVersion().substring(0, temp).split("\\."));
 		}
 		return version;
 	}
