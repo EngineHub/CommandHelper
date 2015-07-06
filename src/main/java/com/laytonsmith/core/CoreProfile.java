@@ -1,6 +1,7 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,10 +15,10 @@ public class CoreProfile {
 		List<Long> array = new ArrayList<Long>();
 		for(long i = 0; i < 100000; i++){
 			array.add(i);
-			System.out.println(i);
+			StreamUtils.GetSystemOut().println(i);
 		}
 		long finish = System.currentTimeMillis();
-		System.out.println(finish - start + "ms");
+		StreamUtils.GetSystemOut().println(finish - start + "ms");
 		
 		/*
 		 Equivalent mscript:

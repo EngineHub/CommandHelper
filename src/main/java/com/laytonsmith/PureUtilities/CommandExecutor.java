@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -247,12 +248,12 @@ public class CommandExecutor {
 	}
 
 	/**
-	 * Sets the inputs and outputs to be System.in, System.out, and System.err.
+	 * Sets the inputs and outputs to be System.in, System.out, and StreamUtils.GetSystemErr().
 	 * @return
 	 */
 	public CommandExecutor setSystemInputsAndOutputs(){
-		setSystemOut(System.out);
-		setSystemErr(System.err);
+		setSystemOut(StreamUtils.GetSystemOut());
+		setSystemErr(StreamUtils.GetSystemErr());
 		setSystemIn(System.in);
 		return this;
 	}

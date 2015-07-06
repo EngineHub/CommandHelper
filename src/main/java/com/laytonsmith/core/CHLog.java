@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.abstraction.Implementation;
@@ -283,9 +284,9 @@ public final class CHLog {
             } catch(IOException e){
                 //Well, shoot.
                 if(level.level <= 1){
-                    System.err.println("Was going to print information to the log, but instead, there was"
+                    StreamUtils.GetSystemErr().println("Was going to print information to the log, but instead, there was"
                             + " an IOException: ");
-                    e.printStackTrace(System.err);
+                    e.printStackTrace(StreamUtils.GetSystemErr());
                 }
             }
         }

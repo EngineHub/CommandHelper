@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
@@ -284,7 +285,7 @@ public class Meta {
 					p.setOp(value);
 				} else {
 					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
-					System.err.println("Extra information about the error: ");
+					StreamUtils.GetSystemErr().println("Extra information about the error: ");
 					e.printStackTrace();
 				}
 			}

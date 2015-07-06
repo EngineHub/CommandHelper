@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.ZipIterator;
@@ -189,7 +190,7 @@ public class ClassDiscovery {
 			throw new NullPointerException("url cannot be null");
 		}
 		if(debug){
-			System.out.println("Adding precache for " + url);
+			StreamUtils.GetSystemOut().println("Adding precache for " + url);
 		}
 		preCaches.put(url, cache);
 	}
@@ -235,7 +236,7 @@ public class ClassDiscovery {
 	private synchronized void discover(URL rootLocation) {
 		long start = System.currentTimeMillis();
 		if(debug){
-			System.out.println("Beginning discovery of " + rootLocation);
+			StreamUtils.GetSystemOut().println("Beginning discovery of " + rootLocation);
 		}
 		try {
 			//If the ClassDiscoveryCache is set, just use this.
@@ -263,14 +264,14 @@ public class ClassDiscovery {
 			final Set<ClassMirror<?>> mirrors = classCache.get(rootLocation);
 			if (preCaches.containsKey(rootLocation)) {
 				if(debug){
-					System.out.println("Precache already contains this URL, so using it");
+					StreamUtils.GetSystemOut().println("Precache already contains this URL, so using it");
 				}
 				//No need, already got a cache for this url
 				mirrors.addAll(preCaches.get(rootLocation).getClasses());
 				return;
 			}
 			if(debug){
-				System.out.println("Precache does not contain data for this URL, so scanning now.");
+				StreamUtils.GetSystemOut().println("Precache does not contain data for this URL, so scanning now.");
 			}
 			url = url.replaceFirst("^jar:", "");
 			if (url.endsWith("!/")) {
@@ -352,7 +353,7 @@ public class ClassDiscovery {
 			e.printStackTrace();;
 		} finally {
 			if(debug){
-				System.out.println("Scans finished for " + rootLocation + ", taking " + (System.currentTimeMillis() - start) + " ms.");
+				StreamUtils.GetSystemOut().println("Scans finished for " + rootLocation + ", taking " + (System.currentTimeMillis() - start) + " ms.");
 			}
 		}
 	}
@@ -970,7 +971,7 @@ public class ClassDiscovery {
 		} else {
 			File [] list = start.listFiles();
 			if(list == null){
-				System.out.println("Could not list files in " + start);
+				StreamUtils.GetSystemOut().println("Could not list files in " + start);
 				return;
 			}
 			for (File child : start.listFiles()) {

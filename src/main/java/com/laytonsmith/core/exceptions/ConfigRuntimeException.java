@@ -4,6 +4,7 @@
 package com.laytonsmith.core.exceptions;
 
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
@@ -289,7 +290,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType)?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME,
 				LogLevel.ERROR, log.toString(), top, false);
 		//Console
-		System.out.println(console.toString() + TermColors.reset());
+		StreamUtils.GetSystemOut().println(console.toString() + TermColors.reset());
 		//Player
 		if(currentPlayer != null){
 			currentPlayer.sendMessage(player.toString());
@@ -305,16 +306,16 @@ public class ConfigRuntimeException extends RuntimeException {
 		if(Prefs.DebugMode()){
 			if(e.getCause() != null){
 				//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
-				System.err.println("The previous MethodScript error had an attached cause:");
-				e.getCause().printStackTrace(System.err);
+				StreamUtils.GetSystemErr().println("The previous MethodScript error had an attached cause:");
+				e.getCause().printStackTrace(StreamUtils.GetSystemErr());
 			}
 			if(e.getTarget().equals(Target.UNKNOWN)){
 				//This should never happen, but there are still some hard to track
 				//down bugs that cause this. If it does happen, we want to print out
 				//a stacktrace from here, which *might* assist in fixing the error
 				//messages to provide a proper target.
-				System.err.println("Since the exception has an unknown code target, here is additional information that may help:");
-				System.err.println(StackTraceUtils.GetStacktrace(new Exception()));
+				StreamUtils.GetSystemErr().println("Since the exception has an unknown code target, here is additional information that may help:");
+				StreamUtils.GetSystemErr().println(StackTraceUtils.GetStacktrace(new Exception()));
 			}
 		}
     }

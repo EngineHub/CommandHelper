@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentParserResults;
 import com.laytonsmith.PureUtilities.ArgumentParser.ResultUseException;
 import com.laytonsmith.PureUtilities.ArgumentParser.ValidationException;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -270,7 +271,7 @@ public class ArgumentSuite {
 				String modeHelp = modeResults.getStringArgument();
 				ArgumentParser selectedMode = suite.getModeFromName(suite.getModeFromAlias(modeHelp));
 				if(selectedMode != null){
-					System.out.println(selectedMode.getBuiltDescription());
+					StreamUtils.GetSystemOut().println(selectedMode.getBuiltDescription());
 					System.exit(0);
 				} else {
 					showHelp(suite);
@@ -278,10 +279,10 @@ public class ArgumentSuite {
 			} else if(mode == mode1 || mode == mode2){
 				String argument;
 				if((argument = modeResults.getStringArgument("arg1")) != null){
-					System.out.println("You selected " + argument + " for arg1");
+					StreamUtils.GetSystemOut().println("You selected " + argument + " for arg1");
 				}
 				if((argument = modeResults.getStringArgument("arg2")) != null){
-					System.out.println("You selected " + argument + " for arg2");
+					StreamUtils.GetSystemOut().println("You selected " + argument + " for arg2");
 				}
 				System.exit(0);
 			}
@@ -293,7 +294,7 @@ public class ArgumentSuite {
 	}
 	
 	private static void showHelp(ArgumentSuite suite){
-		System.out.println(suite.getBuiltDescription());
+		StreamUtils.GetSystemOut().println(suite.getBuiltDescription());
 		System.exit(1);
 	}
 	

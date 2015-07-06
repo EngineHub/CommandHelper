@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.HeapDumper;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
@@ -266,7 +267,7 @@ public class Debug {
 				if(Prefs.DebugMode()){
 					IVariable ivar = (IVariable)args[0];
 					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getName(), t);
-					System.out.println(ivar.getName() + ": " + val.val());
+					StreamUtils.GetSystemOut().println(ivar.getName() + ": " + val.val());
 				}
 				return CVoid.VOID;
 			} else {

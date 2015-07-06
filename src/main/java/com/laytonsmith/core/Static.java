@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.DateUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
@@ -50,8 +51,10 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -496,7 +499,7 @@ public final class Static {
 				//We have terminal colors, we need to reset them at the end
 				msg += TermColors.reset();
 			}
-			System.out.println(msg);
+			StreamUtils.GetSystemOut().println(msg);
 		}
 	}
 

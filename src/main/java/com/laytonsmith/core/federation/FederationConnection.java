@@ -1,5 +1,6 @@
 package com.laytonsmith.core.federation;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -213,7 +214,7 @@ public final class FederationConnection {
 	protected void finalize() throws Throwable {
 		super.finalize();
 		if (!closed) {
-			System.err.println("FederationConnection was not closed properly, and cleanup is having to be done in the finalize method!");
+			StreamUtils.GetSystemErr().println("FederationConnection was not closed properly, and cleanup is having to be done in the finalize method!");
 			closeSocket();
 		}
 	}

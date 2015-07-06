@@ -56,11 +56,11 @@ public class DocGen {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 			CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 			
-			//System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
-			System.out.println(examples("if", true));
+			//StreamUtils.GetSystemOut().println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
+			StreamUtils.GetSystemOut().println(examples("if", true));
 			//System.exit(0);
 			//events("wiki");
-			//System.out.println(Template("persistence_network"));
+			//StreamUtils.GetSystemOut().println(Template("persistence_network"));
 		} catch(Throwable t){
 			t.printStackTrace();
 			System.exit(1);
@@ -250,8 +250,8 @@ public class DocGen {
             } catch (InvocationTargetException ex) {
             } catch (NoSuchMethodException e) {
             } catch (Exception e){
-				e.printStackTrace(System.err);
-				System.err.println("Continuing however.");
+				e.printStackTrace(StreamUtils.GetSystemErr());
+				StreamUtils.GetSystemErr().println("Continuing however.");
 			}
             StringBuilder intro = new StringBuilder();
             if (type == MarkupType.HTML) {
@@ -404,7 +404,7 @@ public class DocGen {
                     Documentation docs = cons.newInstance();
                     list.add(docs);
                 } catch (Exception ex) {
-                    System.err.println("Could not get documentation for " + c.getSimpleName());
+                    StreamUtils.GetSystemErr().println("Could not get documentation for " + c.getSimpleName());
                 }
             }
         }

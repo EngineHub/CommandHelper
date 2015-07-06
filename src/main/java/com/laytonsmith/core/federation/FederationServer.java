@@ -1,5 +1,6 @@
 package com.laytonsmith.core.federation;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -283,7 +284,7 @@ public class FederationServer {
 	protected void finalize() throws Throwable {
 		super.finalize();
 		if(!closed){
-			System.err.println("FederationServer was not closed properly, and cleanup is having to be done in the finalize method!");
+			StreamUtils.GetSystemErr().println("FederationServer was not closed properly, and cleanup is having to be done in the finalize method!");
 			closeAllSockets();
 		}
 	}

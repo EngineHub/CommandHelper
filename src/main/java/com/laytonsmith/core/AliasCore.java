@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
@@ -185,7 +186,7 @@ public class AliasCore {
 												}
 											}
 										} catch (Throwable e) {
-											System.err.println(e.getMessage());
+											StreamUtils.GetSystemErr().println(e.getMessage());
 											player.sendMessage(MCChatColor.RED + e.getMessage());
 										} finally {
 											Static.getAliasCore().removePlayerReference(player);
@@ -200,7 +201,7 @@ public class AliasCore {
 							ConfigRuntimeException.HandleUncaughtException(ex, env);
 						} catch (Throwable e) {
 							//This is not a simple user script error, this is a deeper problem, so we always handle this.
-							System.err.println("An unexpected exception occured: " + e.getClass().getSimpleName());
+							StreamUtils.GetSystemErr().println("An unexpected exception occured: " + e.getClass().getSimpleName());
 							player.sendMessage("An unexpected exception occured: " + MCChatColor.RED + e.getClass().getSimpleName());
 							e.printStackTrace();
 						} finally {
@@ -210,7 +211,7 @@ public class AliasCore {
 						break;
 					}
 				} catch (Exception e) {
-					System.err.println("An unexpected exception occured inside the command " + s.toString());
+					StreamUtils.GetSystemErr().println("An unexpected exception occured inside the command " + s.toString());
 					e.printStackTrace();
 				}
 			}
@@ -321,7 +322,7 @@ public class AliasCore {
 				if (player != null) {
 					player.sendMessage(reloadOptions.getBuiltDescription());
 				} else {
-					System.out.println(reloadOptions.getBuiltDescription());
+					StreamUtils.GetSystemOut().println(reloadOptions.getBuiltDescription());
 				}
 				return;
 			}
@@ -723,12 +724,12 @@ public class AliasCore {
 				}
 			}
 			if (errors > 0) {
-				System.out.println(TermColors.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
+				StreamUtils.GetSystemOut().println(TermColors.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
 				if (player != null) {
 					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + MCChatColor.RED + "with " + errors + " aliases with compile errors.");
 				}
 			} else {
-				System.out.println(TermColors.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined." + TermColors.reset());
+				StreamUtils.GetSystemOut().println(TermColors.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined." + TermColors.reset());
 				if (player != null) {
 					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined.");
 				}

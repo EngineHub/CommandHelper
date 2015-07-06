@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
@@ -203,12 +204,12 @@ public class Script {
             if(p != null){
                 p.sendMessage("The break() function must be used inside a for() or foreach() loop");
             }
-            System.out.println("The break() function must be used inside a for() or foreach() loop");
+            StreamUtils.GetSystemOut().println("The break() function must be used inside a for() or foreach() loop");
         } catch (LoopContinueException e) {
             if(p != null){
                 p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
             }
-            System.out.println("The continue() function must be used inside a for() or foreach() loop");
+            StreamUtils.GetSystemOut().println("The continue() function must be used inside a for() or foreach() loop");
         } catch (FunctionReturnException e) {
             if(myEnv.getEnv(GlobalEnv.class).GetEvent() != null){
                 //Oh, we're running in an event handler. Those know how to catch it too.
@@ -217,9 +218,9 @@ public class Script {
             if(p != null){
                 p.sendMessage("The return() function must be used inside a procedure.");
             }
-            System.out.println("The return() function must be used inside a procedure.");
+            StreamUtils.GetSystemOut().println("The return() function must be used inside a procedure.");
         } catch (Throwable t) {
-            System.out.println("An unexpected exception occured during the execution of a script.");
+            StreamUtils.GetSystemOut().println("An unexpected exception occured during the execution of a script.");
             t.printStackTrace();
             if(p != null){
                 p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");

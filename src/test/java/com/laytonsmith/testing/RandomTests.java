@@ -2,6 +2,7 @@ package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCLocation;
@@ -161,7 +162,7 @@ public class RandomTests {
 				b.append(key).append(" threw: ").append(uhohs.get(key)).append("\n");
 			}
 			String output = ("There was/were " + uhohs.size() + " boilerplate failure(s). Output:\n" + b.toString());
-			System.out.println(output);
+			StreamUtils.GetSystemOut().println(output);
 			fail(output);
 		}
 	}

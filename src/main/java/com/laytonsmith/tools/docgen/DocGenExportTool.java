@@ -3,6 +3,7 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.events.Event;
@@ -57,7 +58,7 @@ public class DocGenExportTool {
 			try {
 				f = ReflectionUtils.newInstance(functionC);
 			} catch(NoClassDefFoundError ex){
-				System.err.println("While attempting to load: " + functionC.getName() + ": " + ex.getMessage());
+				StreamUtils.GetSystemErr().println("While attempting to load: " + functionC.getName() + ": " + ex.getMessage());
 				continue;
 			}
 			DocGen.DocInfo di = new DocGen.DocInfo(f.docs());

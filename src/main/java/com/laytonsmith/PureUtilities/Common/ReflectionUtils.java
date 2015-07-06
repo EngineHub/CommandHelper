@@ -325,7 +325,7 @@ public class ReflectionUtils {
 	 */
 	public static void PrintObjectTrace(Object instance, boolean instanceOnly, PrintStream output) {
 		if (output == null) {
-			output = System.out;
+			output = StreamUtils.GetSystemOut();
 		}
 		if (instance == null) {
 			output.println("The object is null");

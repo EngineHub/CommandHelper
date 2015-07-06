@@ -3,6 +3,7 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.Documentation;
@@ -98,7 +99,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				MethodScriptCompiler.execute(tree, env, null, null);
 			} catch(CancelCommandException ex){
 				if(ex.getMessage() != null && !ex.getMessage().equals("")){
-					System.out.println(ex.getMessage());
+					StreamUtils.GetSystemOut().println(ex.getMessage());
 				}
 			} catch(FunctionReturnException ex){
 				//We simply allow this to end the event execution

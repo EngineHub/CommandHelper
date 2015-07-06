@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -135,7 +136,7 @@ public class ExampleScript {
 
 				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					System.out.println(method.getReturnType().getSimpleName() + " " + method.getName());
+					StreamUtils.GetSystemOut().println(method.getReturnType().getSimpleName() + " " + method.getName());
 					return genericReturn(method.getReturnType());
 				}
 			});
@@ -143,7 +144,7 @@ public class ExampleScript {
 
 				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					System.out.println(method.getReturnType().getSimpleName() + " " + method.getName());
+					StreamUtils.GetSystemOut().println(method.getReturnType().getSimpleName() + " " + method.getName());
 					if(method.getName().equals("getPluginManager")){
 						return bukkitPluginManager;
 					}
@@ -154,7 +155,7 @@ public class ExampleScript {
 
 				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					System.out.println(method.getReturnType().getSimpleName() + " " + method.getName());
+					StreamUtils.GetSystemOut().println(method.getReturnType().getSimpleName() + " " + method.getName());
 					if(method.getName().equals("getServer")){
 						return bukkitServer;
 					}

@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
@@ -34,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -78,12 +80,12 @@ public class Cmdline {
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
-            System.out.print(msg);
+            StreamUtils.GetSystemOut().print(msg);
             if (msg.matches("(?m).*\033.*")) {
                 //We have color codes in it, we need to reset them
-                System.out.print(TermColors.reset());
+                StreamUtils.GetSystemOut().print(TermColors.reset());
             }
-            System.out.println();
+            StreamUtils.GetSystemOut().println();
             return CVoid.VOID;
         }
 
@@ -142,12 +144,13 @@ public class Cmdline {
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
-            System.err.print(msg);
+			PrintStream se = StreamUtils.GetSystemErr();
+            se.print(msg);
             if (msg.matches("(?m).*\033.*")) {
                 //We have color codes in it, we need to reset them
-                System.err.print(TermColors.reset());
+                se.print(TermColors.reset());
             }
-            System.err.println();
+            se.println();
             return CVoid.VOID;
         }
 
@@ -204,8 +207,9 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
-			System.out.print(msg);
-			System.out.flush();
+			PrintStream so = StreamUtils.GetSystemOut();
+			so.print(msg);
+			so.flush();
 			return CVoid.VOID;
 		}
 
@@ -258,8 +262,8 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
-			System.err.print(msg);
-			System.err.flush();
+			StreamUtils.GetSystemErr().print(msg);
+			StreamUtils.GetSystemErr().flush();
 			return CVoid.VOID;
 		}
 
@@ -689,14 +693,14 @@ public class Cmdline {
 			requireCmdlineMode(environment, this, t);
 
 			String prompt = args[0].val();
-			System.out.print(Static.MCToANSIColors(prompt));
-			System.out.flush();
+			StreamUtils.GetSystemOut().print(Static.MCToANSIColors(prompt));
+			StreamUtils.GetSystemOut().flush();
 			jline.console.ConsoleReader reader = null;
 			try {
 				reader = new jline.console.ConsoleReader();
 				reader.setExpandEvents(false);
 				char c = (char)reader.readCharacter();
-				System.out.println(c);
+				StreamUtils.GetSystemOut().println(c);
 				return new CString(c, t);
 			} catch (IOException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
@@ -1034,7 +1038,7 @@ public class Cmdline {
 						final int exitCode = cmd.waitFor();
 						try {
 							cmd.getSystemOut().flush();
-							if(cmd.getSystemOut() != System.out){
+							if(cmd.getSystemOut() != StreamUtils.GetSystemOut()){
 								cmd.getSystemOut().close();
 							}
 						} catch (IOException ex) {
@@ -1042,7 +1046,7 @@ public class Cmdline {
 						}
 						try {
 							cmd.getSystemErr().flush();
-							if(cmd.getSystemErr() != System.err){
+							if(cmd.getSystemErr() != StreamUtils.GetSystemErr()){
 								cmd.getSystemErr().close();
 							}
 						} catch (IOException ex) {

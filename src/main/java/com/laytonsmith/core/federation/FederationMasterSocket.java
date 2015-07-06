@@ -1,5 +1,6 @@
 package com.laytonsmith.core.federation;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.BufferedInputStream;
@@ -203,7 +204,7 @@ public class FederationMasterSocket {
 	protected void finalize() throws Throwable {
 		super.finalize();
 		if (!closed) {
-			System.err.println("FederationMasterSocket was not closed properly, and cleanup is having to be done in the finalize method!");
+			StreamUtils.GetSystemErr().println("FederationMasterSocket was not closed properly, and cleanup is having to be done in the finalize method!");
 			closeAll();
 		}
 	}

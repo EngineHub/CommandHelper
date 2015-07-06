@@ -23,6 +23,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.SimpleVersion;
@@ -229,8 +230,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 				}
 				new File(cd, "logs/debug/loggerPreferences.txt").delete();
 				leaveBreadcrumb(breadcrumb);
-				System.out.println("CommandHelper: Your preferences files have all been relocated to " + p.getPreferencesDirectory());
-				System.out.println("CommandHelper: The loggerPreferences.txt file has been deleted and re-created, as the defaults have changed.");
+				StreamUtils.GetSystemOut().println("CommandHelper: Your preferences files have all been relocated to " + p.getPreferencesDirectory());
+				StreamUtils.GetSystemOut().println("CommandHelper: The loggerPreferences.txt file has been deleted and re-created, as the defaults have changed.");
 			}
 		});
 
@@ -249,7 +250,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			public void run() {
 				try {
 					FileUtil.move(oldProfilesFile, MethodScriptFileLocations.getDefault().getProfilesFile());
-					System.out.println("CommandHelper: sql-profiles.xml has been renamed to " + MethodScriptFileLocations.getDefault().getProfilesFile().getName());
+					StreamUtils.GetSystemOut().println("CommandHelper: sql-profiles.xml has been renamed to " + MethodScriptFileLocations.getDefault().getProfilesFile().getName());
 				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -284,12 +285,12 @@ public class CommandHelperPlugin extends JavaPlugin {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 
-		System.out.println("[CommandHelper] Running initial class discovery,"
+		StreamUtils.GetSystemOut().println("[CommandHelper] Running initial class discovery,"
 				+ " this will probably take a few seconds...");
 		myServer = StaticLayer.GetServer();
 		BukkitMCEntityType.build();
 
-		System.out.println("[CommandHelper] Loading extensions in the background...");
+		StreamUtils.GetSystemOut().println("[CommandHelper] Loading extensions in the background...");
 
 		loadingThread = new Thread("extensionloader") {
 			@Override
@@ -297,15 +298,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 				ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
 
 				if (OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
-					// Using System.out here instead of the logger as the logger doesn't
+					// Using StreamUtils.GetSystemOut() here instead of the logger as the logger doesn't
 					// immediately print to the console.
-					System.out.println("[CommandHelper] Caching extensions...");
+					StreamUtils.GetSystemOut().println("[CommandHelper] Caching extensions...");
 					ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
-					System.out.println("[CommandHelper] Extension caching complete.");
+					StreamUtils.GetSystemOut().println("[CommandHelper] Extension caching complete.");
 				}
 
 				ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-				System.out.println("[CommandHelper] Extension loading complete.");
+				StreamUtils.GetSystemOut().println("[CommandHelper] Extension loading complete.");
 			}
 		};
 
@@ -318,7 +319,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		if(loadingThread.isAlive()){
-			System.out.println("[CommandHelper] Waiting for extension loading to complete...");
+			StreamUtils.GetSystemOut().println("[CommandHelper] Waiting for extension loading to complete...");
 
 			try {
 				loadingThread.join();
@@ -360,9 +361,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 		String main_file = Prefs.MainFile();
 		boolean showSplashScreen = Prefs.ShowSplashScreen();
 		if (showSplashScreen) {
-			System.out.println(TermColors.reset());
-			//System.out.flush();
-			System.out.println("\n\n\n" + Static.Logo());
+			StreamUtils.GetSystemOut().println(TermColors.reset());
+			//StreamUtils.GetSystemOut().flush();
+			StreamUtils.GetSystemOut().println("\n\n\n" + Static.Logo());
 		}
 		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), script_name),
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
@@ -542,12 +543,12 @@ public class CommandHelperPlugin extends JavaPlugin {
 //                if(sender instanceof Player){
 //                    Static.SendMessage(player, MCChatColor.GOLD + "Command Helper scripts sucessfully recompiled.");
 //                }
-//                System.out.println(TermColors.YELLOW + "Command Helper scripts sucessfully recompiled." + TermColors.reset());
+//                StreamUtils.GetSystemOut().println(TermColors.YELLOW + "Command Helper scripts sucessfully recompiled." + TermColors.reset());
 //            } else{
 //                if(sender instanceof Player){
 //                    Static.SendMessage(player, MCChatColor.RED + "An error occured when trying to compile the script. Check the console for more information.");
 //                }
-//                System.out.println(TermColors.RED + "An error occured when trying to compile the script. Check the console for more information." + TermColors.reset());
+//                StreamUtils.GetSystemOut().println(TermColors.RED + "An error occured when trying to compile the script. Check the console for more information." + TermColors.reset());
 //            }
 			return true;
 		} else if (cmdName.equals("commandhelper") && args.length >= 1 && args[0].equalsIgnoreCase("null")) {

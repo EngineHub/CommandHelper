@@ -1,6 +1,7 @@
 package com.laytonsmith.tools;
 
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import static com.laytonsmith.PureUtilities.TermColors.GREEN;
 import static com.laytonsmith.PureUtilities.TermColors.RED;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
@@ -26,7 +27,7 @@ public class MSLPMaker {
     public static void start(String path) throws IOException{
         File start = new File(path);
         if(!start.exists()){
-            System.err.println("The specified file does not exist!");
+            StreamUtils.GetSystemErr().println("The specified file does not exist!");
             return;
         }
 

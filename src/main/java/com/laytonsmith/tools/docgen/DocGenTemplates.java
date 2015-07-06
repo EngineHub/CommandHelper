@@ -52,7 +52,7 @@ public class DocGenTemplates {
 
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		System.out.println(Generate("Federation"));
+		StreamUtils.GetSystemOut().println(Generate("Federation"));
 	}
 
 	public static String Generate(String forPage){

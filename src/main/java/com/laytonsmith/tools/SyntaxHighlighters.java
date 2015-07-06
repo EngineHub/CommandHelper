@@ -3,6 +3,7 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
@@ -220,7 +221,7 @@ public class SyntaxHighlighters {
                     Documentation e = (Documentation)m.newInstance();
                     l.add(e);
                 } catch (Exception ex) {
-                    System.err.println(ex.getMessage());
+                    StreamUtils.GetSystemErr().println(ex.getMessage());
                 }
             }
         }
@@ -240,7 +241,7 @@ public class SyntaxHighlighters {
                     Logger.getLogger(SyntaxHighlighters.class.getName()).log(Level.SEVERE, null, ex);
                 } catch(NoClassDefFoundError e){
                     //Hmm. No real good way to handle this... echo out to stderr, I guess.
-                    System.err.println(e.getMessage());
+                    StreamUtils.GetSystemErr().println(e.getMessage());
                 }
 
             }

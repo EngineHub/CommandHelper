@@ -3,6 +3,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -64,7 +65,7 @@ public class Echoes {
 						//We have terminal colors, we need to reset them at the end
 						mes += TermColors.reset();
 					}
-					System.out.println(mes);
+					StreamUtils.GetSystemOut().println(mes);
 				}
             } finally{
                 throw new CancelCommandException("", t);
@@ -136,8 +137,8 @@ public class Echoes {
 					//We have terminal colors, we need to reset them at the end
 					mes += TermColors.reset();
 				}
-				System.out.println(mes);
-				System.out.flush();
+				StreamUtils.GetSystemOut().println(mes);
+				StreamUtils.GetSystemOut().flush();
 			}
             return CVoid.VOID;
         }
@@ -617,7 +618,7 @@ public class Echoes {
                 //We have terminal colors, we need to reset them at the end
                 mes += TermColors.reset();
             }
-            System.out.println(mes);
+            StreamUtils.GetSystemOut().println(mes);
             return CVoid.VOID;
         }
 		@Override

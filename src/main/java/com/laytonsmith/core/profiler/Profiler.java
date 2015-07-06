@@ -2,6 +2,7 @@ package com.laytonsmith.core.profiler;
 
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
@@ -218,7 +219,7 @@ public final class Profiler {
 			@Override
 			public void run() {
 				if (writeToScreen) {
-					System.out.println(message);
+					StreamUtils.GetSystemOut().println(message);
 				}
 				if (writeToFile) {
 					File file = new File(initFile.getParentFile(), DateUtils.ParseCalendarNotation(logFile));
@@ -228,7 +229,7 @@ public final class Profiler {
 								FileUtil.APPEND, //We want to append
 								true); //Create it for us if it doesn't exist
 					} catch (IOException ex) {
-						System.err.println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
+						StreamUtils.GetSystemErr().println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
 					}
 				}
 

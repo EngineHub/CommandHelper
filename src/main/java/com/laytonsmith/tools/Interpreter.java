@@ -2,6 +2,7 @@ package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.LimitedQueue;
 import com.laytonsmith.PureUtilities.RunnableQueue;
@@ -138,11 +139,11 @@ public final class Interpreter {
 			interpreter.execute(FileUtil.read(fromFile), args, fromFile);
 		} catch (ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, null, null);
-			System.out.println(TermColors.reset());
+			StreamUtils.GetSystemOut().println(TermColors.reset());
 			System.exit(1);
 		} catch(ConfigCompileGroupException ex){
 			ConfigRuntimeException.HandleUncaughtException(ex, null);
-			System.out.println(TermColors.reset());
+			StreamUtils.GetSystemOut().println(TermColors.reset());
 			System.exit(1);
 		}
 	}
@@ -194,15 +195,15 @@ public final class Interpreter {
 			}
 			try {
 				execute(script.toString(), args);
-				System.out.print(TermColors.reset());
+				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(0);
 			} catch (ConfigCompileException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, null, null);
-				System.out.print(TermColors.reset());
+				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(1);
 			} catch(ConfigCompileGroupException ex){
 				ConfigRuntimeException.HandleUncaughtException(ex, null);
-				System.out.println(TermColors.reset());
+				StreamUtils.GetSystemOut().println(TermColors.reset());
 				System.exit(1);
 			}
 
@@ -271,19 +272,19 @@ public final class Interpreter {
 //							int c3 = reader.readCharacter();
 //							if(c3 == 80){
 //								//F1
-//								System.out.println("F1");
+//								StreamUtils.GetSystemOut().println("F1");
 //								continue;
 //							} else if(c3 == 81){
 //								//F2
-//								System.out.println("F2");
+//								StreamUtils.GetSystemOut().println("F2");
 //								continue;
 //							} else if(c3 == 82){
 //								//F3
-//								System.out.println("F3");
+//								StreamUtils.GetSystemOut().println("F3");
 //								continue;
 //							} else if(c3 == 83){
 //								//F4
-//								System.out.println("F4");
+//								StreamUtils.GetSystemOut().println("F4");
 //								continue;
 //							}
 //						} else if(c2 == 91){
@@ -291,27 +292,27 @@ public final class Interpreter {
 //							int c3 = reader.readCharacter();
 //							if(c3 == 68){
 //								//Left arrow
-//								System.out.println("Left Arrow");
+//								StreamUtils.GetSystemOut().println("Left Arrow");
 //								continue;
 //							} else if(c3 == 65){
 //								//Up Arrow
-//								System.out.println("Up Arrow");
+//								StreamUtils.GetSystemOut().println("Up Arrow");
 //								continue;
 //							} else if(c3 == 66){
 //								//Down Arrow
-//								System.out.println("Down Arrow");
+//								StreamUtils.GetSystemOut().println("Down Arrow");
 //								continue;
 //							} else if(c3 == 67){
 //								//Right Arrow
-//								System.out.println("Right Arrow");
+//								StreamUtils.GetSystemOut().println("Right Arrow");
 //								continue;
 //							} else if(c3 == 72){
 //								//Home
-//								System.out.println("Home");
+//								StreamUtils.GetSystemOut().println("Home");
 //								continue;
 //							} else if(c3 == 70){
 //								//End
-//								System.out.println("End");
+//								StreamUtils.GetSystemOut().println("End");
 //								continue;
 //							} else {
 //								//At least 4 characters
@@ -319,19 +320,19 @@ public final class Interpreter {
 //								if(c4 == 126){
 //									if(c3 == 50){
 //										//Insert
-//										System.out.println("Insert");
+//										StreamUtils.GetSystemOut().println("Insert");
 //										continue;
 //									} else if(c3 == 51){
 //										//Delete
-//										System.out.println("Delete");
+//										StreamUtils.GetSystemOut().println("Delete");
 //										continue;
 //									} else if(c3 == 53){
 //										//Page Up
-//										System.out.println("Page Up");
+//										StreamUtils.GetSystemOut().println("Page Up");
 //										continue;
 //									} else if(c3 == 54){
 //										//Page Down
-//										System.out.println("Page Down");
+//										StreamUtils.GetSystemOut().println("Page Down");
 //										continue;
 //									}
 //								} else {
@@ -341,37 +342,37 @@ public final class Interpreter {
 //										if(c3 == 49){
 //											if(c4 == 53){
 //												//F5
-//												System.out.println("F5");
+//												StreamUtils.GetSystemOut().println("F5");
 //												continue;
 //											} else if(c4 == 55){
 //												//F6
-//												System.out.println("F6");
+//												StreamUtils.GetSystemOut().println("F6");
 //												continue;
 //											} else if(c4 == 56){
 //												//F7
-//												System.out.println("F7");
+//												StreamUtils.GetSystemOut().println("F7");
 //												continue;
 //											} else if(c4 == 57){
 //												//F8
-//												System.out.println("F8");
+//												StreamUtils.GetSystemOut().println("F8");
 //												continue;
 //											}
 //										} else if(c3 == 50){
 //											if(c4 == 48){
 //												//F9
-//												System.out.println("F9");
+//												StreamUtils.GetSystemOut().println("F9");
 //												continue;
 //											} else if(c4 == 49){
 //												//F10
-//												System.out.println("F10");
+//												StreamUtils.GetSystemOut().println("F10");
 //												continue;
 //											} else if(c4 == 51){
 //												//F11
-//												System.out.println("F11");
+//												StreamUtils.GetSystemOut().println("F11");
 //												continue;
 //											} else if(c4 == 52){
 //												//F12
-//												System.out.println("F12");
+//												StreamUtils.GetSystemOut().println("F12");
 //												continue;
 //											}
 //										} else {
@@ -390,7 +391,7 @@ public final class Interpreter {
 //					}
 //					if(c == 13){ //"Enter" character
 //						//done, send the line in for processing
-//						System.out.println();
+//						StreamUtils.GetSystemOut().println();
 //						break;
 //					}
 //					if(c == 127){
@@ -464,8 +465,8 @@ public final class Interpreter {
 					ctrlCcount++;
 					if(ctrlCcount > MAX_CTRL_C_MASHES){
 						//Ok, ok, we get the hint.
-						System.out.println();
-						System.out.flush();
+						StreamUtils.GetSystemOut().println();
+						StreamUtils.GetSystemOut().flush();
 						System.exit(130); //Standard Ctrl+C exit code
 					}
 					pl(YELLOW + "\nUse exit() to exit the shell." + reset());
@@ -629,7 +630,7 @@ public final class Interpreter {
 								@Override
 								public void done(String output) {
 									if(System.console() != null && !"".equals(output.trim())){
-										System.out.println(output);
+										StreamUtils.GetSystemOut().println(output);
 									}
 								}
 							}, null, vars);
@@ -644,21 +645,21 @@ public final class Interpreter {
 								System.exit(1);
 							}
 						} catch (NoClassDefFoundError e) {
-							System.err.println(RED + Main.getNoClassDefFoundErrorMessage(e) + reset());
-							System.err.println("Since you're running from standalone interpreter mode, this is not a fatal error, but one of the functions you just used required"
+							StreamUtils.GetSystemErr().println(RED + Main.getNoClassDefFoundErrorMessage(e) + reset());
+							StreamUtils.GetSystemErr().println("Since you're running from standalone interpreter mode, this is not a fatal error, but one of the functions you just used required"
 									+ " an actual backing engine that isn't currently loaded. (It still might fail even if you load the engine though.) You simply won't be"
 									+ " able to use that function here.");
 							if (System.console() == null) {
 								System.exit(1);
 							}
 						} catch (InvalidEnvironmentException ex) {
-							System.err.println(RED + ex.getMessage() + " " + ex.getData() + "() cannot be used in this context.");
+							StreamUtils.GetSystemErr().println(RED + ex.getMessage() + " " + ex.getData() + "() cannot be used in this context.");
 							if (System.console() == null) {
 								System.exit(1);
 							}
 						} catch (RuntimeException e) {
 							pl(RED + e.toString());
-							e.printStackTrace(System.err);
+							e.printStackTrace(StreamUtils.GetSystemErr());
 							if (System.console() == null) {
 								System.exit(1);
 							}
@@ -711,18 +712,18 @@ public final class Interpreter {
 					FileUtil.write(manPage, manPageFile);
 				}
 			} catch (IOException e) {
-				System.err.println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
+				StreamUtils.GetSystemErr().println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
 				return;
 			}
 		} else {
-			System.err.println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
+			StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
 			return;
 		}
-		System.out.println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
+		StreamUtils.GetSystemOut().println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
 				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + INTERPRETER_INSTALLATION_LOCATION + "\" at the top of all your scripts,"
 				+ " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems.");
-		System.out.println("Try this script to test out the basic features of the scripting system:\n");
-		System.out.println(Static.GetStringResource("/interpreter-helpers/sample.ms"));
+		StreamUtils.GetSystemOut().println("Try this script to test out the basic features of the scripting system:\n");
+		StreamUtils.GetSystemOut().println(Static.GetStringResource("/interpreter-helpers/sample.ms"));
 	}
 
 	public static void uninstall() {
@@ -733,14 +734,14 @@ public final class Interpreter {
 					throw new IOException();
 				}
 			} catch (IOException e) {
-				System.err.println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
+				StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
 				return;
 			}
 		} else {
-			System.err.println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
+			StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
 			return;
 		}
-		System.out.println("MethodScript has been uninstalled from this system.");
+		StreamUtils.GetSystemOut().println("MethodScript has been uninstalled from this system.");
 	}
 
 	@convert(type = Implementation.Type.SHELL)

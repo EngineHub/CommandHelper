@@ -283,9 +283,9 @@ public class FileUtil {
 
 			String response = null;
 			if (overwrite == null) {
-				System.out.print("Overwrite existing file " + toFile.getName()
+				StreamUtils.GetSystemOut().print("Overwrite existing file " + toFile.getName()
 					+ "? (Y/N): ");
-				System.out.flush();
+				StreamUtils.GetSystemOut().flush();
 				BufferedReader in = new BufferedReader(new InputStreamReader(
 					System.in));
 				response = in.readLine();

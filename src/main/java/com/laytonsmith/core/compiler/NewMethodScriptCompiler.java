@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CDouble;
@@ -210,9 +211,9 @@ public class NewMethodScriptCompiler {
 		CompilerEnvironment env = new CompilerEnvironment();
 		env.setConstant("v.n", "value");
 		TokenStream stream = lex("<! strict; > @var", null, true);
-		System.out.println(stream + "\n");
-//		System.out.println(preprocess(stream).toString());
+		StreamUtils.GetSystemOut().println(stream + "\n");
+//		StreamUtils.GetSystemOut().println(preprocess(stream).toString());
 		ParseTree tree = compile(stream, Environment.createEnvironment(env));
-		System.out.println(tree.toStringVerbose());
+		StreamUtils.GetSystemOut().println(tree.toStringVerbose());
 	}
 }

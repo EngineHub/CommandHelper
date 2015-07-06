@@ -179,7 +179,7 @@ public class PNViewer extends javax.swing.JFrame {
 				TreePath selPath = keyTree.getPathForLocation(e.getX(), e.getY());
 				if (selRow != -1) {
 					if (SwingUtilities.isRightMouseButton(e)) {
-						System.out.println("Right click on " + selPath);
+						StreamUtils.GetSystemOut().println("Right click on " + selPath);
 					}
 				}
 			}
@@ -819,7 +819,7 @@ public class PNViewer extends javax.swing.JFrame {
 	}
 
 	private static void log(String message) {
-		System.out.println("[" + new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(new Date()) + "]: " + message);
+		StreamUtils.GetSystemOut().println("[" + new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(new Date()) + "]: " + message);
 	}
 
 	private static interface VirtualPersistenceNetwork {

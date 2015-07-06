@@ -8,6 +8,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.abstraction.Implementation;
@@ -530,13 +531,13 @@ public class ExtensionManager {
 				Collections.sort(functions);
 				String functionString = StringUtils.Join(functions, ", ", ", and ", " and ");
 
-				System.out.println(Implementation.GetServerType().getBranding()
+				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded the following functions: " + functionString.trim());
-				System.out.println(Implementation.GetServerType().getBranding()
+				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded " + functions.size() + " function" + (functions.size() == 1 ? "." : "s."));
-				System.out.println(Implementation.GetServerType().getBranding()
+				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded the following events: " + eventString.trim());
-				System.out.println(Implementation.GetServerType().getBranding()
+				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded " + events.size() + " event" + (events.size() == 1 ? "." : "s."));
 			}
 		} catch(Throwable e) {
@@ -579,7 +580,7 @@ public class ExtensionManager {
 			try {
 				Files.delete(f.toPath());
 			} catch (IOException ex) {
-				System.out.println("[CommandHelper] Could not delete loose file "
+				StreamUtils.GetSystemOut().println("[CommandHelper] Could not delete loose file "
 						+ f.getAbsolutePath() + ": " + ex.getMessage());
 			}
 		}

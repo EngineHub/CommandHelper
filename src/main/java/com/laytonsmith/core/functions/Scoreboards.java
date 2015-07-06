@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -51,7 +52,7 @@ public class Scoreboards {
 			} catch(NotInitializedYetException e){
 				//This should only happen during testing or from the shell (or some other cases) so just log
 				//it and continue on.
-				e.printStackTrace(System.err);
+				e.printStackTrace(StreamUtils.GetSystemErr());
 			}
 		}
 	}

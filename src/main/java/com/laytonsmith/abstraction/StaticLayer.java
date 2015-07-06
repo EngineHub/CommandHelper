@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -26,7 +27,7 @@ public final class StaticLayer {
         Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(convert.class);
         for(Class c : classes){
             if(!Convertor.class.isAssignableFrom(c)){
-                System.err.println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
+                StreamUtils.GetSystemErr().println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
             }
             convert convert = (convert)c.getAnnotation(convert.class);
             if(convert.type() == Implementation.GetServerType()){
@@ -39,12 +40,12 @@ public final class StaticLayer {
                     convertor = (Convertor) c.newInstance();                    
                     //At this point we are all set
                 } catch(Exception e){
-                    System.err.println("Tried to instantiate the Convertor, but couldn't!");
+                    StreamUtils.GetSystemErr().println("Tried to instantiate the Convertor, but couldn't!");
                 }
             }
         }
         if(convertor == null){
-            System.err.println("Could not find a suitable convertor! You will experience serious issues with this plugin.");
+            StreamUtils.GetSystemErr().println("Could not find a suitable convertor! You will experience serious issues with this plugin.");
         }
     }
 

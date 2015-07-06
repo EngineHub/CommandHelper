@@ -1,5 +1,6 @@
 package com.laytonsmith.tools.docgen;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -98,7 +99,7 @@ public class SingleFunctionDialog extends javax.swing.JDialog {
 				parent.handler.doUpload(docs, "/API/" + f.getName(), true);
 			} catch (Exception ex) {
 				statusLabel.setText(ex.getMessage());
-				ex.printStackTrace(System.err);
+				ex.printStackTrace(StreamUtils.GetSystemErr());
 			}
 		} catch (ConfigCompileException ex) {
 			statusLabel.setText("That function doesn't exist.");

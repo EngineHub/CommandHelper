@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
@@ -400,7 +401,7 @@ public class Exceptions {
 				that.eval(tryCode, env);
 			} catch (ConfigRuntimeException e) {
 				if (Prefs.DebugMode()) {
-					System.out.println("[" + Implementation.GetServerType().getBranding() + "]:"
+					StreamUtils.GetSystemOut().println("[" + Implementation.GetServerType().getBranding() + "]:"
 							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + e.getExceptionType() + ":" 
 							+ e.getFile() + ":" + e.getLineNum());
 				}
