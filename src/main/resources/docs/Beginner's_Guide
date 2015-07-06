@@ -225,7 +225,7 @@ As well as providing alias functionality, there are a few built in commands. The
 for dealing with user aliases and other useful features.
 
 * /reloadaliases - Reloads the global alias file, while the game is running (ops only) 
-[[CommandHelper/Advanced Guide#reloadaliases|(See the advanced page for usage options)]]
+[[CommandHelper/Staged/Advanced Guide#reloadaliases|(See the advanced page for usage options)]]
 * /runalias - Certain configurable plugins might not use the standard method to call commands, so you would get "Unknown Command." 
 for commands that otherwise work when entered normally. Instead use "/runalias /myalias".
 
