@@ -2045,19 +2045,21 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3, 4, 5};
+			return new Integer[]{3, 4, 5, 6};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {player, potionID, strength, [seconds], [ambient]} Effect is 1-23. Seconds defaults to 30."
-					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
-					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects"
-					+ " for a complete list of potions that can be added. To remove an effect, set the seconds to 0."
-					+ " Strength is the number of levels to add to the base power (effect level 1). Ambient takes a boolean"
-					+ " of whether the particles should be less noticeable. The function returns true if the effect was"
-					+ " added or removed as desired, and false if it wasn't (however, this currently only will happen if"
-					+ " an effect is attempted to be removed, yet isn't already on the player).";
+			return "boolean {player, potionID, strength, [seconds], [ambient], [particles]} Effect is 1-23."
+					+ " Seconds defaults to 30. If the potionID is out of range, a RangeException is thrown, because out"
+					+ " of range potion effects cause the client to crash, fairly hardcore. See"
+					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
+					+ " added. To remove an effect, set the seconds to 0. Strength is the number of levels to add to the"
+					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
+					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all. The"
+					+ " function returns true if the effect was added or removed as desired, and false if it wasn't"
+					+ " (however, this currently only will happen if an effect is attempted to be removed, yet isn't"
+					+ " already on the player).";
 		}
 
 		@Override
@@ -2097,17 +2099,21 @@ public class PlayerManagement {
 			int strength = Static.getInt32(args[2], t);
 			int seconds = 30;
 			boolean ambient = false;
+			boolean particles = true;
 			if (args.length >= 4) {
 				seconds = Static.getInt32(args[3], t);
 			}
-			if (args.length == 5) {
+			if (args.length >= 5) {
 				ambient = Static.getBoolean(args[4]);
+			}
+			if (args.length == 6) {
+				particles = Static.getBoolean(args[5]);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if (seconds == 0) {
 				return CBoolean.get(m.removeEffect(effect));
 			} else {
-				m.addEffect(effect, strength, seconds, ambient, t);
+				m.addEffect(effect, strength, seconds, ambient, particles, t);
 				return CBoolean.TRUE;
 			}
 		}
@@ -2167,7 +2173,8 @@ public class PlayerManagement {
 		public String docs() {
 			return "array {[player]} Returns an array of effects that are currently active on a given player."
 					+ " The array will be full of playerEffect objects, which contain three fields, \"id\","
-					+ " \"strength\", \"seconds\" remaining, and whether the effect is \"ambient\".";
+					+ " \"strength\", \"seconds\" remaining, whether the effect is \"ambient\", and whether"
+					+ " \"particles\" are enabled.";
 		}
 
 		@Override

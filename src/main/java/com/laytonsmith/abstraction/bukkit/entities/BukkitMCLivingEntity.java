@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -207,40 +208,32 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		return blocks;
 	}
 
+	/**
+	 * @param potionID - ID of the potion
+	 * @param strength - potion strength
+	 * @param seconds - duration of the potion in seconds
+	 * @param ambient - make particles less noticable
+	 * @param particles - enable or disable particles entirely
+	 * @param t - target
+	 */
 	@Override
-	public void addEffect(int potionID, int strength, int seconds, boolean ambient, Target t) {
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000), 
-				strength, ambient);
+	public void addEffect(int potionID, int strength, int seconds, boolean ambient, boolean particles, Target t) {
+		PotionEffect pe;
+		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+			pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000),
+					strength, ambient);
+		} else {
+			pe = new PotionEffect(PotionEffectType.getById(potionID), (int) Static.msToTicks(seconds * 1000),
+					strength, ambient, particles);
+		}
 		try{
 			if(le != null){
 				le.addPotionEffect(pe, true);
 			}
 		} catch(NullPointerException e){
-			//
 			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE,
 					"Bukkit appears to have derped. This is a problem with Bukkit, not CommandHelper. The effect should have still been applied.", e);
 		}
-//        EntityPlayer ep = ((CraftPlayer) p).getHandle();
-//        MobEffect me = new MobEffect(potionID, seconds * 20, strength);
-//        //ep.addEffect(me);
-//        //ep.b(me);
-//
-//        Class epc = EntityLiving.class;
-//        try {
-//            Method meth = epc.getDeclaredMethod("b", net.minecraft.server.MobEffect.class);
-//            //ep.d(new MobEffect(effect, seconds * 20, strength));
-//            //Call it reflectively, because it's deobfuscated in newer versions of CB
-//            meth.invoke(ep, me);
-//        } catch (Exception e) {
-//            try {
-//                //Look for the addEffect version
-//                Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
-//                //ep.addEffect(me);
-//                meth.invoke(ep, me);
-//            } catch (Exception ex) {
-//                Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
 	}
 	
 	@Override
@@ -271,8 +264,14 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public List<MCEffect> getEffects(){
 		List<MCEffect> effects = new ArrayList<MCEffect>();
 		for(PotionEffect pe : le.getActivePotionEffects()){
-			MCEffect e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), 
-					(int)(Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient());
+			MCEffect e;
+			if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(),
+						(int) (Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient(), true);
+			} else {
+				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(),
+						(int)(Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient(), pe.hasParticles());
+			}
 			effects.add(e);
 		}
 		return effects;

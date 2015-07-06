@@ -57,10 +57,8 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -930,8 +928,8 @@ public class Minecraft {
 			}
 			if (index == 13 || index == -1) {
 				//Uptime
-				double uptime = (double)(System.currentTimeMillis() - ManagementFactory.getRuntimeMXBean().getStartTime());
-				retVals.add(new CDouble(uptime, t));
+				long uptime = System.currentTimeMillis() - ManagementFactory.getRuntimeMXBean().getStartTime();
+				retVals.add(new CInt(uptime, t));
 			}
 			if (index == 14 || index == -1) {
 				//gcmax
