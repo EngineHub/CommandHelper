@@ -4,10 +4,12 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -34,7 +36,9 @@ public class ItemMeta {
 	
 	private static final String applicableItemMeta = "<ul>"
 			+ "<li>All items - display (string), lore (array of strings), enchants (array of enchantment arrays),"
-			+ " repair (int, repair cost)</li><li>Books - title (string), author (string), pages (array of strings)</li>"
+			+ " repair (int, repair cost),itemflags(array). Possible itemflags: "
+			+ StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
+			+ "<li>Books - title (string), author (string), pages (array of strings)</li>"
 			+ "<li>EnchantedBooks - stored (array of enchantment arrays (see Example))</li>"
 			+ "<li>Leather Armor - color (color array (see Example))</li>"
 			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"
@@ -217,7 +221,10 @@ public class ItemMeta {
 							"This puts Notch's skin on the skull you are wearing"),
 					new ExampleScript("Demonstrates making a custom potion", 
 							"set_itemmeta(5, array(potions: array(id: 8, strength: 4, seconds: 90, ambient: true)))", 
-							"Turns the potion in slot 5 into a Potion of Leaping V")
+							"Turns the potion in slot 5 into a Potion of Leaping V"),
+					new ExampleScript("Demonstrates hiding a potion effect", 
+							"set_itemmeta(4, array(itemflags: array(HIDE_POTION_EFFECTS)))", 
+							"Removes the potion effect information from the potion in slot 4. The effect itself is unaffected.")
 			};
 		}
 		

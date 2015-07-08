@@ -7,11 +7,15 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.abstraction.enums.MCItemFlag;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
 
@@ -121,5 +125,22 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public void setRepairCost(int cost) {
 		((Repairable) im).setRepairCost(cost);
+	}
+	
+	@Override
+	public void addItemFlags(MCItemFlag... flags) {
+		for(MCItemFlag flag : flags) {
+			im.addItemFlags(ItemFlag.valueOf(flag.name()));
+		}
+	}
+	
+	@Override
+	public Set<MCItemFlag> getItemFlags() {
+		Set<ItemFlag> flags = im.getItemFlags();
+		Set<MCItemFlag> ret = new HashSet<>(flags.size());
+		for(ItemFlag flag : flags) {
+			ret.add(MCItemFlag.valueOf(flag.name()));
+		}
+		return ret;
 	}
 }
