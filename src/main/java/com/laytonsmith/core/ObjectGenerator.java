@@ -461,7 +461,7 @@ public class ObjectGenerator {
 				for(MCItemFlag flag : itemFlags) {
 					flagArray.push(new CString(flag.name(), t));
 				}
-				ma.set("itemflags", flagArray, t);
+				ma.set("flags", flagArray, t);
 			}
 			ret = ma;
 		}
@@ -664,8 +664,8 @@ public class ObjectGenerator {
 						((MCPotionMeta) meta).setMainEffect(Static.getInt32(ma.get("main", t), t));
 					}
 				}
-				if (ma.containsKey("itemflags")) {
-					Construct flags = ma.get("itemflags", t);
+				if (ma.containsKey("flags")) {
+					Construct flags = ma.get("flags", t);
 					if (flags instanceof CArray) {
 						CArray flagArray = (CArray) flags;
 						for (int i = 0; i < flagArray.size(); i++) {
