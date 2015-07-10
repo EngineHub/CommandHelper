@@ -5,8 +5,12 @@ import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCNameTagVisibility;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 
 public class BukkitMCTeam implements MCTeam {
@@ -46,6 +50,12 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public String getName() {
 		return t.getName();
+	}
+
+	@Override
+	public MCNameTagVisibility getNameTagVisibility() {
+		NameTagVisibility ntv = t.getNameTagVisibility();
+		return BukkitMCNameTagVisibility.getConvertor().getAbstractedEnum(ntv);
 	}
 
 	@Override
@@ -122,6 +132,11 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public void setDisplayName(String displayName) {
 		t.setDisplayName(displayName);
+	}
+
+	@Override
+	public void setNameTagVisibility(MCNameTagVisibility visibility) {
+		t.setNameTagVisibility(BukkitMCNameTagVisibility.getConvertor().getConcreteEnum(visibility));
 	}
 
 	@Override
