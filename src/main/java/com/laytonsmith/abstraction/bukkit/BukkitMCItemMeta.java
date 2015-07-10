@@ -7,13 +7,18 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
+import com.laytonsmith.abstraction.enums.MCItemFlag;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCItemFlag;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.Repairable;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.Repairable;
 
 /**
  *
@@ -121,5 +126,39 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public void setRepairCost(int cost) {
 		((Repairable) im).setRepairCost(cost);
+	}
+
+	@Override
+	public void addItemFlags(MCItemFlag... itemFlags) {
+		ItemFlag[] flags = new ItemFlag[itemFlags.length];
+		for (int i = 0; i < itemFlags.length; i++) {
+			flags[i] = BukkitMCItemFlag.getConvertor().getConcreteEnum(itemFlags[i]);
+		}
+		im.addItemFlags(flags);
+	}
+
+	@Override
+	public List<MCItemFlag> getItemFlags() {
+		List<MCItemFlag> ret = new ArrayList<MCItemFlag>();
+		for (MCItemFlag flag : MCItemFlag.class.getEnumConstants()) {
+			if (hasItemFlag(flag)) {
+				ret.add(flag);
+			}
+		}
+		return ret;
+	}
+
+	@Override
+	public boolean hasItemFlag(MCItemFlag itemFlag) {
+		return im.hasItemFlag(BukkitMCItemFlag.getConvertor().getConcreteEnum(itemFlag));
+	}
+
+	@Override
+	public void removeItemFlags(MCItemFlag... itemFlags) {
+		ItemFlag[] flags = new ItemFlag[itemFlags.length];
+		for (int i = 0; i < itemFlags.length; i++) {
+			flags[i] = BukkitMCItemFlag.getConvertor().getConcreteEnum(itemFlags[i]);
+		}
+		im.removeItemFlags(flags);
 	}
 }
