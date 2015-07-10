@@ -1,5 +1,7 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
+
 import java.util.Set;
 
 /**
@@ -12,6 +14,7 @@ public interface MCTeam {
 	public boolean canSeeFriendlyInvisibles();
 	public String getDisplayName();
 	public String getName();
+	public MCNameTagVisibility getNameTagVisibility();
 	public Set<String> getEntries();
 	public String getPrefix();
 	public MCScoreboard getScoreboard();
@@ -22,6 +25,7 @@ public interface MCTeam {
 	public void setAllowFriendlyFire(boolean enabled);
 	public void setCanSeeFriendlyInvisibles(boolean enabled);
 	public void setDisplayName(String displayName);
+	public void setNameTagVisibility(MCNameTagVisibility visibility);
 	public void setPrefix(String prefix);
 	public void setSuffix(String suffix);
 	public void unregister();

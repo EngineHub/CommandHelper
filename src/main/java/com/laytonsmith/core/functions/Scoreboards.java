@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
+import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.NotInitializedYetException;
@@ -391,6 +392,7 @@ public class Scoreboards {
 				CArray ops = new CArray(t);
 				ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
 				ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
+				ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
 				to.set("options", ops, t);
 				CArray pl = new CArray(t);
 				for (String entry : team.getEntries()) {
@@ -1019,6 +1021,16 @@ public class Scoreboards {
 				if (options.containsKey("friendlyinvisibles")) {
 					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t)));
 				}
+				if (options.containsKey("nametagvisibility")) {
+					MCNameTagVisibility visibility;
+					try {
+						visibility = MCNameTagVisibility.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
+					} catch (IllegalArgumentException iae) {
+						throw new Exceptions.FormatException("Unknown nametagvisibility: "
+								+ options.get("nametagvisibility", t).val(), t);
+					}
+					team.setNameTagVisibility(visibility);
+				}
 			} else {
 				throw new Exceptions.FormatException("Expected arg 2 to be an array.", t);
 			}
@@ -1038,7 +1050,7 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array,"
-					+ " checking for keys 'friendlyfire' and 'friendlyinvisibles'. " + DEF_MSG;
+					+ " checking for keys 'friendlyfire', 'friendlyinvisibles' and 'nametagvisibility'. " + DEF_MSG;
 		}
 	}
 }
