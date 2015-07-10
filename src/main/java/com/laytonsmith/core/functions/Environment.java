@@ -1283,12 +1283,14 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {locationArray} Returns whether or not a block is being supplied with power.";
+			return "boolean {locationArray, [checkMode]} Returns whether or not a block is being supplied with power."
+					+ "checkMode can be: \"BOTH\" (Check both direct and indirect power), \"DIRECT_ONLY\" (Check direct power only)"
+					+ " or \"INDIRECT_ONLY\" (Check indirect power only). CheckMode defaults to \"BOTH\".";
 		}
 
 		@Override
@@ -1305,7 +1307,97 @@ public class Environment {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			return CBoolean.get(loc.getBlock().isBlockPowered());
+			CheckMode mode;
+			if(args.length == 2) {
+				try {
+					mode = CheckMode.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException e) {
+					throw new ConfigRuntimeException("Invalid checkMode: " + args[1].val() + ".",
+							ExceptionType.FormatException, t);
+				}
+			} else {
+				mode = CheckMode.BOTH; // Default to BOTH to make it backwards compatible.
+			}
+			boolean ret;
+			switch(mode) {
+				case BOTH: {
+					ret = loc.getBlock().isBlockPowered() || loc.getBlock().isBlockIndirectlyPowered();
+					break;
+				}
+				case DIRECT_ONLY: {
+					ret = loc.getBlock().isBlockPowered();
+					break;
+				}
+				case INDIRECT_ONLY: {
+					ret = loc.getBlock().isBlockIndirectlyPowered();
+					break;
+				}
+				default: { // Should not be able to run.
+					throw new ConfigRuntimeException("Invalid checkMode: " + args[1].val() + ".",
+							ExceptionType.FormatException, t);
+				}
+			}
+			return CBoolean.get(ret);
+		}
+		
+		public enum CheckMode {
+			BOTH,
+			DIRECT_ONLY,
+			INDIRECT_ONLY
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_block_power extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException,
+					ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String getName() {
+			return "get_block_power";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "int {locationArray} Returns the redstone power level that is supplied to this block [0-15]."
+					+ " If is_block_powered(locationArray, 'DIRECT_ONLY') returns true, a redstone ore placed at the"
+					+ " given location would be powered the return value - 1.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+				throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (pl instanceof MCPlayer) {
+				w = pl.getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			return new CInt(loc.getBlock().getBlockPower(), t);
 		}
 	}
 
