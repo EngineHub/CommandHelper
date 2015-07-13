@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
+import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This file is responsible for converting CH objects into server objects, and
@@ -393,10 +395,8 @@ public class ObjectGenerator {
 					fadeColors.push(ObjectGenerator.GetGenerator().color(c, t));
 				}
 				cf.set("fade", fadeColors, t);
-			} else {
-				firework = CNull.NULL;
+				ma.set("firework", firework, t);
 			}
-			ma.set("firework", firework, t);
 
 			enchants = enchants(meta.getEnchants(), t);
 			ma.set("display", display, t);
@@ -453,6 +453,14 @@ public class ObjectGenerator {
 					ma.set("main", ((CArray) effects.get(0, t)).get("id", t), t);
 				}
 			}
+			Set<MCItemFlag> itemFlags = meta.getItemFlags();
+			CArray flagArray = new CArray(t);
+			if (itemFlags.size() > 0) {
+				for(MCItemFlag flag : itemFlags) {
+					flagArray.push(new CString(flag.name(), t));
+				}
+			}
+			ma.set("flags", flagArray, t);
 			ret = ma;
 		}
 		return ret;
@@ -652,6 +660,18 @@ public class ObjectGenerator {
 					}
 					if (ma.containsKey("main")) {
 						((MCPotionMeta) meta).setMainEffect(Static.getInt32(ma.get("main", t), t));
+					}
+				}
+				if (ma.containsKey("flags")) {
+					Construct flags = ma.get("flags", t);
+					if (flags instanceof CArray) {
+						CArray flagArray = (CArray) flags;
+						for (int i = 0; i < flagArray.size(); i++) {
+							Construct flag = flagArray.get(i, t);
+							meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
+						}
+					} else {
+						throw new Exceptions.FormatException("Itemflags was expected to be an array of flags.", t);
 					}
 				}
 			} catch(Exception ex) {
