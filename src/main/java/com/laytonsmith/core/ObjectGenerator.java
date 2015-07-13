@@ -395,10 +395,8 @@ public class ObjectGenerator {
 					fadeColors.push(ObjectGenerator.GetGenerator().color(c, t));
 				}
 				cf.set("fade", fadeColors, t);
-			} else {
-				firework = CNull.NULL;
+				ma.set("firework", firework, t);
 			}
-			ma.set("firework", firework, t);
 
 			enchants = enchants(meta.getEnchants(), t);
 			ma.set("display", display, t);
@@ -456,13 +454,13 @@ public class ObjectGenerator {
 				}
 			}
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
+			CArray flagArray = new CArray(t);
 			if (itemFlags.size() > 0) {
-				CArray flagArray = new CArray(t);
 				for(MCItemFlag flag : itemFlags) {
 					flagArray.push(new CString(flag.name(), t));
 				}
-				ma.set("flags", flagArray, t);
 			}
+			ma.set("flags", flagArray, t);
 			ret = ma;
 		}
 		return ret;
