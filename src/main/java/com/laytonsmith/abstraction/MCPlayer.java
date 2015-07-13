@@ -51,7 +51,11 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public MCScoreboard getScoreboard();
 
-    public int getTotalExperience();
+	public int getTotalExperience();
+
+	public int getExpToLevel();
+
+	public int getExpAtLevel();
 
 	public float getWalkSpeed();
 	

@@ -1854,7 +1854,8 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return new CInt(m.getTotalExperience(), t);
+			int texp = m.getExpAtLevel() + m.getExpToLevel() * java.lang.Math.round(m.getExp());
+			return new CInt(texp, t);
 		}
 	}
 
@@ -1915,11 +1916,11 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("Experience can't be negative", ExceptionType.RangeException, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			m.setTotalExperience(xp);
-//            m.setLevel(0);
-//            m.setExp(0);
-//            m.setTotalExperience(0);
-//            m.giveExp(xp);
+			int score = m.getTotalExperience();
+			m.setLevel(0);
+			m.setExp(0);
+			m.giveExp(xp);
+			m.setTotalExperience(score); // reset experience score so that this function does not affect it
 			return CVoid.VOID;
 		}
 	}

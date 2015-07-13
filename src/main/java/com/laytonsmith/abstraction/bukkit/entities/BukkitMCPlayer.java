@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
@@ -171,44 +172,37 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return p.getFireTicks();
     }
 
-//    public int getTotalExperience() {
-//        return p.getTotalExperience();
-//    }
-
-    // Method from Essentials plugin:
-    // https://raw.github.com/essentials/Essentials/master/Essentials/src/net/ess3/craftbukkit/SetExpFix.java
-	//This method is required because the bukkit player.getTotalExperience() method, shows exp that has been 'spent'.
-	//Without this people would be able to use exp and then still sell it.
 	@Override
 	public int getTotalExperience()
 	{
-		int exp = (int)Math.round(getExpAtLevel(p) * p.getExp());
-		int currentLevel = p.getLevel();
-
-		while (currentLevel > 0)
-		{
-			currentLevel--;
-			exp += getExpAtLevel(currentLevel);
-		}
-		return exp;
+		return p.getTotalExperience();
 	}
 
-	private static int getExpAtLevel(final Player player)
-	{
-		return getExpAtLevel(player.getLevel());
+	@Override
+	public int getExpToLevel() {
+		return p.getExpToLevel();
 	}
 
-	private static int getExpAtLevel(final int level)
-	{
-		if (level > 29)
-		{
-			return 62 + (level - 30) * 7;
+	@Override
+	public int getExpAtLevel() {
+		int level = p.getLevel();
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+			if (level > 30) {
+				return (int) (3.5 * Math.pow(level, 2) - 151.5 * level + 2220);
+			}
+			if(level > 15) {
+				return (int) (1.5 * Math.pow(level, 2) - 29.5 * level + 360);
+			}
+			return 17 * level;
+		} else {
+			if (level > 30) {
+				return (int) (4.5 * Math.pow(level, 2) - 162.5 * level + 2220);
+			}
+			if (level > 15) {
+				return (int) (2.5 * Math.pow(level, 2) - 40.5 * level + 360);
+			}
+			return (int) (Math.pow(level, 2) + 6 * level);
 		}
-		if (level > 15)
-		{
-			return 17 + (level - 15) * 3;
-		}
-		return 17;
 	}
 
 	@Override
@@ -478,44 +472,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.recalculatePermissions();
     }
 
-//    public void setTotalExperience(int total) {
-//      p.setTotalExperience(0);
-//		p.setLevel(0);
-//		p.setExp(0);
-//		p.giveExp(total);
-//    }
-
-	// Method from Essentials plugin:
-	// https://raw.github.com/essentials/Essentials/master/Essentials/src/net/ess3/craftbukkit/SetExpFix.java
-	//This method is used to update both the recorded total experience and displayed total experience.
-	//We reset both types to prevent issues.
 	@Override
 	public void setTotalExperience(int total)
 	{
-        p.setExp(0);
-        p.setLevel(0);
-        p.setTotalExperience(0);
-
-		//This following code is technically redundant now, as bukkit now calulcates levels more or less correctly
-		//At larger numbers however... player.getExp(3000), only seems to give 2999, putting the below calculations off.
-		int amount = total;
-		while (amount > 0)
-		{
-			final int expToLevel = getExpAtLevel(p);
-			amount -= expToLevel;
-			if (amount >= 0)
-			{
-				// give until next level
-				p.giveExp(expToLevel);
-			}
-			else
-			{
-				// give the rest
-				amount += expToLevel;
-				p.giveExp(amount);
-				amount = 0;
-			}
-		}
+        p.setTotalExperience(total);
 	}
 
 	@Override
