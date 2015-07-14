@@ -13,15 +13,15 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHorse;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
@@ -53,7 +53,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -245,9 +245,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-    public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data) {
-        w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), e, data);
-    }
+	public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius) {
+		w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), data, radius);
+	}
 
 	@Override
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
@@ -656,8 +656,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				}
 			}
-            ids.push(new CInt(e.getEntityId(), t));
-        }
+			ids.push(new CString(e.getUniqueId().toString(), t));
+		}
         return ids;
     }
 

@@ -38,6 +38,7 @@ import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -721,8 +722,8 @@ public class BlockEvents {
 				}
 
 				if (event.getIgnitingEntity() != null) {
-					map.put("ignitingentity", new CInt(event.getIgnitingEntity().getEntityId(), Target.UNKNOWN));
-				}
+                    map.put("ignitingentity", new CString(event.getIgnitingEntity().getUniqueId().toString(), Target.UNKNOWN));
+                }
 
 				if (event.getIgnitingBlock() != null) {
 					map.put("ignitingblock", new CInt(event.getIgnitingBlock().getTypeId(), Target.UNKNOWN));

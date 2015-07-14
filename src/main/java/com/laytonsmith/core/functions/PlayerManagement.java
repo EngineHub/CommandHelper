@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -12,7 +13,6 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
@@ -923,7 +923,7 @@ public class PlayerManagement {
 				//Item in hand
 				MCItemStack is = p.getItemInHand();
 				int data;
-				if (is.getTypeId() < 256) {
+				if (is.getType().isBlock()) {
 					if (is.getData() != null) {
 						data = is.getData().getData();
 					} else {
@@ -3846,7 +3846,7 @@ public class PlayerManagement {
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
-			return new CInt(p.getHunger(), t);
+			return new CInt(p.getFoodLevel(), t);
 		}
 
 		@Override
@@ -3897,7 +3897,7 @@ public class PlayerManagement {
 				hungerIndex = 1;
 			}
 			hunger = Static.getInt32(args[hungerIndex], t);
-			p.setHunger(hunger);
+			p.setFoodLevel(hunger);
 			return CVoid.VOID;
 		}
 
@@ -4227,11 +4227,11 @@ public class PlayerManagement {
 			}
 
 			Static.AssertPlayerNonNull(p, t);
-			if (p.isInsideVehicle() == false) {
+			if (!p.isInsideVehicle()) {
 				return CNull.NULL;
 			}
 
-			return new CInt(p.getVehicle().getEntityId(), t);
+			return new CString(p.getVehicle().getUniqueId().toString(), t);
 		}
 	}
 
@@ -4542,9 +4542,8 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
 			try {
-				return new CString(((MCPlayer) Static.getLivingEntity(id, t)).getName(), t);
+				return new CString(((MCPlayer) Static.getLivingEntity(args[0], t)).getName(), t);
 			} catch (Exception exception) {
 				return CNull.NULL;
 			}

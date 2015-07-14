@@ -20,6 +20,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.List;
 
 /**
@@ -51,7 +52,9 @@ public class BukkitMetadata {
 
 		@Override
 		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidPluginException, ExceptionType.InvalidWorldException, ExceptionType.PlayerOfflineException};
+			return new Exceptions.ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException,
+					ExceptionType.FormatException, ExceptionType.InvalidPluginException, ExceptionType.LengthException,
+					ExceptionType.InvalidWorldException, ExceptionType.PlayerOfflineException};
 		}
 
 		@Override

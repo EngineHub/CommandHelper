@@ -22,6 +22,8 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
+import java.util.UUID;
+
 /**
  * 
  */
@@ -51,7 +53,8 @@ public class Weather {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			int x, y, z, ent;
+			int x, y, z;
+			UUID ent;
 			MCWorld w = null;
 			boolean safe = false;
 			int safeIndex = 1;
@@ -73,15 +76,15 @@ public class Weather {
 			}
 			if (w != null) {
 				if (!safe) {
-					ent = w.strikeLightning(StaticLayer.GetLocation(w, x, y + 1, z)).getEntityId();
+					ent = w.strikeLightning(StaticLayer.GetLocation(w, x, y + 1, z)).getUniqueId();
 				} else {
-					ent = w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z)).getEntityId();
+					ent = w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z)).getUniqueId();
 				}
 			} else {
 				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
 
-			return new CInt(ent, t);
+			return new CString(ent.toString(), t);
 		}
 
 		@Override
