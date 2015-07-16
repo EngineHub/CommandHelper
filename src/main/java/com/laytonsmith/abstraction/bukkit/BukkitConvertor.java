@@ -307,52 +307,62 @@ public class BukkitConvertor extends AbstractConvertor {
 			return null;
 		}
 
-		Class<? extends MCEntity> clazz = BukkitMCEntityType.getWrapperClass(be.getType());
-		if (clazz != null) {
-			return ReflectionUtils.newInstance(clazz, new Class[]{Entity.class}, new Object[]{be});
+		BukkitMCEntityType type = BukkitMCEntityType.valueOfConcrete(be.getType());
+		if (type.getWrapperClass() != null) {
+			return ReflectionUtils.newInstance(type.getWrapperClass(), new Class[]{Entity.class}, new Object[]{be});
 		}
 
 		if (be instanceof Hanging) {
+			type.setWrapperClass(BukkitMCHanging.class);
 			return new BukkitMCHanging(be);
 		}
 
 		if (be instanceof Minecart) {
 			// Must come before Vehicle
+			type.setWrapperClass(BukkitMCMinecart.class);
 			return new BukkitMCMinecart(be);
 		}
 
 		if (be instanceof Projectile) {
+			type.setWrapperClass(BukkitMCProjectile.class);
 			return new BukkitMCProjectile(be);
 		}
 
 		if (be instanceof Tameable) {
 			// Must come before LivingEntity
+			type.setWrapperClass(BukkitMCTameable.class);
 			return new BukkitMCTameable(be);
 		}
 
 		if (be instanceof HumanEntity) {
 			// Must come before LivingEntity
+			type.setWrapperClass(BukkitMCHumanEntity.class);
 			return new BukkitMCHumanEntity(be);
 		}
 
 		if (be instanceof ComplexEntityPart) {
+			type.setWrapperClass(BukkitMCComplexEntityPart.class);
 			return new BukkitMCComplexEntityPart(be);
 		}
 
 		if (be instanceof ComplexLivingEntity) {
 			// Must come before LivingEntity
+			type.setWrapperClass(BukkitMCComplexLivingEntity.class);
 			return new BukkitMCComplexLivingEntity(be);
 		}
 
 		if (be instanceof LivingEntity) {
+			type.setWrapperClass(BukkitMCLivingEntity.class);
 			return new BukkitMCLivingEntity(be);
 		}
 
 		if (be instanceof Vehicle) {
+			type.setWrapperClass(BukkitMCVehicle.class);
 			return new BukkitMCVehicle(be);
 		}
 
 		// Handle generically if we can't find a more specific type
+		type.setWrapperClass(BukkitMCEntity.class);
 		return new BukkitMCEntity(be);
 	}
 
