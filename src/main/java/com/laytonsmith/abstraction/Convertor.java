@@ -8,9 +8,9 @@ import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Exceptions;
+
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 /**
  * This should be implemented once for each server type. It mostly wraps
@@ -170,24 +170,6 @@ public interface Convertor {
 	 * @return
 	 */
 	public MCNote GetNote(int octave, MCTone tone, boolean sharp);
-
-	/**
-	 * Returns the max block ID number supported by this server.
-	 * @return
-	 */
-	public int getMaxBlockID();
-
-	/**
-	 * Returns the max item ID number supported by this server.
-	 * @return
-	 */
-	public int getMaxItemID();
-
-	/**
-	 * Returns the max record ID number supported by this server.
-	 * @return
-	 */
-	public int getMaxRecordID();
 
 	/**
 	 * Returns a color object for this server.

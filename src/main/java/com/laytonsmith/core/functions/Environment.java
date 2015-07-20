@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
@@ -229,8 +230,8 @@ public class Environment {
 				Character c = id.charAt(i);
 				if (!inMeta) {
 					if (!Character.isDigit(c) && c != ':') {
-						throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers", ExceptionType.FormatException,
-								t);
+						throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers",
+								ExceptionType.FormatException, t);
 					}
 					if (c == ':') {
 						inMeta = true;
@@ -247,9 +248,10 @@ public class Environment {
 
 			int idata = Integer.parseInt(data.toString());
 			byte imeta = Byte.parseByte(meta.toString());
-			if (idata > StaticLayer.GetConvertor().getMaxBlockID()) {
-				throw new ConfigRuntimeException("Maximum blockID exceeded: " + idata +
-						". Attempting to set a block to an item id can corrupt chunks!", ExceptionType.CastException, t);
+			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(idata);
+			if (mat == null || !mat.isBlock()) {
+				throw new ConfigRuntimeException("Not a block ID: " + idata
+						+ ". Attempting to set an invalid id can corrupt chunks!", ExceptionType.CastException, t);
 			}
 			b.setTypeAndData(idata, imeta, physics);
 

@@ -1,21 +1,16 @@
 package com.laytonsmith.tools;
 
+import static com.laytonsmith.PureUtilities.TermColors.*;
+
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.LimitedQueue;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.SignalHandler;
 import com.laytonsmith.PureUtilities.SignalType;
 import com.laytonsmith.PureUtilities.Signals;
 import com.laytonsmith.PureUtilities.TermColors;
-import static com.laytonsmith.PureUtilities.TermColors.BLUE;
-import static com.laytonsmith.PureUtilities.TermColors.RED;
-import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
-import static com.laytonsmith.PureUtilities.TermColors.p;
-import static com.laytonsmith.PureUtilities.TermColors.pl;
-import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCColor;
@@ -47,8 +42,10 @@ import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
@@ -63,17 +60,19 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.CmdlineEvents;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
-import com.laytonsmith.core.Profiles;
-import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
+import jline.console.ConsoleReader;
+import jline.console.completer.ArgumentCompleter;
+import jline.console.completer.StringsCompleter;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -84,11 +83,6 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import jline.console.ConsoleReader;
-import jline.console.completer.ArgumentCompleter;
-import jline.console.completer.StringsCompleter;
 
 /**
  * This is a command line implementation of the in game interpreter mode. This
@@ -836,21 +830,6 @@ public final class Interpreter {
 
 		@Override
 		public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public synchronized int getMaxBlockID() {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public synchronized int getMaxItemID() {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public synchronized int getMaxRecordID() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 

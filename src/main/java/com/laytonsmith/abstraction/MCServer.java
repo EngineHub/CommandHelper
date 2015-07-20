@@ -65,10 +65,14 @@ public interface MCServer extends AbstractionObject{
 
 	public int getPort();
     public String getIp();
-    public Boolean getAllowEnd();
-    public Boolean getAllowFlight();
-    public Boolean getAllowNether();
-    public Boolean getOnlineMode();
+
+	boolean getAllowEnd();
+
+	boolean getAllowFlight();
+
+	boolean getAllowNether();
+
+	boolean getOnlineMode();
 
 	public int getViewDistance();
 

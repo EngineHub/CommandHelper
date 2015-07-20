@@ -162,7 +162,8 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCMaterial getMaterial(int id) {
-		return new BukkitMCMaterial(Material.getMaterial(id));
+		Material mat = Material.getMaterial(id);
+		return mat == null ? null : new BukkitMCMaterial(mat);
 	}
 
 	@Override
@@ -482,50 +483,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 		return new BukkitMCNote(octave, tone, sharp);
-	}
-
-	private static int maxBlockID = -1;
-	private static int maxItemID = -1;
-	private static int maxRecordID = -1;
-
-	@Override
-	public synchronized int getMaxBlockID() {
-		if (maxBlockID == -1) {
-			calculateIDs();
-		}
-		return maxBlockID;
-	}
-
-	@Override
-	public synchronized int getMaxItemID() {
-		if (maxItemID == -1) {
-			calculateIDs();
-		}
-		return maxItemID;
-	}
-
-	@Override
-	public synchronized int getMaxRecordID() {
-		if (maxRecordID == -1) {
-			calculateIDs();
-		}
-		return maxRecordID;
-	}
-
-	private void calculateIDs() {
-		maxBlockID = 0;
-		maxItemID = 256;
-		maxRecordID = 2256;
-		for (Material m : Material.values()) {
-			int mID = m.getId();
-			if (mID >= maxRecordID) {
-				maxRecordID = mID;
-			} else if (mID >= maxItemID) {
-				maxItemID = mID;
-			} else if (mID >= maxBlockID) {
-				maxBlockID = mID;
-			}
-		}
 	}
 
 	@Override

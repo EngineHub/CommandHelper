@@ -22,7 +22,6 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -47,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,8 +99,8 @@ public class VehicleEvents {
 				Map<String, Construct> ret = evaluate_helper(e);
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
-				ret.put("vehicle", new CInt(e.getVehicle().getEntityId(), t));
-				ret.put("passenger", new CInt(e.getEntity().getEntityId(), t));
+				ret.put("vehicle", new CString(e.getVehicle().getUniqueId().toString(), t));
+				ret.put("passenger", new CString(e.getEntity().getUniqueId().toString(), t));
 				if (e.getEntity().getType().getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
 					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
 				} else {
@@ -170,8 +170,8 @@ public class VehicleEvents {
 				Map<String, Construct> ret = evaluate_helper(e);
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
-				ret.put("vehicle", new CInt(e.getVehicle().getEntityId(), t));
-				ret.put("passenger", new CInt(e.getEntity().getEntityId(), t));
+				ret.put("vehicle", new CString(e.getVehicle().getUniqueId().toString(), t));
+				ret.put("passenger", new CString(e.getEntity().getUniqueId().toString(), t));
 				if (e.getEntity().getType().getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
 					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
 				} else {
@@ -260,7 +260,7 @@ public class VehicleEvents {
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(e);
 				ret.put("type", new CString(e.getVehicle().getType().name(), t));
-				ret.put("id", new CInt(e.getVehicle().getEntityId(), t));
+				ret.put("id", new CString(e.getVehicle().getUniqueId().toString(), t));
 				ret.put("collisiontype", new CString(e.getCollisionType().name(), t));
 				Construct block = CNull.NULL;
 				Construct entity = CNull.NULL;
@@ -273,7 +273,7 @@ public class VehicleEvents {
 						break;
 					case ENTITY:
 						MCVehicleEnitityCollideEvent vec = (MCVehicleEnitityCollideEvent) e;
-						entity = new CInt(vec.getEntity().getEntityId(), t);
+						entity = new CString(vec.getEntity().getUniqueId().toString(), t);
 						collide = !vec.isCollisionCancelled();
 						pickup = !vec.isPickupCancelled();
 						break;
@@ -324,7 +324,7 @@ public class VehicleEvents {
 
 		private static Thread thread = null;
 		private Set<Integer> thresholdList = new HashSet<Integer>();
-		private Map<Integer, Map<Integer, MCLocation>> thresholds = new HashMap<Integer, Map<Integer, MCLocation>>();
+		private Map<Integer, Map<UUID, MCLocation>> thresholds = new HashMap<>();
 
 		@Override
 		public void bind(BoundEvent event) {
@@ -363,12 +363,12 @@ public class VehicleEvents {
 								//we have to set all the thresholds.
 								thresholdLoop:
 								for (final Integer i : thresholdList) {
-									if (thresholds.containsKey(i) && thresholds.get(i).containsKey(v.getEntityId())) {
-										final MCLocation last = thresholds.get(i).get(v.getEntityId());
+									if (thresholds.containsKey(i) && thresholds.get(i).containsKey(v.getUniqueId())) {
+										final MCLocation last = thresholds.get(i).get(v.getUniqueId());
 										if (!v.getWorld().getName().equals(last.getWorld().getName())) {
 											//They moved worlds. simply put their new location in here, then
 											//continue.
-											thresholds.get(i).put(v.getEntityId(), v.getLocation());
+											thresholds.get(i).put(v.getUniqueId(), v.getLocation());
 											continue thresholdLoop;
 										}
 										Point3D lastPoint = new Point3D(last.getX(), last.getY(), last.getZ());
@@ -436,15 +436,15 @@ public class VehicleEvents {
 												//Put them back at the from location
 												v.teleport(last);
 											} else {
-												thresholds.get(i).put(v.getEntityId(), current);
+												thresholds.get(i).put(v.getUniqueId(), current);
 											}
 										}
 									} else {
 										//If there is no location here, just put the current location in there.
 										if (!thresholds.containsKey(i)) {
-											thresholds.put(i, new HashMap<Integer, MCLocation>());
+											thresholds.put(i, new HashMap<UUID, MCLocation>());
 										}
-										thresholds.get(i).put(v.getEntityId(), v.asyncGetLocation());
+										thresholds.get(i).put(v.getUniqueId(), v.asyncGetLocation());
 									}
 								}
 							}
@@ -550,8 +550,7 @@ public class VehicleEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 
-			int id = Static.getInt32(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
-			MCEntity e = Static.getEntity(id, Target.UNKNOWN);
+			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			if (!(e instanceof MCVehicle)) {
 				throw new ConfigRuntimeException("The id was not a vehicle",
 						ExceptionType.BadEntityException, Target.UNKNOWN);
@@ -571,7 +570,7 @@ public class VehicleEvents {
 				ret.put("from", ObjectGenerator.GetGenerator().location(((MCVehicleMoveEvent) e).getFrom()));
 				ret.put("to", ObjectGenerator.GetGenerator().location(((MCVehicleMoveEvent) e).getTo()));
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
-				ret.put("id", new CInt(e.getVehicle().getEntityId(), t));
+				ret.put("id", new CString(e.getVehicle().getUniqueId().toString(), t));
 
 				MCEntity passenger = e.getVehicle().getPassenger();
 
@@ -584,7 +583,7 @@ public class VehicleEvents {
 					MCEntityType passengertype = e.getVehicle().getPassenger().getType();
 
 					ret.put("passengertype", new CString(passengertype.name(), t));
-					ret.put("passenger", new CInt(passenger.getEntityId(), t));
+					ret.put("passenger", new CString(passenger.getUniqueId().toString(), t));
 
 					if (passengertype.getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
 						ret.put("player", new CString(((MCPlayer) e.getVehicle().getPassenger()).getName(), t));

@@ -104,11 +104,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public int getFoodLevel() {
-        return p.getFoodLevel();
-    }
-
-	@Override
     public MCPlayerInventory getInventory() {
         if (p == null || p.getInventory() == null) {
             return null;
@@ -376,11 +371,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		p.setFlying(flight);
 	}
 
-	@Override
-    public void setFoodLevel(int f) {
-        p.setFoodLevel(f);
-    }
-
     /*public void setHealth(int i) {
         if(i == 0){
             this.fireEntityDamageEvent(MCDamageCause.CUSTOM);
@@ -516,38 +506,38 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void sendBlockChange(MCLocation loc, int material, byte data) {
-		p.sendBlockChange(((Location)loc.getHandle()), material, data);
+		p.sendBlockChange(((Location) loc.getHandle()), material, data);
 	}
 
 	@Override
 	public void sendSignTextChange(MCLocation loc, String[] lines) {
-		p.sendSignChange(((Location)loc.getHandle()), lines);
+		p.sendSignChange(((Location) loc.getHandle()), lines);
 	}
 
 	@Override
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note) {
-		p.playNote((Location)loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note)note.getHandle());
+		p.playNote((Location) loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note) note.getHandle());
 	}
 	
 	@Override
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
-		p.playSound(((BukkitMCLocation) l).asLocation(), 
+		p.playSound(((BukkitMCLocation) l).asLocation(),
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}
 	
 	@Override
 	public void playSound(MCLocation l, String sound, float volume, float pitch) {
-		p.playSound(((BukkitMCLocation)l).asLocation(), sound, volume, pitch);
+		p.playSound(((BukkitMCLocation) l).asLocation(), sound, volume, pitch);
 	}
 
 	@Override
-	public int getHunger() {
+	public int getFoodLevel() {
 		return p.getFoodLevel();
 	}
 
 	@Override
-	public void setHunger(int h) {
-		p.setFoodLevel(h);
+	public void setFoodLevel(int f) {
+		p.setFoodLevel(f);
 	}
 
 	@Override
@@ -558,6 +548,16 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void setSaturation(float s) {
 		p.setSaturation(s);
+	}
+
+	@Override
+	public float getExhaustion() {
+		return p.getExhaustion();
+	}
+
+	@Override
+	public void setExhaustion(float e) {
+		p.setExhaustion(e);
 	}
 
 	@Override
