@@ -730,7 +730,7 @@ public class StaticTest {
         }
 
 		@Override
-		public MCInventory GetEntityInventory(int entityID) {
+		public MCInventory GetEntityInventory(MCEntity entity) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

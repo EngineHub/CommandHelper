@@ -111,7 +111,7 @@ public interface Convertor {
 	 * @param entityID
 	 * @return
 	 */
-	public MCInventory GetEntityInventory(int entityID);
+	public MCInventory GetEntityInventory(MCEntity entity);
 
 	/**
 	 * Returns the inventory of the block at the specified location, if it is
