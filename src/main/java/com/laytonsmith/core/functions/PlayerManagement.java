@@ -826,7 +826,7 @@ public class PlayerManagement {
 					+ "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - player groups;"
 					+ " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
 					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
-					+ " <li>13 - Player's current entity id</li><li>14 - Is player in a vehicle? Returns true or false.</li>"
+					+ " <li>13 - Player UUID</li><li>14 - Is player in a vehicle? Returns true or false.</li>"
 					+ " <li>15 - The slot number of the player's current hand.</li>"
 					+ " <li>16 - Is sleeping?</li><li>17 - Is blocking?</li><li>18 - Is flying?</li><li>19 - Is sprinting?</li>"
 					+ " <li>20 - Player UUID"
@@ -971,7 +971,7 @@ public class PlayerManagement {
 				retVals.add(new CString(p.getHost(), t));
 			}
 			if (index == 13 || index == -1) {
-				retVals.add(new CInt(p.getEntityId(), t));
+				retVals.add(new CString(p.getUniqueId().toString(), t));
 			}
 			if (index == 14 || index == -1) {
 				retVals.add(CBoolean.get(p.isInsideVehicle()));
