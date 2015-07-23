@@ -819,7 +819,7 @@ public final class Interpreter {
 		}
 
 		@Override
-		public MCInventory GetEntityInventory(int entityID) {
+		public MCInventory GetEntityInventory(MCEntity entity) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 

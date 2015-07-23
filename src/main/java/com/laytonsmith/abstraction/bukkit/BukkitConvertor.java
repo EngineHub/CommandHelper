@@ -418,20 +418,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCInventory GetEntityInventory(int entityID) {
-		Entity entity = null;
-		outer:
-		for (World w : Bukkit.getWorlds()) {
-			for (Entity e : w.getEntities()) {
-				if (e.getEntityId() == entityID) {
-					entity = e;
-					break outer;
-				}
-			}
-		}
-		if (entity == null) {
-			return null;
-		}
+	public MCInventory GetEntityInventory(MCEntity entity) {
 		if (entity instanceof InventoryHolder) {
 			if (entity instanceof Player) {
 				return new BukkitMCPlayerInventory(((Player) entity).getInventory());
