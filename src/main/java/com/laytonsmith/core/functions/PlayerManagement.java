@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
@@ -3428,6 +3429,113 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			p.resetPlayerTime();
 			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class phas_storm extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(args.length == 1) {
+				m = Static.GetPlayer(args[0], t);
+			}
+			return CBoolean.get(m.getPlayerWeather() == MCWeather.DOWNFALL);
+		}
+
+		@Override
+		public String getName() {
+			return "phas_storm";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player]} Returns true if the given player is experiencing precipitation.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pstorm extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			int offset = 0;
+			if (args.length == 2) {
+				m = Static.GetPlayer(args[0], t);
+				offset = 1;
+			}
+			if(args[offset] instanceof CNull) {
+				m.resetPlayerWeather();
+			} else if(Static.getBoolean(args[offset])) {
+				m.setPlayerWeather(MCWeather.DOWNFALL);
+			} else {
+				m.setPlayerWeather(MCWeather.CLEAR);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_pstorm";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], downFall} Sets the weather for the given player. If downFall is true, the player"
+					+ " will experience precipitation. If downFall is null, it will reset the player's weather to that"
+					+ " of the world.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
