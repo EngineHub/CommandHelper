@@ -3471,7 +3471,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player]} Returns true if the given player is experiencing precipitation.";
+			return "void {[player]} Returns true if the given player is experiencing a storm, as set by"
+					+ " set_pstorm(). (ignores world weather)";
 		}
 
 		@Override
@@ -3528,8 +3529,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], downFall} Sets the weather for the given player. If downFall is true, the player"
-					+ " will experience precipitation. If downFall is null, it will reset the player's weather to that"
+			return "void {[player], downFall} Sets the weather for the given player only. If downFall is true, the"
+					+ " player will experience a storm. If downFall is null, it will reset the player's weather to that"
 					+ " of the world.";
 		}
 
