@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 
 /**
@@ -52,7 +53,7 @@ public interface MCFireworkBuilder {
 	 * @param l
 	 * @return entityID of the firework
 	 */
-	int launch(MCLocation l);
+	MCFirework launch(MCLocation l);
 
 	/**
 	 * Given the entered builder data, create a firework meta with these attributes

@@ -8,16 +8,14 @@ import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFirework;
+import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFireworkType;
-import java.util.List;
-import java.util.Map;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
-import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 
 /**
@@ -69,7 +67,7 @@ public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 	}
 
 	@Override
-	public int launch(MCLocation l) {
+	public MCFirework launch(MCLocation l) {
 		FireworkEffect fe = builder.build();
 		Location ll = ((BukkitMCLocation)l).asLocation();
 		Firework fw = (Firework)ll.getWorld().spawnEntity(ll, EntityType.FIREWORK);
@@ -77,7 +75,7 @@ public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 		fwmeta.addEffect(fe);
 		fwmeta.setPower(strength);
 		fw.setFireworkMeta(fwmeta);
-		return fw.getEntityId();
+		return new BukkitMCFirework(fw);
 	}
 
 	@Override
