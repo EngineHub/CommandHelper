@@ -1268,7 +1268,7 @@ public class Minecraft {
 				fw.addFadeColor(color);
 			}
 
-			return new CInt(fw.launch(loc), t);
+			return new CString(fw.launch(loc).getUniqueId().toString(), t);
 		}
 
 		private Set<MCColor> parseColors(Construct c, Target t){
