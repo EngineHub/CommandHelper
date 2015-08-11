@@ -956,7 +956,7 @@ public class EntityManagement {
 					+ " If provide three arguments, with target (entityID, player name or location array), entity will"
 					+ " shoot to target location. Last, fourth argument, is double and specifies the speed"
 					+ " of projectile. Returns the EntityID of the entity. Valid entities types: "
-					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ", " or ");
+					+ StringUtils.Join(MCEntityType.types(), ", ", ", or ", " or ");
 		}
 	}
 
@@ -1056,7 +1056,7 @@ public class EntityManagement {
 			return "array {location array, distance, [type] | location array, distance, [arrayTypes]} Returns an array of"
 					+ " all entities within the given radius. Set type argument to filter entities to a specific type. You"
 					+ " can pass an array of types. Valid types (case doesn't matter): "
-					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ", " or ");
+					+ StringUtils.Join(MCEntityType.types(), ", ", ", or ", " or ");
 		}
 
 		@Override
@@ -2225,7 +2225,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity entity = Static.getEntityByUuid(UUID.fromString(args[0].val()), t);
+			MCEntity entity = Static.getEntityByUuid(Static.GetUUID(args[0], t), t);
 			return new CString(entity.getUniqueId().toString(), t);
 		}
 

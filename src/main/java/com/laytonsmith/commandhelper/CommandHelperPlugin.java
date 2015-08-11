@@ -39,6 +39,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
@@ -288,8 +289,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 		StreamUtils.GetSystemOut().println("[CommandHelper] Running initial class discovery,"
 				+ " this will probably take a few seconds...");
 		myServer = StaticLayer.GetServer();
-		BukkitMCEntityType.build();
-
 		StreamUtils.GetSystemOut().println("[CommandHelper] Loading extensions in the background...");
 
 		loadingThread = new Thread("extensionloader") {
@@ -327,6 +326,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		BukkitMCEntityType.build();
+		BukkitMCBiomeType.build();
 
 		//Metrics
 		try {

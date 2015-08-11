@@ -34,6 +34,8 @@ public interface MCWorld extends MCMetadatable {
 	public String getGenerator();
 	public MCWorldType getWorldType();
 
+	int getSeaLevel();
+
 	public MCDifficulty getDifficulty();
 	public void setDifficulty(MCDifficulty difficulty);
 	public boolean getPVP();

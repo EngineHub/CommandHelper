@@ -1141,6 +1141,7 @@ public class World {
 			ret.set("environment", new CString(w.getEnvironment().name(), t), t);
 			ret.set("generator", new CString(w.getGenerator(), t), t);
 			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
+			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t);
 			return ret;
 		}
 
@@ -1157,7 +1158,7 @@ public class World {
 		@Override
 		public String docs() {
 			return "array {world} Returns an associative array of all the info needed to duplicate the world."
-					+ " The keys are name, seed, environment, generator, and worldtype.";
+					+ " The keys are name, seed, environment, generator, worldtype, and sealevel.";
 		}
 
 		@Override

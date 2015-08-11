@@ -62,7 +62,6 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
@@ -86,7 +85,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof MCWorld ? this.w.equals(((BukkitMCWorld)o).w) : false;
+		return o instanceof MCWorld && this.w.equals(((BukkitMCWorld) o).w);
 	}
 
 	@Override
@@ -213,6 +212,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public int getSeaLevel() {
+		return getHandle().getSeaLevel();
+	}
+
+	@Override
     public MCBlock getBlockAt(int x, int y, int z) {
         if (w.getBlockAt(x, y, z) == null) {
             return null;
@@ -321,13 +325,13 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
     public MCBiomeType getBiome(int x, int z) {
-		return BukkitMCBiomeType.getConvertor().getAbstractedEnum(w.getBiome(x, z));
-    }
+		return BukkitMCBiomeType.valueOfConcrete(w.getBiome(x, z));
+	}
 
 	@Override
     public void setBiome(int x, int z, MCBiomeType type) {
-        w.setBiome(x, z, Biome.valueOf(type.name()));
-    }
+		w.setBiome(x, z, ((BukkitMCBiomeType) type).getConcrete());
+	}
 
 	@Override
 	public MCBlock getHighestBlockAt(int x, int z) {

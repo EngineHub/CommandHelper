@@ -35,6 +35,7 @@ import com.laytonsmith.persistence.PersistenceNetwork;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -180,7 +181,7 @@ public class Reflection {
 					}
 					for (Class<DynamicEnum> d : dEnums) {
 						if (d.getAnnotation(MDynamicEnum.class).value().equals(enumName)) {
-							for (DynamicEnum ee : (DynamicEnum[]) ReflectionUtils.invokeMethod(d, null, "values")) {
+							for (DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d, null, "values")) {
 								a.push(new CString(ee.name(), t));
 							}
 							break;
