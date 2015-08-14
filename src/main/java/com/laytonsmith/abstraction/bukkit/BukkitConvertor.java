@@ -25,6 +25,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
@@ -66,6 +67,7 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
@@ -329,9 +331,15 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 
 		if (be instanceof Tameable) {
-			// Must come before LivingEntity
+			// Must come before Ageable
 			type.setWrapperClass(BukkitMCTameable.class);
 			return new BukkitMCTameable(be);
+		}
+
+		if (be instanceof Ageable) {
+			// Must come before LivingEntity
+			type.setWrapperClass(BukkitMCAgeable.class);
+			return new BukkitMCAgeable(be);
 		}
 
 		if (be instanceof HumanEntity) {
