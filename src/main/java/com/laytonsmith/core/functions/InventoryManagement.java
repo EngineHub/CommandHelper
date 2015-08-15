@@ -1823,13 +1823,13 @@ public class InventoryManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
 			return "void {[player], slotNumber} Sets the selected quickbar slot of the given or executing player"
-					+ " to the given slot. The slots are in range of [1-9].";
+					+ " to the given slot. The slots are in range of [0-8].";
 		}
 
 		@Override
@@ -1876,15 +1876,15 @@ public class InventoryManagement {
 			try {
 				slot = Integer.parseInt(args[0].val());
 			} catch(NumberFormatException e) {
-				throw new ConfigRuntimeException("Slot number must be an integer in range of [1-9].",
+				throw new ConfigRuntimeException("Slot number must be an integer in range of [0-8].",
 							Exceptions.ExceptionType.FormatException, t);
 			}
-			if(slot < 1 || slot > 9) {
-				throw new ConfigRuntimeException("Slot number must be an integer in range of [1-9].",
+			if(slot < 0 || slot > 8) {
+				throw new ConfigRuntimeException("Slot number must be an integer in range of [0-8].",
 						Exceptions.ExceptionType.RangeException, t);
 			}
 			
-			player.getInventory().setHeldItemSlot(slot - 1); // Slots 0-8 correspond to keyboard keys 1-9.
+			player.getInventory().setHeldItemSlot(slot);
 			return CVoid.VOID;
 		}
 
