@@ -13,16 +13,22 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CDotOperator;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CPreIdentifier;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -271,6 +277,38 @@ public class Compiler {
 						list.set(i - 1, conversion);
 						list.remove(i);
 						i--;
+					}
+				}
+			}
+			// dot operator vs concat
+			for (int i = 0; i < list.size() - 1; i++){
+				ParseTree node = list.get(i);
+				if(node.getData() instanceof CDotOperator){
+					if((i == 0 && list.size() > 1)
+							|| list.get(i - 1).getData().getCType().equals(Construct.ConstructType.SYMBOL)){
+						// It's either the first token in the list (and there's a token following it) or there's a symbol before it. Assuming the
+						//following token is an integer, this is a decimal.
+						ParseTree node2 = list.get(i + 1);
+						if(node2.getData() instanceof CInt){
+							// This is a decimal
+							list.set(i, new ParseTree(new CDouble("." + node2.getData().val(), node.getTarget()), node.getFileOptions()));
+							list.remove(i + 1);
+						} else {
+							throw new ConfigCompileException("Unexpected concatenation operator", node.getTarget());
+						}
+					} else {
+						ParseTree prev = list.get(i - 1);
+						ParseTree next = list.get(i + 1);
+						// If both nodes are integers, this is a double. If either node is non-integral, this is concat
+						if(prev.getData() instanceof CInt && next.getData() instanceof CInt){
+							list.set(i - 1, new ParseTree(new CDouble(prev.getData().val() + "." + next.getData().val(), node.getTarget()), node.getFileOptions()));
+							list.remove(i);
+							list.remove(i);
+						} else {
+							// Just set it to a concat, the rest of the code will handle it from here like normal
+							list.set(i, new ParseTree(new CSymbol(".", TType.CONCAT, node.getTarget()), node.getFileOptions()));
+							inSymbolMode = true;
+						}
 					}
 				}
 			}

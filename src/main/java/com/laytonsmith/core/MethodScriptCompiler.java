@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
+import com.laytonsmith.core.constructs.CDotOperator;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
@@ -478,13 +479,16 @@ public final class MethodScriptCompiler {
 				i++;
 				continue;
 			}
-			if (c == '.' && !Character.isDigit(c2) && !state_in_quote) {
-				//if it's a number after this, it's a decimal
-				if (buf.length() > 0) {
+			if(c == '.' && !state_in_quote){
+				if (buf.length() > 0){
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
 				}
-				token_list.add(new Token(TType.CONCAT, ".", target));
+				// Dots are resolved later, because order of operations actually matters here, depending on whether
+				// or not the previous token is a string or a number. But actually, it isn't about the previous token, it's
+				// about the previous construct, and we want to handle it in a more robust way, so we pass it along to
+				// the compiler stage.
+				token_list.add(new Token(TType.DOT, ".", target));
 				continue;
 			}
 			if (c == ':' && c2 == ':' && !state_in_quote) {
@@ -1272,6 +1276,9 @@ public final class MethodScriptCompiler {
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.isSymbol()) { //Logic and math symbols
 				tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
+				constructCount.peek().incrementAndGet();
+			} else if (t.type == TType.DOT){
+				tree.addChild(new ParseTree(new CDotOperator(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
 				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
