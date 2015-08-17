@@ -34,6 +34,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -1081,7 +1082,7 @@ public class World {
 				block.setVelocity(v);
 			}
 
-			return new CInt(block.getEntityId(), t);
+			return new CString(block.getUniqueId().toString(), t);
 		}
 
 		@Override
@@ -1140,6 +1141,7 @@ public class World {
 			ret.set("environment", new CString(w.getEnvironment().name(), t), t);
 			ret.set("generator", new CString(w.getGenerator(), t), t);
 			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
+			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t);
 			return ret;
 		}
 
@@ -1156,7 +1158,7 @@ public class World {
 		@Override
 		public String docs() {
 			return "array {world} Returns an associative array of all the info needed to duplicate the world."
-					+ " The keys are name, seed, environment, generator, and worldtype.";
+					+ " The keys are name, seed, environment, generator, worldtype, and sealevel.";
 		}
 
 		@Override

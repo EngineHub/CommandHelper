@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -1218,7 +1219,8 @@ public class InventoryManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
+                    ExceptionType.LengthException};
 		}
 
 		@Override
@@ -1280,7 +1282,8 @@ public class InventoryManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
+                    ExceptionType.LengthException};
 		}
 
 		@Override
@@ -1340,7 +1343,8 @@ public class InventoryManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+                    ExceptionType.LengthException};
 		}
 
 		@Override
@@ -1395,7 +1399,8 @@ public class InventoryManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
+                    ExceptionType.LengthException};
 		}
 
 		@Override
@@ -1524,9 +1529,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException,
-				Exceptions.ExceptionType.RangeException, Exceptions.ExceptionType.FormatException};
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException,
+                    ExceptionType.FormatException, ExceptionType.LengthException};
 		}
 
 		@Override
@@ -1604,8 +1609,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+                    ExceptionType.LengthException};
 		}
 
 		@Override
@@ -1683,8 +1689,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+                    ExceptionType.LengthException};
 		}
 
 		@Override
@@ -1751,8 +1758,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+                    ExceptionType.LengthException};
 		}
 
 		@Override
@@ -1866,8 +1874,8 @@ public class InventoryManagement {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
 			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
 		} else {
-			int entityID = Static.getInt32(specifier, t);
-			inv = StaticLayer.GetConvertor().GetEntityInventory(entityID);
+			MCEntity entity = Static.getEntity(specifier, t);
+			inv = StaticLayer.GetConvertor().GetEntityInventory(entity);
 		}
 		if(inv == null){
 			throw new Exceptions.FormatException("The entity or location specified is not capable of having an inventory.", t);

@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
@@ -229,8 +230,8 @@ public class Environment {
 				Character c = id.charAt(i);
 				if (!inMeta) {
 					if (!Character.isDigit(c) && c != ':') {
-						throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers", ExceptionType.FormatException,
-								t);
+						throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers",
+								ExceptionType.FormatException, t);
 					}
 					if (c == ':') {
 						inMeta = true;
@@ -247,9 +248,10 @@ public class Environment {
 
 			int idata = Integer.parseInt(data.toString());
 			byte imeta = Byte.parseByte(meta.toString());
-			if (idata > StaticLayer.GetConvertor().getMaxBlockID()) {
-				throw new ConfigRuntimeException("Maximum blockID exceeded: " + idata +
-						". Attempting to set a block to an item id can corrupt chunks!", ExceptionType.CastException, t);
+			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(idata);
+			if (mat == null || !mat.isBlock()) {
+				throw new ConfigRuntimeException("Not a block ID: " + idata
+						+ ". Attempting to set an invalid id can corrupt chunks!", ExceptionType.CastException, t);
 			}
 			b.setTypeAndData(idata, imeta, physics);
 
@@ -536,7 +538,7 @@ public class Environment {
 		public String docs() {
 			return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
 					+ " The location array's y value is ignored. ----"
-					+ " Biome may be one of the following: " + StringUtils.Join(MCBiomeType.values(), ", ", ", or ");
+					+ " Biome may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
 		}
 
 		@Override
@@ -611,7 +613,7 @@ public class Environment {
 		public String docs() {
 			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location array's"
 					+ " y value is ignored. ---- The value returned"
-					+ " may be one of the following: " + StringUtils.Join(MCBiomeType.values(), ", ", ", or ");
+					+ " may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
 		}
 
 		@Override
@@ -1283,12 +1285,14 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {locationArray} Returns whether or not a block is being supplied with power.";
+			return "boolean {locationArray, [checkMode]} Returns whether or not a block is being supplied with power."
+					+ "checkMode can be: \"BOTH\" (Check both direct and indirect power), \"DIRECT_ONLY\" (Check direct power only)"
+					+ " or \"INDIRECT_ONLY\" (Check indirect power only). CheckMode defaults to \"BOTH\".";
 		}
 
 		@Override
@@ -1305,7 +1309,97 @@ public class Environment {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			return CBoolean.get(loc.getBlock().isBlockPowered());
+			CheckMode mode;
+			if(args.length == 2) {
+				try {
+					mode = CheckMode.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException e) {
+					throw new ConfigRuntimeException("Invalid checkMode: " + args[1].val() + ".",
+							ExceptionType.FormatException, t);
+				}
+			} else {
+				mode = CheckMode.BOTH; // Default to BOTH to make it backwards compatible.
+			}
+			boolean ret;
+			switch(mode) {
+				case BOTH: {
+					ret = loc.getBlock().isBlockPowered() || loc.getBlock().isBlockIndirectlyPowered();
+					break;
+				}
+				case DIRECT_ONLY: {
+					ret = loc.getBlock().isBlockPowered();
+					break;
+				}
+				case INDIRECT_ONLY: {
+					ret = loc.getBlock().isBlockIndirectlyPowered();
+					break;
+				}
+				default: { // Should not be able to run.
+					throw new ConfigRuntimeException("Invalid checkMode: " + args[1].val() + ".",
+							ExceptionType.FormatException, t);
+				}
+			}
+			return CBoolean.get(ret);
+		}
+		
+		public enum CheckMode {
+			BOTH,
+			DIRECT_ONLY,
+			INDIRECT_ONLY
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_block_power extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException,
+					ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String getName() {
+			return "get_block_power";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "int {locationArray} Returns the redstone power level that is supplied to this block [0-15]."
+					+ " If is_block_powered(locationArray, 'DIRECT_ONLY') returns true, a redstone ore placed at the"
+					+ " given location would be powered the return value - 1.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+				throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (pl instanceof MCPlayer) {
+				w = pl.getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			return new CInt(loc.getBlock().getBlockPower(), t);
 		}
 	}
 

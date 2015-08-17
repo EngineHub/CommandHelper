@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -12,10 +13,10 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
@@ -826,7 +827,7 @@ public class PlayerManagement {
 					+ "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - player groups;"
 					+ " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
 					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
-					+ " <li>13 - Player's current entity id</li><li>14 - Is player in a vehicle? Returns true or false.</li>"
+					+ " <li>13 - Player UUID</li><li>14 - Is player in a vehicle? Returns true or false.</li>"
 					+ " <li>15 - The slot number of the player's current hand.</li>"
 					+ " <li>16 - Is sleeping?</li><li>17 - Is blocking?</li><li>18 - Is flying?</li><li>19 - Is sprinting?</li>"
 					+ " <li>20 - Player UUID"
@@ -923,7 +924,7 @@ public class PlayerManagement {
 				//Item in hand
 				MCItemStack is = p.getItemInHand();
 				int data;
-				if (is.getTypeId() < 256) {
+				if (is.getType().isBlock()) {
 					if (is.getData() != null) {
 						data = is.getData().getData();
 					} else {
@@ -971,7 +972,7 @@ public class PlayerManagement {
 				retVals.add(new CString(p.getHost(), t));
 			}
 			if (index == 13 || index == -1) {
-				retVals.add(new CInt(p.getEntityId(), t));
+				retVals.add(new CString(p.getUniqueId().toString(), t));
 			}
 			if (index == 14 || index == -1) {
 				retVals.add(CBoolean.get(p.isInsideVehicle()));
@@ -1854,7 +1855,8 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return new CInt(m.getTotalExperience(), t);
+			int texp = m.getExpAtLevel() + m.getExpToLevel() * java.lang.Math.round(m.getExp());
+			return new CInt(texp, t);
 		}
 	}
 
@@ -1915,11 +1917,11 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("Experience can't be negative", ExceptionType.RangeException, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			m.setTotalExperience(xp);
-//            m.setLevel(0);
-//            m.setExp(0);
-//            m.setTotalExperience(0);
-//            m.giveExp(xp);
+			int score = m.getTotalExperience();
+			m.setLevel(0);
+			m.setExp(0);
+			m.giveExp(xp);
+			m.setTotalExperience(score); // reset experience score so that this function does not affect it
 			return CVoid.VOID;
 		}
 	}
@@ -3431,6 +3433,114 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class phas_storm extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(args.length == 1) {
+				m = Static.GetPlayer(args[0], t);
+			}
+			return CBoolean.get(m.getPlayerWeather() == MCWeather.DOWNFALL);
+		}
+
+		@Override
+		public String getName() {
+			return "phas_storm";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player]} Returns true if the given player is experiencing a storm, as set by"
+					+ " set_pstorm(). (ignores world weather)";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pstorm extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			int offset = 0;
+			if (args.length == 2) {
+				m = Static.GetPlayer(args[0], t);
+				offset = 1;
+			}
+			if(args[offset] instanceof CNull) {
+				m.resetPlayerWeather();
+			} else if(Static.getBoolean(args[offset])) {
+				m.setPlayerWeather(MCWeather.DOWNFALL);
+			} else {
+				m.setPlayerWeather(MCWeather.CLEAR);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_pstorm";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], downFall} Sets the weather for the given player only. If downFall is true, the"
+					+ " player will experience a storm. If downFall is null, it will reset the player's weather to that"
+					+ " of the world.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_list_name extends AbstractFunction {
 
 		@Override
@@ -3846,7 +3956,7 @@ public class PlayerManagement {
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
-			return new CInt(p.getHunger(), t);
+			return new CInt(p.getFoodLevel(), t);
 		}
 
 		@Override
@@ -3897,7 +4007,7 @@ public class PlayerManagement {
 				hungerIndex = 1;
 			}
 			hunger = Static.getInt32(args[hungerIndex], t);
-			p.setHunger(hunger);
+			p.setFoodLevel(hunger);
 			return CVoid.VOID;
 		}
 
@@ -4227,11 +4337,11 @@ public class PlayerManagement {
 			}
 
 			Static.AssertPlayerNonNull(p, t);
-			if (p.isInsideVehicle() == false) {
+			if (!p.isInsideVehicle()) {
 				return CNull.NULL;
 			}
 
-			return new CInt(p.getVehicle().getEntityId(), t);
+			return new CString(p.getVehicle().getUniqueId().toString(), t);
 		}
 	}
 
@@ -4542,9 +4652,8 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
 			try {
-				return new CString(((MCPlayer) Static.getLivingEntity(id, t)).getName(), t);
+				return new CString(((MCPlayer) Static.getLivingEntity(args[0], t)).getName(), t);
 			} catch (Exception exception) {
 				return CNull.NULL;
 			}

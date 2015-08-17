@@ -51,10 +51,8 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -634,6 +632,10 @@ public final class Static {
 		}
 	}
 
+	public static UUID GetUUID(Construct subject, Target t) {
+		return GetUUID(subject.val(), t);
+	}
+
 	public static MCOfflinePlayer GetUser(Construct search, Target t) {
 		return GetUser(search.val(), t);
 	}
@@ -785,7 +787,7 @@ public final class Static {
 	 * @return
 	 */
 	public static MCEntity getEntity(int id, Target t) {
-		for (MCWorld w : Static.getServer().getWorlds()) {
+		for (MCWorld w : getServer().getWorlds()) {
 			for (MCEntity e : w.getEntities()) {
 				if (e.getEntityId() == id) {
 					return StaticLayer.GetCorrectEntity(e);
@@ -796,7 +798,11 @@ public final class Static {
 	}
 
 	public static MCEntity getEntity(Construct id, Target t) {
-		return getEntity(Static.getInt32(id, t), t);
+		return getEntityByUuid(GetUUID(id.val(), t), t);
+	}
+
+	public static MCLivingEntity getLivingEntity(Construct id, Target t) {
+		return getLivingByUUID(GetUUID(id.val(), t), t);
 	}
 
 	/**
@@ -807,7 +813,7 @@ public final class Static {
 	 * @return
 	 */
 	public static MCEntity getEntityByUuid(UUID id, Target t) {
-		for (MCWorld w : Static.getServer().getWorlds()) {
+		for (MCWorld w : getServer().getWorlds()) {
 			for (MCEntity e : w.getEntities()) {
 				if (e.getUniqueId().compareTo(id) == 0) {
 					return StaticLayer.GetCorrectEntity(e);
@@ -818,10 +824,34 @@ public final class Static {
 	}
 
 	/**
-	 * Returns the living entity with the specified id. If it doesn't exist or
+	 * Returns the living entity with the specified unique id. If it doesn't exist or
 	 * isn't living, a ConfigRuntimeException is thrown.
 	 *
 	 * @param id
+	 * @return
+	 */
+	public static MCLivingEntity getLivingByUUID(UUID id, Target t) {
+		for (MCWorld w : Static.getServer().getWorlds()) {
+			for (MCLivingEntity e : w.getLivingEntities()) {
+				if (e.getUniqueId().compareTo(id) == 0) {
+					try {
+						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
+					} catch (ClassCastException cce) {
+						throw new ConfigRuntimeException("The entity found was misinterpreted by the converter, this is"
+								+ " a developer mistake, please file a ticket.", ExceptionType.BadEntityException, t);
+					}
+				}
+			}
+		}
+		throw new ConfigRuntimeException("That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
+	}
+
+	/**
+	 * Returns the living entity with the specified id. If it doesn't exist or isn't living, a ConfigRuntimeException is
+	 * thrown.
+	 *
+	 * @param id
+	 *
 	 * @return
 	 */
 	public static MCLivingEntity getLivingEntity(int id, Target t) {
@@ -837,7 +867,8 @@ public final class Static {
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
+		throw new ConfigRuntimeException(
+				"That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
 	}
 
 	/**
@@ -925,9 +956,16 @@ public final class Static {
 		} else if (construct instanceof CArray) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
 		} else if (construct instanceof CString) {
-			return Static.getWorld(construct, t);
+			switch (construct.val().length()) {
+				case 32:
+				case 36:
+					return Static.getEntity(construct, t);
+				default:
+					return Static.getWorld(construct, t);
+			}
 		} else {
-			throw new ConfigRuntimeException("An array, an int or a string was expected, but " + construct.val() + " was found.", ExceptionType.CastException, t);
+			throw new ConfigRuntimeException("An array or a string was expected, but " + construct.val()
+					+ " was found.", ExceptionType.CastException, t);
 		}
 	}
 

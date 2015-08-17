@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +20,8 @@ public interface MCEntity extends MCMetadatable {
 
 	public void fireEntityDamageEvent(MCDamageCause dc);
 
-	public int getEntityId();
+	@Deprecated
+	int getEntityId();
 
 	public float getFallDistance();
 

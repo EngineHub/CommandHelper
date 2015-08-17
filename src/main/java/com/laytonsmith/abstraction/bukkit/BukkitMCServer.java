@@ -307,23 +307,23 @@ public class BukkitMCServer implements MCServer {
     }
 
 	@Override
-    public Boolean getAllowEnd() {
-        return s.getAllowEnd();
+	public boolean getAllowEnd() {
+		return s.getAllowEnd();
     }
 
 	@Override
-    public Boolean getAllowFlight() {
-        return s.getAllowFlight();
+	public boolean getAllowFlight() {
+		return s.getAllowFlight();
     }
 
 	@Override
-    public Boolean getAllowNether() {
-        return s.getAllowNether();
+	public boolean getAllowNether() {
+		return s.getAllowNether();
     }
 
 	@Override
-    public Boolean getOnlineMode() {
-    	return s.getOnlineMode();
+	public boolean getOnlineMode() {
+		return s.getOnlineMode();
     }
 
 	@Override
@@ -395,7 +395,7 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCServer?s.equals(((BukkitMCServer)obj).s):false);
+		return (obj instanceof BukkitMCServer && s.equals(((BukkitMCServer) obj).s));
 	}
 
 	@Override

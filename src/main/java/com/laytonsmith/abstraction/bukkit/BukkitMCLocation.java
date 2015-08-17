@@ -184,7 +184,7 @@ public class BukkitMCLocation implements MCLocation {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCLocation?l.equals(((BukkitMCLocation)obj).l):false);
+		return (obj instanceof BukkitMCLocation && l.equals(((BukkitMCLocation) obj).l));
 	}
 
 	@Override

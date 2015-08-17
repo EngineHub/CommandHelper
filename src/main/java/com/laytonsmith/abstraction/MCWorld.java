@@ -34,6 +34,8 @@ public interface MCWorld extends MCMetadatable {
 	public String getGenerator();
 	public MCWorldType getWorldType();
 
+	int getSeaLevel();
+
 	public MCDifficulty getDifficulty();
 	public void setDifficulty(MCDifficulty difficulty);
 	public boolean getPVP();
@@ -57,7 +59,7 @@ public interface MCWorld extends MCMetadatable {
 
 	public boolean generateTree(MCLocation l, MCTreeType treeType);
 
-    public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data);
+	public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius);
 
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
 

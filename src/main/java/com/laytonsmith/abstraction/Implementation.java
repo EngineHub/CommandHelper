@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.annotations.abstractionenum;
 import com.laytonsmith.core.Prefs;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -69,7 +70,6 @@ public final class Implementation {
 						} catch (InterruptedException ex) {
 							//
 						}
-						StaticLayer.GetConvertor().getMaxBlockID();
 						Set<Class> abstractionenums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
 						for (Class c : abstractionenums) {
 							abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);

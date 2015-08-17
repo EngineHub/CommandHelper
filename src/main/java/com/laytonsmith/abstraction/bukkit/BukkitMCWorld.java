@@ -13,15 +13,15 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHorse;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
@@ -53,7 +53,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -62,7 +62,6 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
@@ -86,7 +85,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof MCWorld ? this.w.equals(((BukkitMCWorld)o).w) : false;
+		return o instanceof MCWorld && this.w.equals(((BukkitMCWorld) o).w);
 	}
 
 	@Override
@@ -213,6 +212,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public int getSeaLevel() {
+		return getHandle().getSeaLevel();
+	}
+
+	@Override
     public MCBlock getBlockAt(int x, int y, int z) {
         if (w.getBlockAt(x, y, z) == null) {
             return null;
@@ -245,9 +249,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-    public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data) {
-        w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), e, data);
-    }
+	public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius) {
+		w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), data, radius);
+	}
 
 	@Override
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
@@ -321,13 +325,13 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
     public MCBiomeType getBiome(int x, int z) {
-		return BukkitMCBiomeType.getConvertor().getAbstractedEnum(w.getBiome(x, z));
-    }
+		return BukkitMCBiomeType.valueOfConcrete(w.getBiome(x, z));
+	}
 
 	@Override
     public void setBiome(int x, int z, MCBiomeType type) {
-        w.setBiome(x, z, Biome.valueOf(type.name()));
-    }
+		w.setBiome(x, z, ((BukkitMCBiomeType) type).getConcrete());
+	}
 
 	@Override
 	public MCBlock getHighestBlockAt(int x, int z) {
@@ -656,8 +660,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				}
 			}
-            ids.push(new CInt(e.getEntityId(), t));
-        }
+			ids.push(new CString(e.getUniqueId().toString(), t));
+		}
         return ids;
     }
 

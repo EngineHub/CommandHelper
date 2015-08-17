@@ -437,7 +437,8 @@ public class Minecraft {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
+			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.LengthException,
+					ExceptionType.BadEntityException};
 		}
 
 		@Override
@@ -473,8 +474,7 @@ public class Minecraft {
 			} else {
 				entityID = args[0];
 			}
-			int id = Static.getInt32(entityID, t);
-			MCLivingEntity e = Static.getLivingEntity(id, t);
+			MCLivingEntity e = Static.getLivingEntity(entityID, t);
 			if (e == null) {
 				return CVoid.VOID;
 			} else if (e instanceof MCTameable) {
@@ -512,7 +512,8 @@ public class Minecraft {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
+			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.LengthException,
+					ExceptionType.BadEntityException};
 		}
 
 		@Override
@@ -532,8 +533,7 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCLivingEntity e = Static.getLivingEntity(id, t);
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			if (e == null) {
 				return CNull.NULL;
 			} else if (e instanceof MCTameable) {
@@ -569,7 +569,7 @@ public class Minecraft {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.BadEntityException};
 		}
 
 		@Override
@@ -589,8 +589,7 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity e = Static.getEntity(id, t);
+			MCEntity e = Static.getEntity(args[0], t);
 			boolean ret;
 			if (e == null) {
 				ret = false;
@@ -665,8 +664,11 @@ public class Minecraft {
 			} catch (IllegalArgumentException ex) {
 				throw new ConfigRuntimeException("The effect type " + args[1].val() + " is not valid", ExceptionType.FormatException, t);
 			}
-			if (e.equals(MCEffect.STEP_SOUND) && (data < 0 || data > StaticLayer.GetConvertor().getMaxBlockID())) {
-				throw new ConfigRuntimeException("This effect requires a valid BlockID", ExceptionType.FormatException, t);
+			if (e.equals(MCEffect.STEP_SOUND)) {
+				MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
+				if (mat == null || !mat.isBlock()) {
+					throw new ConfigRuntimeException("This effect requires a valid BlockID", ExceptionType.FormatException, t);
+				}
 			}
 			if (args.length == 3) {
 				radius = Static.getInt32(args[2], t);
@@ -699,7 +701,7 @@ public class Minecraft {
 		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
-					ExceptionType.RangeException};
+					ExceptionType.RangeException, ExceptionType.LengthException};
 		}
 
 		@Override
@@ -719,7 +721,7 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			double percent = Static.getDouble(args[1], t);
 			if (percent < 0 || percent > 100) {
 				throw new ConfigRuntimeException("Health was expected to be a percentage between 0 and 100",
@@ -752,7 +754,7 @@ public class Minecraft {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.BadEntityException};
 		}
 
 		@Override
@@ -772,7 +774,7 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			return new CDouble(e.getHealth() / e.getMaxHealth() * 100.0, t);
 		}
 	}
@@ -1266,7 +1268,7 @@ public class Minecraft {
 				fw.addFadeColor(color);
 			}
 
-			return new CInt(fw.launch(loc), t);
+			return new CString(fw.launch(loc).getUniqueId().toString(), t);
 		}
 
 		private Set<MCColor> parseColors(Construct c, Target t){
@@ -1717,7 +1719,7 @@ public class Minecraft {
 				item = l.getWorld().dropItem(l, is);
 			}
 			if (item != null) {
-				return new CInt(item.getEntityId(), t);
+				return new CString(item.getUniqueId().toString(), t);
 			} else {
 				return CNull.NULL;
 			}

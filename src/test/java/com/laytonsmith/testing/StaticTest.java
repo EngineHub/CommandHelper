@@ -2,6 +2,10 @@
 
 package com.laytonsmith.testing;
 
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.RunnableQueue;
@@ -55,7 +59,6 @@ import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -66,6 +69,8 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
+import org.mockito.Mockito;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -82,10 +87,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.junit.Assert.fail;
-import org.mockito.Mockito;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 //import static org.powermock.api.mockito.PowerMockito.mock;
 //import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -729,7 +730,7 @@ public class StaticTest {
         }
 
 		@Override
-		public MCInventory GetEntityInventory(int entityID) {
+		public MCInventory GetEntityInventory(MCEntity entity) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -741,21 +742,6 @@ public class StaticTest {
 		@Override
 		public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public int getMaxBlockID() {
-			return 0;
-		}
-
-		@Override
-		public int getMaxItemID() {
-			return 0;
-		}
-
-		@Override
-		public int getMaxRecordID() {
-			return 0;
 		}
 
 		@Override
