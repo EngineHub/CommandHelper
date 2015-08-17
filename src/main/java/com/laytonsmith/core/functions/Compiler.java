@@ -336,10 +336,23 @@ public class Compiler {
 							} else {
 								conversion = new ParseTree(new CFunction(((CSymbol) node.getData()).convert(), node.getTarget()), node.getFileOptions());
 							}
-							conversion.addChild(list.get(i + 1));
+							// We actually need to get all the remaining children, and shove them into an autoconcat
+							List<ParseTree> ac = new ArrayList<>();
 							list.set(i, conversion);
-							list.remove(i + 1);
-							i--;
+							for(int k = i + 1; k < list.size(); k++){
+								ParseTree m = list.get(k);
+								if(m.getData() instanceof CSymbol && ((CSymbol)m.getData()).isUnary()){
+									ac.add(m);
+									list.remove(k);
+									k--;
+									i--;
+									continue;
+								}
+								ac.add(m);
+								list.remove(k);
+								break;
+							}
+							conversion.addChild(optimizeSpecial(ac, returnSConcat));
 						}
 					}
 
