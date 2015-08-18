@@ -43,6 +43,7 @@ public class ItemMeta {
 			+ "<li>Leather Armor - color (color array (see Example))</li>"
 			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"
 			+ "<li>Potions - potions (array of potion arrays), main(int, the id of the main effect)</li>"
+			+ "<li>Banners - basecolor (string), patterns (array of pattern arrays)"
 			+ "</ul>";
 	
 	@api(environments={CommandHelperEnvironment.class})
@@ -127,7 +128,9 @@ public class ItemMeta {
 							"{display: null, enchants: {}, lore: null, owner: Herobrine}"),
 					new ExampleScript("Demonstrates a custom potion", "msg(get_itemmeta(null))", 
 							"{display: null, enchants: {}, lore: null, main: 8,"
-							+ " potions: {{ambient: true, id: 8, seconds: 180, strength: 5}}}")
+							+ " potions: {{ambient: true, id: 8, seconds: 180, strength: 5}}}"),
+					new ExampleScript("Demonstrates a custom banner", "msg(get_itemmeta(0))",
+							"{basecolor: WHITE, patterns: {{color: BLACK, shape: SKULL}, {color: RED, shape: CROSS}}}")
 			};
 		}
 		
@@ -222,9 +225,12 @@ public class ItemMeta {
 					new ExampleScript("Demonstrates making a custom potion", 
 							"set_itemmeta(5, array(potions: array(id: 8, strength: 4, seconds: 90, ambient: true)))", 
 							"Turns the potion in slot 5 into a Potion of Leaping V"),
-					new ExampleScript("Demonstrates hiding a potion effect", 
+					new ExampleScript("Demonstrates hiding a potion effect",
 							"set_itemmeta(4, array(itemflags: array(HIDE_POTION_EFFECTS)))", 
-							"Removes the potion effect information from the potion in slot 4. The effect itself is unaffected.")
+							"Removes the potion effect information from the potion in slot 4. The effect itself is unaffected."),
+					new ExampleScript("Demonstrates making a custom banner",
+							"set_itemmeta(0, array(basecolor: SILVER, patterns: array(array(color: BLACK, shape: SKULL))",
+							"This banner will be silver with a black skull.")
 			};
 		}
 		

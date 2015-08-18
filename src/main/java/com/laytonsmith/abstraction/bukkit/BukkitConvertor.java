@@ -17,6 +17,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCNote;
+import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCRecipe;
@@ -46,10 +47,14 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitServerListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitVehicleListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWeatherListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWorldListener;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
@@ -63,6 +68,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -86,9 +92,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -411,14 +417,14 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
+		if (im instanceof BannerMeta) {
+			return new BukkitMCBannerMeta((BannerMeta) im);
+		}
 		if (im instanceof BookMeta) {
 			return new BukkitMCBookMeta((BookMeta) im);
 		}
 		if (im instanceof EnchantmentStorageMeta) {
 			return new BukkitMCEnchantmentStorageMeta((EnchantmentStorageMeta) im);
-		}
-		if (im instanceof FireworkEffectMeta) {
-
 		}
 		if (im instanceof FireworkMeta) {
 			return new BukkitMCFireworkMeta((FireworkMeta) im);
@@ -494,6 +500,12 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCColor GetColor(int red, int green, int blue) {
 		return BukkitMCColor.GetMCColor(Color.fromRGB(red, green, blue));
+	}
+
+	@Override
+	public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape) {
+		return new BukkitMCPattern(new Pattern(BukkitMCDyeColor.getConvertor().getConcreteEnum(color),
+				BukkitMCPatternShape.getConvertor().getConcreteEnum(shape)));
 	}
 
 	@Override
