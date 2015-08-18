@@ -209,6 +209,11 @@ public class StringHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			for(ParseTree child : children){
+				if(child.getData() instanceof CLabel){
+					throw new ConfigCompileException("Invalid use of concatenation with label", child.getTarget());
+				}
+			}
 			return null;
 		}
 
@@ -287,6 +292,11 @@ public class StringHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			for(ParseTree child : children){
+				if(child.getData() instanceof CLabel){
+					throw new ConfigCompileException("Invalid use of concatenation with label", child.getTarget());
+				}
+			}
 			//Remove empty g or p children
 			Iterator<ParseTree> it = children.iterator();
 			while(it.hasNext()){
