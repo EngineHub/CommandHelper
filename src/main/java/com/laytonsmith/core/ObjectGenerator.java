@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Vector3D;
+import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEnchantment;
@@ -14,6 +15,7 @@ import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPotionMeta;
 import com.laytonsmith.abstraction.MCRecipe;
@@ -23,8 +25,10 @@ import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
+import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -453,6 +457,21 @@ public class ObjectGenerator {
 					ma.set("main", ((CArray) effects.get(0, t)).get("id", t), t);
 				}
 			}
+			if (meta instanceof MCBannerMeta) {
+				MCBannerMeta bannermeta = (MCBannerMeta) meta;
+				CArray patterns = new CArray(t, bannermeta.numberOfPatterns());
+				for (MCPattern p : bannermeta.getPatterns()) {
+					CArray pattern = CArray.GetAssociativeArray(t);
+					pattern.set("shape", new CString(p.getShape().toString(), t), t);
+					pattern.set("color", new CString(p.getColor().toString(), t), t);
+					patterns.push(pattern);
+				}
+				ma.set("patterns", patterns, t);
+				MCDyeColor dyeColor = bannermeta.getBaseColor();
+				if(dyeColor != null) {
+					ma.set("basecolor", new CString(dyeColor.toString(), t), t);
+				}
+			}
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
 			CArray flagArray = new CArray(t);
 			if (itemFlags.size() > 0) {
@@ -660,6 +679,20 @@ public class ObjectGenerator {
 					}
 					if (ma.containsKey("main")) {
 						((MCPotionMeta) meta).setMainEffect(Static.getInt32(ma.get("main", t), t));
+					}
+				}
+				if (meta instanceof MCBannerMeta) {
+					if (ma.containsKey("basecolor")) {
+						((MCBannerMeta) meta).setBaseColor(MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase()));
+					}
+					if (ma.containsKey("patterns")) {
+						CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
+						for (String key : array.stringKeySet()) {
+							CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
+							MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
+							MCDyeColor color = MCDyeColor.valueOf(pattern.get("color", t).val().toUpperCase());
+							((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
+						}
 					}
 				}
 				if (ma.containsKey("flags")) {
