@@ -29,4 +29,19 @@ public class BukkitMCPattern implements MCPattern {
 		return BukkitMCPatternShape.getConvertor().getAbstractedEnum(pattern.getPattern());
 	}
 
+	@Override
+	public String toString() {
+		return pattern.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof BukkitMCPattern && pattern.equals(((BukkitMCPattern)obj).pattern);
+	}
+
+	@Override
+	public int hashCode() {
+		return pattern.hashCode();
+	}
+
 }
