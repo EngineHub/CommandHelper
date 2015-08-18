@@ -1015,7 +1015,15 @@ public final class MethodScriptCompiler {
 			if (next1.type.equals(TType.LABEL)) {
 				//If it's not an atomic identifier it's an error.
 				if(!t.type.isAtomicLit() && t.type != TType.IVARIABLE && t.type != TType.KEYWORD){
-					compilerErrors.add(new ConfigCompileException("Invalid label specified", t.getTarget()));
+					ConfigCompileException error = new ConfigCompileException("Invalid label specified", t.getTarget());
+					if(t.type == TType.FUNC_END){
+						// This is a fairly common mistake, so we have special handling for this,
+						// because otherwise we would get a "Mismatched parenthesis" warning (which doesn't make sense),
+						// and potentially lots of other invalid errors down the line, so we go ahead
+						// and stop compilation at this point.
+						throw error;
+					}
+					compilerErrors.add(error);
 				}
 				Construct val;
 				if(t.type == TType.IVARIABLE){
@@ -1027,6 +1035,7 @@ public final class MethodScriptCompiler {
 				}
 				tree.addChild(new ParseTree(new CLabel(val), fileOptions));
 				constructCount.peek().incrementAndGet();
+				i++;
 				continue;
 			}
 			if(t.type == TType.LABEL && tree.getChildren().size() > 0){
