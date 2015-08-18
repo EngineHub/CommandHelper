@@ -81,6 +81,7 @@ public class ArrayTest {
         assertEquals("{true: 1}", SRun("array(true: 1)", fakePlayer));
         assertEquals("{null: empty}", SRun("array(null: empty)", fakePlayer));
         assertEquals("{2.3: 2.3}", SRun("array(2.3: 2.3)", fakePlayer));
+        assertEquals("{.3: .3}", SRun("array(.3: .3)", fakePlayer));
     }
 
     @Test public void testArrayKeys() throws Exception{
