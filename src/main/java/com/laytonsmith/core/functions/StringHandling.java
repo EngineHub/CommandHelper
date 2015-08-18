@@ -6,8 +6,10 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -57,7 +59,8 @@ public class StringHandling {
 	}
 
 	@api
-	public static class cc extends AbstractFunction {
+	@hide("Overly complicated, and just not worth having. This is deprecated, and will be removed in a future release")
+	public static class cc extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -141,6 +144,19 @@ public class StringHandling {
 			return new ExampleScript[]{
 						new ExampleScript("", "cc('These' 'normally' 'have' 'spaces' 'between' 'them')"),};
 		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, getName() + " has been deprecated, and will be removed in a future release."
+					+ " Please use dot concatenation where necessary, to achieve the same effect.", t);
+			return null;
+		}
+
 	}
 
 	@api
