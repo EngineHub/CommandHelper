@@ -42,6 +42,6 @@ public class CDouble extends CNumber implements Cloneable{
 
     @Override
     public boolean isDynamic() {
-        return true;
+        return false;
     }
 }

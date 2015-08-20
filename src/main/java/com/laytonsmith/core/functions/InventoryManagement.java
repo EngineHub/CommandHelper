@@ -464,7 +464,7 @@ public class InventoryManagement {
                     try{
                         index = Integer.parseInt(key);
                     } catch(NumberFormatException e){
-                        if(key.isEmpty()){
+                        if(key.isEmpty() || key.equals("null")){
                             //It was a null key
                             index = -1;
                         } else {
