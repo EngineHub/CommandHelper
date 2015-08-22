@@ -77,11 +77,15 @@ public class ArrayTest {
     }
 
     @Test public void testArrayKeyNormalization() throws Exception{
-        assertEquals("{false: 0}", SRun("array(false: 0)", fakePlayer));
-        assertEquals("{true: 1}", SRun("array(true: 1)", fakePlayer));
-        assertEquals("{null: empty}", SRun("array(null: empty)", fakePlayer));
+        assertEquals("{0: 0}", SRun("array(false: 0)", fakePlayer));
+        assertEquals("{false: 0}", SRun("array('false': 0)", fakePlayer));
+        assertEquals("{1: 1}", SRun("array(true: 1)", fakePlayer));
+        assertEquals("{true: 1}", SRun("array('true': 1)", fakePlayer));
+        assertEquals("{: empty}", SRun("array(null: empty)", fakePlayer));
+        assertEquals("{null: empty}", SRun("array('null': empty)", fakePlayer));
         assertEquals("{2.3: 2.3}", SRun("array(2.3: 2.3)", fakePlayer));
         assertEquals("{.3: .3}", SRun("array(.3: .3)", fakePlayer));
+        assertEquals("{.3: .3}", SRun("array('.3': .3)", fakePlayer));
     }
 
     @Test public void testArrayKeys() throws Exception{
