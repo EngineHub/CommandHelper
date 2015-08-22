@@ -1030,6 +1030,8 @@ public final class MethodScriptCompiler {
 					val = new IVariable(t.val(), t.target);
 				} else if(t.type == TType.KEYWORD){
 					val = new CKeyword(t.val(), t.target);
+				} else if(t.type == TType.STRING){
+					val = new CString(t.val(), t.target);
 				} else {
 					val = Static.resolveConstruct(t.val(), t.target);
 				}
@@ -1835,6 +1837,7 @@ public final class MethodScriptCompiler {
 			// conditions.
 			processKeywords(node);
 			if(node.getData() instanceof CKeyword
+					|| (node.getData() instanceof CLabel && ((CLabel) node.getData()).cVal() instanceof CKeyword)
 					|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)){
 				// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of all
 				// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will

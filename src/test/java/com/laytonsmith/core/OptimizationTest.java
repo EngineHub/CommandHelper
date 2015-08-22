@@ -221,7 +221,11 @@ public class OptimizationTest {
 
 	//tests the new switch syntax
 	@Test public void testSwitch1() throws Exception {
-		assertEquals("switch(@a,array(1,2),msg('1, 2'),array(3..4),sconcat(msg('3'),msg('4')),msg('default'))",
+		assertEquals("switch(@a,array(1,2),msg('1, 2'),"
+				+ "array(3..4),sconcat(msg('3'),msg('4')),"
+				+ "array(false),msg('false'),"
+				+ "array(0.7),msg(0.7),"
+				+ "msg('default'))",
 				optimize("switch(@a){"
 						+ "	case 1:"
 						+ "	case 2:"
@@ -229,6 +233,10 @@ public class OptimizationTest {
 						+ "	case 3..4:"
 						+ "		msg('3');"
 						+ "		msg('4');"
+						+ "	case false:"
+						+ "		msg('false');"
+						+ "	case 0.7:"
+						+ "		msg(0.7);"
 						+ "	case 'ignored':"
 						+ "	default:"
 						+ "		msg('default');"
