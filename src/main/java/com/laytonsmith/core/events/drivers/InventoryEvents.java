@@ -71,7 +71,8 @@ public class InventoryEvents {
 					+ " | slot: the number of the slot | rawslot: the number of the slot in whole inventory window | slottype"
 					+ " | slotitem | inventorytype | inventorysize: number of slots in opened inventory | cursoritem"
 					+ " | inventory: all the items in the (top) inventory | clicktype | action}"
-					+ " {slotitem: the item currently in the clicked slot | cursoritem: the item on the cursor}"
+					+ " {slotitem: the item currently in the clicked slot | cursoritem: the item on the cursor (may cause"
+					+ " unexpected behavior)}"
 					+ " {}";
 		}
 
