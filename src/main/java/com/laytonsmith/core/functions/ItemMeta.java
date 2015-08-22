@@ -223,7 +223,7 @@ public class ItemMeta {
 					new ExampleScript("Demonstrates a skull", "set_itemmeta(103, array(owner: 'Notch'))", 
 							"This puts Notch's skin on the skull you are wearing"),
 					new ExampleScript("Demonstrates making a custom potion", 
-							"set_itemmeta(5, array(potions: array(id: 8, strength: 4, seconds: 90, ambient: true)))", 
+							"set_itemmeta(5, array(potions: array(array(id: 8, strength: 4, seconds: 90, ambient: true))))",
 							"Turns the potion in slot 5 into a Potion of Leaping V"),
 					new ExampleScript("Demonstrates hiding a potion effect",
 							"set_itemmeta(4, array(itemflags: array(HIDE_POTION_EFFECTS)))", 

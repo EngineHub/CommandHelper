@@ -4551,8 +4551,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Returns the time this player first logged onto this server, or 0 if they never have."
-					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
+			return "int {[player]} Returns the unix time stamp, in milliseconds, that this player first logged onto"
+					+ " this server, or 0 if they never have. This will not throw a PlayerOfflineException, so the"
+					+ " name or UUID must be exact.";
 		}
 
 		@Override
@@ -4614,8 +4615,8 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "int {[player]} Returns the unix time stamp, in milliseconds, that this player was last seen on this"
-					+ " server, or 0 if they never were. This will not throw a PlayerOfflineException, so the name must"
-					+ " be exact.";
+					+ " server, or 0 if they never were. This will not throw a PlayerOfflineException, so the name or "
+					+ " UUID must be exact.";
 		}
 
 		@Override
