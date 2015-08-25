@@ -1035,6 +1035,9 @@ public final class MethodScriptCompiler {
 				} else {
 					val = Static.resolveConstruct(t.val(), t.target);
 				}
+				if(val instanceof CInt && prev1.type == TType.DOT) {
+					val = new CInt(t.val(), t.target);
+				}
 				tree.addChild(new ParseTree(new CLabel(val), fileOptions));
 				constructCount.peek().incrementAndGet();
 				i++;
@@ -1267,6 +1270,8 @@ public final class MethodScriptCompiler {
 				Construct c = Static.resolveConstruct(t.val(), t.target);
 				if(c instanceof CString && fileOptions.isStrict()){
 					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode", t.target));
+				} else if(c instanceof CInt && prev1.type == TType.DOT) {
+					c = new CInt(t.val(), t.target);
 				}
 				tree.addChild(new ParseTree(c, fileOptions));
 				constructCount.peek().incrementAndGet();
