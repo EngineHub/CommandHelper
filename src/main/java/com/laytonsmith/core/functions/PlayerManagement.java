@@ -4199,18 +4199,21 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3, 4};
+			return new Integer[]{1, 2, 3, 4, 5};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the bed of the player to the specified coordinates."
-					+ " If player is omitted, the current player is used.";
+			return "boolean {[player], locationArray, [forced] | [player], x, y, z, [forced]} Sets the respawn location"
+					+ " of a player. If player is omitted, the current player is used. The specified location should be"
+					+ " the block below the respawn location. If forced is false, it will respawn the player next to"
+					+ " that location only if a bed found is found there. (forced defaults to true)";
 		}
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException,
+					ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
 		@Override
@@ -4229,7 +4232,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args)
+				throws CancelCommandException, ConfigRuntimeException {
+
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String pname = null;
 			double x;
@@ -4237,56 +4242,78 @@ public class PlayerManagement {
 			double z;
 			MCPlayer m = null;
 			MCLocation l = null;
+			int locationIndex;
+			boolean forced = true;
+
 			if (args.length == 1) {
 				if (args[0] instanceof CArray) {
-					CArray ca = (CArray) args[0];
-					l = ObjectGenerator.GetGenerator().location(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), t);
-					x = Static.getNumber(ca.get(0, t), t);
-					y = Static.getNumber(ca.get(1, t), t);
-					z = Static.getNumber(ca.get(2, t), t);
 					if (p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
-
+					locationIndex = 0;
 				} else {
-					throw new ConfigRuntimeException("Expecting an array at parameter 1 of set_pbed_location",
+					throw new ConfigRuntimeException("Expecting an array in set_pbed_location",
 							ExceptionType.CastException, t);
 				}
 			} else if (args.length == 2) {
 				if (args[1] instanceof CArray) {
-					CArray ca = (CArray) args[1];
 					pname = args[0].val();
-					l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(pname, t).getWorld(), t);
-					x = l.getX();
-					y = l.getY();
-					z = l.getZ();
+					locationIndex = 1;
+				} else if (args[0] instanceof CArray) {
+					if (p instanceof MCPlayer) {
+						m = ((MCPlayer) p);
+					}
+					locationIndex = 0;
+					forced = Static.getBoolean(args[1]);
 				} else {
-					throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_pbed_location",
+					throw new ConfigRuntimeException("Expecting an array in set_pbed_location",
 							ExceptionType.CastException, t);
 				}
 			} else if (args.length == 3) {
-				if (p instanceof MCPlayer) {
-					m = (MCPlayer) p;
+				if (args[1] instanceof CArray) {
+					pname = args[0].val();
+					locationIndex = 1;
+					forced = Static.getBoolean(args[2]);
+				} else {
+					if (p instanceof MCPlayer) {
+						m = (MCPlayer) p;
+					}
+					locationIndex = 0;
 				}
-				x = Static.getNumber(args[0], t);
-				y = Static.getNumber(args[1], t);
-				z = Static.getNumber(args[2], t);
-				l = m.getLocation();
+			} else if (args.length == 4) {
+				try {
+					m = Static.GetPlayer(args[0], t);
+					locationIndex = 1;
+				} catch (ConfigRuntimeException e) {
+					if (p instanceof MCPlayer) {
+						m = (MCPlayer) p;
+					}
+					locationIndex = 0;
+					forced = Static.getBoolean(args[3]);
+				}
 			} else {
 				m = Static.GetPlayer(args[0], t);
-				x = Static.getNumber(args[1], t);
-				y = Static.getNumber(args[2], t);
-				z = Static.getNumber(args[3], t);
-				l = m.getLocation();
+				locationIndex = 1;
+				forced = Static.getBoolean(args[4]);
 			}
+
 			if (m == null && pname != null) {
 				m = Static.GetPlayer(pname, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			if (!l.getWorld().exists()) {
-				throw new ConfigRuntimeException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
-			};
-			m.setBedSpawnLocation(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch()));
+
+			if(args[locationIndex] instanceof CArray) {
+				CArray ca = (CArray) args[locationIndex];
+				l = ObjectGenerator.GetGenerator().location(ca, m.getWorld(), t);
+				l.add(0, 1, 0); // someone decided to match ploc() here
+			} else {
+				l = m.getLocation();
+				l.setX(Static.getNumber(args[locationIndex], t));
+				l.setY(Static.getNumber(args[locationIndex + 1], t) + 1);
+				l.setZ(Static.getNumber(args[locationIndex + 2], t));
+			}
+
+			m.setBedSpawnLocation(l, forced);
 			return CVoid.VOID;
 		}
 	}
