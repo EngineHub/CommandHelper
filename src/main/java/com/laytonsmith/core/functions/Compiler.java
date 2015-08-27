@@ -7,28 +7,21 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.CDotOperator;
-import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CPreIdentifier;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.Token;
-import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -167,61 +160,6 @@ public class Compiler {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 
-			// dot operator vs concat
-			// This comes first, even before assignments
-			for (int i = 0; i < list.size() - 1; i++){
-				ParseTree node = list.get(i);
-				if(node.getData() instanceof CDotOperator){
-					if((i == 0 && list.size() > 1)
-							// This is a list of values that *won't* be concated together. This list is fairly small, but if there is a bug
-							// with values being concated together that shouldn't be, this is where the bug is.
-							|| list.get(i - 1).getData().getCType().equals(Construct.ConstructType.SYMBOL)
-							|| list.get(i - 1).getData().getCType().equals(Construct.ConstructType.LABEL)){
-						// It's either the first token in the list (and there's a token following it) or there's a symbol before it. Assuming the
-						//following token is an integer, this is a decimal.
-						Construct node2 = list.get(i + 1).getData();
-						boolean wasLabel = false;
-						if(node2 instanceof CLabel){
-							node2 = ((CLabel)node2).cVal();
-							wasLabel = true;
-						}
-						if(node2 instanceof CInt){
-							// This is a decimal
-							if(wasLabel){
-								// a decimal in a label...
-								list.set(i, new ParseTree(new CLabel(new CDouble("." + node2.val(), node.getTarget())), node.getFileOptions()));
-							} else {
-								list.set(i, new ParseTree(new CDouble("." + node2.val(), node.getTarget()), node.getFileOptions()));
-							}
-							list.remove(i + 1);
-						} else {
-							throw new ConfigCompileException("Unexpected concatenation operator", node.getTarget());
-						}
-					} else {
-						Construct prev = list.get(i - 1).getData();
-						Construct next = list.get(i + 1).getData();
-						// If both nodes are integers, this is a double. If either node is non-integral, this is concat
-						boolean wasLabel = false;
-						if(next instanceof CLabel){
-							next = ((CLabel)next).cVal();
-							wasLabel = true;
-						}
-						if(prev instanceof CInt && next instanceof CInt){
-							if(wasLabel){
-								list.set(i - 1, new ParseTree(new CLabel(new CDouble(prev.val() + "." + next.val(), node.getTarget())), node.getFileOptions()));							list.remove(i);
-							} else {
-								list.set(i - 1, new ParseTree(new CDouble(prev.val() + "." + next.val(), node.getTarget()), node.getFileOptions()));							list.remove(i);
-							}
-							list.remove(i);
-							i--;
-						} else {
-							// Just set it to a concat, the rest of the code will handle it from here like normal
-							list.set(i, new ParseTree(new CSymbol(".", TType.CONCAT, node.getTarget()), node.getFileOptions()));
-							inSymbolMode = true;
-						}
-					}
-				}
-			}
 			//Assignment
 			//Note that we are walking the array in reverse, because multiple assignments,
 			//say @a = @b = 1 will break if they look like assign(assign(@a, @b), 1),

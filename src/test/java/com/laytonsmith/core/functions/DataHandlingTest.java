@@ -355,9 +355,10 @@ public class DataHandlingTest {
 
     @Test(timeout = 10000)
     public void testIsDouble() throws Exception {
-        SRun("msg(is_double(5)) msg(is_double('5.0')) msg(is_double(5.0))", fakePlayer);
-        verify(fakePlayer, times(2)).sendMessage("false");
-        verify(fakePlayer).sendMessage("true");
+        SRun("msg(is_double(5)) msg(is_double('5.0')) msg(is_double('5'.0)) msg(is_double(5.'0'))"
+				+ "msg(is_double(5.0)) msg(is_double(5 . 0))", fakePlayer);
+        verify(fakePlayer, times(4)).sendMessage("false");
+        verify(fakePlayer, times(2)).sendMessage("true");
     }
 
     @Test(timeout = 10000)

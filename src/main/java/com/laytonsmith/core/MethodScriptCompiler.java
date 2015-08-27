@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
-import com.laytonsmith.core.constructs.CDotOperator;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
@@ -1012,11 +1012,11 @@ public final class MethodScriptCompiler {
 			}
 
 			//Associative array/label handling
-			if (next1.type.equals(TType.LABEL)) {
+			if(t.type == TType.LABEL && tree.getChildren().size() > 0){
 				//If it's not an atomic identifier it's an error.
-				if(!t.type.isAtomicLit() && t.type != TType.IVARIABLE && t.type != TType.KEYWORD){
+				if(!prev1.type.isAtomicLit() && prev1.type != TType.IVARIABLE && prev1.type != TType.KEYWORD){
 					ConfigCompileException error = new ConfigCompileException("Invalid label specified", t.getTarget());
-					if(t.type == TType.FUNC_END){
+					if(prev1.type == TType.FUNC_END){
 						// This is a fairly common mistake, so we have special handling for this,
 						// because otherwise we would get a "Mismatched parenthesis" warning (which doesn't make sense),
 						// and potentially lots of other invalid errors down the line, so we go ahead
@@ -1025,33 +1025,11 @@ public final class MethodScriptCompiler {
 					}
 					compilerErrors.add(error);
 				}
-				Construct val;
-				if(t.type == TType.IVARIABLE){
-					val = new IVariable(t.val(), t.target);
-				} else if(t.type == TType.KEYWORD){
-					val = new CKeyword(t.val(), t.target);
-				} else if(t.type == TType.STRING){
-					val = new CString(t.val(), t.target);
-				} else {
-					val = Static.resolveConstruct(t.val(), t.target);
-				}
-				if(val instanceof CInt && prev1.type == TType.DOT) {
-					val = new CInt(t.val(), t.target);
-				}
-				tree.addChild(new ParseTree(new CLabel(val), fileOptions));
-				constructCount.peek().incrementAndGet();
-				i++;
-				continue;
-			}
-			if(t.type == TType.LABEL && tree.getChildren().size() > 0){
+				// Wrap previous construct in a CLabel
 				ParseTree cc = tree.getChildren().get(tree.getChildren().size() - 1);
-				if(cc.getData() instanceof CSlice){
-					//Special case where a slice is being used as a label.
-					//Replace the value in the tree with a label, then continue.
-					tree.removeChildAt(tree.getChildren().size() - 1);
-					tree.addChild(new ParseTree(new CLabel(cc.getData()), fileOptions));
-					continue;
-				}
+				tree.removeChildAt(tree.getChildren().size() - 1);
+				tree.addChild(new ParseTree(new CLabel(cc.getData()), fileOptions));
+				continue;
 			}
 
 			//Array notation handling
@@ -1270,8 +1248,15 @@ public final class MethodScriptCompiler {
 				Construct c = Static.resolveConstruct(t.val(), t.target);
 				if(c instanceof CString && fileOptions.isStrict()){
 					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode", t.target));
-				} else if(c instanceof CInt && prev1.type == TType.DOT) {
-					c = new CInt(t.val(), t.target);
+				} else if(c instanceof CInt && next1.type == TType.DOT && next2.type == TType.LIT) {
+					// make CDouble here because otherwise Long.parseLong() will remove
+					// minus zero before decimals and leading zeroes after decimals
+					try {
+						c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
+						i += 2;
+					} catch (NumberFormatException e) {
+						// Not a double
+					}
 				}
 				tree.addChild(new ParseTree(c, fileOptions));
 				constructCount.peek().incrementAndGet();
@@ -1294,7 +1279,20 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type == TType.DOT){
-				tree.addChild(new ParseTree(new CDotOperator(t.val(), t.target), fileOptions));
+				// Check for doubles that start with a decimal, otherwise concat
+				Construct c = null;
+				if(next1.type == TType.LIT && prev1.type != TType.STRING && prev1.type != TType.SMART_STRING) {
+					try {
+						c = new CDouble(Double.parseDouble('.' + next1.val()), t.target);
+						i++;
+					} catch (NumberFormatException e) {
+						// Not a double
+					}
+				}
+				if(c == null) {
+					c = new CSymbol(".", TType.CONCAT, t.target);
+				}
+				tree.addChild(new ParseTree(c, fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
 				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));

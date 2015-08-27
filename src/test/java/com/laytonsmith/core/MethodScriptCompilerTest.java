@@ -606,6 +606,7 @@ public class MethodScriptCompilerTest {
         assertEquals("4", SRun("8 - 4", fakePlayer));
         assertEquals("4", SRun("2 * 2", fakePlayer));
         assertEquals("4", SRun("16/4", fakePlayer));
+        assertEquals("4.0", SRun("-0.5 + 4.5", fakePlayer));
     }
 
     @Test public void testInfixMath2() throws Exception{
