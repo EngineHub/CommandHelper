@@ -1280,11 +1280,16 @@ public final class MethodScriptCompiler {
 				constructCount.peek().incrementAndGet();
 			} else if (t.type == TType.DOT){
 				// Check for doubles that start with a decimal, otherwise concat
-				Construct c;
-				try {
-					c = new CDouble(Double.parseDouble('.' + next1.val()), t.target);
-					i++;
-				} catch (NumberFormatException e) {
+				Construct c = null;
+				if(next1.type == TType.LIT && prev1.type != TType.STRING && prev1.type != TType.SMART_STRING) {
+					try {
+						c = new CDouble(Double.parseDouble('.' + next1.val()), t.target);
+						i++;
+					} catch (NumberFormatException e) {
+						// Not a double
+					}
+				}
+				if(c == null) {
 					c = new CSymbol(".", TType.CONCAT, t.target);
 				}
 				tree.addChild(new ParseTree(c, fileOptions));
