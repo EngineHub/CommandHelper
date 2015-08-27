@@ -3,7 +3,6 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.junit.Assert.assertEquals;
@@ -84,8 +83,8 @@ public class ArrayTest {
         assertEquals("{: empty}", SRun("array(null: empty)", fakePlayer));
         assertEquals("{null: empty}", SRun("array('null': empty)", fakePlayer));
         assertEquals("{2.3: 2.3}", SRun("array(2.3: 2.3)", fakePlayer));
-        assertEquals("{.3: .3}", SRun("array(.3: .3)", fakePlayer));
-        assertEquals("{.3: .3}", SRun("array('.3': .3)", fakePlayer));
+        assertEquals("{0.3: 0.3}", SRun("array(.3: .3)", fakePlayer));
+        assertEquals("{.3: 0.3}", SRun("array('.3': .3)", fakePlayer));
     }
 
     @Test public void testArrayKeys() throws Exception{
