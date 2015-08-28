@@ -2412,7 +2412,7 @@ public class Math {
 			String docs = "double {constant} Returns the value of various math constants. The constant argument must be one of the following: "
 					+ StringUtils.Join(MathConstants.values(), ", ", ", or ") + "\n";
 			docs += "---- The following table lists the values, and a brief description of each:\n"
-					+ "{|\n"
+					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
 					+ "|-\n"
 					+ "! Constant Name\n"
 					+ "! Description\n"
@@ -2436,6 +2436,13 @@ public class Math {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "math_const('PI');")
+			};
 		}
 		
 	}
