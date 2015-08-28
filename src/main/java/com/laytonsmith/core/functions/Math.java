@@ -1,6 +1,9 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
@@ -2325,5 +2328,115 @@ public class Math {
 			};
 		}
 
+	}
+	
+	@api
+	public static class math_const extends AbstractFunction implements Optimizable {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+		
+		@MEnum("MathConstants")
+		public static enum MathConstants {
+			NaN(Double.NaN, "A representation of an undefinied number (Not a Number), per the IEEE 754 standard"),
+			NEGATIVE_INFINITY(Double.NEGATIVE_INFINITY, "A representation of negative infinity, per the IEEE 754 standard"),
+			INFINITY(Double.POSITIVE_INFINITY, "A representation of positive infinity, per the IEEE 754 standard"),
+			DOUBLE_MAX(Double.MAX_VALUE, "The higest number that can be represented as a double"),
+			DOUBLE_MIN(Double.MIN_VALUE, "The lowest number that can be represented as a double"),
+			LONG_MAX((double)Long.MAX_VALUE, "The higest number that can be represented as a long"),
+			LONG_MIN((double)Long.MIN_VALUE, "The lowest number that can be represented as a long"),
+			SHORT_MAX((double)Short.MAX_VALUE, "The higest number that can be represented as a short"),
+			SHORT_MIN((double)Short.MIN_VALUE, "The lowest number that can be represented as a short"),
+			INTEGER_MAX((double)Integer.MAX_VALUE, "The higest number that can be represented as a integer"),
+			INTEGER_MIN((double)Integer.MIN_VALUE, "The lowest number that can be represented as an integer"),
+			FLOAT_MAX((double)Float.MAX_VALUE, "The higest number that can be represented as a float"),
+			FLOAT_MIN((double)Float.MIN_VALUE, "The lowest number that can be represented as a float"),
+			BYTE_MAX((double)Byte.MAX_VALUE, "The higest number that can be represented as a byte"),
+			BYTE_MIN((double)Byte.MIN_VALUE, "The lowest number that can be represented as a byte"),
+			E(java.lang.Math.E, "The mathematical constant e, also known as Euler's number (not to be confused with the Euler-Mascheroni constant)"),
+			PI(java.lang.Math.PI, "The value of π (pi)"),
+			PHI(1.6180339887498948482045868343656381177203091798057628621, "The golden ratio"),
+			C(2.99792458e8, "The speed of light in a vacuum, in meters per second"),
+			EULER(0.5772156649015627, "The Euler-Mascheroni constant γ (not to be confused with e)")
+			;
+			private final Double value;
+			private final String doc;
+			private MathConstants(Double value, String doc){
+				this.value = value;
+				this.doc = doc;
+			}
+			
+			public Double getValue(){
+				return this.value;
+			}
+			
+			public String getDoc(){
+				return doc;
+			}
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			try {
+				MathConstants c = MathConstants.valueOf(args[0].val());
+				return new CDouble(c.getValue(), t);
+			} catch(IllegalArgumentException ex){
+				throw new Exceptions.CastException("No constant with the value " + args[0].val() + " exists.", t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "math_const";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			String docs = "double {constant} Returns the value of various math constants. The constant argument must be one of the following: "
+					+ StringUtils.Join(MathConstants.values(), ", ", ", or ") + "\n";
+			docs += "---- The following table lists the values, and a brief description of each:\n"
+					+ "{|\n"
+					+ "|-\n"
+					+ "! Constant Name\n"
+					+ "! Description\n"
+					+ "! Value\n";
+			for(MathConstants value : MathConstants.values()){
+				docs += "|-\n"
+						+ "| " + value.name() + "\n"
+						+ "| " + value.getDoc() + "\n"
+						+ "| " + value.getValue() + "\n";
+			}
+			docs += "|}\n\n"
+					+ "Note that this function is optimized, and when given a constant value for the parameter, is resolved at compile time.";
+			return docs;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE);
+		}
+		
 	}
 }
