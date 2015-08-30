@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.NotInitializedYetException;
@@ -392,7 +393,9 @@ public class Scoreboards {
 				CArray ops = new CArray(t);
 				ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
 				ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
-				ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+					ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
+				}
 				to.set("options", ops, t);
 				CArray pl = new CArray(t);
 				for (String entry : team.getEntries()) {
@@ -1021,7 +1024,7 @@ public class Scoreboards {
 				if (options.containsKey("friendlyinvisibles")) {
 					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t)));
 				}
-				if (options.containsKey("nametagvisibility")) {
+				if (options.containsKey("nametagvisibility") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
 					MCNameTagVisibility visibility;
 					try {
 						visibility = MCNameTagVisibility.valueOf(options.get("nametagvisibility", t).val().toUpperCase());

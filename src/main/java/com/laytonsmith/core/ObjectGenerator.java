@@ -30,6 +30,7 @@ import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -472,14 +473,16 @@ public class ObjectGenerator {
 					ma.set("basecolor", new CString(dyeColor.toString(), t), t);
 				}
 			}
-			Set<MCItemFlag> itemFlags = meta.getItemFlags();
-			CArray flagArray = new CArray(t);
-			if (itemFlags.size() > 0) {
-				for(MCItemFlag flag : itemFlags) {
-					flagArray.push(new CString(flag.name(), t));
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+				Set<MCItemFlag> itemFlags = meta.getItemFlags();
+				CArray flagArray = new CArray(t);
+				if (itemFlags.size() > 0) {
+					for (MCItemFlag flag : itemFlags) {
+						flagArray.push(new CString(flag.name(), t));
+					}
 				}
+				ma.set("flags", flagArray, t);
 			}
-			ma.set("flags", flagArray, t);
 			ret = ma;
 		}
 		return ret;
@@ -695,7 +698,7 @@ public class ObjectGenerator {
 						}
 					}
 				}
-				if (ma.containsKey("flags")) {
+				if (ma.containsKey("flags") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
 					Construct flags = ma.get("flags", t);
 					if (flags instanceof CArray) {
 						CArray flagArray = (CArray) flags;
