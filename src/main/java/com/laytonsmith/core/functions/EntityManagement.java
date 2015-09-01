@@ -2315,6 +2315,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARMORSTAND_ARMS, CBoolean.get(stand.hasArms()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_BASEPLATE, CBoolean.get(stand.hasBasePlate()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_GRAVITY, CBoolean.get(stand.hasGravity()), t);
+					Boolean marker = stand.isMarker();
+					if(marker != null) { // unsupported before 1.8.7
+						specArray.set(entity_spec.KEY_ARMORSTAND_MARKER, CBoolean.get(marker), t);
+					}
 					specArray.set(entity_spec.KEY_ARMORSTAND_SMALLSIZE, CBoolean.get(stand.isSmall()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_VISIBLE, CBoolean.get(stand.isVisible()), t);
 					CArray poses = CArray.GetAssociativeArray(t);
@@ -2486,6 +2490,7 @@ public class EntityManagement {
 		private static final String KEY_ARMORSTAND_ARMS = "arms";
 		private static final String KEY_ARMORSTAND_BASEPLATE = "baseplate";
 		private static final String KEY_ARMORSTAND_GRAVITY = "gravity";
+		private static final String KEY_ARMORSTAND_MARKER = "marker";
 		private static final String KEY_ARMORSTAND_POSES = "poses";
 		private static final String KEY_ARMORSTAND_SMALLSIZE = "small";
 		private static final String KEY_ARMORSTAND_VISIBLE = "visible";
@@ -2607,6 +2612,9 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_ARMORSTAND_GRAVITY:
 								stand.setHasGravity(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_ARMORSTAND_MARKER:
+								stand.setMarker(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case entity_spec.KEY_ARMORSTAND_SMALLSIZE:
 								stand.setSmall(Static.getBoolean(specArray.get(index, t)));

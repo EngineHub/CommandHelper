@@ -7,6 +7,8 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.core.Static;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -259,6 +261,21 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	@Override
 	public void setSmall(boolean small) {
 		as.setSmall(small);
+	}
+
+	@Override
+	public Boolean isMarker() {
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8_7)) {
+			return as.isMarker();
+		}
+		return null;
+	}
+
+	@Override
+	public void setMarker(boolean marker) {
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8_7)) {
+			as.setMarker(marker);
+		}
 	}
 
 	/**
