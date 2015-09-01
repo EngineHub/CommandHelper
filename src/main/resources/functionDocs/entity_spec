@@ -120,7 +120,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_PRIMED_TNT_FUSETICKS%: The number of ticks until the explosion.
 * %KEY_PRIMED_TNT_SOURCE%: The source of the primed TNT. Not editable.
-|- 
+|-
+| OCELOT
+|
+* %KEY_RABBIT_TYPE%: The type of the rabbit (can be %RABBIT_TYPE%).
+|-
 | SHEEP
 | 
 * %KEY_SHEEP_COLOR%: The color of the sheep (can be %DYE_COLOR%).

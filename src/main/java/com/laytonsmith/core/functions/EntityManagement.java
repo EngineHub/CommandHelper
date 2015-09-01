@@ -47,6 +47,7 @@ import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.entities.MCPig;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
+import com.laytonsmith.abstraction.entities.MCRabbit;
 import com.laytonsmith.abstraction.entities.MCSheep;
 import com.laytonsmith.abstraction.entities.MCSkeleton;
 import com.laytonsmith.abstraction.entities.MCSlime;
@@ -64,6 +65,7 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
+import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.annotations.api;
@@ -2283,6 +2285,7 @@ public class EntityManagement {
 			docs = docs.replace("%DYE_COLOR%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%SKELETON_TYPE%", StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PROFESSION%", StringUtils.Join(MCProfession.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%RABBIT_TYPE%", StringUtils.Join(MCRabbitType.values(), ", ", ", or ", " or "));
 			for (Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -2436,6 +2439,10 @@ public class EntityManagement {
 						specArray.set(entity_spec.KEY_PRIMED_TNT_SOURCE, CNull.NULL, t);
 					}
 					break;
+				case RABBIT:
+					MCRabbit rabbit = (MCRabbit) entity;
+					specArray.set(entity_spec.KEY_RABBIT_TYPE, new CString(rabbit.getRabbitType().name(), t), t);
+					break;
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
 					specArray.set(entity_spec.KEY_SHEEP_COLOR, new CString(sheep.getColor().name(), t), t);
@@ -2515,6 +2522,7 @@ public class EntityManagement {
 		private static final String KEY_PIG_SADDLED = "saddled";
 		private static final String KEY_PIG_ZOMBIE_ANGRY = "angry";
 		private static final String KEY_PIG_ZOMBIE_ANGER = "anger";
+		private static final String KEY_RABBIT_TYPE = "type";
 		private static final String KEY_PRIMED_TNT_FUSETICKS = "fuseticks";
 		private static final String KEY_PRIMED_TNT_SOURCE = "source";
 		private static final String KEY_SHEEP_COLOR = "color";
@@ -2949,6 +2957,22 @@ public class EntityManagement {
 						switch (index.toLowerCase()) {
 							case entity_spec.KEY_PRIMED_TNT_FUSETICKS:
 								tnt.setFuseTicks(Static.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case RABBIT:
+					MCRabbit rabbit = (MCRabbit) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_RABBIT_TYPE:
+								try {
+									rabbit.setRabbitType(MCRabbitType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new ConfigRuntimeException("Invalid rabbit type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+								}
 								break;
 							default:
 								throwException(index, t);
