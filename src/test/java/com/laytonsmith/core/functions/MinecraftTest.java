@@ -76,7 +76,7 @@ public class MinecraftTest {
         assertEquals(MCVersion.match(new String[]{"1", "8"}), MCVersion.MC1_8);
         assertEquals(MCVersion.match(new String[]{"1", "8", "0"}), MCVersion.MC1_8);
         assertEquals(MCVersion.match(new String[]{"1", "8", "6"}), MCVersion.MC1_8_6);
-        assertEquals(MCVersion.match(new String[]{"1", "8", "7"}), MCVersion.MC1_8_X);
+        assertEquals(MCVersion.match(new String[]{"1", "8", "8"}), MCVersion.MC1_8_X);
         assertEquals(MCVersion.match(new String[]{"2", "10", "20"}), MCVersion.MC2_X);
         assertEquals(MCVersion.match(new String[]{"3", "1", "4"}), MCVersion.MCX_X);
     }

@@ -284,4 +284,20 @@ public interface MCArmorStand {
 	 * @param small whether this is scaled down
 	 */
 	void setSmall(boolean small);
+
+	/**
+	 * Returns whether this armor stand is a marker,
+	 * meaning it has a tiny collision box and disables interaction
+	 *
+	 * @return whether this is a marker
+	 */
+	Boolean isMarker();
+
+	/**
+	 * Sets whether this armor stand is a marker,
+	 * meaning it has a tiny collision box and disables interaction
+	 *
+	 * @param marker whether this is a marker
+	 */
+	void setMarker(boolean marker);
 }
