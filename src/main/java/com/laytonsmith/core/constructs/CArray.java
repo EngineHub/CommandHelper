@@ -403,23 +403,17 @@ public class CArray extends Construct implements ArrayAccess{
         return this.get(new CString(index, t), t);
     }
 
-    public boolean containsKey(String c){
-        Integer i;
-        try{
-            i = Integer.valueOf(c);
-        } catch(NumberFormatException e){
-            i = null;
-        }
-        if(associative_mode){
-            return associative_array.containsKey(c);
-        } else {
-            if(i == null){
-                return false;
-            } else {
-                return array.size() > i;
-            }
-        }
-    }
+	public boolean containsKey(String c){
+		if(associative_mode){
+			return associative_array.containsKey(c);
+		} else {
+			try {
+				return Integer.valueOf(c) < array.size();
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+	}
 
     public final boolean containsKey(int i){
         return this.containsKey(Integer.toString(i));
