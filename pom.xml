@@ -537,7 +537,7 @@
 									<include>mysql:mysql-connector-java:jar:*</include>
 									<include>commons-codec:commons-codec:jar:*</include>
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
-									<include>org.objectweb.asm:asm-all:jar:*</include>
+									<include>org.ow2.asm:asm-all:jar:*</include>
 									<include>jline:jline:jar:*</include>
 									<include>javax.mail:mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
