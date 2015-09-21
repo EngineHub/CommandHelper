@@ -234,6 +234,9 @@ public class DataHandling {
 			String name;
 			if(args.length == 3){
 				offset = 1;
+				if(!(args[offset + 0] instanceof IVariable)) {
+					throw new ConfigRuntimeException(getName() + " with 3 arguments only accepts an ivariable as the second argument", ExceptionType.CastException, t);
+				}
 				name = ((IVariable) args[offset + 0]).getName();
 				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null){
 					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null){
@@ -260,7 +263,7 @@ public class DataHandling {
 				list.set(v);
 				return v;
 			}
-			throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
+			throw new ConfigRuntimeException(getName() + " only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
 		}
 
 		@Override
