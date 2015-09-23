@@ -49,10 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The MethodScriptCompiler class handles the various stages of compilation and
@@ -727,8 +724,8 @@ public final class MethodScriptCompiler {
 			Token prev1 = i - 1 >= 0 ? token_list.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
 			Token next = i + 1 < token_list.size() ? token_list.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
 
-			if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus()
-					&& !prev2.type.isIdentifier()) {
+			if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus() && !prev2.type.isIdentifier()
+					&& !t.val().matches("(\\@|\\$)[a-zA-Z0-9_]+")) { // Last boolean makes -@b equal to - @b, instead of a string.
 				//It is a negative/positive number. Absorb the sign
 				t.value = prev1.value + t.value;
 				token_list.remove(i - 1);
@@ -1276,7 +1273,18 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.isSymbol()) { //Logic and math symbols
-				tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
+				
+				// Attempt to find "-@var" and change it to "neg(@var)" if it's not @a - @b. Else just add the symbol.
+				if (!prev1.type.isAtomicLit() && !prev1.type.equals(TType.IVARIABLE)
+						&& !prev1.type.equals(TType.VARIABLE) && t.type.isPlusMinus() && t.val().equals("-")
+						&& (next1.type.equals(TType.IVARIABLE) || next1.type.equals(TType.VARIABLE))) {
+					ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+					negTree.addChild(new ParseTree(new IVariable(next1.val(), next1.target), fileOptions));
+					tree.addChild(negTree);
+					i++;
+				} else {
+					tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
+				}
 				constructCount.peek().incrementAndGet();
 			} else if (t.type == TType.DOT){
 				// Check for doubles that start with a decimal, otherwise concat
