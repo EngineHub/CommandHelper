@@ -3,3 +3,4 @@ notifications:
   irc: 
     channels:
       - "chat.freenode.net#CommandHelper"
+sudo: false
