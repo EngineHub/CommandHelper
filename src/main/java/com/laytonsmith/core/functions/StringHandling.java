@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -1157,7 +1158,7 @@ public class StringHandling {
 				params[i] = convertArgument(arg, c, i, t);
 			}
 			//Ok, done.
-			return new CString(String.format(formatString, params), t);
+			return new CString(String.format(Locale.US, formatString, params), t);
 		}
 
 		private Object convertArgument(Construct arg, Character c, int i, Target t) {
