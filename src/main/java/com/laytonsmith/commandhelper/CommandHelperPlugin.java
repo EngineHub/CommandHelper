@@ -79,7 +79,7 @@ import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.TimedRegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.Metrics;
+//import org.mcstats.Metrics;
 
 import java.io.File;
 import java.io.IOException;
@@ -330,19 +330,20 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCBiomeType.build();
 
 		//Metrics
-		try {
-			org.mcstats.Metrics m = new Metrics(this);
-			m.addCustomData(new Metrics.Plotter("Player count") {
-
-				@Override
-				public int getValue() {
-					return Static.getServer().getOnlinePlayers().size();
-				}
-			});
-			m.start();
-		} catch (IOException e) {
-			// Failed to submit the stats :-(
-		}
+		// MCStats no longer appears to be supported. If it comes back, this code can be re-added
+//		try {
+//			org.mcstats.Metrics m = new Metrics(this);
+//			m.addCustomData(new Metrics.Plotter("Player count") {
+//
+//				@Override
+//				public int getValue() {
+//					return Static.getServer().getOnlinePlayers().size();
+//				}
+//			});
+//			m.start();
+//		} catch (IOException e) {
+//			// Failed to submit the stats :-(
+//		}
 
 		try {
 			//This may seem redundant, but on a /reload, we want to refresh these

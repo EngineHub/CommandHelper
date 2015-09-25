@@ -2,4 +2,5 @@ language: java
 notifications:
   irc: 
     channels:
-      - "chat.freenode.net#CommandHelper"
+      - "irc.esper.net#CommandHelper"
+sudo: false
