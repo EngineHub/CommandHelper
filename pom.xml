@@ -152,11 +152,11 @@
 			<url>http://files.zachsthings.com/repo/</url>
 		</repository-->
 
-		<!-- mcstats repo -->
+		<!-- mcstats repo (this appears to no longer be working)
 		<repository>
 			<id>Plugin Metrics</id>
 			<url>http://repo.mcstats.org/content/repositories/public</url>
-		</repository>
+		</repository>-->
 
 		<!-- Java Mail -->
 		<repository>
@@ -344,12 +344,12 @@
 			<artifactId>substance</artifactId>
 			<version>6.0</version>
 		</dependency>
-		<!-- MCStats -->
+		<!-- MCStats (this appears to no longer be working)
 		<dependency>
 			<groupId>org.mcstats</groupId>
 			<artifactId>metrics</artifactId>
 			<version>1.2-SNAPSHOT</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
