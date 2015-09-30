@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -1584,5 +1585,19 @@ public final class Static {
 		} else {
 			return construct;
 		}
+	}
+
+	/**
+	 * Given a locale string, returns the java locale, or null if it can't be found.
+	 * @param fromLocaleString
+	 * @return
+	 */
+	public static Locale GetLocale(String fromLocaleString){
+		for(Locale loc : Locale.getAvailableLocales()) {
+			if(loc.toString().toLowerCase().equals(fromLocaleString.toLowerCase())) {
+				return loc;
+			}
+		}
+		return null;
 	}
 }

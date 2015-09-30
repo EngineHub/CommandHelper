@@ -144,45 +144,46 @@ public class StringHandlingTest {
 	}
 
 	@Test public void testStringFormat() throws Exception{
-		assertEquals("%", SRun("lsprintf('US', '%%')", null));
+		assertEquals("%", SRun("lsprintf('en_US', '%%')", null));
 		//ultra simple tests
-		assertEquals("1", SRun("lsprintf('US', '%d', 1)", null));
-		assertEquals("12", SRun("lsprintf('US', '%d%d', 1, 2)", null));
+		assertEquals("1", SRun("lsprintf('en_US', '%d', 1)", null));
+		assertEquals("12", SRun("lsprintf('en_US', '%d%d', 1, 2)", null));
 		//simple test with array
-		assertEquals("12", SRun("lsprintf('US', '%d%d', array(1, 2))", null));
+		assertEquals("12", SRun("lsprintf('en_US', '%d%d', array(1, 2))", null));
 		try{
-			SRun("lsprintf('US', '%d')", null);
-			fail("Expected lsprintf('US', '%d') to throw a compile exception");
+			SRun("lsprintf('en_US', '%d')", null);
+			fail("Expected lsprintf('en_US', '%d') to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
 
 		try{
-			SRun("lsprintf('US', '%d', 1, 1)", null);
-			fail("Expected lsprintf('US', '%d') to throw a compile exception");
+			SRun("lsprintf('en_US', '%d', 1, 1)", null);
+			fail("Expected lsprintf('en_US', '%d') to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
 
 		try{
-			SRun("lsprintf('US', '%c', 'toobig')", null);
-			fail("Expected lsprintf('US', '%c', 'toobig') to throw a compile exception");
+			SRun("lsprintf('en_US', '%c', 'toobig')", null);
+			fail("Expected lsprintf('en_US', '%c', 'toobig') to throw a compile exception");
 		} catch(ConfigCompileException|ConfigCompileGroupException e){
 			//pass
 		}
 
 		try{
-			SRun("lsprintf('US', '%0.3f', 1.1)", null);
-			fail("Expected lsprintf('US', '%0.3f', 1.1) to throw a compile exception");
+			SRun("lsprintf('en_US', '%0.3f', 1.1)", null);
+			fail("Expected lsprintf('en_US', '%0.3f', 1.1) to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
 
 		//A few advanced usages
-		assertEquals("004.000", SRun("lsprintf('US', '%07.3f', 4)", null));
+		assertEquals("004.000", SRun("lsprintf('en_US', '%07.3f', 4)", null));
+		assertEquals("004,000", SRun("lsprintf('no_NO', '%07.3f', 4)", null));
 
 		long s = System.currentTimeMillis();
-		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("lsprintf('US', '%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
+		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("lsprintf('en_US', '%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
 
 	}
 	

@@ -1132,7 +1132,7 @@ public class StringHandling {
 			if(countryCode == null){
 				locale = Locale.getDefault();
 			} else {
-				locale = getLocale(countryCode);
+				locale = Static.GetLocale(countryCode);
 			}
 			if(locale == null) {
 				throw new ConfigRuntimeException("The given locale was not found on your system: "
@@ -1327,15 +1327,6 @@ public class StringHandling {
 			}
 		}
 
-		public static Locale getLocale(String countryCode){
-			for(Locale loc : Locale.getAvailableLocales()) {
-				if(loc.getCountry().equals(countryCode)) {
-					return loc;
-				}
-			}
-			return null;
-		}
-
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() < 2) {
@@ -1343,7 +1334,7 @@ public class StringHandling {
 			}
 			if (children.get(0).isConst()){
 				String locale = children.get(0).getData().nval();
-				if(locale != null && getLocale(locale) == null){
+				if(locale != null && Static.GetLocale(locale) == null){
 					throw new ConfigCompileException("The locale " + locale + " could not be found on this system", t);
 				}
 			}
@@ -1510,7 +1501,7 @@ public class StringHandling {
 		public String docs() {
 			return "string {locale, formatString, parameters... | locale, formatString, array(parameters...)} Returns a string formatted to the"
 					+ " given formatString specification, using the parameters passed in. Locale should be a string in format"
-					+ " XX with XX being the country code (US, NL, NO, ..). Which locales are available depends on your system. Use"
+					+ " XX with XX being the country code (en_US, nl_NL, no_NO, ..). Which locales are available depends on your system. Use"
 					+ " null to use the system's locale."
 					+ " The formatString should be formatted according to"
 					+ " [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
@@ -1532,23 +1523,23 @@ public class StringHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "lsprintf('US', '%d', 1)"),
-				new ExampleScript("Multiple arguments", "lsprintf('US', '%d%d', 1, '2')"),
-				new ExampleScript("Multiple arguments in an array", "lsprintf('US', '%d%d', array(1, 2))"),
-				new ExampleScript("Compile error, missing parameters", "lsprintf('US', '%d')", true),
-				new ExampleScript("Other formatting: float with precision (using integer)", "lsprintf('US', '%07.3f', 4)"),
-				new ExampleScript("Other formatting: float with precision (with rounding)", "lsprintf('US', '%07.3f', 3.4567)"),
-				new ExampleScript("Other formatting: float with precision in a different locale (with rounding)", "lsprintf('NL', '%07.3f', 3.4567)"),
-				new ExampleScript("Other formatting: time", "lsprintf('US', '%1$tm %1$te,%1$tY', time())", ":06 13,2013"),
-				new ExampleScript("Literal percent sign", "lsprintf('US', '%%')"),
-				new ExampleScript("Hexidecimal formatting", "lsprintf('US', '%x', 15)"),
-				new ExampleScript("Other formatting: character", "lsprintf('US', '%c', 's')"),
-				new ExampleScript("Other formatting: character (with capitalization)", "lsprintf('US', '%C', 's')"),
-				new ExampleScript("Other formatting: scientific notation", "lsprintf('US', '%e', '2345')"),
-				new ExampleScript("Other formatting: plain string", "lsprintf('US', '%s', 'plain string')"),
-				new ExampleScript("Other formatting: boolean", "lsprintf('US', '%b', 1)"),
-				new ExampleScript("Other formatting: boolean (with capitalization)", "lsprintf('US', '%B', 0)"),
-				new ExampleScript("Other formatting: hash code", "lsprintf('US', '%h', 'will be hashed')"),
+				new ExampleScript("Basic usage", "lsprintf('en_US', '%d', 1)"),
+				new ExampleScript("Multiple arguments", "lsprintf('en_US', '%d%d', 1, '2')"),
+				new ExampleScript("Multiple arguments in an array", "lsprintf('en_US', '%d%d', array(1, 2))"),
+				new ExampleScript("Compile error, missing parameters", "lsprintf('en_US', '%d')", true),
+				new ExampleScript("Other formatting: float with precision (using integer)", "lsprintf('en_US', '%07.3f', 4)"),
+				new ExampleScript("Other formatting: float with precision (with rounding)", "lsprintf('en_US', '%07.3f', 3.4567)"),
+				new ExampleScript("Other formatting: float with precision in a different locale (with rounding)", "lsprintf('nl_NL', '%07.3f', 3.4567)"),
+				new ExampleScript("Other formatting: time", "lsprintf('en_US', '%1$tm %1$te,%1$tY', time())", ":06 13,2013"),
+				new ExampleScript("Literal percent sign", "lsprintf('en_US', '%%')"),
+				new ExampleScript("Hexidecimal formatting", "lsprintf('en_US', '%x', 15)"),
+				new ExampleScript("Other formatting: character", "lsprintf('en_US', '%c', 's')"),
+				new ExampleScript("Other formatting: character (with capitalization)", "lsprintf('en_US', '%C', 's')"),
+				new ExampleScript("Other formatting: scientific notation", "lsprintf('en_US', '%e', '2345')"),
+				new ExampleScript("Other formatting: plain string", "lsprintf('en_US', '%s', 'plain string')"),
+				new ExampleScript("Other formatting: boolean", "lsprintf('en_US', '%b', 1)"),
+				new ExampleScript("Other formatting: boolean (with capitalization)", "lsprintf('en_US', '%B', 0)"),
+				new ExampleScript("Other formatting: hash code", "lsprintf('en_US', '%h', 'will be hashed')"),
 			};
 		}
 
