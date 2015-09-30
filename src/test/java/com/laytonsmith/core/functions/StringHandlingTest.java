@@ -10,6 +10,7 @@ import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
+import java.util.Locale;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -143,45 +144,45 @@ public class StringHandlingTest {
 	}
 
 	@Test public void testStringFormat() throws Exception{
-		assertEquals("%", SRun("lsprintf('LOCALE_US', '%%')", null));
+		assertEquals("%", SRun("lsprintf('US', '%%')", null));
 		//ultra simple tests
-		assertEquals("1", SRun("lsprintf('LOCALE_US', '%d', 1)", null));
-		assertEquals("12", SRun("lsprintf('LOCALE_US', '%d%d', 1, 2)", null));
+		assertEquals("1", SRun("lsprintf('US', '%d', 1)", null));
+		assertEquals("12", SRun("lsprintf('US', '%d%d', 1, 2)", null));
 		//simple test with array
-		assertEquals("12", SRun("lsprintf('LOCALE_US', '%d%d', array(1, 2))", null));
+		assertEquals("12", SRun("lsprintf('US', '%d%d', array(1, 2))", null));
 		try{
-			SRun("lsprintf('LOCALE_US', '%d')", null);
-			fail("Expected lsprintf('LOCALE_US', '%d') to throw a compile exception");
+			SRun("lsprintf('US', '%d')", null);
+			fail("Expected lsprintf('US', '%d') to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
 
 		try{
-			SRun("lsprintf('LOCALE_US', '%d', 1, 1)", null);
-			fail("Expected lsprintf('LOCALE_US', '%d') to throw a compile exception");
+			SRun("lsprintf('US', '%d', 1, 1)", null);
+			fail("Expected lsprintf('US', '%d') to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
 
 		try{
-			SRun("lsprintf('LOCALE_US', '%c', 'toobig')", null);
-			fail("Expected lsprintf('LOCALE_US', '%c', 'toobig') to throw a compile exception");
+			SRun("lsprintf('US', '%c', 'toobig')", null);
+			fail("Expected lsprintf('US', '%c', 'toobig') to throw a compile exception");
 		} catch(ConfigCompileException|ConfigCompileGroupException e){
 			//pass
 		}
 
 		try{
-			SRun("lsprintf('LOCALE_US', '%0.3f', 1.1)", null);
-			fail("Expected lsprintf('LOCALE_US', '%0.3f', 1.1) to throw a compile exception");
+			SRun("lsprintf('US', '%0.3f', 1.1)", null);
+			fail("Expected lsprintf('US', '%0.3f', 1.1) to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
 
 		//A few advanced usages
-		assertEquals("004.000", SRun("lsprintf('LOCALE_US', '%07.3f', 4)", null));
+		assertEquals("004.000", SRun("lsprintf('US', '%07.3f', 4)", null));
 
 		long s = System.currentTimeMillis();
-		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("lsprintf('LOCALE_US', '%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
+		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("lsprintf('US', '%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
 
 	}
 	
@@ -221,7 +222,7 @@ public class StringHandlingTest {
 		}
 
 		//A few advanced usages
-		assertEquals("004.000", SRun("sprintf('%07.3f', 4)", null));
+		assertEquals(String.format(Locale.getDefault(), "%07.3f", 4.0), SRun("sprintf('%07.3f', 4)", null));
 
 		long s = System.currentTimeMillis();
 		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("sprintf('%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));

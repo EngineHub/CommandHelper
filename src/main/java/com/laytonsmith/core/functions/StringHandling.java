@@ -23,6 +23,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -1098,6 +1099,7 @@ public class StringHandling {
 	}
 
 	@api
+	@seealso({sprintf.class, Meta.get_locales.class})
 	public static class lsprintf extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1126,25 +1128,15 @@ public class StringHandling {
 			
 			// Get the Locale.
 			Locale locale = null;
-			if(!args[0].val().toUpperCase().startsWith("LOCALE_")) {
-				throw new ConfigRuntimeException("The locale has to be in format LOCALE_XX with XX being the country code."
-						+ " LOCALE_DEFAULT uses the systems default locale. Given locale: " + args[0].val()
-						, ExceptionType.FormatException, t);
+			String countryCode = args[0].nval();
+			if(countryCode == null){
+				locale = Locale.getDefault();
+			} else {
+				locale = getLocale(countryCode);
 			}
-			String countryCode = args[0].val().toUpperCase().replaceFirst("LOCALE_", "");
-			if(!countryCode.equals("DEFAULT")) { // LOCALE_DEFAULT applies the systems default locale.
-				boolean success = false;
-				for(Locale loc : Locale.getAvailableLocales()) {
-					if(loc.getCountry().equals(countryCode)) {
-						locale = loc;
-						success = true;
-						break;
-					}
-				}
-				if(!success) {
-					throw new ConfigRuntimeException("The given locale was not found on your system: LOCALE_"
-							+ countryCode, ExceptionType.IllegalArgumentException, t);
-				}
+			if(locale == null) {
+				throw new ConfigRuntimeException("The given locale was not found on your system: "
+						+ countryCode, ExceptionType.FormatException, t);
 			}
 			
 			// Handle the formatting.
@@ -1335,11 +1327,27 @@ public class StringHandling {
 			}
 		}
 
+		public static Locale getLocale(String countryCode){
+			for(Locale loc : Locale.getAvailableLocales()) {
+				if(loc.getCountry().equals(countryCode)) {
+					return loc;
+				}
+			}
+			return null;
+		}
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() < 2) {
 				throw new ConfigCompileException(getName() + " expects 2 or more argument", t);
-			} else if (children.get(1).isConst()) {
+			}
+			if (children.get(0).isConst()){
+				String locale = children.get(0).getData().nval();
+				if(locale != null && getLocale(locale) == null){
+					throw new ConfigCompileException("The locale " + locale + " could not be found on this system", t);
+				}
+			}
+			if (children.get(1).isConst()) {
 				ParseTree me = new ParseTree(new CFunction(getName(), t), children.get(1).getFileOptions());
 				me.setChildren(children);
 				me.setOptimized(true); //After this run, we will be, anyways.
@@ -1502,7 +1510,8 @@ public class StringHandling {
 		public String docs() {
 			return "string {locale, formatString, parameters... | locale, formatString, array(parameters...)} Returns a string formatted to the"
 					+ " given formatString specification, using the parameters passed in. Locale should be a string in format"
-					+ " LOCALE_XX with XX being the country code (US, NL, NO, ..). Which locales are available depends on your system."
+					+ " XX with XX being the country code (US, NL, NO, ..). Which locales are available depends on your system. Use"
+					+ " null to use the system's locale."
 					+ " The formatString should be formatted according to"
 					+ " [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
 					+ " with the caveat that the parameter types are automatically cast to the appropriate type, if possible."
@@ -1523,29 +1532,30 @@ public class StringHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "lsprintf('LOCALE_US', '%d', 1)"),
-				new ExampleScript("Multiple arguments", "lsprintf('LOCALE_US', '%d%d', 1, '2')"),
-				new ExampleScript("Multiple arguments in an array", "lsprintf('LOCALE_US', '%d%d', array(1, 2))"),
-				new ExampleScript("Compile error, missing parameters", "lsprintf('LOCALE_US', '%d')", true),
-				new ExampleScript("Other formatting: float with precision (using integer)", "lsprintf('LOCALE_US', '%07.3f', 4)"),
-				new ExampleScript("Other formatting: float with precision (with rounding)", "lsprintf('LOCALE_US', '%07.3f', 3.4567)"),
-				new ExampleScript("Other formatting: float with precision in a different locale (with rounding)", "lsprintf('LOCALE_NL', '%07.3f', 3.4567)"),
-				new ExampleScript("Other formatting: time", "lsprintf('LOCALE_US', '%1$tm %1$te,%1$tY', time())", ":06 13,2013"),
-				new ExampleScript("Literal percent sign", "lsprintf('LOCALE_US', '%%')"),
-				new ExampleScript("Hexidecimal formatting", "lsprintf('LOCALE_US', '%x', 15)"),
-				new ExampleScript("Other formatting: character", "lsprintf('LOCALE_US', '%c', 's')"),
-				new ExampleScript("Other formatting: character (with capitalization)", "lsprintf('LOCALE_US', '%C', 's')"),
-				new ExampleScript("Other formatting: scientific notation", "lsprintf('LOCALE_US', '%e', '2345')"),
-				new ExampleScript("Other formatting: plain string", "lsprintf('LOCALE_US', '%s', 'plain string')"),
-				new ExampleScript("Other formatting: boolean", "lsprintf('LOCALE_US', '%b', 1)"),
-				new ExampleScript("Other formatting: boolean (with capitalization)", "lsprintf('LOCALE_US', '%B', 0)"),
-				new ExampleScript("Other formatting: hash code", "lsprintf('LOCALE_US', '%h', 'will be hashed')"),
+				new ExampleScript("Basic usage", "lsprintf('US', '%d', 1)"),
+				new ExampleScript("Multiple arguments", "lsprintf('US', '%d%d', 1, '2')"),
+				new ExampleScript("Multiple arguments in an array", "lsprintf('US', '%d%d', array(1, 2))"),
+				new ExampleScript("Compile error, missing parameters", "lsprintf('US', '%d')", true),
+				new ExampleScript("Other formatting: float with precision (using integer)", "lsprintf('US', '%07.3f', 4)"),
+				new ExampleScript("Other formatting: float with precision (with rounding)", "lsprintf('US', '%07.3f', 3.4567)"),
+				new ExampleScript("Other formatting: float with precision in a different locale (with rounding)", "lsprintf('NL', '%07.3f', 3.4567)"),
+				new ExampleScript("Other formatting: time", "lsprintf('US', '%1$tm %1$te,%1$tY', time())", ":06 13,2013"),
+				new ExampleScript("Literal percent sign", "lsprintf('US', '%%')"),
+				new ExampleScript("Hexidecimal formatting", "lsprintf('US', '%x', 15)"),
+				new ExampleScript("Other formatting: character", "lsprintf('US', '%c', 's')"),
+				new ExampleScript("Other formatting: character (with capitalization)", "lsprintf('US', '%C', 's')"),
+				new ExampleScript("Other formatting: scientific notation", "lsprintf('US', '%e', '2345')"),
+				new ExampleScript("Other formatting: plain string", "lsprintf('US', '%s', 'plain string')"),
+				new ExampleScript("Other formatting: boolean", "lsprintf('US', '%b', 1)"),
+				new ExampleScript("Other formatting: boolean (with capitalization)", "lsprintf('US', '%B', 0)"),
+				new ExampleScript("Other formatting: hash code", "lsprintf('US', '%h', 'will be hashed')"),
 			};
 		}
 
 	}
 	
 	@api
+	@seealso(lsprintf.class)
 	public static class sprintf extends lsprintf implements Optimizable {
 
 		@Override
@@ -1560,12 +1570,16 @@ public class StringHandling {
 					+ " according to [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
 					+ " with the caveat that the parameter types are automatically cast to the appropriate type, if possible."
 					+ " Calendar/time specifiers, (t and T) expect an integer which represents unix time, but are otherwise"
-					+ " valid. All format specifiers in the documentation are valid.";
+					+ " valid. All format specifiers in the documentation are valid. This works the same as lsprintf with the"
+					+ " locale set to \"DEFAULT\".";
 		}
 		
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			children.add(0, new ParseTree(new CString("LOCALE_US", t), fileOptions)); // Add a default locale to the arguments.
+			if(children.size() < 1){
+				throw new ConfigCompileException(getName() + " expects at least 1 argument", t);
+			}
+			children.add(0, new ParseTree(CNull.NULL, fileOptions)); // Add a default locale to the arguments.
 			return super.optimizeDynamic(t, children, fileOptions);
 		}
 
