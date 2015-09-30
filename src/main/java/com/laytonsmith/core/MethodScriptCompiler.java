@@ -49,10 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The MethodScriptCompiler class handles the various stages of compilation and
@@ -727,8 +724,8 @@ public final class MethodScriptCompiler {
 			Token prev1 = i - 1 >= 0 ? token_list.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
 			Token next = i + 1 < token_list.size() ? token_list.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
 
-			if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus()
-					&& !prev2.type.isIdentifier()) {
+			if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus() && !prev2.type.isIdentifier()
+					&& !t.val().matches("(\\@|\\$)[a-zA-Z0-9_]+")) { // Last boolean makes -@b equal to - @b, instead of a string.
 				//It is a negative/positive number. Absorb the sign
 				t.value = prev1.value + t.value;
 				token_list.remove(i - 1);
@@ -952,7 +949,10 @@ public final class MethodScriptCompiler {
 		 */
 		Stack<AtomicInteger> arrayStack = new Stack<>();
 		arrayStack.add(new AtomicInteger(-1));
-
+		
+		Stack<AtomicInteger> minusArrayStack = new Stack<>();
+		Stack<AtomicInteger> minusFuncStack = new Stack<>();
+		
 		int parens = 0;
 		Token t = null;
 
@@ -1066,7 +1066,21 @@ public final class MethodScriptCompiler {
 				ParseTree arrayGet = new ParseTree(new CFunction("array_get", t.target), fileOptions);
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
-				tree.addChild(arrayGet);
+				
+				// Check if the @var[...] had a negating "-" in front. If so, add a neg().
+				if (minusArrayStack.size() != 0 && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
+					if (!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
+						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						negTree.addChild(arrayGet);
+						tree.addChild(negTree);
+						minusArrayStack.pop();
+					} else {
+						// Negate the next array_get instead, so just add this one to the tree.
+						tree.addChild(arrayGet);
+					}
+				} else {
+					tree.addChild(arrayGet);
+				}
 				constructCount.peek().set(constructCount.peek().get() - myIndex.numberOfChildren());
 				continue;
 			}
@@ -1139,6 +1153,22 @@ public final class MethodScriptCompiler {
 				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
+				
+				// Handle "-func(args)" and "-func(args)[index]".
+				if (minusFuncStack.size() != 0 && minusFuncStack.peek().get() == parens + 1) {
+					if(next1.type.equals(TType.LSQUARE_BRACKET)) {
+						// Move the negation to the array_get which contains this function.
+						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
+					} else {
+						// Negate this function.
+						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						negTree.addChild(tree.getChildAt(tree.numberOfChildren() - 1));
+						tree.removeChildAt(tree.numberOfChildren() - 1);
+						tree.addChildAt(tree.numberOfChildren(), negTree);
+					}
+					minusFuncStack.pop();
+				}
+				
 			} else if (t.type.equals(TType.COMMA)) {
 				if (constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
@@ -1276,8 +1306,30 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.isSymbol()) { //Logic and math symbols
-				tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
-				constructCount.peek().incrementAndGet();
+				
+				// Attempt to find "-@var" and change it to "neg(@var)" if it's not @a - @b. Else just add the symbol.
+				// Also handles "-function()" and "-@var[index]". 
+				if (!prev1.type.isAtomicLit() && !prev1.type.equals(TType.IVARIABLE)
+						&& !prev1.type.equals(TType.VARIABLE) && t.type.equals(TType.MINUS)
+						&& (next1.type.equals(TType.IVARIABLE) || next1.type.equals(TType.VARIABLE) || next1.type.equals(TType.FUNC_NAME))) {
+					
+					// Check if we are negating a value from an array, function or variable.
+					if (next2.type.equals(TType.LSQUARE_BRACKET)) {
+						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
+					} else if (next1.type.equals(TType.FUNC_NAME)) {
+						minusFuncStack.push(new AtomicInteger(parens + 1)); // +1 because the function isn't counted yet.
+					} else {
+						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						negTree.addChild(new ParseTree(new IVariable(next1.value, next1.target), fileOptions));
+						tree.addChild(negTree);
+						constructCount.peek().incrementAndGet();
+						i++; // Skip the next variable as we've just handled it.
+					}
+				} else {
+					tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
+					constructCount.peek().incrementAndGet();
+				}
+				
 			} else if (t.type == TType.DOT){
 				// Check for doubles that start with a decimal, otherwise concat
 				Construct c = null;

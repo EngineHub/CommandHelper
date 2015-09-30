@@ -19,7 +19,6 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -46,6 +45,7 @@ import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -1098,7 +1098,7 @@ public class StringHandling {
 	}
 
 	@api
-	public static class sprintf extends AbstractFunction implements Optimizable {
+	public static class lsprintf extends AbstractFunction implements Optimizable {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -1119,33 +1119,60 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length == 0) {
-				throw new ConfigRuntimeException(getName() + " expects 1 or more argument", ExceptionType.InsufficientArgumentsException, t);
+			if (args.length < 2) {
+				throw new ConfigRuntimeException(getName() + " expects 2 or more arguments", ExceptionType.InsufficientArgumentsException, t);
 			}
-			String formatString = args[0].val();
-			Object[] params = new Object[args.length - 1];
+			int numArgs = args.length;
+			
+			// Get the Locale.
+			Locale locale = null;
+			if(!args[0].val().toUpperCase().startsWith("LOCALE_")) {
+				throw new ConfigRuntimeException("The locale has to be in format LOCALE_XX with XX being the country code."
+						+ " LOCALE_DEFAULT uses the systems default locale. Given locale: " + args[0].val()
+						, ExceptionType.FormatException, t);
+			}
+			String countryCode = args[0].val().toUpperCase().replaceFirst("LOCALE_", "");
+			if(!countryCode.equals("DEFAULT")) { // LOCALE_DEFAULT applies the systems default locale.
+				boolean success = false;
+				for(Locale loc : Locale.getAvailableLocales()) {
+					if(loc.getCountry().equals(countryCode)) {
+						locale = loc;
+						success = true;
+						break;
+					}
+				}
+				if(!success) {
+					throw new ConfigRuntimeException("The given locale was not found on your system: LOCALE_"
+							+ countryCode, ExceptionType.IllegalArgumentException, t);
+				}
+			}
+			
+			// Handle the formatting.
+			String formatString = args[1].val();
+			Object[] params = new Object[numArgs - 2];
 			List<FormatString> parsed;
 			try{
 				parsed = parse(formatString, t);
 			} catch(IllegalFormatException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			}
-			if (requiredArgs(parsed) != args.length - 1) {
+			if (requiredArgs(parsed) != numArgs - 2) {
 				throw new ConfigRuntimeException("The specified format string: \"" + formatString + "\""
-						+ " expects " + requiredArgs(parsed) + " argument, but " + (args.length - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
+						+ " expects " + requiredArgs(parsed) + " argument(s), but " + (numArgs - 2) + " were provided.",
+						ExceptionType.InsufficientArgumentsException, t);
 			}
 
 			List<Construct> flattenedArgs = new ArrayList<Construct>();
-			if (args.length == 2 && args[1] instanceof CArray) {
-				if (((CArray) args[1]).inAssociativeMode()) {
+			if (numArgs == 3 && args[2] instanceof CArray) {
+				if (((CArray) args[2]).inAssociativeMode()) {
 					throw new ConfigRuntimeException("If the second argument to " + getName() + " is an array, it may not be associative.", ExceptionType.CastException, t);
 				} else {
-					for (int i = 0; i < ((CArray) args[1]).size(); i++) {
-						flattenedArgs.add(((CArray) args[1]).get(i, t));
+					for (int i = 0; i < ((CArray) args[2]).size(); i++) {
+						flattenedArgs.add(((CArray) args[2]).get(i, t));
 					}
 				}
 			} else {
-				for (int i = 1; i < args.length; i++) {
+				for (int i = 2; i < numArgs; i++) {
 					flattenedArgs.add(args[i]);
 				}
 			}
@@ -1157,7 +1184,7 @@ public class StringHandling {
 				params[i] = convertArgument(arg, c, i, t);
 			}
 			//Ok, done.
-			return new CString(String.format(formatString, params), t);
+			return new CString(String.format(locale, formatString, params), t);
 		}
 
 		private Object convertArgument(Construct arg, Character c, int i, Target t) {
@@ -1310,17 +1337,17 @@ public class StringHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.isEmpty()) {
-				throw new ConfigCompileException(getName() + " expects 1 or more argument", t);
-			} else if (children.get(0).isConst()) {
-				ParseTree me = new ParseTree(new CFunction(getName(), t), children.get(0).getFileOptions());
+			if (children.size() < 2) {
+				throw new ConfigCompileException(getName() + " expects 2 or more argument", t);
+			} else if (children.get(1).isConst()) {
+				ParseTree me = new ParseTree(new CFunction(getName(), t), children.get(1).getFileOptions());
 				me.setChildren(children);
 				me.setOptimized(true); //After this run, we will be, anyways.
-				if(children.size() == 2 && children.get(1).getData() instanceof CFunction && ((CFunction)children.get(1).getData()).getFunction().getName().equals(new DataHandling.array().getName())){
+				if(children.size() == 3 && children.get(2).getData() instanceof CFunction && ((CFunction)children.get(2).getData()).getFunction().getName().equals(new DataHandling.array().getName())){
 					//Normally we can't do anything with a hardcoded array, it's considered dynamic. But in this case, we can at least pull up the arguments,
 					//because the array's size is constant, even if the arguments in it aren't.
-					ParseTree array = children.get(1);
-					children.remove(1);
+					ParseTree array = children.get(2);
+					children.remove(2);
 					boolean allIndexesStatic = true;
 					for(int i = 0; i < array.numberOfChildren(); i++){
 						ParseTree child = array.getChildAt(i);
@@ -1335,17 +1362,17 @@ public class StringHandling {
 				}
 				//We can check the format string and make sure it doesn't throw an IllegalFormatException.
 				try {
-					List<FormatString> parsed = parse(children.get(0).getData().val(), t);
-					if (requiredArgs(parsed) != children.size() - 1) {
-						throw new ConfigRuntimeException("The specified format string: \"" + children.get(0).getData().val() + "\""
-								+ " expects " + requiredArgs(parsed) + " argument, but " + (children.size() - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
+					List<FormatString> parsed = parse(children.get(1).getData().val(), t);
+					if (requiredArgs(parsed) != children.size() - 2) {
+						throw new ConfigRuntimeException("The specified format string: \"" + children.get(1).getData().val() + "\""
+								+ " expects " + requiredArgs(parsed) + " argument(s), but " + (children.size() - 2) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
 					}
 					//If the arguments are constant, we can actually check them too
-					for(int i = 1; i < children.size(); i++){
+					for(int i = 2; i < children.size(); i++){
 						//We skip the dynamic ones, but the constant ones we can know for sure
 						//if they are convertable or not.
 						if(children.get(i).isConst()){
-							convertArgument(children.get(i).getData(), parsed.get(i - 1).getExpectedType(), i + 1, t);
+							convertArgument(children.get(i).getData(), parsed.get(i - 2).getExpectedType(), i, t);
 						}
 					}
 				} catch (IllegalFormatException e) {
@@ -1463,7 +1490,7 @@ public class StringHandling {
 
 		@Override
 		public String getName() {
-			return "sprintf";
+			return "lsprintf";
 		}
 
 		@Override
@@ -1473,9 +1500,11 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "string {formatString, parameters... | formatString, array(parameters...)} Returns a string formatted to the"
-					+ " given formatString specification, using the parameters passed in. The formatString should be formatted"
-					+ " according to [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
+			return "string {locale, formatString, parameters... | locale, formatString, array(parameters...)} Returns a string formatted to the"
+					+ " given formatString specification, using the parameters passed in. Locale should be a string in format"
+					+ " LOCALE_XX with XX being the country code (US, NL, NO, ..). Which locales are available depends on your system."
+					+ " The formatString should be formatted according to"
+					+ " [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
 					+ " with the caveat that the parameter types are automatically cast to the appropriate type, if possible."
 					+ " Calendar/time specifiers, (t and T) expect an integer which represents unix time, but are otherwise"
 					+ " valid. All format specifiers in the documentation are valid.";
@@ -1489,6 +1518,55 @@ public class StringHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE, OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "lsprintf('LOCALE_US', '%d', 1)"),
+				new ExampleScript("Multiple arguments", "lsprintf('LOCALE_US', '%d%d', 1, '2')"),
+				new ExampleScript("Multiple arguments in an array", "lsprintf('LOCALE_US', '%d%d', array(1, 2))"),
+				new ExampleScript("Compile error, missing parameters", "lsprintf('LOCALE_US', '%d')", true),
+				new ExampleScript("Other formatting: float with precision (using integer)", "lsprintf('LOCALE_US', '%07.3f', 4)"),
+				new ExampleScript("Other formatting: float with precision (with rounding)", "lsprintf('LOCALE_US', '%07.3f', 3.4567)"),
+				new ExampleScript("Other formatting: float with precision in a different locale (with rounding)", "lsprintf('LOCALE_NL', '%07.3f', 3.4567)"),
+				new ExampleScript("Other formatting: time", "lsprintf('LOCALE_US', '%1$tm %1$te,%1$tY', time())", ":06 13,2013"),
+				new ExampleScript("Literal percent sign", "lsprintf('LOCALE_US', '%%')"),
+				new ExampleScript("Hexidecimal formatting", "lsprintf('LOCALE_US', '%x', 15)"),
+				new ExampleScript("Other formatting: character", "lsprintf('LOCALE_US', '%c', 's')"),
+				new ExampleScript("Other formatting: character (with capitalization)", "lsprintf('LOCALE_US', '%C', 's')"),
+				new ExampleScript("Other formatting: scientific notation", "lsprintf('LOCALE_US', '%e', '2345')"),
+				new ExampleScript("Other formatting: plain string", "lsprintf('LOCALE_US', '%s', 'plain string')"),
+				new ExampleScript("Other formatting: boolean", "lsprintf('LOCALE_US', '%b', 1)"),
+				new ExampleScript("Other formatting: boolean (with capitalization)", "lsprintf('LOCALE_US', '%B', 0)"),
+				new ExampleScript("Other formatting: hash code", "lsprintf('LOCALE_US', '%h', 'will be hashed')"),
+			};
+		}
+
+	}
+	
+	@api
+	public static class sprintf extends lsprintf implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "sprintf";
+		}
+
+		@Override
+		public String docs() {
+			return "string {formatString, parameters... | formatString, array(parameters...)} Returns a string formatted to the"
+					+ " given formatString specification, using the parameters passed in. The formatString should be formatted"
+					+ " according to [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
+					+ " with the caveat that the parameter types are automatically cast to the appropriate type, if possible."
+					+ " Calendar/time specifiers, (t and T) expect an integer which represents unix time, but are otherwise"
+					+ " valid. All format specifiers in the documentation are valid.";
+		}
+		
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			children.add(0, new ParseTree(new CString("LOCALE_US", t), fileOptions)); // Add a default locale to the arguments.
+			return super.optimizeDynamic(t, children, fileOptions);
 		}
 
 		@Override
@@ -1514,8 +1592,6 @@ public class StringHandling {
 		}
 
 	}
-	// TODO: Add a sprintf_local function, which will allow for the locale to be changed, and change sprintf to simply call sprintf_locale with
-	// the default locale.
 
 	@api
 	public static class string_get_bytes extends AbstractFunction {

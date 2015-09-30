@@ -143,6 +143,49 @@ public class StringHandlingTest {
 	}
 
 	@Test public void testStringFormat() throws Exception{
+		assertEquals("%", SRun("lsprintf('LOCALE_US', '%%')", null));
+		//ultra simple tests
+		assertEquals("1", SRun("lsprintf('LOCALE_US', '%d', 1)", null));
+		assertEquals("12", SRun("lsprintf('LOCALE_US', '%d%d', 1, 2)", null));
+		//simple test with array
+		assertEquals("12", SRun("lsprintf('LOCALE_US', '%d%d', array(1, 2))", null));
+		try{
+			SRun("lsprintf('LOCALE_US', '%d')", null);
+			fail("Expected lsprintf('LOCALE_US', '%d') to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+
+		try{
+			SRun("lsprintf('LOCALE_US', '%d', 1, 1)", null);
+			fail("Expected lsprintf('LOCALE_US', '%d') to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+
+		try{
+			SRun("lsprintf('LOCALE_US', '%c', 'toobig')", null);
+			fail("Expected lsprintf('LOCALE_US', '%c', 'toobig') to throw a compile exception");
+		} catch(ConfigCompileException|ConfigCompileGroupException e){
+			//pass
+		}
+
+		try{
+			SRun("lsprintf('LOCALE_US', '%0.3f', 1.1)", null);
+			fail("Expected lsprintf('LOCALE_US', '%0.3f', 1.1) to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+
+		//A few advanced usages
+		assertEquals("004.000", SRun("lsprintf('LOCALE_US', '%07.3f', 4)", null));
+
+		long s = System.currentTimeMillis();
+		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("lsprintf('LOCALE_US', '%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
+
+	}
+	
+	@Test public void testStringFormat2() throws Exception{
 		assertEquals("%", SRun("sprintf('%%')", null));
 		//ultra simple tests
 		assertEquals("1", SRun("sprintf('%d', 1)", null));
