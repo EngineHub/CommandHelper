@@ -2,7 +2,6 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.StaticTest;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
@@ -271,6 +270,12 @@ public class OptimizationTest {
 		
 		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),neg(array_get(array(1,0),1))),0),0)))",
 				optimize("@b = -array(array(array(2)))[-array(1,0)[1]][0][0]"));
+		
+		// Test behaviour where the value should not be negated.
+		assertEquals("assign(@c,subtract(@a,@b))", optimize("@c = @a - @b"));
+		assertEquals("assign(@c,subtract(array_get(@a,0),@b))", optimize("@c = @a[0] - @b"));
+		assertEquals("assign(@c,subtract(abs(@a),@b))", optimize("@c = abs(@a) - @b"));
+		assertEquals("assign(@c,subtract(if(@bool,2,3),@b))", optimize("@c = if(@bool) {2} else {3} - @b"));
 	}
 
 

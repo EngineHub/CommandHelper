@@ -1308,9 +1308,10 @@ public final class MethodScriptCompiler {
 			} else if (t.type.isSymbol()) { //Logic and math symbols
 				
 				// Attempt to find "-@var" and change it to "neg(@var)" if it's not @a - @b. Else just add the symbol.
-				// Also handles "-function()" and "-@var[index]". 
-				if (!prev1.type.isAtomicLit() && !prev1.type.equals(TType.IVARIABLE)
-						&& !prev1.type.equals(TType.VARIABLE) && t.type.equals(TType.MINUS)
+				// Also handles "-function()" and "-@var[index]".
+				if (!prev1.type.isAtomicLit() && !prev1.type.equals(TType.IVARIABLE) && !prev1.type.equals(TType.VARIABLE)
+						&& !prev1.type.equals(TType.RSQUARE_BRACKET) && !prev1.type.equals(TType.FUNC_END)
+						&& !prev1.type.equals(TType.RCURLY_BRACKET) && t.type.equals(TType.MINUS)
 						&& (next1.type.equals(TType.IVARIABLE) || next1.type.equals(TType.VARIABLE) || next1.type.equals(TType.FUNC_NAME))) {
 					
 					// Check if we are negating a value from an array, function or variable.
