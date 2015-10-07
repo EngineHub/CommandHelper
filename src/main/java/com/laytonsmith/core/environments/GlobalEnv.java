@@ -186,6 +186,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		} else if(!cloneVars){
 			clone.iVariableList = new IVariableList();
 		}
+		clone.uncaughtExceptionHandler.setObject(this.uncaughtExceptionHandler.getObject());
 		return clone;
 	}
 

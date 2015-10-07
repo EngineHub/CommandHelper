@@ -99,8 +99,8 @@ public class Environment implements Cloneable {
 	public Environment clone() throws CloneNotSupportedException {
 		Environment clone = (Environment) super.clone();
 		clone.environments = new HashMap<>();
-		for(Class c : environments.keySet()){
-			clone.environments.put(c, environments.get(c).clone());
+		for(Class c : this.environments.keySet()){
+			clone.environments.put(c, this.environments.get(c).clone());
 		}
 		return clone;
 	}		
