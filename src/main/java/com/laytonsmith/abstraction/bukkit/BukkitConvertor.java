@@ -616,7 +616,11 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(cs == null){
 			return null;
 		} else {
-			return cs.getName();
+			String name = cs.getName();
+			if("CONSOLE".equals(name)){
+				name = "~console";
+			}
+			return name;
 		}
 	}
 }

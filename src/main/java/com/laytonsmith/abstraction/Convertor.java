@@ -253,7 +253,8 @@ public interface Convertor {
 
 	/**
 	 * Returns the name of the current user, or null if this doesn't make sense in the given platform.
-	 * @return 
+	 * @param env The runtime environment, in case the convertor needs it
+	 * @return The username
 	 */
 	public String GetUser(Environment env);
 }
