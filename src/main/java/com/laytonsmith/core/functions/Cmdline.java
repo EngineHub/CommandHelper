@@ -1614,6 +1614,58 @@ public class Cmdline {
 
 	}
 
+	@api
+	public static class user extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String name = StaticLayer.GetConvertor().GetUser(environment);
+			if(name == null){
+				return CNull.NULL;
+			} else {
+				return new CString(name, t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "user";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "string {} Returns the name of the current user. This is retrieved in a platform specific manner, and should"
+					+ " be cross compatible in all scripts. Null is returned if this function call is non-sensical in the"
+					+ " current platform";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
+
 	/**
 	 * Requires cmdline mode. If not currently in cmdline mode, a proper CRE is thrown.
 	 * @param environment

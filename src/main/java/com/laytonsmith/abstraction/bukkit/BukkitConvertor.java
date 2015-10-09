@@ -60,6 +60,8 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.functions.Exceptions;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -606,5 +608,15 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
 		return ConvertorHelper.GetColor(colorName, t);
+	}
+
+	@Override
+	public String GetUser(Environment env) {
+		MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		if(cs == null){
+			return null;
+		} else {
+			return cs.getName();
+		}
 	}
 }
