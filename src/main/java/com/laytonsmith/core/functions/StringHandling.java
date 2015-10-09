@@ -1500,8 +1500,8 @@ public class StringHandling {
 		@Override
 		public String docs() {
 			return "string {locale, formatString, parameters... | locale, formatString, array(parameters...)} Returns a string formatted to the"
-					+ " given formatString specification, using the parameters passed in. Locale should be a string in format"
-					+ " XX with XX being the country code (en_US, nl_NL, no_NO, ..). Which locales are available depends on your system. Use"
+					+ " given formatString specification, using the parameters passed in. Locale should be a string in format,"
+					+ " for instance, en_US, nl_NL, no_NO... Which locales are available depends on your system. Use"
 					+ " null to use the system's locale."
 					+ " The formatString should be formatted according to"
 					+ " [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"

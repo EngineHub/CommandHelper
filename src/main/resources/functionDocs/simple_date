@@ -1,4 +1,4 @@
-mixed {format, [time, [timezone]]} Returns a date of the current time (or the time specified) in the format you give. ---- 
+mixed {format, [time, [timezone, [locale]]]} Returns a date of the current time (or the time specified) in the format you give. ---- 
 Date and time formats are specified by date and time pattern strings.
 Within date and time pattern strings, unquoted letters from 'A' to 'Z'
 and from 'a' to 'z' are interpreted as pattern letters representing
