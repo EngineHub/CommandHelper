@@ -599,7 +599,7 @@ public class Scheduling {
 						/* 8 */ new ExampleScript("With alternate timezone", "simple_date('K:mm a, z', time(), 'GMT')", ":4:42 PM, GMT"),
 						/* 9 */ new ExampleScript("With 5 digit year", "simple_date('yyyyy.MMMMM.dd GGG hh:mm aaa')", ":02013.June.05 AD 11:42 AM"),
 						/* 10 */ new ExampleScript("Long format", "simple_date('EEE, d MMM yyyy HH:mm:ss Z')", ":Wed, 5 Jun 2013 11:42:56 -0500"),
-						/* 10 */ new ExampleScript("Long format with alternate locale", "simple_date('EEE, d MMM yyyy HH:mm:ss Z', 1444418254496, null, 'no_NO')"),
+						/* 10 */ new ExampleScript("Long format with alternate locale", "simple_date('EEE, d MMM yyyy HH:mm:ss Z', 1444418254496, 'CET', 'no_NO')"),
 						/* 11 */ new ExampleScript("Computer readable format", "simple_date('yyMMddHHmmssZ')", ":130605114256-0500"),
 						/* 12 */ new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')", ":2013-06-05T11:42:56.799-0500"),
 			};
