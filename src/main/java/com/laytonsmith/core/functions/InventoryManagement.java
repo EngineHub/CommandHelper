@@ -1812,6 +1812,157 @@ public class InventoryManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pheld_slot extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_pheld_slot";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], slotNumber} Sets the selected quickbar slot of the given or executing player"
+					+ " to the given slot. The slot number is in range of [0-8].";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.RangeException, Exceptions.ExceptionType.PlayerOfflineException,
+					Exceptions.ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer player;
+			switch(args.length) {
+				case 1: {
+					MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+					if(sender instanceof MCPlayer) {
+						player = (MCPlayer) sender;
+					} else {
+						throw new ConfigRuntimeException("The command sender is not online (are you running this from console?).",
+								Exceptions.ExceptionType.PlayerOfflineException, t);
+					}
+					break;
+				}
+				case 2: {
+					player = Static.GetPlayer(args[0], t);
+					break;
+				}
+				default: {
+					throw new ConfigRuntimeException("Wrong number of arguments passed to " + this.getName(),
+							Exceptions.ExceptionType.FormatException, t);
+				}
+			}
+			
+			int slot;
+			try {
+				slot = Integer.parseInt(args[0].val());
+			} catch(NumberFormatException e) {
+				throw new ConfigRuntimeException("Slot number must be an integer in range of [0-8].",
+							Exceptions.ExceptionType.FormatException, t);
+			}
+			if(slot < 0 || slot > 8) {
+				throw new ConfigRuntimeException("Slot number must be an integer in range of [0-8].",
+						Exceptions.ExceptionType.RangeException, t);
+			}
+			
+			player.getInventory().setHeldItemSlot(slot);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pheld_slot extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pheld_slot";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "int {[player]} Returns the selected quickbar slot of the given or executing player."
+					+ " The slot number is in range of [0-8].";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException,
+				Exceptions.ExceptionType.FormatException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer player;
+			switch(args.length) {
+				case 0: {
+					MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+					if(sender instanceof MCPlayer) {
+						player = (MCPlayer) sender;
+					} else {
+						throw new ConfigRuntimeException("The command sender is not online (are you running this from console?).",
+								Exceptions.ExceptionType.PlayerOfflineException, t);
+					}
+					break;
+				}
+				case 1: {
+					player = Static.GetPlayer(args[0], t);
+					break;
+				}
+				default: {
+					throw new ConfigRuntimeException("Wrong number of arguments passed to " + this.getName(),
+							Exceptions.ExceptionType.FormatException, t);
+				}
+			}
+			
+			int slot = player.getInventory().getHeldItemSlot();
+			return new CInt(slot, t);
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
 //    @api
 //    public static class pinv_consolidate extends AbstractFunction {
 //

@@ -548,7 +548,7 @@ public class ClassMirror<T> implements Serializable {
 	}
 
 	
-	private static class ClassInfo implements ClassVisitor, Serializable {
+	private static class ClassInfo extends ClassVisitor implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
 		public ModifierMirror modifiers;
@@ -561,6 +561,10 @@ public class ClassMirror<T> implements Serializable {
 		public ClassReferenceMirror classReferenceMirror;
 		public List<FieldMirror> fields = new ArrayList<>();
 		public List<MethodMirror> methods = new ArrayList<>();
+
+		public ClassInfo() {
+			super(Opcodes.ASM5);
+		}
 
 		@Override
 		public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -611,7 +615,7 @@ public class ClassMirror<T> implements Serializable {
 			final FieldMirror fm = new FieldMirror(classReferenceMirror, new ModifierMirror(ModifierMirror.Type.FIELD, access),
 					new ClassReferenceMirror(desc), name, value);
 			fields.add(fm);
-			return new FieldVisitor() {
+			return new FieldVisitor(Opcodes.ASM5) {
 
 				@Override
 				public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
@@ -673,7 +677,7 @@ public class ClassMirror<T> implements Serializable {
 					new ClassReferenceMirror(ret), name, params, 
 					(access & Opcodes.ACC_VARARGS) > 0, (access & Opcodes.ACC_SYNTHETIC) > 0);
 			methods.add(mm);
-			return new MethodVisitor() {
+			return new MethodVisitor(Opcodes.ASM5) {
 
 				@Override
 				public AnnotationVisitor visitAnnotationDefault() {
@@ -806,10 +810,11 @@ public class ClassMirror<T> implements Serializable {
 		
 	}
 	
-	private static class AnnotationV implements AnnotationVisitor {
+	private static class AnnotationV extends AnnotationVisitor {
 		
 		private final AnnotationMirror mirror;
 		public AnnotationV(AnnotationMirror mirror){
+			super(Opcodes.ASM5);
 			this.mirror = mirror;
 		}
 
