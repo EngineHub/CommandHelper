@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.functions.Exceptions;
 
 import java.util.List;
@@ -249,4 +250,11 @@ public interface Convertor {
 	 * @return
 	 */
 	public MCPlugin GetPlugin();
+
+	/**
+	 * Returns the name of the current user, or null if this doesn't make sense in the given platform.
+	 * @param env The runtime environment, in case the convertor needs it
+	 * @return The username
+	 */
+	public String GetUser(Environment env);
 }

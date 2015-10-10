@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -491,6 +492,7 @@ public class Scheduling {
 	}
 
 	@api
+	@seealso(Meta.get_locales.class)
 	public static class simple_date extends AbstractFunction {
 
 		@Override
@@ -500,7 +502,7 @@ public class Scheduling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
+			return new Integer[]{1, 2, 3, 4};
 		}
 
 		@Override
@@ -558,12 +560,25 @@ public class Scheduling {
 				now = new Date(Static.getInt(args[1], t));
 			}
 			TimeZone timezone = TimeZone.getDefault();
-			if(args.length >= 3){
+			if(args.length >= 3 && args[2].nval() != null){
 				timezone = TimeZone.getTimeZone(args[2].val());
+			}
+			Locale locale = Locale.getDefault();
+			if(args.length >= 4){
+				String countryCode = args[3].nval();
+				if(countryCode == null){
+					locale = Locale.getDefault();
+				} else {
+					locale = Static.GetLocale(countryCode);
+				}
+				if(locale == null) {
+					throw new ConfigRuntimeException("The given locale was not found on your system: "
+							+ countryCode, ExceptionType.FormatException, t);
+				}
 			}
 			SimpleDateFormat dateFormat;
 			try{
-				dateFormat = new SimpleDateFormat(args[0].toString());
+				dateFormat = new SimpleDateFormat(args[0].toString(), locale);
 			} catch(IllegalArgumentException ex){
 				throw new Exceptions.FormatException(ex.getMessage(), t);
 			}
@@ -584,6 +599,7 @@ public class Scheduling {
 						/* 8 */ new ExampleScript("With alternate timezone", "simple_date('K:mm a, z', time(), 'GMT')", ":4:42 PM, GMT"),
 						/* 9 */ new ExampleScript("With 5 digit year", "simple_date('yyyyy.MMMMM.dd GGG hh:mm aaa')", ":02013.June.05 AD 11:42 AM"),
 						/* 10 */ new ExampleScript("Long format", "simple_date('EEE, d MMM yyyy HH:mm:ss Z')", ":Wed, 5 Jun 2013 11:42:56 -0500"),
+						/* 10 */ new ExampleScript("Long format with alternate locale", "simple_date('EEE, d MMM yyyy HH:mm:ss Z', 1444418254496, 'CET', 'no_NO')"),
 						/* 11 */ new ExampleScript("Computer readable format", "simple_date('yyMMddHHmmssZ')", ":130605114256-0500"),
 						/* 12 */ new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')", ":2013-06-05T11:42:56.799-0500"),
 			};

@@ -905,6 +905,11 @@ public final class Interpreter {
 		public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
+
+		@Override
+		public String GetUser(Environment env) {
+			return System.getProperty("user.name");
+		}
 	}
 
 }

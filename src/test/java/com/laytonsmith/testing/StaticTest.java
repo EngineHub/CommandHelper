@@ -837,6 +837,11 @@ public class StaticTest {
 		public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
 			return ConvertorHelper.GetColor(colorName, t);
 		}
+
+		@Override
+		public String GetUser(Environment env) {
+			return "testUser";
+		}
 	}
 
     public static class FakeServerMixin implements EventMixinInterface{

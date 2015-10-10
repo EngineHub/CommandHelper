@@ -77,7 +77,11 @@ public class ObjectGenerator {
         Construct y = new CDouble(l.getY(), Target.UNKNOWN);
         Construct z = new CDouble(l.getZ(), Target.UNKNOWN);
         Construct world = new CString(l.getWorld().getName(), Target.UNKNOWN);
-        Construct yaw = new CDouble(l.getYaw(), Target.UNKNOWN);
+		float yawRaw = l.getYaw();
+		if (yawRaw < 0) {
+			yawRaw = (((yawRaw) % 360) + 360);
+		}
+        Construct yaw = new CDouble(yawRaw, Target.UNKNOWN);
         Construct pitch = new CDouble(l.getPitch(), Target.UNKNOWN);
         ca.set("0", x, Target.UNKNOWN);
         ca.set("1", y, Target.UNKNOWN);

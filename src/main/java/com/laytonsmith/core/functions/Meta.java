@@ -31,6 +31,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistence.DataSourceException;
@@ -39,6 +40,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.jar.JarFile;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -916,6 +918,69 @@ public class Meta {
 	}
 	
 	@api
+	public static class get_locales extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CArray exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray c = new CArray(t);
+			for(Locale l : Locale.getAvailableLocales()){
+				if(!l.getCountry().equals("")){
+					c.push(new CString(l.toString(), t));
+				}
+			}
+			new ArrayHandling.array_sort().exec(t, environment, c);
+			c = new ArrayHandling.array_unique().exec(t, environment, c);
+			return c;
+
+
+		}
+
+		@Override
+		public String getName() {
+			return "get_locales";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns a list of locales on this system.";
+
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "get_locales()")
+			};
+		}
+
+	}
+	
+	@api
 	public static class compile_date extends AbstractFunction {
 
 		@Override
@@ -968,6 +1033,5 @@ public class Meta {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
 }

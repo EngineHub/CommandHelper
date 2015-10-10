@@ -2,7 +2,6 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.StaticTest;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
@@ -249,6 +248,34 @@ public class OptimizationTest {
 				+ "	case 0..2:"
 				+ "		msg('invalid');"
 				+ "}");
+	}
+	
+	// Tests "-" signs in front of values to negate them.
+	@Test public void testMinusWithoutValueInFront() throws Exception{
+		assertEquals("assign(@b,neg(@a))", optimize("@b = -@a"));
+		assertEquals("assign(@b,neg(@a))", optimize("@b = - @a"));
+		
+		assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(-@a)"));
+		assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(- @a)"));
+		
+		assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = -@a[1]"));
+		assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = - @a[1]"));
+		
+		assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = -dec(@a)"));
+		assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = - dec(@a)"));
+		
+		assertEquals("assign(@b,neg(array_get(array(1,2,3),1)))", optimize("@b = -array(1,2,3)[1]"));
+		
+		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),0),0),0)))", optimize("@b = -array(array(array(2)))[0][0][0]"));
+		
+		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),neg(array_get(array(1,0),1))),0),0)))",
+				optimize("@b = -array(array(array(2)))[-array(1,0)[1]][0][0]"));
+		
+		// Test behaviour where the value should not be negated.
+		assertEquals("assign(@c,subtract(@a,@b))", optimize("@c = @a - @b"));
+		assertEquals("assign(@c,subtract(array_get(@a,0),@b))", optimize("@c = @a[0] - @b"));
+		assertEquals("assign(@c,subtract(abs(@a),@b))", optimize("@c = abs(@a) - @b"));
+		assertEquals("assign(@c,subtract(if(@bool,2,3),@b))", optimize("@c = if(@bool) {2} else {3} - @b"));
 	}
 
 
