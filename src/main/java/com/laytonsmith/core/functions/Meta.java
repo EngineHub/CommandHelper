@@ -981,7 +981,7 @@ public class Meta {
 	}
 	
 	@api
-	public static class compile_date extends AbstractFunction {
+	public static class engine_build_date extends AbstractFunction {
 
 		@Override
 		public ExceptionType[] thrown() {
@@ -1015,7 +1015,7 @@ public class Meta {
 
 		@Override
 		public String getName() {
-			return "compile_date";
+			return "engine_build_date";
 		}
 
 		@Override
@@ -1033,5 +1033,50 @@ public class Meta {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+	
+	@api
+	public static class build_date extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CInt(environment.getEnv(GlobalEnv.class).GetScript().getCompileTime(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "build_date";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "int {} Returns the compile date of the current script, as a unix time stamp in milliseconds.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }

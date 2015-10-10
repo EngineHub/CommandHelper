@@ -79,6 +79,7 @@ public class Script {
     private Map<String, Variable> left_vars;
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
+	private final long compileTime;
     private String label;
     private Environment CurrentEnv;
 
@@ -122,9 +123,16 @@ public class Script {
         this.fullRight = right;
         this.left_vars = new HashMap<String, Variable>();
         //this.OriginalEnv = env;
+		compileTime = System.currentTimeMillis();
     }
 
-    private Script(){}
+    private Script(){
+		compileTime = System.currentTimeMillis();
+	}
+	
+	public long getCompileTime(){
+		return compileTime;
+	}
 
     public static Script GenerateScript(ParseTree tree, String label){
         Script s = new Script();
