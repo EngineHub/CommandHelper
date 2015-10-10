@@ -801,6 +801,7 @@ public class Cmdline {
 	}
 
 	@api
+	@noboilerplate
 	public static class sys_beep extends AbstractFunction {
 
 		@Override

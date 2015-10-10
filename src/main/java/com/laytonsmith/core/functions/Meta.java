@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
@@ -20,6 +21,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -32,10 +34,14 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistence.DataSourceException;
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
 
 /**
  * 
@@ -907,5 +913,61 @@ public class Meta {
 			return CHVersion.V3_3_1;
 		}
 
+	}
+	
+	@api
+	public static class compile_date extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			JarFile jf;
+			try {
+				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
+				jar = jar.replaceFirst("file:[\\|/]", "");
+				jf = new JarFile(jar);
+			} catch (IOException ex) {
+				return CNull.NULL;
+			}
+			ZipEntry manifest = jf.getEntry("META-INF/MANIFEST.MF");
+			long manifestTime = manifest.getTime();
+			return new CInt(manifestTime, t);
+		}
+
+		@Override
+		public String getName() {
+			return "compile_date";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "int {} Returns the compile date, in a millisecond unit time stamp, of when " + Implementation.GetServerType().getBranding() + " was compiled,"
+					+ " or null, if that can't be computed for various reasons.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }
