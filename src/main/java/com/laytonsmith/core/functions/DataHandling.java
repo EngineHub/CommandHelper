@@ -2751,16 +2751,16 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof IVariable) {
-				//Mode 1
-				IVariable var = (IVariable) args[0];
-				environment.getEnv(GlobalEnv.class).GetVarList().set(Globals.GetGlobalIVar(var));
-				return CVoid.VOID;
-			} else {
+//			if (args[0] instanceof IVariable) {
+//				//Mode 1
+//				IVariable var = (IVariable) args[0];
+//				environment.getEnv(GlobalEnv.class).GetVarList().set(Globals.GetGlobalIVar(var));
+//				return CVoid.VOID;
+//			} else {
 				//Mode 2
 				String key = GetNamespace(args, null, getName(), t);
 				return Globals.GetGlobalConstruct(key);
-			}
+//			}
 		}
 
 		@Override
@@ -2779,10 +2779,10 @@ public class DataHandling {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
 						+ " Use import('my.namespace') instead of import('my', 'namespace')", t);
 			}
-			if (children.get(0).getData() instanceof IVariable) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "import(@ivar) usage is deprecated. Please use the @ivar = import('custom.name') format,"
-						+ " as this feature WILL be removed in the future.", t);
-			}
+//			if (children.get(0).getData() instanceof IVariable) {
+//				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "import(@ivar) usage is deprecated. Please use the @ivar = import('custom.name') format,"
+//						+ " as this feature WILL be removed in the future.", t);
+//			}
 			//Just a compiler warning
 			return null;
 		}
@@ -2843,14 +2843,14 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length == 1) {
-				if (args[0] instanceof IVariable) {
-					IVariable cur = (IVariable) args[0];
-					Globals.SetGlobal(environment.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()));
-				} else {
-					throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
-				}
-			} else {
+//			if (args.length == 1) {
+//				if (args[0] instanceof IVariable) {
+//					IVariable cur = (IVariable) args[0];
+//					Globals.SetGlobal(environment.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()));
+//				} else {
+//					throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
+//				}
+//			} else {
 				String key = GetNamespace(args, args.length - 1, getName(), t);
 				Construct c = args[args.length - 1];
 				//We want to store the value contained, not the ivar itself
@@ -2858,20 +2858,20 @@ public class DataHandling {
 					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
 				}
 				Globals.SetGlobal(key, c);
-			}
+//			}
 			return CVoid.VOID;
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Deprecated usage", "@var = 2\n"
-				+ "export(@var)\n"
-				+ "@var = 0\n"
-				+ "# In other code, perhaps inside a proc, or another execution unit\n"
-				+ "import(@var)\n"
-				+ "msg(@var)"),
-				new ExampleScript("Preferred usage", "@var = 2\n"
+//				new ExampleScript("Deprecated usage", "@var = 2\n"
+//				+ "export(@var)\n"
+//				+ "@var = 0\n"
+//				+ "# In other code, perhaps inside a proc, or another execution unit\n"
+//				+ "import(@var)\n"
+//				+ "msg(@var)"),
+				new ExampleScript("Basic usage", "@var = 2\n"
 				+ "export('custom.name', @var)\n"
 				+ "@var2 = import('custom.name')\n"
 				+ "msg(@var2)"),
@@ -2894,10 +2894,10 @@ public class DataHandling {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
 						+ " Use export('my.namespace', @var) instead of export('my', 'namespace', @var)", t);
 			}
-			if (children.get(0).getData() instanceof IVariable) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "export(@ivar) usage is deprecated. Please use the export('custom.name', @ivar) format,"
-						+ " as this feature WILL be removed in the future.", t);
-			}
+//			if (children.get(0).getData() instanceof IVariable) {
+//				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "export(@ivar) usage is deprecated. Please use the export('custom.name', @ivar) format,"
+//						+ " as this feature WILL be removed in the future.", t);
+//			}
 			//Just a compiler warning
 			return null;
 		}
