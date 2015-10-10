@@ -28,7 +28,10 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		super(mcVanillaBiomeType, concrete);
 	}
 
-	public static MCBiomeType valueOf(String test) {
+	public static MCBiomeType valueOf(String test) throws IllegalArgumentException {
+		if (mappings == null) {
+			return null;
+		}
 		MCBiomeType ret = mappings.get(test);
 		if (ret == null) {
 			throw new IllegalArgumentException("Unknown biome type: " + test);

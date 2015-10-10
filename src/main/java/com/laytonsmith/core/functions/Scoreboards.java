@@ -3,9 +3,9 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCObjective;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCScoreboard;
+import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
@@ -87,9 +87,9 @@ public class Scoreboards {
 	 * @param id The name to save the new scoreboard as
 	 * @param board Scoreboard, either from {@link com.laytonsmith.abstraction.MCServer#getNewScoreboard()} or {@link MCPlayer#getScoreboard()}
 	 * @param t
-	 * @throws ConfigRuntimeException if the cache already contains the board or the id
+	 * @throws ScoreboardException if the cache already contains the board or the id
 	 */
-	public static void addBoard(String id, MCScoreboard board, Target t) {
+	public static void addBoard(String id, MCScoreboard board, Target t) throws ScoreboardException {
 		if (isBoard(id)) {
 			throw new ScoreboardException("That id is already in use.", t);
 		}
@@ -104,13 +104,17 @@ public class Scoreboards {
 	 * @param id Name of the scoreboard to look for
 	 * @param t
 	 * @return the scoreboard with the given id
-	 * @throws ConfigRuntimeException if the cache does not contain id
+	 * @throws ScoreboardException if the cache does not contain id or if the MCScoreboard object is null
 	 */
-	public static MCScoreboard getBoard(String id, Target t) {
+	public static MCScoreboard getBoard(String id, Target t) throws ScoreboardException {
 		if (!isBoard(id)) {
 			throw new ScoreboardException("The specified scoreboard does not exist.", t);
 		}
-		return boards.get(id);
+		MCScoreboard ret = boards.get(id);
+		if (ret == null) {
+			throw new ScoreboardException("The specified scoreboard is null. Are you running from cmdline mode?", t);
+		}
+		return ret;
 	}
 
 	/**
@@ -118,9 +122,9 @@ public class Scoreboards {
 	 * @param board The scoreboard to find the ID for
 	 * @param t
 	 * @return the ID of the scoreboard
-	 * @throws ConfigRuntimeException if the cache does not contain the given scoreboard
+	 * @throws ScoreboardException if the cache does not contain the given scoreboard
 	 */
-	public static String getBoardID(MCScoreboard board, Target t) {
+	public static String getBoardID(MCScoreboard board, Target t) throws ScoreboardException {
 		for (Map.Entry<String, MCScoreboard> e : boards.entrySet()) {
 			if (board.equals(e.getValue())) {
 				return e.getKey();
@@ -133,9 +137,9 @@ public class Scoreboards {
 	 * Removes a scoreboard from the cache, without clearing any of its data
 	 * @param id The scoreboard to remove
 	 * @param t
-	 * @throws ConfigRuntimeException if used on MAIN or if the cache does not contain id
+	 * @throws ScoreboardException if used on MAIN or if the cache does not contain id
 	 */
-	public static void removeBoard(String id, Target t) {
+	public static void removeBoard(String id, Target t) throws ScoreboardException {
 		if (id.equalsIgnoreCase(MAIN)) {
 			throw new ScoreboardException("Cannot remove the main server scoreboard.", t);
 		}
@@ -152,8 +156,9 @@ public class Scoreboards {
 	 * @param t
 	 * @param args the array of arguments passed to the function
 	 * @return the scoreboard chosen, defaulting to main if numArgsToReadName was not matched
+	 * @throws ScoreboardException if the specified scoreboard does not exist
 	 */
-	public static MCScoreboard assignBoard(int numArgsToReadName, int indexOfName, Target t, Construct... args) {
+	public static MCScoreboard assignBoard(int numArgsToReadName, int indexOfName, Target t, Construct... args) throws ScoreboardException {
 		if (args.length == numArgsToReadName) {
 			return getBoard(args[indexOfName].val(), t);
 		}
@@ -314,8 +319,7 @@ public class Scoreboards {
 	public static class get_objectives extends SBFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s;
 			if (args.length == 0) {
 				s = getBoard(MAIN, t);
@@ -429,9 +433,19 @@ public class Scoreboards {
 	public static class create_scoreboard extends SBFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			addBoard(args[0].val(), Static.getServer().getNewScoreboard(), t);
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.NullPointerException};
+		}
+		
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCScoreboard newBoard = Static.getServer().getNewScoreboard();
+			if (newBoard == null) {
+				throw new ConfigRuntimeException(
+						"Could not create scoreboard, the server returned a null scoreboard"
+						+ " (Are you running in cmdline mode?)", ExceptionType.NullPointerException, t);
+			}
+			addBoard(args[0].val(), newBoard, t);
 			return CVoid.VOID;
 		}
 
@@ -1009,8 +1023,7 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, 2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
 			if (team == null) {

@@ -57,6 +57,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -146,7 +147,7 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -177,8 +178,14 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("No matching player could be found.",
 						ExceptionType.PlayerOfflineException, t);
 			}
-			String uuid = pl.getUniqueID().toString();
-			return new CString(dashless ? uuid.replace("-", "") : uuid, t);
+			UUID uuid = pl.getUniqueID();
+			if (uuid == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the UUID of the player (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
+			String uuidStr = uuid.toString();
+			return new CString(dashless ? uuidStr.replace("-", "") : uuidStr, t);
 		}
 
 		@Override
@@ -340,7 +347,8 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+				ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -382,6 +390,11 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			MCLocation location = p.getLocation();
+			if (location == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the location of the player (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
 			location.setY(location.getY() - 1);
 			return ObjectGenerator.GetGenerator().location(location);
 		}
@@ -394,7 +407,7 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -436,7 +449,9 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException,
+				ExceptionType.PlayerOfflineException, ExceptionType.FormatException,
+				ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -494,6 +509,7 @@ public class PlayerManagement {
 				if (p instanceof MCPlayer) {
 					m = (MCPlayer) p;
 				}
+				Static.AssertPlayerNonNull(m, t);
 				x = Static.getNumber(args[0], t);
 				y = Static.getNumber(args[1], t);
 				z = Static.getNumber(args[2], t);
@@ -509,6 +525,11 @@ public class PlayerManagement {
 				m = Static.GetPlayer(MCPlayer, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
+			if (l == null) {
+				throw new ConfigRuntimeException(
+					"Could not find the location of the player (are you running in cmdline mode?)",
+					ExceptionType.NotFoundException, t);
+			}
 			if (!l.getWorld().exists()) {
 				throw new ConfigRuntimeException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
 			}
@@ -760,16 +781,18 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender sender = null;
+			MCCommandSender sender;
 			if (args.length == 0) {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			} else {
 				sender = Static.GetCommandSender(args[0].val(), t);
 			}
-
+			
 			CArray ret = new CArray(t);
-			for (String group : sender.getGroups()) {
-				ret.push(new CString(group, t));
+			if (sender != null) {
+				for (String group : sender.getGroups()) {
+					ret.push(new CString(group, t));
+				}
 			}
 			return ret;
 		}
@@ -836,7 +859,8 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException,
+				ExceptionType.CastException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -884,8 +908,16 @@ public class PlayerManagement {
 			}
 			if (index == 1 || index == -1) {
 				//MCPlayer location
-				retVals.add(new CArray(t, new CDouble(p.getLocation().getX(), t),
-						new CDouble(p.getLocation().getY() - 1, t), new CDouble(p.getLocation().getZ(), t)));
+				MCLocation loc = p.getLocation();
+				if (loc == null) {
+					throw new ConfigRuntimeException(
+							"Could not find the location of the player (are you running in cmdline mode?)",
+							ExceptionType.NotFoundException, t);
+				}
+				retVals.add(new CArray(t,
+						new CDouble(loc.getX(), t),
+						new CDouble(loc.getY() - 1, t),
+						new CDouble(loc.getZ(), t)));
 			}
 			if (index == 2 || index == -1) {
 				//MCPlayer cursor
@@ -1292,7 +1324,8 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException,
+				ExceptionType.CastException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -1346,7 +1379,13 @@ public class PlayerManagement {
 				//We are setting F for this MCPlayer
 				if (p instanceof MCPlayer) {
 					toSet = (MCPlayer) p;
-					pitch = toSet.getLocation().getPitch();
+					MCLocation loc = toSet.getLocation();
+					if (loc == null) {
+						throw new ConfigRuntimeException(
+								"Could not find the location of the given player (are you running in cmdline mode?)",
+								ExceptionType.NotFoundException, t);
+					}
+					pitch = loc.getPitch();
 				}
 				int g = Static.getInt32(args[0], t);
 				if (g < 0 || g > 3) {
@@ -1389,7 +1428,13 @@ public class PlayerManagement {
 						ExceptionType.RangeException, t);
 			}
 			Static.AssertPlayerNonNull(toSet, t);
-			MCLocation l = toSet.getLocation().clone();
+			MCLocation l = toSet.getLocation();
+			if (l == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the location of the player (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
+			l = l.clone();
 			l.setPitch(pitch);
 			l.setYaw(yaw);
 			MCEntity vehicle = null;
@@ -1424,7 +1469,8 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException,
+					ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -1454,7 +1500,13 @@ public class PlayerManagement {
 			}
 
 			Static.AssertPlayerNonNull(m, t);
-			String mode = m.getGameMode().name();
+			MCGameMode gm = m.getGameMode();
+			if (gm == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the gamemode of the given player (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
+			String mode = gm.name();
 			return new CString(mode, t);
 		}
 	}
@@ -2386,7 +2438,7 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -2408,6 +2460,11 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
 			boolean whitelist = Static.getBoolean(args[1]);
+			if (pl == null) {
+				throw new ConfigRuntimeException(
+						this.getName() + " could not get the offline player (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
 			pl.setWhitelisted(whitelist);
 			return CVoid.VOID;
 		}
@@ -2445,7 +2502,7 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -2466,6 +2523,11 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
+			if (pl == null) {
+				throw new ConfigRuntimeException(
+						this.getName() + " could not get the offline player (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
 			return CBoolean.get(pl.isBanned());
 		}
 	}
@@ -2494,7 +2556,7 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -2515,6 +2577,11 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
+			if (pl == null) {
+				throw new ConfigRuntimeException(
+						this.getName() + " could not get the offline player (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
 			boolean ban = Static.getBoolean(args[1]);
 			pl.setBanned(ban);
 			return CVoid.VOID;
@@ -3456,6 +3523,7 @@ public class PlayerManagement {
 			if(args.length == 1) {
 				m = Static.GetPlayer(args[0], t);
 			}
+			Static.AssertPlayerNonNull(m, t);
 			return CBoolean.get(m.getPlayerWeather() == MCWeather.DOWNFALL);
 		}
 
@@ -3507,6 +3575,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0], t);
 				offset = 1;
 			}
+			Static.AssertPlayerNonNull(m, t);
 			if(args[offset] instanceof CNull) {
 				m.resetPlayerWeather();
 			} else if(Static.getBoolean(args[offset])) {
@@ -3568,11 +3637,10 @@ public class PlayerManagement {
 			} else {
 				listName = args[0].nval();
 			}
-
-			if (listName.length() > 16) {
-				throw new ConfigRuntimeException("set_list_name([player,] name) expects name to be 16 characters or less", Exceptions.ExceptionType.LengthException, t);
+			if (listName != null && listName.length() > 16) {
+				throw new ConfigRuntimeException("set_list_name([player,] name) expects name to be 16 characters or less",
+						Exceptions.ExceptionType.LengthException, t);
 			}
-
 			Static.AssertPlayerNonNull(m, t);
 			m.setPlayerListName(listName);
 			return CVoid.VOID;
@@ -3623,11 +3691,12 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t);
 			}
-			return new CString(m.getPlayerListName(), t);
+			Static.AssertPlayerNonNull(p, t);
+			return new CString(p.getPlayerListName(), t);
 		}
 
 		@Override
@@ -3675,7 +3744,7 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -3694,8 +3763,14 @@ public class PlayerManagement {
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
+			Static.AssertPlayerNonNull(p, t);
 			CArray vector = CArray.GetAssociativeArray(t);
 			Vector3D velocity = p.getVelocity();
+			if (velocity == null) {
+				throw new ConfigRuntimeException(
+						"The players velocity could not be found (Are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
 			vector.set("magnitude", new CDouble(velocity.length(), t), t);
 			vector.set("x", new CDouble(velocity.X(), t), t);
 			vector.set("y", new CDouble(velocity.Y(), t), t);
@@ -3742,6 +3817,7 @@ public class PlayerManagement {
 						p = Static.GetPlayer(args[0], t);
 					}
 					if (args[offset] instanceof CArray) {
+						Static.AssertPlayerNonNull(p, t);
 						MCLocation l = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
 						x = l.getX();
 						y = l.getY();
@@ -3774,6 +3850,7 @@ public class PlayerManagement {
 								+ " (It was " + v.length() + ")", t);
 				return CBoolean.FALSE;
 			}
+			Static.AssertPlayerNonNull(p, t);
 			p.setVelocity(v);
 			return CBoolean.TRUE;
 		}
@@ -3830,6 +3907,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 				offset = 1;
 			}
+			Static.AssertPlayerNonNull(p, t);
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
 
 			String[] lines = new String[4];
@@ -3904,6 +3982,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 				offset = 1;
 			}
+			Static.AssertPlayerNonNull(p, t);
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0 + offset], p.getWorld(), t);
 			MCItemStack item = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t);
 			p.sendBlockChange(loc, item.getType().getType(), (byte) item.getData().getData());
@@ -3956,6 +4035,7 @@ public class PlayerManagement {
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
+			Static.AssertPlayerNonNull(p, t);
 			return new CInt(p.getFoodLevel(), t);
 		}
 
@@ -4006,6 +4086,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 				hungerIndex = 1;
 			}
+			Static.AssertPlayerNonNull(p, t);
 			hunger = Static.getInt32(args[hungerIndex], t);
 			p.setFoodLevel(hunger);
 			return CVoid.VOID;
@@ -4108,6 +4189,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 				saturationIndex = 1;
 			}
+			Static.AssertPlayerNonNull(p, t);
 			saturation = (float) Static.getDouble(args[saturationIndex], t);
 			p.setSaturation(saturation);
 			return CVoid.VOID;
@@ -4153,6 +4235,14 @@ public class PlayerManagement {
 			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				player = Static.GetUser(args[0].val(), t);
+			} else if (player == null) {
+				throw new ConfigRuntimeException(this.getName() + " requires a player as first argument when ran from console",
+						ExceptionType.InsufficientArgumentsException, t);
+			}
+			if (player == null) {
+				throw new ConfigRuntimeException(
+						this.getName() + " failed to get an offline player (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
 			}
 			MCLocation loc = player.getBedSpawnLocation();
 			if (loc == null) {
@@ -4170,7 +4260,7 @@ public class PlayerManagement {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -4213,7 +4303,8 @@ public class PlayerManagement {
 		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException,
-					ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+					ExceptionType.PlayerOfflineException, ExceptionType.FormatException,
+					ExceptionType.NullPointerException};
 		}
 
 		@Override
@@ -4237,11 +4328,8 @@ public class PlayerManagement {
 
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String pname = null;
-			double x;
-			double y;
-			double z;
 			MCPlayer m = null;
-			MCLocation l = null;
+			MCLocation l;
 			int locationIndex;
 			boolean forced = true;
 
@@ -4308,6 +4396,11 @@ public class PlayerManagement {
 				l.add(0, 1, 0); // someone decided to match ploc() here
 			} else {
 				l = m.getLocation();
+				if (l == null) {
+					throw new ConfigRuntimeException(
+							"The given player has a null location (are you running from cmdline mode?)",
+							ExceptionType.NullPointerException , t);
+				}
 				l.setX(Static.getNumber(args[locationIndex], t));
 				l.setY(Static.getNumber(args[locationIndex + 1], t) + 1);
 				l.setZ(Static.getNumber(args[locationIndex + 2], t));
@@ -4441,12 +4534,13 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCServer s = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
-			for (MCOfflinePlayer offp : s.getOfflinePlayers()) {
-				ret.push(new CString(offp.getName(), t));
+			if (s != null && s.getOfflinePlayers() != null) { // This causes the function to return an empty array for a fake/null server.
+				for (MCOfflinePlayer offp : s.getOfflinePlayers()) {
+					ret.push(new CString(offp.getName(), t));
+				}
 			}
 			return ret;
 		}
@@ -4501,7 +4595,7 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer offp = Static.GetUser(args[0].val(), t);
-			return CBoolean.get(offp.hasPlayedBefore());
+			return CBoolean.get(offp != null && offp.hasPlayedBefore());
 		}
 
 		@Override
@@ -4560,10 +4654,10 @@ public class PlayerManagement {
 			MCOfflinePlayer op = null;
 			if (args.length == 1) {
 				op = Static.GetUser(args[0].val(), t);
-			} else {
+			} else if (cs != null) {
 				op = Static.GetUser(cs.getName(), t);
 			}
-			return new CInt(op.getFirstPlayed(), t);
+			return new CInt((op == null ? 0 : op.getFirstPlayed()), t); // Return 0 for fake/null command senders.
 		}
 
 		@Override
@@ -4617,16 +4711,15 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if (args.length == 1) {
 				op = Static.GetUser(args[0].val(), t);
-			} else {
+			} else if (cs != null) {
 				op = Static.GetUser(cs.getName(), t);
 			}
-			return new CInt(op.getLastPlayed(), t);
+			return new CInt((op == null ? 0 : op.getLastPlayed()), t); // Return 0 for fake/null command senders.
 		}
 
 		@Override

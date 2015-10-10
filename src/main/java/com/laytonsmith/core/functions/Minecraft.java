@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
@@ -14,6 +15,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.abstraction.MCPluginManager;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.MCWorld;
@@ -363,7 +365,9 @@ public class Minecraft {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException, ExceptionType.InvalidWorldException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException,
+				ExceptionType.FormatException, ExceptionType.PlayerOfflineException,
+				ExceptionType.InvalidWorldException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -392,10 +396,10 @@ public class Minecraft {
 			int qty = 1;
 			if (args.length > 1) {
 				qty = Static.getInt32(args[1], t);
-			}
-			if (qty > 50) {
-				throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
-						ExceptionType.RangeException, t);
+				if (qty > 50) {
+					throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
+							ExceptionType.RangeException, t);
+				}
 			}
 			MCLocation l;
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -406,6 +410,13 @@ public class Minecraft {
 			} else {
 				throw new ConfigRuntimeException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
 			}
+			
+			if (l == null) { // Happends when executed by a fake player.
+				throw new ConfigRuntimeException(
+					"Could not find the location of the player (are you running in cmdline mode?)",
+					ExceptionType.NotFoundException, t);
+			}
+			
 			try{
 				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
 			} catch(IllegalArgumentException e){
@@ -819,7 +830,8 @@ public class Minecraft {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException,
+				ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -848,7 +860,7 @@ public class Minecraft {
 			}
 
 			if (index < -1 || index > 16) {
-				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 16 (inclusive)",
+				throw new ConfigRuntimeException(this.getName() + " expects the index to be between -1 and 16 (inclusive)",
 						ExceptionType.RangeException, t);
 			}
 
@@ -903,7 +915,13 @@ public class Minecraft {
 			if (index == 9 || index == -1) {
 				//Array of plugins
 				CArray co = new CArray(t);
-				List<MCPlugin> plugs = server.getPluginManager().getPlugins();
+				MCPluginManager plugManager = server.getPluginManager();
+				if (plugManager == null) {
+					throw new ConfigRuntimeException(this.getName()
+							+ " could not receive the server plugins. Are you running in cmdline mode?",
+							ExceptionType.NotFoundException, t);
+				}
+				List<MCPlugin> plugs = plugManager.getPlugins();
 
 				for (MCPlugin p : plugs) {
 					if (p == null) {
@@ -998,7 +1016,7 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCServer server = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
+			MCServer server = StaticLayer.GetServer();
 
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getBannedPlayers();
@@ -1053,8 +1071,8 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCServer server = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
-
+			MCServer server = StaticLayer.GetServer();
+			
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
 			for (MCOfflinePlayer o : so) {
@@ -1694,6 +1712,9 @@ public class Minecraft {
 				} else {
 					throw new ConfigRuntimeException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
 				}
+				if (args[0] instanceof CNull) {
+					return CNull.NULL; // The item is null, this means we are dropping air.
+				}
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
 				MCPlayer p;
@@ -1706,6 +1727,9 @@ public class Minecraft {
 					Static.AssertPlayerNonNull(p, t);
 					l = p.getEyeLocation();
 					natural = false;
+				}
+				if (args[1] instanceof CNull) {
+					return CNull.NULL; // The item is null, this means we are dropping air.
 				}
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
 			}

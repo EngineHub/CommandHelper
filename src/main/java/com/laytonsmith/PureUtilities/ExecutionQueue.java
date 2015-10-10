@@ -262,6 +262,9 @@ public class ExecutionQueue {
 		queue = prepareLock(queue);
 		synchronized(locks.get(queue)){
 			Deque<Runnable> q = queues.get(queue);
+			if (q == null) {
+				throw new NoSuchElementException("The given queue does not exist.");
+			}
 			return q.removeFirst();
 		}
 	}

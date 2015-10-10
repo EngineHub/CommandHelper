@@ -69,7 +69,8 @@ public class Environment {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
+				ExceptionType.LengthException, ExceptionType.InvalidWorldException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -124,6 +125,11 @@ public class Environment {
 			y = java.lang.Math.floor(y);
 			z = java.lang.Math.floor(z);
 			MCBlock b = w.getBlockAt((int) x, (int) y, (int) z);
+			if (b == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the block in " + this.getName() + " (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
 			return new CString(b.getTypeId() + ":" + b.getData(), t);
 		}
 
@@ -543,7 +549,8 @@ public class Environment {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
+				ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -580,6 +587,11 @@ public class Environment {
 			MCBiomeType bt;
 			try {
 				bt = MCBiomeType.valueOf(args[args.length - 1].val());
+				if (bt == null) {
+					throw new ConfigRuntimeException(
+							"Could not find the internal biome type object (are you running in cmdline mode?)",
+							ExceptionType.NotFoundException, t);
+				}
 			} catch (IllegalArgumentException e) {
 				throw new ConfigRuntimeException("The biome type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
 			}
@@ -618,7 +630,8 @@ public class Environment {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.InvalidWorldException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
+				ExceptionType.InvalidWorldException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -656,6 +669,11 @@ public class Environment {
 				throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
 			}
 			MCBiomeType bt = w.getBiome(x, z);
+			if (bt == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the biome type (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
 			return new CString(bt.name(), t);
 		}
 
@@ -687,7 +705,9 @@ public class Environment {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
+				ExceptionType.LengthException, ExceptionType.InvalidWorldException,
+				ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -732,7 +752,13 @@ public class Environment {
 			if (w == null) {
 				throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
 			}
-			return ObjectGenerator.GetGenerator().location(w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z)).getLocation(), false);
+			MCBlock highestBlock = w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z));
+			if (highestBlock == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the highest block in " + this.getName() + " (are you running in cmdline mode?)",
+						ExceptionType.NotFoundException, t);
+			}
+			return ObjectGenerator.GetGenerator().location(highestBlock.getLocation(), false);
 		}
 
 		@Override
@@ -856,9 +882,9 @@ public class Environment {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCInstrument i = null;
 			MCNote n = null;
-			MCLocation l = null;
-			int instrumentOffset = 0;
-			int noteOffset = 0;
+			MCLocation l;
+			int instrumentOffset;
+			int noteOffset;
 			if (args.length == 2) {
 				Static.AssertPlayerNonNull(p, t);
 				instrumentOffset = 0;
@@ -880,6 +906,7 @@ public class Environment {
 					//location provided, player not
 					instrumentOffset = 0;
 					noteOffset = 1;
+					Static.AssertPlayerNonNull(p, t);
 					l = ObjectGenerator.GetGenerator().location(args[2], p.getWorld(), t);
 				}
 			}
@@ -913,6 +940,7 @@ public class Environment {
 			} else {
 				throw new Exceptions.CastException("Expected an array for note parameter, but " + args[noteOffset] + " found instead", t);
 			}
+			Static.AssertPlayerNonNull(p, t);
 			p.playNote(l, i, n);
 			return CVoid.VOID;
 		}

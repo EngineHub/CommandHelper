@@ -1361,7 +1361,11 @@ public class Cmdline {
 			if(Static.InCmdLine(environment)){
 				root = environment.getEnv(GlobalEnv.class).GetRootFolder();
 			} else {
-				root = t.file().getParentFile();
+				if (t.file() == null) {
+					root = null;
+				} else {
+					root = t.file().getParentFile();
+				}
 			}
 			if(root == null){
 				throw new ConfigRuntimeException("Running in interpreted mode. pwd() is not available.", ExceptionType.ShellException, t);

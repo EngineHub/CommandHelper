@@ -252,6 +252,10 @@ public class World {
 			} else {
 				//world, x and z provided
 				world = Static.getServer().getWorld(args[0].val());
+				if (world == null) {
+					throw new ConfigRuntimeException("World " + args[0].val() + " does not exist.",
+							ExceptionType.InvalidWorldException, t);
+				}
 				x = Static.getInt32(args[1], t);
 				z = Static.getInt32(args[2], t);
 			}
@@ -294,6 +298,10 @@ public class World {
  				//Either location array and world provided, or x and z. Test for array at pos 2
  				if (args[1] instanceof CArray) {
  					world = Static.getServer().getWorld(args[0].val());
+					if (world == null) {
+						throw new ConfigRuntimeException("The given world (" + args[0].val() + ") does not exist.",
+								ExceptionType.InvalidWorldException, t);
+					}
  					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
  					x = l.getBlockX();
  					z = l.getBlockZ();
@@ -308,6 +316,10 @@ public class World {
  			} else {
  				//world, x and z provided
  				world = Static.getServer().getWorld(args[0].val());
+				if (world == null) {
+					throw new ConfigRuntimeException("The given world (" + args[0].val() + ") does not exist.",
+							ExceptionType.InvalidWorldException, t);
+				}
  				x = Static.getInt32(args[1], t);
  				z = Static.getInt32(args[2], t);
  			}
@@ -388,6 +400,9 @@ public class World {
  				x = Static.getInt32(args[1], t);
  				z = Static.getInt32(args[2], t);
  			}
+			if (world == null) { // Happends when m is a fake console or null command sender.
+				throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+			}
  			world.unloadChunk(x, z);
  			return CVoid.VOID;
  		}
@@ -419,7 +434,8 @@ public class World {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+				ExceptionType.InvalidWorldException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -441,11 +457,19 @@ public class World {
  				world = Static.getServer().getWorld(args[0].val());
  			} else {
 				if (m == null) {
- 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
- 					}
+ 					throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+ 				}
  				world = m.getWorld();
 			}
+			if (world == null) { // Happends when m is a fake console or null command sender.
+				throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+			}
  			MCChunk[] chunks = world.getLoadedChunks();
+			if (chunks == null) { // Happends when m is a fake player.
+				throw new ConfigRuntimeException(
+					"Could not find the chunk objects of the world (are you running in cmdline mode?)",
+					ExceptionType.NotFoundException, t);
+			}
 			CArray ret = new CArray(t);
 			for (int i = 0; i < chunks.length; i++) {
 				CArray chunk = new CArray(t);
@@ -538,6 +562,10 @@ public class World {
 				//Either location array and world provided, or x and z. Test for array at pos 1
 				if (args[0] instanceof CArray) {
 					world = Static.getServer().getWorld(args[1].val());
+					if (world == null) {
+						throw new ConfigRuntimeException("World " + args[1].val() + " does not exist.",
+								ExceptionType.InvalidWorldException, t);
+					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
 
 					x = l.getChunk().getX();
@@ -556,6 +584,10 @@ public class World {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
+				if (world == null) {
+					throw new ConfigRuntimeException("World " + args[2].val() + " does not exist.",
+							ExceptionType.InvalidWorldException, t);
+				}
 			}
 
 			return CBoolean.get(world.regenerateChunk(x, z));
@@ -609,19 +641,20 @@ public class World {
 			MCWorld world;
 			int x;
 			int z;
-			long seed;
 			if (args.length == 1) {
 				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 				world = l.getWorld();
-				seed = world.getSeed();
 				x = l.getChunk().getX();
 				z = l.getChunk().getZ();
 			} else if (args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
 				if (args[0] instanceof CArray) {
 					world = Static.getServer().getWorld(args[1].val());
-					seed = world.getSeed();
+					if (world == null) {
+						throw new ConfigRuntimeException("The given world (" + args[1].val() + ") does not exist.",
+								ExceptionType.InvalidWorldException, t);
+					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
 					x = l.getChunk().getX();
 					z = l.getChunk().getZ();
@@ -630,7 +663,6 @@ public class World {
 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
 					}
 					world = m.getWorld();
-					seed = world.getSeed();
 					x = Static.getInt32(args[0], t);
 					z = Static.getInt32(args[1], t);
 				}
@@ -639,9 +671,12 @@ public class World {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
-				seed = world.getSeed();
+				if (world == null) {
+					throw new ConfigRuntimeException("The given world (" + args[2].val() + ") does not exist.",
+							ExceptionType.InvalidWorldException, t);
+				}
 			}
-			rnd.setSeed(seed
+			rnd.setSeed(world.getSeed()
 				+ x * x * 0x4c1906
 				+ x * 0x5ac0db
 				+ z * z * 0x4307a7L
@@ -977,6 +1012,11 @@ public class World {
 				p = (MCPlayer)cs;
 				Static.AssertPlayerNonNull(p, t);
 				l = p.getLocation();
+				if (l == null) {
+					throw new ConfigRuntimeException(
+							"Could not find the location of the given player (are you running in cmdline mode?)",
+							ExceptionType.NotFoundException, t);
+				}
 				w = l.getWorld();
 			}
 
@@ -1013,7 +1053,8 @@ public class World {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.InsufficientArgumentsException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.InsufficientArgumentsException,
+				ExceptionType.NotFoundException};
 		}
 
 		@Override

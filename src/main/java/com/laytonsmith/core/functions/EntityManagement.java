@@ -846,8 +846,8 @@ public class EntityManagement {
 							ExceptionType.FormatException, t);
 				}
 			} else {
-				shooter_id = p.getUniqueId();
 				Static.AssertPlayerNonNull(p, t);
+				shooter_id = p.getUniqueId();
 			}
 
 			if (args.length >= 3) {
@@ -1409,7 +1409,7 @@ public class EntityManagement {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
 					ExceptionType.BadEntityException, ExceptionType.InvalidWorldException,
-					ExceptionType.PlayerOfflineException};
+					ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -1437,6 +1437,11 @@ public class EntityManagement {
 			}
 			try {
 				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
+				if (entType == null) {
+					throw new ConfigRuntimeException(
+							"Could not find the entity type internal object (are you running in cmdline mode?)",
+							ExceptionType.NotFoundException, t);
+				}
 				if (!entType.isSpawnable()) {
 					throw new Exceptions.FormatException("Unspawnable entitytype: " + args[0].val(), t);
 				}

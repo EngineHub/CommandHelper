@@ -61,7 +61,12 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
-			MCCommand cmd = s.getCommandMap().getCommand(args[0].val());
+			MCCommandMap map = s.getCommandMap();
+			if (map == null) {
+				throw new ConfigRuntimeException(this.getName() + " is not supported in this mode (CommandMap not found).",
+						ExceptionType.NotFoundException, t);
+			}
+			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
 				throw new ConfigRuntimeException("Command not found, did you forget to register it?",
 						ExceptionType.NotFoundException, t);
@@ -135,6 +140,10 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
+			if (map == null) {
+				throw new ConfigRuntimeException(this.getName() + " is not supported in this mode (CommandMap not found).",
+						ExceptionType.NotFoundException, t);
+			}
 			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
 				throw new ConfigRuntimeException("Command not found, did you forget to register it?",
@@ -169,7 +178,8 @@ public class Commands {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.FormatException,
+					ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -185,6 +195,10 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
+			if (map == null) {
+				throw new ConfigRuntimeException(this.getName() + " is not supported in this mode (CommandMap not found).",
+						ExceptionType.NotFoundException, t);
+			}
 			MCCommand cmd = map.getCommand(args[0].val().toLowerCase());
 			boolean isnew = false;
 			if (cmd == null) {
@@ -284,7 +298,12 @@ public class Commands {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCCommand cmd = Static.getServer().getCommandMap().getCommand(args[0].val());
+			MCCommandMap map = Static.getServer().getCommandMap();
+			if (map == null) {
+				throw new ConfigRuntimeException(this.getName() + " is not supported in this mode (CommandMap not found).",
+						ExceptionType.NotFoundException, t);
+			}
+			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
 				throw new ConfigRuntimeException("Command not found did you forget to register it?",
 						ExceptionType.NotFoundException, t);
@@ -357,6 +376,9 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
+			if (map == null) {
+				return CNull.NULL;
+			}
 			Collection<MCCommand> commands = map.getCommands();
 			CArray ret = CArray.GetAssociativeArray(t);
 			for(MCCommand command : commands) {
@@ -394,7 +416,7 @@ public class Commands {
 
 		@Override
 		public String docs() {
-			return "array {} Returns an array of command arrays in the format register_command expects."
+			return "array {} Returns an array of command arrays in the format register_command expects or null if no commands could be found."
 					+ " This does not include " + Implementation.GetServerType().getBranding() + " aliases, as they are not registered commands.";
 		}
 
@@ -426,7 +448,9 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
-			map.clearCommands();
+			if (map != null) {
+				map.clearCommands();
+			}
 			return CVoid.VOID;
 		}
 

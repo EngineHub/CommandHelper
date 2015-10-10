@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.MCFurnaceRecipe;
+import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
@@ -492,12 +493,18 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	public MCItemMeta itemMeta(Construct c, MCMaterial mat, Target t) {
-		MCItemMeta meta = Static.getServer().getItemFactory().getItemMeta(mat);
+	public MCItemMeta itemMeta(Construct c, MCMaterial mat, Target t) throws ConfigRuntimeException {
+		MCItemFactory itemFactory = Static.getServer().getItemFactory();
+		if (itemFactory == null) {
+			throw new ConfigRuntimeException(
+					"Could not find the internal MCItemFactory object (are you running in cmdline mode?)",
+					ExceptionType.NotFoundException, t);
+		}
+		MCItemMeta meta = itemFactory.getItemMeta(mat);
 		if (c instanceof CNull) {
 			return meta;
 		}
-		CArray ma = null;
+		CArray ma;
 		if (c instanceof CArray) {
 			ma = (CArray) c;
 			try {

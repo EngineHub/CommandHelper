@@ -68,7 +68,9 @@ public class InventoryManagement {
 
 		@Override
         public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException};
+            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException,
+				Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException,
+				Exceptions.ExceptionType.NotFoundException};
         }
 
 		@Override
@@ -128,6 +130,12 @@ public class InventoryManagement {
                 return ObjectGenerator.GetGenerator().item(m.getItemInHand(), t);
             }
             MCPlayerInventory inv = m.getInventory();
+			if (inv == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)",
+						Exceptions.ExceptionType.NotFoundException, t);
+			}
+			
             if(slot.equals(36)){
                 slot = 100;
             }
@@ -179,15 +187,16 @@ public class InventoryManagement {
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p;
-
+			
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
-
+			
+			Static.AssertPlayerNonNull(p, t);
 			p.closeInventory();
-
+			
             return CVoid.VOID;
         }
 
@@ -218,7 +227,8 @@ public class InventoryManagement {
 
 		@Override
         public Exceptions.ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException,
+				ExceptionType.InsufficientArgumentsException};
         }
 
 		@Override
@@ -239,6 +249,11 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0], t);
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if (p == null) {
+					throw new ConfigRuntimeException(
+							"You have to specify a player when running " + this.getName() + " from console.",
+							ExceptionType.InsufficientArgumentsException, t);
+				}
 			}
 
 			p.openWorkbench(p.getLocation(), true);
@@ -301,7 +316,9 @@ public class InventoryManagement {
 				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				other = player;
 			}
-
+			
+			Static.AssertPlayerNonNull(player, t);
+			Static.AssertPlayerNonNull(other, t);
 			player.openInventory(other.getEnderChest());
 
 			return CVoid.VOID;
@@ -357,7 +374,8 @@ public class InventoryManagement {
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
-
+			
+			Static.AssertPlayerNonNull(p, t);
 			p.openEnchanting(p.getLocation(), true);
 
             return CVoid.VOID;
@@ -525,7 +543,7 @@ public class InventoryManagement {
 		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.FormatException,
-                Exceptions.ExceptionType.CastException};
+                Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.NotFoundException};
         }
 
 		@Override
@@ -550,6 +568,12 @@ public class InventoryManagement {
 			Static.AssertPlayerNonNull(p, t);
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
             MCPlayerInventory inv = p.getInventory();
+			if (inv == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)",
+						Exceptions.ExceptionType.NotFoundException, t);
+			}
+			
             int total = 0;
             for(int i = 0; i < 36; i++){
                 MCItemStack iis = inv.getItem(i);
@@ -603,7 +627,7 @@ public class InventoryManagement {
 		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
-                Exceptions.ExceptionType.PlayerOfflineException};
+                Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.NotFoundException};
         }
 
 		@Override
@@ -628,6 +652,11 @@ public class InventoryManagement {
 			Static.AssertPlayerNonNull(p, t);
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
             MCPlayerInventory inv = p.getInventory();
+			if (inv == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)",
+						Exceptions.ExceptionType.NotFoundException, t);
+			}
             CArray ca = new CArray(t);
             for(int i = 0; i < 36; i++){
                 if(match(is, inv.getItem(i))){
@@ -688,7 +717,7 @@ public class InventoryManagement {
 		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
-                Exceptions.ExceptionType.PlayerOfflineException};
+                Exceptions.ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
         }
 
 		@Override
@@ -771,7 +800,7 @@ public class InventoryManagement {
 		@Override
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
-                Exceptions.ExceptionType.FormatException};
+                Exceptions.ExceptionType.FormatException, Exceptions.ExceptionType.NotFoundException};
         }
 
 		@Override
@@ -797,6 +826,12 @@ public class InventoryManagement {
             int remaining = is.getAmount();
 			Static.AssertPlayerNonNull(p, t);
             MCPlayerInventory inv = p.getInventory();
+			if (inv == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)",
+						Exceptions.ExceptionType.NotFoundException, t);
+			}
+			
             for(int i = 35; i >= 0; i--){
                 MCItemStack iis = inv.getItem(i);
                 if(remaining <= 0){
@@ -862,7 +897,7 @@ public class InventoryManagement {
 		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
-				Exceptions.ExceptionType.PlayerOfflineException};
+				Exceptions.ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -943,7 +978,7 @@ public class InventoryManagement {
 		@Override
 		public Exceptions.ExceptionType[] thrown() {
 			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
-				Exceptions.ExceptionType.FormatException};
+				Exceptions.ExceptionType.FormatException, Exceptions.ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -970,6 +1005,12 @@ public class InventoryManagement {
 			int remaining = is.getAmount();
 			Static.AssertPlayerNonNull(p, t);
 			MCInventory inv = p.getEnderChest();
+			if (inv == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the enderchest inventory of the given player (are you running in cmdline mode?)",
+						Exceptions.ExceptionType.NotFoundException, t);
+			}
+			
 			for (int i = 26; i >= 0; i--) {
 				MCItemStack iis = inv.getItem(i);
 				if (remaining <= 0) {
@@ -1137,7 +1178,9 @@ public class InventoryManagement {
 
 		@Override
 		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException};
+			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException,
+				Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException,
+				Exceptions.ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -1201,15 +1244,15 @@ public class InventoryManagement {
 
 		private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
 			MCInventory inv = m.getEnderChest();
-
-			MCItemStack is;
-
-			if (slot >= 0 && slot <= 26) {
-				is = inv.getItem(slot);
-			} else {
+			if (inv == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the enderchest inventory of the given player (are you running in cmdline mode?)",
+						Exceptions.ExceptionType.NotFoundException, t);
+			}
+			if (slot < 0 || slot > 26) {
 				throw new ConfigRuntimeException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
 			}
-
+			MCItemStack is = inv.getItem(slot);
 			return ObjectGenerator.GetGenerator().item(is, t);
 		}
 	}
@@ -1835,7 +1878,7 @@ public class InventoryManagement {
 		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, Exceptions.ExceptionType.PlayerOfflineException,
-					Exceptions.ExceptionType.FormatException};
+					Exceptions.ExceptionType.FormatException, Exceptions.ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -1884,7 +1927,13 @@ public class InventoryManagement {
 						Exceptions.ExceptionType.RangeException, t);
 			}
 			
-			player.getInventory().setHeldItemSlot(slot);
+			MCPlayerInventory pinv = player.getInventory();
+			if (pinv == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)",
+						Exceptions.ExceptionType.NotFoundException, t);
+			}
+			pinv.setHeldItemSlot(slot);
 			return CVoid.VOID;
 		}
 
@@ -1916,7 +1965,7 @@ public class InventoryManagement {
 		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException,
-				Exceptions.ExceptionType.FormatException};
+				Exceptions.ExceptionType.FormatException, Exceptions.ExceptionType.NotFoundException};
 		}
 
 		@Override
@@ -1953,7 +2002,13 @@ public class InventoryManagement {
 				}
 			}
 			
-			int slot = player.getInventory().getHeldItemSlot();
+			MCPlayerInventory pinv = player.getInventory();
+			if (pinv == null) {
+				throw new ConfigRuntimeException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)",
+						Exceptions.ExceptionType.NotFoundException, t);
+			}
+			int slot = pinv.getHeldItemSlot();
 			return new CInt(slot, t);
 		}
 

@@ -1,7 +1,6 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import org.bukkit.plugin.Plugin;
 import org.junit.Before;
