@@ -47,7 +47,10 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		return wrapperClass;
 	}
 
-	public static MCEntityType valueOf(String test) {
+	public static MCEntityType valueOf(String test) throws IllegalArgumentException {
+		if (mappings == null) {
+			return null;
+		}
 		MCEntityType ret = mappings.get(test);
 		if (ret == null) {
 			throw new IllegalArgumentException("Unknown entity type: " + test);
@@ -56,6 +59,9 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public static MCEntityType valueOfVanillaType(MCVanillaEntityType type) {
+		if (vanilla == null) {
+			return null;
+		}
 		return vanilla.get(type);
 	}
 

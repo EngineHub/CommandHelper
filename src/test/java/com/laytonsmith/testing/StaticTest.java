@@ -72,6 +72,7 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
+import com.laytonsmith.core.functions.Scoreboards;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -114,6 +115,8 @@ public class StaticTest {
      * Tests the boilerplate functions in a Function. While all functions should conform to
      * at least this, it is useful to also use the more strict TestBoilerplate function.
      * @param ff
+	 * @param name
+	 * @throws java.lang.Exception
      */
     public static void TestBoilerplate(FunctionBase ff, String name) throws Exception {
         if(!(ff instanceof Function)){

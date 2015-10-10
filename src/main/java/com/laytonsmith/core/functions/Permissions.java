@@ -71,8 +71,8 @@ public class Permissions {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 
-			MCCommandSender sender = null;
-			String permission = null;
+			MCCommandSender sender;
+			String permission;
 
 			if (args.length == 1) {
 				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -89,8 +89,11 @@ public class Permissions {
 					}
 				}
 			}
-
-
+			
+			if (sender == null) {
+				return CBoolean.FALSE; // Return false for null command senders.
+			}
+			
 			if ((Static.getConsoleName().equals(sender.getName().toLowerCase())
 					|| sender.getName().startsWith(Static.getBlockPrefix()))
 					&& !sender.isPermissionSet(permission)) {

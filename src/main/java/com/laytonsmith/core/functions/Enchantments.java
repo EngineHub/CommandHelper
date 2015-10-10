@@ -223,8 +223,10 @@ public class Enchantments {
 			if (args.length == 4) {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
+			} else if (m == null) {
+				throw new ConfigRuntimeException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
 			}
-			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
+			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
 			if (is == null) {
 				throw new Exceptions.CastException("There is no item at slot " + args[1 - offset], t);
 			}
@@ -397,8 +399,11 @@ public class Enchantments {
 				slot = args[1];
 			} else {
 				slot = args[0];
+				if (m == null) {
+					throw new ConfigRuntimeException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
+				}
 			}
-			MCItemStack is = m.getItemAt(slot instanceof CNull?null:Static.getInt32(slot, t));
+			MCItemStack is = m.getItemAt(slot instanceof CNull ? null : Static.getInt32(slot, t));
 			if (is == null) {
 				throw new Exceptions.CastException("There is no item at slot " + slot, t);
 			}

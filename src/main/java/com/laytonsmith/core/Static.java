@@ -1238,7 +1238,7 @@ public final class Static {
 		return hostCache.get(p.getName());
 	}
 
-	public static void AssertPlayerNonNull(MCPlayer p, Target t) {
+	public static void AssertPlayerNonNull(MCPlayer p, Target t) throws ConfigRuntimeException {
 		if (p == null) {
 			throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
 		}
@@ -1252,7 +1252,7 @@ public final class Static {
 		return ticks * 50;
 	}
 
-	public static void AssertNonNull(Object var, String message) {
+	public static void AssertNonNull(Object var, String message) throws NullPointerException {
 		if (var == null) {
 			throw new NullPointerException(message);
 		}
@@ -1326,7 +1326,7 @@ public final class Static {
 	 * @param arg
 	 * @return
 	 */
-	public static File GetFileFromArgument(String arg, Environment env, Target t, File def) {
+	public static File GetFileFromArgument(String arg, Environment env, Target t, File def) throws ConfigRuntimeException {
 		if (arg == null) {
 			return def;
 		}
@@ -1341,6 +1341,8 @@ public final class Static {
 		//If so, we use the root directory, not the target.
 		if (env != null && InCmdLine(env)) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
+		} else if (t.file() == null) {
+			throw new ConfigRuntimeException("Unable to receive a non-absolute file with an unknown target", ExceptionType.IOException, t);
 		} else {
 			return new File(t.file().getParent(), arg);
 		}

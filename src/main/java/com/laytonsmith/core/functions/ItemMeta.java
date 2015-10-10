@@ -141,7 +141,8 @@ public class ItemMeta {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException,
+				ExceptionType.CastException, ExceptionType.NotFoundException};
 		}
 
 		@Override

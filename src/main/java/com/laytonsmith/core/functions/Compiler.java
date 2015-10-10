@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
@@ -532,6 +533,7 @@ public class Compiler {
 
 	@api
 	@hide("This is only used for testing unexpected error handling.")
+	@noboilerplate
 	public static class npe extends DummyFunction {
 
 		@Override
