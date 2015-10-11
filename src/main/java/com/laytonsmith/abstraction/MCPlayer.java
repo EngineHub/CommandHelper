@@ -56,6 +56,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public int getExpAtLevel();
 
+    public MCEntity getSpectatorTarget();
+
 	public float getWalkSpeed();
 	
 	public void setWalkSpeed(float speed);
@@ -100,6 +102,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public void setRemainingFireTicks(int i);
 
 	public void setScoreboard(MCScoreboard board);
+
+    public void setSpectatorTarget(MCEntity entity);
 
     public void setTempOp(Boolean value) throws Exception;
 

@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
@@ -397,6 +398,26 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void setRemainingFireTicks(int i) {
         p.setFireTicks(i);
     }
+
+	@Override
+	public void setSpectatorTarget(MCEntity entity) {
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7)) {
+			return;
+		}
+		if(entity == null) {
+			p.setSpectatorTarget(null);
+			return;
+		}
+		p.setSpectatorTarget((Entity) entity.getHandle());
+	}
+
+	@Override
+	public MCEntity getSpectatorTarget() {
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7)) {
+			return null;
+		}
+		return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
+	}
 
 	@Override
     public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
