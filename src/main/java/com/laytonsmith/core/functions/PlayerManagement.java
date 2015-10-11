@@ -5032,11 +5032,7 @@ public class PlayerManagement {
 			if(args[offset] instanceof CNull) {
 				p.setSpectatorTarget(null);
 			} else {
-				MCEntity e = Static.getEntity(args[offset], t);
-				// spectating a non-living entity will crash the client and destroy the entity
-				if (e instanceof MCLivingEntity) {
-					p.setSpectatorTarget(e);
-				}
+				p.setSpectatorTarget(Static.getLivingEntity(args[offset], t));
 			}
 			return CVoid.VOID;
 		}
