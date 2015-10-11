@@ -1856,7 +1856,15 @@ public final class MethodScriptCompiler {
 				try {
 					Construct result;
 					if (options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
-						result = func.exec(tree.getData().getTarget(), null, constructs);
+						List<Integer> numArgsList = Arrays.asList(func.numArgs());
+						if (!numArgsList.contains(Integer.MAX_VALUE) &&
+								!numArgsList.contains(tree.getChildren().size())) {
+							compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
+									+ tree.getData().val(), tree.getData().getTarget()));
+							result = null;
+						} else {
+							result = func.exec(tree.getData().getTarget(), null, constructs);
+						}
 					} else {
 						result = ((Optimizable) func).optimize(tree.getData().getTarget(), constructs);
 					}

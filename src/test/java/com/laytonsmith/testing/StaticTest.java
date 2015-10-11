@@ -72,7 +72,6 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
-import com.laytonsmith.core.functions.Scoreboards;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -198,6 +197,7 @@ public class StaticTest {
 
     /**
      * Checks to see if the documentation follows the specified format
+	 * @param f
      */
     public static void TestDocs(Function f) {
         //TODO
@@ -302,6 +302,7 @@ public class StaticTest {
 
     /**
      * Gets the value out of s construct, ignoring information like line numbers.
+	 * @param c
      * @return
      */
     public static Object Val(Construct c) {
@@ -387,9 +388,7 @@ public class StaticTest {
 
     public static List<Token> tokens(Token... array) {
         List<Token> tokens = new ArrayList<Token>();
-        for (Token t : array) {
-            tokens.add(t);
-        }
+		tokens.addAll(Arrays.asList(array));
         return tokens;
     }
 
@@ -561,6 +560,7 @@ public class StaticTest {
 
     /**
      * Creates an entire fake server environment, adding players and everything.
+	 * @return The fake MCServer
      */
     public static MCServer GetFakeServer(){
         MCServer fakeServer = mock(MCServer.class);
@@ -605,6 +605,7 @@ public class StaticTest {
      * work. Additionally, adds the fakePlayer to the server, if player based
      * events are to be called, this is the player returned.
      * @param fakePlayer
+	 * @throws java.lang.Exception
      */
     public static void InstallFakeConvertor(MCPlayer fakePlayer) throws Exception{
         InstallFakeServerFrontend();
@@ -923,7 +924,6 @@ public class StaticTest {
                     break;
                 } catch(NoSuchFieldException e){
                     search = search.getSuperclass();
-                    continue;
                 }
             }
             if(f == null){
