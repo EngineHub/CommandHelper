@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -4907,6 +4908,132 @@ public class PlayerManagement {
 			p.setFlying(flight);
 			// We only want to set whether the player is flying; not whether the player can fly.
 			p.setAllowFlight(true);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class pspectator_target extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pspectator_target";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player]} Gets the entity that a spectator is viewing. If the player isn't spectating"
+					+ " from an entity, null is returned. If the player isn't in spectator mode, an"
+					+ " IllegalArgumentException is thrown.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.IllegalArgumentException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if (args.length == 0) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			} else {
+				p = Static.GetPlayer(args[0], t);
+			}
+			Static.AssertPlayerNonNull(p, t);
+			if(p.getGameMode() != MCGameMode.SPECTATOR) {
+				throw new ConfigRuntimeException("Player must be in spectator mode.",
+						ExceptionType.IllegalArgumentException, t);
+			}
+			MCEntity e = p.getSpectatorTarget();
+			if(e == null) {
+				return CNull.NULL;
+			}
+			return new CString(e.getUniqueId().toString(), t);
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class set_pspectator_target extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_pspectator_target";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], entity} Sets the entity for the player to spectate. If set to null, the"
+					+ " spectator will stop following an entity. If the player is not in spectator mode an"
+					+ " IllegalArgumentException is thrown.";
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.IllegalArgumentException,
+					ExceptionType.BadEntityException};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			int offset = 0;
+			if (args.length == 1) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				offset = 1;
+			}
+			Static.AssertPlayerNonNull(p, t);
+			if(p.getGameMode() != MCGameMode.SPECTATOR) {
+				throw new ConfigRuntimeException("Player must be in spectator mode.",
+						ExceptionType.IllegalArgumentException, t);
+			}
+			if(args[offset] instanceof CNull) {
+				p.setSpectatorTarget(null);
+			} else {
+				p.setSpectatorTarget(Static.getLivingEntity(args[offset], t));
+			}
 			return CVoid.VOID;
 		}
 
