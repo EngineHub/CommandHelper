@@ -856,9 +856,9 @@ public class Math {
 				return v;
 			} else {
 				if (Static.anyDoubles(args[0])) {
-					return new CDouble(Static.getNumber(args[0], t) + value, t);
+					return new CDouble(Static.getNumber(args[0], t) - value, t);
 				} else {
-					return new CInt(Static.getInt(args[0], t) + value, t);
+					return new CInt(Static.getInt(args[0], t) - value, t);
 				}
 			}
 		}
@@ -980,9 +980,9 @@ public class Math {
 				return oldVal;
 			} else {
 				if (Static.anyDoubles(args[0])) {
-					return new CDouble(Static.getNumber(args[0], t) + value, t);
+					return new CDouble(Static.getNumber(args[0], t) - value, t);
 				} else {
-					return new CInt(Static.getInt(args[0], t) + value, t);
+					return new CInt(Static.getInt(args[0], t) - value, t);
 				}
 			}
 		}
