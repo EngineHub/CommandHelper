@@ -725,6 +725,7 @@ public final class MethodScriptCompiler {
 			Token next = i + 1 < token_list.size() ? token_list.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
 
 			if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus() && !prev2.type.isIdentifier()
+					&& !prev2.type.equals(TType.FUNC_END)
 					&& !t.val().matches("(\\@|\\$)[a-zA-Z0-9_]+")) { // Last boolean makes -@b equal to - @b, instead of a string.
 				//It is a negative/positive number. Absorb the sign
 				t.value = prev1.value + t.value;
