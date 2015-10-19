@@ -343,12 +343,6 @@
 			<groupId>org.java.net.substance</groupId>
 			<artifactId>substance</artifactId>
 			<version>6.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm-all</artifactId>
-                </exclusion>
-            </exclusions>
 		</dependency>
 		<!-- MCStats (this appears to no longer be working)
 		<dependency>
@@ -369,9 +363,9 @@
 			<version>6.0-SNAPSHOT</version>
 		</dependency>-->
 		<dependency>
-			<groupId>org.ow2.asm</groupId>
+			<groupId>asm</groupId>
 			<artifactId>asm-all</artifactId>
-			<version>5.0</version>
+			<version>3.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>jline</groupId>
@@ -537,7 +531,7 @@
 									<include>mysql:mysql-connector-java:jar:*</include>
 									<include>commons-codec:commons-codec:jar:*</include>
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
-									<include>org.objectweb.asm:asm-all:jar:*</include>
+									<include>asm:asm-all:jar:*</include>
 									<include>jline:jline:jar:*</include>
 									<include>javax.mail:mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
@@ -707,7 +701,7 @@
 									</includes>
 								</filter>-->
 								<filter>
-									<artifact>org.ow2.asm:asm-all:jar:*</artifact>
+									<artifact>asm:asm-all:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
