@@ -49,13 +49,10 @@ import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UpgradeLog;
-import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistence.DataSourceException;
@@ -113,7 +110,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PersistenceNetwork persistenceNetwork;
-	public boolean firstLoad = true;
+	public Profiles profiles;
+	//public boolean firstLoad = true;
 	public long interpreterUnlockedUntil = 0;
 	private Thread loadingThread;
 	/**
@@ -225,7 +223,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				try {
-					FileUtil.move(new File(cd, "sql-profiles.xml"), p.getSQLProfilesFile());
+					FileUtil.move(new File(cd, "sql-profiles.xml"), p.getProfilesFile());
 				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -570,7 +568,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			} else if(sender instanceof BlockCommandSender){
 				MCCommandSender s = new BukkitMCBlockCommandSender((BlockCommandSender)sender);
 				String cmd2 = StringUtils.Join(args, " ");
-				Static.getAliasCore().alias(cmd2, s, new ArrayList<Script>());
+				Static.getAliasCore().alias(cmd2, s);
 			}
 			return true;
 		} else if(cmdName.equalsIgnoreCase("interpreter-on")){
@@ -584,8 +582,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				sender.sendMessage("This command can only be run from console.");
 			}
 			return true;
-		} else if (sender instanceof Player && java.util.Arrays.asList(new String[]{"commandhelper", "repeat",
-				"viewalias", "delalias", "interpreter", "alias"}).contains(cmdName)) {
+		} else if (sender instanceof Player && (cmdName.equalsIgnoreCase("commandhelper") || cmdName.equalsIgnoreCase("interpreter"))) {
 			try {
 				return runCommand(new BukkitMCPlayer((Player) sender), cmdName, args);
 			} catch (DataSourceException ex) {
@@ -617,107 +614,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		commandRunning.add(player);
-		UserManager um = UserManager.GetUserManager(player.getName());
-		// Repeat command
-		if (cmd.equals("repeat")) {
-			if (player.isOp() || player.hasPermission("commandhelper.repeat")
-					|| player.hasPermission("ch.repeat")) {
-				//Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
-				//an infinite loop though, because the preprocessor won't try to fire off a repeat command
-				commandRunning.remove(player);
-				if (um.getLastCommand() != null) {
-					Static.SendMessage(player, MCChatColor.GRAY + um.getLastCommand());
-					execCommand(player, um.getLastCommand());
-				} else {
-					Static.SendMessage(player, MCChatColor.RED + "No previous command.");
-				}
-				return true;
-			} else {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the repeat command");
-				commandRunning.remove(player);
-				return true;
-			}
-
-			// Save alias
-		} else if (cmd.equalsIgnoreCase("alias")) {
-			if (!player.hasPermission("commandhelper.useralias") && !player.hasPermission("ch.useralias")) {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the alias command");
-				commandRunning.remove(player);
-				return true;
-			}
-
-			if (args.length > 0) {
-				String alias = CommandHelperPlugin.joinString(args, " ");
-				try {
-					int id = um.addAlias(alias, persistenceNetwork);
-					if (id > -1) {
-						Static.SendMessage(player, MCChatColor.YELLOW + "Alias added with id '" + id + "'");
-					}
-				} catch (ConfigCompileException ex) {
-					Static.SendMessage(player, "Your alias could not be added due to a compile error:\n" + MCChatColor.RED + ex.getMessage());
-				} catch (ConfigCompileGroupException e){
-					StringBuilder b = new StringBuilder();
-					b.append("Your alias could not be added due to compile errors:\n").append(MCChatColor.RED);
-					for(ConfigCompileException ex : e.getList()){
-						b.append(ex.getMessage());
-					}
-					Static.SendMessage(player, b.toString());
-				}
-			} else {
-				//Display a help message
-				Static.SendMessage(player, MCChatColor.GREEN + "Command usage: \n"
-						+ MCChatColor.GREEN + "/alias <alias> - adds an alias to your user defined list\n"
-						+ MCChatColor.GREEN + "/delalias <id> - deletes alias with id <id> from your user defined list\n"
-						+ MCChatColor.GREEN + "/viewalias - shows you all of your aliases");
-			}
-
-			commandRunning.remove(player);
-			return true;
-			//View all aliases for this user
-		} else if (cmd.equalsIgnoreCase("viewalias")) {
-			if (!player.hasPermission("commandhelper.useralias") && !player.hasPermission("ch.useralias")) {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the viewalias command");
-				commandRunning.remove(player);
-				return true;
-			}
-			int page = 0;
-			try {
-				page = Integer.parseInt(args[0]);
-			} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-				//Meh. Index out of bounds, or number format exception. Whatever, show page 1
-			}
-			Static.SendMessage(player, um.getAllAliases(page, persistenceNetwork));
-			commandRunning.remove(player);
-			return true;
-			// Delete alias
-		} else if (cmd.equalsIgnoreCase("delalias")) {
-			if (!player.hasPermission("commandhelper.useralias") && !player.hasPermission("ch.useralias")) {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the delalias command");
-				commandRunning.remove(player);
-				return true;
-			}
-			try {
-				ArrayList<String> deleted = new ArrayList<String>();
-				for (String arg : args) {
-					um.delAlias(Integer.parseInt(arg), persistenceNetwork);
-					deleted.add("#" + arg);
-				}
-				if (args.length > 1) {
-					String s = MCChatColor.YELLOW + "Aliases " + deleted.toString() + " were deleted";
-					Static.SendMessage(player, s);
-
-				} else {
-					Static.SendMessage(player, MCChatColor.YELLOW + "Alias #" + args[0] + " was deleted");
-				}
-			} catch (NumberFormatException e) {
-				Static.SendMessage(player, MCChatColor.RED + "The id must be a number");
-			} catch (ArrayIndexOutOfBoundsException e) {
-				Static.SendMessage(player, MCChatColor.RED + "Usage: /delalias <id> <id> ...");
-			}
-			commandRunning.remove(player);
-			return true;
-
-		} else if (cmd.equalsIgnoreCase("interpreter")) {
+		if (cmd.equalsIgnoreCase("interpreter")) {
 			if (player.hasPermission("commandhelper.interpreter")) {
 				if (Prefs.EnableInterpreter()) {
 					if(Prefs.InterpreterTimeout() != 0){

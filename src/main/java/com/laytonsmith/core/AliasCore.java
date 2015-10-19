@@ -110,24 +110,13 @@ public class AliasCore {
 	 * @param command
 	 * @return
 	 */
-	public boolean alias(String command, final MCCommandSender player, List<Script> playerCommands) {
-
-		GlobalEnv gEnv;
-		try {
-			gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
-					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
-					new TaskManager());
-		} catch (IOException ex) {
-			Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-			return false;
-		} catch (Profiles.InvalidProfileException ex) {
-			throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), Target.UNKNOWN);
-		}
+	public boolean alias(String command, final MCCommandSender player) {
+		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
+				MethodScriptFileLocations.getDefault().getConfigDirectory(),
+				parent.profiles, new TaskManager());
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(player);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
-
 		if (player instanceof MCBlockCommandSender) {
 			cEnv.SetBlockCommandSender((MCBlockCommandSender) player);
 		}
@@ -144,8 +133,6 @@ public class AliasCore {
 				//we are running one of the expanded commands, so exit with false
 				return false;
 			}
-
-			//Global aliases override personal ones, so check the list first
 			for (Script s : scripts) {
 				try {
 					if (s.match(command)) {
@@ -216,55 +203,6 @@ public class AliasCore {
 				}
 			}
 
-			if (player instanceof MCPlayer) {
-				if (match == false && playerCommands != null) {
-					//if we are still looking, look in the aliases for this player
-					for (Script ac : playerCommands) {
-						//RunnableAlias b = ac.getRunnableAliases(command, player);
-						try {
-
-							ac.compile();
-
-							if (ac.match(command)) {
-								Static.getAliasCore().addPlayerReference(player);
-								ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("User Alias (" + player.getName() + ") - \"" + command + "\"", LogLevel.ERROR);
-								try {
-									ac.run(ac.getVariables(command), env, new MethodScriptComplete() {
-										@Override
-										public void done(String output) {
-											if (output != null) {
-												if (!output.trim().isEmpty() && output.trim().startsWith("/")) {
-													if (Prefs.DebugMode()) {
-														Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer) player).getName() + ": " + output.trim());
-													}
-													((MCPlayer) player).chat(output.trim());
-												}
-											}
-											Static.getAliasCore().removePlayerReference(player);
-										}
-									});
-								} finally {
-									alias.stop();
-								}
-								match = true;
-								break;
-							}
-						} catch (ConfigRuntimeException e) {
-							//Unlike system scripts, this should just report the problem to the player
-							//env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
-							Static.getAliasCore().removePlayerReference(player);
-							e.setEnv(env);
-							ConfigRuntimeException.HandleUncaughtException(e, env);
-							match = true;
-						} catch (ConfigCompileException e) {
-							//Something strange happened, and a bad alias was added
-							//to the database. Our best course of action is to just
-							//skip it.
-						}
-					}
-
-				}
-			}
 		} catch (Throwable e) {
 			//Not only did an error happen, an error happened in our error handler
 			throw new InternalException(TermColors.RED + "An unexpected error occured in the CommandHelper plugin. "
@@ -413,17 +351,16 @@ public class AliasCore {
 					persistenceConfigReload.stop();
 				}
 			}
-			GlobalEnv gEnv;
 			try {
-				gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
-						MethodScriptFileLocations.getDefault().getConfigDirectory(),
-						new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
-						new TaskManager());
-				gEnv.SetLabel(Static.GLOBAL_PERMISSION);
-			} catch (Profiles.InvalidProfileException ex) {
+				parent.profiles = new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile());
+			} catch (IOException | Profiles.InvalidProfileException ex) {
 				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;
 			}
+			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
+					MethodScriptFileLocations.getDefault().getConfigDirectory(),
+					parent.profiles, new TaskManager());
+			gEnv.SetLabel(Static.GLOBAL_PERMISSION);
 			if (reloadExecutionQueue) {
 				ProfilePoint stoppingExecutionQueue = parent.profiler.start("Stopping execution queues", LogLevel.VERBOSE);
 				try {

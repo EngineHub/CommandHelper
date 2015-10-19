@@ -84,7 +84,7 @@ public class Manager {
 		CHLog.initialize(chDirectory);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
-				chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
+				chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()),
 				new TaskManager());
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());

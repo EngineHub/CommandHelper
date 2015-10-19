@@ -140,18 +140,6 @@ public class MethodScriptFileLocations extends FileLocations {
 	}
 
 	/**
-	 * Returns the SQL profiles config file location.
-	 * @return
-	 * @deprecated Use {@link #getProfilesFile()} instead, as the method name is
-	 * more accurate, since the profiles file contains profiles for other features,
-	 * not necessarily SQL.
-	 */
-	@Deprecated
-	public File getSQLProfilesFile(){
-		return getProfilesFile();
-	}
-
-	/**
 	 * Returns the profiles config file location. The profiles config is a universal
 	 * repository for saving credentials in a standard location, that isn't tied
 	 * to the code base. In general, this file should be ignored by version control

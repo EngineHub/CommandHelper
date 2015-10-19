@@ -18,7 +18,6 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -417,21 +416,6 @@ public class Meta {
 					return CBoolean.TRUE;
 				}
 			}
-
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p instanceof MCPlayer) {
-				try {
-					// p might be null
-					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistenceNetwork())) {
-						if (s.match(args[0].val())) {
-							return CBoolean.TRUE;
-						}
-					}
-				} catch (DataSourceException ex) {
-					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
-				}
-			}
-
 			return CBoolean.FALSE;
 		}
 
@@ -510,7 +494,7 @@ public class Meta {
 			if (doRemoval) {
 				Static.getAliasCore().removePlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			}
-			boolean ret = Static.getAliasCore().alias(args[0].val(), env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), null);
+			boolean ret = Static.getAliasCore().alias(args[0].val(), env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			if (doRemoval) {
 				Static.getAliasCore().addPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			}
