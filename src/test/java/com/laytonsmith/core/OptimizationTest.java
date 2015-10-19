@@ -276,6 +276,9 @@ public class OptimizationTest {
 		assertEquals("assign(@c,subtract(array_get(@a,0),@b))", optimize("@c = @a[0] - @b"));
 		assertEquals("assign(@c,subtract(abs(@a),@b))", optimize("@c = abs(@a) - @b"));
 		assertEquals("assign(@c,subtract(if(@bool,2,3),@b))", optimize("@c = if(@bool) {2} else {3} - @b"));
+		
+		assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)-2"));
+		assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)- 2"));
 	}
 
 
