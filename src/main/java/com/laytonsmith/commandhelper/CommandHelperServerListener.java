@@ -38,7 +38,7 @@ public class CommandHelperServerListener implements Listener{
         }
         boolean match = false;
         try {
-            match = Static.getAliasCore().alias("/" + event.getCommand(), player, new ArrayList<Script>());
+            match = Static.getAliasCore().alias("/" + event.getCommand(), player);
         } catch (InternalException e) {
             Static.getLogger().log(Level.SEVERE, e.getMessage());
         } catch (ConfigRuntimeException e) {

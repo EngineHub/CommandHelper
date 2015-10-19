@@ -28,7 +28,6 @@ import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -82,10 +81,7 @@ public class CommandHelperListener implements Listener {
      * @return
      */
     public boolean runAlias(String command, MCPlayer player) throws DataSourceException {
-        UserManager um = UserManager.GetUserManager(player.getName());
-        List<Script> scripts = um.getAllScripts(plugin.persistenceNetwork);
-
-        return CommandHelperPlugin.getCore().alias(command, player, scripts);
+        return CommandHelperPlugin.getCore().alias(command, player);
     }
 
     /**
@@ -94,7 +90,7 @@ public class CommandHelperListener implements Listener {
      * @param event Relevant event details
      */
     @EventHandler(priority= EventPriority.LOWEST)
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         if(CommandHelperPlugin.self.interpreterListener
                 .isInInterpreterMode(event.getPlayer().getName())){
             //They are in interpreter mode, so we want it to handle this, not everything else.
@@ -109,11 +105,6 @@ public class CommandHelperListener implements Listener {
         String cmd = event.getMessage();        
         MCPlayer player = new BukkitMCPlayer(event.getPlayer());
         BukkitDirtyRegisteredListener.PlayDirty();
-        if (cmd.equals("/.") || cmd.equals("/repeat")) {
-            return;
-        }
-        
-        UserManager.GetUserManager(player.getName()).setLastCommand(cmd);
 
         if (!Prefs.PlayDirty()) {
             if (event.isCancelled()) {
@@ -139,17 +130,6 @@ public class CommandHelperListener implements Listener {
             event.setCancelled(true);
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Called when a player leaves a server
-     *
-     * @param event Relevant event details
-     */
-    @EventHandler(priority= EventPriority.NORMAL)
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-        UserManager.ClearUser(player.getName());
     }
 
     @EventHandler(priority= EventPriority.NORMAL)

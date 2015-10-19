@@ -1282,7 +1282,7 @@ public final class Static {
 				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace("\\", "/")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
-				new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()), new TaskManager());
+				new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManager());
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}

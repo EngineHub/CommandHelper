@@ -144,61 +144,51 @@ public class CommandHelperInterpreterListener implements Listener {
     public void reload() {
     }
 
-    public void execute(String script, final MCPlayer p) throws ConfigCompileException, ConfigCompileGroupException {
-        List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
-        ParseTree tree = MethodScriptCompiler.compile(stream);
-        interpreterMode.remove(p.getName());
-		GlobalEnv gEnv;
-		try {
-			gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
-					CommandHelperFileLocations.getDefault().getConfigDirectory(),
-					new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
-					new TaskManager());
-		} catch (IOException ex) {
-			CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
-			return;
-		} catch (Profiles.InvalidProfileException ex) {
-			CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
-			return;
-		}
+	public void execute(String script, final MCPlayer p) throws ConfigCompileException, ConfigCompileGroupException {
+		List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
+		ParseTree tree = MethodScriptCompiler.compile(stream);
+		interpreterMode.remove(p.getName());
+		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
+				CommandHelperFileLocations.getDefault().getConfigDirectory(),
+				plugin.profiles, new TaskManager());
 		gEnv.SetDynamicScriptingMode(true);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-        cEnv.SetPlayer(p);
+		cEnv.SetPlayer(p);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
-        try {
-            MethodScriptCompiler.registerAutoIncludes(env, null);
-            MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
+		try {
+			MethodScriptCompiler.registerAutoIncludes(env, null);
+			MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
 
 				@Override
-                public void done(String output) {
-                    output = output.trim();
-                    if (output.isEmpty()) {
-                        Static.SendMessage(p, ":");
-                    } else {
-                        if (output.startsWith("/")) {
-                            //Run the command
-                            Static.SendMessage(p, ":" + MCChatColor.YELLOW + output);
-                            p.chat(output);
-                        } else {
-                            //output the results
-                            Static.SendMessage(p, ":" + MCChatColor.GREEN + output);
-                        }
-                    }
-                    interpreterMode.add(p.getName());
-                }
-            }, null);
-        } catch (CancelCommandException e) {
-            interpreterMode.add(p.getName());
-        } catch(ConfigRuntimeException e) {
-            ConfigRuntimeException.HandleUncaughtException(e, env);
-            Static.SendMessage(p, MCChatColor.RED + e.toString());
-            interpreterMode.add(p.getName());
-        } catch(Exception e){
-            Static.SendMessage(p, MCChatColor.RED + e.toString());
-            Logger.getLogger(CommandHelperInterpreterListener.class.getName()).log(Level.SEVERE, null, e);
-            interpreterMode.add(p.getName());
-        }
-    }
+				public void done(String output) {
+					output = output.trim();
+					if (output.isEmpty()) {
+						Static.SendMessage(p, ":");
+					} else {
+						if (output.startsWith("/")) {
+							//Run the command
+							Static.SendMessage(p, ":" + MCChatColor.YELLOW + output);
+							p.chat(output);
+						} else {
+							//output the results
+							Static.SendMessage(p, ":" + MCChatColor.GREEN + output);
+						}
+					}
+					interpreterMode.add(p.getName());
+				}
+			}, null);
+		} catch (CancelCommandException e) {
+			interpreterMode.add(p.getName());
+		} catch(ConfigRuntimeException e) {
+			ConfigRuntimeException.HandleUncaughtException(e, env);
+			Static.SendMessage(p, MCChatColor.RED + e.toString());
+			interpreterMode.add(p.getName());
+		} catch(Exception e){
+			Static.SendMessage(p, MCChatColor.RED + e.toString());
+			Logger.getLogger(CommandHelperInterpreterListener.class.getName()).log(Level.SEVERE, null, e);
+			interpreterMode.add(p.getName());
+		}
+	}
 
     public void startInterpret(String playername) {
         interpreterMode.add(playername);

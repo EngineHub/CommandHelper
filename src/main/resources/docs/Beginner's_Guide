@@ -229,12 +229,6 @@ for dealing with user aliases and other useful features.
 * /runalias - Certain configurable plugins might not use the standard method to call commands, so you would get "Unknown Command." 
 for commands that otherwise work when entered normally. Instead use "/runalias /myalias".
 
-The following commands may be removed in future versions, and should not be relied on too heavily:
-* /. or /repeat - Reruns the user's last command, if there was one.
-* /alias <alias> - Adds a new user alias to the list of aliases for this user
-* /viewalias or /viewaliases - Shows all of the aliases for this user, as well as their id, which is used to delete the alias
-* /delalias <id> [<id>...] - Deletes the specified alias(es)
-
 ===Continued Learning===
 
 The advanced guide covers more of the scripting elements of CommandHelper, and can be used to jump start learning the
