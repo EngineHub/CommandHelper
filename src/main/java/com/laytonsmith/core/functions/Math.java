@@ -2355,30 +2355,30 @@ public class Math {
 			INFINITY(Double.POSITIVE_INFINITY, "A representation of positive infinity, per the IEEE 754 standard"),
 			DOUBLE_MAX(Double.MAX_VALUE, "The higest number that can be represented as a double"),
 			DOUBLE_MIN(Double.MIN_VALUE, "The lowest number that can be represented as a double"),
-			LONG_MAX((double)Long.MAX_VALUE, "The higest number that can be represented as a long"),
-			LONG_MIN((double)Long.MIN_VALUE, "The lowest number that can be represented as a long"),
-			SHORT_MAX((double)Short.MAX_VALUE, "The higest number that can be represented as a short"),
-			SHORT_MIN((double)Short.MIN_VALUE, "The lowest number that can be represented as a short"),
-			INTEGER_MAX((double)Integer.MAX_VALUE, "The higest number that can be represented as a integer"),
-			INTEGER_MIN((double)Integer.MIN_VALUE, "The lowest number that can be represented as an integer"),
-			FLOAT_MAX((double)Float.MAX_VALUE, "The higest number that can be represented as a float"),
-			FLOAT_MIN((double)Float.MIN_VALUE, "The lowest number that can be represented as a float"),
-			BYTE_MAX((double)Byte.MAX_VALUE, "The higest number that can be represented as a byte"),
-			BYTE_MIN((double)Byte.MIN_VALUE, "The lowest number that can be represented as a byte"),
+			LONG_MAX(Long.MAX_VALUE, "The higest number that can be represented as a long"),
+			LONG_MIN(Long.MIN_VALUE, "The lowest number that can be represented as a long"),
+			SHORT_MAX(Short.MAX_VALUE, "The higest number that can be represented as a short"),
+			SHORT_MIN(Short.MIN_VALUE, "The lowest number that can be represented as a short"),
+			INTEGER_MAX(Integer.MAX_VALUE, "The higest number that can be represented as a integer"),
+			INTEGER_MIN(Integer.MIN_VALUE, "The lowest number that can be represented as an integer"),
+			FLOAT_MAX(Float.MAX_VALUE, "The higest number that can be represented as a float"),
+			FLOAT_MIN(Float.MIN_VALUE, "The lowest number that can be represented as a float"),
+			BYTE_MAX(Byte.MAX_VALUE, "The higest number that can be represented as a byte"),
+			BYTE_MIN(Byte.MIN_VALUE, "The lowest number that can be represented as a byte"),
 			E(java.lang.Math.E, "The mathematical constant e, also known as Euler's number (not to be confused with the Euler-Mascheroni constant)"),
 			PI(java.lang.Math.PI, "The value of π (pi)"),
 			PHI(1.6180339887498948482045868343656381177203091798057628621, "The golden ratio"),
 			C(2.99792458e8, "The speed of light in a vacuum, in meters per second"),
 			EULER(0.5772156649015627, "The Euler-Mascheroni constant γ (not to be confused with e)")
 			;
-			private final Double value;
+			private final Number value;
 			private final String doc;
-			private MathConstants(Double value, String doc){
+			private MathConstants(Number value, String doc){
 				this.value = value;
 				this.doc = doc;
 			}
 			
-			public Double getValue(){
+			public Number getValue(){
 				return this.value;
 			}
 			
@@ -2391,7 +2391,12 @@ public class Math {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				MathConstants c = MathConstants.valueOf(args[0].val());
-				return new CDouble(c.getValue(), t);
+				Number v = c.getValue();
+				if(v instanceof Double){
+					return new CDouble((Double)c.getValue(), t);
+				} else {
+					return new CInt((Integer)c.getValue(), t);
+				}
 			} catch(IllegalArgumentException ex){
 				throw new Exceptions.CastException("No constant with the value " + args[0].val() + " exists.", t);
 			}
@@ -2409,7 +2414,7 @@ public class Math {
 
 		@Override
 		public String docs() {
-			String docs = "double {constant} Returns the value of various math constants. The constant argument must be one of the following: "
+			String docs = "number {constant} Returns the value of various math constants. The constant argument must be one of the following: "
 					+ StringUtils.Join(MathConstants.values(), ", ", ", or ") + "\n";
 			docs += "---- The following table lists the values, and a brief description of each:\n"
 					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
