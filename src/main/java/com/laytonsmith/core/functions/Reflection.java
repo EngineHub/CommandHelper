@@ -11,6 +11,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -559,5 +560,70 @@ public class Reflection {
 			return CHVersion.V3_3_1;
 		}
 		
+	}
+
+	@api
+	public static class get_procedures extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for (Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
+				ret.push(new CString(p.getKey(), t));
+			}
+			ret.sort(CArray.SortType.STRING_IC);
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_procedures";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns an array of procedures callable in the current scope.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Simple example", "msg(get_procedures());\n"
+						+ "proc _testProc() {}\n"
+						+ "msg(get_procedures());"),
+				new ExampleScript("Example with procedures within procedures", "msg(get_procedures());\n"
+						+ "proc _testProc() {\n"
+						+ "\tproc _innerProc() {}\n"
+						+ "\tmsg(get_procedures());\n"
+						+ "}\n"
+						+ "_testProc();\n"
+						+ "msg(get_procedures());")
+			};
+		}
 	}
 }
