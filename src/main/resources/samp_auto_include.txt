@@ -1,6 +1,6 @@
 #===============================================================================
 #
-#   Sample external MethodScript include
+#   Sample external MethodScript include. To use these functions, uncomment them.
 #
 #===============================================================================
 
@@ -9,7 +9,7 @@
  * @param array @arr1 The first point, expects an array of x, y, z
  * @param array @arr2 The second point, expects an array of x, y, z
  */
-proc(_3d_distance, @arr1, @arr2,
+/*proc _3d_distance(array @arr1, array @arr2){
     return(
         floor(
             sqrt(				
@@ -18,20 +18,20 @@ proc(_3d_distance, @arr1, @arr2,
 				+ ((@arr2[2] - @arr1[2]) ** 2)
             )
         )
-    )
-)
+    );
+}*/
 
 /**
  * Given two blocks, iterates through all the blocks inside the cuboid, and calls the 
- * user defined function on them. The used defined procedure should accept 3 parameters,
+ * user defined closure on them. The used defined closure should accept 3 parameters,
  * the x, y, and z coordinates of the block.
  */
-proc(_iterate_cuboid, @b1, @b2, @proc_name,
-        for(assign(@x, min(@b1[0], @b2[0])), @x <= max(@b1[0], @b2[0]), @x++,
-                for(assign(@y, min(@b1[1], @b2[1])), @y <= max(@b1[1], @b2[1]), @y++,
-                        for(assign(@z, min(@b1[2], @b2[2])), @z <= max(@b1[2], @b2[2]), @z++,
-                                call_proc(@proc_name, @x, @y, @z)
-                        )
-                )
-        )
-)
+/*proc _iterate_cuboid(array @b1, array @b2, closure @callback){
+        for(@x = min(@b1[0], @b2[0]), @x <= max(@b1[0], @b2[0]), @x++){
+                for(@y = min(@b1[1], @b2[1]), @y <= max(@b1[1], @b2[1]), @y++){
+                        for(@z = min(@b1[2], @b2[2]), @z <= max(@b1[2], @b2[2]), @z++){
+                                execute(@x, @y, @z, @callback);
+                        }
+                }
+        }
+}*/
