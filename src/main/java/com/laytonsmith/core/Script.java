@@ -482,58 +482,56 @@ public class Script {
         boolean isAMatch = true;
         StringBuilder lastVar = new StringBuilder();
         int lastJ = 0;
-        try {
-            for (int j = 0; j < cleft.size(); j++) {
-                if (!isAMatch) {
-                    break;
-                }
-                lastJ = j;
-                Construct c = cleft.get(j);
-                String arg = args.get(j);
-                if (c.getCType() != ConstructType.VARIABLE) {
-                    if (case_sensitive && !c.val().equals(arg) || !case_sensitive && !c.val().equalsIgnoreCase(arg)) {
-                        isAMatch = false;
-                        continue;
-                    }
-                } else {
-                    //It's a variable. If it's optional, the rest of them are optional too, so as long as the size of
-                    //args isn't greater than the size of cleft, it's a match
-                    if (((Variable) c).isOptional()) {
-                        if (args.size() <= cleft.size()) {
-                            return true;
-                        } else {
-                            Construct fin = cleft.get(cleft.size() - 1);
-                            if (fin instanceof Variable) {
-                                if (((Variable) fin).isFinal()) {
-                                    return true;
-                                }
-                            }
-                            return false;
-                        }
-                    }
-                }
-                if (j == cleft.size() - 1) {
-                    if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
-                        Variable lv = (Variable) cleft.get(j);
-                        if (lv.isFinal()) {
-                            for (int a = j; a < args.size(); a++) {
-                                if (lastVar.length() == 0) {
-                                    lastVar.append(args.get(a));
-                                } else {
-                                    lastVar.append(" ").append(args.get(a));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (IndexOutOfBoundsException e) {
-            if (cleft.get(lastJ).getCType() != ConstructType.VARIABLE
-                    || cleft.get(lastJ).getCType() == ConstructType.VARIABLE
-                    && !((Variable) cleft.get(lastJ)).isOptional()) {
-                isAMatch = false;
-            }
-        }
+		for (int j = 0; j < cleft.size(); j++) {
+			if (!isAMatch) {
+				break;
+			}
+			lastJ = j;
+			Construct c = cleft.get(j);
+			if(args.size() <= j) {
+				if (c.getCType() != ConstructType.VARIABLE || !((Variable) c).isOptional()) {
+					isAMatch = false;
+				}
+				break;
+			}
+			String arg = args.get(j);
+			if (c.getCType() != ConstructType.VARIABLE) {
+				if (case_sensitive && !c.val().equals(arg) || !case_sensitive && !c.val().equalsIgnoreCase(arg)) {
+					isAMatch = false;
+					continue;
+				}
+			} else {
+				//It's a variable. If it's optional, the rest of them are optional too, so as long as the size of
+				//args isn't greater than the size of cleft, it's a match
+				if (((Variable) c).isOptional()) {
+					if (args.size() <= cleft.size()) {
+						return true;
+					} else {
+						Construct fin = cleft.get(cleft.size() - 1);
+						if (fin instanceof Variable) {
+							if (((Variable) fin).isFinal()) {
+								return true;
+							}
+						}
+						return false;
+					}
+				}
+			}
+			if (j == cleft.size() - 1) {
+				if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
+					Variable lv = (Variable) cleft.get(j);
+					if (lv.isFinal()) {
+						for (int a = j; a < args.size(); a++) {
+							if (lastVar.length() == 0) {
+								lastVar.append(args.get(a));
+							} else {
+								lastVar.append(" ").append(args.get(a));
+							}
+						}
+					}
+				}
+			}
+		}
         boolean lastIsFinal = false;
         if (cleft.get(cleft.size() - 1) instanceof Variable) {
             Variable v = (Variable) cleft.get(cleft.size() - 1);

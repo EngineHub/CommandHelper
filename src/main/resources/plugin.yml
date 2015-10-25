@@ -1,7 +1,6 @@
 name: CommandHelper
 main: com.laytonsmith.commandhelper.CommandHelperPlugin
 version: "${project.version}"
-softdepend: [Vault]
 commands:
     reloadaliases:
         description: Reloads aliases

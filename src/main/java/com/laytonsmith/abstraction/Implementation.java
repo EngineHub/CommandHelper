@@ -140,14 +140,10 @@ public final class Implementation {
 	private static void checkEnumConvertors(EnumConvertor convertor, Class to, Class from, boolean isToConcrete) {
 		for (Object enumConst : from.getEnumConstants()) {
 			ReflectionUtils.set(EnumConvertor.class, convertor, "useError", false);
-			try {
-				if (isToConcrete) {
-					convertor.getConcreteEnum((Enum) enumConst);
-				} else {
-					convertor.getAbstractedEnum((Enum) enumConst);
-				}
-			} catch (IllegalArgumentException e) {
-				//Ignored, it should have already logged it
+			if (isToConcrete) {
+				convertor.getConcreteEnum((Enum) enumConst);
+			} else {
+				convertor.getAbstractedEnum((Enum) enumConst);
 			}
 			ReflectionUtils.set(EnumConvertor.class, convertor, "useError", true);
 		}
