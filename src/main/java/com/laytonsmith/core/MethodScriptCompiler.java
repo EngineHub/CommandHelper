@@ -1087,12 +1087,16 @@ public final class MethodScriptCompiler {
 
 			//Smart strings
 			if (t.type == TType.SMART_STRING) {
+				if(t.val().contains("@")) {
 				ParseTree function = new ParseTree(fileOptions);
 				function.setData(new CFunction(new Compiler.smart_string().getName(), t.target));
 				ParseTree string = new ParseTree(fileOptions);
 				string.setData(new CString(t.value, t.target));
 				function.addChild(string);
 				tree.addChild(function);
+				} else {
+					tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
+				}
 				constructCount.peek().incrementAndGet();
 				continue;
 			}
