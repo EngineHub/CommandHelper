@@ -2712,14 +2712,10 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "mixed {ivar | key} This function imports a value from the global value"
-					+ " register. In the first mode, it looks for an ivariable with the specified"
-					+ " name, and stores the value in the variable, and returns void. The first"
-					+ " mode is deprecated, and should not be used. In the"
-					+ " second mode, it looks for a value stored with the specified key, and"
-					+ " returns that value. Items can be stored with the export function. If"
-					+ " the specified ivar doesn't exist, the ivar will be assigned an empty"
-					+ " string, and if the specified string key doesn't exist, null is returned."
+			return "mixed {key} This function imports a value from the global value"
+					+ " register. It looks for a value stored with the specified key, and"
+					+ " returns that value. Items can be stored with the export function."
+					+ " If the specified string key doesn't exist, null is returned."
 					+ " See the documentation on [[CommandHelper/import-export|imports/exports]]"
 					+ " for more information. import() is threadsafe.";
 		}
@@ -2805,11 +2801,9 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "void {ivar | key, value} Stores a value in the global storage register."
-					+ " When using the first mode, the ivariable is stored so it can be imported"
-					+ " later, and when using the second mode, an arbitrary value is stored with"
-					+ " the give key, and can be retreived using the secode mode of import. The first mode will"
-					+ " be deprecated in future versions, so should be avoided. If"
+			return "void {key, value} Stores a value in the global storage register."
+					+ " An arbitrary value is stored with"
+					+ " the given key, and can be retreived using import(). If"
 					+ " the value is already stored, it is overwritten. See {{function|import}} and"
 					+ " [[CommandHelper/import-export|importing/exporting]]. The reference to the value"
 					+ " is stored, not a copy of the value, so in the case of arrays, manipulating the"
