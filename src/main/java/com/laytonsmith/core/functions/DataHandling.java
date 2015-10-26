@@ -3037,7 +3037,6 @@ public class DataHandling {
 
 	@api
 	@unbreakable
-	@nolinking
 	public static class iclosure extends closure {
 
 		@Override
