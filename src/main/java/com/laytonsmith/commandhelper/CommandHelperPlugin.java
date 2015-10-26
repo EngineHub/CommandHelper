@@ -129,7 +129,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 */
 	final CommandHelperServerListener serverListener =
 			new CommandHelperServerListener();
-	final Set<MCPlayer> commandRunning = new HashSet<MCPlayer>();
 
 	@Override
 	public void onLoad() {
@@ -539,36 +538,24 @@ public class CommandHelperPlugin extends JavaPlugin {
 				player = new BukkitMCPlayer((Player) sender);
 			}
 			ac.reload(player, args);
-//            if(ac.reload(player)){
-//                if(sender instanceof Player){
-//                    Static.SendMessage(player, MCChatColor.GOLD + "Command Helper scripts sucessfully recompiled.");
-//                }
-//                StreamUtils.GetSystemOut().println(TermColors.YELLOW + "Command Helper scripts sucessfully recompiled." + TermColors.reset());
-//            } else{
-//                if(sender instanceof Player){
-//                    Static.SendMessage(player, MCChatColor.RED + "An error occured when trying to compile the script. Check the console for more information.");
-//                }
-//                StreamUtils.GetSystemOut().println(TermColors.RED + "An error occured when trying to compile the script. Check the console for more information." + TermColors.reset());
-//            }
 			return true;
-		} else if (cmdName.equals("commandhelper") && args.length >= 1 && args[0].equalsIgnoreCase("null")) {
-			return true;
+		} else if (cmdName.equalsIgnoreCase("commandhelper")) {
+			return args.length >= 1 && args[0].equalsIgnoreCase("null");
 		} else if (cmdName.equals("runalias")) {
 			//Hardcoded alias rebroadcast
+			String command = StringUtils.Join(args, " ");
 			if (sender instanceof Player) {
-				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, StringUtils.Join(args, " "));
+				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, command);
 				playerListener.onPlayerCommandPreprocess(pcpe);
 			} else if (sender instanceof ConsoleCommandSender) {
-				String cmd2 = Static.strJoin(args, " ");
-				if (cmd2.startsWith("/")) {
-					cmd2 = cmd2.substring(1);
+				if (command.startsWith("/")) {
+					command = command.substring(1);
 				}
-				ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender) sender, cmd2);
+				ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender) sender, command);
 				serverListener.onServerCommand(sce);
 			} else if(sender instanceof BlockCommandSender){
 				MCCommandSender s = new BukkitMCBlockCommandSender((BlockCommandSender)sender);
-				String cmd2 = StringUtils.Join(args, " ");
-				Static.getAliasCore().alias(cmd2, s);
+				Static.getAliasCore().alias(command, s);
 			}
 			return true;
 		} else if(cmdName.equalsIgnoreCase("interpreter-on")){
@@ -576,21 +563,27 @@ public class CommandHelperPlugin extends JavaPlugin {
 				int interpreterTimeout = Prefs.InterpreterTimeout();
 				if(interpreterTimeout != 0){
 					interpreterUnlockedUntil = (interpreterTimeout * 60 * 1000) + System.currentTimeMillis();
-					sender.sendMessage("Inpterpreter mode unlocked for " + interpreterTimeout + " minute" + (interpreterTimeout==1?"":"s"));
+					sender.sendMessage("Inpterpreter mode unlocked for " + interpreterTimeout + " minute"
+							+ (interpreterTimeout==1?"":"s"));
 				}
 			} else {
 				sender.sendMessage("This command can only be run from console.");
 			}
 			return true;
-		} else if (sender instanceof Player && (cmdName.equalsIgnoreCase("commandhelper") || cmdName.equalsIgnoreCase("interpreter"))) {
-			try {
-				return runCommand(new BukkitMCPlayer((Player) sender), cmdName, args);
-			} catch (DataSourceException ex) {
-				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (ReadOnlyException ex) {
-				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (IOException ex) {
-				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+		} else if (sender instanceof Player && cmdName.equalsIgnoreCase("interpreter")) {
+			if (!sender.hasPermission("commandhelper.interpreter")) {
+				sender.sendMessage(MCChatColor.RED + "You do not have permission to run that command");
+			} else if (!Prefs.EnableInterpreter()) {
+				sender.sendMessage(MCChatColor.RED + "The interpreter is currently disabled."
+						+ " Check your preferences file.");
+			} else if (Prefs.InterpreterTimeout() != 0 && interpreterUnlockedUntil < System.currentTimeMillis()) {
+				sender.sendMessage(MCChatColor.RED + "Interpreter mode is currently locked. Run \"interpreter-on\""
+						+ " console to unlock it. If you want to turn this off entirely, set the interpreter-timeout"
+						+ " option to 0 in " + CommandHelperFileLocations.getDefault().getPreferencesFile().getName());
+			} else {
+				interpreterListener.startInterpret(sender.getName());
+				sender.sendMessage(MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a"
+						+ " line by itself to exit, and >>> to enter multiline mode.");
 			}
 			return true;
 		} else {
@@ -598,48 +591,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 			MCCommand mccmd = new BukkitMCCommand(cmd);
 			return mccmd.handleCustomCommand(mcsender, commandLabel, args);
 		}
-	}
-
-	/**
-	 * Runs commands.
-	 *
-	 * @param player
-	 * @param cmd
-	 * @param args
-	 * @return
-	 */
-	private boolean runCommand(final MCPlayer player, String cmd, String[] args) throws DataSourceException, ReadOnlyException, IOException {
-		if (commandRunning.contains(player)) {
-			return true;
-		}
-
-		commandRunning.add(player);
-		if (cmd.equalsIgnoreCase("interpreter")) {
-			if (player.hasPermission("commandhelper.interpreter")) {
-				if (Prefs.EnableInterpreter()) {
-					if(Prefs.InterpreterTimeout() != 0){
-						if(interpreterUnlockedUntil < System.currentTimeMillis()){
-							player.sendMessage(MCChatColor.RED + "Interpreter mode is currently locked. Run \"interpreter-on\" from console to unlock it."
-									+ " If you want to turn this off entirely, set the interpreter-timeout option to 0 in "
-									+ CommandHelperFileLocations.getDefault().getPreferencesFile().getName());
-							commandRunning.remove(player);
-							return true;
-						}
-					}
-					interpreterListener.startInterpret(player.getName());
-					Static.SendMessage(player, MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
-							+ " multiline mode.");
-				} else {
-					Static.SendMessage(player, MCChatColor.RED + "The interpreter is currently disabled. Check your preferences file.");
-				}
-			} else {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to run that command");
-			}
-			commandRunning.remove(player);
-			return true;
-		}
-		commandRunning.remove(player);
-		return false;
 	}
 
 	/**

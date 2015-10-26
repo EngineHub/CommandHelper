@@ -134,13 +134,6 @@
 			<id>spigot-repo</id>
 			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
 		</repository>
-		<!--<repository>
-			<id>bukkit-maven</id>
-			<url>http://repo.bukkit.org/content/repositories/releases/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>-->
 
 		<!-- Other repositories -->
 		<repository>

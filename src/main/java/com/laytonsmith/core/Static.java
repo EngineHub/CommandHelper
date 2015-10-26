@@ -388,6 +388,16 @@ public final class Static {
 	}
 
 	/**
+	 * Regex patterns
+	 */
+	private static final Pattern INVALID_HEX = Pattern.compile("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*");
+	private static final Pattern VALID_HEX = Pattern.compile("0x[a-fA-F0-9]+");
+	private static final Pattern INVALID_BINARY = Pattern.compile("\"0b[0-1]*[^0-1]+[0-1]*\"");
+	private static final Pattern VALID_BINARY = Pattern.compile("0b[0-1]+");
+	private static final Pattern INVALID_OCTAL = Pattern.compile("0o[0-7]*[^0-7]+[0-7]*");
+	private static final Pattern VALID_OCTAL = Pattern.compile("0b[0-1]+");
+
+	/**
 	 * Given a string input, creates and returns a Construct of the appropriate
 	 * type. This takes into account that null, true, and false are keywords.
 	 *
@@ -413,27 +423,27 @@ public final class Static {
 		if(val.equals("void")){
 			return CClassType.VOID;
 		}
-		if (val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")) {
+		if (INVALID_HEX.matcher(val).matches()) {
 			throw new ConfigRuntimeException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.",
 					ExceptionType.FormatException, t);
 		}
-		if (val.matches("0x[a-fA-F0-9]+")) {
+		if (VALID_HEX.matcher(val).matches()) {
 			//Hex number
 			return new CInt(Long.parseLong(val.substring(2), 16), t);
 		}
-		if (val.matches("0b[0-1]*[^0-1]+[0-1]*")) {
+		if (INVALID_BINARY.matcher(val).matches()) {
 			throw new ConfigRuntimeException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.",
 					ExceptionType.FormatException, t);
 		}
-		if (val.matches("0b[0-1]+")) {
+		if (VALID_BINARY.matcher(val).matches()) {
 			//Binary number
 			return new CInt(Long.parseLong(val.substring(2), 2), t);
 		}
-		if(val.matches("0o[0-7]*[^0-7]+[0-7]*")){
+		if (INVALID_OCTAL.matcher(val).matches()){
 			throw new ConfigRuntimeException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.",
 					ExceptionType.FormatException, t);
 		}
-		if(val.matches("0o[0-7]+")){
+		if (VALID_OCTAL.matcher(val).matches()){
 			return new CInt(Long.parseLong(val.substring(2), 8), t);
 		}
 		try {
