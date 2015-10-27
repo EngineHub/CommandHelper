@@ -22,6 +22,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -1062,5 +1063,52 @@ public class Meta {
 			return CHVersion.V3_3_1;
 		}
 		
+	}
+
+	@api
+	public static class get_script_environment extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CResource<>(environment, t);
+		}
+
+		@Override
+		public String getName() {
+			return "get_script_environment";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "resource {} Returns a copy of the underlying engine's environment object. This is only useful to embedded scripting"
+					+ " engines that are attempting to call back into " + Implementation.GetServerType().getBranding() + ". The object returned"
+					+ " is a CResource.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
 	}
 }
