@@ -1,0 +1,111 @@
+It's usually not necessary to define permissions to use the basic alias/macro functionality. More advanced features like scripting may require some permissions to be defined.
+
+== External Commands  ==
+All permissions remain the same when commands in plugins or vanilla server are called by this plugin.
+
+''Example:'' Bob does not have permission to use the '''/give''' command. If Bob triggered an alias which calls '''/give''', he still wouldn't be able to use it.
+
+The exception to this is the '''runas()''' function, which can override permissions in some cases. However, the function itself is restricted and requires permission to use (see below).
+
+== Internal Commands  ==
+These commands are provided by the plugin itself and are not aliases:
+
+{| class="wiki-table" width="100%"
+|-
+! Permission
+! Command
+! Description
+|-
+| rowspan=2 | ''No permission required''
+| '''/commandhelper ''<arguments>'''''
+| Gain meta information about CommandHelper.
+|-
+| '''/runalias ''<alias>'''''
+| Run an alias. Can be used by other plugins to call aliases. '''''<alias>''''' includes the forward slash. <br>''Example:'' '''/runalias /eat cake''' would always fire off the alias '''/eat cake'''
+|-
+| '''commandhelper.reloadaliases'''
+| '''/reloadalias''' or '''/reloadaliases'''
+| Reload all aliases from file.
+|-
+| '''commandhelper.interpreter'''
+| '''/interpreter'''
+| Puts your chat into [[CommandHelper/Interpreter Mode|interpreter mode]]. Note that interpreter mode must also be enabled in the preferences.
+|}
+
+== Function Types ==
+Functions are divided into two groups:
+=== Unrestricted Functions ===
+These are used for typical programming type tasks or retrieving basic information. They are considered to be harmless on their own.
+
+''Example:'' '''if()''' can not be used to bypass protections or do harm.
+
+No permissions are required to use these.
+
+=== Restricted Functions ===
+These often tie into game functionality and have some potential for abuse.
+
+''Example:'' '''spawn_mob()''' can be used to spawn a large number of creepers.
+
+Permission is required to use these. The next section describes how to give access to these functions.
+
+== Scripting Permissions ==
+There are two ways to handle the permissions for restricted functions:
+=== Function Based Permissions ===
+These permissions apply no matter where or how a function is used.
+
+{{warning|text=These apply to ALL scripts everywhere, and so are usually not recommended for use except by advanced users. See alias based permissions below for more granular control}}
+
+{| class="wiki-table" width="100%"
+|-
+! width=300 | Permission
+! Description
+|-
+| '''commandhelper.func.use.''<function name>'''''
+| Allow usage of the function ''<function name>'' in a script. <br>Basically, allow running created aliases containing this function.
+|}
+
+It is not recommended to give these permissions to untrusted users unless you know exactly what you're doing. Instead, carefully craft aliases for them to prevent abuse. Read on to learn how to create permissions for individual aliases.
+
+=== Alias Based Permissions ===
+Alias based permissions apply to all functions within an alias. Think of them like overrides. They allow for more fine grained control since you can control the content of the alias. These permissions allow for quick, common sense default handling of aliases. If, however, you need very fine grained control, see the section below with star aliases. Alias based permissions only act to ''further unrestrict otherwise restricted functions''. That is, you can't use alias permissions to directly deny access to a command in which the user would otherwise have permission for. The idea is that if you trust a user to use all the functions in a script, then it doesn't matter so much how those functions are arranged, they should still be able to use the command as a whole. This isn't always true though, so in those cases, you'll need to do your own permission checking from within the alias (see the section on star permissions below).
+
+To create permissions for an alias, add a label in front of it:
+ ''<label>'':/command = ...
+
+There are two types of labels:
+==== Permission Labels ====
+Put only letters, numbers and underscores in the label to assign the permission '''commandhelper.alias.''<label>''''' to the entire alias.
+
+''Example:'' '''tasty:/eat cake = ...''' would cause people with '''commandhelper.alias.tasty''' to be given permission to use '''/eat cake'''
+
+==== Group Labels ====
+Start your label with a tilde "'''~'''" to turn it into a group label.
+
+Add the group names separated by forward slashes "'''/'''" to give them permission.
+
+Add a hyphen "'''-'''" in front of a group name to remove permissions instead.
+
+Groups take priority from left to right.
+
+Example: '''~mods/-admin/default:/eat cake = ...''' would give permission to mods and the default group, but remove permissions from the admins (causing restricted functions to always fail). A user in both the admin and default group would lose permissions due to how priority works.
+
+==== Star Label ====
+
+You can use the star label as an alternative to assigning all groups to an alias, or giving all groups a permission, then tagging the alias with that label. This opens the alias up to all users. It essentially disables permission checking entirely for that one alias.
+
+<pre>
+*:/safeAlias = dangerous('careful')
+</pre>
+
+This is useful in combination with the <code>has_permission()</code> function, in the case where you need super fine grained control of the permissions for this alias. You can open up the alias to everyone, then more carefully select the behavior from within the alias, based on the results of <code>has_permission()</code>
+
+== Extra Notes ==
+=== Shorthand Permissions ===
+'''commandhelper.''<permission>''''' can always be shortened into '''ch.''<permission>''''' if you feel like typing less.
+
+=== Console Commands ===
+Aliases can always be triggered from the console. However, some functions expecting a player will fail.
+
+External Commands will generally behave as if you typed the command from console yourself.
+
+{{LearningTrail}}
