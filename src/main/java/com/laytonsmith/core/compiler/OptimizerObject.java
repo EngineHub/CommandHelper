@@ -43,27 +43,14 @@ class OptimizerObject {
 	private void optimize01(ParseTree tree, CompilerEnvironment compilerEnvironment) throws ConfigCompileException {
 		com.laytonsmith.core.functions.Compiler.__autoconcat__ autoconcat
 				= (com.laytonsmith.core.functions.Compiler.__autoconcat__) FunctionList.getFunction("__autoconcat__", Target.UNKNOWN);
-		if (tree.getData() instanceof CFunction && tree.getData().val().equals("cc")) {
-			for (int i = 0; i < tree.getChildren().size(); i++) {
-				ParseTree node = tree.getChildAt(i);
-				if (node.getData().val().equals("__autoconcat__")) {
-					ParseTree tempNode = autoconcat.optimizeSpecial(node.getChildren(), false);
-					tree.setData(tempNode.getData());
-					tree.setChildren(tempNode.getChildren());
-					optimize01(tree, compilerEnvironment);
-					return;
-				}
-			}
-		} else {
-			if (tree.getData() instanceof CFunction && tree.getData().val().equals("__autoconcat__")) {
-				ParseTree tempNode = autoconcat.optimizeSpecial(tree.getChildren(), true);
-				tree.setData(tempNode.getData());
-				tree.setChildren(tempNode.getChildren());
-			}
-			for (int i = 0; i < tree.getChildren().size(); i++) {
-				ParseTree node = tree.getChildren().get(i);
-				optimize01(node, compilerEnvironment);
-			}
+		if (tree.getData() instanceof CFunction && tree.getData().val().equals("__autoconcat__")) {
+			ParseTree tempNode = autoconcat.optimizeSpecial(tree.getChildren(), true);
+			tree.setData(tempNode.getData());
+			tree.setChildren(tempNode.getChildren());
+		}
+		for (int i = 0; i < tree.getChildren().size(); i++) {
+			ParseTree node = tree.getChildren().get(i);
+			optimize01(node, compilerEnvironment);
 		}
 	}
 

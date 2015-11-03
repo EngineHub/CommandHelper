@@ -176,7 +176,7 @@ public class NewMethodScriptCompiler {
 
 	private static void link(ParseTree root, Environment compilerEnvirontment) throws ConfigCompileException {
 		//Before we actually link, we need to optimize our branch functions, that is,
-		//currently just if. However, at this point, we also need to optimize __autoconcat__ and cc.
+		//currently just if. However, at this point, we also need to optimize __autoconcat__.
 		//so we know what the tree actually looks like. Also, we want to first group all our auto includes
 		//together, along with our actual tree.
 		ParseTree master = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), root.getFileOptions());

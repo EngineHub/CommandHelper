@@ -50,7 +50,7 @@ public class ProcedureTest {
     }
 
     @Test public void ensureOutOfScopeWorks() throws Exception{
-        SRun("assign(@lol, '42') proc(_blah, msg(cc('notlol' @lol))) _blah()", fakePlayer);
+        SRun("assign(@lol, '42') proc(_blah, msg('notlol'.@lol)) _blah()", fakePlayer);
         verify(fakePlayer).sendMessage("notlolnull");
     }
 
