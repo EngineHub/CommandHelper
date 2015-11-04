@@ -995,7 +995,8 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof ArrayAccess) {
+			// As an exception, strings aren't supported here. There's no reason to do this for a string that isn't accidental.
+			if (args[0] instanceof ArrayAccess && !(args[0] instanceof CString)) {
 				ArrayAccess ca = (ArrayAccess) args[0];
 				CArray ca2 = new CArray(t);
 				for (Construct c : ca.keySet()) {
