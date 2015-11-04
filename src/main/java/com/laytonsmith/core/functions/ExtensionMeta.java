@@ -285,7 +285,7 @@ public class ExtensionMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 
-			CArray retn = new CArray(t);
+			CArray retn = new CArray(t, -1);
 
 			if (args.length == 0) {
 				for (URL url: trackers.keySet()) {
@@ -293,7 +293,7 @@ public class ExtensionMeta {
 					CArray trkdata;
 
 					if (!retn.containsKey(trk.getIdentifier())) {
-						trkdata = new CArray(t);
+						trkdata = new CArray(t, -1);
 					} else {
 						trkdata = (CArray) retn.get(trk.getIdentifier(), t);
 					}

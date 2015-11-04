@@ -1451,7 +1451,7 @@ public class EntityManagement {
 			for (int i = 0; i < qty; i++) {
 				switch (entType.getAbstracted()) {
 					case DROPPED_ITEM:
-						CArray c = new CArray(t);
+						CArray c = new CArray(t, -1);
 						c.set("type", new CInt(1, t), t);
 						c.set("qty", new CInt(qty, t), t);
 						MCItemStack is = ObjectGenerator.GetGenerator().item(c, t);
@@ -1674,7 +1674,7 @@ public class EntityManagement {
 			if (eq.getHolder() instanceof MCPlayer) {
 				throw new ConfigRuntimeException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, -1);
 			for (Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
 				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t);
 			}
@@ -2307,7 +2307,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
-			CArray specArray = new CArray(t);
+			CArray specArray = new CArray(t, -1);
 
 			switch (entity.getType().getAbstracted()) {
 				case ARROW:

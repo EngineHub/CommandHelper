@@ -1198,7 +1198,7 @@ public class Environment {
 						throw new ConfigRuntimeException("Invalid argument for block info", ExceptionType.FormatException, t);
 				}
 			}
-			CArray array = new CArray(t);
+			CArray array = new CArray(t, -1);
 			array.set("solid", CBoolean.get(b.isSolid()), t);
 			array.set("flammable", CBoolean.get(b.isFlammable()), t);
 			array.set("transparent", CBoolean.get(b.isTransparent()), t);

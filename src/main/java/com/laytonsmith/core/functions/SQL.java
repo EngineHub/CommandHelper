@@ -218,7 +218,7 @@ public class SQL {
 						ResultSetMetaData md = ps.getMetaData();
 						ResultSet rs = ps.getResultSet();
 						while (rs != null && rs.next()) {
-							CArray row = new CArray(t);
+							CArray row = new CArray(t, -1);
 							for (int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
