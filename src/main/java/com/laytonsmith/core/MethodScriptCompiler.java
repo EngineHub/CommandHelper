@@ -1592,30 +1592,6 @@ public final class MethodScriptCompiler {
 			//There's no way to optimize something that's not a function
 			return;
 		}
-		//cc has to be inb4 other autoconcats, so sconcats on the lower level won't get run
-		if (tree.getData().val().equals("cc")) {
-			for (int i = 0; i < tree.getChildren().size(); i++) {
-				ParseTree node = tree.getChildAt(i);
-				if (node.getData().val().equals(__autoconcat__)) {
-					Compiler.__autoconcat__ func;
-					try {
-						func = (Compiler.__autoconcat__) FunctionList.getFunction(node.getData());
-					} catch (ConfigCompileException ex) {
-						compilerErrors.add(ex);
-						return;
-					}
-					try {
-						ParseTree tempNode = func.optimizeSpecial(node.getChildren(), false);
-						tree.setData(tempNode.getData());
-						tree.setChildren(tempNode.getChildren());
-					} catch (ConfigCompileException ex) {
-						compilerErrors.add(ex);
-					}
-					optimize(tree, procs, compilerErrors);
-					return;
-				}
-			}
-		}
 		//If it is a proc definition, we need to go ahead and see if we can add it to the const proc stack
 		if (tree.getData().val().equals("proc")) {
 			procs.push(new ArrayList<Procedure>());

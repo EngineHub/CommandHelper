@@ -465,26 +465,6 @@
 				</configuration>
 			</plugin>
 
-			<!-- Assembly -->
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2-beta-2</version>
-				<configuration>
-					<descriptor>${basedir}/src/main/assembly/default.xml</descriptor>
-				</configuration>
-			</plugin>
-
-			<!-- Release -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.2.2</version>
-				<configuration>
-					<preparationGoals>assembly:assembly</preparationGoals>
-					<goals>assembly:assembly</goals>
-				</configuration>
-			</plugin>
-
 			<!-- Shade plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
