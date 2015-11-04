@@ -1186,6 +1186,75 @@ public class BasicLogic {
 	}
 
 	@api
+	public static class sequals_ic extends AbstractFunction implements Optimizable {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Construct v1 = args[0];
+			Construct v2 = args[1];
+			if(!v2.getClass().equals(v1.getClass())){
+				return CBoolean.FALSE;
+			}
+			return new equals_ic().exec(t, environment, v1, v2);
+		}
+
+		@Override
+		public String getName() {
+			return "sequals_ic";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {value1, value2} Returns true if the values are the same type, as well as equal, according to equals_ic."
+					+ " Generally, equals_ic will suffice, because usually you will be comparing two strings, however, this function"
+					+ " may be useful in various other cases, perhaps where the datatypes are unknown, but could be strings.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
+			);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "sequals_ic(1, 1)"),
+				new ExampleScript("False result", "sequals_ic('1', 1)"),
+				new ExampleScript("False result", "sequals_ic('false', true)")
+			};
+		}
+
+	}
+
+	@api
 	@seealso({equals_ic.class})
 	public static class nequals_ic extends AbstractFunction implements Optimizable {
 
