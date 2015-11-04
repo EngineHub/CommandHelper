@@ -132,13 +132,12 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args.length == 0) {
-				throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
-			}
-			Construct index = new CSlice(0, -1, t);
+			Construct index;
 			Construct defaultConstruct = null;
 			if (args.length >= 2) {
 				index = args[1];
+			} else {
+				index = new CSlice(0, -1, t);
 			}
 			if (args.length >= 3) {
 				defaultConstruct = args[2];
@@ -185,17 +184,17 @@ public class ArrayHandling {
 				} else {
 					try {
 						if (!ca.inAssociativeMode()) {
-							if(args[1] instanceof CNull){
+							if(index instanceof CNull){
 								throw new Exceptions.CastException("Expected a number, but recieved null instead", t);
 							}
-							long iindex = Static.getInt(args[1], t);
+							long iindex = Static.getInt(index, t);
 							if (iindex < 0) {
 								//negative index, convert to positive index
 								iindex = ca.size() + iindex;
 							}
 							return ca.get(iindex, t);
 						} else {
-							return ca.get(args[1], t);
+							return ca.get(index, t);
 						}
 					} catch (ConfigRuntimeException e) {
 						if (e.getExceptionType() == ExceptionType.IndexOverflowException) {
@@ -211,7 +210,7 @@ public class ArrayHandling {
 							} else {
 								c = new CArray(t);
 							}
-							ca.set(args[1], c, t);
+							ca.set(index, c, t);
 							return c;
 						}
 						throw e;
@@ -231,7 +230,6 @@ public class ArrayHandling {
 						if (finish < 0) {
 							finish = aa.val().length() + finish;
 						}
-						CArray na = new CArray(t);
 						if (finish < start) {
 							//return an empty array in cases where the indexes don't make sense
 							return new CString("", t);
