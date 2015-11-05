@@ -299,7 +299,7 @@ public class Commands {
 						+ "\t'aliases':array('hugg', 'hugs'),\n"
 						+ "\t'executor': closure(@alias, @sender, @args) {\n"
 						+ "\t\t\tif(array_size(@args) == 1) {\n"
-						+ "\t\t\t\tif(!ponline(@args[0])) {\n"
+						+ "\t\t\t\tif(ponline(@args[0])) {\n"
 						+ "\t\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@args[0]));\n"
 						+ "\t\t\t\t} else {\n"
 						+ "\t\t\t\t\ttmsg(@sender, colorize('&cThe given player is not online.'));\n"
