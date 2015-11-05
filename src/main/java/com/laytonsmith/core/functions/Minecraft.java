@@ -1235,9 +1235,11 @@ public class Minecraft {
 				w = p.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			CArray options = new CArray(t);
+			CArray options;
 			if(args.length == 2){
 				options = Static.getArray(args[1], t);
+			} else {
+				options = new CArray(t, -1);
 			}
 			int strength = 2;
 			boolean flicker = false;
@@ -1613,7 +1615,7 @@ public class Minecraft {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, -1);
 			ret.set("maxStacksize", new CInt(i.getMaxStackSize(), t), t);
 			ret.set("maxDurability", new CInt(i.getMaxDurability(), t), t);
 			ret.set("hasGravity", CBoolean.get(i.hasGravity()), t);

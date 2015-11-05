@@ -394,7 +394,7 @@ public class Scoreboards {
 				to.set("prefix", new CString(team.getPrefix(), t), t);
 				to.set("suffix", new CString(team.getSuffix(), t), t);
 				to.set("size", new CInt(team.getSize(), t), t);
-				CArray ops = new CArray(t);
+				CArray ops = new CArray(t, -1);
 				ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
 				ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
@@ -578,7 +578,7 @@ public class Scoreboards {
 			if (o == null) {
 				throw new ScoreboardException("No objective by that name exists.", t);
 			}
-			CArray dis = new CArray(t);
+			CArray dis = new CArray(t, -1);
 			if (args[1] instanceof CArray) {
 				dis = (CArray) args[1];
 			} else {
@@ -651,7 +651,7 @@ public class Scoreboards {
 			if (o == null) {
 				throw new ScoreboardException("No team by that name exists.", t);
 			}
-			CArray dis = new CArray(t);
+			CArray dis = new CArray(t, -1);
 			if (args[1] instanceof CArray) {
 				dis = (CArray) args[1];
 			} else {

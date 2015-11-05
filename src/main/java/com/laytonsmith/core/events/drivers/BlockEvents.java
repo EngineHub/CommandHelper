@@ -83,7 +83,7 @@ public class BlockEvents {
             MCBlockPistonEvent event = (MCBlockPistonEvent) e;
             Map<String, Construct> map = evaluate_helper(event);
 
-            CArray blk = new CArray(Target.UNKNOWN);
+            CArray blk = new CArray(Target.UNKNOWN, -1);
 
             int blktype = event.getBlock().getTypeId();
             blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
@@ -149,7 +149,7 @@ public class BlockEvents {
 			CArray affected = new CArray(Target.UNKNOWN);
 			
 			for (MCBlock block : event.getPushedBlocks()) {
-				CArray blk = new CArray(Target.UNKNOWN);
+				CArray blk = new CArray(Target.UNKNOWN, -1);
 
 				int blktype = block.getTypeId();
 				blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
@@ -307,7 +307,7 @@ public class BlockEvents {
 
             map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 
-            CArray blk = new CArray(Target.UNKNOWN);
+            CArray blk = new CArray(Target.UNKNOWN, -1);
 
             int blktype = event.getBlock().getTypeId();
             blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
@@ -491,7 +491,7 @@ public class BlockEvents {
             int blkdata = event.getBlock().getData();
             map.put("data", new CInt(blkdata, Target.UNKNOWN));
 
-            CArray agst = new CArray(Target.UNKNOWN);
+            CArray agst = new CArray(Target.UNKNOWN, -1);
             MCBlock agstblk = event.getBlockAgainst();
             int againsttype = agstblk.getTypeId();
             agst.set("type", new CInt(againsttype, Target.UNKNOWN), Target.UNKNOWN);
@@ -503,7 +503,7 @@ public class BlockEvents {
             map.put("against", agst);
 
             MCBlockState old = event.getBlockReplacedState();
-            CArray oldarr = new CArray(Target.UNKNOWN);
+            CArray oldarr = new CArray(Target.UNKNOWN, -1);
             oldarr.set("type", new CInt(old.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
             oldarr.set("data", new CInt(old.getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
             map.put("oldblock", oldarr);
@@ -627,7 +627,7 @@ public class BlockEvents {
             MCBlockBurnEvent event = (MCBlockBurnEvent) e;
             Map<String, Construct> map = evaluate_helper(event);
 
-            CArray blk = new CArray(Target.UNKNOWN);
+            CArray blk = new CArray(Target.UNKNOWN, -1);
 
             int blktype = event.getBlock().getTypeId();
             blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
@@ -1024,12 +1024,12 @@ public class BlockEvents {
 				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
 				MCBlock oldBlock = blockGrowEvent.getBlock();
-				CArray oldBlockArray = new CArray(Target.UNKNOWN);
+				CArray oldBlockArray = new CArray(Target.UNKNOWN, -1);
 				oldBlockArray.set("type", new CInt(oldBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
 				oldBlockArray.set("data", new CInt(oldBlock.getData(), Target.UNKNOWN), Target.UNKNOWN);
 				mapEvent.put("oldblock", oldBlockArray);
 				MCBlockState newBlock = blockGrowEvent.getNewState();
-				CArray newBlockArray = new CArray(Target.UNKNOWN);
+				CArray newBlockArray = new CArray(Target.UNKNOWN, 1);
 				newBlockArray.set("type", new CInt(newBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
 				newBlockArray.set("data", new CInt(newBlock.getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
 				mapEvent.put("newblock", newBlockArray);

@@ -113,7 +113,7 @@ public class Web {
 			}
 			CArray c;
 			if(!update){
-				c = new CArray(t);
+				c = new CArray(t, -1);
 			} else {
 				c = aCookie;
 			}
@@ -371,9 +371,9 @@ public class Web {
 				public void run() {
 					try{
 						HTTPResponse resp = WebUtility.GetPage(url, settings);
-						final CArray array = new CArray(t);
+						final CArray array = new CArray(t, -1);
 						array.set("body", new CString(resp.getContent(), t), t);
-						CArray headers = new CArray(t);
+						CArray headers = new CArray(t, -1);
 						for(String key : resp.getHeaderNames()){
 							CArray h = new CArray(t);
 							for(String val : resp.getHeaders(key)){
@@ -787,7 +787,7 @@ public class Web {
 				message.setSubject(subject);
 
 				if(!"".equals(body)){
-					CArray bodyAttachment = new CArray(t);
+					CArray bodyAttachment = new CArray(t, -1);
 					bodyAttachment.set("type", "text/plain");
 					bodyAttachment.set("content", body);
 					attachments.push(bodyAttachment, 0, t);
