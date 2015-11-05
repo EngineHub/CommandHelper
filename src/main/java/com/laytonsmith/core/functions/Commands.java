@@ -18,6 +18,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
@@ -275,6 +276,41 @@ public class Commands {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Register the /hug <player> command.",
+						"register_command('hug', array(\n"
+						+ "\t'description': 'Spread the love!',\n"
+						+ "\t'usage': '/hug <player>',\n"
+						+ "\t'permission': 'perms.hugs',\n"
+						+ "\t'noPermMsg': 'You do not have permission to give hugs to players (Sorry :o).',\n"
+						+ "\t'tabcompleter': closure(@alias, @sender, @args) {\n"
+						+ "\t\t\tif(array_size(@args) == 0) {\n"
+						+ "\t\t\t\treturn(all_players());\n"
+						+ "\t\t\t}\n"
+						+ "\t\t\t@search = @args[array_size(@args) - 1];\n"
+						+ "\t\t\treturn(array_filter(all_players(), closure(@index, @player) {\n"
+						+ "\t\t\t\treturn(equals_ic(@search, substr(@player, 0, length(@search))));\n"
+						+ "\t\t\t}));\n"
+						+ "\t\t},\n"
+						+ "\t'aliases':array('hugg', 'hugs'),\n"
+						+ "\t'executor': closure(@alias, @sender, @args) {\n"
+						+ "\t\t\tif(array_size(@args) == 1) {\n"
+						+ "\t\t\t\tif(!ponline(@args[0])) {\n"
+						+ "\t\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@args[0]));\n"
+						+ "\t\t\t\t} else {\n"
+						+ "\t\t\t\t\ttmsg(@sender, colorize('&cThe given player is not online.'));\n"
+						+ "\t\t\t\t}\n"
+						+ "\t\t\t\treturn(true);\n"
+						+ "\t\t\t}\n"
+						+ "\t\t\treturn(false);\n"
+						+ "\t\t}\n"
+						+ "));",
+						"Registers the /hug command.")
+			};
 		}
 	}
 
