@@ -962,7 +962,7 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray worlds = new CArray(t);
 			for(MCWorld w : Static.getServer().getWorlds()){
-				worlds.push(new CString(w.getName(), t));
+				worlds.push(new CString(w.getName(), t), t);
 			}
 			return worlds;
 		}

@@ -229,8 +229,8 @@ public class CArray extends Construct implements ArrayAccess{
 	 * Pushes a new Construct onto the end of the array.
 	 * @param c
 	 */
-	public void push(Construct c){
-		push(c, null);
+	public final void push(Construct c, Target t){
+		push(c, null, t);
 	}
     /**
      * Pushes a new Construct onto the end of the array. If the index is specified, this works like
@@ -243,7 +243,7 @@ public class CArray extends Construct implements ArrayAccess{
 	 * @throws IndexOutOfBoundsException If the index is not null, and the index specified is out of
 	 * range.
      */
-    public void push(Construct c, Integer index) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void push(Construct c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (!associative_mode) {
 			if(index != null){
 				array.add(index, c);
@@ -325,7 +325,7 @@ public class CArray extends Construct implements ArrayAccess{
                 if (indx > next_index || indx < 0) {
                     throw new ConfigRuntimeException("", ExceptionType.IndexOverflowException, Target.UNKNOWN);
                 } else if(indx == next_index){
-                    this.push(c);
+                    this.push(c, t);
                 } else {
                     array.set(indx, c);
                 }
@@ -446,13 +446,13 @@ public class CArray extends Construct implements ArrayAccess{
 		if(associative_mode){
 			for(String key : associative_array.keySet()){
 				if(BasicLogic.equals.doEquals(associative_array.get(key), value)){
-					ret.push(new CString(key, Target.UNKNOWN));
+					ret.push(new CString(key, Target.UNKNOWN), Target.UNKNOWN);
 				}
 			}
 		} else {
 			for(int i = 0; i < array.size(); i++){
 				if(BasicLogic.equals.doEquals(array.get(i), value)){
-					ret.push(new CInt(i, Target.UNKNOWN));
+					ret.push(new CInt(i, Target.UNKNOWN), Target.UNKNOWN);
 				}
 			}
 		}

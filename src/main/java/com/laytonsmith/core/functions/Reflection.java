@@ -128,7 +128,7 @@ public class Reflection {
 					//No name provided
 					CArray ca = new CArray(t);
 					for (String name : env.getEnv(GlobalEnv.class).GetVarList().keySet()) {
-						ca.push(new CString(name, t));
+						ca.push(new CString(name, t), t);
 					}
 					return ca;
 				} else if (args.length == 2) {
@@ -165,17 +165,17 @@ public class Reflection {
 				if(args.length == 1){
 					//No name provided
 					for(Class<Enum> e : enums){
-						a.push(new CString(e.getAnnotation(MEnum.class).value(), t));
+						a.push(new CString(e.getAnnotation(MEnum.class).value(), t), t);
 					}
 					for (Class<DynamicEnum> d : dEnums) {
-						a.push(new CString(d.getAnnotation(MDynamicEnum.class).value(), t));
+						a.push(new CString(d.getAnnotation(MDynamicEnum.class).value(), t), t);
 					}
 				} else if(args.length == 2){
 					String enumName = args[1].val();
 					for(Class<Enum> e : enums){
 						if(e.getAnnotation(MEnum.class).value().equals(enumName)){
 							for(Enum ee : e.getEnumConstants()){
-								a.push(new CString(ee.name(), t));
+								a.push(new CString(ee.name(), t), t);
 							}
 							break;
 						}
@@ -183,7 +183,7 @@ public class Reflection {
 					for (Class<DynamicEnum> d : dEnums) {
 						if (d.getAnnotation(MDynamicEnum.class).value().equals(enumName)) {
 							for (DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d, null, "values")) {
-								a.push(new CString(ee.name(), t));
+								a.push(new CString(ee.name(), t), t);
 							}
 							break;
 						}
@@ -384,7 +384,7 @@ public class Reflection {
 			for (String cname : funcs.keySet()) {
 				CArray fnames = new CArray(t);
 				for (String fname : funcs.get(cname)) {
-					fnames.push(new CString(fname, t));
+					fnames.push(new CString(fname, t), t);
 				}
 				ret.set(new CString(cname, t), fnames, t);
 			}
@@ -437,7 +437,7 @@ public class Reflection {
 				Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (Event event : EventList.GetEvents()) {
-				ret.push(new CString(event.getName(), t));
+				ret.push(new CString(event.getName(), t), t);
 			}
 			ret.sort(CArray.SortType.STRING_IC);
 			return ret;
@@ -486,7 +486,7 @@ public class Reflection {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (Script s : Static.getAliasCore().getScripts()) {
-				ret.push(new CString(s.getSignature(), t));
+				ret.push(new CString(s.getSignature(), t), t);
 			}
 			ret.sort(CArray.SortType.STRING_IC);
 			return ret;
@@ -584,7 +584,7 @@ public class Reflection {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
-				ret.push(new CString(p.getKey(), t));
+				ret.push(new CString(p.getKey(), t), t);
 			}
 			ret.sort(CArray.SortType.STRING_IC);
 			return ret;

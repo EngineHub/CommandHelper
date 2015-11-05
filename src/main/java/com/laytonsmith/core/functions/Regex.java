@@ -209,7 +209,7 @@ public class Regex {
 				} catch(ReflectionUtils.ReflectionException e){
 					throw new ConfigRuntimeException("Named captures are only supported with Java 7.", ExceptionType.FormatException, t);
 				}
-                fret.push(ret);
+                fret.push(ret, t);
             }
             return fret;
         }              
@@ -412,7 +412,7 @@ public class Regex {
             String [] rsplit = pattern.split(subject, limit + 1);
             CArray ret = new CArray(t);
             for(String split : rsplit){
-                ret.push(new CString(split, t));
+                ret.push(new CString(split, t), t);
             }
             return ret;
         }

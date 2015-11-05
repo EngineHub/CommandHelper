@@ -957,7 +957,7 @@ public class StringHandling {
 			if(split.length() == 0){
 				//Empty string, so special case.
 				for(int i = 0; i < string.length(); i++){
-					array.push(new CString(string.charAt(i), t));
+					array.push(new CString(string.charAt(i), t), t);
 				}
 				return array;
 			}
@@ -966,16 +966,16 @@ public class StringHandling {
 				if (string.substring(i, i + split.length()).equals(split)) {
 					//Split point found
 					splitsFound++;
-					array.push(new CString(string.substring(sp, i), t));
+					array.push(new CString(string.substring(sp, i), t), t);
 					sp = i + split.length();
 					i += split.length() - 1;
 				}
 			}
 			if (sp != 0) {
-				array.push(new CString(string.substring(sp, string.length()), t));
+				array.push(new CString(string.substring(sp, string.length()), t), t);
 			} else {
 				//It was not found anywhere, so put the whole string in
-				array.push(args[1]);
+				array.push(args[1], t);
 			}
 			return array;
 		}

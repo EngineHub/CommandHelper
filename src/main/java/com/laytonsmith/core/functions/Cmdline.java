@@ -1483,7 +1483,7 @@ public class Cmdline {
 			File cwd = Static.GetFileFromArgument(args.length > 0 ? args[0].val() : null, environment, t, environment.getEnv(GlobalEnv.class).GetRootFolder());
 			if(cwd.exists()){
 				for(File f : cwd.listFiles()){
-					ca.push(new CString(f.getName(), t));
+					ca.push(new CString(f.getName(), t), t);
 				}
 			} else {
 				throw new ConfigRuntimeException("No such file or directory: " + cwd.getPath(),

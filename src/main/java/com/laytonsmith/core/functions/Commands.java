@@ -432,7 +432,7 @@ public class Commands {
 				ca.set("usage", new CString(command.getUsage(), t), t);
 				CArray aliases = new CArray(t);
 				for (String a : command.getAliases()) {
-					aliases.push(new CString(a, t));
+					aliases.push(new CString(a, t), t);
 				}
 				ca.set("aliases", aliases, t);
 				ret.set(command.getName(), ca, t);

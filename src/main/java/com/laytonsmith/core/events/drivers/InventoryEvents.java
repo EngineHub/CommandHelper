@@ -107,7 +107,7 @@ public class InventoryEvents {
 				map.put("player", new CString(e.getWhoClicked().getName(), Target.UNKNOWN));
 				CArray viewers = new CArray(Target.UNKNOWN);
 				for (MCHumanEntity viewer : e.getViewers()) {
-					viewers.push(new CString(viewer.getName(), Target.UNKNOWN));
+					viewers.push(new CString(viewer.getName(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("viewers", viewers);
 
@@ -230,13 +230,13 @@ public class InventoryEvents {
 
 				CArray slots = new CArray(Target.UNKNOWN);
 				for (Integer slot : e.getInventorySlots()) {
-					slots.push(new CInt(slot.intValue(), Target.UNKNOWN));
+					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("slots", slots);
 
 				CArray rawSlots = new CArray(Target.UNKNOWN);
 				for (Integer slot : e.getRawSlots()) {
-					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN));
+					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("rawslots", rawSlots);
 
@@ -595,7 +595,7 @@ public class InventoryEvents {
 
 				for (int i = 0; i < expCosts.length; i++) {
 					int j = expCosts[i];
-					expCostsCArray.push(new CInt(j, Target.UNKNOWN), i);
+					expCostsCArray.push(new CInt(j, Target.UNKNOWN), i, Target.UNKNOWN);
 				}
 
 				map.put("expcosts", expCostsCArray);
@@ -767,7 +767,7 @@ public class InventoryEvents {
 				Target t = Target.UNKNOWN;
 				CArray viewers = new CArray(t);
 				for (MCHumanEntity v : e.getViewers()) {
-					viewers.push(new CString(v.getName(), t));
+					viewers.push(new CString(v.getName(), t), t);
 				}
 				ret.put("viewers", viewers);
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));

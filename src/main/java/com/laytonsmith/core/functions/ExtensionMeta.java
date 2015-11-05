@@ -310,7 +310,7 @@ public class ExtensionMeta {
 					}
 					for (FunctionBase func: trk.getFunctions()) {
 						if (!funcs.contains(func.getName())) {
-							funcs.push(new CString(func.getName(), t));
+							funcs.push(new CString(func.getName(), t), t);
 						}
 					}
 					funcs.sort(CArray.SortType.STRING_IC);
@@ -323,7 +323,7 @@ public class ExtensionMeta {
 						events = (CArray) trkdata.get("events", t);
 					}
 					for (Event event: trk.getEvents()) {
-						events.push(new CString(event.getName(), t));
+						events.push(new CString(event.getName(), t), t);
 					}
 					events.sort(CArray.SortType.STRING_IC);
 					trkdata.set("events", events, t);
@@ -346,7 +346,7 @@ public class ExtensionMeta {
 						CArray functions = (retn.containsKey("functions")) ? (CArray) retn.get("functions", t) : new CArray(t);
 						for (FunctionBase function : tracker.getFunctions()) {
 							if (!functions.contains(function.getName())) {
-								functions.push(new CString(function.getName(), t));
+								functions.push(new CString(function.getName(), t), t);
 							}
 						}
 						functions.sort(CArray.SortType.STRING_IC);
@@ -354,7 +354,7 @@ public class ExtensionMeta {
 						CArray events = (retn.containsKey("events")) ? (CArray) retn.get("events", t) : new CArray(t);
 						for (Event event : tracker.getEvents()) {
 							if (!events.contains(event.getName())) {
-								events.push(new CString(event.getName(), t));
+								events.push(new CString(event.getName(), t), t);
 							}
 						}
 						events.sort(CArray.SortType.STRING_IC);

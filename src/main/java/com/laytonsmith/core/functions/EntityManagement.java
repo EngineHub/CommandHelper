@@ -164,7 +164,7 @@ public class EntityManagement {
 			if (args.length == 0) {
 				for (MCWorld w : Static.getServer().getWorlds()) {
 					for (MCEntity e : w.getEntities()) {
-						ret.push(new CString(e.getUniqueId().toString(), t));
+						ret.push(new CString(e.getUniqueId().toString(), t), t);
 					}
 				}
 			} else {
@@ -186,13 +186,13 @@ public class EntityManagement {
 						c = w.getChunkAt(ObjectGenerator.GetGenerator().location(l, w, t));
 					}
 					for (MCEntity e : c.getEntities()) {
-						ret.push(new CString(e.getUniqueId().toString(), t));
+						ret.push(new CString(e.getUniqueId().toString(), t), t);
 					}
 				} else {
 					if (args[0] instanceof CArray) {
 						c = ObjectGenerator.GetGenerator().location(args[0], null, t).getChunk();
 						for (MCEntity e : c.getEntities()) {
-							ret.push(new CString(e.getUniqueId().toString(), t));
+							ret.push(new CString(e.getUniqueId().toString(), t), t);
 						}
 					} else {
 						w = Static.getServer().getWorld(args[0].val());
@@ -200,7 +200,7 @@ public class EntityManagement {
 							throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 						}
 						for (MCEntity e : w.getEntities()) {
-							ret.push(new CString(e.getUniqueId().toString(), t));
+							ret.push(new CString(e.getUniqueId().toString(), t), t);
 						}
 					}
 				}
@@ -1027,7 +1027,7 @@ public class EntityManagement {
 			}
 			CArray entities = new CArray(t);
 			for (UUID e : eSet) {
-				entities.push(new CString(e.toString(), t));
+				entities.push(new CString(e.toString(), t), t);
 			}
 
 			return entities;
@@ -1464,7 +1464,7 @@ public class EntityManagement {
 					default:
 						ent = l.getWorld().spawn(l, entType);
 				}
-				ret.push(new CString(ent.getUniqueId().toString(), t));
+				ret.push(new CString(ent.getUniqueId().toString(), t), t);
 			}
 			return ret;
 		}
@@ -2190,7 +2190,7 @@ public class EntityManagement {
 			}
 			CArray lineOfSight = new CArray(t);
 			for (MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
-				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false));
+				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), t);
 			}
 			return lineOfSight;
 		}

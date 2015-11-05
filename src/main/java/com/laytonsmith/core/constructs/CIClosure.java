@@ -65,7 +65,7 @@ public class CIClosure extends CClosure {
 				CArray arguments = new CArray(node.getData().getTarget());
 				if (values != null) {
 					for (Construct value : values) {
-						arguments.push(value);
+						arguments.push(value, node.getData().getTarget());
 					}
 				}
 				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, node.getData().getTarget()));

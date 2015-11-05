@@ -491,7 +491,7 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 		}
 
 		@Override
-		public void push(Construct c) {
+		public void push(Construct c, Integer i, Target t) {
 			throw new ROException();
 		}
 

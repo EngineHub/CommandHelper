@@ -190,16 +190,17 @@ public class RandomTests {
 	@Test
 	public void testJSONEscapeString() throws MarshalException {
 		CArray ca = new CArray(Target.UNKNOWN);
-		ca.push(C.Int(1));
-		ca.push(C.Double(2.2));
-		ca.push(C.String("string"));
-		ca.push(C.String("\"Quote\""));
-		ca.push(C.Boolean(true));
-		ca.push(C.Boolean(false));
-		ca.push(C.Null());
-		ca.push(C.Void());
-		ca.push(new Command("/Command", Target.UNKNOWN));
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
+		final Target t = Target.UNKNOWN;
+		ca.push(C.Int(1), t);
+		ca.push(C.Double(2.2), t);
+		ca.push(C.String("string"), t);
+		ca.push(C.String("\"Quote\""), t);
+		ca.push(C.Boolean(true), t);
+		ca.push(C.Boolean(false), t);
+		ca.push(C.Null(), t);
+		ca.push(C.Void(), t);
+		ca.push(new Command("/Command", Target.UNKNOWN), t);
+		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), t);
 		//[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
 		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN));
 	}
@@ -207,16 +208,16 @@ public class RandomTests {
 	@Test
 	public void testJSONDecodeString() throws MarshalException {
 		CArray ca = new CArray(Target.UNKNOWN);
-		ca.push(C.Int(1));
-		ca.push(C.Double(2.2));
-		ca.push(C.String("string"));
-		ca.push(C.String("\"Quote\""));
-		ca.push(C.Boolean(true));
-		ca.push(C.Boolean(false));
-		ca.push(C.Null());
-		ca.push(C.Void());
-		ca.push(new Command("/Command", Target.UNKNOWN));
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
+		ca.push(C.Int(1), Target.UNKNOWN);
+		ca.push(C.Double(2.2), Target.UNKNOWN);
+		ca.push(C.String("string"), Target.UNKNOWN);
+		ca.push(C.String("\"Quote\""), Target.UNKNOWN);
+		ca.push(C.Boolean(true), Target.UNKNOWN);
+		ca.push(C.Boolean(false), Target.UNKNOWN);
+		ca.push(C.Null(), Target.UNKNOWN);
+		ca.push(C.Void(), Target.UNKNOWN);
+		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN);
+		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN);
 		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN));
 	}
 

@@ -238,14 +238,14 @@ public class Enchantments {
 //            }
 			CArray enchantArray = new CArray(t);
 			if (!(args[2 - offset] instanceof CArray)) {
-				enchantArray.push(args[2 - offset]);
+				enchantArray.push(args[2 - offset], t);
 			} else {
 				enchantArray = (CArray) args[2 - offset];
 			}
 
 			CArray levelArray = new CArray(t);
 			if (!(args[3 - offset] instanceof CArray)) {
-				levelArray.push(args[3 - offset]);
+				levelArray.push(args[3 - offset], t);
 			} else {
 				levelArray = (CArray) args[3 - offset];
 			}
@@ -331,7 +331,7 @@ public class Enchantments {
 
 			CArray enchantArray = new CArray(t);
 			if (!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
-				enchantArray.push(args[2 - offset]);
+				enchantArray.push(args[2 - offset], t);
 			} else if (args[2 - offset] instanceof CNull) {
 				for (MCEnchantment e : is.getEnchantments().keySet()) {
 					is.removeEnchantment(e);
@@ -418,8 +418,8 @@ public class Enchantments {
 			for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
 				MCEnchantment e = entry.getKey();
 				Integer l = entry.getValue();
-				enchants.push(new CString(e.getName(), t));
-				levels.push(new CInt(l, t));
+				enchants.push(new CString(e.getName(), t), t);
+				levels.push(new CInt(l, t), t);
 			}
 
 			return new CArray(t, enchants, levels);
@@ -587,7 +587,7 @@ public class Enchantments {
 			CArray ca = new CArray(t);
 			for (MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
 				if (e.canEnchantItem(is)) {
-					ca.push(new CString(e.getName(), t));
+					ca.push(new CString(e.getName(), t), t);
 				}
 			}
 			cache.put(args[0].val(), ca);
@@ -668,7 +668,7 @@ public class Enchantments {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t);
 			for(MCEnchantment e : enchantments){
-				ret.push(new CString(e.getName(), t));
+				ret.push(new CString(e.getName(), t), t);
 			}
 			return ret;
 		}

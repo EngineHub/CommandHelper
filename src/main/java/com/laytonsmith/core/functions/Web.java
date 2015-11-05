@@ -125,7 +125,7 @@ public class Web {
 			c.set("httpOnly", CBoolean.get(cookie.isHttpOnly()), t);
 			c.set("secureOnly", CBoolean.get(cookie.isSecureOnly()), t);
 			if(!update){
-				ret.push(c);
+				ret.push(c, t);
 			}
 		}
 	}
@@ -377,7 +377,7 @@ public class Web {
 						for(String key : resp.getHeaderNames()){
 							CArray h = new CArray(t);
 							for(String val : resp.getHeaders(key)){
-								h.push(new CString(val, t));
+								h.push(new CString(val, t), t);
 							}
 							headers.set(key, h, t);
 						}
@@ -741,7 +741,7 @@ public class Web {
 			CArray to;
 			if(cto instanceof CString){
 				to = new CArray(t);
-				to.push(cto);
+				to.push(cto, t);
 			} else {
 				to = (CArray)cto;
 			}
@@ -790,7 +790,7 @@ public class Web {
 					CArray bodyAttachment = new CArray(t);
 					bodyAttachment.set("type", "text/plain");
 					bodyAttachment.set("content", body);
-					attachments.push(bodyAttachment, 0);
+					attachments.push(bodyAttachment, 0, t);
 				}
 
 				for(Construct c : to.asList()){

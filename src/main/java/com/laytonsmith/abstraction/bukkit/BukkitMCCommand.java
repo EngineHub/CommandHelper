@@ -207,7 +207,7 @@ public class BukkitMCCommand implements MCCommand {
 			Target t = Target.UNKNOWN;
 			CArray cargs = new CArray(t);
 			for (String arg : args) {
-				cargs.push(new CString(arg, t));
+				cargs.push(new CString(arg, t), t);
 			}
 			try {
 				Commands.onTabComplete.get(cmd.getName().toLowerCase()).execute(new Construct[]{
@@ -243,7 +243,7 @@ public class BukkitMCCommand implements MCCommand {
 			Target t = Target.UNKNOWN;
 			CArray cargs = new CArray(t);
 			for (String arg : args) {
-				cargs.push(new CString(arg, t));
+				cargs.push(new CString(arg, t), t);
 			}
 
 			CClosure closure = Commands.onCommand.get(cmd.getName().toLowerCase());

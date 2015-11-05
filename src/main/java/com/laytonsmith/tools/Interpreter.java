@@ -606,7 +606,7 @@ public final class Interpreter {
 				v.setDefault(arg);
 				vars.add(v);
 				finalArgument.append(arg);
-				arguments.push(new CString(arg, Target.UNKNOWN));
+				arguments.push(new CString(arg, Target.UNKNOWN), Target.UNKNOWN);
 			}
 			Variable v = new Variable("$", "", false, true, Target.UNKNOWN);
 			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));

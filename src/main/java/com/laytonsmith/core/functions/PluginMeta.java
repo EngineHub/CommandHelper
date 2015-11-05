@@ -342,7 +342,7 @@ public class PluginMeta {
 			CArray arr = new CArray(t);
 			
 			for (String chan : chans) {
-				arr.push(new CString(chan, t));
+				arr.push(new CString(chan, t), t);
 			}
 			
 			return arr;

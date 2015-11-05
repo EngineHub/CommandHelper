@@ -660,7 +660,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				}
 			}
-			ids.push(new CString(e.getUniqueId().toString(), t));
+			ids.push(new CString(e.getUniqueId().toString(), t), t);
 		}
         return ids;
     }

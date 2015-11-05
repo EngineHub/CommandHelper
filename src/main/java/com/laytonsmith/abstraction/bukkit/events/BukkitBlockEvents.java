@@ -312,7 +312,7 @@ public class BukkitBlockEvents {
             CArray retn = new CArray(Target.UNKNOWN);
 
             for (int i = 0; i < 4; i++) {
-                retn.push(new CString(pie.getLine(i), Target.UNKNOWN));
+                retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN);
             }
 
             return retn;

@@ -127,8 +127,8 @@ public class CMutablePrimitive extends CArray implements Sizable {
 	}
 
 	@Override
-	public void push(Construct c) {
-		this.value = c;
+	public void push(Construct c, Integer i, Target t) {
+		set(c, t);
 	}
 
 	@Override

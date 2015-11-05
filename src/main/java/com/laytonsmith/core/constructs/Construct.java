@@ -216,7 +216,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			}
 			CArray carray = new CArray(t);
 			for (int i = 0; i < array.size(); i++) {
-				carray.push(convertJSON(array.get(i), t));
+				carray.push(convertJSON(array.get(i), t), t);
 			}
 			return carray;
 		} else {
@@ -250,7 +250,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			java.util.List l = (java.util.List) o;
 			CArray ca = new CArray(t);
 			for (Object l1 : l) {
-				ca.push(convertJSON(l1, t));
+				ca.push(convertJSON(l1, t), t);
 			}
 			return ca;
 		} else if (o == null) {
@@ -334,7 +334,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			CArray a = new CArray(Target.UNKNOWN);
 			Collection l = (Collection) o;
 			for (Object obj : l) {
-				a.push(GetConstruct(obj, allowResources));
+				a.push(GetConstruct(obj, allowResources), Target.UNKNOWN);
 			}
 			return a;
 		} else {

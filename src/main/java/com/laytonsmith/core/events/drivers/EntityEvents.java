@@ -268,7 +268,7 @@ public class EntityEvents {
 				Map<String, Construct> ret = evaluate_helper(e);
 				CArray blocks = new CArray(t);
 				for (MCBlock b : e.getBlocks()) {
-					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()));
+					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()), t);
 				}
 				ret.put("blocks", blocks);
 				Construct entity = CNull.NULL;
@@ -575,12 +575,12 @@ public class EntityEvents {
 				throws EventException {
 			if (event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
-				Target t = Target.UNKNOWN;
+				final Target t = Target.UNKNOWN;
 				MCLivingEntity dead = e.getEntity();
 				Map<String, Construct> map = evaluate_helper(event);
 				CArray drops = new CArray(t);
 				for(MCItemStack is : e.getDrops()){
-					drops.push(ObjectGenerator.GetGenerator().item(is, t));
+					drops.push(ObjectGenerator.GetGenerator().item(is, t), t);
 				}
 				map.put("type", new CString(dead.getType().name(), t));
 				map.put("id", new CString(dead.getUniqueId().toString(), t));

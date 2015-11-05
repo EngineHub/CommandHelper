@@ -925,7 +925,7 @@ public class Meta {
 			CArray c = new CArray(t);
 			for(Locale l : Locale.getAvailableLocales()){
 				if(!l.getCountry().equals("")){
-					c.push(new CString(l.toString(), t));
+					c.push(new CString(l.toString(), t), t);
 				}
 			}
 			new ArrayHandling.array_sort().exec(t, environment, c);

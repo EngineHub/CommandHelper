@@ -162,7 +162,7 @@ public class BlockEvents {
 				blk.set("Z", new CInt(block.getZ(), Target.UNKNOWN), Target.UNKNOWN);
 				blk.set("world", new CString(block.getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
 				
-				affected.push(blk);
+				affected.push(blk, Target.UNKNOWN);
 			}
 			
 			map.put("affectedBlocks", affected);
@@ -331,7 +331,7 @@ public class BlockEvents {
             for (Iterator<MCItemStack> iter = items.iterator(); iter.hasNext();) {
                 MCItemStack stack = new BukkitMCItemStack((MCItemStack) iter.next());
                 CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, Target.UNKNOWN);
-                drops.push(item);
+                drops.push(item, Target.UNKNOWN);
             }
             map.put("drops", drops);
 

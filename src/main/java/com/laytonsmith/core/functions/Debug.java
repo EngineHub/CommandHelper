@@ -517,7 +517,7 @@ public class Debug {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			CArray carray = new CArray(t);
 			for(Thread thread : threadSet){
-				carray.push(new CString(thread.getName(), t));
+				carray.push(new CString(thread.getName(), t), t);
 			}
 			return carray;
 		}

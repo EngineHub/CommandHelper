@@ -62,7 +62,7 @@ public class TaskHandling {
 					properties.set(prop, task.getPropertyData().get(prop).toString());
 				}
 				tt.set("properties", properties, t);
-				ret.push(tt);
+				ret.push(tt, t);
 			}
 			return ret;
 		}

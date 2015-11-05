@@ -247,14 +247,14 @@ public class Sandbox {
             }
             CArray enchantArray = new CArray(t);
             if (!( args[2 - offset] instanceof CArray )) {
-                enchantArray.push(args[2 - offset]);
+                enchantArray.push(args[2 - offset], t);
             } else {
                 enchantArray = (CArray) args[2 - offset];
             }
 
             CArray levelArray = new CArray(t);
             if (!( args[3 - offset] instanceof CArray )) {
-                levelArray.push(args[3 - offset]);
+                levelArray.push(args[3 - offset], t);
             } else {
                 levelArray = (CArray) args[3 - offset];
             }

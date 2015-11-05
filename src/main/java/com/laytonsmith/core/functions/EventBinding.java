@@ -854,7 +854,7 @@ public class EventBinding {
 			}
 			CArray history = new CArray(t);
 			for (String entry : environment.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
-				history.push(new CString(entry, t));
+				history.push(new CString(entry, t), t);
 			}
 			return history;
 		}

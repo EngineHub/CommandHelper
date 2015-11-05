@@ -1440,7 +1440,7 @@ public final class Static {
 			boolean[] array = (boolean[]) object;
 			CArray r = new CArray(t);
 			for (boolean b : array) {
-				r.push(CBoolean.get(b));
+				r.push(CBoolean.get(b), t);
 			}
 			return r;
 		} else if (object instanceof byte[]) {
@@ -1449,48 +1449,48 @@ public final class Static {
 			char[] array = (char[]) object;
 			CArray r = new CArray(t);
 			for (char c : array) {
-				r.push(new CString(c, t));
+				r.push(new CString(c, t), t);
 			}
 			return r;
 		} else if (object instanceof short[]) {
 			short[] array = (short[]) object;
 			CArray r = new CArray(t);
 			for (short s : array) {
-				r.push(new CInt(s, t));
+				r.push(new CInt(s, t), t);
 			}
 			return r;
 		} else if (object instanceof int[]) {
 			int[] array = (int[]) object;
 			CArray r = new CArray(t);
 			for (int i : array) {
-				r.push(new CInt(i, t));
+				r.push(new CInt(i, t), t);
 			}
 			return r;
 		} else if (object instanceof long[]) {
 			long[] array = (long[]) object;
 			CArray r = new CArray(t);
 			for (long l : array) {
-				r.push(new CInt(l, t));
+				r.push(new CInt(l, t), t);
 			}
 			return r;
 		} else if (object instanceof float[]) {
 			float[] array = (float[]) object;
 			CArray r = new CArray(t);
 			for (float f : array) {
-				r.push(new CDouble(f, t));
+				r.push(new CDouble(f, t), t);
 			}
 			return r;
 		} else if (object instanceof double[]) {
 			double[] array = (double[]) object;
 			CArray r = new CArray(t);
 			for (double d : array) {
-				r.push(new CDouble(d, t));
+				r.push(new CDouble(d, t), t);
 			}
 			return r;
 		} else if (object instanceof Object[]) {
 			CArray r = new CArray(t);
 			for (Object o : (Object[]) object) {
-				r.push((o == object) ? r : getMSObject(o, t));
+				r.push((o == object) ? r : getMSObject(o, t), t);
 			}
 			return r;
 		} else if (object instanceof Collection) {

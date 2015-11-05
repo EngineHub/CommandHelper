@@ -292,7 +292,7 @@ public class Scoreboards {
 				Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (String id : boards.keySet()) {
-				ret.push(new CString(id, t));
+				ret.push(new CString(id, t), t);
 			}
 			return ret;
 		}
@@ -350,7 +350,7 @@ public class Scoreboards {
 				obj.set("slot", slot, t);
 				obj.set("modifiable", CBoolean.get(o.isModifiable()), t);
 				obj.set("criteria", new CString(o.getCriteria(), t), t);
-				ret.push(obj);
+				ret.push(obj, t);
 			}
 			return ret;
 		}
@@ -403,10 +403,10 @@ public class Scoreboards {
 				to.set("options", ops, t);
 				CArray pl = new CArray(t);
 				for (String entry : team.getEntries()) {
-					pl.push(new CString(entry, t));
+					pl.push(new CString(entry, t), t);
 				}
 				to.set("players", pl, t);
-				ret.push(to);
+				ret.push(to, t);
 			}
 			return ret;
 		}

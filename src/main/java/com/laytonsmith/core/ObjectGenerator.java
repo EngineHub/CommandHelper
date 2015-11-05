@@ -240,7 +240,7 @@ public class ObjectGenerator {
             CArray enchObj = CArray.GetAssociativeArray(t);
             enchObj.set("etype", new CString(entry.getKey().getName(), t), t);
             enchObj.set("elevel", new CInt(entry.getValue(), t), t);
-            enchants.push(enchObj);
+            enchants.push(enchObj, t);
         }
 		Construct meta = itemMeta(is, t);
         CArray ret = CArray.GetAssociativeArray(t);
@@ -376,7 +376,7 @@ public class ObjectGenerator {
 			if (meta.hasLore()) {
 				lore = new CArray(t);
 				for (String l : meta.getLore()) {
-					((CArray) lore).push(new CString(l, t));
+					((CArray) lore).push(new CString(l, t), t);
 				}
 			} else {
 				lore = CNull.NULL;
@@ -397,12 +397,12 @@ public class ObjectGenerator {
 				}
 				CArray colors = new CArray(t);
 				for(MCColor c : mcfm.getColors()){
-					colors.push(ObjectGenerator.GetGenerator().color(c, t));
+					colors.push(ObjectGenerator.GetGenerator().color(c, t), t);
 				}
 				cf.set("colors", colors, t);
 				CArray fadeColors = new CArray(t);
 				for(MCColor c : mcfm.getFadeColors()){
-					fadeColors.push(ObjectGenerator.GetGenerator().color(c, t));
+					fadeColors.push(ObjectGenerator.GetGenerator().color(c, t), t);
 				}
 				cf.set("fade", fadeColors, t);
 				ma.set("firework", firework, t);
@@ -431,7 +431,7 @@ public class ObjectGenerator {
 				if (((MCBookMeta) meta).hasPages()) {
 					pages = new CArray(t);
 					for (String p : ((MCBookMeta) meta).getPages()) {
-						((CArray) pages).push(new CString(p, t));
+						((CArray) pages).push(new CString(p, t), t);
 					}
 				} else {
 					pages = CNull.NULL;
@@ -470,7 +470,7 @@ public class ObjectGenerator {
 					CArray pattern = CArray.GetAssociativeArray(t);
 					pattern.set("shape", new CString(p.getShape().toString(), t), t);
 					pattern.set("color", new CString(p.getColor().toString(), t), t);
-					patterns.push(pattern);
+					patterns.push(pattern, t);
 				}
 				ma.set("patterns", patterns, t);
 				MCDyeColor dyeColor = bannermeta.getBaseColor();
@@ -483,7 +483,7 @@ public class ObjectGenerator {
 				CArray flagArray = new CArray(t);
 				if (itemFlags.size() > 0) {
 					for (MCItemFlag flag : itemFlags) {
-						flagArray.push(new CString(flag.name(), t));
+						flagArray.push(new CString(flag.name(), t), t);
 					}
 				}
 				ma.set("flags", flagArray, t);
@@ -732,10 +732,10 @@ public class ObjectGenerator {
 
     public CArray exception(ConfigRuntimeException e, Target t) {
 		CArray ex = new CArray(t);
-		ex.push(new CString(e.getExceptionType().toString(), t));
-		ex.push(new CString(e.getMessage(), t));
-		ex.push(new CString((e.getFile() != null ? e.getFile().getAbsolutePath() : "null"), t));
-		ex.push(new CInt(e.getLineNum(), t));
+		ex.push(new CString(e.getExceptionType().toString(), t), t);
+		ex.push(new CString(e.getMessage(), t), t);
+		ex.push(new CString((e.getFile() != null ? e.getFile().getAbsolutePath() : "null"), t), t);
+		ex.push(new CInt(e.getLineNum(), t), t);
 		return ex;
     }
 
@@ -906,7 +906,7 @@ public class ObjectGenerator {
 			CArray eObj = CArray.GetAssociativeArray(t);
 			eObj.set("etype", new CString(entry.getKey().getName(), t), t);
 			eObj.set("elevel", new CInt(entry.getValue(), t), t);
-			ret.push(eObj);
+			ret.push(eObj, t);
 		}
 		return ret;
 	}
@@ -939,7 +939,7 @@ public class ObjectGenerator {
 			effect.set("seconds", new CInt(eff.getSecondsRemaining(), t), t);
 			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
 			effect.set("particles", CBoolean.get(eff.hasParticles()), t);
-			ea.push(effect);
+			ea.push(effect, t);
 		}
 		return ea;
 	}
@@ -989,14 +989,14 @@ public class ObjectGenerator {
 		} else if (r instanceof MCShapelessRecipe) {
 			CArray il = new CArray(t);
 			for (MCItemStack i : ((MCShapelessRecipe) r).getIngredients()) {
-				il.push(item(i, t));
+				il.push(item(i, t), t);
 			}
 			ret.set("ingredients", il, t);
 		} else if (r instanceof MCShapedRecipe) {
 			MCShapedRecipe sr = (MCShapedRecipe) r;
 			CArray shape = new CArray(t);
 			for (String line : sr.getShape()) {
-				shape.push(new CString(line, t));
+				shape.push(new CString(line, t), t);
 			}
 			CArray imap = CArray.GetAssociativeArray(t);
 			for (Map.Entry<Character, MCItemStack> entry : sr.getIngredientMap().entrySet()) {

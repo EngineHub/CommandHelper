@@ -660,20 +660,20 @@ public class InventoryManagement {
             CArray ca = new CArray(t);
             for(int i = 0; i < 36; i++){
                 if(match(is, inv.getItem(i))){
-                    ca.push(new CInt(i, t));
+                    ca.push(new CInt(i, t), t);
                 }
             }
             if(match(is, inv.getBoots())){
-                ca.push(new CInt(100, t));
+                ca.push(new CInt(100, t), t);
             }
             if(match(is, inv.getLeggings())){
-                ca.push(new CInt(101, t));
+                ca.push(new CInt(101, t), t);
             }
             if(match(is, inv.getChestplate())){
-                ca.push(new CInt(102, t));
+                ca.push(new CInt(102, t), t);
             }
             if(match(is, inv.getHelmet())){
-                ca.push(new CInt(103, t));
+                ca.push(new CInt(103, t), t);
             }
             return ca;
         }

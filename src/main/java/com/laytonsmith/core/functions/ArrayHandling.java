@@ -173,9 +173,9 @@ public class ArrayHandling {
 						}
 						for (long i = start; i <= finish; i++) {
 							try {
-								na.push(ca.get((int) i, t).clone());
+								na.push(ca.get((int) i, t).clone(), t);
 							} catch (CloneNotSupportedException e) {
-								na.push(ca.get((int) i, t));
+								na.push(ca.get((int) i, t), t);
 							}
 						}
 						return na;
@@ -450,7 +450,7 @@ public class ArrayHandling {
 				CArray array = (CArray)args[0];
 				int initialSize = (int)array.size();
 				for (int i = 1; i < args.length; i++) {
-					((CArray) args[0]).push(args[i]);
+					((CArray) args[0]).push(args[i], t);
 					for(ArrayAccess.ArrayAccessIterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess)args[0]))){
 						//This is always pushing after the current index.
 						//Given that this is the last one, we don't need to waste
@@ -527,7 +527,7 @@ public class ArrayHandling {
 			Construct value = args[1];
 			int index = Static.getInt32(args[2], t);
 			try{
-				array.push(value, index);
+				array.push(value, index, t);
 				//If the push succeeded (actually an insert) we need to check to see if we are currently iterating
 				//and act appropriately.
 				for(ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)){
@@ -853,7 +853,7 @@ public class ArrayHandling {
 					fill = args[2];
 				}
 				for (long i = original.size(); i < size; i++) {
-					original.push(fill);
+					original.push(fill, t);
 				}
 			} else {
 				throw new ConfigRuntimeException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", ExceptionType.CastException, t);
@@ -930,7 +930,7 @@ public class ArrayHandling {
 			}
 			CArray ret = new CArray(t);
 			for (long i = start; (increment > 0 ? i < finish : i > finish); i = i + increment) {
-				ret.push(new CInt(i, t));
+				ret.push(new CInt(i, t), t);
 			}
 			return ret;
 		}
@@ -1000,7 +1000,7 @@ public class ArrayHandling {
 				ArrayAccess ca = (ArrayAccess) args[0];
 				CArray ca2 = new CArray(t);
 				for (Construct c : ca.keySet()) {
-					ca2.push(c);
+					ca2.push(c, t);
 				}
 				return ca2;
 			} else {
@@ -1067,7 +1067,7 @@ public class ArrayHandling {
 				ArrayAccess ca = (ArrayAccess) args[0];
 				CArray ca2 = new CArray(t);
 				for (Construct c : ca.keySet()) {
-					ca2.push(ca.get(c.val(), t));
+					ca2.push(ca.get(c.val(), t), t);
 				}
 				return ca2;
 			} else {
@@ -1140,7 +1140,7 @@ public class ArrayHandling {
 					ArrayAccess cur = (ArrayAccess) arg;
 					if (!cur.isAssociative()) {
 						for (int j = 0; j < cur.size(); j++) {
-							newArray.push(cur.get(j, t));
+							newArray.push(cur.get(j, t), t);
 						}
 					} else {
 						for (Construct key : cur.keySet()) {
@@ -1440,10 +1440,10 @@ public class ArrayHandling {
 			CArray right = new CArray(t);
 			int middle = (int)(ca.size() / 2);
 			for(int i = 0; i < middle; i++){
-				left.push(ca.get(i, t));
+				left.push(ca.get(i, t), t);
 			}
 			for(int i = middle; i < ca.size(); i++){
-				right.push(ca.get(i, t));
+				right.push(ca.get(i, t), t);
 			}
 
 			left = customSort(left, closure, t);
@@ -1478,17 +1478,17 @@ public class ArrayHandling {
 						throw new ConfigRuntimeException("The custom closure did not return a value. It must always return true, false, or null.", ExceptionType.CastException, t);
 					}
 					if(value <= 0){
-						result.push(left.get(0, t));
+						result.push(left.get(0, t), t);
 						left.remove(0);
 					} else {
-						result.push(right.get(0, t));
+						result.push(right.get(0, t), t);
 						right.remove(0);
 					}
 				} else if(left.size() > 0){
-					result.push(left.get(0, t));
+					result.push(left.get(0, t), t);
 					left.remove(0);
 				} else if(right.size() > 0){
-					result.push(right.get(0, t));
+					result.push(right.get(0, t), t);
 					right.remove(0);
 				}
 			}
@@ -2016,9 +2016,9 @@ public class ArrayHandling {
 			List<Construct> keySet = new ArrayList<Construct>(array.keySet());
 			for(Integer i : randoms){
 				if(getKeys){
-					newArray.push(keySet.get(i));
+					newArray.push(keySet.get(i), t);
 				} else {
-					newArray.push(array.get(keySet.get(i), t));
+					newArray.push(array.get(keySet.get(i), t), t);
 				}
 			}
 			return newArray;
@@ -2107,7 +2107,7 @@ public class ArrayHandling {
 					}
 				});
 				for(Construct c : set){
-					newArray.push(c);
+					newArray.push(c, t);
 				}
 				return newArray;
 			}
@@ -2217,7 +2217,7 @@ public class ArrayHandling {
 					}
 					boolean bret = Static.getBoolean(ret);
 					if(bret){
-						newArray.push(value);
+						newArray.push(value, t);
 					}
 				}
 			}

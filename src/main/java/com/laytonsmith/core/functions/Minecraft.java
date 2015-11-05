@@ -908,7 +908,7 @@ public class Minecraft {
 						continue;
 					}
 					CString os = new CString(o.getName(), t);
-					co.push(os);
+					co.push(os, t);
 				}
 				retVals.add(co);
 			}
@@ -929,7 +929,7 @@ public class Minecraft {
 					}
 
 					CString name = new CString(p.getName(), t);
-					co.push(name);
+					co.push(name, t);
 				}
 
 				retVals.add(co);
@@ -969,7 +969,7 @@ public class Minecraft {
 			} else {
 				CArray ca = new CArray(t);
 				for (Construct c : retVals) {
-					ca.push(c);
+					ca.push(c, t);
 				}
 				return ca;
 			}
@@ -1025,7 +1025,7 @@ public class Minecraft {
 					continue;
 				}
 				CString os = new CString(o.getName(), t);
-				co.push(os);
+				co.push(os, t);
 			}
 			return co;
 		}
@@ -1080,7 +1080,7 @@ public class Minecraft {
 					continue;
 				}
 				CString os = new CString(o.getName(), t);
-				co.push(os);
+				co.push(os, t);
 			}
 			return co;
 		}
@@ -1523,7 +1523,7 @@ public class Minecraft {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
 			for (String ip : s.getIPBans()) {
-				ret.push(new CString(ip, t));
+				ret.push(new CString(ip, t), t);
 			}
 			return ret;
 		}

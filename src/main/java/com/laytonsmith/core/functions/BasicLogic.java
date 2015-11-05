@@ -545,7 +545,7 @@ public class BasicLogic {
 							//	code()
 							//would be turned into array(1, 2), code() in the
 							//old style.
-							conditions.push(((CLabel) c2.getData()).cVal());
+							conditions.push(((CLabel) c2.getData()).cVal(), t);
 							inCase = true;
 							i++;
 							continue;
@@ -630,7 +630,7 @@ public class BasicLogic {
 						if (child.getData().isDynamic()) {
 							throw new ConfigCompileException(notConstant, child.getTarget());
 						}
-						data.push(child.getData());
+						data.push(child.getData(), t);
 					}
 					children.set(i, new ParseTree(data, children.get(i).getFileOptions()));
 				}
@@ -685,7 +685,7 @@ public class BasicLogic {
 					if (!(data instanceof CArray) || data instanceof CSlice) {
 						//Put it in an array to make the rest of this parsing easier.
 						data = new CArray(t);
-						((CArray) data).push(children.get(i).getData());
+						((CArray) data).push(children.get(i).getData(), t);
 					}
 					for (Construct value : ((CArray) data).asList()) {
 						if (value instanceof CSlice) {

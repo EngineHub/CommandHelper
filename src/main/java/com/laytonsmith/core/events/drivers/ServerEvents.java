@@ -94,7 +94,7 @@ public class ServerEvents {
 				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
 				CArray players = new CArray(t);
 				for (MCPlayer player : event.getPlayers()) {
-					players.push(new CString(player.getName(), t));
+					players.push(new CString(player.getName(), t), t);
 				}
 				ret.put("list", players);
 				return ret;
@@ -179,13 +179,13 @@ public class ServerEvents {
 				ret.put("sender", new CString(e.getCommandSender().getName(), t));
 				CArray comp = new CArray(t);
 				for (String c : e.getCompletions()) {
-					comp.push(new CString(c, t));
+					comp.push(new CString(c, t), t);
 				}
 				ret.put("completions", comp);
 				ret.put("command", new CString(e.getCommand().getName(), t));
 				CArray args = new CArray(t);
 				for (String a : e.getArguments()) {
-						args.push(new CString(a, t));
+						args.push(new CString(a, t), t);
 				}
 				ret.put("args", args);
 				ret.put("alias", new CString(e.getAlias(), t));

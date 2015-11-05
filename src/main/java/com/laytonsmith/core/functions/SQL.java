@@ -269,7 +269,7 @@ public class SQL {
 								// the user will expect in the results.
 								row.set(md.getColumnLabel(i), value, t);
 							}
-							ret.push(row);
+							ret.push(row, t);
 						}
 						return ret;
 					} else {

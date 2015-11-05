@@ -1500,7 +1500,7 @@ public class PlayerEvents {
                 map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
                 CArray ca = new CArray(Target.UNKNOWN);
                 for(MCPlayer recipient : event.getRecipients()){
-                    ca.push(new CString(recipient.getName(), Target.UNKNOWN));
+                    ca.push(new CString(recipient.getName(), Target.UNKNOWN), Target.UNKNOWN);
                 }
 				map.put("format", new CString(event.getFormat(), Target.UNKNOWN));
                 map.put("recipients", ca);
@@ -1615,7 +1615,7 @@ public class PlayerEvents {
                 map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
                 CArray ca = new CArray(Target.UNKNOWN);
                 for(MCPlayer recipient : event.getRecipients()){
-                    ca.push(new CString(recipient.getName(), Target.UNKNOWN));
+                    ca.push(new CString(recipient.getName(), Target.UNKNOWN), Target.UNKNOWN);
                 }
 				map.put("format", new CString(event.getFormat(), Target.UNKNOWN));
                 map.put("recipients", ca);
@@ -2306,7 +2306,7 @@ public class PlayerEvents {
 				ret.put("last", new CString(event.getLastToken(), t));
 				CArray completions = new CArray(t);
 				for (String c : event.getTabCompletions()) {
-					completions.push(new CString(c, t));
+					completions.push(new CString(c, t), t);
 				}
 				ret.put("completions", completions);
 				return ret;
@@ -2483,7 +2483,7 @@ public class PlayerEvents {
 				if (oldBookMeta.hasPages()) {
 					CArray pages = new CArray(Target.UNKNOWN);
 					for (String page : oldBookMeta.getPages()) {
-						pages.push(new CString(page, Target.UNKNOWN));
+						pages.push(new CString(page, Target.UNKNOWN), Target.UNKNOWN);
 					}
 					oldBookArray.set("author", pages, Target.UNKNOWN);
 				} else {
@@ -2505,7 +2505,7 @@ public class PlayerEvents {
 				if (newBookMeta.hasPages()) {
 					CArray pages = new CArray(Target.UNKNOWN);
 					for (String page : newBookMeta.getPages()) {
-						pages.push(new CString(page, Target.UNKNOWN));
+						pages.push(new CString(page, Target.UNKNOWN), Target.UNKNOWN);
 					}
 					newBookArray.set("pages", pages, Target.UNKNOWN);
 				} else {

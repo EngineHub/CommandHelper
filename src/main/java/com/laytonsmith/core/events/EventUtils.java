@@ -279,7 +279,7 @@ public final class EventUtils {
 			Iterator<BoundEvent> i = set.iterator();
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
-				ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN));
+				ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN), Target.UNKNOWN);
 			}
 		}
 		return ca;

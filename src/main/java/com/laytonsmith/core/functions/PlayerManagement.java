@@ -230,7 +230,7 @@ public class PlayerManagement {
 			CArray players = new CArray(t);
 			if (args.length == 0) {
 				for (MCPlayer player : Static.getServer().getOnlinePlayers()) {
-					players.push(new CString(player.getName(), t));
+					players.push(new CString(player.getName(), t), t);
 				}
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
@@ -238,7 +238,7 @@ public class PlayerManagement {
 					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 				}
 				for (MCPlayer player : world.getPlayers()) {
-					players.push(new CString(player.getName(), t));
+					players.push(new CString(player.getName(), t), t);
 				}
 			}
 			return players;
@@ -334,7 +334,7 @@ public class PlayerManagement {
 
 			for (MCPlayer pa1 : pa) {
 				if (inRadius(pa1, dist, loc)) {
-					sa.push(new CString(pa1.getName(), t));
+					sa.push(new CString(pa1.getName(), t), t);
 				}
 			}
 
@@ -792,7 +792,7 @@ public class PlayerManagement {
 			CArray ret = new CArray(t);
 			if (sender != null) {
 				for (String group : sender.getGroups()) {
-					ret.push(new CString(group, t));
+					ret.push(new CString(group, t), t);
 				}
 			}
 			return ret;
@@ -980,7 +980,7 @@ public class PlayerManagement {
 				//MCPlayer groups
 				CArray a = new CArray(t);
 				for (String group : p.getGroups()) {
-					a.push(new CString(group, t));
+					a.push(new CString(group, t), t);
 				}
 				retVals.add(a);
 			}
@@ -1033,7 +1033,7 @@ public class PlayerManagement {
 			} else {
 				CArray ca = new CArray(t);
 				for (Construct c : retVals) {
-					ca.push(c);
+					ca.push(c, t);
 				}
 				return ca;
 			}
@@ -4540,7 +4540,7 @@ public class PlayerManagement {
 			CArray ret = new CArray(t);
 			if (s != null && s.getOfflinePlayers() != null) { // This causes the function to return an empty array for a fake/null server.
 				for (MCOfflinePlayer offp : s.getOfflinePlayers()) {
-					ret.push(new CString(offp.getName(), t));
+					ret.push(new CString(offp.getName(), t), t);
 				}
 			}
 			return ret;
