@@ -1100,9 +1100,6 @@ public final class Static {
 		MCCommandSender commandSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 		String label = env.getEnv(GlobalEnv.class).GetLabel();
 		boolean perm = false;
-		if (label != null && GLOBAL_PERMISSION.equals(label)) {
-			perm = true;
-		}
 		if (commandSender != null) {
 			if (commandSender.isOp()) {
 				perm = true;
