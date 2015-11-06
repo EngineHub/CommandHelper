@@ -251,7 +251,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     //        GenericTree<Construct> root = new GenericTree<Construct>();
     //        root.setRoot(tree);
             Environment env = originalEnv.clone();
-            CArray ca = new CArray(Target.UNKNOWN);
+            CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN);
             for (String key : activeEvent.parsedEvent.keySet()) {
                 ca.set(new CString(key, Target.UNKNOWN), activeEvent.parsedEvent.get(key), Target.UNKNOWN);
             }

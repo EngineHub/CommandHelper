@@ -2469,7 +2469,7 @@ public class PlayerEvents {
 				MCPlayerEditBookEvent playerEditBookEvent = (MCPlayerEditBookEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
 				MCBookMeta oldBookMeta = playerEditBookEvent.getPreviousBookMeta();
-				CArray oldBookArray = new CArray(Target.UNKNOWN);
+				CArray oldBookArray = CArray.GetAssociativeArray(Target.UNKNOWN);
 				if (oldBookMeta.hasTitle()) {
 					oldBookArray.set("title", new CString(oldBookMeta.getTitle(), Target.UNKNOWN), Target.UNKNOWN);
 				} else {
@@ -2491,7 +2491,7 @@ public class PlayerEvents {
 				}
 				mapEvent.put("oldbook", oldBookArray);
 				MCBookMeta newBookMeta = playerEditBookEvent.getNewBookMeta();
-				CArray newBookArray = new CArray(Target.UNKNOWN);
+				CArray newBookArray = CArray.GetAssociativeArray(Target.UNKNOWN);
 				if (newBookMeta.hasTitle()) {
 					newBookArray.set("title", new CString(newBookMeta.getTitle(), Target.UNKNOWN), Target.UNKNOWN);
 				} else {

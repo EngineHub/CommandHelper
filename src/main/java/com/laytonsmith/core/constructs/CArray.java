@@ -79,7 +79,7 @@ public class CArray extends Construct implements ArrayAccess{
 			}
 		}
 		associative_array = new TreeMap<>(comparator);
-		array = associative_mode ? new ArrayList<Construct>() : initialCapacity > -1 ? new ArrayList<Construct>(initialCapacity) : items != null ? new ArrayList<Construct>(items.length) : new ArrayList<Construct>();
+		array = associative_mode ? new ArrayList<Construct>() : initialCapacity > 0 ? new ArrayList<Construct>(initialCapacity) : items != null ? new ArrayList<Construct>(items.length) : new ArrayList<Construct>();
 		if(associative_mode){
 			if(items != null){
 				for(Construct item : items){
@@ -177,23 +177,11 @@ public class CArray extends Construct implements ArrayAccess{
 	 * @return
 	 */
 	public static CArray GetAssociativeArray(Target t){
-		return new CArray(t).forceAssociativeMode();
+		return new CArray(t, -1);
 	}
 
 	public static CArray GetAssociativeArray(Target t, Construct[] args){
-		return new CArray(t, -1, args).forceAssociativeMode();
-	}
-
-    /**
-     * This should only be used when copying an array that is already known to be associative, so integer keys will
-     * remain associative.
-     */
-    private CArray forceAssociativeMode(){
-        if(associative_array == null){
-            associative_array = new TreeMap<String, Construct>();
-        }
-        associative_mode = true;
-		return this;
+		return new CArray(t, -1, args);
     }
 
 	/**
@@ -725,13 +713,11 @@ public class CArray extends Construct implements ArrayAccess{
 			// Null checks!
 			if (o1 == null && o2 != null) {
 				return -1;
-			} else if (o1 == null && o2 == null) {
+			} else if (o1 == null) {
 				return 0;
-			} else if (o1 != null && o2 == null) {
+			} else if (o2 == null) {
 				return 1;
 			}
-			assert o1 != null;
-			assert o2 != null;
 			// This fixes a bug where occasionally (I can't totally figure out the pattern) a value
 			// would be missing from the list. I think this is ok in all cases, except that it may
 			// change the order of certain associative array's key display, however, this has never

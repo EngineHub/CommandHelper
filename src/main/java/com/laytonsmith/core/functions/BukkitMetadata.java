@@ -119,7 +119,7 @@ public class BukkitMetadata {
 				}
 				return CNull.NULL;
 			} else {
-				CArray values = new CArray(t);
+				CArray values = CArray.GetAssociativeArray(t);
 				for (MCMetadataValue value : metadata) {
 					values.set(value.getOwningPlugin().getName(), Static.getMSObject(value.value(), t), t);
 				}
