@@ -395,7 +395,7 @@ public class Cmdline {
 				}
                 return new CString(prop, t);
             } else {
-                CArray ca = new CArray(t);
+                CArray ca = CArray.GetAssociativeArray(t);
                 for (String key : System.getProperties().stringPropertyNames()) {
                     ca.set(key, System.getProperty(key));
                 }
@@ -473,7 +473,7 @@ public class Cmdline {
             if (args.length == 1) {
                 return new CString(System.getenv(args[0].val()), t);
             } else {
-                CArray ca = new CArray(t);
+                CArray ca = CArray.GetAssociativeArray(t);
                 for (String key : System.getenv().keySet()) {
                     ca.set(key, System.getenv(key));
                 }

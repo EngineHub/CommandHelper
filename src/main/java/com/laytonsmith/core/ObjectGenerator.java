@@ -747,7 +747,7 @@ public class ObjectGenerator {
 	 * @return
 	 */
 	public CArray color(MCColor color, Target t){
-		CArray ca = new CArray(t);
+		CArray ca = CArray.GetAssociativeArray(t);
 		ca.set("r", new CInt(color.getRed(), t), t);
 		ca.set("g", new CInt(color.getGreen(), t), t);
 		ca.set("b", new CInt(color.getBlue(), t), t);
