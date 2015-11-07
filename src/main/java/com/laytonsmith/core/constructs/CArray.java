@@ -216,10 +216,22 @@ public class CArray extends Construct implements ArrayAccess{
 	/**
 	 * Pushes a new Construct onto the end of the array.
 	 * @param c
+	 * @param t
 	 */
 	public final void push(Construct c, Target t){
 		push(c, null, t);
 	}
+	
+	/**
+	 * Pushes a new Construct onto the end of the array.
+	 * @param c
+	 * @deprecated Use push(Construct c, Target t) instead.
+	 */
+	@Deprecated
+	public final void push(Construct c){
+		push(c, null, Target.UNKNOWN);
+	}
+	
     /**
      * Pushes a new Construct onto the end of the array. If the index is specified, this works like
 	 * a "insert" operation, in that all values are shifted to the right, starting with the value
