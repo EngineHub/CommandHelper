@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -3154,6 +3153,7 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@hide("Deprecated in favor of set_pflight")
 	@Deprecated
 	public static class pset_flight extends set_pflight implements Optimizable {
 
@@ -3256,6 +3256,7 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@hide("Deprecated in favor of set_ptime")
 	@Deprecated
 	public static class pset_time extends set_ptime implements Optimizable {
 
