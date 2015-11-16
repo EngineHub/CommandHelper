@@ -4933,7 +4933,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "UUID {[player]} Gets the entity that a spectator is viewing. If the player isn't spectating"
+			return "mixed {[player]} Gets the entity that a spectator is viewing. If the player isn't spectating"
 					+ " from an entity, null is returned. If the player isn't in spectator mode, an"
 					+ " IllegalArgumentException is thrown.";
 		}
