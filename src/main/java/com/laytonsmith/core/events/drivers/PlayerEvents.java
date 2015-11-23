@@ -637,6 +637,7 @@ public class PlayerEvents {
                     + "can specify the kick message by modifying 'kickmsg'. "
                     + "{player: The player's name | uuid: The player's unique id | "
 					+ "kickmsg: The default kick message | ip: the player's IP address | "
+					+ "hostname: The hostname used to reach the server | "
 					+ "result: the default response to their logging in}"
                     + "{kickmsg|result}"
                     + "{player|kickmsg|ip|result}";
@@ -675,6 +676,7 @@ public class PlayerEvents {
 				//TODO: The event.getResult needs to be enum'd
                 map.put("result", new CString(event.getResult(), Target.UNKNOWN));
                 map.put("kickmsg", new CString(event.getKickMessage(), Target.UNKNOWN));
+                map.put("hostname", new CString(event.getHostname(), Target.UNKNOWN));
 
                 return map;
             } else{
