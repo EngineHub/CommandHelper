@@ -374,6 +374,11 @@ public class BukkitPlayerEvents {
 		public String getIP() {
 			return event.getAddress().getHostAddress();
 		}
+
+		@Override
+		public String getHostname() {
+			return event.getHostname();
+		}
 	}
 
 	public static class BukkitMCPlayerPreLoginEvent implements MCPlayerPreLoginEvent {

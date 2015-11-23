@@ -12,4 +12,5 @@ public interface MCPlayerLoginEvent extends MCPlayerEvent{
     public String getResult();
     public void setResult(String rst);
     public String getIP();
+    public String getHostname();
 }
