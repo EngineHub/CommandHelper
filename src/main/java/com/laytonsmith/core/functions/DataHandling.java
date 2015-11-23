@@ -2726,7 +2726,7 @@ public class DataHandling {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.IllegalArgumentException};
 		}
 
 		@Override
@@ -2736,7 +2736,7 @@ public class DataHandling {
 
 		@Override
 		public boolean preResolveVariables() {
-			return false;
+			return true;
 		}
 
 		@Override
@@ -2758,7 +2758,17 @@ public class DataHandling {
 //				return CVoid.VOID;
 //			} else {
 				//Mode 2
-				String key = GetNamespace(args, null, getName(), t);
+				String key;
+				if(args.length == 1) {
+					if(!(args[0] instanceof CString)) {
+						throw new ConfigRuntimeException(this.getName() + " with 1 argument expects the argument to be a string.",
+								ExceptionType.IllegalArgumentException, t);
+					}
+					key = args[0].val();
+				} else {
+					// Handle the deprecated syntax.
+					key = GetNamespace(args, null, getName(), t);
+				}
 				return Globals.GetGlobalConstruct(key);
 //			}
 		}
@@ -2818,7 +2828,7 @@ public class DataHandling {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
+			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException, ExceptionType.IllegalArgumentException};
 		}
 
 		@Override
@@ -2828,7 +2838,7 @@ public class DataHandling {
 
 		@Override
 		public boolean preResolveVariables() {
-			return false;
+			return true;
 		}
 
 		@Override
@@ -2851,12 +2861,22 @@ public class DataHandling {
 //					throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
 //				}
 //			} else {
-				String key = GetNamespace(args, args.length - 1, getName(), t);
-				Construct c = args[args.length - 1];
-				//We want to store the value contained, not the ivar itself
-				while (c instanceof IVariable) {
-					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
+				String key;
+				if(args.length == 2) {
+					if(!(args[0] instanceof CString)) {
+						throw new ConfigRuntimeException(this.getName() + " with 2 arguments expects the first argument to be a string.",
+								ExceptionType.IllegalArgumentException, t);
+					}
+					key = args[0].val();
+				} else {
+					// Handle the deprecated syntax.
+					key = GetNamespace(args, args.length - 1, getName(), t);
 				}
+				Construct c = args[args.length - 1];
+//				//We want to store the value contained, not the ivar itself
+//				while (c instanceof IVariable) {
+//					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
+//				}
 				Globals.SetGlobal(key, c);
 //			}
 			return CVoid.VOID;
