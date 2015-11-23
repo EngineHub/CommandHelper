@@ -1917,7 +1917,7 @@ public class InventoryManagement {
 			
 			int slot;
 			try {
-				slot = Integer.parseInt(args[0].val());
+				slot = Integer.parseInt(args[args.length - 1].val());
 			} catch(NumberFormatException e) {
 				throw new ConfigRuntimeException("Slot number must be an integer in range of [0-8].",
 							Exceptions.ExceptionType.FormatException, t);
