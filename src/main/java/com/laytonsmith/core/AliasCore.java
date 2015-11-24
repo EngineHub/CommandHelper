@@ -444,6 +444,11 @@ public class AliasCore {
 				String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
 				localPackages.appendMSA(alias_config, aliasConfig);
 
+				File auto_include = new File(env.getEnv(GlobalEnv.class).GetRootFolder(), "auto_include.ms");
+				if (auto_include.exists()) {
+					localPackages.addAutoInclude(auto_include);
+				}
+
 				//Now that we've included the default files, search the local_packages directory
 				GetAuxAliases(auxAliases, localPackages);
 
@@ -451,8 +456,11 @@ public class AliasCore {
 
 				ProfilePoint compilerMS = parent.profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
 				try {
+					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
+					MethodScriptCompiler.registerAutoIncludes(env, null);
 					localPackages.compileMS(player, env);
 				} finally {
+					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(null);
 					compilerMS.stop();
 				}
 				ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
@@ -677,8 +685,6 @@ public class AliasCore {
 			for (FileInfo fi : ms) {
 				boolean exception = false;
 				try {
-					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
-					MethodScriptCompiler.registerAutoIncludes(env, null);
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
 				} catch (ConfigCompileGroupException e){
 					exception = true;
@@ -696,8 +702,6 @@ public class AliasCore {
 				} catch (ProgramFlowManipulationException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in main files.", e.getTarget()), env);
-				} finally {
-					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(null);
 				}
 				if (exception) {
 					if (Prefs.HaltOnFailure()) {
