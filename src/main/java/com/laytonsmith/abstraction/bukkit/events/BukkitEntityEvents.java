@@ -552,6 +552,11 @@ public class BukkitEntityEvents {
         }
 
 		@Override
+		public double getFinalDamage() {
+			return event.getFinalDamage();
+		}
+
+		@Override
         public double getDamage() {
             return event.getDamage();
         }
