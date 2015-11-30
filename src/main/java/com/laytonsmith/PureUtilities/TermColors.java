@@ -196,7 +196,7 @@ public final class TermColors {
             }
         }
 		if(type.equals("reset")){
-			return "\033[0m";
+			return "\033[m";
 		}
         return "";
     }
