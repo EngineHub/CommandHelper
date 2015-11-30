@@ -498,6 +498,8 @@ public class CArray extends Construct implements ArrayAccess{
 						v = ((CArray)value).getString(arrays, t);
 						arrays.pop();
 					}
+				} else if(value instanceof CString ){
+					v = "'" + value.val().replaceAll( "'", "\\'") + "'";
 				} else {
 					v = value.val();
 				}
@@ -525,6 +527,8 @@ public class CArray extends Construct implements ArrayAccess{
 							arrays.add(((CArray)value));
 							v = ((CArray)value).getString(arrays, t);
 						}
+					} else if(value instanceof CString ){
+						v = "'" + value.val().replaceAll( "'", "\\'") + "'";
 					} else {
 						v = value.val();
 					}
