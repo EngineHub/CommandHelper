@@ -543,6 +543,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 			return args.length >= 1 && args[0].equalsIgnoreCase("null");
 		} else if (cmdName.equals("runalias")) {
 			//Hardcoded alias rebroadcast
+			if(args.length == 0){
+				return false;
+			}
 			String command = StringUtils.Join(args, " ");
 			if (sender instanceof Player) {
 				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, command);
