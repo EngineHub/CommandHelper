@@ -182,25 +182,26 @@ public class ObjectGenerator {
             } else {
                 throw new ConfigRuntimeException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, t);
             }
-        }
-        if (array.containsKey("x")) {
-            x = Static.getNumber(array.get("x", t), t);
-        }
-        if (array.containsKey("y")) {
-            y = Static.getNumber(array.get("y", t), t);
-        }
-        if (array.containsKey("z")) {
-            z = Static.getNumber(array.get("z", t), t);
-        }
-        if (array.containsKey("world")) {
-            world = Static.getServer().getWorld(array.get("world", t).val());
-        }
-        if (array.containsKey("yaw")) {
-            yaw = (float) Static.getDouble(array.get("yaw", t), t);
-        }
-        if (array.containsKey("pitch")) {
-            pitch = (float) Static.getDouble(array.get("pitch", t), t);
-        }
+        } else {
+			if (array.containsKey("x")) {
+				x = Static.getNumber(array.get("x", t), t);
+			}
+			if (array.containsKey("y")) {
+				y = Static.getNumber(array.get("y", t), t);
+			}
+			if (array.containsKey("z")) {
+				z = Static.getNumber(array.get("z", t), t);
+			}
+			if (array.containsKey("world")) {
+				world = Static.getServer().getWorld(array.get("world", t).val());
+			}
+			if (array.containsKey("yaw")) {
+				yaw = (float) Static.getDouble(array.get("yaw", t), t);
+			}
+			if (array.containsKey("pitch")) {
+				pitch = (float) Static.getDouble(array.get("pitch", t), t);
+			}
+		}
 		//If world is still null at this point, it's an error
 		if (world == null) {
 			throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
