@@ -30,5 +30,9 @@ public abstract class ProgramFlowManipulationException extends RuntimeException 
 	public Target getTarget() {
 		return t;
 	}
-    
+
+	@Override
+	public Throwable fillInStackTrace(){
+		return this;
+	}
 }
