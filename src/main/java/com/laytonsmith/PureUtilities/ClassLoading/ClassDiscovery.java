@@ -565,7 +565,7 @@ public class ClassDiscovery {
 						return true;
 					} else {
 						//We need to add change the reference to su
-						su = new ClassReferenceMirror("L" + clazz.getSuperclass().getName().replace(".", "/") + ";");
+						su = new ClassReferenceMirror("L" + clazz.getSuperclass().getName().replace('.', '/') + ";");
 					}
 				} catch (ClassNotFoundException ex) {
 					//Hmm, ok? I guess something bad happened, so let's break
@@ -593,7 +593,7 @@ public class ClassDiscovery {
 				try {
 					Class clazz = Class.forName(r.toString());
 					for (Class c : clazz.getInterfaces()) {
-						interfaces.add(new ClassReferenceMirror("L" + c.getName().replace(".", "/") + ";"));
+						interfaces.add(new ClassReferenceMirror("L" + c.getName().replace('.', '/') + ";"));
 					}
 				} catch (ClassNotFoundException ex) {
 					return false;

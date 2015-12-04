@@ -143,7 +143,7 @@ public class Reflection {
 					return new CString("Unknown (maybe the interpreter?)", t);
 				} else {
 					try {
-						return new CString(t.file().getCanonicalPath().replace("\\", "/"), t);
+						return new CString(t.file().getCanonicalPath().replace('\\', '/'), t);
 					} catch (IOException ex) {
 						throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
 					}

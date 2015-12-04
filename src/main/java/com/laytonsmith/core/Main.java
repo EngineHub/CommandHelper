@@ -334,7 +334,7 @@ public class Main {
 				PersistenceNetwork pn = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile().getCanonicalPath()
 								//This replace is required on Windows.
-								.replace("\\", "/")), options);
+								.replace('\\', '/')), options);
 				Map<String[], String> values = pn.getNamespace(new String[]{});
 				for(String [] s : values.keySet()){
 					StreamUtils.GetSystemOut().println(StringUtils.Join(s, ".") + "=" + values.get(s));

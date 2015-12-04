@@ -346,7 +346,7 @@ public class AliasCore {
 					options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
 					parent.persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 							new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
-							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
+							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')), options);
 				} finally {
 					persistenceConfigReload.stop();
 				}

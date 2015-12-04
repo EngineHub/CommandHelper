@@ -139,7 +139,7 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public String getClassName(){
 		if(underlyingClass != null){
-			return underlyingClass.getName().replace("$", ".");
+			return underlyingClass.getName().replace('$', '.');
 		}
 		return info.name.replaceAll("[/$]", ".");
 	}
@@ -453,7 +453,7 @@ public class ClassMirror<T> implements Serializable {
 		if(underlyingClass != null){
 			return (underlyingClass.getSuperclass() == superClass);
 		}
-		String name = superClass.getName().replace(".", "/");
+		String name = superClass.getName().replace('.', '/');
 		if(info.superClass.equals(name)){
 			return true;
 		}
