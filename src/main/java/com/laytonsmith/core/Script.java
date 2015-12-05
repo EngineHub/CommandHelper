@@ -732,10 +732,10 @@ public class Script {
                 }
             }
             if (inside_opt_var && t.type.equals(TType.OPT_VAR_ASSIGN)) {
-                if (!((next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) && after_token.type.equals(TType.RSQUARE_BRACKET)
+                if (!(next_token.type.isAtomicLit() && after_token.type.equals(TType.RSQUARE_BRACKET)
                         || (next_token.type.equals(TType.RSQUARE_BRACKET)))) {
                     throw new ConfigCompileException("Unexpected token in optional variable", t.target);
-                } else if (next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) {
+                } else if (next_token.type.isAtomicLit()) {
                     left_vars.get(lastVar).setDefault(next_token.val());
                 }
             }
