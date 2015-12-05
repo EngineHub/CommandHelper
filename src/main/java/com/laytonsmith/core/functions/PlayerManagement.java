@@ -237,7 +237,9 @@ public class PlayerManagement {
 					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 				}
 				for (MCPlayer player : world.getPlayers()) {
-					players.push(new CString(player.getName(), t), t);
+					if(player.isOnline()){
+						players.push(new CString(player.getName(), t), t);
+					}
 				}
 			}
 			return players;
