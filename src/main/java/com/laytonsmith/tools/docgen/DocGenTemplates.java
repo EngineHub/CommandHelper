@@ -143,7 +143,9 @@ public class DocGenTemplates {
 	 */
 	public static String DoTemplateReplacement(String template, Map<String, Generator> generators){
 		try {
-			Prefs.init(null);
+			if(Implementation.GetServerType() != Implementation.Type.BUKKIT){
+				Prefs.init(null);
+			}
 		} catch (IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
