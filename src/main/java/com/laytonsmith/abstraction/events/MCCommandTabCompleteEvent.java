@@ -16,4 +16,6 @@ public interface MCCommandTabCompleteEvent extends BindableEvent {
 	public String[] getArguments();
 	
 	public List<String> getCompletions();
+
+	public void setCompletions(List<String> completions);
 }
