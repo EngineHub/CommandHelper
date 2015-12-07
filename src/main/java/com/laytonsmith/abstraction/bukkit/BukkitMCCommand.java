@@ -16,7 +16,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -209,11 +208,11 @@ public class BukkitMCCommand implements MCCommand {
 			for (String arg : args) {
 				cargs.push(new CString(arg, t), t);
 			}
+			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
 			try {
-				Commands.onTabComplete.get(cmd.getName().toLowerCase()).execute(new Construct[]{
-					new CString(alias, t), new CString(sender.getName(), t), cargs,
-					new CArray(t) // reserved for an obgen style command array
-				});
+				closure.execute(new CString(alias, t), new CString(sender.getName(), t), cargs,
+						new CArray(t) // reserved for an obgen style command array
+				);
 			} catch (FunctionReturnException e) {
 				Construct fret = e.getReturn();
 				if (fret instanceof CArray) {
@@ -229,10 +228,12 @@ public class BukkitMCCommand implements MCCommand {
 					}
 					return ret;
 				}
+			} catch (ConfigRuntimeException cre){
+				ConfigRuntimeException.HandleUncaughtException(cre, closure.getEnv());
+				return new ArrayList<>();
 			}
 		}
 		BukkitMCCommandTabCompleteEvent event = new BukkitMCCommandTabCompleteEvent(sender, cmd, alias, args);
-		EventUtils.TriggerExternal(event);
 		EventUtils.TriggerListener(Driver.TAB_COMPLETE, "tab_complete_command", event);
 		return event.getCompletions();
 	}
@@ -255,10 +256,9 @@ public class BukkitMCCommand implements MCCommand {
 			}
 
 			try {
-				closure.execute(new Construct[]{
-					new CString(label, t), new CString(sender.getName(), t), cargs,
-					new CArray(t) // reserved for an obgen style command array
-				});
+				closure.execute(new CString(label, t), new CString(sender.getName(), t), cargs,
+						new CArray(t) // reserved for an obgen style command array
+				);
 			} catch (FunctionReturnException e) {
 				Construct fret = e.getReturn();
 				if (fret instanceof CBoolean) {
