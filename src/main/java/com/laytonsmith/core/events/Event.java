@@ -114,6 +114,15 @@ public interface Event extends Comparable<Event>, Documentation{
     public void bind(BoundEvent event);
 
     /**
+     * This function is called once a script unbinds this event. It may throw an
+     * UnsupportedOperationException if it is not needed. The BoundEvent is sent,
+     * in case the event can do some further optimization based on it.
+     * @param event The event that is triggering bind. Things like the prefilters and
+     * environment are available with the event.
+     */
+    public void unbind(BoundEvent event);
+
+    /**
      * This function is called once when the plugin starts up, to give this
      * event a chance to make a hook into the server if it needs it.
      * It may throw an UnsupportedOperationException if it is not needed.

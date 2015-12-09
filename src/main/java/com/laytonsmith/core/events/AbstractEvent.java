@@ -54,7 +54,17 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      */
 	@Override
     public void bind(BoundEvent event) {
-        throw new UnsupportedOperationException("Not supported yet.");
+
+    }
+
+	/**
+	 * If the event needs to run special code when a player unbinds the event, it
+	 * can be done here. By default, an UnsupportedOperationException is thrown,
+	 * but is caught and ignored.
+	 */
+	@Override
+	public void unbind(BoundEvent event) {
+
     }
 
     /**

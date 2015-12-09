@@ -62,10 +62,7 @@ public final class EventUtils {
 		}
 		SortedSet<BoundEvent> set = event_handles.get(event.driver());
 		set.add(b);
-		try {
-			event.bind(b);
-		} catch (UnsupportedOperationException e) {
-		}
+		event.bind(b);
 	}
 
 	/**
@@ -82,6 +79,7 @@ public final class EventUtils {
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
 				if (b.getId().equals(id)) {
+					b.getEventDriver().unbind(b);
 					i.remove();
 					return;
 				}
