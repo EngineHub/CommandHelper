@@ -87,8 +87,6 @@ public class Commands {
 			if (arg instanceof CClosure) {
 				onTabComplete.remove(cmd.getName());
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
-				cmd.setTabCompleter(Static.getServer().getPluginManager()
-						.getPlugin(Implementation.GetServerType().getBranding()));
 			} else {
 				throw new ConfigRuntimeException("At this time, only closures are accepted as tabcompleters",
 						ExceptionType.FormatException, t);
@@ -359,8 +357,6 @@ public class Commands {
 			if (arg instanceof CClosure) {
 				onCommand.remove(cmd.getName());
 				onCommand.put(cmd.getName(), (CClosure) arg);
-				cmd.setTabCompleter(Static.getServer().getPluginManager()
-						.getPlugin(Implementation.GetServerType().getBranding()));
 			} else {
 				throw new ConfigRuntimeException("At this time, only closures are accepted as command executors.",
 						ExceptionType.FormatException, t);

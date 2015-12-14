@@ -97,7 +97,7 @@ public class ZipReader {
 			String newFile = file.getPath().substring(5);
 			//Replace all \ with /, to simply processing, but also replace ! with /, since jar addresses
 			//use that to denote the jar. We don't care, it's just a folder, so replace that with a slash.
-			newFile = newFile.replace("\\", "/").replace("!", "/");
+			newFile = newFile.replace('\\', '/').replace('!', '/');
 			while(newFile.startsWith("//")){
 				//We only want up to one slash here
 				newFile = newFile.substring(1);

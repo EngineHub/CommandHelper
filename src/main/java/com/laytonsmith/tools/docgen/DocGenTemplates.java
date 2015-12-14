@@ -143,7 +143,9 @@ public class DocGenTemplates {
 	 */
 	public static String DoTemplateReplacement(String template, Map<String, Generator> generators){
 		try {
-			Prefs.init(null);
+			if(Implementation.GetServerType() != Implementation.Type.BUKKIT){
+				Prefs.init(null);
+			}
 		} catch (IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -307,7 +309,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
-			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getName() + "]";
+			return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + c.getName() + "]";
 		}
 	};
 
@@ -332,7 +334,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
-			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getSimpleName() + "]";
+			return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + c.getSimpleName() + "]";
 		}
 	};
 
@@ -351,7 +353,7 @@ public class DocGenTemplates {
 				while(c.getEnclosingClass() != null){
 					c = c.getEnclosingClass();
 				}
-				return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + b.getName() + "]";
+				return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + b.getName() + "]";
 			} catch (ConfigCompileException ex) {
 				return "Unknown function: " + args[0];
 			}

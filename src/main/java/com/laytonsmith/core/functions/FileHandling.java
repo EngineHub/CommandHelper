@@ -543,7 +543,7 @@ public class FileHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			//TODO: Doesn't work yet.
 			//TODO: Be sure to change over to Static.GetFileFromArgument
-			String path = args[0].val().trim().replace("\\", "/");
+			String path = args[0].val().trim().replace('\\', '/');
 			//Remove duplicate /
 			path = path.replaceAll("(/)(?=.*?/)", path);
 			if("/".equals(path) || path.matches("[a-zA-Z]:/")){

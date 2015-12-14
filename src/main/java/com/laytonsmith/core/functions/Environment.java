@@ -229,37 +229,29 @@ public class Environment {
 			int iy = (int) y;
 			int iz = (int) z;
 			MCBlock b = w.getBlockAt(ix, iy, iz);
-			StringBuilder data = new StringBuilder();
-			StringBuilder meta = new StringBuilder();
-			boolean inMeta = false;
-			for (int i = 0; i < id.length(); i++) {
-				Character c = id.charAt(i);
-				if (!inMeta) {
-					if (!Character.isDigit(c) && c != ':') {
-						throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers",
-								ExceptionType.FormatException, t);
-					}
-					if (c == ':') {
-						inMeta = true;
-						continue;
-					}
-					data.append(c);
+			String[] dataAndMeta = id.split(":");
+			int data;
+			byte meta;
+			try {
+				if(dataAndMeta.length == 1) {
+					meta = 0;
+				} else if(dataAndMeta.length == 2) {
+					meta = Byte.parseByte(dataAndMeta[1]); // Throws NumberFormatException.
 				} else {
-					meta.append(c);
+					throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers",
+							ExceptionType.FormatException, t);
 				}
+				data = Integer.parseInt(dataAndMeta[0]); // Throws NumberFormatException.
+			} catch(NumberFormatException e) {
+				throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers",
+						ExceptionType.FormatException, t);
 			}
-			if (meta.length() == 0) {
-				meta.append("0");
-			}
-
-			int idata = Integer.parseInt(data.toString());
-			byte imeta = Byte.parseByte(meta.toString());
-			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(idata);
+			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
 			if (mat == null || !mat.isBlock()) {
-				throw new ConfigRuntimeException("Not a block ID: " + idata
+				throw new ConfigRuntimeException("Not a block ID: " + data
 						+ ". Attempting to set an invalid id can corrupt chunks!", ExceptionType.CastException, t);
 			}
-			b.setTypeAndData(idata, imeta, physics);
+			b.setTypeAndData(data, meta, physics);
 
 			return CVoid.VOID;
 		}
@@ -1198,7 +1190,7 @@ public class Environment {
 						throw new ConfigRuntimeException("Invalid argument for block info", ExceptionType.FormatException, t);
 				}
 			}
-			CArray array = new CArray(t);
+			CArray array = CArray.GetAssociativeArray(t);
 			array.set("solid", CBoolean.get(b.isSolid()), t);
 			array.set("flammable", CBoolean.get(b.isFlammable()), t);
 			array.set("transparent", CBoolean.get(b.isTransparent()), t);

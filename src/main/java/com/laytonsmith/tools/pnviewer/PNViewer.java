@@ -707,7 +707,7 @@ public class PNViewer extends javax.swing.JFrame {
 		File config = new File(configPath);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(config.getParentFile().getParentFile());
-		return new PersistenceNetwork(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace("\\", "/")), options);
+		return new PersistenceNetwork(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace('\\', '/')), options);
 	}
 
 	/**

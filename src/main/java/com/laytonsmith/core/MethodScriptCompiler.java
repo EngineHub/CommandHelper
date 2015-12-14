@@ -29,6 +29,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
@@ -1991,14 +1992,12 @@ public final class MethodScriptCompiler {
 	}
 
 	public static void registerAutoIncludes(Environment env, Script s) {
-		File root = env.getEnv(GlobalEnv.class).GetRootFolder();
-		File auto_include = new File(root, "auto_include.ms");
-		if (auto_include.exists()) {
-			MethodScriptCompiler.execute(IncludeCache.get(auto_include, new Target(0, auto_include, 0)), env, null, s);
-		}
-
 		for (File f : Static.getAliasCore().autoIncludes) {
-			MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
+			try {
+				MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
+			} catch (ProgramFlowManipulationException e) {
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in auto include files.", e.getTarget()), env);
+			}
 		}
 	}
 }

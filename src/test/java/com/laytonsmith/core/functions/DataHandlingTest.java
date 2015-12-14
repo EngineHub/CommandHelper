@@ -339,6 +339,21 @@ public class DataHandlingTest {
                 + "msg(_get())", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2}");
     }
+	
+	@Test
+    public void testExportImportIvarValue() throws Exception{
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("assign(@key, 'key1')"
+				+ "assign(@value, 'key1Value')"
+                + "export(@key, @value)"
+                + "msg(import('key1'))", fakePlayer);
+        verify(fakePlayer).sendMessage("key1Value");
+		SRun("assign(@key, 'key2')"
+				+ "assign(@value, 'key2Value')"
+                + "export('key2', @value)"
+                + "msg(import(@key))", fakePlayer);
+        verify(fakePlayer).sendMessage("key2Value");
+    }
 
     @Test(timeout = 10000)
     public void testIsBoolean() throws Exception {

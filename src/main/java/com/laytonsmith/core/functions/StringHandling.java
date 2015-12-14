@@ -661,7 +661,7 @@ public class StringHandling {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		@Override
@@ -681,6 +681,10 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if (!(args[0] instanceof CString)) {
+				throw new ConfigRuntimeException(this.getName() + " expects a string as first argument, but type "
+						+ args[0].typeof() + " was found.", ExceptionType.FormatException, t);
+			}
 			return new CString(args[0].val().toUpperCase(), t);
 		}
 
@@ -720,7 +724,7 @@ public class StringHandling {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		@Override
@@ -740,6 +744,10 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if (!(args[0] instanceof CString)) {
+				throw new ConfigRuntimeException(this.getName() + " expects a string as first argument, but type "
+						+ args[0].typeof() + " was found.", ExceptionType.FormatException, t);
+			}
 			return new CString(args[0].val().toLowerCase(), t);
 		}
 

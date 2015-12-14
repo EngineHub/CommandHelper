@@ -268,7 +268,7 @@ public class Persistence {
 			} catch(IllegalArgumentException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
 			}
-			CArray ca = new CArray(t);
+			CArray ca = CArray.GetAssociativeArray(t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
 			for (String[] e : list.keySet()) {
 				try {

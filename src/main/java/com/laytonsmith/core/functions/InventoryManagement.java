@@ -715,10 +715,11 @@ public class InventoryManagement {
         }
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
-                Exceptions.ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
-        }
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+					ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException,
+					ExceptionType.IllegalArgumentException};
+		}
 
 		@Override
         public boolean isRestricted() {
@@ -759,7 +760,12 @@ public class InventoryManagement {
 				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getType(), t);
 			}
 			is.setItemMeta(meta);
-			Map<Integer, MCItemStack> h = p.getInventory().addItem(is);
+			Map<Integer, MCItemStack> h;
+			try {
+				h = p.getInventory().addItem(is);
+			} catch(IllegalArgumentException e) {
+				throw new ConfigRuntimeException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
+			}
 
 			p.updateInventory();
 
@@ -895,9 +901,10 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
-				Exceptions.ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+					ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException,
+					ExceptionType.IllegalArgumentException};
 		}
 
 		@Override
@@ -940,7 +947,12 @@ public class InventoryManagement {
 				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getType(), t);
 			}
 			is.setItemMeta(meta);
-			Map<Integer, MCItemStack> h = p.getEnderChest().addItem(is);
+			Map<Integer, MCItemStack> h;
+			try {
+				h = p.getEnderChest().addItem(is);
+			} catch(IllegalArgumentException e) {
+				throw new ConfigRuntimeException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
+			}
 
 			if (h.isEmpty()) {
 				return new CInt(0, t);
@@ -1734,7 +1746,7 @@ public class InventoryManagement {
 		@Override
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-                    ExceptionType.LengthException};
+                    ExceptionType.LengthException, ExceptionType.IllegalArgumentException};
 		}
 
 		@Override
@@ -1766,7 +1778,12 @@ public class InventoryManagement {
 				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getType(), t);
 			}
 			is.setItemMeta(meta);
-			Map<Integer, MCItemStack> h = inventory.addItem(is);
+			Map<Integer, MCItemStack> h;
+			try {
+				h = inventory.addItem(is);
+			} catch(IllegalArgumentException e){
+				throw new ConfigRuntimeException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
+			}
 
 			if (h.isEmpty()) {
 				return new CInt(0, t);
@@ -1917,7 +1934,7 @@ public class InventoryManagement {
 			
 			int slot;
 			try {
-				slot = Integer.parseInt(args[0].val());
+				slot = Integer.parseInt(args[args.length - 1].val());
 			} catch(NumberFormatException e) {
 				throw new ConfigRuntimeException("Slot number must be an integer in range of [0-8].",
 							Exceptions.ExceptionType.FormatException, t);

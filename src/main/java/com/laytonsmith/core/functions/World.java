@@ -1176,7 +1176,7 @@ public class World {
 				throw new ConfigRuntimeException("Unknown world: " + args[0],
 						ExceptionType.InvalidWorldException, t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("name", new CString(w.getName(), t), t);
 			ret.set("seed", new CInt(w.getSeed(), t), t);
 			ret.set("environment", new CString(w.getEnvironment().name(), t), t);
@@ -1527,7 +1527,7 @@ public class World {
 				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 			}
 			if (args.length == 1) {
-				CArray gameRules = new CArray(t);
+				CArray gameRules = CArray.GetAssociativeArray(t);
 				for (MCGameRule gameRule : MCGameRule.values()) {
 					gameRules.set(new CString(gameRule.getGameRule(), t), CBoolean.get(world.getGameRuleValue(gameRule)), t);
 				}

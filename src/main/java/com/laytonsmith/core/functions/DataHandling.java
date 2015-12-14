@@ -229,41 +229,46 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
-			int offset = 0;
-			CClassType type = CClassType.AUTO;
+			int offset;
+			CClassType type;
 			String name;
 			if(args.length == 3){
 				offset = 1;
-				if(!(args[offset + 0] instanceof IVariable)) {
-					throw new ConfigRuntimeException(getName() + " with 3 arguments only accepts an ivariable as the second argument", ExceptionType.CastException, t);
+				if(!(args[offset] instanceof IVariable)){
+					throw new ConfigRuntimeException(getName() +
+							" with 3 arguments only accepts an ivariable as the second argument.",
+							ExceptionType.CastException, t);
 				}
-				name = ((IVariable) args[offset + 0]).getName();
+				name = ((IVariable) args[offset]).getName();
 				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null){
 					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null){
-						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "The variable " + name + " is hiding another value of the"
+						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR,
+								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
 					} else {
 						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
-								+ list.get(name, t, true).getDefinedTarget() + " but is being redefined", t);
+								+ list.get(name, t, true).getDefinedTarget() + " but is being redefined.", t);
 					}
 				}
 				type = ArgumentValidation.getClassType(args[0], t);
+			} else {
+				offset = 0;
+				if(!(args[offset] instanceof IVariable)){
+					throw new ConfigRuntimeException(getName() +
+							" with 2 arguments only accepts an ivariable as the second argument.",
+							ExceptionType.CastException, t);
+				}
+				name = ((IVariable) args[offset]).getName();
+				type = list.get(name, t, true).getDefinedType();
 			}
-			name = ((IVariable) args[offset + 0]).getName();
 			Construct c = args[offset + 1];
-			while (c instanceof IVariable) {
+			while(c instanceof IVariable){
 				IVariable cur = (IVariable) c;
 				c = list.get(cur.getName(), cur.getTarget()).ival();
 			}
-			if (args[offset + 0] instanceof IVariable) {
-				if(args.length == 2){
-					type = list.get(name, t, true).getDefinedType();
-				}
-				IVariable v = new IVariable(type, name, c, t);
-				list.set(v);
-				return v;
-			}
-			throw new ConfigRuntimeException(getName() + " only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
+			IVariable v = new IVariable(type, name, c, t);
+			list.set(v);
+			return v;
 		}
 
 		@Override
@@ -2726,7 +2731,7 @@ public class DataHandling {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.IllegalArgumentException};
 		}
 
 		@Override
@@ -2736,7 +2741,7 @@ public class DataHandling {
 
 		@Override
 		public boolean preResolveVariables() {
-			return false;
+			return true;
 		}
 
 		@Override
@@ -2758,7 +2763,17 @@ public class DataHandling {
 //				return CVoid.VOID;
 //			} else {
 				//Mode 2
-				String key = GetNamespace(args, null, getName(), t);
+				String key;
+				if(args.length == 1) {
+					if(!(args[0] instanceof CString)) {
+						throw new ConfigRuntimeException(this.getName() + " with 1 argument expects the argument to be a string.",
+								ExceptionType.IllegalArgumentException, t);
+					}
+					key = args[0].val();
+				} else {
+					// Handle the deprecated syntax.
+					key = GetNamespace(args, null, getName(), t);
+				}
 				return Globals.GetGlobalConstruct(key);
 //			}
 		}
@@ -2818,7 +2833,7 @@ public class DataHandling {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
+			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException, ExceptionType.IllegalArgumentException};
 		}
 
 		@Override
@@ -2828,7 +2843,7 @@ public class DataHandling {
 
 		@Override
 		public boolean preResolveVariables() {
-			return false;
+			return true;
 		}
 
 		@Override
@@ -2851,12 +2866,22 @@ public class DataHandling {
 //					throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
 //				}
 //			} else {
-				String key = GetNamespace(args, args.length - 1, getName(), t);
-				Construct c = args[args.length - 1];
-				//We want to store the value contained, not the ivar itself
-				while (c instanceof IVariable) {
-					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
+				String key;
+				if(args.length == 2) {
+					if(!(args[0] instanceof CString)) {
+						throw new ConfigRuntimeException(this.getName() + " with 2 arguments expects the first argument to be a string.",
+								ExceptionType.IllegalArgumentException, t);
+					}
+					key = args[0].val();
+				} else {
+					// Handle the deprecated syntax.
+					key = GetNamespace(args, args.length - 1, getName(), t);
 				}
+				Construct c = args[args.length - 1];
+//				//We want to store the value contained, not the ivar itself
+//				while (c instanceof IVariable) {
+//					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
+//				}
 				Globals.SetGlobal(key, c);
 //			}
 			return CVoid.VOID;

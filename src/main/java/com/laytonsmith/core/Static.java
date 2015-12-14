@@ -395,7 +395,7 @@ public final class Static {
 	private static final Pattern INVALID_BINARY = Pattern.compile("\"0b[0-1]*[^0-1]+[0-1]*\"");
 	private static final Pattern VALID_BINARY = Pattern.compile("0b[0-1]+");
 	private static final Pattern INVALID_OCTAL = Pattern.compile("0o[0-7]*[^0-7]+[0-7]*");
-	private static final Pattern VALID_OCTAL = Pattern.compile("0b[0-1]+");
+	private static final Pattern VALID_OCTAL = Pattern.compile("0o[0-7]+");
 
 	/**
 	 * Given a string input, creates and returns a Construct of the appropriate
@@ -1100,9 +1100,6 @@ public final class Static {
 		MCCommandSender commandSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 		String label = env.getEnv(GlobalEnv.class).GetLabel();
 		boolean perm = false;
-		if (label != null && GLOBAL_PERMISSION.equals(label)) {
-			perm = true;
-		}
 		if (commandSender != null) {
 			if (commandSender.isOp()) {
 				perm = true;

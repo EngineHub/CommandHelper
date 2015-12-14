@@ -48,8 +48,12 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	}
 
 	@Override
-	public void setShooter(MCProjectileSource shooter) {
-		proj.setShooter((ProjectileSource) shooter.getHandle());
+	public void setShooter(MCProjectileSource shooter){
+		if(shooter == null){
+			proj.setShooter(null);
+		} else {
+			proj.setShooter((ProjectileSource) shooter.getHandle());
+		}
 	}
 
 	public Projectile asProjectile() {

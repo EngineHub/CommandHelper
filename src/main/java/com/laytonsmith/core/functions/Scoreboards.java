@@ -394,7 +394,7 @@ public class Scoreboards {
 				to.set("prefix", new CString(team.getPrefix(), t), t);
 				to.set("suffix", new CString(team.getSuffix(), t), t);
 				to.set("size", new CInt(team.getSize(), t), t);
-				CArray ops = new CArray(t);
+				CArray ops = CArray.GetAssociativeArray(t);
 				ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
 				ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
@@ -483,7 +483,7 @@ public class Scoreboards {
 				throw new Exceptions.LengthException("Objective names should be no more than 16 characters", t);
 			}
 			MCCriteria criteria = MCCriteria.DUMMY;
-			if (args.length == 2) {
+			if (args.length > 1) {
 				try {
 					criteria = MCCriteria.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException iae) {
@@ -578,7 +578,7 @@ public class Scoreboards {
 			if (o == null) {
 				throw new ScoreboardException("No objective by that name exists.", t);
 			}
-			CArray dis = new CArray(t);
+			CArray dis = CArray.GetAssociativeArray(t);
 			if (args[1] instanceof CArray) {
 				dis = (CArray) args[1];
 			} else {
@@ -651,7 +651,7 @@ public class Scoreboards {
 			if (o == null) {
 				throw new ScoreboardException("No team by that name exists.", t);
 			}
-			CArray dis = new CArray(t);
+			CArray dis = CArray.GetAssociativeArray(t);
 			if (args[1] instanceof CArray) {
 				dis = (CArray) args[1];
 			} else {
