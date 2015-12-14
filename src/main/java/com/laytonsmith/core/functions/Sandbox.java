@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -472,6 +473,46 @@ public class Sandbox {
 								"| *  ((*   *  /\n" +
 								" \\  *))  *  .'\n" +
 								"  '-.((*_.-'", t);
+		}
+
+	}
+
+	@api
+	@hide("This is an easter egg")
+	public static class norway extends DummyFunction {
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int multiplier = 2;
+			char c = '=';
+			String one = multiply(c, 1 * multiplier);
+			String two = multiply(c, 2 * multiplier);
+			String six = multiply(c, 6 * multiplier);
+			String seven = multiply(c, 7 * multiplier);
+			String twelve = multiply(c, 12 * multiplier);
+			String thirteen = multiply(c, 13 * multiplier);
+			String twentytwo = multiply(c, 22 * multiplier);
+			for(int i = 0; i < 6; ++i){
+				System.out.println(TermColors.RED + six + TermColors.WHITE + one + TermColors.BLUE + two + TermColors.WHITE + one + TermColors.RED + twelve);
+			}
+			System.out.println(TermColors.WHITE + seven + TermColors.BLUE + two + TermColors.WHITE + thirteen);
+			for(int i = 0; i < 2; ++i){
+				System.out.println(TermColors.BLUE + twentytwo);
+			}
+			System.out.println(TermColors.WHITE + seven + TermColors.BLUE + two + TermColors.WHITE + thirteen);
+			for(int i = 0; i < 6; ++i){
+				System.out.println(TermColors.RED + six + TermColors.WHITE + one + TermColors.BLUE + two + TermColors.WHITE + one + TermColors.RED + twelve);
+			}
+
+			return CVoid.VOID;
+		}
+
+		public static String multiply(char c, int times){
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < times; ++i){
+				b.append(c);
+			}
+			return b.toString();
 		}
 
 	}
