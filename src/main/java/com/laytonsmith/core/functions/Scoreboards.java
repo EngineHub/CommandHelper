@@ -483,7 +483,7 @@ public class Scoreboards {
 				throw new Exceptions.LengthException("Objective names should be no more than 16 characters", t);
 			}
 			MCCriteria criteria = MCCriteria.DUMMY;
-			if (args.length == 2) {
+			if (args.length > 1) {
 				try {
 					criteria = MCCriteria.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException iae) {
