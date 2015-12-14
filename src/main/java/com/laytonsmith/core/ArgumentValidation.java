@@ -1,20 +1,12 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CByteArray;
-import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CMutablePrimitive;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+
+import java.util.regex.Pattern;
 
 /**
  * This class provides a way to validate, parse, and manipulate arguments passed
@@ -157,6 +149,36 @@ public class ArgumentValidation {
 					Exceptions.ExceptionType.CastException, t);
 		}
 		return d;
+	}
+
+	// Matches a string that will be successfully parsed by Double.parseDouble(String)
+	// Based on https://docs.oracle.com/javase/8/docs/api/java/lang/Double.html#valueOf-java.lang.String-
+	private static final Pattern VALID_DOUBLE = Pattern.compile(
+			"[\\x00-\\x20]*" + // leading whitespace
+			"[+-]?(" +
+				"(" +
+					"((\\p{Digit}+)(\\.)?((\\p{Digit}+)?)([eE][+-]?(\\p{Digit}+))?)" +
+					"|" +
+					"(\\.(\\p{Digit}+)([eE][+-]?(\\p{Digit}+))?)" +
+				"|" +
+					// Hexadecimal strings
+					"((" +
+					"(0[xX](\\p{XDigit}+)(\\.)?)" +
+					"|" +
+					"(0[xX](\\p{XDigit}+)?(\\.)(\\p{XDigit}+))" +
+					")[pP][+-]?(\\p{Digit}+))" +
+				")[fFdD]?" +
+			")[\\x00-\\x20]*" // trailing whitespace
+	);
+
+	/**
+	 * Validates that a construct's value is a number or string that can be returned by GetNumber()
+	 *
+	 * @param c Construct
+	 * @return boolean
+	 */
+	public static boolean isNumber(Construct c) {
+		return c instanceof CNumber || VALID_DOUBLE.matcher(c.val()).matches();
 	}
 
 	/**
