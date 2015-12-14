@@ -253,7 +253,11 @@ public class AliasCore {
 			try {
 				results = reloadOptions.match(settings);
 			} catch (ArgumentParser.ValidationException ex) {
-				Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+				if (player != null) {
+					player.sendMessage(ex.getMessage());
+				} else {
+					StreamUtils.GetSystemOut().println(ex.getMessage());
+				}
 				return;
 			}
 			if (results.isFlagSet('h')) {
