@@ -1275,18 +1275,12 @@ public final class Static {
 	 * @throws URISyntaxException
 	 */
 	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
-		File jarLocation;
-		if (Static.class.getProtectionDomain().getCodeSource().getLocation() != null) {
-			jarLocation = new File(Static.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-		} else {
-			jarLocation = new File(".");
-		}
-		File platformFolder = new File(jarLocation, Implementation.GetServerType().getBranding() + "/");
+		File platformFolder = MethodScriptFileLocations.getDefault().getConfigDirectory();
 		Installer.Install(platformFolder);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(platformFolder);
 		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
-				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace("\\", "/")), options);
+				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/')), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
 				new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManager());
