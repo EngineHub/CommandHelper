@@ -871,29 +871,26 @@ public class ObjectGenerator {
 					x = Static.getNumber(va.get(0, t), t);
 					y = Static.getNumber(va.get(1, t), t);
 					z = Static.getNumber(va.get(2, t), t);
-				} else
-				if(va.size() == 2) { // 2nd dimension vector
+				} else if(va.size() == 2){ // 2nd dimension vector
 					x = Static.getNumber(va.get(0, t), t);
 					y = Static.getNumber(va.get(1, t), t);
-					z = 0;
-				} else {
-					throw new ConfigRuntimeException("Expecting a Vector array, but the array did not meet the format specifications", ExceptionType.FormatException, t);
+				} else if(va.size() == 1){
+					x = Static.getNumber(va.get(0, t), t);
+				}
+			} else {
+				if(va.containsKey("x")){
+					x = Static.getNumber(va.get("x", t), t);
+				}
+				if(va.containsKey("y")){
+					y = Static.getNumber(va.get("y", t), t);
+				}
+				if(va.containsKey("z")){
+					z = Static.getNumber(va.get("z", t), t);
 				}
 			}
 
-			if(va.containsKey("x")) {
-				x = Static.getNumber(va.get("x", t), t);
-			}
-			if(va.containsKey("y")) {
-				y = Static.getNumber(va.get("y", t), t);
-			}
-			if(va.containsKey("z")) {
-				z = Static.getNumber(va.get("z", t), t);
-			}
-
 			return new Vector3D(x, y, z);
-		} else
-		if(c instanceof CNull) {
+		} else if(c instanceof CNull) {
 			// fulfilling the todo?
 			return v;
 		} else {
