@@ -1399,6 +1399,9 @@ public class ArrayHandling {
 			CArray ca = (CArray) args[0];
 			CArray.SortType sortType = CArray.SortType.REGULAR;
 			CClosure customSort = null;
+			if(ca.size() <= 1){
+				return ca;
+			}
 			try {
 				if (args.length == 2) {
 					if(args[1] instanceof CClosure){
