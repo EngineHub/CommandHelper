@@ -449,7 +449,7 @@ public class Enchantments {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.EnchantmentException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.EnchantmentException, ExceptionType.FormatException};
 		}
 
 		@Override
@@ -556,7 +556,7 @@ public class Enchantments {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		@Override

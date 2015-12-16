@@ -61,7 +61,7 @@ public class Echoes {
 					Static.SendMessage(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), b.toString(), t);
 				} else {
 					String mes = Static.MCToANSIColors(b.toString());
-					if(mes.matches("(?m).*\033.*")){
+					if(mes.contains("\033")){
 						//We have terminal colors, we need to reset them at the end
 						mes += TermColors.reset();
 					}
@@ -133,7 +133,7 @@ public class Echoes {
 				Static.SendMessage(p, b.toString(), t);
 			} else {
 				String mes = Static.MCToANSIColors(b.toString());
-				if(mes.matches("(?m).*\033.*")){
+				if(mes.contains("\033")){
 					//We have terminal colors, we need to reset them at the end
 					mes += TermColors.reset();
 				}
@@ -614,7 +614,7 @@ public class Echoes {
                 prefix = Static.getBoolean(args[1]);
             }
             mes = (prefix?"CommandHelper: ":"") + Static.MCToANSIColors(mes);
-            if(mes.matches("(?m).*\033.*")){
+            if(mes.contains("\033")){
                 //We have terminal colors, we need to reset them at the end
                 mes += TermColors.reset();
             }

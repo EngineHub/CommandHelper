@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -782,8 +783,7 @@ public class BasicLogic {
 			}
 			if(Static.anyNulls(args)){
 				boolean equals = true;
-				for(int i = 0; i < args.length; i++){
-					Construct c = args[i];
+				for(Construct c : args){
 					if(!(c instanceof CNull)){
 						equals = false;
 					}
@@ -817,16 +817,22 @@ public class BasicLogic {
 				}
 			}
 			try {
+				// Validate that these are numbers, so that getNumber doesn't throw an exception.
+				if(!ArgumentValidation.isNumber(args[0])) {
+					return CBoolean.FALSE;
+				}
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
+					if(!ArgumentValidation.isNumber(args[i])) {
+						return CBoolean.FALSE;
+					}
 					double arg1 = Static.getNumber(args[i - 1], t);
 					double arg2 = Static.getNumber(args[i], t);
 					if (arg1 != arg2) {
-						equals = false;
-						break;
+						return CBoolean.FALSE;
 					}
 				}
-				return CBoolean.get(equals);
+				return CBoolean.TRUE;
 			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}

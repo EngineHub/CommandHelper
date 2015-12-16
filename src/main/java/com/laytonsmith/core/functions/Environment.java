@@ -84,47 +84,49 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double x = 0;
-			double y = 0;
-			double z = 0;
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			int x;
+			int y;
+			int z;
 			MCWorld w = null;
-			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			String world = null;
-			if (sender instanceof MCPlayer) {
-				w = ((MCPlayer) sender).getWorld();
+			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (player != null) {
+				w = player.getWorld();
 			}
-			if (args.length == 1 || args.length == 2) {
-				if (args[0] instanceof CArray) {
-					MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-					x = loc.getX();
-					y = loc.getY();
-					z = loc.getZ();
-					world = loc.getWorld().getName();
-				} else {
-					throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, t);
+			if (args.length < 3) {
+				if (!(args[0] instanceof CArray)) {
+					throw new ConfigRuntimeException("get_block_at expects param 1 to be an array",
+							ExceptionType.CastException, t);
 				}
+				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+				x = loc.getBlockX();
+				y = loc.getBlockY();
+				z = loc.getBlockZ();
+				w = loc.getWorld();
 				if (args.length == 2) {
-					world = args[1].val();
+					w = Static.getServer().getWorld(args[1].val());
+					if (w == null) {
+						throw new ConfigRuntimeException("The specified world " + args[1].val() + " doesn't exist",
+								ExceptionType.InvalidWorldException, t);
+					}
 				}
-			} else if (args.length == 3 || args.length == 4) {
-				x = Static.getDouble(args[0], t);
-				y = Static.getDouble(args[1], t);
-				z = Static.getDouble(args[2], t);
+			} else {
+				x = (int) java.lang.Math.floor(Static.getNumber(args[0], t));
+				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
+				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
 				if (args.length == 4) {
-					world = args[3].val();
+					w = Static.getServer().getWorld(args[3].val());
+					if (w == null) {
+						throw new ConfigRuntimeException("The specified world " + args[4].val() + " doesn't exist",
+								ExceptionType.InvalidWorldException, t);
+					}
 				}
-			}
-			if (world != null) {
-				w = Static.getServer().getWorld(world);
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
+				throw new ConfigRuntimeException("No world was provided", ExceptionType.InvalidWorldException, t);
 			}
-			x = java.lang.Math.floor(x);
-			y = java.lang.Math.floor(y);
-			z = java.lang.Math.floor(z);
-			MCBlock b = w.getBlockAt((int) x, (int) y, (int) z);
+			MCBlock b = w.getBlockAt(x, y, z);
 			if (b == null) {
 				throw new ConfigRuntimeException(
 						"Could not find the block in " + this.getName() + " (are you running in cmdline mode?)",
@@ -164,7 +166,8 @@ public class Environment {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException,
+					ExceptionType.FormatException, ExceptionType.InvalidWorldException};
 		}
 
 		@Override
@@ -178,68 +181,59 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double x = 0;
-			double y = 0;
-			double z = 0;
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			int x;
+			int y;
+			int z;
 			boolean physics = true;
-			String id = null;
-			String world = null;
+			String id;
 			MCWorld w = null;
-			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if (sender instanceof MCPlayer) {
-				w = ((MCPlayer) sender).getWorld();
+			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (player != null) {
+				w = player.getWorld();
 			}
 			if (args.length < 4) {
 				if (!(args[0] instanceof CArray)) {
-					throw new ConfigRuntimeException("set_block_at expects param 1 to be an array", ExceptionType.CastException, t);
+					throw new ConfigRuntimeException("set_block_at expects param 1 to be an array",
+							ExceptionType.CastException, t);
 				}
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = l.getBlockX();
 				y = l.getBlockY();
 				z = l.getBlockZ();
-				world = l.getWorld().getName();
+				w = l.getWorld();
 				id = args[1].val();
 				if (args.length == 3) {
 					physics = Static.getBoolean(args[2]);
 				}
 
 			} else {
-				x = Static.getNumber(args[0], t);
-				y = Static.getNumber(args[1], t);
-				z = Static.getNumber(args[2], t);
+				x = (int) java.lang.Math.floor(Static.getNumber(args[0], t));
+				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
+				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
 				id = args[3].val();
 				if (args.length >= 5) {
-					world = args[4].val();
+					w = Static.getServer().getWorld(args[4].val());
+					if (w == null) {
+						throw new ConfigRuntimeException("The specified world " + args[4].val() + " doesn't exist",
+								ExceptionType.InvalidWorldException, t);
+					}
+				} else if (w == null) {
+					throw new ConfigRuntimeException("No world was provided",
+							ExceptionType.InvalidWorldException, t);
 				}
 				if (args.length == 6) {
 					physics = Static.getBoolean(args[2]);
 				}
 			}
-			if (world != null) {
-				w = Static.getServer().getWorld(world);
-			}
-			if (w == null) {
-				throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
-			}
-			x = java.lang.Math.floor(x);
-			y = java.lang.Math.floor(y);
-			z = java.lang.Math.floor(z);
-			int ix = (int) x;
-			int iy = (int) y;
-			int iz = (int) z;
-			MCBlock b = w.getBlockAt(ix, iy, iz);
+			MCBlock b = w.getBlockAt(x, y, z);
 			String[] dataAndMeta = id.split(":");
 			int data;
-			byte meta;
+			byte meta = 0;
 			try {
-				if(dataAndMeta.length == 1) {
-					meta = 0;
-				} else if(dataAndMeta.length == 2) {
+				if(dataAndMeta.length == 2) {
 					meta = Byte.parseByte(dataAndMeta[1]); // Throws NumberFormatException.
-				} else {
-					throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers",
-							ExceptionType.FormatException, t);
 				}
 				data = Integer.parseInt(dataAndMeta[0]); // Throws NumberFormatException.
 			} catch(NumberFormatException e) {
