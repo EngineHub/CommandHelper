@@ -459,7 +459,7 @@
 							<!--<mainClass>com.laytonsmith.core.MainSandbox</mainClass>-->
 						</manifest>
 						<manifestEntries>
-							<Class-Path>WorldEdit.jar CommandHelper/WorldEdit.jar lib/WorldEdit.jar ../lib/WorldEdit.jar ../WorldEdit.jar ../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
+							<Class-Path>../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
 						</manifestEntries>
 					</archive>
 				</configuration>
