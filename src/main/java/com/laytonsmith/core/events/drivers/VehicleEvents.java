@@ -1,14 +1,11 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Point3D;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCVehicle;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCCollisionType;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
@@ -39,17 +36,11 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -319,156 +310,25 @@ public class VehicleEvents {
 		}
 	}
 
+	private static final Set<Integer> thresholdList = new HashSet<>();
+
+	public static Set<Integer> GetThresholdList(){
+		return thresholdList;
+	}
+
+	private static final Map<Integer, Map<UUID, MCLocation>> lastVehicleLocations = new HashMap<>();
+
+	public static Map<UUID, MCLocation> GetLastLocations(Integer i){
+		if (!lastVehicleLocations.containsKey(i)) {
+			HashMap<UUID, MCLocation> newLocation = new HashMap<>();
+			lastVehicleLocations.put(i, newLocation);
+			return newLocation;
+		}
+		return(lastVehicleLocations.get(i));
+	}
+
 	@api
 	public static class vehicle_move extends AbstractEvent {
-
-		private static Thread thread = null;
-		private Set<Integer> thresholdList = new HashSet<Integer>();
-		private Map<Integer, Map<UUID, MCLocation>> thresholds = new HashMap<>();
-
-		@Override
-		public void bind(BoundEvent event) {
-			Map<String, Construct> prefilters = event.getPrefilter();
-			if (prefilters.containsKey("threshold")) {
-				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
-				thresholdList.add(i);
-			}
-			if (thread == null) {
-				thresholdList.add(1);
-				thread = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						outerLoop:
-						while (true) {
-							if (thread != Thread.currentThread()) {
-								//If it's a different thread, kill it.
-								return;
-							}
-
-							List<MCVehicle> vehicles = null;
-							try {
-								vehicles = Static.getVehicles();
-							} catch (ConcurrentModificationException ex) {
-								continue outerLoop;
-							}
-
-							for (final MCVehicle v : vehicles) {
-								final MCLocation current = ((MCEntity) v).asyncGetLocation();
-								Point3D currentPoint = new Point3D(current.getX(), current.getY(), current.getZ());
-								//We need to loop through all the thresholds
-								//and see if any of the points meet them. If so,
-								//we know we need to fire the event. If none of them
-								//match, carry on with the next vehicle. As soon as
-								//one matches though, we can't quit the loop, because
-								//we have to set all the thresholds.
-								thresholdLoop:
-								for (final Integer i : thresholdList) {
-									if (thresholds.containsKey(i) && thresholds.get(i).containsKey(v.getUniqueId())) {
-										final MCLocation last = thresholds.get(i).get(v.getUniqueId());
-										if (!v.getWorld().getName().equals(last.getWorld().getName())) {
-											//They moved worlds. simply put their new location in here, then
-											//continue.
-											thresholds.get(i).put(v.getUniqueId(), v.getLocation());
-											continue thresholdLoop;
-										}
-										Point3D lastPoint = new Point3D(last.getX(), last.getY(), last.getZ());
-										double distance = lastPoint.distance(currentPoint);
-										if (distance > i) {
-											//We've met the threshold.
-											//Well, we're still not sure. To run the prefilters on this thread,
-											//we're gonna simulate a prefilter match now. We have to run this manually,
-											//because each bind could have a different threshold, and it will be expecting
-											//THIS from location. Other binds will be expecting other from locations.
-											final MCVehicleMoveEvent fakeEvent = new MCVehicleMoveEvent() {
-												boolean cancelled = false;
-
-												@Override
-												public int getThreshold() {
-													return i;
-												}
-
-												@Override
-												public MCLocation getFrom() {
-													return last;
-												}
-
-												@Override
-												public MCLocation getTo() {
-													return current;
-												}
-
-												@Override
-												public Object _GetObject() {
-													return null;
-												}
-
-												@Override
-												public void setCancelled(boolean state) {
-													cancelled = state;
-												}
-
-												@Override
-												public boolean isCancelled() {
-													return cancelled;
-												}
-
-												@Override
-												public MCVehicle getVehicle() {
-													return v;
-												}
-											};
-											//We need to run the prefilters on this thread, so we have
-											//to do this all by hand.
-											final SortedSet<BoundEvent> toRun = EventUtils.GetMatchingEvents(Driver.VEHICLE_MOVE, vehicle_move.this.getName(), fakeEvent, vehicle_move.this);
-											//Ok, now the events to be run need to actually be run on the main server thread, so let's run that now.
-											try {
-												StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-													@Override
-													public Object call() throws Exception {
-														EventUtils.FireListeners(toRun, vehicle_move.this, fakeEvent);
-														return null;
-													}
-												});
-											} catch (Exception ex) {
-												Logger.getLogger(VehicleEvents.class.getName()).log(Level.SEVERE, null, ex);
-											}
-											if (fakeEvent.isCancelled()) {
-												//Put them back at the from location
-												v.teleport(last);
-											} else {
-												thresholds.get(i).put(v.getUniqueId(), current);
-											}
-										}
-									} else {
-										//If there is no location here, just put the current location in there.
-										if (!thresholds.containsKey(i)) {
-											thresholds.put(i, new HashMap<UUID, MCLocation>());
-										}
-										thresholds.get(i).put(v.getUniqueId(), v.asyncGetLocation());
-									}
-								}
-							}
-							synchronized (vehicle_move.this) {
-								try {
-									//Throttle this thread just a little
-									vehicle_move.this.wait(10);
-								} catch (InterruptedException ex) {
-									//
-								}
-							}
-						}
-					}
-				}, Implementation.GetServerType().getBranding() + "VehicleMoveEventRunner");
-				thread.start();
-				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-					@Override
-					public void run() {
-						thresholdList.clear();
-						thread = null;
-					}
-				});
-			}
-		}
 
 		@Override
 		public String getName() {
@@ -478,12 +338,51 @@ public class VehicleEvents {
 		@Override
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
-					+ " the enitytype of the passenger} Fires when an vehicle is moving."
-					+ " {from: Get the previous position | to: Get the next position"
+					+ " the enitytype of the passenger | world: <string> the world the vehicle is in}"
+					+ " Fires when a vehicle is moving. Due to the high frequency of this event, prefilters are"
+					+ " extremely important to use -- especially threshold."
+					+ "{world | from: Get the previous position | to: Get the next position"
 					+ " | vehicletype | passengertype | id: entityID | passenger: entityID"
 					+ " | player: player name if passenger is a player, null otherwise}"
 					+ " {}"
 					+ " {}";
+		}
+
+		@Override
+		public void hook() {
+			thresholdList.clear();
+			lastVehicleLocations.clear();
+		}
+
+		@Override
+		public void bind(BoundEvent event) {
+			int threshold = 1;
+			Map<String, Construct> prefilters = event.getPrefilter();
+			if(prefilters.containsKey("threshold")) {
+				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+			}
+			thresholdList.add(threshold);
+		}
+
+		@Override
+		public void unbind(BoundEvent event) {
+			int threshold = 1;
+			Map<String, Construct> prefilters = event.getPrefilter();
+			if(prefilters.containsKey("threshold")) {
+				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+			}
+			for (BoundEvent b : EventUtils.GetEvents(event.getDriver())) {
+				if (b.getId().equals(event.getId())) {
+					continue;
+				}
+				if (b.getPrefilter().containsKey("threshold")) {
+					if(threshold == Static.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN)) {
+						return;
+					}
+				}
+			}
+			thresholdList.remove(threshold);
+			lastVehicleLocations.remove(threshold);
 		}
 
 		@Override
@@ -500,25 +399,22 @@ public class VehicleEvents {
 
 		@Override
 		public boolean isCancelled(BindableEvent o) {
-			if (o instanceof MCVehicleMoveEvent) {
-				return ((MCVehicleMoveEvent) o).isCancelled();
-			} else {
-				return false;
-			}
+			return o instanceof MCVehicleMoveEvent && ((MCVehicleMoveEvent) o).isCancelled();
 		}
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent event = (MCVehicleMoveEvent) e;
-
-				if (!event.getFrom().getWorld().getName().equals(event.getTo().getWorld().getName())) {
+				if(prefilter.containsKey("threshold")) {
+					if(Static.getInt(prefilter.get("threshold"), Target.UNKNOWN) != event.getThreshold()) {
+						return false;
+					}
+				} else if(event.getThreshold() != 1) {
 					return false;
 				}
-
-				if(prefilter.containsKey("threshold")) {
-					Prefilters.match(prefilter, "threshold", event.getThreshold(), PrefilterType.MATH_MATCH);
-				} else if(event.getThreshold() != 1) {
+				if(prefilter.containsKey("world")
+						&& !prefilter.get("world").val().equals(event.getFrom().getWorld().getName())) {
 					return false;
 				}
 				if (prefilter.containsKey("from")) {
@@ -566,9 +462,10 @@ public class VehicleEvents {
 			if (event instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent e = (MCVehicleMoveEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(e);
-				ret.put("from", ObjectGenerator.GetGenerator().location(((MCVehicleMoveEvent) e).getFrom()));
-				ret.put("to", ObjectGenerator.GetGenerator().location(((MCVehicleMoveEvent) e).getTo()));
+				Map<String, Construct> ret = new HashMap<>();
+				ret.put("world", new CString(e.getFrom().getWorld().getName(), t));
+				ret.put("from", ObjectGenerator.GetGenerator().location(e.getFrom()));
+				ret.put("to", ObjectGenerator.GetGenerator().location(e.getTo()));
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CString(e.getVehicle().getUniqueId().toString(), t));
 
