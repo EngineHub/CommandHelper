@@ -11,15 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockGrowEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.*;
 
 /**
  *
@@ -111,5 +103,11 @@ public class BukkitBlockListener implements Listener{
 	public void onBlockGrow(BlockGrowEvent e) {
 		BukkitBlockEvents.BukkitMCBlockGrowEvent bge = new BukkitBlockEvents.BukkitMCBlockGrowEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_GROW, "block_grow", bge);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onNotePlay(NotePlayEvent e) {
+		BukkitBlockEvents.BukkitMCNotePlayEvent npe = new BukkitBlockEvents.BukkitMCNotePlayEvent(e);
+		EventUtils.TriggerListener(Driver.NOTE_PLAY, "note_play", npe);
 	}
 }
