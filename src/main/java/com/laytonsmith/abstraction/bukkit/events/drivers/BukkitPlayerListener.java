@@ -84,10 +84,6 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
 		BukkitMCPlayerRespawnEvent pre = new BukkitMCPlayerRespawnEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_SPAWN, "player_spawn", pre);
-		// Reset player_move lastLocations
-		for(Integer i : PlayerEvents.GetThresholdList()) {
-			PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(), new BukkitMCLocation(event.getRespawnLocation()));
-		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled=true)
@@ -222,12 +218,6 @@ public class BukkitPlayerListener implements Listener {
 		
 		BukkitMCPlayerTeleportEvent pte = new BukkitMCPlayerTeleportEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", pte);
-		if(!pte.isCancelled()) {
-			// Reset player_move lastLocations
-			for(Integer i : PlayerEvents.GetThresholdList()) {
-				PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(), new BukkitMCLocation(event.getTo()));
-			}
-		}
 	}
 	
 
@@ -317,6 +307,27 @@ public class BukkitPlayerListener implements Listener {
 				if (!pme.isCancelled()) {
 					lastLocations.put(p, movedTo);
 				}
+			}
+		}
+	}
+
+	// Reset player_move lastLocations when player respawns or teleports
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onNewRespawnLocation(PlayerRespawnEvent event) {
+		for(Integer i : PlayerEvents.GetThresholdList()) {
+			PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(),
+					new BukkitMCLocation(event.getRespawnLocation()));
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onNewTeleportLocation(PlayerTeleportEvent event) {
+		if (event.getFrom().equals(event.getTo())) {
+			return;
+		}
+		if(!event.isCancelled()) {
+			for(Integer i : PlayerEvents.GetThresholdList()) {
+				PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(), new BukkitMCLocation(event.getTo()));
 			}
 		}
 	}
