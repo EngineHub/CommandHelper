@@ -5,7 +5,9 @@ import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCScore;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
+import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -45,10 +47,9 @@ public class BukkitMCObjective implements MCObjective {
 
 	@Override
 	public MCScore getScore(String entry) {
-		if(ReflectionUtils.hasMethod(o.getClass(), "getScore", null, String.class)){
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_7_10)){
 			return new BukkitMCScore(o.getScore(entry));
 		} else {
-			// Old style
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			return new BukkitMCScore((Score) ReflectionUtils.invokeMethod(o, "getScore", player));
 		}

@@ -7,7 +7,9 @@ import com.laytonsmith.abstraction.MCScore;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
+import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.Objective;
@@ -72,7 +74,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public Set<String> getEntries() {
-		if(ReflectionUtils.hasMethod(s.getClass(), "getEntries", null)){
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_7_10)){
 			return s.getEntries();
 		} else {
 			// Old style, where we have to build it from the list of players
@@ -96,12 +98,11 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public Set<MCScore> getScores(String entry) {
 		Set<MCScore> ret = new HashSet<>();
-		if(ReflectionUtils.hasMethod(s.getClass(), "getScores", null, String.class)){
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_7_10)){
 			for (Score o : s.getScores(entry)) {
 				ret.add(new BukkitMCScore(o));
 			}
 		} else {
-			// Old style, we have to build the list of offline players ourselves
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", player)) {
 				ret.add(new BukkitMCScore(o));
@@ -140,7 +141,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public void resetScores(String entry) {
-		if(ReflectionUtils.hasMethod(s.getClass(), "resetScores", null, String.class)){
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_7_10)){
 			s.resetScores(entry);
 		} else {
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
