@@ -8,6 +8,8 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
+import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
 import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
 import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
@@ -17,6 +19,7 @@ import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
+import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -36,10 +39,13 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.functions.Exceptions;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -1042,6 +1048,96 @@ public class BlockEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+			return false;
+		}
+	}
+
+	@api
+	public static class note_play extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "note_play";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.NOTE_PLAY;
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " This event is called when a noteblock is activated via player interaction or redstone."
+					+ " The instrument may be one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + "."
+					+ " {location: The location of the noteblock | instrument: The name of the sound"
+					+ " | tone: The note played (eg. F#) | octave: The octave the tone was played (0 - 2)}"
+					+ " {instrument|tone|octave}"
+					+ " {}";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			return event instanceof MCNotePlayEvent;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCNotePlayEvent) {
+				MCNotePlayEvent e = (MCNotePlayEvent) event;
+				Map<String, Construct> map = new HashMap<>();
+				Target t = Target.UNKNOWN;
+				map.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
+				map.put("instrument", new CString(e.getInstrument().name(), t));
+				map.put("tone", new CString(e.getNote().getTone().name() + (e.getNote().isSharped() ? "#" : ""), t));
+				map.put("octave", new CInt(e.getNote().getOctave(), t));
+				return map;
+			} else {
+				throw new EventException("Cannot convert event to NotePlayEvent");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+			if (e instanceof MCNotePlayEvent) {
+				MCNotePlayEvent event = (MCNotePlayEvent) e;
+				try {
+					if("instrument".equals(key)){
+						event.setInstrument(MCInstrument.valueOf(value.val()));
+						return true;
+					}
+					if("tone".equals(key)){
+						if(value.val().length() == 0){
+							return false;
+						}
+						int octave = event.getNote().getOctave();
+						MCTone tone = MCTone.valueOf(value.val().substring(0, 1));
+						boolean sharp = value.val().endsWith("#");
+						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
+						return true;
+					}
+					if("octave".equals(key)){
+						int octave = Static.getInt32(value, Target.UNKNOWN);
+						MCTone tone = event.getNote().getTone();
+						boolean sharp = event.getNote().isSharped();
+						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
+						return true;
+					}
+				} catch(IllegalArgumentException ex){
+					throw new ConfigRuntimeException("No " + key + " with the value " + value + " exists",
+							Exceptions.ExceptionType.IllegalArgumentException, Target.UNKNOWN, ex);
+				}
+			}
 			return false;
 		}
 	}

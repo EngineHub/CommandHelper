@@ -23,6 +23,7 @@ public enum Driver {
 	BLOCK_PLACE,
 	SIGN_CHANGED,
 	REDSTONE_CHANGED,
+	NOTE_PLAY,
 
 	/**
 	 * Entity events

@@ -738,8 +738,9 @@ public class Scoreboards {
 			if (team == null) {
 				throw new ScoreboardException("No team by that name exists.", t);
 			}
-			if (args[1].val().length() > 16) {
-				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
+			if (args[1].val().length() > 40
+					|| (args[1].val().length() > 16 && Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7))){
+				throw new Exceptions.LengthException("Player name is too long.", t);
 			}
 			team.addEntry(args[1].val());
 			return CVoid.VOID;
@@ -757,10 +758,9 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists."
-					+ " Offline players can be added, so the name must be exact. Alternatively,"
-					+ " this allows you to add fake players, but names can still only be 16 characters."
-					+ " The player will be removed from any other team on the same scoreboard. " + DEF_MSG;
+			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists. This allows"
+					+ " you to add fake players with up to 40 characters. (16 characters prior to 1.8.7) The player"
+					+ " will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
 	}
 
@@ -962,8 +962,8 @@ public class Scoreboards {
 			if (o == null) {
 				throw new ScoreboardException("The given objective does not exist.", t);
 			}
-			if (args[1].val().length() > 16) {
-				throw new Exceptions.LengthException("Player names can only be 16 characters.", t);
+			if (args[1].val().length() > 40){
+				throw new Exceptions.LengthException("Player names can only be 40 characters.", t);
 			}
 			o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
 			return CVoid.VOID;
@@ -981,10 +981,8 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {objectiveName, name, int, [scoreboard]} Sets the player's score for the given objective,"
-					+ " or an arbitrary name if not a valid player name."
-					+ " You can set scores for fake players to create custom displays,"
-					+ " but the 16 character name limit still applies. " + DEF_MSG;
+			return "void {objectiveName, name, int, [scoreboard]} Sets the player's score for the given objective."
+					+ " You can set scores for fake players with up to 40 characters. " + DEF_MSG;
 		}
 	}
 
