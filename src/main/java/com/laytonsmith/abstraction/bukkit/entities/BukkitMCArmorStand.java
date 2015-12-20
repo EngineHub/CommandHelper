@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCArmorStand;
 import com.laytonsmith.abstraction.MCEntityEquipment;
@@ -7,8 +8,6 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
-import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.core.Static;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -265,7 +264,8 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public Boolean isMarker() {
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8_7)) {
+		// Added in 1.8.7
+		if(ReflectionUtils.hasMethod(as.getClass(), "isMarker", null)){
 			return as.isMarker();
 		}
 		return null;
@@ -273,7 +273,8 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setMarker(boolean marker) {
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8_7)) {
+		// Added in 1.8.7
+		if(ReflectionUtils.hasMethod(as.getClass(), "setMarker", null, boolean.class)){
 			as.setMarker(marker);
 		}
 	}

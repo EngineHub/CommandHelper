@@ -7,9 +7,7 @@ import com.laytonsmith.abstraction.MCScore;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
-import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.Objective;
@@ -74,10 +72,10 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public Set<String> getEntries() {
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_7_10)){
+		if(ReflectionUtils.hasMethod(s.getClass(), "getEntries", null)){
 			return s.getEntries();
 		} else {
-			// Old style, where we have to build it from the list of players
+			// Probably 1.7.8 or prior
 			Set<String> ret = new HashSet<>();
 			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(s, "getPlayers")) {
 				ret.add(o.getName());
@@ -98,11 +96,12 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public Set<MCScore> getScores(String entry) {
 		Set<MCScore> ret = new HashSet<>();
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_7_10)){
+		if(ReflectionUtils.hasMethod(s.getClass(), "getScores", null, String.class)){
 			for (Score o : s.getScores(entry)) {
 				ret.add(new BukkitMCScore(o));
 			}
 		} else {
+			// Probably 1.7.8 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", player)) {
 				ret.add(new BukkitMCScore(o));
@@ -141,9 +140,10 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public void resetScores(String entry) {
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_7_10)){
+		if(ReflectionUtils.hasMethod(s.getClass(), "resetScores", null, String.class)){
 			s.resetScores(entry);
 		} else {
+			// Probably 1.7.8 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			ReflectionUtils.invokeMethod(s, "resetScores", player);
 		}

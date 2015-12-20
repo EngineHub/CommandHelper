@@ -401,7 +401,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setSpectatorTarget(MCEntity entity) {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7)) {
+		if(!ReflectionUtils.hasMethod(p.getClass(), "setSpectatorTarget", null, Entity.class)){
+			// Probably 1.8.6 or prior
 			return;
 		}
 		if(entity == null) {
@@ -413,7 +414,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public MCEntity getSpectatorTarget() {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7)) {
+		if(!ReflectionUtils.hasMethod(p.getClass(), "getSpectatorTarget", null)){
+			// Probably 1.8.6 or prior
 			return null;
 		}
 		return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
