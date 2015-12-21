@@ -291,14 +291,12 @@ public class BukkitPlayerListener implements Listener {
 		String p = event.getPlayer().getName();
 		for(Integer threshold : PlayerEvents.GetThresholdList()) {
 			Map<String, MCLocation> lastLocations = PlayerEvents.GetLastLocations(threshold);
+			MCLocation last;
 			if(!lastLocations.containsKey(p)) {
-				lastLocations.put(p, new BukkitMCLocation(from));
-				continue;
-			}
-			MCLocation last = lastLocations.get(p);
-			if (!to.getWorld().getName().equals(last.getWorld().getName())) {
-				lastLocations.put(p, new BukkitMCLocation(to));
-				continue;
+				last = new BukkitMCLocation(from);
+				lastLocations.put(p, last);
+			} else {
+				last = lastLocations.get(p);
 			}
 			MCLocation movedTo = new BukkitMCLocation(to);
 			if (last.distance(movedTo) > threshold) {
