@@ -411,4 +411,11 @@ public class ArrayHandlingTest {
 		verify(fakePlayer).sendMessage("{1, 16, 64}");
 	}
 
+	@Test public void testArrayReverse() throws Exception {
+		Run("@array = array(1, 2, 3, 4);\n"
+				+ "array_reverse(@array);\n"
+				+ "msg(@array);\n", fakePlayer);
+		verify(fakePlayer).sendMessage("{4, 3, 2, 1}");
+	}
+
 }
