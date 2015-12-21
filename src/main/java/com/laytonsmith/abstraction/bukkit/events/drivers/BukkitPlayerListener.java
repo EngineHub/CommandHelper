@@ -299,6 +299,10 @@ public class BukkitPlayerListener implements Listener {
 				last = lastLocations.get(p);
 			}
 			MCLocation movedTo = new BukkitMCLocation(to);
+			if(!movedTo.getWorld().getName().equals(last.getWorld().getName())){
+				lastLocations.put(p, movedTo);
+				continue;
+			}
 			if (last.distance(movedTo) > threshold) {
 				BukkitMCPlayerMoveEvent pme = new BukkitMCPlayerMoveEvent(event, threshold, last);
 				EventUtils.TriggerListener(Driver.PLAYER_MOVE, "player_move", pme);
