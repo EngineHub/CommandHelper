@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
@@ -479,10 +480,15 @@ public class Sandbox {
 
 	@api
 	@hide("This is an easter egg")
+	@noboilerplate
 	public static class norway extends DummyFunction {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Function color = new Echoes.color();
+			String red = color.exec(t, environment, args.length == 3 ? args[0] : new CString("RED", t)).val();
+			String white = color.exec(t, environment, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
+			String blue = color.exec(t, environment, args.length == 3 ? args[2] : new CString("BLUE", t)).val();
 			int multiplier = 2;
 			char c = '=';
 			String one = multiply(c, 1 * multiplier);
@@ -493,18 +499,23 @@ public class Sandbox {
 			String thirteen = multiply(c, 13 * multiplier);
 			String twentytwo = multiply(c, 22 * multiplier);
 			for(int i = 0; i < 6; ++i){
-				System.out.println(TermColors.RED + six + TermColors.WHITE + one + TermColors.BLUE + two + TermColors.WHITE + one + TermColors.RED + twelve + TermColors.RESET);
+				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
 			}
-			System.out.println(TermColors.WHITE + seven + TermColors.BLUE + two + TermColors.WHITE + thirteen + TermColors.RESET);
+			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
 			for(int i = 0; i < 2; ++i){
-				System.out.println(TermColors.BLUE + twentytwo + TermColors.RESET);
+				System.out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
 			}
-			System.out.println(TermColors.WHITE + seven + TermColors.BLUE + two + TermColors.WHITE + thirteen + TermColors.RESET);
+			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
 			for(int i = 0; i < 6; ++i){
-				System.out.println(TermColors.RED + six + TermColors.WHITE + one + TermColors.BLUE + two + TermColors.WHITE + one + TermColors.RED + twelve + TermColors.RESET);
+				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
 			}
 
 			return CVoid.VOID;
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 3};
 		}
 
 		public static String multiply(char c, int times){
