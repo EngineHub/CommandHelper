@@ -493,15 +493,15 @@ public class Sandbox {
 			String thirteen = multiply(c, 13 * multiplier);
 			String twentytwo = multiply(c, 22 * multiplier);
 			for(int i = 0; i < 6; ++i){
-				System.out.println(TermColors.RED + six + TermColors.WHITE + one + TermColors.BLUE + two + TermColors.WHITE + one + TermColors.RED + twelve);
+				System.out.println(TermColors.RED + six + TermColors.WHITE + one + TermColors.BLUE + two + TermColors.WHITE + one + TermColors.RED + twelve + TermColors.RESET);
 			}
-			System.out.println(TermColors.WHITE + seven + TermColors.BLUE + two + TermColors.WHITE + thirteen);
+			System.out.println(TermColors.WHITE + seven + TermColors.BLUE + two + TermColors.WHITE + thirteen + TermColors.RESET);
 			for(int i = 0; i < 2; ++i){
-				System.out.println(TermColors.BLUE + twentytwo);
+				System.out.println(TermColors.BLUE + twentytwo + TermColors.RESET);
 			}
-			System.out.println(TermColors.WHITE + seven + TermColors.BLUE + two + TermColors.WHITE + thirteen);
+			System.out.println(TermColors.WHITE + seven + TermColors.BLUE + two + TermColors.WHITE + thirteen + TermColors.RESET);
 			for(int i = 0; i < 6; ++i){
-				System.out.println(TermColors.RED + six + TermColors.WHITE + one + TermColors.BLUE + two + TermColors.WHITE + one + TermColors.RED + twelve);
+				System.out.println(TermColors.RED + six + TermColors.WHITE + one + TermColors.BLUE + two + TermColors.WHITE + one + TermColors.RED + twelve + TermColors.RESET);
 			}
 
 			return CVoid.VOID;
