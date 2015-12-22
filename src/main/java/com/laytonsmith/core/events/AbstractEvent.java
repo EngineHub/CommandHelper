@@ -260,16 +260,4 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		return false;
 	}
 
-	/**
-	 *
-	 * @param manualObject
-	 * @return
-	 * @deprecated The new signature, with a target provided is required to be implemented.
-	 */
-	@Deprecated
-	public BindableEvent convert(CArray manualObject) {
-		//TODO: Remove this function after 6/1/14
-		return this.convert(manualObject, Target.UNKNOWN);
-	}
-
 }
