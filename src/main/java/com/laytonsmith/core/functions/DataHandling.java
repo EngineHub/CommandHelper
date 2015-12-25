@@ -2703,7 +2703,7 @@ public class DataHandling {
 
 	@api
 	@seealso({_export.class})
-	public static class _import extends AbstractFunction implements Optimizable {
+	public static class _import extends AbstractFunction {
 
 		@Override
 		public String getName() {
@@ -2712,35 +2712,26 @@ public class DataHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
+			return new Integer[]{1,2};
 		}
 
 		@Override
 		public String docs() {
-			return "mixed {ivar | key} This function imports a value from the global value"
-					+ " register. In the first mode, it looks for an ivariable with the specified"
-					+ " name, and stores the value in the variable, and returns void. The first"
-					+ " mode is deprecated, and should not be used. In the"
-					+ " second mode, it looks for a value stored with the specified key, and"
-					+ " returns that value. Items can be stored with the export function. If"
-					+ " the specified ivar doesn't exist, the ivar will be assigned an empty"
-					+ " string, and if the specified string key doesn't exist, null is returned."
-					+ " See the documentation on [[CommandHelper/import-export|imports/exports]]"
-					+ " for more information. import() is threadsafe.";
+			return "mixed {key, [default]} This function imports a value from the global value"
+					+ " register. It looks for a value stored with the specified key, and"
+					+ " returns that value. Items can be stored with the export function."
+					+ " If the specified string key doesn't exist, null is returned. However, if a"
+					+ " second argument is provided, it will return that instead of null."
+					+ " import() is threadsafe.";
 		}
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IllegalArgumentException};
+			return new ExceptionType[]{ExceptionType.IllegalArgumentException, ExceptionType.IndexOverflowException};
 		}
 
 		@Override
 		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public boolean preResolveVariables() {
 			return true;
 		}
 
@@ -2756,57 +2747,31 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			if (args[0] instanceof IVariable) {
-//				//Mode 1
-//				IVariable var = (IVariable) args[0];
-//				environment.getEnv(GlobalEnv.class).GetVarList().set(Globals.GetGlobalIVar(var));
-//				return CVoid.VOID;
-//			} else {
-				//Mode 2
-				String key;
-				if(args.length == 1) {
-					if(!(args[0] instanceof CString)) {
-						throw new ConfigRuntimeException(this.getName() + " with 1 argument expects the argument to be a string.",
-								ExceptionType.IllegalArgumentException, t);
-					}
-					key = args[0].val();
-				} else {
-					// Handle the deprecated syntax.
-					key = GetNamespace(args, null, getName(), t);
-				}
-				return Globals.GetGlobalConstruct(key);
-//			}
+			String key;
+			if(args[0] instanceof CString){
+				key = args[0].val();
+			} else if(args[0] instanceof CArray){
+				key = GetNamespace((CArray) args[0], t);
+			} else {
+				throw new ConfigRuntimeException("Argument 1 in " + this.getName() + " must be a string or array.",
+						ExceptionType.IllegalArgumentException, t);
+			}
+			Construct c = Globals.GetGlobalConstruct(key);
+			if(args.length == 2 && c instanceof CNull){
+				c = args[1];
+			}
+			return c;
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new _export().examples();
 		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() > 2) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
-						+ " Use import('my.namespace') instead of import('my', 'namespace')", t);
-			}
-//			if (children.get(0).getData() instanceof IVariable) {
-//				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "import(@ivar) usage is deprecated. Please use the @ivar = import('custom.name') format,"
-//						+ " as this feature WILL be removed in the future.", t);
-//			}
-			//Just a compiler warning
-			return null;
-		}
-
 	}
 
 	@api
 	@seealso({_import.class})
-	public static class _export extends AbstractFunction implements Optimizable {
+	public static class _export extends AbstractFunction {
 
 		@Override
 		public String getName() {
@@ -2815,34 +2780,26 @@ public class DataHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
+			return new Integer[]{2};
 		}
 
 		@Override
 		public String docs() {
-			return "void {ivar | key, value} Stores a value in the global storage register."
-					+ " When using the first mode, the ivariable is stored so it can be imported"
-					+ " later, and when using the second mode, an arbitrary value is stored with"
-					+ " the give key, and can be retreived using the secode mode of import. The first mode will"
-					+ " be deprecated in future versions, so should be avoided. If"
-					+ " the value is already stored, it is overwritten. See {{function|import}} and"
-					+ " [[CommandHelper/import-export|importing/exporting]]. The reference to the value"
-					+ " is stored, not a copy of the value, so in the case of arrays, manipulating the"
-					+ " contents of the array will manipulate the stored value. export() is threadsafe.";
+			return "void {key, value} Stores a value in the global storage register."
+					+ " An arbitrary value is stored with the given key, and can be retreived using import."
+					+ " If the value is already stored, it is overwritten. See {{function|import}}."
+					+ " The reference to the value is stored, not a copy of the value, so in the case of"
+					+ " arrays, manipulating the contents of the array will manipulate the stored value."
+					+ " export() is threadsafe.";
 		}
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException, ExceptionType.IllegalArgumentException};
+			return new ExceptionType[]{ExceptionType.IllegalArgumentException, ExceptionType.IndexOverflowException};
 		}
 
 		@Override
 		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public boolean preResolveVariables() {
 			return true;
 		}
 
@@ -2858,75 +2815,41 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			if (args.length == 1) {
-//				if (args[0] instanceof IVariable) {
-//					IVariable cur = (IVariable) args[0];
-//					Globals.SetGlobal(environment.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()));
-//				} else {
-//					throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
-//				}
-//			} else {
-				String key;
-				if(args.length == 2) {
-					if(!(args[0] instanceof CString)) {
-						throw new ConfigRuntimeException(this.getName() + " with 2 arguments expects the first argument to be a string.",
-								ExceptionType.IllegalArgumentException, t);
-					}
-					key = args[0].val();
-				} else {
-					// Handle the deprecated syntax.
-					key = GetNamespace(args, args.length - 1, getName(), t);
-				}
-				Construct c = args[args.length - 1];
-//				//We want to store the value contained, not the ivar itself
-//				while (c instanceof IVariable) {
-//					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
-//				}
-				Globals.SetGlobal(key, c);
-//			}
+			String key;
+			if(args[0] instanceof CString){
+				key = args[0].val();
+			} else if(args[0] instanceof CArray){
+				key = GetNamespace((CArray) args[0], t);
+			} else {
+				throw new ConfigRuntimeException("Argument 1 in " + this.getName() + " must be a string or array.",
+						ExceptionType.IllegalArgumentException, t);
+			}
+			Construct c = args[1];
+			Globals.SetGlobal(key, c);
 			return CVoid.VOID;
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-//				new ExampleScript("Deprecated usage", "@var = 2\n"
-//				+ "export(@var)\n"
-//				+ "@var = 0\n"
-//				+ "# In other code, perhaps inside a proc, or another execution unit\n"
-//				+ "import(@var)\n"
-//				+ "msg(@var)"),
-				new ExampleScript("Basic usage", "@var = 2\n"
-				+ "export('custom.name', @var)\n"
-				+ "@var2 = import('custom.name')\n"
-				+ "msg(@var2)"),
-				new ExampleScript("Storage of references", "@array = array(1, 2, 3)\n"
-				+ "export('array', @array)\n"
-				+ "@array[0] = 4\n"
-				+ "@array2 = import('array')\n"
-				+ "msg(@array2)")
+				new ExampleScript("Basic usage", "@var = 2;\n"
+				+ "export('custom.name', @var);\n"
+				+ "@var2 = import('custom.name');\n"
+				+ "msg(@var2);"),
+				new ExampleScript("Storage of references", "@array = array(1, 2, 3);\n"
+				+ "export('array', @array);\n"
+				+ "@array[0] = 4;\n"
+				+ "@array2 = import('array');\n"
+				+ "msg(@array2);"),
+				new ExampleScript("Array key usage", "@key = array(custom, name);\n"
+				+ "export(@key, 'value');\n"
+				+ "@value = import(@key);\n"
+				+ "msg(@value);"),
+				new ExampleScript("Default value usage", "export('custom.name', null);\n"
+				+ "@value = import('custom.name', 'default value');\n"
+				+ "msg(@value);")
 			};
 		}
-
-		@Override
-		public Set<Optimizable.OptimizationOption> optimizationOptions() {
-			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() > 2) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
-						+ " Use export('my.namespace', @var) instead of export('my', 'namespace', @var)", t);
-			}
-//			if (children.get(0).getData() instanceof IVariable) {
-//				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "export(@ivar) usage is deprecated. Please use the export('custom.name', @ivar) format,"
-//						+ " as this feature WILL be removed in the future.", t);
-//			}
-			//Just a compiler warning
-			return null;
-		}
-
 	}
 
 	@api(environments = CommandHelperEnvironment.class)
@@ -3652,29 +3575,20 @@ public class DataHandling {
 	}
 
 	/**
-	 * Generates the namespace for this value, given an array of constructs. If
-	 * the entire list of arguments isn't supposed to be part of the namespace,
-	 * the value to be excluded may be specified.
+	 * Generates the namespace for this value, given an array.
 	 *
-	 * @param args
-	 * @param exclude
+	 * @param array
 	 * @return
 	 */
-	private static String GetNamespace(Construct[] args, Integer exclude, String name, Target t) {
-		if (exclude != null && args.length < 2 || exclude == null && args.length < 1) {
-			throw new ConfigRuntimeException(name + " was not provided with enough arguments. Check the documentation, and try again.", ExceptionType.InsufficientArgumentsException, t);
-		}
+	private static String GetNamespace(CArray array, Target t) {
 		boolean first = true;
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < args.length; i++) {
-			if (exclude != null && exclude == i) {
-				continue;
-			}
+		for (int i = 0; i < array.size(); i++) {
 			if (!first) {
 				b.append(".");
 			}
 			first = false;
-			b.append(args[i].val());
+			b.append(array.get(i, t).val());
 		}
 		return b.toString();
 	}
