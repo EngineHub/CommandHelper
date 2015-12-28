@@ -280,6 +280,7 @@ public class ObjectGenerator {
 			if (item.get("type", t).val().contains(":")) {
 				//We're using the combo addressing method
 				String[] split = item.get("type", t).val().split(":");
+				item = item.deepClone(t);
 				item.set("type", split[0]);
 				item.set("data", split[1]);
 			}
