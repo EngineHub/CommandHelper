@@ -2717,12 +2717,11 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "mixed {key, [default]} This function imports a value from the global value"
-					+ " register. It looks for a value stored with the specified key, and"
-					+ " returns that value. Items can be stored with the export function."
-					+ " If the specified string key doesn't exist, null is returned. However, if a"
-					+ " second argument is provided, it will return that instead of null."
-					+ " import() is threadsafe.";
+			return "mixed {key, [default]} This function imports a value from the global value register. It looks for a"
+					+ " value stored with the specified key (using the export function), and returns that value."
+					+ " If specified key doesn't exist, it will return either null or the default value if specified."
+					+ " An array may be used as a key. It is converted into a string with the array values separated by"
+					+ " dots. import() is threadsafe.";
 		}
 
 		@Override
@@ -2789,7 +2788,8 @@ public class DataHandling {
 					+ " An arbitrary value is stored with the given key, and can be retreived using import."
 					+ " If the value is already stored, it is overwritten. See {{function|import}}."
 					+ " The reference to the value is stored, not a copy of the value, so in the case of"
-					+ " arrays, manipulating the contents of the array will manipulate the stored value."
+					+ " arrays, manipulating the contents of the array will manipulate the stored value. An array may"
+					+ " be used as a key. It is converted into a string with the array values separated by dots."
 					+ " export() is threadsafe.";
 		}
 
