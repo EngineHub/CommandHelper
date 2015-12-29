@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 import javax.xml.xpath.XPathExpressionException;
@@ -228,11 +229,10 @@ public class DataTransformations {
 			} catch(ScannerException | ParserException ex){
 				cause = ex;
 			}
-			if(!(ret instanceof Map)){
+			if(!(ret instanceof Map) && !(ret instanceof Collection)){
 				throw new Exceptions.FormatException("Improperly formatted YML", t, cause);
 			}
-			Map<String, Object> map = (Map<String, Object>) ret;
-			return Construct.GetConstruct(map);
+			return Construct.GetConstruct(ret);
 		}
 
 		@Override
