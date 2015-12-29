@@ -259,6 +259,7 @@ public class ObjectGenerator {
      * new formats currently
      *
      * @param i
+	 * @param t
      * @return
      */
     public MCItemStack item(Construct i, Target t) {
@@ -277,14 +278,23 @@ public class ObjectGenerator {
 		if (item.containsKey("name")) {
 			mat = StaticLayer.GetConvertor().GetMaterial(item.get("name", t).val());
 		} else if (item.containsKey("type")) {
-			if (item.get("type", t).val().contains(":")) {
-				//We're using the combo addressing method
-				String[] split = item.get("type", t).val().split(":");
-				item = item.deepClone(t);
-				item.set("type", split[0]);
-				item.set("data", split[1]);
+			String type = item.get("type", t).val();
+			if (!type.matches("(\\d+|\\d+\\:\\d+)")) {
+				throw new ConfigRuntimeException(
+						"Expected an itemType in format \"id\" or \"id:data\" but received: " + type, ExceptionType.FormatException, t);
 			}
-			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(item.get("type", t), t));
+			int seperatorIndex = type.indexOf(":");
+			if (seperatorIndex != -1) {
+				try {
+					data = Integer.parseInt(type.substring(seperatorIndex + 1));
+				} catch(NumberFormatException e) {
+					throw new ConfigRuntimeException(
+							"The item data must be in range of 0 to " + Integer.MAX_VALUE
+							+ ". The received value was: " + type.substring(seperatorIndex + 1), ExceptionType.RangeException, t);
+				}
+				type = type.substring(0, seperatorIndex);
+			}
+			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(new CString(type, t), t));
 		} else {
 			throw new ConfigRuntimeException("Could not find item type!", ExceptionType.FormatException, t);
 		}

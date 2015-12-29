@@ -287,7 +287,8 @@ public class Minecraft {
 
 		@Override
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+			return new ExceptionType[]{
+				ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.RangeException};
 		}
 
 		@Override
@@ -302,23 +303,41 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t);
 				return new CInt(is.getType().getMaxStackSize(), t);
+			}
+			int itemId;
+			if(args[0] instanceof CInt) {
+				long itemIdLong = ((CInt) args[0]).getInt();
+				if(itemIdLong > Integer.MAX_VALUE || itemIdLong < 0) {
+					throw new ConfigRuntimeException(
+							"The item id must be in range of 0 to " + Integer.MAX_VALUE
+							+ ". The received value was: " + itemIdLong, ExceptionType.RangeException, t);
+				}
+				itemId = (int) itemIdLong;
+				
 			} else {
 				String item = args[0].val();
-				if (item.contains(":")) {
-					String[] split = item.split(":");
-					item = split[0];
+				if(!item.matches("(\\d+|\\d+\\:\\d+)")) {
+					throw new ConfigRuntimeException(
+							"Improper value passed to " + this.getName()
+							+ ". The received value was: " + item, ExceptionType.FormatException, t);
+				}
+				int seperatorIndex = item.indexOf(":");
+				if(seperatorIndex != -1) {
+					item = item.substring(0, seperatorIndex);
 				}
 				try {
-					int iitem = Integer.parseInt(item);
-					int max = StaticLayer.GetItemStack(iitem, 1).getType().getMaxStackSize();
-					return new CInt(max, t);
+					itemId = Integer.parseInt(item);
 				} catch (NumberFormatException e) {
+					throw new ConfigRuntimeException(
+							"The item id must be in range of 0 to " + Integer.MAX_VALUE
+							+ ". The received value was: " + item, ExceptionType.RangeException, t);
 				}
 			}
-			throw new ConfigRuntimeException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", ExceptionType.CastException, t);
+			int max = StaticLayer.GetItemStack(itemId, 1).getType().getMaxStackSize();
+			return new CInt(max, t);
 		}
 
 		@Override
